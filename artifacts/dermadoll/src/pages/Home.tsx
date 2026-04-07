@@ -6,6 +6,7 @@ import BeforeAfter from "@/components/BeforeAfter";
 import ResultsVideos from "@/components/ResultsVideos";
 import Training from "@/components/Training";
 import Reviews from "@/components/Reviews";
+import InstagramSection from "@/components/InstagramSection";
 import FAQ from "@/components/FAQ";
 import BookNow from "@/components/BookNow";
 import Footer from "@/components/Footer";
@@ -21,6 +22,7 @@ export default function Home() {
       <ResultsVideos />
       <Training />
       <Reviews />
+      <InstagramSection />
       <FAQ />
       <BookNow />
       <Footer />
