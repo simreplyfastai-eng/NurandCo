@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 export default function Hero() {
   return (
-    <section className="relative h-[75vh] md:h-[100dvh] w-full overflow-hidden flex items-center justify-center">
+    <section className="relative h-[60vh] md:h-[100dvh] w-full overflow-hidden flex items-center justify-center">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-br from-[#1a1a1a] to-[#2d2520]">
         <video
@@ -14,7 +14,8 @@ export default function Hero() {
         >
           <source src={`${import.meta.env.BASE_URL}hero.mp4`} type="video/mp4" />
         </video>
-        <div className="absolute inset-0 bg-black/45" />
+        <div className="absolute inset-0 bg-black/60" />
+        <div className="absolute inset-x-0 bottom-0 h-1/3" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.9), transparent)" }} />
       </div>
 
       {/* Content */}
