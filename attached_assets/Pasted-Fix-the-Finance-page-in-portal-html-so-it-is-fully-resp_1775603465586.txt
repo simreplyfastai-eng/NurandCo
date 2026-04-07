@@ -1,0 +1,70 @@
+Fix the Finance page in portal.html so it is fully responsive 
+and there is zero horizontal scrolling on mobile. The page must 
+sit perfectly within the screen width at all times.
+
+SPECIFIC FIXES:
+
+OVERALL:
+- Add overflow-x: hidden to the finance page container
+- All elements must use width: 100% or max-width: 100%
+- No fixed pixel widths on any element that would cause 
+  overflow on mobile
+- All padding on mobile: 16px max, reduce card padding 
+  from 32px to 16px on screens under 768px
+
+TOP SUMMARY CARDS:
+- On desktop: 3 cards side by side in a row
+- On tablet (under 768px): 3 cards still in a row but 
+  smaller, padding 12px, font size reduced
+- On mobile (under 480px): stack to 1 column, full width, 
+  each card 100% width
+- Remove any min-width values on these cards
+
+REVENUE CHART:
+- The canvas element must be: 
+  width: 100% !important, 
+  max-width: 100% !important,
+  height: 200px on mobile (under 480px)
+  height: 260px on desktop
+- The chart container div must be:
+  width: 100%, overflow: hidden, position: relative
+- Reinitialise the canvas size on window resize using 
+  ResizeObserver so the chart redraws responsively
+- No horizontal scroll from the chart at any screen size
+
+TRANSACTIONS TABLE:
+- On desktop: show all columns — 
+  Date | Client | Treatment | Total | Status | Action
+- On mobile (under 600px): hide the "Treatment" column, 
+  keep Date | Client | Total | Status | Action
+- Table must be: width: 100%, table-layout: fixed
+- All cells: overflow: hidden, text-overflow: ellipsis, 
+  white-space: nowrap
+- The table wrapper div: 
+  width: 100%, overflow-x: hidden (NOT auto or scroll)
+- Column widths on mobile (table-layout fixed):
+  Date: 20%, Client: 25%, Total: 18%, 
+  Status: 20%, Action: 17%
+- Reduce cell padding to 8px on mobile
+
+FILTER TABS (All / Paid / Pending / Overdue):
+- On mobile: tabs row must wrap or scroll horizontally 
+  within its own container only — not the whole page
+- Tab container: display flex, overflow-x: auto, 
+  -webkit-overflow-scrolling: touch,
+  scrollbar-width: none (hidden scrollbar)
+- Each tab: flex-shrink: 0, white-space: nowrap
+
+MONTH SELECTOR:
+- Must be full width on mobile: width: 100%, box-sizing border-box
+- Font size 13px on mobile
+
+EXPORT BUTTON:
+- On mobile: hide the Export button to save space, 
+  only show on desktop (display: none below 600px)
+
+GENERAL MOBILE RULES:
+- box-sizing: border-box on all elements in the finance section
+- No element should have a width greater than 100vw
+- Test at 375px width (iPhone SE) — must look clean with 
+  zero side scroll
