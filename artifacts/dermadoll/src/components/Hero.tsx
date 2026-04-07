@@ -25,10 +25,16 @@ export default function Hero() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="flex flex-col items-center mb-10"
         >
-          <span className="font-serif text-5xl md:text-7xl tracking-[0.2em] font-bold leading-none text-white">
+          <span
+            className="font-serif text-5xl md:text-7xl tracking-[0.2em] font-bold leading-none text-white"
+            style={{ textShadow: "0 0 20px rgba(201,169,110,0.25), 0 0 40px rgba(201,169,110,0.1)" }}
+          >
             DERMADOLL
           </span>
-          <span className="font-sans text-sm md:text-base tracking-[0.4em] font-light mt-4 text-white/90">
+          <span
+            className="font-sans text-sm md:text-base tracking-[0.4em] font-light mt-4 text-white/90"
+            style={{ textShadow: "0 0 15px rgba(201,169,110,0.2)" }}
+          >
             AESTHETICS
           </span>
         </motion.div>
@@ -39,7 +45,10 @@ export default function Hero() {
           transition={{ duration: 1, delay: 0.4 }}
           className="mb-6 relative inline-block"
         >
-          <h1 className="font-serif text-4xl md:text-6xl text-white font-medium leading-tight">
+          <h1
+            className="font-serif text-4xl md:text-6xl text-white font-medium leading-tight"
+            style={{ textShadow: "0 0 20px rgba(201,169,110,0.2), 0 0 40px rgba(201,169,110,0.08)" }}
+          >
             Redefining Natural Beauty
           </h1>
           <motion.div
@@ -55,6 +64,7 @@ export default function Hero() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
           className="text-white/90 font-light text-lg md:text-xl max-w-2xl mx-auto mb-12"
+          style={{ textShadow: "0 0 15px rgba(201,169,110,0.15)" }}
         >
           Premium aesthetics treatments in Birmingham & Solihull
         </motion.p>
