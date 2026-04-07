@@ -36,6 +36,8 @@ export default function Hero() {
           muted
           loop
           playsInline
+          preload="auto"
+          poster={`${import.meta.env.BASE_URL}opengraph.jpg`}
           {...{ "webkit-playsinline": "true" } as any}
           className="absolute inset-0 w-full h-full object-cover object-top"
         >
