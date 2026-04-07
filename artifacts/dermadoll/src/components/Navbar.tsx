@@ -38,6 +38,7 @@ export default function Navbar() {
             ? "bg-white text-foreground shadow-sm py-4"
             : "bg-transparent text-white py-6"
         }`}
+        style={{ borderBottom: "1px solid rgba(201,169,110,0.55)" }}
       >
         <div className="container mx-auto px-6 flex items-center justify-between">
           <a href="#" className="flex flex-col relative z-50" onClick={(e) => scrollTo(e, "#")}>

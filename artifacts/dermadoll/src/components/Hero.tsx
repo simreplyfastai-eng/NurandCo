@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 export default function Hero() {
   return (
-    <section className="relative h-[85vh] md:h-[100dvh] w-full overflow-hidden flex items-center justify-center">
+    <section className="relative h-[100dvh] w-full overflow-hidden flex items-center justify-center">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-br from-[#1a1a1a] to-[#2d2520]">
         <video
@@ -19,22 +19,25 @@ export default function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-6 flex flex-col items-center justify-center w-full max-w-5xl mx-auto pt-16 md:pt-20">
+      <div className="relative z-10 text-center px-6 flex flex-col items-center justify-center w-full max-w-5xl mx-auto py-28 md:py-32">
         {/* Logo wordmark */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="flex flex-col items-center mb-8 md:mb-10"
+          transition={{ duration: 0.9, ease: "easeOut" }}
+          className="flex flex-col items-center mb-10 md:mb-12"
         >
           <span
-            className="font-serif text-[2.6rem] md:text-7xl tracking-[0.2em] font-bold leading-none text-white"
-            style={{ textShadow: "0 0 20px rgba(201,169,110,0.25), 0 0 40px rgba(201,169,110,0.1)" }}
+            className="font-serif tracking-[0.18em] font-bold leading-none text-white"
+            style={{
+              fontSize: "clamp(3.2rem, 12vw, 8rem)",
+              textShadow: "0 0 30px rgba(201,169,110,0.3), 0 0 60px rgba(201,169,110,0.12)",
+            }}
           >
             DERMADOLL
           </span>
           <span
-            className="font-sans text-sm md:text-base tracking-[0.4em] font-light mt-3 md:mt-4 text-white/90"
+            className="font-sans text-sm md:text-base tracking-[0.45em] font-light mt-4 text-white/85"
             style={{ textShadow: "0 0 15px rgba(201,169,110,0.2)" }}
           >
             AESTHETICS
@@ -45,11 +48,11 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.4 }}
-          className="mb-6 md:mb-6 relative inline-block"
+          transition={{ duration: 1, delay: 0.45 }}
+          className="mb-8 relative inline-block"
         >
           <h1
-            className="font-serif text-[1.9rem] md:text-6xl text-white font-medium leading-tight"
+            className="font-serif text-[1.85rem] md:text-[3.25rem] text-white font-medium leading-tight"
             style={{ textShadow: "0 0 20px rgba(201,169,110,0.2), 0 0 40px rgba(201,169,110,0.08)" }}
           >
             Redefining Natural Beauty
@@ -57,7 +60,7 @@ export default function Hero() {
           <motion.div
             initial={{ scaleX: 0 }}
             animate={{ scaleX: 1 }}
-            transition={{ duration: 1.2, delay: 1, ease: "easeInOut" }}
+            transition={{ duration: 1.2, delay: 1.1, ease: "easeInOut" }}
             className="h-[1px] bg-primary w-full absolute -bottom-2 left-0 origin-left"
           />
         </motion.div>
@@ -66,8 +69,8 @@ export default function Hero() {
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-white/90 font-light text-base md:text-xl max-w-2xl mx-auto mb-12 md:mb-14"
+          transition={{ duration: 0.8, delay: 0.85 }}
+          className="text-white/85 font-light text-base md:text-xl max-w-2xl mx-auto mb-14 md:mb-16"
           style={{ textShadow: "0 0 15px rgba(201,169,110,0.15)" }}
         >
           Premium aesthetics treatments in Birmingham & Solihull
@@ -77,7 +80,7 @@ export default function Hero() {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 1.2 }}
+          transition={{ duration: 0.8, delay: 1.3 }}
           className="flex flex-col sm:flex-row gap-5 md:gap-4 items-center w-full sm:w-auto"
         >
           <a
