@@ -27,13 +27,13 @@ export default function Hero() {
           className="flex flex-col items-center mb-5 md:mb-10"
         >
           <span
-            className="font-serif text-3xl md:text-7xl tracking-[0.2em] font-bold leading-none text-white"
+            className="font-serif text-[2.6rem] md:text-7xl tracking-[0.2em] font-bold leading-none text-white"
             style={{ textShadow: "0 0 20px rgba(201,169,110,0.25), 0 0 40px rgba(201,169,110,0.1)" }}
           >
             DERMADOLL
           </span>
           <span
-            className="font-sans text-xs md:text-base tracking-[0.4em] font-light mt-2 md:mt-4 text-white/90"
+            className="font-sans text-sm md:text-base tracking-[0.4em] font-light mt-2 md:mt-4 text-white/90"
             style={{ textShadow: "0 0 15px rgba(201,169,110,0.2)" }}
           >
             AESTHETICS
@@ -47,7 +47,7 @@ export default function Hero() {
           className="mb-4 md:mb-6 relative inline-block"
         >
           <h1
-            className="font-serif text-2xl md:text-6xl text-white font-medium leading-tight"
+            className="font-serif text-[1.9rem] md:text-6xl text-white font-medium leading-tight"
             style={{ textShadow: "0 0 20px rgba(201,169,110,0.2), 0 0 40px rgba(201,169,110,0.08)" }}
           >
             Redefining Natural Beauty
@@ -64,7 +64,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-white/90 font-light text-xs md:text-xl max-w-2xl mx-auto mb-7 md:mb-12"
+          className="text-white/90 font-light text-base md:text-xl max-w-2xl mx-auto mb-7 md:mb-12"
           style={{ textShadow: "0 0 15px rgba(201,169,110,0.15)" }}
         >
           Premium aesthetics treatments in Birmingham & Solihull
@@ -78,7 +78,7 @@ export default function Hero() {
         >
           <a
             href="#services"
-            className="w-full sm:w-auto bg-primary text-white px-6 py-2.5 md:px-8 md:py-3.5 rounded-full text-xs md:text-sm uppercase tracking-wider font-medium hover:bg-primary/90 transition-all duration-300"
+            className="w-full sm:w-auto bg-primary text-white px-8 py-3.5 rounded-full text-sm uppercase tracking-wider font-medium hover:bg-primary/90 transition-all duration-300"
             onClick={(e) => {
               e.preventDefault();
               document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" });
@@ -90,7 +90,7 @@ export default function Hero() {
             href="https://facesconsent.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto border border-white text-white px-6 py-2.5 md:px-8 md:py-3.5 rounded-full text-xs md:text-sm uppercase tracking-wider font-medium hover:bg-white hover:text-black transition-all duration-300"
+            className="w-full sm:w-auto border border-white text-white px-8 py-3.5 rounded-full text-sm uppercase tracking-wider font-medium hover:bg-white hover:text-black transition-all duration-300"
           >
             Book a Consultation
           </a>
