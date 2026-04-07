@@ -1,4 +1,5 @@
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
 type Treatment = {
   name: string;
@@ -85,12 +86,79 @@ const services: Category[] = [
   },
 ];
 
+function CategoryDropdown({ category, index }: { category: Category; index: number }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ delay: index * 0.06 }}
+      className="border-t border-primary/25"
+    >
+      <button
+        onClick={() => setOpen(!open)}
+        className="w-full flex items-center justify-between py-5 md:py-6 group text-left"
+      >
+        <span className="font-serif italic text-xl md:text-2xl text-foreground group-hover:text-primary transition-colors duration-200">
+          {category.title}
+        </span>
+        <div className="flex items-center gap-3">
+          <span className="text-xs tracking-widest uppercase text-foreground/40 font-light hidden sm:block">
+            {category.items.length} treatments
+          </span>
+          <motion.span
+            animate={{ rotate: open ? 45 : 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="text-primary text-2xl leading-none font-light"
+          >
+            +
+          </motion.span>
+        </div>
+      </button>
+
+      <AnimatePresence initial={false}>
+        {open && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.35, ease: "easeInOut" }}
+            className="overflow-hidden"
+          >
+            <div className="pb-6 space-y-0">
+              {category.items.map((item, i) => (
+                <motion.div
+                  key={item.name}
+                  initial={{ opacity: 0, x: -8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: i * 0.04 }}
+                  className="flex items-center justify-between py-3.5 border-b border-primary/10 last:border-b-0 group/item"
+                >
+                  <span className="text-sm md:text-base text-foreground/80 font-light group-hover/item:text-foreground transition-colors">
+                    {item.name}
+                  </span>
+                  <div className="flex items-center gap-4 md:gap-8 flex-shrink-0 ml-4">
+                    <span className="text-xs text-foreground/40 hidden sm:block">{item.duration}</span>
+                    <span className="font-serif text-lg md:text-xl text-primary">{item.price}</span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
 export default function Services() {
   return (
     <section id="services" className="py-24 bg-white">
-      <div className="container mx-auto px-6 max-w-6xl">
+      <div className="container mx-auto px-6 max-w-3xl">
         <div className="text-center mb-16">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -98,51 +166,22 @@ export default function Services() {
           >
             Our Treatments
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-foreground/70 font-light text-lg"
+            className="text-foreground/60 font-light text-lg"
           >
             Explore our full range of aesthetic treatments
           </motion.p>
         </div>
 
-        <div className="space-y-20">
-          {services.map((category, catIndex) => (
-            <div key={category.title}>
-              <div className="flex items-center gap-6 mb-8">
-                <h3 className="font-serif italic text-3xl text-foreground whitespace-nowrap">
-                  {category.title}
-                </h3>
-                <div className="h-[1px] w-full bg-primary/30" />
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {category.items.map((item, index) => (
-                  <motion.div
-                    key={item.name}
-                    initial={{ opacity: 0, y: 20 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true }}
-                    transition={{ delay: index * 0.05 }}
-                    className="bg-white p-6 border border-primary/30 rounded-sm hover:-translate-y-1 hover:shadow-lg transition-all duration-300 group flex flex-col justify-between"
-                  >
-                    <div>
-                      <h4 className="font-medium text-foreground text-sm mb-3 leading-snug group-hover:text-primary transition-colors">
-                        {item.name}
-                      </h4>
-                    </div>
-                    <div className="flex justify-between items-end mt-4">
-                      <span className="font-serif text-2xl text-primary">{item.price}</span>
-                      <span className="text-xs text-foreground/50">{item.duration}</span>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-            </div>
+        <div>
+          {services.map((category, i) => (
+            <CategoryDropdown key={category.title} category={category} index={i} />
           ))}
+          <div className="border-t border-primary/25" />
         </div>
       </div>
     </section>
