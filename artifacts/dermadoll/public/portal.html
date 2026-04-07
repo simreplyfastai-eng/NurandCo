@@ -110,9 +110,13 @@ tr:hover td{background:#FDFBF8}
 .bar-val{width:50px;font-size:11px;font-weight:600;color:var(--text)}
 
 /* ── CALENDAR ────────────────────────────────────── */
-#cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:8px}
-.cal-day-name{font-size:10px;font-weight:600;color:var(--muted);text-align:center;padding:6px 0;letter-spacing:.05em;text-transform:uppercase}
-.cal-cell{min-height:80px;border:1px solid var(--border);border-radius:6px;padding:6px;cursor:pointer;transition:background .15s;position:relative}
+#page-schedule{overflow-x:hidden}
+#schedule-layout{padding:20px;display:grid;grid-template-columns:1fr 320px;gap:20px;box-sizing:border-box;overflow-x:hidden}
+#cal-section{overflow-x:hidden;box-sizing:border-box;min-width:0}
+#cal-day-names{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px;width:100%;box-sizing:border-box}
+#cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-top:0;width:100%;box-sizing:border-box}
+.cal-day-name{font-size:10px;font-weight:600;color:var(--muted);text-align:center;padding:6px 0;letter-spacing:.05em;text-transform:uppercase;box-sizing:border-box}
+.cal-cell{min-height:80px;border:1px solid var(--border);border-radius:6px;padding:6px;cursor:pointer;transition:background .15s;position:relative;box-sizing:border-box;overflow:hidden;min-width:0}
 .cal-cell:hover{background:#FDF9F4}
 .cal-cell.today{border-color:var(--gold)}
 .cal-cell.selected{background:#FDF6EC;border-color:var(--gold)}
@@ -121,13 +125,40 @@ tr:hover td{background:#FDFBF8}
 .cal-cell.available{background:rgba(201,169,110,.05)}
 .cal-date{font-size:11px;font-weight:600;margin-bottom:4px}
 .cal-cell.today .cal-date{color:var(--gold)}
-.cal-booking-pill{background:var(--gold);color:#fff;font-size:9px;border-radius:4px;padding:1px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block}
-.day-panel{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;min-height:300px}
-.timeline-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #F5F5F5}
+.cal-booking-pill{background:var(--gold);color:#fff;font-size:9px;border-radius:4px;padding:1px 5px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:block;max-width:100%}
+.cal-overflow-pill{background:#E8E8E8;color:#666;font-size:9px;border-radius:4px;padding:1px 5px;margin-bottom:2px;display:block}
+.cal-new-mobile{display:none}
+.day-panel{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;min-height:300px;overflow-y:auto;box-sizing:border-box}
+.timeline-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #F5F5F5;align-items:flex-start;box-sizing:border-box}
 .timeline-time{font-size:12px;font-weight:700;color:var(--gold);width:48px;flex-shrink:0;padding-top:1px}
-.timeline-body{flex:1;font-size:12px}
-.timeline-name{font-weight:600;margin-bottom:2px}
-.timeline-treat{color:var(--muted)}
+.timeline-body{flex:1;font-size:12px;min-width:0}
+.timeline-name{font-weight:600;margin-bottom:2px;font-size:13px}
+.timeline-treat{color:var(--muted);font-size:12px}
+.timeline-status{flex-shrink:0}
+.cal-empty-state{text-align:center;padding:32px 0;color:#AAAAAA;font-size:13px;font-style:italic}
+
+/* ── CALENDAR MOBILE ─────────────────────────────── */
+@media(max-width:767px){
+  #schedule-layout{display:block !important;padding:12px !important}
+  #cal-section{width:100%}
+  #cal-day-names{grid-template-columns:14.28% 14.28% 14.28% 14.28% 14.28% 14.28% 10% !important}
+  #cal-grid{grid-template-columns:14.28% 14.28% 14.28% 14.28% 14.28% 14.28% 10% !important}
+  .cal-cell{min-height:60px;padding:4px}
+  .cal-cell.sunday{background:#FAFAFA;color:#CCCCCC}
+  .cal-cell.sunday .cal-date{color:#CCCCCC}
+  .cal-day-name{font-size:10px;padding:4px 0;letter-spacing:0}
+  .cal-day-name.sunday-hdr{background:#FAFAFA;color:#CCCCCC}
+  .cal-date{font-size:12px}
+  .cal-booking-pill{font-size:9px;padding:2px 5px;border-radius:4px}
+  .day-panel{margin-top:16px;min-height:auto;padding:16px}
+  #day-panel-title{font-size:20px !important;margin-bottom:12px !important}
+  .timeline-item{background:#FAFAFA;border:1px solid #F0F0F0;border-radius:8px;padding:12px;margin-bottom:8px;border-bottom:none;flex-wrap:wrap;gap:8px}
+  .timeline-status{width:100%;display:flex;justify-content:flex-end}
+  .timeline-status .pill{min-height:36px;display:inline-flex;align-items:center;padding:0 14px}
+  #page-schedule .topbar .cal-desktop-new{display:none}
+  .cal-new-mobile{display:block;width:100%;padding:10px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:12px;min-height:44px}
+  .cal-new-mobile:active{background:#b8903a}
+}
 
 /* ── CLIENT CARDS ───────────────────────────────── */
 .client-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
@@ -401,19 +432,20 @@ tr:hover td{background:#FDFBF8}
     <!-- ── SCHEDULE ── -->
     <div id="page-schedule" class="page">
       <div class="topbar">
-        <button onclick="changeMonth(-1)" style="background:none;border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:16px;color:var(--gold)">‹</button>
-        <span class="topbar-title serif" id="cal-title" style="margin:0 auto"></span>
-        <button onclick="changeMonth(1)" style="background:none;border:1px solid var(--border);border-radius:8px;padding:7px 12px;cursor:pointer;font-size:16px;color:var(--gold)">›</button>
-        <button class="btn-gold" onclick="openBookingModal()">+ New Booking</button>
+        <button onclick="changeMonth(-1)" style="background:none;border:1px solid var(--border);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:18px;color:var(--gold);min-height:44px;min-width:44px">‹</button>
+        <span class="topbar-title serif" id="cal-title" style="margin:0 auto;font-size:14px"></span>
+        <button onclick="changeMonth(1)" style="background:none;border:1px solid var(--border);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:18px;color:var(--gold);min-height:44px;min-width:44px">›</button>
+        <button class="btn-gold cal-desktop-new" onclick="openBookingModal()">+ New Booking</button>
       </div>
-      <div style="padding:20px;display:grid;grid-template-columns:1fr 320px;gap:20px" id="schedule-layout">
-        <div>
-          <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px" id="cal-day-names"></div>
+      <div id="schedule-layout">
+        <div id="cal-section">
+          <button class="cal-new-mobile" onclick="openBookingModal()">+ New Booking</button>
+          <div id="cal-day-names"></div>
           <div id="cal-grid"></div>
         </div>
         <div class="day-panel" id="day-panel">
-          <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-bottom:14px" id="day-panel-title">Select a day</div>
-          <div id="day-panel-body"><p style="color:var(--muted);font-size:13px;font-style:italic">Click a date to see bookings</p></div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;margin-bottom:14px" id="day-panel-title">Select a day</div>
+          <div id="day-panel-body"><p class="cal-empty-state">Click a date to see bookings</p></div>
         </div>
       </div>
     </div>
@@ -799,6 +831,13 @@ function showPortal(){
 window.addEventListener('DOMContentLoaded',()=>{
   if(localStorage.getItem('dd_session')==='1'){showPortal();}
 });
+let _calResizeTimer;
+window.addEventListener('resize',()=>{
+  clearTimeout(_calResizeTimer);
+  _calResizeTimer=setTimeout(()=>{
+    if(document.getElementById('page-schedule').classList.contains('active')){buildCalendar();}
+  },200);
+});
 
 // ═══════════════════════════════════════════════════
 // NAVIGATION
@@ -932,8 +971,12 @@ function buildCalendar(){
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-title').textContent=months[m]+' '+y;
 
-  const dayNames=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  document.getElementById('cal-day-names').innerHTML=dayNames.map(d=>`<div class="cal-day-name">${d}</div>`).join('');
+  const isMobile=window.innerWidth<768;
+  const dayNamesFull=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const dayNamesMob=['M','T','W','T','F','S','S'];
+  const names=isMobile?dayNamesMob:dayNamesFull;
+  // Last entry is Sunday — add grey class on mobile
+  document.getElementById('cal-day-names').innerHTML=names.map((d,i)=>`<div class="cal-day-name${i===6?' sunday-hdr':''}">${d}</div>`).join('');
 
   const firstDay=new Date(y,m,1);
   let startDow=firstDay.getDay();
@@ -945,6 +988,7 @@ function buildCalendar(){
   const bookings=getBookings();
 
   const workingDays={2:true,3:true,4:true,5:true,6:true}; // Tue-Sat (0=Sun,1=Mon)
+  const maxPills=isMobile?2:3;
   const cells=[];
 
   for(let i=0;i<startDow;i++){
@@ -959,10 +1003,17 @@ function buildCalendar(){
     const isToday=dateStr===todayStr;
     const isWork=workingDays[dow];
     const dayBookings=bookings.filter(b=>b.date===dateStr&&b.status!=='Cancelled');
-    const pills=dayBookings.slice(0,3).map(b=>`<span class="cal-booking-pill">${b.clientName.split(' ')[0][0]}${b.clientName.split(' ')[1]?b.clientName.split(' ')[1][0]:''} · ${b.treatment.slice(0,8)}</span>`).join('');
-    cells.push(`<div class="cal-cell ${isSun?'sunday':''} ${isToday?'today':''} ${isWork&&!isSun?'available':''}" onclick="selectDay('${dateStr}')">
-      <div class="cal-date">${d}</div>${pills}
-      ${dayBookings.length>3?`<span style="font-size:9px;color:var(--gold)">+${dayBookings.length-3} more</span>`:''}
+    const visible=dayBookings.slice(0,maxPills);
+    const overflow=dayBookings.length-maxPills;
+    const initials=b=>`${b.clientName.split(' ')[0][0]}${b.clientName.split(' ')[1]?b.clientName.split(' ')[1][0]:''}`;
+    const pillContent=isMobile
+      ? visible.map(b=>`<span class="cal-booking-pill">${initials(b)}</span>`).join('')
+      : visible.map(b=>`<span class="cal-booking-pill">${initials(b)} · ${b.treatment.slice(0,8)}</span>`).join('');
+    const overflowPill=overflow>0?`<span class="cal-overflow-pill">+${overflow}</span>`:'';
+    const clickAttr=isSun?'':` onclick="selectDay('${dateStr}')"`;
+    const classes=`cal-cell${isSun?' sunday':''}${isToday?' today':''}${isWork&&!isSun?' available':''}`;
+    cells.push(`<div class="${classes}"${clickAttr}>
+      <div class="cal-date">${d}</div>${pillContent}${overflowPill}
     </div>`);
   }
   const remaining=(7-((startDow+daysInMonth)%7))%7;
@@ -979,7 +1030,7 @@ function changeMonth(dir){
 
 function selectDay(dateStr){
   document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
+  if(event&&event.currentTarget)event.currentTarget.classList.add('selected');
   const bookings=getBookings().filter(b=>b.date===dateStr).sort((a,b)=>a.time.localeCompare(b.time));
   document.getElementById('day-panel-title').textContent=formatDate(dateStr);
   document.getElementById('day-panel-body').innerHTML=bookings.length?bookings.map(b=>`
@@ -990,9 +1041,9 @@ function selectDay(dateStr){
         <div class="timeline-treat">${b.treatment} · £${b.price}</div>
         ${b.notes?`<div style="color:var(--muted);font-size:11px;margin-top:2px">${b.notes}</div>`:''}
       </div>
-      ${statusPill(b.status)}
+      <div class="timeline-status">${statusPill(b.status)}</div>
     </div>
-  `).join(''):'<p style="color:var(--muted);font-size:13px;font-style:italic">No bookings for this day</p>';
+  `).join(''):`<p class="cal-empty-state">No bookings for this day</p>`;
 }
 
 // ═══════════════════════════════════════════════════
