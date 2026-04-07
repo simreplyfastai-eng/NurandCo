@@ -1,5 +1,21 @@
+import { useState, useCallback } from "react";
+
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const [clickCount, setClickCount] = useState(0);
+  const [lastClick, setLastClick] = useState(0);
+
+  const handleSecretClick = useCallback(() => {
+    const now = Date.now();
+    const fresh = now - lastClick < 3000;
+    const next = fresh ? clickCount + 1 : 1;
+    setClickCount(next);
+    setLastClick(now);
+    if (next >= 5) {
+      setClickCount(0);
+      window.location.href = "/portal.html";
+    }
+  }, [clickCount, lastClick]);
   
   const navLinks = [
     { name: "Services", href: "#services" },
@@ -28,7 +44,10 @@ export default function Footer() {
               AESTHETICS
             </span>
           </div>
-          <div className="font-serif italic text-primary text-xl">
+          <div
+            className="font-serif italic text-primary text-xl cursor-default select-none"
+            onClick={handleSecretClick}
+          >
             Beauty Redefined
           </div>
         </div>

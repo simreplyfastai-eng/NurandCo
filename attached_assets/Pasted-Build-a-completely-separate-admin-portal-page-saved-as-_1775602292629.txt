@@ -1,0 +1,272 @@
+Build a completely separate admin portal page saved as portal.html 
+in the same Replit project as the Dermadoll Aesthetics website.
+
+The portal is accessed by clicking "Beauty Redefined" in the footer 
+of index.html exactly 5 times within 3 seconds. On the 5th click, 
+redirect to portal.html.
+
+PORTAL DESIGN:
+- Background: #FFFFFF white main content area
+- Sidebar: #FAF9F7 warm off-white
+- Accent: #C9A96E gold throughout
+- Text: #111111 black
+- Font: Cormorant Garamond for headings, Inter for all body/UI text
+- Status pills, cards and charts match the brand — clean, luxury, 
+  minimal. Light mode throughout.
+- No dark backgrounds anywhere — this is a white/cream/gold portal
+
+AUTHENTICATION:
+Before portal.html loads, show a full-screen login page:
+- White background, centred card with soft shadow
+- DERMADOLL AESTHETICS wordmark at top in gold
+- "Admin Portal" subtitle in grey Inter
+- Email + Password fields, gold bordered inputs
+- Gold "Login" button full width
+- Shake animation on wrong credentials
+- Correct login: admin@dermadoll.com / dermadoll2024
+- On success: store session in localStorage, load the portal
+- If already logged in (session exists): skip login, go straight to 
+  portal
+- Logout button in sidebar clears session and returns to login
+
+LAYOUT:
+Fixed left sidebar (240px wide) + main content area (rest of width).
+Sidebar collapses to icon-only on mobile with hamburger toggle.
+
+SIDEBAR:
+Top: DERMADOLL wordmark (Cormorant Garamond bold) + "AESTHETICS" 
+spaced below in gold. Green "● Portal" pill badge beneath it.
+
+Navigation sections:
+
+OVERVIEW
+- Dashboard (grid icon)
+- Schedule (calendar icon) — show booking count badge in gold
+
+BUSINESS
+- Clients (person icon)
+- Treatments (sparkle icon)
+- Finance (£ icon) — show gold badge
+
+SYSTEM
+- Media (image icon)
+- Settings (cog icon)
+
+Active nav item: gold background pill, black text, bold.
+Inactive: grey text, hover turns gold text.
+
+MAIN CONTENT — PAGE BY PAGE:
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 1: DASHBOARD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Header bar: "Dashboard / Overview" — Cormorant Garamond 28px left, 
+search bar centre (Search clients, treatments...), Export button 
+outlined, "+ New Booking" gold filled button right.
+
+4 KPI CARDS (pulled from localStorage booking data):
+1. Revenue This Month — sum of all confirmed booking prices this 
+   calendar month. Show % change vs last month in green/red.
+2. Appointments — total booking count. Show +N from last month.
+3. Active Clients — unique client names. Show +N new this month.
+4. Avg. Spend — total revenue / total bookings. Show change per visit.
+
+Cards: white background, soft shadow, rounded corners 12px, gold 
+number display in Cormorant Garamond 36px, small grey label above.
+
+RECENT BOOKINGS TABLE:
+Columns: Client | Treatment | Date | Status
+Show last 5 bookings from localStorage, newest first.
+Status pills: Confirmed (green bg), Pending (gold bg), 
+Cancelled (red bg), Complete (grey bg).
+"View all →" link top right goes to Schedule page.
+
+RECENT ACTIVITY FEED (right panel):
+Pull from localStorage — show last 10 events as a feed:
+- Booking confirmed — [Name]. Treatment · £price. Time ago.
+- New client registered — [Name] · via [source]
+- Payment received — [Name] · £amount deposit
+- Cancellation — [Name]. Treatment · rescheduled
+- Treatment completed — [Name] · Treatment · £price
+Each entry has a coloured dot: green=confirmed, gold=pending, 
+blue=new client, red=cancelled.
+
+REVENUE BY TREATMENT (bottom left):
+Horizontal bar chart — pure CSS/vanilla JS, no libraries.
+Categories: Dermal Filler | Botox | Skin Boosters | Facials | 
+Fat Dissolving | Training
+Bars: gold gradient fill, proportional to revenue total per category.
+Value shown right of each bar in Inter bold.
+
+TODAY'S SCHEDULE (bottom right):
+Time-sorted list of today's bookings.
+Each row: time (bold gold) | client name | treatment | price | 
+status pill.
+Empty state: "No bookings today" in grey italic.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 2: SCHEDULE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Full calendar view — monthly grid, vanilla JS only.
+Header: Month Year with left/right arrows in gold.
+Days: Mon–Sat available (Sunday greyed out).
+Niamh's hours shown as subtle gold tint on available day cells:
+  Tue Wed Thu: 10:00–19:00
+  Fri: 09:00–16:00
+  Sat: 09:00–14:00
+Booked slots show as small gold pills inside the day cell with 
+client initial + treatment abbreviation.
+Click a day: opens a day detail panel on the right showing all 
+bookings for that day as a vertical timeline.
+"+ New Booking" button top right opens booking creation modal.
+
+NEW BOOKING MODAL:
+- Client name (text input with autocomplete from existing clients)
+- Treatment (dropdown — all treatments listed)
+- Date picker (same branded calendar as main site)
+- Time picker (available slots only, respects working hours)
+- Deposit amount (auto-fills 50% of treatment price)
+- Notes field
+- "Save Booking" gold button
+- Saves to localStorage, updates all counts immediately
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 3: CLIENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Header: "Clients" + total count badge + search bar + 
+"+ Add Client" gold button.
+
+Client cards in a 3-col grid (2 col tablet, 1 col mobile):
+Each card: client initials avatar (gold circle), full name bold, 
+join date, total spend in gold, number of visits, last visit date, 
+status badge (Active/Inactive).
+
+Click a client card: opens a full client profile side panel:
+- Name, contact info (phone/email if stored)
+- Total spend (gold, large)
+- Visit history: list of all their bookings with treatment, date, 
+  price, status
+- Notes field (editable, saves to localStorage)
+- "Book Again" button — prefills new booking modal with their name
+
+All client data pulled from and saved to localStorage.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 4: TREATMENTS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Header: "Treatments" + search bar.
+Grouped by category (same categories as main site).
+Each treatment row: name | duration | price | booking count | 
+total revenue generated | toggle (active/hidden on site).
+Edit pencil icon on each row — click to edit price or duration 
+inline. Changes save to localStorage and reflect on main site 
+treatments if using shared data.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 5: FINANCE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Header: "Finance" + month selector dropdown + Export button.
+
+TOP ROW — 3 summary cards:
+- Total Revenue (this month) — gold large number
+- Deposits Collected — green
+- Balance Outstanding — red
+
+REVENUE CHART:
+Line chart — vanilla JS canvas, no libraries.
+X axis: days of current month.
+Y axis: cumulative revenue.
+Gold line, soft gold fill below the line.
+
+TRANSACTIONS TABLE:
+Columns: Date | Client | Treatment | Total | Deposit Paid | 
+Balance Due | Status
+Filterable by: All / Paid / Pending / Overdue
+Each row has a "Mark Paid" button if balance outstanding.
+Export button generates a plain text summary of all transactions.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 6: MEDIA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Header: "Media Manager"
+Subheading: "Manage your website images and videos"
+
+Sections:
+
+HERO VIDEO:
+- Shows current hero video filename (hero.mp4)
+- Instruction card: "To update your hero video, rename your new 
+  file to hero.mp4 and upload it to Replit replacing the existing 
+  file. Changes go live instantly."
+- Gold outlined instruction box with a film icon
+
+BEFORE & AFTER IMAGES:
+- 4 slot grid — each slot shows current image filename or 
+  "Empty — upload image"
+- Slot labels: Slot 1 (before-after-1) | Slot 2 | Slot 3 | Slot 4
+- Each slot: before filename + after filename
+- Instruction: "Rename files as: before-after-1-before.jpg and 
+  before-after-1-after.jpg and upload to Replit."
+
+RESULTS VIDEOS:
+- 4 slot grid for video1.mp4 through video4.mp4
+- Each slot shows label (e.g. "Lip Filler Treatment"), filename, 
+  and edit icon to rename the label
+- Label changes save to localStorage and reflect on main site
+
+PROFILE / BRAND IMAGES:
+- Instructions for swapping any other site images
+- Note: "All media is hosted directly in Replit. Contact your 
+  developer for major structural changes."
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE 7: SETTINGS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Header: "Settings"
+
+Sections:
+
+BUSINESS INFO:
+- Clinic name (editable)
+- Practitioner name (editable)
+- Instagram handle (editable)
+- WhatsApp number (editable)
+- Working hours display (read-only — Tue-Thu 10-7, Fri 9-4, Sat 9-2)
+  with note: "Contact developer to update availability"
+- Save button — stores to localStorage
+
+BOOKING SETTINGS:
+- Deposit % toggle: 50% (default) — editable number input
+- Booking confirmation message (editable textarea) — this text 
+  appears in the success screen on the main site
+- Notification email (editable) — where booking alerts go
+
+DEVELOPER:
+- Site URL display
+- Last updated: 07/04/2026
+- Version: 1.0.0
+- "Contact Developer" button — opens WhatsApp to +447XXXXXXXXX
+  (replace XXXXXXXXX with your actual number)
+- "View Site" button — opens index.html in new tab
+
+DANGER ZONE:
+- "Clear All Bookings" — red outlined button, requires typing 
+  CONFIRM in a prompt before clearing localStorage bookings
+- "Reset Portal Data" — clears all localStorage, red button, 
+  same confirmation requirement
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+GLOBAL TECHNICAL REQUIREMENTS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+- Single portal.html file — all CSS and JS inline
+- No frameworks, no CDN libraries except Google Fonts
+- All data stored and read from localStorage
+- All pages rendered via vanilla JS show/hide sections 
+  (no page reloads)
+- Smooth fade transition between pages (opacity 0→1, 150ms)
+- All charts and graphs: pure vanilla JS canvas — no Chart.js, 
+  no D3, nothing external
+- Fully mobile responsive — sidebar collapses on mobile
+- Session persists until logout button clicked
+- Booking data created on main site (index.html) feeds into 
+  portal automatically via shared localStorage keys
