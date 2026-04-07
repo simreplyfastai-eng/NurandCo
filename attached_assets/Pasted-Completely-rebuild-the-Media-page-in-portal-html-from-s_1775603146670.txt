@@ -1,0 +1,137 @@
+Completely rebuild the Media page in portal.html from scratch.
+
+OVERALL PAGE STYLE:
+- White (#FFFFFF) page background
+- Each section is a white card, border-radius 12px, 
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06)
+- Card padding: 32px
+- Gap between cards: 32px
+- Max-width 860px, centred
+- All headings: Cormorant Garamond
+- All body/UI text: Inter
+- Gold accent: #C9A96E throughout
+- No bullet point instructions anywhere on this page
+
+CARD STRUCTURE (every card follows this pattern):
+- Top row: section title left (Cormorant Garamond 20px bold 
+  #111111) + status pill right (e.g. "● Live" or 
+  "4 live · 4 total" — small Inter 11px, grey bg #F3F3F3, 
+  border-radius 20px, padding 4px 12px)
+- Subtitle below title: Inter 13px #888888 italic, one line only
+- Content below subtitle
+- Thin #F0F0F0 divider line before any upload zone
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+CARD 1 — HERO VIDEO
+━━━━━━━━━━━━━━━━━━━━━━━━
+Title: "Hero Section Video"
+Status pill: "● Live"  (green dot)
+Subtitle: "This video plays full screen on your homepage hero"
+
+VIDEO PREVIEW AREA:
+- 16:9 aspect ratio container, border-radius 12px, 
+  background #111111, overflow hidden, width 100%
+- If hero.mp4 exists: show <video> element with src="hero.mp4" 
+  autoplay muted loop playsinline object-fit cover
+  with a "● LIVE NOW" pill overlaid bottom-left 
+  (green dot, white text, dark semi-transparent bg, 
+  Inter 11px bold, border-radius 6px, padding 6px 12px)
+- If no video: dashed border 2px #E0E0E0, border-radius 12px, 
+  centred content: film icon (unicode 🎬 or SVG), 
+  "No video uploaded yet" Inter 14px #AAAAAA below it
+
+BELOW PREVIEW — VIDEO LIBRARY SUBHEADER ROW:
+- "VIDEO LIBRARY" left — Inter 11px bold #AAAAAA caps 
+  letter-spacing 1.5px
+- "+ Upload Video" right — border: 1px solid #C9A96E, 
+  color: #C9A96E, Inter 12px, border-radius 20px, 
+  padding 6px 16px, background white, 
+  hover: background #C9A96E color white
+
+UPLOAD DROP ZONE:
+- Dashed border 2px #E8E8E8, border-radius 10px, 
+  padding 32px, text-align centre
+- "Drag video here or click to upload" Inter 13px #BBBBBB
+- Clicking opens file input (accept video/mp4)
+- On upload: file stored to localStorage as base64 reference, 
+  label saved, appears in library below
+
+LIBRARY GRID:
+- Uploaded videos appear as cards in a row, flex-wrap
+- Each card: 160px wide, border-radius 10px, overflow hidden, 
+  border 1px solid #F0F0F0
+- Top: black video thumbnail area 90px tall, 
+  object-fit cover, border-radius 10px 10px 0 0
+  with "● LIVE" green pill overlaid top-left if active
+- Bottom: white area, padding 8px
+  - Label text Inter 12px bold #111111, truncated
+  - Row below: "Turn Off" grey text button left, 
+    red trash icon button right (border none, 
+    cursor pointer, hover red)
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+CARD 2 — GALLERY PHOTOS (Before & After)
+━━━━━━━━━━━━━━━━━━━━━━━━
+Title: "Gallery Photos"
+Status pill: "4 live · 4 total" — grey
+Subtitle: "The 2×2 grid matches exactly what visitors see 
+on your site. Tap Replace on any photo to swap it instantly."
+
+LIVE SLOTS GRID — 2×2:
+Each slot is a square image card (1:1 ratio):
+- border-radius 10px, overflow hidden, position relative
+- Image fills the card (object-fit cover, width/height 100%)
+- Top-left overlay pill — dark rgba(0,0,0,0.55) background, 
+  white text, Inter 9px bold, uppercase, border-radius 4px, 
+  padding 3px 7px, margin 8px
+  Labels: "TOP LEFT" "TOP RIGHT" "BOTTOM LEFT" "BOTTOM RIGHT"
+- If no image: #F5F5F5 background, centred grey image icon + 
+  "No image" Inter 12px #BBBBBB
+- Below each card (outside the image):
+  - Treatment label: Inter 13px bold #111111 (editable 
+    inline on click)
+  - "⟳ Replace" button: border 1px solid #C9A96E, 
+    color #C9A96E, Inter 12px, border-radius 20px, 
+    padding 5px 14px, background white, 
+    hover fills #C9A96E white text
+  - Clicking Replace opens file input for that slot, 
+    stores image to localStorage
+
+SAVED LIBRARY SUBHEADER ROW (below live grid):
+- "SAVED LIBRARY" left — Inter 11px bold #AAAAAA caps
+- "+ Add Photo" right — same gold outlined button style
+
+LIBRARY THUMBNAILS:
+- Flex row, wrap, gap 12px
+- Each thumbnail: 130px wide, border-radius 10px, 
+  border 1px solid #F0F0F0, overflow hidden
+- Image area: 90px tall, object-fit cover, position relative
+  with "● LIVE" green pill top-left if active on site
+- Bottom: white area 40px, padding 6px 8px
+  - Label Inter 11px bold truncated
+  - "Turn Off" small grey text left, red trash icon right
+
+UPLOAD DROP ZONE:
+- Same style as hero card drop zone
+- Accept image/* files
+- Stores to localStorage
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+CARD 3 — RESULTS VIDEOS
+━━━━━━━━━━━━━━━━━━━━━━━━
+Title: "Showcase Videos"
+Status pill: "4 live · 4 total" — grey
+Subtitle: "These 4 slots match the See the Results section 
+on your site. Tap Replace to swap any video instantly."
+
+LIVE SLOTS GRID — 2×2:
+Same structure as Gallery Photos but for videos:
+- Each slot: black background square card, border-radius 10px
+- <video> element inside each slot: 
+  src="video1.mp4" through "video4.mp4", 
+  muted autoplay loop playsinline, object-fit cover, 
+  width/height 100%
+- Top-left overlay pill same as gallery: 
+  "TOP LEFT" "TOP RIGHT" "BOTTOM LEFT" "BOTTOM RIGHT"
+- "● LIVE" green pill top-right if video file exists
+- If no video: dashed border #E0E0E0, film icon cen
