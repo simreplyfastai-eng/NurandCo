@@ -52,7 +52,7 @@ export default function FAQ() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="font-serif text-[2.5rem] md:text-[56px] mb-5"
+            className="font-serif text-[2rem] md:text-[56px] mb-5"
           >
             Frequently Asked Questions
           </motion.h2>

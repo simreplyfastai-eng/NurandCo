@@ -99,8 +99,7 @@ function CategoryDropdown({ category, index }: { category: Category; index: numb
     >
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between text-left"
-        style={{ paddingTop: "30px", paddingBottom: "30px" }}
+        className="w-full flex items-center justify-between text-left py-5 md:py-[30px]"
       >
         <span
           className="font-serif italic text-foreground hover:text-primary transition-colors duration-200"
@@ -172,7 +171,7 @@ export default function Services() {
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="font-serif text-[2.5rem] md:text-[56px] mb-5"
+            className="font-serif text-[2rem] md:text-[56px] mb-5"
           >
             Our Treatments
           </motion.h2>

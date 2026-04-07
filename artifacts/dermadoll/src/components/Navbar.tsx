@@ -77,9 +77,9 @@ export default function Navbar() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? (
-              <X size={24} className={isScrolled ? "text-foreground" : "text-foreground"} />
+              <X size={28} strokeWidth={2.5} className="text-foreground" />
             ) : (
-              <Menu size={24} />
+              <Menu size={28} strokeWidth={2.5} className={isScrolled ? "text-foreground" : "text-white"} />
             )}
           </button>
         </div>
