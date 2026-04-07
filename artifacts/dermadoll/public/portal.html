@@ -145,7 +145,37 @@ tr:hover td{background:#FDFBF8}
 .panel-body{padding:24px}
 
 /* ── TREATMENT TABLE ─────────────────────────────── */
-.treat-cat-header{padding:12px 16px;background:#FAFAF8;border-top:1px solid var(--border);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+.treat-cat-header{padding:12px 16px;background:#F9F9F9;border-top:1px solid var(--border);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#AAAAAA}
+.treats-table{width:100%;table-layout:fixed;border-collapse:collapse}
+.treats-table th,.treats-table td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+.treats-table td.treat-name-cell{white-space:normal;font-weight:700;font-size:13px;line-height:1.3}
+.treats-table td.treat-price-cell,.treats-table td.treat-rev-cell{color:var(--gold);font-weight:700;font-size:13px;white-space:nowrap}
+.treats-table .edit-btn{background:none;border:none;cursor:pointer;color:var(--gold);font-size:16px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin:auto}
+/* Tablet: hide Bookings (col 4) */
+@media(max-width:768px){
+  #treatments-topbar{flex-wrap:wrap;gap:8px;padding:12px 14px 12px 60px}
+  #treat-search{max-width:100%!important;width:100%!important;margin-top:2px}
+  #treats-outer{padding:12px}
+  .treat-cat-header{padding:8px 12px;font-size:11px;letter-spacing:1px}
+  .treats-table th,.treats-table td{padding:12px 8px}
+  .treats-table col.col-bookings{display:none}
+  .treats-table th.col-bookings,.treats-table td.col-bookings{display:none}
+  /* Column widths tablet */
+  .treats-table col.col-name{width:35%}
+  .treats-table col.col-dur{width:18%}
+  .treats-table col.col-price{width:16%}
+  .treats-table col.col-rev{width:18%}
+  .treats-table col.col-edit{width:13%}
+}
+/* Mobile: also hide Duration (col 2) */
+@media(max-width:600px){
+  .treats-table th.col-dur,.treats-table td.col-dur{display:none}
+  /* Column widths mobile */
+  .treats-table col.col-name{width:40%}
+  .treats-table col.col-price{width:20%}
+  .treats-table col.col-rev{width:22%}
+  .treats-table col.col-edit{width:18%}
+}
 
 /* ── FINANCE CHART ───────────────────────────────── */
 #revenue-canvas{width:100%!important;max-width:100%!important;height:260px;display:block}
@@ -391,11 +421,13 @@ tr:hover td{background:#FDFBF8}
 
     <!-- ── TREATMENTS ── -->
     <div id="page-treatments" class="page">
-      <div class="topbar">
+      <div class="topbar" id="treatments-topbar">
         <span class="topbar-title serif">Treatments</span>
-        <input class="topbar-search" placeholder="Search treatments…" oninput="filterTreatments(this.value)"/>
+        <input id="treat-search" style="flex:1;max-width:300px;padding:9px 14px;border:1px solid #E0E0E0;border-radius:20px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;box-sizing:border-box" placeholder="Search treatments…" oninput="filterTreatments(this.value)"/>
       </div>
-      <div style="padding:28px"><div class="card" id="treatments-table-wrap"></div></div>
+      <div id="treats-outer" style="padding:20px;overflow-x:hidden;box-sizing:border-box">
+        <div id="treatments-table-wrap"></div>
+      </div>
     </div>
 
     <!-- ── FINANCE ── -->
@@ -1055,28 +1087,46 @@ function renderTreatments(filter){
   const bookings=getBookings();
   const custom=JSON.parse(localStorage.getItem('dd_treatment_overrides')||'{}');
   const cats=[...new Set(TREATMENTS.map(t=>t.cat))];
+  const catLabels={FACE:'Face',SKIN:'Skin',BODY:'Body',TEETH:'Teeth'};
   let html='';
   cats.forEach(cat=>{
     const rows=TREATMENTS.filter(t=>t.cat===cat&&(!filter||t.name.toLowerCase().includes(filter.toLowerCase())));
     if(!rows.length)return;
-    html+=`<div class="treat-cat-header">${cat}</div>`;
-    html+='<table style="width:100%"><thead><tr><th>Treatment</th><th>Duration</th><th>Price</th><th>Bookings</th><th>Revenue</th><th>Edit</th></tr></thead><tbody>';
+    html+=`<div class="treat-cat-header">${catLabels[cat]||cat}</div>`;
+    html+=`<table class="treats-table">
+      <colgroup>
+        <col class="col-name"/>
+        <col class="col-dur"/>
+        <col class="col-price"/>
+        <col class="col-bookings"/>
+        <col class="col-rev"/>
+        <col class="col-edit"/>
+      </colgroup>
+      <thead><tr>
+        <th class="col-name">Treatment</th>
+        <th class="col-dur">Duration</th>
+        <th class="col-price">Price</th>
+        <th class="col-bookings">Bookings</th>
+        <th class="col-rev">Revenue</th>
+        <th class="col-edit">Edit</th>
+      </tr></thead><tbody>`;
     rows.forEach(t=>{
       const tBookings=bookings.filter(b=>b.treatment===t.name&&b.status!=='Cancelled');
       const rev=tBookings.reduce((s,b)=>s+Number(b.price),0);
       const override=custom[t.name]||{};
+      const safeName=t.name.replace(/'/g,"\\'");
       html+=`<tr>
-        <td><strong>${t.name}</strong></td>
-        <td>${override.duration||t.duration} min</td>
-        <td id="t-price-${t.name.replace(/\s/g,'_')}">£${override.price||t.price}</td>
-        <td>${tBookings.length}</td>
-        <td style="color:var(--gold);font-weight:600">£${rev}</td>
-        <td><button onclick="editTreatment('${t.name}')" style="background:none;border:none;cursor:pointer;font-size:14px">✏️</button></td>
+        <td class="treat-name-cell col-name">${t.name}</td>
+        <td class="col-dur" style="font-size:12px;color:var(--muted)">${override.duration||t.duration}m</td>
+        <td class="treat-price-cell col-price">£${override.price||t.price}</td>
+        <td class="col-bookings" style="font-size:13px">${tBookings.length}</td>
+        <td class="treat-rev-cell col-rev">£${rev}</td>
+        <td class="col-edit"><button class="edit-btn" onclick="editTreatment('${safeName}')">✏</button></td>
       </tr>`;
     });
     html+='</tbody></table>';
   });
-  document.getElementById('treatments-table-wrap').innerHTML=html;
+  document.getElementById('treatments-table-wrap').innerHTML=html||'<p style="padding:20px;color:var(--muted);font-size:13px">No treatments found</p>';
 }
 function filterTreatments(v){renderTreatments(v)}
 

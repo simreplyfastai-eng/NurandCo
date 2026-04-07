@@ -1,0 +1,92 @@
+Fix the Treatments page in portal.html so it is fully responsive 
+with zero horizontal scrolling on mobile. Must sit perfectly 
+within the screen width at all times.
+
+SPECIFIC FIXES:
+
+OVERALL:
+- overflow-x: hidden on the treatments page container
+- box-sizing: border-box on all elements
+- All padding reduced to 16px on screens under 768px
+- No fixed pixel widths anywhere that exceed the viewport
+
+CATEGORY HEADER ROWS (FACE / SKIN / BODY / TEETH etc):
+- Full width, padding 8px 12px on mobile
+- Font size 11px on mobile, letter-spacing 1px
+- background: #F9F9F9, color: #AAAAAA, uppercase Inter bold
+
+TREATMENTS TABLE:
+- width: 100%, table-layout: fixed
+- overflow-x: hidden on the wrapper div (NOT scroll or auto)
+- All cells: overflow hidden, text-overflow ellipsis, 
+  white-space nowrap, vertical-align middle
+
+COLUMN VISIBILITY BY BREAKPOINT:
+
+Desktop (above 768px) — show all columns:
+Treatment | Duration | Price | Bookings | Revenue | Edit
+
+Tablet (under 768px) — hide Bookings column:
+Treatment | Duration | Price | Revenue | Edit
+
+Mobile (under 600px) — hide Duration and Bookings:
+Treatment | Price | Revenue | Edit
+
+COLUMN WIDTHS ON MOBILE (table-layout fixed, under 600px):
+- Treatment: 40%
+- Price: 20%
+- Revenue: 22%
+- Edit: 18%
+
+COLUMN WIDTHS ON TABLET (under 768px):
+- Treatment: 35%
+- Duration: 18%
+- Price: 16%
+- Revenue: 18%
+- Edit: 13%
+
+TREATMENT NAME CELL:
+- font-weight bold, Inter 13px on mobile
+- Allow text to wrap on mobile only 
+  (white-space: normal for this cell only)
+- Two lines max, line-height 1.3
+
+PRICE CELL:
+- Inter 13px bold, color #C9A96E
+- No wrapping
+
+REVENUE CELL:
+- Inter 13px bold, color #C9A96E
+- No wrapping
+
+EDIT BUTTON (pencil icon):
+- On mobile: icon only, no label text
+- 32px × 32px touch target
+- gold color #C9A96E, border none, background transparent
+- Centered in cell
+
+ACTIVE/HIDDEN TOGGLE:
+- On mobile: remove any text label, show only a small 
+  toggle switch (CSS only, no libraries)
+- Toggle: 36px wide × 20px tall, border-radius 10px
+- On: gold background #C9A96E, Off: #DDDDDD
+- Thumb: white circle 16px, transitions smoothly
+
+SEARCH BAR:
+- width: 100%, box-sizing border-box
+- On mobile: full width below the page title
+- border: 1px solid #E0E0E0, border-radius 20px, 
+  padding 10px 16px, Inter 13px
+- No overflow
+
+PAGE TITLE ROW:
+- On mobile: stack title and search bar vertically
+- Title: Cormorant Garamond 22px, full width
+- Search below it: full width, margin-top 10px
+- Hide any secondary buttons (export etc) on mobile 
+  under 600px
+
+GENERAL:
+- Test at 375px viewport — zero horizontal scroll
+- All interactive elements minimum 44px touch target height
+- Cell padding: 12px 8px on mobile (reduced from desktop)
