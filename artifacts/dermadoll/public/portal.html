@@ -109,8 +109,9 @@ tr:hover td{background:#FDFBF8}
 .three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
 
 /* ── ACTIVITY FEED ──────────────────────────────── */
-.feed-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #F5F5F5;font-size:12px}
+.feed-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid #F5F5F5;font-size:12px;cursor:pointer;border-radius:6px;transition:background .15s;margin:0 -8px;padding-left:8px;padding-right:8px}
 .feed-item:last-child{border-bottom:none}
+.feed-item:hover{background:#FAFAFA}
 .feed-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
 
 /* ── CHART ───────────────────────────────────────── */
@@ -1102,7 +1103,7 @@ function renderDashboard(){
   const feed=[...bookings].sort((a,b)=>b.createdAt-a.createdAt).slice(0,10);
   document.getElementById('activity-feed').innerHTML=feed.map(b=>{
     const col=b.status==='Confirmed'?'#2e7d32':b.status==='Pending'?'var(--gold)':b.status==='Cancelled'?'#c62828':'#888';
-    return`<div class="feed-item"><div class="feed-dot" style="background:${col}"></div><div><div style="font-weight:500;font-size:12px">${b.status} — ${b.clientName}</div><div style="color:var(--muted);margin-top:2px">${b.treatment} · £${b.price} · ${timeAgo(b.createdAt)}</div></div></div>`;
+    return`<div class="feed-item" onclick="openClientByName('${b.clientName.replace(/'/g,"\\'")}')"><div class="feed-dot" style="background:${col}"></div><div><div style="font-weight:500;font-size:12px">${b.status} — ${b.clientName}</div><div style="color:var(--muted);margin-top:2px">${b.treatment} · £${b.price} · ${timeAgo(b.createdAt)}</div></div></div>`;
   }).join('');
 }
 
@@ -1572,6 +1573,10 @@ function renderClients(filter){
 }
 function filterClients(v){renderClients(v)}
 
+function openClientByName(name){
+  const c=getClients().find(x=>x.name===name);
+  if(c){openClientPanel(c.id);}
+}
 function openClientPanel(id){
   const clients=getClients();
   const c=clients.find(x=>x.id===id);
