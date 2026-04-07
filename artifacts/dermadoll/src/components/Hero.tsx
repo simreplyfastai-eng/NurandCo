@@ -1,79 +1,18 @@
 import { motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
 
 export default function Hero() {
-  const video1Ref = useRef<HTMLVideoElement>(null);
-  const video2Ref = useRef<HTMLVideoElement>(null);
-  const [activeVideo, setActiveVideo] = useState<1 | 2>(1);
-  const fadeDuration = 1500; // ms
-
-  useEffect(() => {
-    const v1 = video1Ref.current;
-    const v2 = video2Ref.current;
-    if (!v1 || !v2) return;
-
-    v2.pause();
-    v2.currentTime = 0;
-
-    const handleV1End = () => {
-      v2.currentTime = 0;
-      v2.play().catch(() => {});
-      setActiveVideo(2);
-      setTimeout(() => {
-        v1.pause();
-        v1.currentTime = 0;
-      }, fadeDuration);
-    };
-
-    const handleV2End = () => {
-      v1.currentTime = 0;
-      v1.play().catch(() => {});
-      setActiveVideo(1);
-      setTimeout(() => {
-        v2.pause();
-        v2.currentTime = 0;
-      }, fadeDuration);
-    };
-
-    v1.addEventListener("ended", handleV1End);
-    v2.addEventListener("ended", handleV2End);
-
-    return () => {
-      v1.removeEventListener("ended", handleV1End);
-      v2.removeEventListener("ended", handleV2End);
-    };
-  }, []);
-
-  const transitionStyle = `opacity ${fadeDuration}ms ease-in-out`;
-
   return (
     <section className="relative h-[100dvh] w-full overflow-hidden flex items-center justify-center">
-      {/* Background Videos */}
+      {/* Background Video */}
       <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-br from-[#1a1a1a] to-[#2d2520]">
         <video
-          ref={video1Ref}
           autoPlay
           muted
+          loop
           playsInline
           className="absolute inset-0 w-full h-full object-cover"
-          style={{
-            opacity: activeVideo === 1 ? 1 : 0,
-            transition: transitionStyle,
-          }}
         >
           <source src={`${import.meta.env.BASE_URL}hero.mp4`} type="video/mp4" />
-        </video>
-        <video
-          ref={video2Ref}
-          muted
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{
-            opacity: activeVideo === 2 ? 1 : 0,
-            transition: transitionStyle,
-          }}
-        >
-          <source src={`${import.meta.env.BASE_URL}hero2.mp4`} type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-black/45" />
       </div>
