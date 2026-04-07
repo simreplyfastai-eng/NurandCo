@@ -188,16 +188,43 @@ tr:hover td{background:#FDFBF8}
   #sidebar-overlay.open{display:block}
   #mobile-toggle{display:flex}
   #main-content{margin-left:0}
-  .kpi-grid{grid-template-columns:1fr 1fr}
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:10px}
+  .kpi-card{padding:14px}
+  .kpi-value{font-size:26px}
+  .kpi-label{font-size:10px}
+  .kpi-change{font-size:10px}
   .two-col{grid-template-columns:1fr}
-  .three-col{grid-template-columns:1fr}
+  .three-col{grid-template-columns:1fr 1fr;gap:10px}
   .client-grid{grid-template-columns:1fr 1fr}
-  .topbar{padding:14px 16px}
-  .page{padding:16px}
+  .topbar{padding:12px 14px;gap:8px;flex-wrap:wrap}
+  .topbar-title{font-size:20px}
+  .page{padding:12px}
   .topbar-search{display:none}
   .side-panel{width:100%}
+  .card-title{font-size:16px}
+  table{font-size:11px}
+  th{padding:8px 10px;font-size:9px}
+  td{padding:8px 10px}
+  .card{border-radius:10px}
+  .modal-box{padding:20px;margin:12px}
+  .bar-label{width:80px;font-size:10px}
+  .bar-val{font-size:10px}
+  /* Make tables scroll horizontally on mobile */
+  .card{overflow-x:auto}
+  #finance-tbody tr td:nth-child(5),
+  #finance-tbody tr td:nth-child(6){display:none}
+  #page-finance table thead th:nth-child(5),
+  #page-finance table thead th:nth-child(6){display:none}
+  .timeline-time{font-size:11px;width:40px}
 }
-@media(max-width:480px){.kpi-grid{grid-template-columns:1fr}.client-grid{grid-template-columns:1fr}}
+@media(max-width:480px){
+  .kpi-grid{grid-template-columns:1fr 1fr}
+  .three-col{grid-template-columns:1fr}
+  .client-grid{grid-template-columns:1fr}
+  .kpi-value{font-size:22px}
+  .topbar{padding:10px 12px}
+  .btn-gold{font-size:11px;padding:7px 12px}
+}
 </style>
 </head>
 <body>
