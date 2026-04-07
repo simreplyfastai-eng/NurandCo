@@ -1,0 +1,223 @@
+Build a single-file index.html website for "Dermadoll Aesthetics" — a premium aesthetics clinic based in Birmingham/Solihull, UK, run by a practitioner named Niamh.
+
+DESIGN BRIEF:
+- Colour palette: Pure white (#FFFFFF) background, warm off-white sections (#FAF9F7), black text (#111111), gold accent (#C9A96E) for buttons, borders and highlights
+- Typography: Google Fonts — "Cormorant Garamond" (serif) for all headings and logo, "Inter" for body text
+- Logo: Two-line wordmark — "DERMADOLL" in bold wide-tracking caps, "AESTHETICS" smaller, lighter, letter-spaced below. Text only, no image.
+- Aesthetic: Clean, luxury, editorial. High-end London clinic feel. Generous whitespace, thin gold dividers, nothing cluttered.
+- Fully mobile responsive with hamburger menu on mobile
+
+SECTIONS (in order):
+
+1. NAV
+Fixed top navbar. Transparent over hero, white background once scrolled.
+Logo left. Links right: Services | Training | Reviews | Book Now (gold filled pill button).
+Mobile: hamburger that reveals full-screen overlay menu.
+
+2. HERO — VIDEO BACKGROUND
+Full-viewport-height section with an MP4 video as the background.
+Video element: autoplay, muted, loop, playsinline, object-fit: cover, width: 100%, height: 100%.
+Source: <source src="hero.mp4" type="video/mp4">
+Over the video, place a dark overlay (background: rgba(0,0,0,0.45)) so text is always legible.
+Centred content on top of overlay:
+- Logo wordmark in white: "DERMADOLL" large bold serif, "AESTHETICS" spaced smaller below
+- Headline: "Redefining Natural Beauty" — large white Cormorant Garamond
+- Subheading: "Premium aesthetics treatments in Birmingham & Solihull" — white Inter, light weight
+- Two CTA buttons: "View Treatments" (gold filled) | "Book a Consultation" (white outlined)
+- Thin gold animated underline on the headline
+
+3. ABOUT
+Centred text block on off-white (#FAF9F7).
+Heading: "Meet Dermadoll Aesthetics"
+Body: "Dermadoll Aesthetics is a premier face clinic dedicated to enhancing your natural beauty. Led by Niamh — a skilled, experienced practitioner — every treatment is tailored to you, combining the latest techniques with a warm, professional approach. Your comfort and results are our priority."
+Stat row below in three columns, gold numbers:
+[62 Treatments Performed] [★ 5.0 Rating] [5 Five-Star Reviews]
+
+4. SERVICES
+Heading: "Our Treatments"
+Subheading: "Explore our full range of aesthetic treatments"
+
+Display each category as its own full section with a thin gold divider above it, a left-aligned category heading in Cormorant Garamond, and treatment cards in a responsive grid (3 col desktop, 2 col tablet, 1 col mobile). Each card: treatment name, price in gold, duration. White card, subtle border, lifts on hover.
+
+— BOTOX —
+Botox 1 Area | £100 | 15 mins
+Botox 2 Areas | £140 | 15 mins
+Botox 3 Areas | £180 | 15 mins
+Botox 4 Areas | £210 | 15 mins
+Masseter Botox | £200 | 15 mins
+Nefertiti Lift Botox (Neck) | £220 | 30 mins
+Chin Botox (Mentalis Muscle) | £80 | 30 mins
+Nose Slimming Botox | £80 | 30 mins
+Gummy Smile / Lip Flip Botox | £80 | 30 mins
+Hyperhidrosis (Underarm) Botox | £220 | 30 mins
+Botox Topup | £20 | 15 mins
+
+— DERMAL FILLER —
+0.5ml Lip Filler | £100 | 30 mins
+0.7ml Lip Filler | £120 | 45 mins
+1.1ml Lip Filler | £150 | 45 mins
+1.1ml Nasal Labials | £150 | 30 mins
+1.1ml Cheek Filler | £150 | 30 mins
+1.5ml Cheek Filler | £200 | 45 mins
+2.2ml Cheek Filler | £250 | 45 mins
+1.1ml Chin Filler | £150 | 45 mins
+2.2ml Jawline Filler | £250 | 1 hr
+Liquid Rhinoplasty | £180 | 45 mins
+Teartrough Filler | £180 | 45 mins
+2.2ml Facial Contouring | £230 | 45 mins
+3.3ml Facial Contouring | £330 | 1 hr
+4.4ml Facial Contouring | £440 | 1 hr
+
+— FACIALS —
+Glass Skin Facial | £80 | 1 hr
+Glass Skin Facial + Microneedling | £120 | 1 hr
+
+— SKIN BOOSTERS —
+1x Skin Booster | £150 | 30 mins
+3x Lumi Pro Skin Booster | £350 | 30 mins
+Plenhyage XL Strong | £200 | 30 mins
+Plenhyage XL Strong 2 Treatments | £350 | 30 mins
+Vitarin I - Eye Polynucleotide | £170 | 30 mins
+Vitarin I - Eye Polynucleotide x2 | £300 | 30 mins
+B12 Injection | £30 | 15 mins
+
+— FAT DISSOLVING —
+Lemon Bottle Small Area | £70 | 30 mins
+Lemon Bottle Large Area | £100 | 30 mins
+
+— TREATMENT BUNDLES —
+Botox 3 Areas + 1.1ml Dermal Filler | £320 | 45 mins
+Botox 3 Areas + 1.1ml Lips + Lumi Pro | £450 | 1 hr
+Botox 3 Areas + 1x Lumi Pro Skin Booster | £300 | 45 mins
+Botox 3 Areas + 1x Plenhyage XL | £350 | 45 mins
+Botox 3 Areas + Vitarin I Eye | £300 | 45 mins
+
+5. BEFORE & AFTER
+Heading: "Real Results"
+Subheading: "Every result is natural, tailored and uniquely yours"
+Background: off-white (#FAF9F7)
+
+Display 4 before/after comparison cards in a 2x2 grid (2 col desktop, 1 col mobile).
+Each card uses an image-reveal slider — a draggable vertical divider the user can slide left/right to reveal before vs after.
+Left side label: "BEFORE" | Right side label: "AFTER" — both in small gold uppercase text.
+Each card has a treatment label underneath: Lip Filler | Cheek Filler | Botox 3 Areas | Jawline Filler
+Image sources (placeholder — owner will swap in):
+before-after-1-before.jpg / before-after-1-after.jpg
+before-after-2-before.jpg / before-after-2-after.jpg
+before-after-3-before.jpg / before-after-3-after.jpg
+before-after-4-before.jpg / before-after-4-after.jpg
+Build the slider interaction in pure vanilla JS — no libraries.
+If images are missing, show an elegant placeholder with the treatment name centred on a soft grey card.
+
+6. RESULTS VIDEOS
+Heading: "See The Results"
+Subheading: "Watch real treatments and transformations"
+Background: white
+
+Display 4 video cards in a 2x2 grid (2 col desktop, 1 col mobile).
+Each card is a rounded white container with a subtle shadow.
+Each card contains:
+- An MP4 video: controls, playsinline, preload="metadata", object-fit: cover, max-height: 500px, width: 100%, border-radius inherited
+- A small gold label underneath: e.g. "Lip Filler Treatment" | "Glass Skin Facial" | "Masseter Botox" | "Skin Booster Results"
+Video sources (owner will swap in):
+video1.mp4 | video2.mp4 | video3.mp4 | video4.mp4
+Videos should NOT autoplay. User taps play manually.
+
+7. TRAINING
+Full dedicated section on off-white.
+Heading: "Pathway to Aesthetics"
+Subheading: "Launch your aesthetics career with a fully comprehensive 3-day course"
+Two-column layout (stacks on mobile):
+Left — What's included:
+✓ Level 3 Anatomy & Physiology
+✓ First Aid
+✓ Complications Management
+✓ Hyalase Dissolving
+✓ Dermaplaning
+✓ Microneedling
+✓ Foundation Dermal Filler
+✓ Foundation Anti-Wrinkle
+✓ B12
+✓ Insurance & Prescriber Advice
+✓ 24/7 Ongoing Support
+✓ Pre-Study Materials
+Right — Key details:
+- Price: £2,000 (large gold display)
+- Add-on: Skin Boosters or Advanced Dermal Filler +£500
+- 3-day course | Max 3 students
+- Location: Birmingham | Solihull
+- £300 deposit secures your place
+- Finance options available
+- "Real models. Real experience. Real confidence."
+CTA button: "DM to Enquire" — links to https://instagram.com/dermadollaesthetics
+
+8. REVIEWS
+Heading: "What Our Clients Say"
+Rating display: ★ 5.0 | 5 Reviews — Powered by Faces
+Three review cards, white, subtle shadow, gold stars:
+
+Card 1 — Ellisha W. | February 2026
+"I have only ever been to Niamh for my aesthetics and she does everything so professionally! I am always so pleased with the results."
+
+Card 2 — Donna S. | February 2026
+"Very good at her job — the best I've been to for my treatment."
+
+Card 3 — Donna S. | December 2025
+"The best."
+
+9. FAQ
+Heading: "Frequently Asked Questions"
+Subheading: "Everything you need to know before booking"
+Background: off-white (#FAF9F7)
+
+Accordion-style FAQ — click question to expand answer. Gold arrow rotates on open. Smooth expand/collapse animation.
+
+Questions & answers:
+
+Q: Are your treatments safe?
+A: Absolutely. Niamh is a fully trained and insured aesthetic practitioner using only premium, CE-marked products. All treatments are carried out in a professional clinical environment with your safety as the top priority.
+
+Q: Does it hurt?
+A: Most treatments involve minimal discomfort. Topical numbing cream is applied before filler treatments to keep you comfortable throughout. Botox injections are very quick and most clients find them virtually painless.
+
+Q: How long do results last?
+A: Results vary by treatment. Botox typically lasts 3–4 months, dermal fillers 6–18 months depending on the area and product used. Skin boosters and facials provide cumulative results with regular sessions.
+
+Q: How do I book?
+A: You can book directly via our Faces profile using the Book Now button, or send us a DM on Instagram @dermadollaesthetics and we'll get you booked in.
+
+Q: What should I do before my appointment?
+A: Arrive with a clean face where possible. Avoid alcohol 24 hours before filler treatments and avoid blood-thinning medications (unless prescribed) 48 hours prior. Full aftercare advice is provided at your appointment.
+
+Q: Do you offer finance or payment plans?
+A: Yes — finance options are available to help spread the cost of treatments. DM us on Instagram for more details.
+
+Q: Where are you located?
+A: We are based in Birmingham and Solihull. Exact location details are provided upon booking confirmation.
+
+Q: What is included in the Pathway to Aesthetics training?
+A: The 3-day course covers Level 3 Anatomy & Physiology, First Aid, Complications Management, Hyalase Dissolving, Dermaplaning, Microneedling, Foundation Dermal Filler, Foundation Anti-Wrinkle, B12, Insurance & Prescriber Advice, and more — all for £2,000 with a £300 deposit to secure your place.
+
+10. BOOK NOW CTA SECTION
+Full-width white section.
+Heading: "Ready to Book?"
+Subtext: "Book directly via our Faces profile or reach out on Instagram"
+Two buttons: "Book Now" (gold filled, links to https://facesconsent.com) | "@dermadollaesthetics" (gold outlined, links to https://instagram.com/dermadollaesthetics)
+
+11. FOOTER
+Centred logo wordmark.
+Tagline: "Beauty Redefined"
+Nav links: Services | Training | Reviews | Book Now
+Social link: Instagram — @dermadollaesthetics
+© 2025 Dermadoll Aesthetics. All rights reserved.
+
+INTERACTIONS & TECHNICAL:
+- Smooth scroll on all anchor links
+- Nav becomes white with shadow on scroll (IntersectionObserver or scroll event)
+- Treatment cards lift on hover: transform: translateY(-4px), box-shadow transition
+- Before/after slider: pure vanilla JS drag interaction, works on touch and mouse
+- FAQ accordion: click to expand, gold chevron rotates 180deg, smooth max-height transition
+- All buttons have gold hover states
+- Mobile hamburger: full-screen overlay with nav links centred
+- No frameworks. No CDN libraries. Google Fonts only (Cormorant Garamond + Inter).
+- Single index.html file. All CSS and JS inline.
