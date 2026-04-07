@@ -5,7 +5,9 @@ const router = Router();
 
 // GET /api/portal/store  — fetch multiple keys at once (?keys=k1,k2,k3)
 router.get("/portal/store", async (req, res) => {
-  const keys = (req.query["keys"] as string || "").split(",").filter(Boolean);
+  const raw = req.query["keys"];
+  const keysStr = Array.isArray(raw) ? raw.join(",") : (raw as string || "");
+  const keys = keysStr.split(",").filter(Boolean);
   if (!keys.length) return res.json({});
   try {
     const result = await pool.query(

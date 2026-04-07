@@ -71,7 +71,14 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 
 /* ── KPI CARDS ───────────────────────────────────── */
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
-.kpi-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:var(--card-shadow)}
+.kpi-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:var(--card-shadow);position:relative}
+.kpi-card.kpi-link{cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s}
+.kpi-card.kpi-link:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,169,110,.15)}
+.kpi-card.kpi-link::after{content:'→';position:absolute;bottom:16px;right:16px;color:var(--gold);font-size:13px;opacity:0;transition:opacity .2s}
+.kpi-card.kpi-link:hover::after{opacity:1}
+.back-to-dash{display:none;align-items:center;gap:5px;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;color:var(--text);transition:border-color .15s,color .15s;white-space:nowrap}
+.back-to-dash:hover{border-color:var(--gold);color:var(--gold)}
+.back-to-dash.visible{display:inline-flex}
 .kpi-label{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
 .kpi-value{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;color:var(--gold);line-height:1}
 .kpi-change{font-size:11px;margin-top:8px;display:flex;align-items:center;gap:4px}
@@ -479,6 +486,7 @@ tr:hover td{background:#FDFBF8}
     <!-- ── SCHEDULE ── -->
     <div id="page-schedule" class="page">
       <div class="topbar">
+        <button class="back-to-dash" id="back-schedule" onclick="goBackToDash()">← Dashboard</button>
         <button onclick="changeMonth(-1)" style="background:none;border:1px solid var(--border);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:18px;color:var(--gold);min-height:44px;min-width:44px">‹</button>
         <span class="topbar-title serif" id="cal-title" style="margin:0 auto;font-size:14px"></span>
         <button onclick="changeMonth(1)" style="background:none;border:1px solid var(--border);border-radius:8px;padding:7px 14px;cursor:pointer;font-size:18px;color:var(--gold);min-height:44px;min-width:44px">›</button>
@@ -538,6 +546,7 @@ tr:hover td{background:#FDFBF8}
     <!-- ── CLIENTS ── -->
     <div id="page-clients" class="page">
       <div class="topbar">
+        <button class="back-to-dash" id="back-clients" onclick="goBackToDash()">← Dashboard</button>
         <span class="topbar-title serif">Clients <span id="client-count" style="font-size:14px;font-family:'Inter',sans-serif;color:var(--muted);font-weight:400"></span></span>
         <input class="topbar-search" placeholder="Search clients…" oninput="filterClients(this.value)"/>
         <button class="btn-gold" onclick="openAddClientModal()">+ Add Client</button>
@@ -559,6 +568,7 @@ tr:hover td{background:#FDFBF8}
     <!-- ── FINANCE ── -->
     <div id="page-finance" class="page">
       <div class="topbar">
+        <button class="back-to-dash" id="back-finance" onclick="goBackToDash()">← Dashboard</button>
         <span class="topbar-title serif">Finance</span>
         <select id="finance-month-sel" class="form-input" style="width:auto;max-width:180px;padding:8px 12px" onchange="renderFinance()"></select>
         <button id="finance-export-btn" class="btn-outline" onclick="exportFinance()">Export</button>
@@ -928,7 +938,7 @@ window.addEventListener('resize',()=>{
 // ═══════════════════════════════════════════════════
 // NAVIGATION
 // ═══════════════════════════════════════════════════
-function showPage(id,el){
+function showPage(id,el,fromKpi){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
@@ -939,8 +949,24 @@ function showPage(id,el){
   if(id==='treatments')renderTreatments();
   if(id==='finance')renderFinance();
   if(id==='media')renderMedia();
+  // manage back button visibility
+  document.querySelectorAll('.back-to-dash').forEach(b=>b.classList.remove('visible'));
+  if(fromKpi){
+    const btn=document.getElementById('back-'+id);
+    if(btn)btn.classList.add('visible');
+  }
   // close mobile sidebar
   if(window.innerWidth<=768)toggleSidebar();
+}
+
+function navFromKpi(page){
+  const sidebarEl=document.querySelector(`.sb-item[onclick*="'${page}'"]`);
+  showPage(page,sidebarEl,true);
+}
+
+function goBackToDash(){
+  const sidebarEl=document.querySelector(`.sb-item[onclick*="'dashboard'"]`);
+  showPage('dashboard',sidebarEl,false);
 }
 
 function toggleSidebar(){
@@ -974,10 +1000,10 @@ function renderDashboard(){
 
   const kpiGrid=document.getElementById('kpi-grid');
   kpiGrid.innerHTML=`
-    ${kpiCard('Revenue This Month','£'+rev.toLocaleString(),revChange>0?'up':'down',(revChange>0?'↑ ':'↓ ')+Math.abs(revChange)+'% vs last month')}
-    ${kpiCard('Appointments',appts,apptsDiff>=0?'up':'down',(apptsDiff>=0?'+':'')+apptsDiff+' from last month')}
-    ${kpiCard('Active Clients',activeClients,'up','+'+newClients+' new this month')}
-    ${kpiCard('Avg. Spend','£'+avgSpend,avgDiff>=0?'up':'down',(avgDiff>=0?'+':'')+'£'+avgDiff+' per visit')}
+    ${kpiCard('Revenue This Month','£'+rev.toLocaleString(),revChange>0?'up':'down',(revChange>0?'↑ ':'↓ ')+Math.abs(revChange)+'% vs last month','finance')}
+    ${kpiCard('Appointments',appts,apptsDiff>=0?'up':'down',(apptsDiff>=0?'+':'')+apptsDiff+' from last month','schedule')}
+    ${kpiCard('Active Clients',activeClients,'up','+'+newClients+' new this month','clients')}
+    ${kpiCard('Avg. Spend','£'+avgSpend,avgDiff>=0?'up':'down',(avgDiff>=0?'+':'')+'£'+avgDiff+' per visit','finance')}
   `;
 
   // Recent bookings
@@ -1028,8 +1054,9 @@ function renderDashboard(){
   }).join('');
 }
 
-function kpiCard(label,value,dir,change){
-  return`<div class="kpi-card"><div class="kpi-label">${label}</div><div class="kpi-value">${value}</div><div class="kpi-change ${dir}">${change}</div></div>`;
+function kpiCard(label,value,dir,change,page){
+  const extra=page?` kpi-link" onclick="navFromKpi('${page}')`:'';
+  return`<div class="kpi-card${extra}"><div class="kpi-label">${label}</div><div class="kpi-value">${value}</div><div class="kpi-change ${dir}">${change}</div></div>`;
 }
 function statusPill(s){
   const cls={Confirmed:'pill-green',Pending:'pill-gold',Cancelled:'pill-red',Complete:'pill-grey'}[s]||'pill-grey';
