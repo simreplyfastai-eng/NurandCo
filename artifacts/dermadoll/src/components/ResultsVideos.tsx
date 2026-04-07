@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 export default function ResultsVideos() {
   const videos = [
     { label: "Medical Needling", src: "video1.mp4" },
-    { label: "Glass Skin Facial", src: "video2.mp4" },
+    { label: "Lip Filler", src: "video2.mp4" },
     { label: "Masseter Botox", src: "video3.mp4" },
     { label: "Skin Booster Results", src: "video4.mp4" },
   ];
