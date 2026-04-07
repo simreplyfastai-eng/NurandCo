@@ -1,0 +1,74 @@
+Fix the Schedule page in portal.html so it is fully optimised 
+for mobile. Zero horizontal scrolling, everything fits within 
+the screen width at all times.
+
+LAYOUT CHANGE ON MOBILE (under 768px):
+- On desktop: keep the current side-by-side layout — 
+  calendar left, day detail panel right
+- On mobile: stack vertically — calendar on top, 
+  day detail panel below it. No side by side at all.
+- Both sections full width (100%) on mobile
+- Remove any fixed widths or min-widths on either panel
+
+CALENDAR GRID:
+- width: 100%, table-layout: fixed
+- Each day column: equal width (100% / 7 = 14.28% each)
+- Day header labels (MON TUE WED etc):
+  On mobile: shorten to single letter M T W T F S S
+  Font size: 10px, padding 4px 0
+- Date number in each cell:
+  Font size 12px on mobile
+  Cell height: 60px on mobile (reduced from desktop)
+  Padding: 4px on mobile
+- Booking pills inside day cells:
+  On mobile: show only client initials + no treatment text
+  e.g. "EW" instead of "EW · Lip Fill"
+  Font size 9px, padding 2px 5px, border-radius 4px
+  Max 2 pills visible per cell, overflow hidden
+  If more than 2: show "+N more" pill in grey
+
+MONTH NAVIGATION HEADER:
+- On mobile: "April 2026" centred, Inter 14px bold
+- Left/right arrows either side, 36px touch targets
+- "+ New Booking" button: 
+  On mobile move below the month title as full-width 
+  gold button, border-radius 8px, padding 10px
+  Hide any other header buttons on mobile
+
+DAY DETAIL PANEL (right side / below on mobile):
+- On mobile: full width, margin-top 16px
+- Panel heading (e.g. "2 Apr 2026"): 
+  Cormorant Garamond 20px, margin-bottom 12px
+- Each booking row in the panel:
+  Padding 12px, border-radius 8px, margin-bottom 8px
+  Background #FAFAFA, border 1px solid #F0F0F0
+  Time: Inter 12px bold gold left
+  Client name: Inter 13px bold black
+  Treatment + price: Inter 12px #888888 below name
+  Status button: right aligned, border-radius 20px, 
+  padding 4px 12px, Inter 11px bold
+  Min touch target 44px height for the button
+
+EMPTY STATE:
+- "No bookings for this day" centred
+- Inter 13px #AAAAAA italic
+- Padding 32px 0
+
+SCROLL BEHAVIOUR:
+- The calendar section: no horizontal scroll at any size
+- The day detail panel: can scroll vertically if many bookings
+- overflow-x: hidden on both panels and page container
+- overflow-y: auto on day detail panel only
+
+SUNDAY COLUMNS:
+- On mobile: grey out Sunday column header and cells
+- background: #FAFAFA, color: #CCCCCC
+- Slightly narrower if needed — can be 10% width 
+  vs 15% for active days
+
+GENERAL:
+- box-sizing: border-box on all elements
+- All text: Inter, no wrapping issues
+- Test at 375px — calendar must be fully visible 
+  without any horizontal scroll
+- Minimum tap target 44px on all interactive elements

@@ -685,11 +685,11 @@ const TREATMENTS = [
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
 function getBookings(){return JSON.parse(localStorage.getItem('dd_bookings')||'[]')}
-function saveBookings(b){localStorage.setItem('dd_bookings',JSON.stringify(b))}
+function saveBookings(b){localStorage.setItem('dd_bookings',JSON.stringify(b));CloudStore.set('dd_bookings',b);}
 function getClients(){return JSON.parse(localStorage.getItem('dd_clients')||'[]')}
-function saveClients(c){localStorage.setItem('dd_clients',JSON.stringify(c))}
+function saveClients(c){localStorage.setItem('dd_clients',JSON.stringify(c));CloudStore.set('dd_clients',c);}
 function getSettings(){return JSON.parse(localStorage.getItem('dd_settings')||'{}')}
-function saveSettingsData(s){localStorage.setItem('dd_settings',JSON.stringify(s))}
+function saveSettingsData(s){localStorage.setItem('dd_settings',JSON.stringify(s));CloudStore.set('dd_settings',s);}
 function getVideoLabels(){return JSON.parse(localStorage.getItem('dd_video_labels')||'{"video1":"Medical Needling","video2":"Lip Filler","video3":"Masseter Botox","video4":"Skin Booster Results"}')}
 
 function initSampleData(){
@@ -724,6 +724,44 @@ function initSampleData(){
 function fmt(d){return d.toISOString().slice(0,10)}
 
 // ═══════════════════════════════════════════════════
+// CLOUD STORE — real-time sync to PostgreSQL via API
+// Falls back gracefully to localStorage if API is down
+// ═══════════════════════════════════════════════════
+const CloudStore = {
+  BASE: '/api/portal/store',
+  KEYS: ['dd_bookings','dd_clients','dd_settings','dd_custom_treats',
+         'dd_custom_cats','dd_cat_states','dd_treatment_overrides','dd_video_labels'],
+
+  async init() {
+    try {
+      const params = this.KEYS.map(k=>'keys='+encodeURIComponent(k)).join('&');
+      const r = await fetch(`${this.BASE}?${params}`);
+      if (!r.ok) return;
+      const data = await r.json();
+      this.KEYS.forEach(key => {
+        if (data[key] !== undefined && data[key] !== null) {
+          localStorage.setItem(key, JSON.stringify(data[key]));
+        }
+      });
+    } catch(e) {
+      console.warn('CloudStore init failed — using localStorage', e);
+    }
+  },
+
+  async set(key, value) {
+    try {
+      await fetch(`${this.BASE}/${key}`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({value})
+      });
+    } catch(e) {
+      console.warn('CloudStore.set failed for', key, e);
+    }
+  }
+};
+
+// ═══════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════
 function doLogin(){
@@ -748,12 +786,14 @@ function doLogout(){localStorage.removeItem('dd_session');location.reload()}
 function showPortal(){
   document.getElementById('login-page').style.display='none';
   document.getElementById('portal').classList.add('visible');
-  initSampleData();
-  renderDashboard();
-  buildTreatmentSelect();
-  buildCalendar();
-  renderMedia();
-  updateSidebarBadges();
+  CloudStore.init().then(()=>{
+    initSampleData();
+    renderDashboard();
+    buildTreatmentSelect();
+    buildCalendar();
+    renderMedia();
+    updateSidebarBadges();
+  });
 }
 
 window.addEventListener('DOMContentLoaded',()=>{
@@ -1144,11 +1184,11 @@ function saveClient(){
 // ═══════════════════════════════════════════════════
 // ── Treatment data helpers ──
 function getCustomTreatments(){return JSON.parse(localStorage.getItem('dd_custom_treats')||'[]')}
-function saveCustomTreatments(t){localStorage.setItem('dd_custom_treats',JSON.stringify(t))}
+function saveCustomTreatments(t){localStorage.setItem('dd_custom_treats',JSON.stringify(t));CloudStore.set('dd_custom_treats',t);}
 function getCustomCats(){return JSON.parse(localStorage.getItem('dd_custom_cats')||'[]')}
-function saveCustomCats(c){localStorage.setItem('dd_custom_cats',JSON.stringify(c))}
+function saveCustomCats(c){localStorage.setItem('dd_custom_cats',JSON.stringify(c));CloudStore.set('dd_custom_cats',c);}
 function getCatStates(){return JSON.parse(localStorage.getItem('dd_cat_states')||'{}')}
-function saveCatStates(s){localStorage.setItem('dd_cat_states',JSON.stringify(s))}
+function saveCatStates(s){localStorage.setItem('dd_cat_states',JSON.stringify(s));CloudStore.set('dd_cat_states',s);}
 function getTreatOverrides(){return JSON.parse(localStorage.getItem('dd_treatment_overrides')||'{}')}
 
 const CAT_LABELS={FACE:'Face',SKIN:'Skin',BODY:'Body',TEETH:'Teeth'};
@@ -1302,6 +1342,7 @@ function saveEditTreatment(){
     const overrides=getTreatOverrides();
     overrides[name]={price:newPrice,duration:newDur};
     localStorage.setItem('dd_treatment_overrides',JSON.stringify(overrides));
+    CloudStore.set('dd_treatment_overrides',overrides);
   }
   closeEditTreatModal();
   renderTreatments();
@@ -1725,6 +1766,7 @@ function editVideoLabel(key){
   if(newLabel===null)return;
   labels[key]=newLabel;
   localStorage.setItem('dd_video_labels',JSON.stringify(labels));
+  CloudStore.set('dd_video_labels',labels);
   renderMedia();
 }
 
