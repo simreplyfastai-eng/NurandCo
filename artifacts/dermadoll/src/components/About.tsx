@@ -10,7 +10,8 @@ export default function About() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="font-serif text-4xl md:text-5xl mb-8">Meet Dermadoll Aesthetics</h2>
+          <h2 className="font-serif text-[2.5rem] md:text-[56px] mb-5">Meet Dermadoll Aesthetics</h2>
+          <div className="w-[60px] h-px bg-primary mx-auto mb-6" />
           <p className="text-foreground/80 leading-relaxed text-lg md:text-xl font-light mb-20 max-w-3xl mx-auto">
             Dermadoll Aesthetics is a premier face clinic dedicated to enhancing your natural beauty. Led by Niamh — a skilled, experienced practitioner — every treatment is tailored to you, combining the latest techniques with a warm, professional approach. Your comfort and results are our priority.
           </p>

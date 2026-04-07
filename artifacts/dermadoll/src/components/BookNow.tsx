@@ -10,7 +10,8 @@ export default function BookNow() {
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
         >
-          <h2 className="font-serif text-4xl md:text-5xl mb-8">Ready to Book?</h2>
+          <h2 className="font-serif text-[2.5rem] md:text-[56px] mb-5">Ready to Book?</h2>
+          <div className="w-[60px] h-px bg-primary mx-auto mb-5" />
           <p className="text-foreground/70 font-light text-lg mb-14">
             Book directly via our Faces profile or reach out on Instagram
           </p>
