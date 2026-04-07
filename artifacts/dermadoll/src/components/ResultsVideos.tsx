@@ -18,7 +18,7 @@ export default function ResultsVideos() {
             viewport={{ once: true }}
             className="font-serif text-[2rem] md:text-[56px] mb-5"
           >
-            See The Results
+            Real Results
           </motion.h2>
           <div className="w-[60px] h-px bg-primary mx-auto mb-5" />
           <motion.p
