@@ -45,9 +45,9 @@ export default function FAQ() {
   };
 
   return (
-    <section id="faq" className="py-24 bg-secondary">
+    <section id="faq" className="py-[100px] bg-secondary">
       <div className="container mx-auto px-6 max-w-3xl">
-        <div className="text-center mb-16">
+        <div className="text-center mb-20">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}

@@ -21,9 +21,9 @@ export default function Reviews() {
   ];
 
   return (
-    <section id="reviews" className="py-24 bg-white">
+    <section id="reviews" className="py-[100px] bg-white">
       <div className="container mx-auto px-6 max-w-6xl">
-        <div className="text-center mb-16">
+        <div className="text-center mb-20">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
