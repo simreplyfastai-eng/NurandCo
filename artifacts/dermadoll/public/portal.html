@@ -137,6 +137,53 @@ tr:hover td{background:#FDFBF8}
 .timeline-status{flex-shrink:0}
 .cal-empty-state{text-align:center;padding:32px 0;color:#AAAAAA;font-size:13px;font-style:italic}
 
+/* ── AVAILABILITY MANAGER ───────────────────────── */
+#avail-section{padding:0 20px 32px}
+.avail-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;box-sizing:border-box}
+.avail-card-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--text)}
+.avail-card-sub{font-size:12px;color:var(--muted);margin-top:3px}
+.avail-section-label{font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+.avail-two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:20px}
+.avail-day-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #F5F5F5}
+.avail-day-row:last-child{border-bottom:none}
+.avail-day-name{font-size:13px;font-weight:500;width:90px;flex-shrink:0}
+.avail-hours{display:flex;align-items:center;gap:6px;flex:1}
+.avail-hours.hidden{display:none}
+.avail-off-label{font-size:11px;color:#AAAAAA;font-style:italic;flex:1}
+.avail-time-input{border:1px solid #E0E0E0;border-radius:6px;padding:5px 7px;font-size:12px;font-family:'Inter',sans-serif;color:var(--text);background:#FAFAFA;width:88px;box-sizing:border-box;cursor:pointer}
+.avail-time-input:focus{outline:none;border-color:var(--gold)}
+
+/* Toggle switch */
+.avail-toggle{position:relative;display:inline-block;width:40px;height:22px;flex-shrink:0}
+.avail-toggle input{opacity:0;width:0;height:0;position:absolute}
+.avail-slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:#DDD;border-radius:22px;transition:.25s}
+.avail-slider:before{position:absolute;content:'';height:16px;width:16px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.25s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.avail-toggle input:checked + .avail-slider{background:var(--gold)}
+.avail-toggle input:checked + .avail-slider:before{transform:translateX(18px)}
+
+/* Mini override calendar */
+.avail-mini-hdr{display:flex;align-items:center;gap:6px;margin-bottom:8px}
+.avail-mini-nav{background:none;border:1px solid var(--border);border-radius:6px;padding:4px 10px;cursor:pointer;color:var(--gold);font-size:14px;min-height:32px}
+.avail-mini-title{flex:1;text-align:center;font-size:13px;font-weight:600}
+.avail-mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.avail-mini-day-hdr{text-align:center;font-size:9px;font-weight:700;color:var(--muted);padding:3px 0}
+.avail-mini-cell{height:30px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;border:2px solid transparent;box-sizing:border-box}
+.avail-mini-cell.working{background:rgba(201,169,110,.12);color:var(--text)}
+.avail-mini-cell.off{background:#F0F0F0;color:#BBBBBB}
+.avail-mini-cell.overridden{border-color:var(--gold)}
+.avail-mini-cell.selected{border-color:#111;box-shadow:0 0 0 1px #111}
+.avail-mini-cell.empty{cursor:default}
+.avail-override-editor{margin-top:12px;background:#FAFAFA;border:1px solid var(--border);border-radius:8px;padding:14px;box-sizing:border-box}
+.avail-override-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.avail-save-row{display:flex;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #F0F0F0}
+
+@media(max-width:767px){
+  #avail-section{padding:0 12px 24px}
+  .avail-two-col{grid-template-columns:1fr}
+  .avail-day-name{width:76px}
+  .avail-time-input{width:76px}
+}
+
 /* ── CALENDAR MOBILE ─────────────────────────────── */
 @media(max-width:767px){
   #schedule-layout{display:block !important;padding:12px !important}
@@ -446,6 +493,44 @@ tr:hover td{background:#FDFBF8}
         <div class="day-panel" id="day-panel">
           <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;margin-bottom:14px" id="day-panel-title">Select a day</div>
           <div id="day-panel-body"><p class="cal-empty-state">Click a date to see bookings</p></div>
+        </div>
+      </div>
+
+      <!-- ── AVAILABILITY MANAGER ── -->
+      <div id="avail-section">
+        <div class="avail-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+            <div>
+              <div class="avail-card-title">Working Hours &amp; Availability</div>
+              <div class="avail-card-sub">Set your default weekly schedule and block out specific dates</div>
+            </div>
+            <button class="btn-gold" id="avail-save-btn" onclick="saveAvailability()">Save Changes</button>
+          </div>
+
+          <div class="avail-two-col">
+            <!-- Left: default weekly schedule -->
+            <div>
+              <div class="avail-section-label">Default Weekly Schedule</div>
+              <div id="avail-days-list"></div>
+            </div>
+            <!-- Right: date override mini calendar -->
+            <div>
+              <div class="avail-section-label">Date Overrides</div>
+              <div class="avail-mini-hdr">
+                <button class="avail-mini-nav" onclick="changeAvailMonth(-1)">‹</button>
+                <span class="avail-mini-title" id="avail-mini-title"></span>
+                <button class="avail-mini-nav" onclick="changeAvailMonth(1)">›</button>
+              </div>
+              <div class="avail-mini-grid" id="avail-mini-day-hdrs"></div>
+              <div class="avail-mini-grid" id="avail-mini-grid" style="margin-top:2px"></div>
+              <div id="avail-override-editor" style="display:none"></div>
+              <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5">
+                <span style="display:inline-block;width:10px;height:10px;background:rgba(201,169,110,.2);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Working &nbsp;
+                <span style="display:inline-block;width:10px;height:10px;background:#F0F0F0;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Off &nbsp;
+                <span style="display:inline-block;width:10px;height:10px;background:rgba(201,169,110,.12);border:2px solid var(--gold);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Overridden
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -762,7 +847,7 @@ function fmt(d){return d.toISOString().slice(0,10)}
 const CloudStore = {
   BASE: '/api/portal/store',
   KEYS: ['dd_bookings','dd_clients','dd_settings','dd_custom_treats',
-         'dd_custom_cats','dd_cat_states','dd_treatment_overrides','dd_video_labels'],
+         'dd_custom_cats','dd_cat_states','dd_treatment_overrides','dd_video_labels','dd_availability'],
 
   async init() {
     try {
@@ -823,6 +908,7 @@ function showPortal(){
     renderDashboard();
     buildTreatmentSelect();
     buildCalendar();
+    renderAvailability();
     renderMedia();
     updateSidebarBadges();
   });
@@ -848,7 +934,7 @@ function showPage(id,el){
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   if(el)el.classList.add('active');
   if(id==='dashboard')renderDashboard();
-  if(id==='schedule')buildCalendar();
+  if(id==='schedule'){buildCalendar();renderAvailability();}
   if(id==='clients')renderClients();
   if(id==='treatments')renderTreatments();
   if(id==='finance')renderFinance();
@@ -987,7 +1073,7 @@ function buildCalendar(){
   const todayStr=fmt(new Date());
   const bookings=getBookings();
 
-  const workingDays={2:true,3:true,4:true,5:true,6:true}; // Tue-Sat (0=Sun,1=Mon)
+  const avail=getAvailability();
   const maxPills=isMobile?2:3;
   const cells=[];
 
@@ -1001,7 +1087,10 @@ function buildCalendar(){
     const dateStr=fmt(date);
     const isSun=dow===0;
     const isToday=dateStr===todayStr;
-    const isWork=workingDays[dow];
+    // Use availability data: check date override first, then day default
+    const override=avail.overrides[dateStr];
+    const dayDefault=avail.defaults[dow]||{on:false};
+    const isWork=override!==undefined?override.on:dayDefault.on;
     const dayBookings=bookings.filter(b=>b.date===dateStr&&b.status!=='Cancelled');
     const visible=dayBookings.slice(0,maxPills);
     const overflow=dayBookings.length-maxPills;
@@ -1044,6 +1133,237 @@ function selectDay(dateStr){
       <div class="timeline-status">${statusPill(b.status)}</div>
     </div>
   `).join(''):`<p class="cal-empty-state">No bookings for this day</p>`;
+}
+
+// ═══════════════════════════════════════════════════
+// AVAILABILITY MANAGER
+// ═══════════════════════════════════════════════════
+const AVAIL_DEFAULT={
+  defaults:{
+    0:{on:false},
+    1:{on:false},
+    2:{on:true,start:'09:00',end:'18:00'},
+    3:{on:true,start:'09:00',end:'18:00'},
+    4:{on:true,start:'09:00',end:'18:00'},
+    5:{on:true,start:'09:00',end:'18:00'},
+    6:{on:true,start:'09:00',end:'18:00'}
+  },
+  overrides:{}
+};
+
+function getAvailability(){
+  const raw=localStorage.getItem('dd_availability');
+  if(!raw)return JSON.parse(JSON.stringify(AVAIL_DEFAULT));
+  const parsed=JSON.parse(raw);
+  // ensure defaults exist
+  if(!parsed.defaults)parsed.defaults=AVAIL_DEFAULT.defaults;
+  if(!parsed.overrides)parsed.overrides={};
+  return parsed;
+}
+
+function saveAvailability(){
+  const avail=collectAvailabilityForm();
+  localStorage.setItem('dd_availability',JSON.stringify(avail));
+  CloudStore.set('dd_availability',avail);
+  buildCalendar();
+  const btn=document.getElementById('avail-save-btn');
+  const orig=btn.textContent;
+  btn.textContent='Saved ✓';btn.style.background='#4CAF50';
+  setTimeout(()=>{btn.textContent=orig;btn.style.background='';},2000);
+}
+
+function collectAvailabilityForm(){
+  const avail=getAvailability();
+  [0,1,2,3,4,5,6].forEach(dow=>{
+    const row=document.getElementById('avd-row-'+dow);
+    if(!row)return;
+    const toggle=row.querySelector('input[type=checkbox]');
+    if(!toggle)return;
+    const isOn=toggle.checked;
+    if(isOn){
+      const s=document.getElementById('avd-start-'+dow);
+      const e=document.getElementById('avd-end-'+dow);
+      avail.defaults[dow]={on:true,start:s?s.value:'09:00',end:e?e.value:'18:00'};
+    } else {
+      avail.defaults[dow]={on:false};
+    }
+  });
+  return avail;
+}
+
+function renderAvailability(){
+  const avail=getAvailability();
+  renderAvailDays(avail);
+  renderAvailMiniCal(avail);
+}
+
+function renderAvailDays(avail){
+  const dayNames=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const order=[1,2,3,4,5,6,0]; // Mon→Sun
+  let html='';
+  order.forEach(dow=>{
+    const d=avail.defaults[dow]||{on:false};
+    html+=`<div class="avail-day-row" id="avd-row-${dow}">
+      <span class="avail-day-name">${dayNames[dow]}</span>
+      <label class="avail-toggle">
+        <input type="checkbox" ${d.on?'checked':''} onchange="onToggleAvailDay(${dow},this.checked)">
+        <span class="avail-slider"></span>
+      </label>
+      <div class="avail-hours ${d.on?'':'hidden'}" id="avd-hours-${dow}">
+        <input type="time" class="avail-time-input" value="${d.start||'09:00'}" id="avd-start-${dow}">
+        <span style="font-size:11px;color:var(--muted)">–</span>
+        <input type="time" class="avail-time-input" value="${d.end||'18:00'}" id="avd-end-${dow}">
+      </div>
+      ${d.on?'':'<span class="avail-off-label">Day off</span>'}
+    </div>`;
+  });
+  document.getElementById('avail-days-list').innerHTML=html;
+}
+
+function onToggleAvailDay(dow,checked){
+  const hoursEl=document.getElementById('avd-hours-'+dow);
+  const row=document.getElementById('avd-row-'+dow);
+  const offLabel=row.querySelector('.avail-off-label');
+  if(checked){
+    hoursEl.classList.remove('hidden');
+    if(offLabel)offLabel.remove();
+  } else {
+    hoursEl.classList.add('hidden');
+    if(!row.querySelector('.avail-off-label')){
+      const span=document.createElement('span');
+      span.className='avail-off-label';
+      span.textContent='Day off';
+      row.appendChild(span);
+    }
+  }
+}
+
+let availCalDate=null;
+let selectedOverrideDate=null;
+const AVAIL_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function renderAvailMiniCal(avail){
+  if(!availCalDate)availCalDate=new Date(calDate.getFullYear(),calDate.getMonth(),1);
+  const y=availCalDate.getFullYear(),m=availCalDate.getMonth();
+  document.getElementById('avail-mini-title').textContent=AVAIL_MONTHS[m]+' '+y;
+
+  // Day headers
+  document.getElementById('avail-mini-day-hdrs').innerHTML=
+    ['M','T','W','T','F','S','S'].map(d=>`<div class="avail-mini-day-hdr">${d}</div>`).join('');
+
+  const firstDay=new Date(y,m,1);
+  let startDow=firstDay.getDay();
+  startDow=startDow===0?6:startDow-1;
+  const daysInMonth=new Date(y,m+1,0).getDate();
+
+  let cells='';
+  for(let i=0;i<startDow;i++) cells+=`<div class="avail-mini-cell empty"></div>`;
+
+  for(let d=1;d<=daysInMonth;d++){
+    const date=new Date(y,m,d);
+    const dow=date.getDay();
+    const dateStr=fmt(date);
+    const override=avail.overrides[dateStr];
+    const dayDefault=avail.defaults[dow]||{on:false};
+    const isOn=override!==undefined?override.on:dayDefault.on;
+    const isOverridden=override!==undefined;
+    const isSelected=dateStr===selectedOverrideDate;
+    let cls='avail-mini-cell '+(isOn?'working':'off');
+    if(isOverridden)cls+=' overridden';
+    if(isSelected)cls+=' selected';
+    cells+=`<div class="${cls}" onclick="selectOverrideDate('${dateStr}')">${d}</div>`;
+  }
+
+  document.getElementById('avail-mini-grid').innerHTML=cells;
+
+  // Render or hide override editor
+  if(selectedOverrideDate){
+    renderOverrideEditor(avail,selectedOverrideDate);
+  } else {
+    document.getElementById('avail-override-editor').style.display='none';
+  }
+}
+
+function changeAvailMonth(dir){
+  if(!availCalDate)availCalDate=new Date(calDate.getFullYear(),calDate.getMonth(),1);
+  availCalDate.setMonth(availCalDate.getMonth()+dir);
+  selectedOverrideDate=null;
+  renderAvailMiniCal(getAvailability());
+}
+
+function selectOverrideDate(dateStr){
+  selectedOverrideDate=(selectedOverrideDate===dateStr)?null:dateStr;
+  renderAvailMiniCal(getAvailability());
+}
+
+function renderOverrideEditor(avail,dateStr){
+  const date=new Date(dateStr+'T00:00:00');
+  const dow=date.getDay();
+  const override=avail.overrides[dateStr];
+  const dayDefault=avail.defaults[dow]||{on:false};
+  const isOn=override!==undefined?override.on:dayDefault.on;
+  const start=(override&&override.start)||(dayDefault.start||'09:00');
+  const end=(override&&override.end)||(dayDefault.end||'18:00');
+  const hasOverride=override!==undefined;
+
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const [y,mo,dd]=dateStr.split('-');
+  const label=`${parseInt(dd)} ${months[parseInt(mo)-1]} ${y}`;
+
+  const edEl=document.getElementById('avail-override-editor');
+  edEl.style.display='block';
+  edEl.innerHTML=`
+    <div class="avail-override-row" style="justify-content:space-between;margin-bottom:10px">
+      <span style="font-size:13px;font-weight:600">${label}</span>
+      ${hasOverride?`<button onclick="clearOverride('${dateStr}')" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline">Reset to default</button>`:''}
+    </div>
+    <div class="avail-override-row">
+      <span style="font-size:12px;color:var(--muted);width:70px">Available</span>
+      <label class="avail-toggle">
+        <input type="checkbox" id="oe-toggle" ${isOn?'checked':''} onchange="onToggleOverrideOn(this.checked)">
+        <span class="avail-slider"></span>
+      </label>
+    </div>
+    <div id="oe-hours" style="display:${isOn?'flex':'none'};align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
+      <input type="time" class="avail-time-input" value="${start}" id="oe-start">
+      <span style="font-size:11px;color:var(--muted)">–</span>
+      <input type="time" class="avail-time-input" value="${end}" id="oe-end">
+    </div>
+    <button onclick="applyOverride('${dateStr}')" class="btn-gold" style="margin-top:12px;width:100%;border-radius:8px;padding:8px">
+      ${hasOverride?'Update Override':'Set Override'}
+    </button>
+  `;
+}
+
+function onToggleOverrideOn(checked){
+  const hoursEl=document.getElementById('oe-hours');
+  if(hoursEl) hoursEl.style.display=checked?'flex':'none';
+}
+
+function applyOverride(dateStr){
+  const avail=getAvailability();
+  const isOn=document.getElementById('oe-toggle').checked;
+  if(isOn){
+    const start=document.getElementById('oe-start').value;
+    const end=document.getElementById('oe-end').value;
+    avail.overrides[dateStr]={on:true,start,end};
+  } else {
+    avail.overrides[dateStr]={on:false};
+  }
+  localStorage.setItem('dd_availability',JSON.stringify(avail));
+  CloudStore.set('dd_availability',avail);
+  buildCalendar();
+  renderAvailMiniCal(avail);
+}
+
+function clearOverride(dateStr){
+  const avail=getAvailability();
+  delete avail.overrides[dateStr];
+  localStorage.setItem('dd_availability',JSON.stringify(avail));
+  CloudStore.set('dd_availability',avail);
+  selectedOverrideDate=null;
+  buildCalendar();
+  renderAvailMiniCal(avail);
 }
 
 // ═══════════════════════════════════════════════════
