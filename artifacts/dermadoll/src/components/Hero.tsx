@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 export default function Hero() {
   return (
-    <section className="relative h-[100dvh] w-full overflow-hidden flex items-center justify-center">
+    <section className="relative h-[100dvh] md:h-[150dvh] w-full overflow-hidden flex items-center md:items-start justify-center">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-br from-[#1a1a1a] to-[#2d2520]">
         <video
@@ -19,7 +19,7 @@ export default function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-6 flex flex-col items-center justify-center w-full max-w-5xl mx-auto py-28 md:py-32">
+      <div className="relative z-10 text-center px-6 flex flex-col items-center justify-center w-full max-w-5xl mx-auto py-28 md:py-0 md:pt-[28dvh]">
         {/* Logo wordmark */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
