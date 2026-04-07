@@ -144,37 +144,46 @@ tr:hover td{background:#FDFBF8}
 .panel-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted);line-height:1}
 .panel-body{padding:24px}
 
-/* ── TREATMENT TABLE ─────────────────────────────── */
-.treat-cat-header{padding:12px 16px;background:#F9F9F9;border-top:1px solid var(--border);border-bottom:1px solid var(--border);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#AAAAAA}
+/* ── TREATMENT ACCORDION ──────────────────────────── */
+.cat-accordion{background:#fff;border:1px solid var(--border);border-radius:12px;margin-bottom:12px;overflow:hidden;box-shadow:var(--card-shadow)}
+.cat-accordion-header{display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;user-select:none;transition:background .15s}
+.cat-accordion-header:hover{background:#FDFBF8}
+.cat-chevron{font-size:12px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.cat-accordion.open .cat-chevron{transform:rotate(90deg)}
+.cat-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:700;flex:1}
+.cat-count{background:#F3F0EA;color:var(--gold);font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;flex-shrink:0}
+.cat-add-btn{border:1px solid var(--gold);color:var(--gold);background:#fff;border-radius:20px;padding:5px 14px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.cat-add-btn:hover{background:var(--gold);color:#fff}
+.cat-delete-btn{border:none;background:none;color:#ddd;font-size:14px;cursor:pointer;padding:4px;border-radius:6px;flex-shrink:0}
+.cat-delete-btn:hover{color:#e53935}
+.cat-accordion-body{display:none;border-top:1px solid var(--border)}
+.cat-accordion.open .cat-accordion-body{display:block}
 .treats-table{width:100%;table-layout:fixed;border-collapse:collapse}
-.treats-table th,.treats-table td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
-.treats-table td.treat-name-cell{white-space:normal;font-weight:700;font-size:13px;line-height:1.3}
-.treats-table td.treat-price-cell,.treats-table td.treat-rev-cell{color:var(--gold);font-weight:700;font-size:13px;white-space:nowrap}
-.treats-table .edit-btn{background:none;border:none;cursor:pointer;color:var(--gold);font-size:16px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin:auto}
-/* Tablet: hide Bookings (col 4) */
+.treats-table th{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;padding:10px 14px;text-align:left;background:#FAFAFA;border-bottom:1px solid var(--border)}
+.treats-table td{padding:12px 14px;font-size:13px;border-bottom:1px solid #F5F5F5;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.treats-table tr:last-child td{border-bottom:none}
+.treats-table tr:hover td{background:#FDFBF8}
+.treat-name-cell{white-space:normal!important;font-weight:700;line-height:1.3}
+.treat-price-cell,.treat-rev-cell{color:var(--gold);font-weight:700;white-space:nowrap}
+.edit-btn{background:none;border:none;cursor:pointer;color:var(--gold);font-size:15px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;margin:auto;border-radius:6px;transition:background .15s}
+.edit-btn:hover{background:#F5EFE3}
+.del-treat-btn{background:none;border:none;cursor:pointer;color:#ddd;font-size:14px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;margin:auto;border-radius:6px;transition:all .15s}
+.del-treat-btn:hover{color:#e53935;background:#fce8e6}
+.add-cat-row{text-align:center;padding:4px 0 8px}
+/* Tablet */
 @media(max-width:768px){
   #treatments-topbar{flex-wrap:wrap;gap:8px;padding:12px 14px 12px 60px}
   #treat-search{max-width:100%!important;width:100%!important;margin-top:2px}
   #treats-outer{padding:12px}
-  .treat-cat-header{padding:8px 12px;font-size:11px;letter-spacing:1px}
-  .treats-table th,.treats-table td{padding:12px 8px}
-  .treats-table col.col-bookings{display:none}
   .treats-table th.col-bookings,.treats-table td.col-bookings{display:none}
-  /* Column widths tablet */
-  .treats-table col.col-name{width:35%}
-  .treats-table col.col-dur{width:18%}
-  .treats-table col.col-price{width:16%}
-  .treats-table col.col-rev{width:18%}
-  .treats-table col.col-edit{width:13%}
+  .treats-table th,.treats-table td{padding:10px 8px}
+  .cat-name{font-size:16px}
 }
-/* Mobile: also hide Duration (col 2) */
+/* Mobile */
 @media(max-width:600px){
   .treats-table th.col-dur,.treats-table td.col-dur{display:none}
-  /* Column widths mobile */
-  .treats-table col.col-name{width:40%}
-  .treats-table col.col-price{width:20%}
-  .treats-table col.col-rev{width:22%}
-  .treats-table col.col-edit{width:18%}
+  .treats-table th,.treats-table td{padding:8px 6px;font-size:12px}
+  .cat-accordion-header{padding:12px 14px}
 }
 
 /* ── FINANCE CHART ───────────────────────────────── */
@@ -595,6 +604,53 @@ tr:hover td{background:#FDFBF8}
   </div>
 </div>
 
+<!-- ADD TREATMENT MODAL -->
+<div class="modal-overlay" id="add-treat-modal">
+  <div class="modal-box">
+    <div class="modal-title">Add Treatment</div>
+    <input type="hidden" id="atm-cat"/>
+    <div class="form-group"><label class="form-label">Category</label><input class="form-input" id="atm-cat-display" readonly style="background:#FAFAFA"/></div>
+    <div class="form-group"><label class="form-label">Treatment Name</label><input class="form-input" id="atm-name" placeholder="e.g. Cheek Filler"/></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Price (£)</label><input class="form-input" id="atm-price" type="number" placeholder="200"/></div>
+      <div class="form-group"><label class="form-label">Duration (min)</label><input class="form-input" id="atm-dur" type="number" placeholder="45"/></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn-outline" onclick="closeAddTreatModal()">Cancel</button>
+      <button class="btn-gold" onclick="saveNewTreatment()">Add Treatment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD CATEGORY MODAL -->
+<div class="modal-overlay" id="add-cat-modal">
+  <div class="modal-box">
+    <div class="modal-title">New Category</div>
+    <div class="form-group"><label class="form-label">Category Name</label><input class="form-input" id="acm-name" placeholder="e.g. Wellness"/></div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn-outline" onclick="closeAddCatModal()">Cancel</button>
+      <button class="btn-gold" onclick="saveNewCategory()">Create Category</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT TREATMENT MODAL -->
+<div class="modal-overlay" id="edit-treat-modal">
+  <div class="modal-box">
+    <div class="modal-title">Edit Treatment</div>
+    <input type="hidden" id="etm-id"/>
+    <div class="form-group"><label class="form-label">Treatment Name</label><input class="form-input" id="etm-name"/></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Price (£)</label><input class="form-input" id="etm-price" type="number"/></div>
+      <div class="form-group"><label class="form-label">Duration (min)</label><input class="form-input" id="etm-dur" type="number"/></div>
+    </div>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:8px">
+      <button class="btn-outline" onclick="closeEditTreatModal()">Cancel</button>
+      <button class="btn-gold" onclick="saveEditTreatment()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
 <!-- CLIENT SIDE PANEL -->
 <div class="side-panel" id="client-panel">
   <div class="panel-header">
@@ -906,7 +962,12 @@ let editingBookingId=null;
 
 function buildTreatmentSelect(){
   const sel=document.getElementById('bm-treatment');
-  sel.innerHTML='<option value="">Select treatment</option>'+TREATMENTS.map(t=>`<option value="${t.name}" data-price="${t.price}" data-cat="${t.cat}">${t.name}</option>`).join('');
+  const all=allTreatments?allTreatments():TREATMENTS;
+  const overrides=getTreatOverrides?getTreatOverrides():{};
+  sel.innerHTML='<option value="">Select treatment</option>'+all.map(t=>{
+    const ov=overrides[t.name]||{};
+    return`<option value="${t.name}" data-price="${ov.price||t.price}" data-cat="${t.cat}">${t.name}</option>`;
+  }).join('');
 
   // Time slots
   const times=[];
@@ -1081,66 +1142,212 @@ function saveClient(){
 // ═══════════════════════════════════════════════════
 // TREATMENTS
 // ═══════════════════════════════════════════════════
+// ── Treatment data helpers ──
+function getCustomTreatments(){return JSON.parse(localStorage.getItem('dd_custom_treats')||'[]')}
+function saveCustomTreatments(t){localStorage.setItem('dd_custom_treats',JSON.stringify(t))}
+function getCustomCats(){return JSON.parse(localStorage.getItem('dd_custom_cats')||'[]')}
+function saveCustomCats(c){localStorage.setItem('dd_custom_cats',JSON.stringify(c))}
+function getCatStates(){return JSON.parse(localStorage.getItem('dd_cat_states')||'{}')}
+function saveCatStates(s){localStorage.setItem('dd_cat_states',JSON.stringify(s))}
+function getTreatOverrides(){return JSON.parse(localStorage.getItem('dd_treatment_overrides')||'{}')}
+
+const CAT_LABELS={FACE:'Face',SKIN:'Skin',BODY:'Body',TEETH:'Teeth'};
+
+function allTreatments(){
+  const custom=getCustomTreatments();
+  return[...TREATMENTS,...custom];
+}
+
+function allCategories(){
+  const builtIn=[...new Set(TREATMENTS.map(t=>t.cat))].map(k=>({key:k,label:CAT_LABELS[k]||k,builtIn:true}));
+  const custom=getCustomCats().map(c=>({key:c.key,label:c.label,builtIn:false}));
+  return[...builtIn,...custom];
+}
+
 let treatFilter='';
 function renderTreatments(filter){
   filter=filter!==undefined?filter:treatFilter;treatFilter=filter;
   const bookings=getBookings();
-  const custom=JSON.parse(localStorage.getItem('dd_treatment_overrides')||'{}');
-  const cats=[...new Set(TREATMENTS.map(t=>t.cat))];
-  const catLabels={FACE:'Face',SKIN:'Skin',BODY:'Body',TEETH:'Teeth'};
+  const overrides=getTreatOverrides();
+  const catStates=getCatStates();
+  const cats=allCategories();
+  const treats=allTreatments();
   let html='';
+
   cats.forEach(cat=>{
-    const rows=TREATMENTS.filter(t=>t.cat===cat&&(!filter||t.name.toLowerCase().includes(filter.toLowerCase())));
-    if(!rows.length)return;
-    html+=`<div class="treat-cat-header">${catLabels[cat]||cat}</div>`;
-    html+=`<table class="treats-table">
-      <colgroup>
-        <col class="col-name"/>
-        <col class="col-dur"/>
-        <col class="col-price"/>
-        <col class="col-bookings"/>
-        <col class="col-rev"/>
-        <col class="col-edit"/>
-      </colgroup>
-      <thead><tr>
-        <th class="col-name">Treatment</th>
-        <th class="col-dur">Duration</th>
-        <th class="col-price">Price</th>
-        <th class="col-bookings">Bookings</th>
-        <th class="col-rev">Revenue</th>
-        <th class="col-edit">Edit</th>
-      </tr></thead><tbody>`;
-    rows.forEach(t=>{
-      const tBookings=bookings.filter(b=>b.treatment===t.name&&b.status!=='Cancelled');
-      const rev=tBookings.reduce((s,b)=>s+Number(b.price),0);
-      const override=custom[t.name]||{};
-      const safeName=t.name.replace(/'/g,"\\'");
-      html+=`<tr>
-        <td class="treat-name-cell col-name">${t.name}</td>
-        <td class="col-dur" style="font-size:12px;color:var(--muted)">${override.duration||t.duration}m</td>
-        <td class="treat-price-cell col-price">£${override.price||t.price}</td>
-        <td class="col-bookings" style="font-size:13px">${tBookings.length}</td>
-        <td class="treat-rev-cell col-rev">£${rev}</td>
-        <td class="col-edit"><button class="edit-btn" onclick="editTreatment('${safeName}')">✏</button></td>
-      </tr>`;
-    });
-    html+='</tbody></table>';
+    const rows=treats.filter(t=>t.cat===cat.key&&(!filter||t.name.toLowerCase().includes(filter.toLowerCase())));
+    if(!rows.length&&filter)return;
+    const isOpen=catStates[cat.key]!==false; // default open
+    html+=`<div class="cat-accordion${isOpen?' open':''}" id="acc-${cat.key}">
+      <div class="cat-accordion-header" onclick="toggleCat('${cat.key}')">
+        <span class="cat-chevron">▶</span>
+        <span class="cat-name">${cat.label}</span>
+        <span class="cat-count">${rows.length}</span>
+        <button class="cat-add-btn" onclick="event.stopPropagation();openAddTreat('${cat.key}','${cat.label}')">+ Add</button>
+        ${!cat.builtIn?`<button class="cat-delete-btn" onclick="event.stopPropagation();deleteCat('${cat.key}')" title="Delete category">🗑</button>`:''}
+      </div>
+      <div class="cat-accordion-body">
+        ${rows.length?`<table class="treats-table">
+          <thead><tr>
+            <th class="col-name" style="width:38%">Treatment</th>
+            <th class="col-dur" style="width:14%">Duration</th>
+            <th class="col-price" style="width:15%">Price</th>
+            <th class="col-bookings" style="width:13%">Bookings</th>
+            <th class="col-rev" style="width:13%">Revenue</th>
+            <th style="width:7%"></th>
+          </tr></thead>
+          <tbody>${rows.map(t=>{
+            const tBookings=bookings.filter(b=>b.treatment===t.name&&b.status!=='Cancelled');
+            const rev=tBookings.reduce((s,b)=>s+Number(b.price),0);
+            const ov=overrides[t.name]||{};
+            const isCustom=!!t.id;
+            const safeId=isCustom?t.id:encodeURIComponent(t.name);
+            return`<tr>
+              <td class="treat-name-cell col-name">${t.name}</td>
+              <td class="col-dur" style="color:var(--muted)">${ov.duration||t.duration}m</td>
+              <td class="treat-price-cell col-price">£${ov.price||t.price}</td>
+              <td class="col-bookings">${tBookings.length}</td>
+              <td class="treat-rev-cell col-rev">£${rev}</td>
+              <td style="text-align:center;display:flex;gap:2px;justify-content:center">
+                <button class="edit-btn" onclick="openEditTreat('${safeId}','${isCustom}')" title="Edit">✏</button>
+                ${isCustom?`<button class="del-treat-btn" onclick="deleteCustomTreat('${t.id}')" title="Remove">✕</button>`:''}
+              </td>
+            </tr>`;
+          }).join('')}</tbody>
+        </table>`
+        :`<div style="padding:16px 20px;font-size:13px;color:var(--muted);font-style:italic">No treatments yet — click + Add to begin</div>`}
+      </div>
+    </div>`;
   });
-  document.getElementById('treatments-table-wrap').innerHTML=html||'<p style="padding:20px;color:var(--muted);font-size:13px">No treatments found</p>';
+
+  html+=`<div class="add-cat-row">
+    <button class="btn-outline" onclick="openAddCat()" style="border-radius:20px;font-size:12px">+ New Category</button>
+  </div>`;
+
+  document.getElementById('treatments-table-wrap').innerHTML=html||'<p style="padding:20px;color:var(--muted)">No treatments found</p>';
 }
 function filterTreatments(v){renderTreatments(v)}
 
-function editTreatment(name){
-  const custom=JSON.parse(localStorage.getItem('dd_treatment_overrides')||'{}');
-  const t=TREATMENTS.find(x=>x.name===name);
-  const ov=custom[name]||{};
-  const price=prompt('New price for '+name+':',ov.price||t.price);
-  if(price===null)return;
-  const dur=prompt('New duration (min) for '+name+':',ov.duration||t.duration);
-  if(dur===null)return;
-  custom[name]={price:Number(price),duration:Number(dur)};
-  localStorage.setItem('dd_treatment_overrides',JSON.stringify(custom));
+// ── Accordion toggle ──
+function toggleCat(key){
+  const states=getCatStates();
+  const el=document.getElementById('acc-'+key);
+  if(!el)return;
+  const nowOpen=el.classList.toggle('open');
+  states[key]=nowOpen;
+  saveCatStates(states);
+}
+
+// ── Add Treatment ──
+function openAddTreat(catKey,catLabel){
+  document.getElementById('atm-cat').value=catKey;
+  document.getElementById('atm-cat-display').value=catLabel;
+  document.getElementById('atm-name').value='';
+  document.getElementById('atm-price').value='';
+  document.getElementById('atm-dur').value='';
+  document.getElementById('add-treat-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('atm-name').focus(),50);
+}
+function closeAddTreatModal(){document.getElementById('add-treat-modal').classList.remove('open')}
+function saveNewTreatment(){
+  const name=document.getElementById('atm-name').value.trim();
+  const price=Number(document.getElementById('atm-price').value)||0;
+  const dur=Number(document.getElementById('atm-dur').value)||30;
+  const cat=document.getElementById('atm-cat').value;
+  if(!name){alert('Please enter a treatment name');return}
+  const treats=getCustomTreatments();
+  treats.push({id:'ct-'+Date.now(),cat,name,price,duration:dur});
+  saveCustomTreatments(treats);
+  closeAddTreatModal();
   renderTreatments();
+  buildTreatmentSelect();
+}
+
+// ── Edit Treatment ──
+function openEditTreat(safeId,isCustom){
+  const overrides=getTreatOverrides();
+  isCustom=isCustom==='true';
+  let t,currentPrice,currentDur,currentName;
+  if(isCustom){
+    t=getCustomTreatments().find(x=>x.id===safeId);
+    if(!t)return;
+    currentName=t.name;currentPrice=t.price;currentDur=t.duration;
+  } else {
+    const name=decodeURIComponent(safeId);
+    t=TREATMENTS.find(x=>x.name===name);
+    if(!t)return;
+    const ov=overrides[t.name]||{};
+    currentName=t.name;currentPrice=ov.price||t.price;currentDur=ov.duration||t.duration;
+  }
+  document.getElementById('etm-id').value=safeId+'|'+isCustom;
+  document.getElementById('etm-name').value=currentName;
+  document.getElementById('etm-price').value=currentPrice;
+  document.getElementById('etm-dur').value=currentDur;
+  document.getElementById('edit-treat-modal').classList.add('open');
+}
+function closeEditTreatModal(){document.getElementById('edit-treat-modal').classList.remove('open')}
+function saveEditTreatment(){
+  const [safeId,isCustomStr]=document.getElementById('etm-id').value.split('|');
+  const isCustom=isCustomStr==='true';
+  const newName=document.getElementById('etm-name').value.trim();
+  const newPrice=Number(document.getElementById('etm-price').value)||0;
+  const newDur=Number(document.getElementById('etm-dur').value)||30;
+  if(!newName){alert('Name cannot be empty');return}
+  if(isCustom){
+    const treats=getCustomTreatments();
+    const i=treats.findIndex(x=>x.id===safeId);
+    if(i>-1){treats[i].name=newName;treats[i].price=newPrice;treats[i].duration=newDur;saveCustomTreatments(treats);}
+  } else {
+    const name=decodeURIComponent(safeId);
+    const overrides=getTreatOverrides();
+    overrides[name]={price:newPrice,duration:newDur};
+    localStorage.setItem('dd_treatment_overrides',JSON.stringify(overrides));
+  }
+  closeEditTreatModal();
+  renderTreatments();
+  buildTreatmentSelect();
+}
+
+// ── Delete custom treatment ──
+function deleteCustomTreat(id){
+  if(!confirm('Remove this treatment?'))return;
+  const treats=getCustomTreatments().filter(x=>x.id!==id);
+  saveCustomTreatments(treats);
+  renderTreatments();
+  buildTreatmentSelect();
+}
+
+// ── Add Category ──
+function openAddCat(){
+  document.getElementById('acm-name').value='';
+  document.getElementById('add-cat-modal').classList.add('open');
+  setTimeout(()=>document.getElementById('acm-name').focus(),50);
+}
+function closeAddCatModal(){document.getElementById('add-cat-modal').classList.remove('open')}
+function saveNewCategory(){
+  const label=document.getElementById('acm-name').value.trim();
+  if(!label){alert('Please enter a category name');return}
+  const key='cat-'+label.toLowerCase().replace(/\s+/g,'-')+'-'+Date.now();
+  const cats=getCustomCats();
+  cats.push({key,label});
+  saveCustomCats(cats);
+  closeAddCatModal();
+  renderTreatments();
+}
+
+// ── Delete custom category ──
+function deleteCat(key){
+  if(!confirm('Delete this category and all its custom treatments?'))return;
+  const cats=getCustomCats().filter(c=>c.key!==key);
+  saveCustomCats(cats);
+  const treats=getCustomTreatments().filter(t=>t.cat!==key);
+  saveCustomTreatments(treats);
+  renderTreatments();
+}
+
+// Legacy alias kept for any old references
+function editTreatment(name){
+  openEditTreat(encodeURIComponent(name),'false');
 }
 
 // ═══════════════════════════════════════════════════
