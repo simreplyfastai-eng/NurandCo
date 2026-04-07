@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import BookingModal from "./BookingModal";
 
 type Treatment = {
   name: string;
@@ -86,7 +87,45 @@ const services: Category[] = [
   },
 ];
 
-function CategoryDropdown({ category, index }: { category: Category; index: number }) {
+function BookNowPill({ onClick }: { onClick: () => void }) {
+  return (
+    <button
+      onClick={(e) => { e.stopPropagation(); onClick(); }}
+      className="flex-shrink-0 transition-all duration-150"
+      style={{
+        border: "1px solid #C9A96E",
+        color: "#C9A96E",
+        background: "transparent",
+        borderRadius: "20px",
+        padding: "4px 14px",
+        fontSize: "12px",
+        fontFamily: "Inter, sans-serif",
+        cursor: "pointer",
+        whiteSpace: "nowrap",
+      }}
+      onMouseEnter={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#C9A96E";
+        (e.currentTarget as HTMLButtonElement).style.color = "#fff";
+      }}
+      onMouseLeave={(e) => {
+        (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
+        (e.currentTarget as HTMLButtonElement).style.color = "#C9A96E";
+      }}
+    >
+      Book Now
+    </button>
+  );
+}
+
+function CategoryDropdown({
+  category,
+  index,
+  onBook,
+}: {
+  category: Category;
+  index: number;
+  onBook: (t: { name: string; price: string }) => void;
+}) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -137,21 +176,29 @@ function CategoryDropdown({ category, index }: { category: Category; index: numb
                   initial={{ opacity: 0, y: 6 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.04, duration: 0.25 }}
-                  className="flex items-start justify-between py-4 border-b last:border-b-0"
+                  className="flex items-center justify-between py-4 border-b last:border-b-0 gap-3"
                   style={{ borderColor: "rgba(201,169,110,0.15)" }}
                 >
-                  <div className="flex flex-col">
-                    <span className="text-sm md:text-base text-foreground font-light">
+                  {/* Name + duration */}
+                  <div className="flex flex-col min-w-0">
+                    <span className="text-sm md:text-base text-foreground font-light leading-snug">
                       {item.name}
                     </span>
                     <span className="text-xs text-foreground/40 mt-0.5">{item.duration}</span>
                   </div>
-                  <span
-                    className="font-serif flex-shrink-0 ml-6"
-                    style={{ fontSize: "20px", color: "#C9A96E" }}
-                  >
-                    {item.price}
-                  </span>
+
+                  {/* Price + Book Now */}
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <span
+                      className="font-serif"
+                      style={{ fontSize: "20px", color: "#C9A96E" }}
+                    >
+                      {item.price}
+                    </span>
+                    <BookNowPill
+                      onClick={() => onBook({ name: item.name, price: item.price })}
+                    />
+                  </div>
                 </motion.div>
               ))}
             </div>
@@ -163,6 +210,8 @@ function CategoryDropdown({ category, index }: { category: Category; index: numb
 }
 
 export default function Services() {
+  const [bookingTreatment, setBookingTreatment] = useState<{ name: string; price: string } | null>(null);
+
   return (
     <section id="services" className="py-[100px] bg-white">
       <div className="container mx-auto px-6 max-w-3xl">
@@ -189,10 +238,24 @@ export default function Services() {
 
         <div style={{ borderTop: "1px solid #C9A96E" }}>
           {services.map((category, i) => (
-            <CategoryDropdown key={category.title} category={category} index={i} />
+            <CategoryDropdown
+              key={category.title}
+              category={category}
+              index={i}
+              onBook={setBookingTreatment}
+            />
           ))}
         </div>
       </div>
+
+      <AnimatePresence>
+        {bookingTreatment && (
+          <BookingModal
+            treatment={bookingTreatment}
+            onClose={() => setBookingTreatment(null)}
+          />
+        )}
+      </AnimatePresence>
     </section>
   );
 }

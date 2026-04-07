@@ -1,0 +1,62 @@
+For every treatment item in the accordion, add a "Book Now" 
+button on the right side next to the price. Style it as a small 
+gold outlined pill button — border: 1px solid #C9A96E, color: 
+#C9A96E, background: transparent, border-radius: 20px, padding: 
+4px 14px, font-size: 12px, font-family: Inter. On hover: 
+background becomes #C9A96E, text becomes white.
+
+When a "Book Now" button is clicked, a booking modal slides up 
+from the bottom of the screen (mobile-style sheet) or appears 
+centred on desktop. The modal has:
+
+MODAL DESIGN:
+- White background, border-radius: 16px on top corners
+- Padding: 40px
+- Max-width: 520px, centred on desktop
+- Dark overlay behind it (rgba(0,0,0,0.5))
+- Close button top right — thin X, gold colour
+- Treatment name at the top in Cormorant Garamond 24px
+- Price below in gold #C9A96E
+
+STEP 1 — DATE PICKER:
+- Heading: "Select a Date" in Cormorant Garamond 20px
+- A custom calendar rendered in pure JS — no libraries
+- Calendar style: white background, current month displayed
+- Header row: left arrow | Month Year | right arrow — 
+  all in Cormorant Garamond, arrows in gold
+- Day name headers (Mon Tue Wed Thu Fri Sat Sun) in small 
+  grey Inter caps
+- Date cells: 40px x 40px, rounded, hover turns gold background 
+  with white text
+- Past dates greyed out and unclickable
+- Selected date: solid gold background (#C9A96E), white text
+- Available days: Monday to Saturday only (Sunday disabled, 
+  greyed out)
+
+STEP 2 — TIME SLOTS (shown after date selected):
+- Heading: "Select a Time" in Cormorant Garamond 20px
+- Display time slots in a grid: 09:00 | 09:30 | 10:00 | 10:30 
+  | 11:00 | 11:30 | 12:00 | 12:30 | 13:00 | 14:00 | 14:30 | 
+  15:00 | 15:30 | 16:00 | 16:30 | 17:00
+- Each slot: pill shape, border: 1px solid #C9A96E, gold text, 
+  white background
+- Selected slot: gold background, white text
+- Smooth fade in when time slots appear
+
+STEP 3 — CONFIRM (shown after time selected):
+- Summary box showing: Treatment name | Date | Time | Price
+- Summary box has a soft gold border and off-white background
+- Large gold "Confirm Booking" button — full width, 
+  border-radius: 8px
+- On click: show a success state — gold checkmark icon, 
+  heading "Booking Request Sent!" in Cormorant Garamond, 
+  subtext "We'll confirm your appointment via Instagram DM 
+  or WhatsApp shortly." — then auto-close modal after 3 seconds
+
+OVERALL:
+- Smooth slide-up animation on modal open (translateY transition)
+- Trap focus inside modal when open
+- Close on overlay click
+- All typography matches site — Cormorant Garamond headings, 
+  Inter body
+- Fully mobile responsive — modal takes full screen on mobile
