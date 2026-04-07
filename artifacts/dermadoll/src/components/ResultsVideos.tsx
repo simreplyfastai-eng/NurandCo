@@ -44,10 +44,11 @@ export default function ResultsVideos() {
             >
               <div className="rounded-sm overflow-hidden bg-[#FAF9F7] aspect-square">
                 <video
-                  controls
-                  playsInline
-                  preload="metadata"
+                  autoPlay
+                  muted
                   loop
+                  playsInline
+                  preload="auto"
                   className="w-full h-full object-cover"
                 >
                   <source src={`${import.meta.env.BASE_URL}${vid.src}`} type="video/mp4" />
