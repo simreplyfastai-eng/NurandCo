@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 export default function Hero() {
   return (
-    <section className="relative h-[100dvh] w-full overflow-hidden flex items-center justify-center">
+    <section className="relative h-[75vh] md:h-[100dvh] w-full overflow-hidden flex items-center justify-center">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-br from-[#1a1a1a] to-[#2d2520]">
         <video
@@ -10,7 +10,7 @@ export default function Hero() {
           muted
           loop
           playsInline
-          className="absolute inset-0 w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover object-top"
         >
           <source src={`${import.meta.env.BASE_URL}hero.mp4`} type="video/mp4" />
         </video>
