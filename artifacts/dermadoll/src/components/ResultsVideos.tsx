@@ -24,6 +24,7 @@ export default function ResultsVideos() {
           loop
           playsInline
           preload="auto"
+          {...{ "webkit-playsinline": "true" } as any}
           className="w-full h-full object-cover"
         >
           <source src={`${import.meta.env.BASE_URL}${vid.src}`} type="video/mp4" />

@@ -1,15 +1,27 @@
 import { motion } from "framer-motion";
+import { useEffect, useRef } from "react";
 
 export default function Hero() {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true;
+    video.play().catch(() => {});
+  }, []);
+
   return (
     <section className="relative h-[100dvh] md:h-[150dvh] w-full overflow-hidden flex items-center md:items-start justify-center">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-br from-[#1a1a1a] to-[#2d2520]">
         <video
+          ref={videoRef}
           autoPlay
           muted
           loop
           playsInline
+          {...{ "webkit-playsinline": "true" } as any}
           className="absolute inset-0 w-full h-full object-cover object-top"
         >
           <source src={`${import.meta.env.BASE_URL}hero.mp4`} type="video/mp4" />
