@@ -145,7 +145,6 @@ tr:hover td{background:#FDFBF8}
 .cal-empty-state{text-align:center;padding:32px 0;color:#AAAAAA;font-size:13px;font-style:italic}
 
 /* ── AVAILABILITY MANAGER ───────────────────────── */
-#avail-section{padding:0 20px 32px}
 .avail-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:24px;box-sizing:border-box}
 .avail-card-title{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--text)}
 .avail-card-sub{font-size:12px;color:var(--muted);margin-top:3px}
@@ -185,7 +184,6 @@ tr:hover td{background:#FDFBF8}
 .avail-save-row{display:flex;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #F0F0F0}
 
 @media(max-width:767px){
-  #avail-section{padding:0 12px 24px}
   .avail-two-col{grid-template-columns:1fr}
   .avail-day-name{width:76px}
   .avail-time-input{width:76px}
@@ -410,6 +408,10 @@ tr:hover td{background:#FDFBF8}
         Schedule
         <span class="sb-badge-count" id="sb-count">0</span>
       </div>
+      <div class="sb-item" onclick="showPage('availability',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+        Availability
+      </div>
       <div class="sb-section">Business</div>
       <div class="sb-item" onclick="showPage('clients',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
@@ -504,8 +506,14 @@ tr:hover td{background:#FDFBF8}
         </div>
       </div>
 
-      <!-- ── AVAILABILITY MANAGER ── -->
-      <div id="avail-section">
+    </div>
+
+    <!-- ── AVAILABILITY CALENDAR ── -->
+    <div id="page-availability" class="page">
+      <div class="topbar">
+        <span class="topbar-title serif">Availability Calendar</span>
+      </div>
+      <div style="padding:20px;overflow-x:hidden;box-sizing:border-box">
         <div class="avail-card">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
             <div>
@@ -944,7 +952,8 @@ function showPage(id,el,fromKpi){
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
   if(el)el.classList.add('active');
   if(id==='dashboard')renderDashboard();
-  if(id==='schedule'){buildCalendar();renderAvailability();}
+  if(id==='schedule')buildCalendar();
+  if(id==='availability')renderAvailability();
   if(id==='clients')renderClients();
   if(id==='treatments')renderTreatments();
   if(id==='finance')renderFinance();
