@@ -964,8 +964,9 @@ function showPage(id,el,fromKpi){
     const btn=document.getElementById('back-'+id);
     if(btn)btn.classList.add('visible');
   }
-  // close mobile sidebar
-  if(window.innerWidth<=768)toggleSidebar();
+  // close mobile sidebar (always close, never toggle)
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
 }
 
 function navFromKpi(page){
