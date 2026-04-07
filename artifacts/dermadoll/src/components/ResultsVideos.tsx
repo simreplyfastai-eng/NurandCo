@@ -10,9 +10,9 @@ export default function ResultsVideos() {
 
   return (
     <section className="py-[100px] bg-white">
-      <div className="container mx-auto px-6 max-w-6xl">
+      <div className="container mx-auto px-6 max-w-5xl">
         <div className="text-center mb-20">
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -21,7 +21,7 @@ export default function ResultsVideos() {
             See The Results
           </motion.h2>
           <div className="w-[60px] h-px bg-primary mx-auto mb-5" />
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -32,30 +32,29 @@ export default function ResultsVideos() {
           </motion.p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="grid grid-cols-2 gap-3 md:gap-6">
           {videos.map((vid, i) => (
             <motion.div
               key={vid.label}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: i * 0.1, duration: 0.6 }}
-              className="flex flex-col gap-4"
+              transition={{ delay: i * 0.08, duration: 0.6 }}
+              className="flex flex-col gap-2"
             >
-              <div className="rounded-md overflow-hidden shadow-sm bg-[#FAF9F7] aspect-[3/4] relative">
-                 <video
+              <div className="rounded-sm overflow-hidden bg-[#FAF9F7] aspect-square">
+                <video
                   controls
                   playsInline
                   preload="metadata"
                   className="w-full h-full object-cover"
                 >
-                  <source src={vid.src} type="video/mp4" />
-                  Your browser does not support the video tag.
+                  <source src={`${import.meta.env.BASE_URL}${vid.src}`} type="video/mp4" />
                 </video>
               </div>
-              <h4 className="text-center font-sans text-xs uppercase tracking-[0.2em] text-primary font-medium">
+              <p className="text-center font-sans text-[10px] md:text-xs uppercase tracking-[0.18em] text-primary font-medium">
                 {vid.label}
-              </h4>
+              </p>
             </motion.div>
           ))}
         </div>
