@@ -1,0 +1,74 @@
+Redesign the Clients page in portal.html to be compact, 
+clean and fully optimised for mobile. The current cards 
+are too large and take up too much space.
+
+LAYOUT CHANGE:
+- Remove the large individual cards entirely
+- Replace with a clean compact list view — one client 
+  per row, not cards
+- Each row is a single horizontal strip with all info 
+  inline on one line
+- Thin #F0F0F0 divider line between each row
+- No box shadows, no card borders — clean flat list
+
+EACH CLIENT ROW:
+Height: 64px on mobile, 68px on desktop
+Padding: 12px 16px
+Display: flex, align-items centre, gap 12px
+Background: white, hover background #FAFAFA
+
+Left — Avatar circle:
+- 38px × 38px, border-radius 50%
+- Background: #C9A96E, color white
+- Initials in Inter 13px bold, centred
+- flex-shrink: 0
+
+Middle — Client info (flex: 1):
+- Top line: client name Inter 13px bold #111111
+- Bottom line: Inter 11px #AAAAAA — 
+  "X visits · Last: DD Mon YYYY"
+- Both lines truncated with ellipsis if too long
+
+Right — Stats (text-align right, flex-shrink 0):
+- Total spend: Inter 13px bold #C9A96E
+- Status pill below it: 
+  Active — tiny green dot + "Active" Inter 10px #2D6A4F
+  Inactive — grey dot + "Inactive" Inter 10px #888888
+  Pill: no background, just dot + text, no border
+
+CLICKING A ROW:
+- Opens the existing client detail side panel (keep 
+  all existing functionality)
+- Subtle right arrow chevron › on far right of each row
+- Color #CCCCCC, Inter 16px
+
+PAGE HEADER:
+- "Clients" left in Cormorant Garamond 24px + count 
+  badge in grey pill next to it
+- "+ Add Client" right — small gold outlined button
+  border: 1px solid #C9A96E, color #C9A96E, 
+  Inter 12px, border-radius 20px, padding 6px 16px
+  hover: fills gold, text white
+
+SEARCH BAR:
+- Full width below header
+- border: 1px solid #EEEEEE, border-radius 8px
+- padding 10px 16px, Inter 13px #111111
+- Placeholder: "Search clients..."
+- Filters list in real time as user types
+
+EMPTY STATE:
+- If no clients: centred illustration placeholder
+- "No clients yet" Cormorant Garamond 20px #111111
+- "Bookings will appear here automatically" 
+  Inter 13px #AAAAAA below
+- padding 60px 0
+
+MOBILE SPECIFIC:
+- Rows full width, no horizontal scroll
+- Avatar stays visible at all sizes
+- Right stats column hides total spend on screens 
+  under 380px — show status only
+- Keep minimum 44px touch target per row
+- Add padding-bottom 80px so last row 
+  not hidden behind floating button
