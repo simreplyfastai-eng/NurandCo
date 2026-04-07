@@ -47,6 +47,7 @@ export default function ResultsVideos() {
                   controls
                   playsInline
                   preload="metadata"
+                  loop
                   className="w-full h-full object-cover"
                 >
                   <source src={`${import.meta.env.BASE_URL}${vid.src}`} type="video/mp4" />
