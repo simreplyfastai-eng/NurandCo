@@ -64,7 +64,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.8 }}
-          className="text-white/90 font-light text-base md:text-xl max-w-2xl mx-auto mb-7 md:mb-12"
+          className="text-white/90 font-light text-base md:text-xl max-w-2xl mx-auto mb-10 md:mb-14"
           style={{ textShadow: "0 0 15px rgba(201,169,110,0.15)" }}
         >
           Premium aesthetics treatments in Birmingham & Solihull
@@ -74,7 +74,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.2 }}
-          className="flex flex-col sm:flex-row gap-3 md:gap-4 items-center w-full sm:w-auto"
+          className="flex flex-col sm:flex-row gap-5 md:gap-4 items-center w-full sm:w-auto"
         >
           <a
             href="#services"
