@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 
 export default function Hero() {
   return (
-    <section className="relative h-[60vh] md:h-[100dvh] w-full overflow-hidden flex items-center justify-center">
+    <section className="relative h-[70vh] md:h-[100dvh] w-full overflow-hidden flex items-center justify-center">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-br from-[#1a1a1a] to-[#2d2520]">
         <video
