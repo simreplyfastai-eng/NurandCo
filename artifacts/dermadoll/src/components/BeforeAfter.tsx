@@ -3,8 +3,8 @@ import { motion } from "framer-motion";
 const results = [
   { src: "result-1.jpg", label: "Liquid Rhinoplasty" },
   { src: "result-2.jpg", label: "Lip Filler" },
-  { src: "result-3.jpg", label: "Glass Skin Facial & Microneedling" },
   { src: "result-4.jpg", label: "Lip Filler" },
+  { src: "result-3.jpg", label: "Glass Skin Facial & Microneedling" },
 ];
 
 export default function BeforeAfter() {
