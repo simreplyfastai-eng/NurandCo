@@ -95,16 +95,20 @@ function CategoryDropdown({ category, index }: { category: Category; index: numb
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: index * 0.06 }}
-      className="border-t border-primary/25"
+      style={{ borderBottom: "1px solid #C9A96E" }}
     >
       <button
         onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between py-5 md:py-6 group text-left"
+        className="w-full flex items-center justify-between text-left"
+        style={{ paddingTop: "30px", paddingBottom: "30px" }}
       >
-        <span className="font-serif italic text-xl md:text-2xl text-foreground group-hover:text-primary transition-colors duration-200">
+        <span
+          className="font-serif italic text-foreground hover:text-primary transition-colors duration-200"
+          style={{ fontSize: "22px" }}
+        >
           {category.title}
         </span>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4 flex-shrink-0 ml-4">
           <span className="text-xs tracking-widest uppercase text-foreground/40 font-light hidden sm:block">
             {category.items.length} treatments
           </span>
@@ -127,22 +131,28 @@ function CategoryDropdown({ category, index }: { category: Category; index: numb
             transition={{ duration: 0.35, ease: "easeInOut" }}
             className="overflow-hidden"
           >
-            <div className="pb-6 space-y-0">
+            <div className="pb-4">
               {category.items.map((item, i) => (
                 <motion.div
                   key={item.name}
-                  initial={{ opacity: 0, x: -8 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.04 }}
-                  className="flex items-center justify-between py-3.5 border-b border-primary/10 last:border-b-0 group/item"
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.04, duration: 0.25 }}
+                  className="flex items-start justify-between py-4 border-b last:border-b-0"
+                  style={{ borderColor: "rgba(201,169,110,0.15)" }}
                 >
-                  <span className="text-sm md:text-base text-foreground/80 font-light group-hover/item:text-foreground transition-colors">
-                    {item.name}
-                  </span>
-                  <div className="flex items-center gap-4 md:gap-8 flex-shrink-0 ml-4">
-                    <span className="text-xs text-foreground/40 hidden sm:block">{item.duration}</span>
-                    <span className="font-serif text-lg md:text-xl text-primary">{item.price}</span>
+                  <div className="flex flex-col">
+                    <span className="text-sm md:text-base text-foreground font-light">
+                      {item.name}
+                    </span>
+                    <span className="text-xs text-foreground/40 mt-0.5">{item.duration}</span>
                   </div>
+                  <span
+                    className="font-serif flex-shrink-0 ml-6"
+                    style={{ fontSize: "20px", color: "#C9A96E" }}
+                  >
+                    {item.price}
+                  </span>
                 </motion.div>
               ))}
             </div>
@@ -177,11 +187,10 @@ export default function Services() {
           </motion.p>
         </div>
 
-        <div>
+        <div style={{ borderTop: "1px solid #C9A96E" }}>
           {services.map((category, i) => (
             <CategoryDropdown key={category.title} category={category} index={i} />
           ))}
-          <div className="border-t border-primary/25" />
         </div>
       </div>
     </section>
