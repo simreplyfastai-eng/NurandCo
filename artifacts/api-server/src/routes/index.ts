@@ -8,6 +8,7 @@ import authRouter from "./auth";
 import availabilityRouter from "./availability";
 import mediaRouter from "./media";
 import cronRouter from "./cron";
+import enquiriesRouter from "./enquiries";
 
 const router: IRouter = Router();
 
@@ -20,5 +21,6 @@ router.use(portalRouter);
 router.use(bookingsRouter);
 router.use(financeRouter);
 router.use(clientsRouter);
+router.use(enquiriesRouter);
 
 export default router;

@@ -42,8 +42,56 @@ export const TREATMENT_DURATIONS: Record<string, number> = {
   "Botox 3 Areas + Vitarin I Eye": 45,
 };
 
+const TREATMENT_CATEGORIES: Record<string, string> = {
+  "Botox 1 Area": "Botox",
+  "Botox 2 Areas": "Botox",
+  "Botox 3 Areas": "Botox",
+  "Botox 4 Areas": "Botox",
+  "Masseter Botox": "Botox",
+  "Nefertiti Lift Botox (Neck)": "Botox",
+  "Chin Botox (Mentalis Muscle)": "Botox",
+  "Nose Slimming Botox": "Botox",
+  "Gummy Smile / Lip Flip Botox": "Botox",
+  "Hyperhidrosis (Underarm) Botox": "Botox",
+  "Botox Topup": "Botox",
+  "0.5ml Lip Filler": "Dermal Filler",
+  "0.7ml Lip Filler": "Dermal Filler",
+  "1.1ml Lip Filler": "Dermal Filler",
+  "1.1ml Nasal Labials": "Dermal Filler",
+  "1.1ml Cheek Filler": "Dermal Filler",
+  "1.5ml Cheek Filler": "Dermal Filler",
+  "2.2ml Cheek Filler": "Dermal Filler",
+  "1.1ml Chin Filler": "Dermal Filler",
+  "2.2ml Jawline Filler": "Dermal Filler",
+  "Liquid Rhinoplasty": "Dermal Filler",
+  "Teartrough Filler": "Dermal Filler",
+  "2.2ml Facial Contouring": "Dermal Filler",
+  "3.3ml Facial Contouring": "Dermal Filler",
+  "4.4ml Facial Contouring": "Dermal Filler",
+  "Glass Skin Facial": "Facials",
+  "Glass Skin Facial + Microneedling": "Facials",
+  "1x Skin Booster": "Skin Boosters",
+  "3x Lumi Pro Skin Booster": "Skin Boosters",
+  "Plenhyage XL Strong": "Skin Boosters",
+  "Plenhyage XL Strong 2 Treatments": "Skin Boosters",
+  "Vitarin I - Eye Polynucleotide": "Skin Boosters",
+  "Vitarin I - Eye Polynucleotide x2": "Skin Boosters",
+  "B12 Injection": "Skin Boosters",
+  "Lemon Bottle Small Area": "Fat Dissolving",
+  "Lemon Bottle Large Area": "Fat Dissolving",
+  "Botox 3 Areas + 1.1ml Dermal Filler": "Treatment Bundles",
+  "Botox 3 Areas + 1.1ml Lips + Lumi Pro": "Treatment Bundles",
+  "Botox 3 Areas + 1x Lumi Pro Skin Booster": "Treatment Bundles",
+  "Botox 3 Areas + 1x Plenhyage XL": "Treatment Bundles",
+  "Botox 3 Areas + Vitarin I Eye": "Treatment Bundles",
+};
+
 export function getTreatmentDuration(treatmentName: string): number {
   return TREATMENT_DURATIONS[treatmentName] ?? 30;
+}
+
+export function getTreatmentCategory(treatmentName: string): string {
+  return TREATMENT_CATEGORIES[treatmentName] ?? "";
 }
 
 /** Returns minutes since midnight for a "HH:MM" string */

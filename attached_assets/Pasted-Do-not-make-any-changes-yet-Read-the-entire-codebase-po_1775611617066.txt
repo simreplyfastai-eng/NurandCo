@@ -1,0 +1,65 @@
+Do not make any changes yet. Read the entire 
+codebase — portal.html, index.html, and all 
+backend files — and give me an honest answer 
+to these specific questions:
+
+1. BOOKING FORM ON INDEX.HTML
+When a client fills in the booking form on 
+the main website and submits, walk me through 
+exactly what happens step by step:
+- What data is collected
+- What API is called
+- What is saved and where
+- What confirmation does the client see
+- What does Niamh see in the portal
+- Does the booking appear on the calendar
+- Does the finance page update
+- Does the client get an email
+- Does Niamh get an email
+
+2. AVAILABILITY CHECK ON WEBSITE
+When a client opens the booking calendar 
+on index.html:
+- Does it fetch availability from the API?
+- Are Niamh's days off (Monday and Sunday) 
+  actually blocked?
+- Are her working hours enforced 
+  (Tue-Thu 10-19, Fri 09-16, Sat 09-14)?
+- Are already-booked slots greyed out 
+  with duration + 15 min buffer applied?
+- What happens if the API is slow or fails?
+
+3. TRAINING COURSES ON THE WEBSITE
+The website has a Training section with 
+these courses:
+- Pathway to Aesthetics £2,000
+- Foundation Anti-Wrinkle & Tox £1,300
+- Advanced Dermal Filler £600
+- Advanced Anti-Wrinkle £600
+- Skin Boosters & Polynucleotides £600
+- Glass Skin Facial & Microneedling £700
+- Russian Lip Masterclass £600
+Is there any booking or enquiry flow for 
+training courses?
+Or does the "DM to Enquire" button just 
+open Instagram?
+Should training enquiries be captured 
+somewhere — name, email, which course?
+
+4. PORTAL CALENDAR VS WEBSITE BOOKINGS
+If a client books from the website right now:
+- Does it appear on the portal Schedule 
+  calendar immediately?
+- Does the gold dot show on the correct date?
+- Does clicking the date show the booking 
+  details correctly?
+- Is the client added to the Clients section?
+
+5. ANYTHING THAT COULD BREAK LIVE
+Be honest — list anything that could go 
+wrong or break when real clients start 
+using the website for the first time.
+Include edge cases, missing error handling, 
+anything that looks fragile.
+
+Give me the full picture before we go live.

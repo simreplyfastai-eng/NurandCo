@@ -316,7 +316,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       category: "",
       price,
       deposit,
-      depositPaid: true,
+      depositPaid: false,
       balancePaid: false,
       date: selectedDate ? fmtDate(selectedDate) : "",
       time: selectedTime ?? "",
@@ -338,24 +338,32 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       if (res.status === 409) {
         const data = await res.json();
         setSlotError(data.error ?? "Sorry, that slot was just taken. Please choose another time.");
-        // Refresh slots for the selected date
-        if (selectedDate) {
-          await fetchDateBookings(selectedDate);
-        }
+        if (selectedDate) await fetchDateBookings(selectedDate);
         setSelectedTime(null);
         setStep(2);
         setSubmitting(false);
         return;
       }
 
-      if (!res.ok) throw new Error("booking failed");
+      if (res.status === 429) {
+        setSlotError("Too many booking attempts. Please try again in a few minutes.");
+        setSubmitting(false);
+        return;
+      }
+
+      if (!res.ok) {
+        setSlotError("Something went wrong. Please try again or contact us directly.");
+        setSubmitting(false);
+        return;
+      }
     } catch {
-      // Fall through to success so the user isn't left hanging on non-409 errors
+      setSlotError("Something went wrong. Please try again or contact us directly.");
+      setSubmitting(false);
+      return;
     }
 
     setSubmitting(false);
     setStep("success");
-    setTimeout(onClose, 4000);
   };
 
   const formatDate = (d: Date) =>
@@ -372,6 +380,9 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const price = parsePrice(treatment.price);
   const deposit = Math.round(price * 0.5);
   const balance = price - deposit;
+  const firstName = name.trim().split(" ")[0] || "there";
+  const treatmentRef = (treatment.name.length > 20 ? treatment.name.slice(0, 20) : treatment.name);
+  const bankRef = `${firstName} - ${treatmentRef}`;
 
   // Compute available slots: working hours minus blocked slots
   const workingSlots = selectedDate ? getWorkingSlots(avail, selectedDate) : [];
@@ -384,7 +395,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         className="absolute inset-0"
         style={{ background: "rgba(0,0,0,0.5)" }}
-        onClick={onClose}
+        onClick={step === "success" ? undefined : onClose}
       />
 
       <motion.div
@@ -394,18 +405,22 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
         style={{ borderRadius: "16px 16px 0 0", maxHeight: "92dvh", padding: "clamp(28px, 5vw, 40px)", paddingBottom: "40px" }}
         onClick={(e) => e.stopPropagation()}
       >
-        <button
-          ref={firstFocusRef}
-          onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10"
-          style={{ color: "#C9A96E", fontSize: "18px" }}
-          aria-label="Close"
-        >✕</button>
+        {step !== "success" && (
+          <button
+            ref={firstFocusRef}
+            onClick={onClose}
+            className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10"
+            style={{ color: "#C9A96E", fontSize: "18px" }}
+            aria-label="Close"
+          >✕</button>
+        )}
 
-        <div className="mb-7 pr-8">
-          <h2 className="font-serif leading-snug mb-1" style={{ fontSize: "24px" }}>{treatment.name}</h2>
-          <span className="font-serif" style={{ fontSize: "20px", color: "#C9A96E" }}>{treatment.price}</span>
-        </div>
+        {step !== "success" && (
+          <div className="mb-7 pr-8">
+            <h2 className="font-serif leading-snug mb-1" style={{ fontSize: "24px" }}>{treatment.name}</h2>
+            <span className="font-serif" style={{ fontSize: "20px", color: "#C9A96E" }}>{treatment.price}</span>
+          </div>
+        )}
 
         {/* ── Step 1 — Calendar ── */}
         {step === 1 && (
@@ -494,11 +509,11 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
                   <span className="font-serif" style={{ fontSize: "16px", color: "#111" }}>{treatment.price}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: "#888" }}>Deposit due today (50%)</span>
+                  <span style={{ color: "#888" }}>Deposit (50%)</span>
                   <span className="font-medium" style={{ color: "#C9A96E" }}>£{deposit}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: "#888" }}>Remaining balance (due on arrival)</span>
+                  <span style={{ color: "#888" }}>Balance due on arrival</span>
                   <span className="font-medium" style={{ color: "#666" }}>£{balance}</span>
                 </div>
               </div>
@@ -537,31 +552,109 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
               />
             </Field>
 
+            {slotError && (
+              <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: "#FFF3F3", color: "#C62828", border: "1px solid #FFCDD2" }}>
+                {slotError}
+              </div>
+            )}
+
             <button
               onClick={handleConfirm}
               disabled={submitting}
               className="w-full py-4 text-white font-medium text-sm uppercase tracking-wider transition-all duration-200 hover:opacity-90 active:scale-[0.99]"
-              style={{ backgroundColor: submitting ? "#D4B98A" : "#C9A96E", borderRadius: "8px", cursor: submitting ? "default" : "pointer", marginTop: "8px" }}
+              style={{ backgroundColor: "#C9A96E", borderRadius: "12px", fontFamily: "Inter, sans-serif", opacity: submitting ? 0.7 : 1 }}
             >
-              {submitting ? "Sending…" : `Request Booking — Pay £${deposit} Deposit`}
+              {submitting ? "Submitting…" : "Confirm Booking Request"}
             </button>
-            <p className="text-center text-xs mt-3" style={{ color: "#AAA", fontFamily: "Inter, sans-serif" }}>
-              Deposit secures your appointment. Balance paid on the day.
+
+            <p className="text-xs text-center mt-3" style={{ color: "#bbb", fontFamily: "Inter, sans-serif" }}>
+              You will receive bank transfer details to secure your appointment.
             </p>
           </motion.div>
         )}
 
-        {/* ── Success ── */}
+        {/* ── Success screen ── */}
         {step === "success" && (
           <motion.div
             key="success"
-            initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}
-            className="text-center py-10"
+            initial={{ opacity: 0, scale: 0.97 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.35 }}
+            className="text-center"
           >
-            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: "rgba(201,169,110,0.1)", color: "#C9A96E", fontSize: "28px" }}>✓</div>
-            <h2 className="font-serif mb-3" style={{ fontSize: "28px" }}>Booking Request Sent!</h2>
-            <p className="font-light leading-relaxed mb-2" style={{ color: "#777" }}>We'll confirm your appointment via Instagram DM or WhatsApp shortly.</p>
-            <p className="text-sm" style={{ color: "#AAA" }}>This window will close automatically.</p>
+            <div className="flex items-center justify-center w-14 h-14 mx-auto mb-5 rounded-full" style={{ backgroundColor: "rgba(201,169,110,0.12)" }}>
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+
+            <h2 className="font-serif mb-2" style={{ fontSize: "24px" }}>Booking Request Received</h2>
+            <p className="text-sm mb-6" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
+              A confirmation has been sent to <strong style={{ color: "#111" }}>{email}</strong>
+            </p>
+
+            {/* Booking summary */}
+            <div className="text-left mb-6 p-4 rounded-xl space-y-2" style={{ border: "1px solid rgba(201,169,110,0.25)", backgroundColor: "#FEFDFB" }}>
+              <div className="flex justify-between gap-4 text-sm">
+                <span style={{ color: "#888" }}>Treatment</span>
+                <span className="font-medium text-right">{treatment.name}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm">
+                <span style={{ color: "#888" }}>Date</span>
+                <span className="font-medium text-right">{selectedDate ? formatDate(selectedDate) : "—"}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm">
+                <span style={{ color: "#888" }}>Time</span>
+                <span className="font-medium">{selectedTime}</span>
+              </div>
+              <div className="border-t pt-2 mt-2 space-y-1" style={{ borderColor: "rgba(201,169,110,0.15)" }}>
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: "#888" }}>Deposit due</span>
+                  <span className="font-medium" style={{ color: "#C9A96E" }}>£{deposit}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: "#888" }}>Balance due on arrival</span>
+                  <span className="font-medium" style={{ color: "#666" }}>£{balance}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bank transfer section */}
+            <div className="text-left mb-6 p-4 rounded-xl" style={{ background: "#FFF8F0", border: "1px solid #F5DEB3" }}>
+              <p className="font-medium text-sm mb-3" style={{ fontFamily: "Inter, sans-serif" }}>
+                To secure your appointment, please send your deposit of <strong style={{ color: "#C9A96E" }}>£{deposit}</strong> via bank transfer:
+              </p>
+              <div className="space-y-1.5 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
+                <div className="flex justify-between">
+                  <span style={{ color: "#888" }}>Account name</span>
+                  <span className="font-medium">Simrandeep Sangha</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: "#888" }}>Sort code</span>
+                  <span className="font-medium">60-84-07</span>
+                </div>
+                <div className="flex justify-between">
+                  <span style={{ color: "#888" }}>Account number</span>
+                  <span className="font-medium">17575567</span>
+                </div>
+                <div className="flex justify-between gap-4">
+                  <span style={{ color: "#888" }}>Reference</span>
+                  <span className="font-medium text-right">{bankRef}</span>
+                </div>
+              </div>
+              <p className="text-xs mt-3" style={{ color: "#999", fontFamily: "Inter, sans-serif" }}>
+                Your appointment will be confirmed once your deposit is received. If you have any questions contact us on Instagram{" "}
+                <strong>@dermadollaesthetics</strong> or WhatsApp.
+              </p>
+            </div>
+
+            <button
+              onClick={onClose}
+              className="w-full py-4 text-white font-medium text-sm uppercase tracking-wider transition-all duration-200 hover:opacity-90"
+              style={{ backgroundColor: "#C9A96E", borderRadius: "12px", fontFamily: "Inter, sans-serif" }}
+            >
+              Done
+            </button>
           </motion.div>
         )}
       </motion.div>

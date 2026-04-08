@@ -1,8 +1,8 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
 import { upsertClientFromBooking } from "./clients";
-import { getTreatmentDuration, hasConflict } from "../lib/treatments";
-import { sendCancellationEmail, sendAdminNotificationEmail } from "../lib/email";
+import { getTreatmentDuration, getTreatmentCategory, hasConflict } from "../lib/treatments";
+import { sendCancellationEmail, sendAdminNotificationEmail, sendClientConfirmationEmail } from "../lib/email";
 
 const router = Router();
 
@@ -19,7 +19,7 @@ function rowToBooking(row: Record<string, unknown>) {
     category: row.category ?? "",
     price: row.price ?? 0,
     deposit: row.deposit ?? 0,
-    depositPaid: row.deposit_paid ?? true,
+    depositPaid: row.deposit_paid ?? false,
     balancePaid: row.balance_paid ?? false,
     date: row.date,
     time: row.time ?? "",
@@ -128,9 +128,15 @@ router.post("/bookings", async (req, res) => {
   }
 
   const durationMinutes = getTreatmentDuration(b.treatment);
+  const category = b.category && b.category !== "" ? b.category : getTreatmentCategory(b.treatment);
   const id = b.id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
   const price = Number(b.price) || 0;
   const deposit = b.deposit !== undefined ? Number(b.deposit) : Math.round(price * 0.5);
+  const balance = price - deposit;
+
+  // Website bookings: depositPaid starts as false (no payment taken yet)
+  // Portal bookings: respect whatever the portal sends
+  const depositPaid = b.source === "Website" ? false : (b.depositPaid ?? false);
 
   try {
     // Run autocomplete before inserting
@@ -170,10 +176,10 @@ router.post("/bookings", async (req, res) => {
 
     await pool.query(
       `INSERT INTO bookings
-        (id,client_id,client_name,client_email,treatment,category,price,deposit,
+        (id,client_id,client_name,client_email,client_phone,treatment,category,price,deposit,
          deposit_paid,balance_paid,date,time,status,payment_method,
          stripe_payment_id,notes,created_at,source,duration_minutes,reminder_sent)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
        ON CONFLICT (id) DO UPDATE SET
         client_id=COALESCE(EXCLUDED.client_id,bookings.client_id),
         client_name=EXCLUDED.client_name,treatment=EXCLUDED.treatment,
@@ -181,10 +187,10 @@ router.post("/bookings", async (req, res) => {
         date=EXCLUDED.date,time=EXCLUDED.time,status=EXCLUDED.status,
         notes=EXCLUDED.notes,duration_minutes=EXCLUDED.duration_minutes`,
       [
-        id, clientId ?? null, b.clientName, b.clientEmail ?? "",
-        b.treatment, b.category ?? "",
+        id, clientId ?? null, b.clientName, b.clientEmail ?? "", b.clientPhone ?? "",
+        b.treatment, category,
         price, deposit,
-        b.depositPaid ?? true, b.balancePaid ?? false,
+        depositPaid, b.balancePaid ?? false,
         b.date, b.time ?? "",
         b.status ?? "Pending", b.paymentMethod ?? "Stripe",
         b.stripePaymentId ?? null, b.notes ?? "",
@@ -195,6 +201,23 @@ router.post("/bookings", async (req, res) => {
 
     const result = await pool.query("SELECT * FROM bookings WHERE id=$1", [id]);
     const booking = rowToBooking(result.rows[0]);
+
+    const whatsapp = await getWhatsApp();
+
+    // Client confirmation email (non-blocking)
+    if (b.clientEmail) {
+      sendClientConfirmationEmail({
+        clientEmail: b.clientEmail,
+        clientName: b.clientName,
+        treatment: b.treatment,
+        date: b.date,
+        time: b.time ?? "",
+        durationMinutes,
+        deposit,
+        balance,
+        whatsapp,
+      }).catch(() => {});
+    }
 
     // Admin notification email (non-blocking)
     const adminEmail = process.env.ADMIN_EMAIL ?? "";
@@ -241,18 +264,19 @@ router.post("/bookings/bulk", async (req, res) => {
       const price = Number(b.price) || 0;
       const deposit = b.deposit !== undefined ? Number(b.deposit) : Math.round(price * 0.5);
       const durationMinutes = getTreatmentDuration(String(b.treatment ?? ""));
+      const category = String(b.category ?? "") || getTreatmentCategory(String(b.treatment ?? ""));
       await pool.query(
         `INSERT INTO bookings
-          (id,client_name,client_email,treatment,category,price,deposit,
+          (id,client_name,client_email,client_phone,treatment,category,price,deposit,
            deposit_paid,balance_paid,date,time,status,payment_method,
            stripe_payment_id,notes,created_at,source,duration_minutes,reminder_sent)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
          ON CONFLICT (id) DO NOTHING`,
         [
-          id, String(b.clientName ?? ""), String(b.clientEmail ?? ""),
-          String(b.treatment ?? ""), String(b.category ?? ""),
+          id, String(b.clientName ?? ""), String(b.clientEmail ?? ""), String(b.clientPhone ?? ""),
+          String(b.treatment ?? ""), category,
           price, deposit,
-          b.depositPaid ?? true, b.balancePaid ?? false,
+          b.depositPaid ?? false, b.balancePaid ?? false,
           String(b.date ?? ""), String(b.time ?? ""),
           String(b.status ?? "Pending"), String(b.paymentMethod ?? "Stripe"),
           b.stripePaymentId ?? null, String(b.notes ?? ""),
@@ -279,31 +303,33 @@ router.put("/bookings/:id", async (req, res) => {
     const prevStatus = cur.status;
     const newStatus: string | null = b.status ?? null;
 
-    // If treatment changed, update duration
+    // If treatment changed, update duration and category
     const treatmentName: string | null = b.treatment ?? null;
     const newDuration = treatmentName ? getTreatmentDuration(treatmentName) : null;
+    const newCategory = treatmentName ? getTreatmentCategory(treatmentName) : null;
 
     await pool.query(
       `UPDATE bookings SET
         client_name=COALESCE($2,client_name),
         client_email=COALESCE($3,client_email),
-        treatment=COALESCE($4,treatment),
-        category=COALESCE($5,category),
-        price=COALESCE($6,price),
-        deposit=COALESCE($7,deposit),
-        deposit_paid=COALESCE($8,deposit_paid),
-        balance_paid=COALESCE($9,balance_paid),
-        date=COALESCE($10,date),
-        time=COALESCE($11,time),
-        status=COALESCE($12,status),
-        notes=COALESCE($13,notes),
-        stripe_payment_id=COALESCE($14,stripe_payment_id),
-        duration_minutes=COALESCE($15,duration_minutes)
+        client_phone=COALESCE($4,client_phone),
+        treatment=COALESCE($5,treatment),
+        category=COALESCE($6,category),
+        price=COALESCE($7,price),
+        deposit=COALESCE($8,deposit),
+        deposit_paid=COALESCE($9,deposit_paid),
+        balance_paid=COALESCE($10,balance_paid),
+        date=COALESCE($11,date),
+        time=COALESCE($12,time),
+        status=COALESCE($13,status),
+        notes=COALESCE($14,notes),
+        stripe_payment_id=COALESCE($15,stripe_payment_id),
+        duration_minutes=COALESCE($16,duration_minutes)
        WHERE id=$1`,
       [
         id,
-        b.clientName ?? null, b.clientEmail ?? null,
-        treatmentName, b.category ?? null,
+        b.clientName ?? null, b.clientEmail ?? null, b.clientPhone ?? null,
+        treatmentName, newCategory ?? null,
         b.price != null ? Number(b.price) : null,
         b.deposit != null ? Number(b.deposit) : null,
         b.depositPaid ?? null, b.balancePaid ?? null,
@@ -323,7 +349,7 @@ router.put("/bookings/:id", async (req, res) => {
       if (email) {
         const whatsapp = await getWhatsApp();
         sendCancellationEmail({
-          clientEmail: email,
+          clientEmail: email as string,
           clientName: booking.clientName as string,
           treatment: booking.treatment as string,
           date: booking.date as string,

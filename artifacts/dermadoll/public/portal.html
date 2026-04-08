@@ -494,10 +494,20 @@ tr:hover td{background:#FDFBF8}
   .fin-kpi-label{font-size:9px}
   .fin-kpi-card{padding:12px 6px}
 }
+/* ── TOAST ── */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{background:#111;color:#fff;font-family:'Inter',sans-serif;font-size:13px;padding:12px 18px;border-radius:8px;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;max-width:320px;line-height:1.5}
+.toast.show{opacity:1;transform:translateY(0)}
+/* ── ENQUIRIES TABLE ── */
+#enq-body tr:nth-child(even){background:#FAFAFA}
+#enq-body td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:top}
+#enq-body tr:last-child td{border-bottom:none}
+.enq-status-select{font-family:'Inter',sans-serif;font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;background:#fff;cursor:pointer}
 </style>
 </head>
 <body>
 
+<div id="toast-container"></div>
 <!-- ═══ LOGIN ════════════════════════════════════════ -->
 <div id="login-page">
   <div class="login-card" id="login-card">
@@ -562,6 +572,11 @@ tr:hover td{background:#FDFBF8}
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
         Finance
         <span class="sb-badge-count" id="sb-finance-badge" style="display:none">!</span>
+      </div>
+      <div class="sb-item" onclick="showPage('enquiries',this)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Enquiries
+        <span class="sb-badge-count" id="sb-enq-badge" style="display:none">0</span>
       </div>
       <div class="sb-section">System</div>
       <div class="sb-item" onclick="showPage('media',this)">
@@ -797,6 +812,28 @@ tr:hover td{background:#FDFBF8}
       </div>
     </div>
 
+    <!-- ── ENQUIRIES ── -->
+    <div id="page-enquiries" class="page">
+      <div class="topbar"><span class="topbar-title serif">Training Enquiries</span></div>
+      <div style="padding:20px 24px;box-sizing:border-box;overflow-x:hidden">
+        <div class="card" style="padding:0;overflow:hidden">
+          <table id="enq-table" style="width:100%;border-collapse:collapse">
+            <thead>
+              <tr>
+                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Date</th>
+                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Name</th>
+                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Course</th>
+                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Phone</th>
+                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Email</th>
+                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Status</th>
+              </tr>
+            </thead>
+            <tbody id="enq-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
     <!-- ── MEDIA ── -->
     <div id="page-media" class="page">
       <div class="topbar"><span class="topbar-title serif">Media</span></div>
@@ -857,8 +894,16 @@ tr:hover td{background:#FDFBF8}
           <div class="settings-section-header">Developer</div>
           <div class="settings-body">
             <div class="settings-row"><label>Site URL</label><input type="text" readonly value="dermadollaesthetics.replit.app" style="background:#FAFAFA"/></div>
-            <div class="settings-row"><label>Last updated</label><span style="font-size:13px">07/04/2026</span></div>
-            <div class="settings-row"><label>Version</label><span style="font-size:13px">1.0.0</span></div>
+            <div class="settings-row"><label>Last updated</label><span style="font-size:13px">08/04/2026</span></div>
+            <div class="settings-row"><label>Version</label><span style="font-size:13px">1.1.0</span></div>
+            <div class="settings-row" style="align-items:flex-start">
+              <label>Scheduled Tasks</label>
+              <div style="font-size:12px;color:var(--muted);line-height:1.8">
+                <strong style="color:var(--text)">Reminders:</strong> GET /api/cron/reminders — runs hourly (sends 24h reminder emails to clients)<br/>
+                <strong style="color:var(--text)">Autocomplete:</strong> GET /api/cron/autocomplete — runs daily at 00:01 UK time (marks past Confirmed bookings as Complete)<br/>
+                <em style="font-size:11px">These endpoints are registered as scheduled tasks in Replit's project settings. Contact your developer if emails are not being sent.</em>
+              </div>
+            </div>
             <div style="display:flex;gap:10px;margin-top:8px">
               <button class="btn-gold" onclick="window.open('https://wa.me/447000000000','_blank')">Contact Developer</button>
               <button class="btn-outline" onclick="window.open('/','_blank')">View Site</button>
@@ -1379,8 +1424,9 @@ function saveSession(token,expiresAt){
 
 function clearSession(message){
   SESSION_KEYS.forEach(k=>localStorage.removeItem(k));
+  document.getElementById('portal').classList.remove('visible');
+  document.getElementById('login-page').style.display='flex';
   if(message){
-    // Show message briefly on login page
     const errEl=document.getElementById('login-error');
     if(errEl)errEl.textContent=message;
   }
@@ -1475,6 +1521,9 @@ function showPortal(){
       }
       updateSidebarBadges();
     },60000);
+    // Live booking polling every 30s + enquiry badge
+    startLiveRefresh();
+    updateEnquiryBadge();
   });
 }
 
@@ -1524,6 +1573,7 @@ function showPage(id,el,fromKpi){
   if(id==='clients')renderClients();
   if(id==='treatments')renderTreatments();
   if(id==='finance')renderFinance();
+  if(id==='enquiries')renderEnquiries();
   if(id==='media')renderMedia();
   // manage back button visibility
   document.querySelectorAll('.back-to-dash').forEach(b=>b.classList.remove('visible'));
@@ -1783,7 +1833,7 @@ function changeMonth(dir){
 function selectDay(dateStr){
   document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));
   if(event&&event.currentTarget)event.currentTarget.classList.add('selected');
-  const bookings=getBookings().filter(b=>b.date===dateStr).sort((a,b)=>a.time.localeCompare(b.time));
+  const bookings=getBookings().filter(b=>b.date===dateStr&&b.status!=='Cancelled').sort((a,b)=>a.time.localeCompare(b.time));
   document.getElementById('day-panel-title').textContent=formatDate(dateStr);
   document.getElementById('day-panel-body').innerHTML=bookings.length?bookings.map(b=>`
     <div class="timeline-item">
@@ -1791,6 +1841,7 @@ function selectDay(dateStr){
       <div class="timeline-body">
         <div class="timeline-name">${b.clientName}</div>
         <div class="timeline-treat">${b.treatment} · £${b.price}</div>
+        ${b.clientPhone?`<div style="color:var(--muted);font-size:11px;margin-top:2px">📞 ${b.clientPhone}</div>`:''}
         ${b.notes?`<div style="color:var(--muted);font-size:11px;margin-top:2px">${b.notes}</div>`:''}
       </div>
       <div class="timeline-status">${statusPill(b.status)}</div>
@@ -3142,6 +3193,137 @@ function exportData(){
   let txt='DERMADOLL AESTHETICS — Bookings Export\n\nDate,Client,Treatment,Price,Deposit,Status\n';
   b.forEach(x=>{txt+=`${x.date},${x.clientName},${x.treatment},£${x.price},£${x.deposit},${x.status}\n`});
   const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(txt);a.download='dermadoll-bookings.csv';a.click();
+}
+
+// ═══════════════════════════════════════════════════
+// TOAST NOTIFICATIONS
+// ═══════════════════════════════════════════════════
+function showToast(msg,duration=3500){
+  const c=document.getElementById('toast-container');
+  const t=document.createElement('div');
+  t.className='toast';
+  t.textContent=msg;
+  c.appendChild(t);
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>t.classList.add('show')); });
+  setTimeout(()=>{
+    t.classList.remove('show');
+    setTimeout(()=>t.remove(),350);
+  },duration);
+}
+
+// ═══════════════════════════════════════════════════
+// LIVE BOOKING REFRESH (every 30s)
+// ═══════════════════════════════════════════════════
+let _liveRefreshInterval=null;
+async function pollBookings(){
+  try{
+    const token=localStorage.getItem('dd_token');
+    if(!token)return;
+    const res=await fetch('/api/bookings',{headers:{Authorization:'Bearer '+token}});
+    if(res.status===401){clearSession('Session expired — please log in again.');return;}
+    if(!res.ok)return;
+    const data=await res.json();
+    const fresh=data.bookings||[];
+    const prev=getBookings();
+    const prevCount=prev.length;
+    // Merge into CloudStore
+    if(typeof CloudStore!=='undefined'){
+      CloudStore.set('dd_bookings',JSON.stringify(fresh));
+      localStorage.setItem('dd_bookings',JSON.stringify(fresh));
+    }
+    if(fresh.length>prevCount){
+      const diff=fresh.length-prevCount;
+      showToast(`${diff} new booking${diff>1?'s':''} received!`);
+      updateSidebarBadges();
+      // Refresh visible page
+      const activePage=document.querySelector('.page.active');
+      if(activePage){
+        const id=activePage.id.replace('page-','');
+        if(id==='bookings')renderBookings();
+        else if(id==='dashboard')renderDashboard();
+      }
+    }
+  }catch(e){/* silent */}
+}
+function startLiveRefresh(){
+  if(_liveRefreshInterval)clearInterval(_liveRefreshInterval);
+  _liveRefreshInterval=setInterval(pollBookings,30000);
+}
+
+// ═══════════════════════════════════════════════════
+// ENQUIRIES
+// ═══════════════════════════════════════════════════
+async function renderEnquiries(){
+  const body=document.getElementById('enq-body');
+  body.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--muted)">Loading…</td></tr>';
+  try{
+    const token=localStorage.getItem('dd_token');
+    const res=await fetch('/api/enquiries',{headers:{Authorization:'Bearer '+token}});
+    if(res.status===401){clearSession('Session expired — please log in again.');return;}
+    if(!res.ok){body.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:#c62828">Failed to load enquiries.</td></tr>';return;}
+    const data=await res.json();
+    const enqs=data.enquiries||[];
+    // Update badge
+    const newCount=enqs.filter(e=>e.status==='New').length;
+    const badge=document.getElementById('sb-enq-badge');
+    if(badge){badge.textContent=newCount;badge.style.display=newCount>0?'inline-flex':'none';}
+    if(!enqs.length){body.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--muted)">No enquiries yet.</td></tr>';return;}
+    body.innerHTML=enqs.map(e=>{
+      const ts=e.createdAt||e.created_at||0;
+      const d=new Date(Number(ts));
+      const dateStr=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+      return `<tr>
+        <td style="white-space:nowrap">${dateStr}</td>
+        <td>
+          <div style="font-weight:500">${e.name}</div>
+          <div style="font-size:11px;color:var(--muted)">${e.email}</div>
+        </td>
+        <td>${e.course||'—'}</td>
+        <td>${e.phone||'—'}</td>
+        <td><a href="mailto:${e.email}" style="color:var(--gold);text-decoration:none">${e.email}</a></td>
+        <td>
+          <select class="enq-status-select" onchange="updateEnquiryStatus(${e.id},this.value)">
+            ${['New','Contacted','Closed'].map(s=>`<option${s===e.status?' selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+      </tr>`;
+    }).join('');
+  }catch(ex){
+    body.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:#c62828">Error loading enquiries.</td></tr>';
+  }
+}
+
+async function updateEnquiryStatus(id,status){
+  try{
+    const token=localStorage.getItem('dd_token');
+    await fetch(`/api/enquiries/${id}`,{
+      method:'PUT',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({status})
+    });
+    showToast(`Enquiry marked as ${status}`);
+    // Refresh badge
+    const badgeRes=await fetch('/api/enquiries',{headers:{Authorization:'Bearer '+token}});
+    if(badgeRes.ok){
+      const d=await badgeRes.json();
+      const newCount=(d.enquiries||[]).filter(e=>e.status==='New').length;
+      const badge=document.getElementById('sb-enq-badge');
+      if(badge){badge.textContent=newCount;badge.style.display=newCount>0?'inline-flex':'none';}
+    }
+  }catch(e){showToast('Failed to update status');}
+}
+
+async function updateEnquiryBadge(){
+  try{
+    const token=localStorage.getItem('dd_token');
+    if(!token)return;
+    const res=await fetch('/api/enquiries',{headers:{Authorization:'Bearer '+token}});
+    if(!res.ok)return;
+    const data=await res.json();
+    const newCount=(data.enquiries||[]).filter(e=>e.status==='New').length;
+    const badge=document.getElementById('sb-enq-badge');
+    if(badge){badge.textContent=newCount;badge.style.display=newCount>0?'inline-flex':'none';}
+  }catch(e){}
 }
 </script>
 </body>

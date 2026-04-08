@@ -1,0 +1,111 @@
+Fix the booking success screen and confirmation 
+email to correctly reflect that the deposit 
+has already been paid via Stripe.
+
+THE LOGIC:
+When a client completes the booking form and 
+pays through Stripe, the deposit has already 
+been taken. The success screen and confirmation 
+email must reflect this — not ask them to pay 
+something they've already paid.
+
+BOOKING SUCCESS SCREEN ON INDEX.HTML:
+Remove all bank transfer details and 
+"deposit due" language entirely.
+
+Replace with:
+
+"Booking Confirmed! ✓
+
+Your deposit of £[amount] has been received.
+
+Treatment: [treatment name]
+Date: [day, date e.g. Tuesday, 15 April 2026]
+Time: [time e.g. 14:00]
+Duration: approximately [X] minutes
+
+Deposit paid: £[deposit amount] ✓
+Remaining balance: £[balance] — due on arrival
+
+A confirmation email has been sent to 
+[client email address].
+
+See you soon!
+If you need to reschedule, contact us:
+Instagram: @dermadollaesthetics
+WhatsApp: [number from settings]"
+
+Show a gold checkmark icon at the top.
+"Deposit paid: £X ✓" in green.
+"Remaining balance: £X — due on arrival" 
+in standard black text.
+Do not auto-close — show a "Done" button.
+
+CLIENT CONFIRMATION EMAIL:
+Subject: "Booking Confirmed — Dermadoll 
+Aesthetics"
+
+Body:
+Hi [first name],
+
+Your appointment is confirmed. Here are 
+your details:
+
+Treatment: [treatment name]
+Date: [Tuesday, 15 April 2026]
+Time: [14:00]
+Duration: approximately [X] minutes
+
+Deposit paid: £[deposit] ✓
+Balance due on arrival: £[balance]
+
+Please arrive 5 minutes before your 
+appointment time.
+
+If you need to reschedule please contact 
+us at least 24 hours in advance:
+Instagram: @dermadollaesthetics
+WhatsApp: [number from settings]
+
+See you soon!
+The Dermadoll Aesthetics Team
+
+SET depositPaid: true ON ALL STRIPE 
+CONFIRMED BOOKINGS:
+When the Stripe webhook receives 
+payment_intent.succeeded:
+- Set depositPaid: true on the booking
+- Set status: "Confirmed"
+- Then trigger the confirmation email
+
+For bookings created before Stripe is 
+live (current state):
+- Keep depositPaid: false and 
+  status: "Pending"
+- Niamh manually confirms in the portal 
+  after receiving bank transfer
+- When she clicks "Mark Deposit Paid" 
+  in the portal, set depositPaid: true 
+  and status: "Confirmed"
+- This triggers the confirmation email 
+  to be sent at that point
+
+Add "Mark Deposit Paid" button to each 
+Pending booking in the portal:
+- Shows on New Bookings page per row
+- Shows in the booking edit modal
+- On click: PUT /api/bookings/:id 
+  { depositPaid: true, status: "Confirmed" }
+- Triggers confirmation email to client
+- Updates Finance deposits collected figure
+- Updates booking status pill to Confirmed
+- Button disappears once depositPaid is true
+
+PORTAL BOOKING LIST:
+In the New Bookings table add a 
+"DEPOSIT" column showing:
+- "✓ Paid" in green if depositPaid: true
+- "Pending" in gold if depositPaid: false
+This replaces the current deposit display 
+which always shows as paid even when 
+no money has been received.

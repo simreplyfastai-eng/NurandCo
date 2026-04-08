@@ -43,6 +43,11 @@ Express 5 REST API on port 8080. All routes prefixed `/api/`.
 - `DELETE /api/bookings/:id` — Delete
 - `DELETE /api/bookings/sample` — Remove seeded test data
 
+**Enquiry routes** (protected by JWT auth for GET/PUT):
+- `GET /api/enquiries` — All training enquiries (`{ enquiries: [] }`)
+- `POST /api/enquiries` — Submit training enquiry (rate-limited, sends admin alert + client auto-reply)
+- `PUT /api/enquiries/:id` — Update enquiry status (New/Contacted/Closed)
+
 **Other routes:**
 - `GET /api/availability` — Working hours from portal_kv (day-name keys)
 - `POST /api/media/upload-url` — Presigned GCS upload URL
@@ -71,11 +76,24 @@ Express 5 REST API on port 8080. All routes prefixed `/api/`.
 | duration_minutes | integer | default 30, looked up from treatments lib |
 | reminder_sent | boolean | default false |
 | source | text | Website/Portal |
+| client_phone | text | Captured from booking form |
 
 **Unique index**: `bookings_date_time_unique` on `(date, time)` WHERE `status != 'Cancelled' AND time != ''`
 
 ### `clients`
 id, name, email, phone, join_date, notes, source, created_at
+
+### `enquiries`
+| Column | Type | Notes |
+|--------|------|-------|
+| id | text PK | Date.now().toString(36) + random suffix |
+| name | text | |
+| email | text | |
+| phone | text | |
+| course | text | Training course name |
+| message | text | |
+| status | text | New / Contacted / Closed |
+| created_at | bigint | Unix timestamp ms |
 
 ### `portal_kv`
 Key-value store for portal settings: `dd_settings`, `dd_availability`, `dd_media`

@@ -1,0 +1,243 @@
+Remove all bank transfer details and 
+"booking request received" language 
+from the entire codebase. Stripe is the 
+only payment method. Build everything 
+as if Stripe is fully live and connected.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+STRIPE PAYMENT FLOW — FULL IMPLEMENTATION
+━━━━━━━━━━━━━━━━━━━━━━━━
+When a client clicks "Book Now" on the 
+website and fills in the booking form, 
+the final step is Stripe payment.
+
+STEP 1 — BOOKING SUMMARY BEFORE PAYMENT:
+Before showing the Stripe payment form, 
+show a clean summary screen:
+
+"Confirm Your Booking
+
+Treatment: [treatment name]
+Date: [Tuesday, 15 April 2026]
+Time: [14:00]
+Duration: approximately [X] minutes
+
+Deposit to pay now: £[50% of price]
+Balance due on arrival: £[remaining 50%]
+
+Pay securely with card ↓"
+
+Then show the Stripe payment form 
+embedded below the summary.
+
+STEP 2 — STRIPE PAYMENT INTENT:
+When the client reaches the payment step:
+POST /api/stripe/create-payment-intent
+Body: { 
+  amount: [deposit in pence], 
+  treatment: [name],
+  clientName: [name],
+  clientEmail: [email]
+}
+
+Backend creates a Stripe PaymentIntent 
+for the deposit amount (50% of treatment 
+price, in pence).
+Returns { clientSecret } to the frontend.
+
+Frontend uses Stripe.js to mount the 
+payment element:
+const stripe = Stripe(STRIPE_PUBLISHABLE_KEY)
+const elements = stripe.elements({ 
+  clientSecret 
+})
+Mount the payment element to a div 
+#stripe-payment-element
+Style it to match the site — white 
+background, gold accent #C9A96E
+
+STEP 3 — ON PAYMENT SUCCESS:
+When stripe.confirmPayment() resolves 
+successfully:
+- POST /api/bookings with all booking 
+  data plus stripePaymentIntentId
+- Save booking to PostgreSQL with:
+  depositPaid: true
+  status: "Confirmed"
+  stripePaymentIntentId: [id]
+- Send client confirmation email
+- Send admin notification email
+- Show success screen (see below)
+
+STEP 4 — SUCCESS SCREEN:
+Show immediately after payment confirmed:
+
+Gold checkmark icon, large, centred.
+
+"Booking Confirmed! 
+
+Treatment: [treatment name]
+Date: [Tuesday, 15 April 2026]  
+Time: [14:00]
+Duration: approximately [X] minutes
+
+Deposit paid: £[amount] ✓
+Balance due on arrival: £[amount]
+
+A confirmation has been sent to 
+[client email]
+
+See you soon!
+Questions? Contact us:
+Instagram: @dermadollaesthetics
+WhatsApp: [number from settings]"
+
+"Deposit paid: £X ✓" — green text
+"Balance due on arrival: £X" — black text
+Single "Done" button closes the modal.
+No auto-close.
+
+STEP 5 — PAYMENT FAILURE HANDLING:
+If stripe.confirmPayment() fails:
+- Do NOT create a booking
+- Show error message below the 
+  payment form in red:
+  "Payment failed: [Stripe error message]
+  Please check your card details and 
+  try again."
+- Keep the form open so they can retry
+- Do not close the modal
+
+If the network fails after payment 
+succeeds but before POST /api/bookings:
+- The Stripe webhook (see below) will 
+  catch this and create the booking
+- Show success screen anyway since 
+  money was taken
+
+STEP 6 — STRIPE WEBHOOK:
+POST /api/stripe/webhook handles 
+payment_intent.succeeded events.
+
+On this event:
+1. Find if a booking already exists 
+   with this stripePaymentIntentId
+2. If yes: ensure depositPaid: true 
+   and status: "Confirmed" — idempotent
+3. If no booking exists yet (network 
+   failure edge case):
+   - Create the booking from the 
+     PaymentIntent metadata
+   - Set depositPaid: true, 
+     status: "Confirmed"
+   - Send confirmation email to client
+   - Send notification to admin
+
+Store Stripe webhook secret as 
+STRIPE_WEBHOOK_SECRET in Replit Secrets.
+Verify webhook signature on every 
+incoming event using:
+stripe.webhooks.constructEvent(
+  body, signature, STRIPE_WEBHOOK_SECRET
+)
+Return 400 if signature invalid.
+Return 200 immediately to acknowledge.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+REPLIT SECRETS NEEDED:
+━━━━━━━━━━━━━━━━━━━━━━━━
+The following secrets must be added to 
+Replit before payments go live.
+Add placeholders now so the code 
+references them correctly:
+
+STRIPE_SECRET_KEY — Stripe secret key 
+  (starts with sk_live_ or sk_test_)
+STRIPE_PUBLISHABLE_KEY — Stripe 
+  publishable key (starts with pk_)
+STRIPE_WEBHOOK_SECRET — from Stripe 
+  dashboard webhooks section
+
+Add a clear comment in the code:
+// STRIPE KEYS — add to Replit Secrets
+// STRIPE_SECRET_KEY=sk_live_...
+// STRIPE_PUBLISHABLE_KEY=pk_live_...
+// STRIPE_WEBHOOK_SECRET=whsec_...
+// Get these from stripe.com/dashboard
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+DEPOSIT LOGIC THROUGHOUT
+━━━━━━━━━━━━━━━━━━━━━━━━
+Deposit is always exactly 50% of the 
+treatment price, rounded down to the 
+nearest pound.
+deposit = Math.floor(price / 2)
+balance = price - deposit
+
+This must be consistent across:
+- The booking summary screen
+- The Stripe PaymentIntent amount 
+  (in pence: deposit * 100)
+- The success screen
+- The confirmation email
+- The portal booking record
+- The Finance deposits collected figure
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+PORTAL — DEPOSIT STATUS
+━━━━━━━━━━━━━━━━━━━━━━━━
+In the New Bookings table:
+DEPOSIT column shows:
+- "✓ Paid" green — depositPaid: true
+- "Pending" gold — depositPaid: false
+
+In the booking edit modal:
+If depositPaid: false — show 
+"Mark Deposit Paid" button (for manual 
+cash/transfer payments if needed)
+On click: PUT /api/bookings/:id 
+{ depositPaid: true, status: "Confirmed" }
+Then send confirmation email.
+Button disappears once paid.
+
+If depositPaid: true — show 
+"✓ Deposit paid via Stripe" in green.
+No button needed.
+
+Add "Mark Balance Paid" button:
+If balancePaid: false — show button
+On click: PUT /api/bookings/:id 
+{ balancePaid: true }
+Updates Finance outstanding balance.
+Button disappears once paid.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+REMOVE COMPLETELY:
+━━━━━━━━━━━━━━━━━━━━━━━━
+Remove every reference to:
+- Bank transfer details (sort code, 
+  account number, account name)
+- "Your booking request has been received"
+- "We'll confirm your appointment once 
+  your deposit is received"
+- Any language implying manual payment
+- Any "DM us to pay" or similar
+
+The only payment method is Stripe.
+The only confirmation language is 
+"Booking Confirmed" after Stripe succeeds.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+DO NOT CHANGE:
+━━━━━━━━━━━━━━━━━━━━━━━━
+Do not change any existing functionality 
+that is already working:
+- Slot blocking and duration logic
+- Availability enforcement
+- JWT authentication
+- Media cloud storage
+- Client deduplication
+- Portal pages CSS and styling
+- Finance SQL queries
+- Email templates for reminders 
+  and cancellations

@@ -1,0 +1,332 @@
+Fix all critical and medium issues identified 
+in the pre-launch audit. Do not change anything 
+that is already working correctly.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+1. CLIENT CONFIRMATION EMAIL
+━━━━━━━━━━━━━━━━━━━━━━━━
+This is the single most important fix.
+
+When POST /api/bookings succeeds, send a 
+confirmation email to the client's email 
+address via Resend.
+
+Subject: "Booking Confirmed — Dermadoll 
+Aesthetics"
+
+Body (plain and clean, branded):
+Hi [first name],
+
+Thank you for booking with Dermadoll 
+Aesthetics. Here are your appointment 
+details:
+
+Treatment: [treatment name]
+Date: [date in format: Monday 14 April 2026]
+Time: [time e.g. 14:00]
+Duration: approximately [X] minutes
+
+Payment:
+Deposit due: £[deposit] (50%)
+Balance due on arrival: £[balance]
+
+Please note your deposit is due to 
+confirm your appointment. You will 
+receive payment details shortly.
+
+If you need to reschedule or have any 
+questions, please contact us:
+Instagram: @dermadollaesthetics
+WhatsApp: [WhatsApp number from settings]
+
+We look forward to seeing you!
+The Dermadoll Aesthetics Team
+
+Send this email even before Stripe is live.
+It gives the client a permanent record of 
+their booking details in their inbox.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+2. SUCCESS SCREEN — DO NOT AUTO CLOSE
+━━━━━━━━━━━━━━━━━━━━━━━━
+Remove the 4-second auto-close on the 
+booking success screen entirely.
+
+Replace with:
+- A permanent success state that stays 
+  visible until the client actively 
+  dismisses it
+- Show all booking details clearly:
+  Treatment, Date, Time, Deposit amount, 
+  Balance due on arrival
+- Add a note: "A confirmation has been 
+  sent to [email address]"
+- A single "Done" button that closes 
+  the modal when the client is ready
+- No auto-close under any circumstances
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+3. STRIPE — HONEST DEPOSIT MESSAGE
+━━━━━━━━━━━━━━━━━━━━━━━━
+Stripe is not live yet. Do not show 
+"Pay deposit now" or imply payment is 
+being taken when it isn't.
+
+Change the booking success screen to say:
+
+"Your booking request has been received.
+
+To secure your appointment, please send 
+your deposit of £[amount] via bank 
+transfer:
+
+Account name: Simrandeep Sangha
+Sort code: 60-84-07
+Account number: 17575567
+Reference: [client first name] - 
+[treatment abbreviated]
+
+Your appointment will be confirmed once 
+your deposit is received. If you have 
+any questions contact us on Instagram 
+@dermadollaesthetics or WhatsApp."
+
+Change depositPaid: true to 
+depositPaid: false on all new bookings 
+from the website.
+Status should be "Pending" not "Confirmed" 
+until Niamh manually confirms after 
+receiving the deposit.
+
+Update Finance page: "Deposits Collected" 
+must only count bookings where 
+depositPaid = true — not all bookings.
+This is currently overcounting.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+4. PORTAL LIVE REFRESH
+━━━━━━━━━━━━━━━━━━━━━━━━
+The portal currently only loads bookings 
+once on login. New website bookings are 
+invisible until the page is refreshed.
+
+Fix: poll GET /api/bookings every 30 
+seconds in the background regardless 
+of which portal page is active.
+
+On each poll:
+- Compare new booking IDs to cached IDs
+- If any new bookings found:
+  - Update the localStorage cache
+  - If on Dashboard: refresh KPI cards, 
+    recent bookings table, today's schedule
+  - If on Schedule: refresh calendar dots 
+    and day panel if currently open
+  - If on New Bookings page: add new rows 
+    to the top of the table
+  - Show a subtle toast notification:
+    "New booking — [Client Name] — 
+    [Treatment]" 
+    gold pill, slides in from top, 
+    auto-dismisses after 4 seconds
+  - Update the sidebar Pending badge count
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+5. PHONE NUMBER ON BOOKING RECORD
+━━━━━━━━━━━━━━━━━━━━━━━━
+The client's phone number is saved to 
+the clients table but not to the bookings 
+table. When Niamh opens a booking in the 
+portal she cannot see the phone number.
+
+Fix:
+Add client_phone column to the bookings 
+table in PostgreSQL.
+When POST /api/bookings is called, store 
+the phone number on the booking row as well 
+as on the client record.
+Display the phone number in:
+- The booking detail view in New Bookings
+- The day panel on the Schedule calendar
+- The booking edit modal
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+6. CATEGORY ON WEBSITE BOOKINGS
+━━━━━━━━━━━━━━━━━━━━━━━━
+Website bookings currently save with a 
+blank category field.
+
+Fix: when a treatment is selected on 
+the booking form, look it up in the 
+treatments.ts library and automatically 
+assign its category to the booking.
+
+Categories:
+Botox treatments → "Botox"
+Lip/cheek/chin/jaw/nose/teartrough 
+filler treatments → "Dermal Filler"
+Glass Skin treatments → "Facials"
+Skin Booster/Plenhyage/Vitarin/B12 
+→ "Skin Boosters"
+Lemon Bottle treatments → "Fat Dissolving"
+Bundle treatments → "Treatment Bundles"
+
+Store this category on the booking row 
+in PostgreSQL.
+This fixes the Revenue by Treatment chart 
+on the dashboard for website bookings.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+7. CANCELLED BOOKINGS IN DAY PANEL
+━━━━━━━━━━━━━━━━━━━━━━━━
+The portal Schedule day panel currently 
+shows cancelled bookings mixed in with 
+active ones.
+
+Fix: in the selectDay() function, filter 
+out bookings with status === "Cancelled" 
+before rendering the day panel timeline.
+
+Cancelled bookings should not appear in 
+the day view at all.
+The gold dot on the calendar should also 
+only count non-cancelled bookings — if 
+all bookings on a day are cancelled, 
+no dot should show.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+8. SESSION EXPIRY REDIRECT
+━━━━━━━━━━━━━━━━━━━━━━━━
+When the JWT session expires mid-session 
+the portal currently just shows an expiry 
+message but does not redirect to the 
+login view. The dashboard stays visible 
+but broken.
+
+Fix: when session expiry is detected:
+- Immediately hide all portal content
+- Show the login screen with the message:
+  "Your session has expired. 
+  Please log in again."
+- After successful re-login, restore 
+  the user to the page they were on 
+  using the value stored in sessionStorage
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+9. RATE LIMITING ON BOOKING ENDPOINT
+━━━━━━━━━━━━━━━━━━━━━━━━
+POST /api/bookings is publicly accessible 
+with no protection. A bot could spam 
+hundreds of fake bookings.
+
+Fix: add rate limiting to POST /api/bookings:
+- Maximum 3 booking attempts per IP 
+  address per 10 minutes
+- On limit exceeded: return HTTP 429 with:
+  "Too many booking attempts. 
+  Please try again in a few minutes."
+- Use express-rate-limit package:
+  npm install express-rate-limit
+- Apply only to POST /api/bookings and 
+  POST /api/auth/login
+- Do not apply to GET endpoints
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+10. TRAINING COURSES — ADD ALL 7 
+AND CAPTURE ENQUIRIES
+━━━━━━━━━━━━━━━━━━━━━━━━
+The website training section currently 
+only shows Pathway to Aesthetics (£2,000).
+The other 6 courses are missing.
+
+Add all 7 courses as individual cards:
+- Pathway to Aesthetics — £2,000
+  3-day course, max 3 students
+- Foundation Anti-Wrinkle & Tox — £1,300
+- Advanced Dermal Filler — £600
+- Advanced Anti-Wrinkle — £600
+- Skin Boosters & Polynucleotides — £600
+- Glass Skin Facial & Microneedling — £700
+- Russian Lip Masterclass — £600
+
+All courses: CPD accredited, no background 
+needed, Birmingham/Solihull location.
+
+Replace "DM to Enquire" with a proper 
+enquiry form that captures:
+- Full name (required)
+- Email address (required)
+- Phone number (required)
+- Which course they are interested in 
+  (dropdown of all 7 courses, required)
+- Message (optional)
+- "Send Enquiry" gold button
+
+On submit: POST /api/enquiries
+Save to a new PostgreSQL table: enquiries
+Columns: id, name, email, phone, course, 
+message, created_at, status (default "New")
+
+Send two emails via Resend:
+1. To ADMIN_EMAIL:
+   Subject: "New training enquiry — 
+   [Name] — [Course]"
+   Body: all details
+
+2. To the enquirer:
+   Subject: "Thanks for your enquiry — 
+   Dermadoll Aesthetics"
+   Body: "Hi [name], thank you for your 
+   interest in [course]. We'll be in touch 
+   shortly with more details and available 
+   dates. In the meantime, feel free to 
+   message us on Instagram 
+   @dermadollaesthetics"
+
+Add an Enquiries section to the portal 
+sidebar under BUSINESS.
+Show all training enquiries in a simple 
+table: Date | Name | Course | Phone | 
+Email | Status
+Status can be toggled: New → Contacted → 
+Booked → Closed
+Each status pill is clickable to update.
+All saved to PostgreSQL, visible across 
+devices.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+11. CRON JOBS — SET UP SCHEDULING
+━━━━━━━━━━━━━━━━━━━━━━━━
+The reminder and autocomplete endpoints 
+exist but nothing calls them automatically.
+
+In Replit, set up scheduled tasks:
+
+Every hour:
+GET /api/cron/reminders
+(sends 24hr reminder emails)
+
+Every day at 00:01 UK time:
+GET /api/cron/autocomplete
+(flips past Confirmed bookings to Complete)
+
+Add these as Replit scheduled tasks 
+in the project settings.
+Also add a note in the Settings page 
+of the portal under Developer section:
+"Scheduled tasks: reminders run hourly, 
+autocomplete runs daily at midnight."
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+IMPORTANT — DO NOT CHANGE:
+━━━━━━━━━━━━━━━━━━━━━━━━
+Do not change anything related to:
+- The slot blocking and duration logic 
+  (already working correctly)
+- The availability enforcement on the 
+  website calendar
+- The JWT authentication system
+- The media upload cloud storage
+- The client deduplication logic
+- The Finance page SQL queries
+- Any CSS or visual styling
