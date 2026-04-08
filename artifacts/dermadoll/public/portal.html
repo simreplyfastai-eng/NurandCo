@@ -3145,7 +3145,10 @@ function renderMedia(){
         ${practPreview}
       </div>
       <input type="file" id="file-practitioner" accept="image/*" style="display:none" onchange="handlePractitionerUpload(this)"/>
-      ${mBtn('⟳ Replace Photo','document.getElementById(\'file-practitioner\').click()',true)}
+      <div style="display:flex;gap:8px;align-items:center">
+        ${mBtn('⟳ Replace Photo','document.getElementById(\'file-practitioner\').click()',true)}
+        <button onclick="clearPractitioner()" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:20px;padding:4px;line-height:1" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑</button>
+      </div>
     </div>
   `);
 
@@ -3153,9 +3156,12 @@ function renderMedia(){
   const heroSrc=cloudSrc(data.heroSrc)||HERO_SRC;
   const heroCard=mCard(`
     ${mCardHeader('Hero Section Video','● Live','This video plays full screen on your homepage hero',true)}
-    <div style="position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#111;margin-bottom:18px">
+    <div style="position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#111;margin-bottom:10px">
       <video src="${heroSrc}" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
       <div style="position:absolute;bottom:12px;left:12px">${livePill('● LIVE NOW',true)}</div>
+    </div>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+      <button onclick="clearHeroVideo()" style="border:none;background:none;cursor:pointer;color:#CCC;font-family:Inter,sans-serif;font-size:12px;display:flex;align-items:center;gap:5px;padding:4px 0" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑 Clear video</button>
     </div>
     ${mDivider()}
     ${mSubheader('VIDEO LIBRARY',mBtn('+ Upload Video','document.getElementById("file-hero-upload").click()',true))}
@@ -3182,7 +3188,10 @@ function renderMedia(){
       </div>
       <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px">
         <span contenteditable="true" id="ba-label-${s.key}" style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:#111;min-width:60px;outline:none;cursor:text" onblur="saveBALabel('${s.key}',this.innerText)">${label}</span>
-        ${mBtn('⟳ Replace',`replaceBAImage('${s.key}')`,false)}
+        <div style="display:flex;gap:6px;align-items:center">
+          ${mBtn('⟳ Replace',`replaceBAImage('${s.key}')`,false)}
+          <button onclick="clearBASlot('${s.key}')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;padding:2px 4px;line-height:1" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑</button>
+        </div>
       </div>
       <input type="file" id="ba-file-${s.key}" accept="image/*" style="display:none" onchange="handleBAImage('${s.key}',this)"/>
     </div>`;
@@ -3248,7 +3257,10 @@ function renderMedia(){
       </div>
       <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px">
         <span contenteditable="true" id="vid-label-${s.key}" style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:#111;min-width:60px;outline:none;cursor:text" onblur="saveVidLabel('${s.key}',this.innerText)">${label}</span>
-        ${mBtn('⟳ Replace',`replaceVid('${s.key}')`,false)}
+        <div style="display:flex;gap:6px;align-items:center">
+          ${mBtn('⟳ Replace',`replaceVid('${s.key}')`,false)}
+          <button onclick="clearVidSlot('${s.key}')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;padding:2px 4px;line-height:1" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑</button>
+        </div>
       </div>
       <input type="file" id="vid-file-${s.key}" accept="video/mp4,video/*" style="display:none" onchange="handleVidReplace('${s.key}',this)"/>
     </div>`;
@@ -3333,7 +3345,10 @@ function renderMedia(){
       +' onchange="saveGradField('+idx+',\'course\',this.value)"/>'
       +'</div>'
       +'<input type="file" id="grad-file-'+idx+'" accept="image/*" style="display:none" onchange="handleGradUpload('+idx+',this)"/>'
+      +'<div style="display:flex;gap:8px;align-items:center">'
       +replBtn
+      +'<button onclick="clearGrad('+idx+')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;padding:2px 4px;line-height:1" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">\ud83d\uddd1</button>'
+      +'</div>'
       +'</div>';
   }).join('');
   const gradHeader=mCardHeader('Graduate Photos',gradLiveCount+' set \u00b7 3 total','Shown in the Training section on your website');
@@ -3529,6 +3544,41 @@ function deleteBAImage(key){
   const d=getMediaData();
   if(d.baImages)delete d.baImages[key];
   if(d.baLabels)delete d.baLabels[key];
+  saveMediaData(d);renderMedia();
+}
+
+function clearBASlot(key){
+  if(!confirm('Clear this slot? The image stays in your library.'))return;
+  const d=getMediaData();
+  if(d.baImages)delete d.baImages[key];
+  saveMediaData(d);renderMedia();
+}
+
+function clearVidSlot(key){
+  if(!confirm('Clear this slot? The video stays in your library.'))return;
+  const d=getMediaData();
+  if(d.vidSrcs)delete d.vidSrcs[key];
+  saveMediaData(d);renderMedia();
+}
+
+function clearPractitioner(){
+  if(!confirm('Remove the practitioner photo?'))return;
+  const d=getMediaData();
+  delete d.practitionerImage;
+  saveMediaData(d);renderMedia();
+}
+
+function clearGrad(idx){
+  if(!confirm('Clear this graduate photo?'))return;
+  const d=getMediaData();
+  if(d.graduates&&d.graduates[idx])d.graduates[idx].src='';
+  saveMediaData(d);renderMedia();
+}
+
+function clearHeroVideo(){
+  if(!confirm('Clear the hero video? The default video will show until you upload a new one.'))return;
+  const d=getMediaData();
+  delete d.heroSrc;
   saveMediaData(d);renderMedia();
 }
 
