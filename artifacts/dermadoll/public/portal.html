@@ -8,9 +8,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;max-width:100%}
 :root{--gold:#C9A96E;--bg:#FFFFFF;--sidebar:#FAF9F7;--text:#111111;--muted:#888;--border:#E8E4DE;--card-shadow:0 2px 12px rgba(0,0,0,.06)}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;max-width:100vw}
 h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 
 /* ── LOGIN ─────────────────────────────────────── */
@@ -31,7 +31,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 #portal{display:none;min-height:100vh;flex-direction:row}
 #portal.visible{display:flex}
 #sidebar{width:240px;min-height:100vh;background:var(--sidebar);border-right:1px solid var(--border);position:fixed;top:0;left:0;bottom:0;display:flex;flex-direction:column;z-index:100;transition:transform .25s}
-#main-content{margin-left:240px;flex:1;min-height:100vh;background:var(--bg)}
+#main-content{margin-left:240px;flex:1;min-height:100vh;background:var(--bg);overflow-x:hidden;width:calc(100% - 240px);max-width:calc(100% - 240px)}
 
 /* ── SIDEBAR ────────────────────────────────────── */
 .sb-brand{padding:28px 20px 16px;border-bottom:1px solid var(--border)}
@@ -69,7 +69,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 .btn-gold:hover{opacity:.88}
 
 /* ── PAGE COMMON ─────────────────────────────────── */
-.page{display:none;padding:28px;animation:fadeIn .15s ease}
+.page{display:none;padding:28px;animation:fadeIn .15s ease;overflow-x:hidden;width:100%;max-width:100%;position:relative;box-sizing:border-box}
 .page.active{display:block}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
@@ -355,44 +355,58 @@ tr:hover td{background:#FDFBF8}
 .fin-mark-btn:hover{background:#C9A96E;color:#fff}
 .fin-mark-circle{width:28px;height:28px;border-radius:50%;border:1px solid #C9A96E;color:#C9A96E;background:#fff;font-size:14px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;margin:auto;display:flex}
 .fin-mark-circle:hover{background:#C9A96E;color:#fff}
-.bk-filter-btn{font-family:'Inter',sans-serif;font-size:12px;padding:6px 14px;border-radius:20px;background:#F5F5F5;color:#888;border:none;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+/* ── BOOKINGS FILTER ROW ─────────────────────────── */
+.bk-filter-btn{font-family:'Inter',sans-serif;font-size:12px;padding:6px 14px;border-radius:20px;background:#F5F5F5;color:#888;border:none;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;max-width:none}
 .bk-filter-btn.active{background:#111;color:#fff}
 .bk-filter-btn:hover:not(.active){background:#e8e8e8;color:#444}
-.bk-filter-row{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;margin-bottom:18px}
+.bk-filter-row{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;white-space:nowrap;margin-bottom:18px;width:100%;max-width:100%}
 .bk-filter-row::-webkit-scrollbar{display:none}
-#bk-all-wrap{overflow-x:hidden;box-sizing:border-box}
-#bk-all-table{width:100%;table-layout:fixed;border-collapse:collapse}
-#bk-all-table thead th{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;color:#AAAAAA;letter-spacing:1px;text-transform:uppercase;padding:10px 12px;text-align:left;background:#FAFAFA;border-bottom:1px solid #F0F0F0;overflow:hidden;white-space:nowrap}
+/* ── BOOKINGS TABLE WRAPPER ──────────────────────── */
+#bk-all-wrap{width:100%;max-width:100%;overflow:hidden;box-sizing:border-box;display:block}
+#bk-all-table{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;display:table}
+#bk-all-table thead th{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;color:#AAAAAA;letter-spacing:1px;text-transform:uppercase;padding:10px 12px;text-align:left;background:#FAFAFA;border-bottom:1px solid #F0F0F0;overflow:hidden;white-space:nowrap;max-width:none}
 #bk-all-table tbody tr{border-bottom:1px solid #F5F5F5;height:56px}
 #bk-all-table tbody tr:last-child{border-bottom:none}
 #bk-all-table tbody tr:hover td{background:#FAFAFA}
-#bk-all-table tbody td{padding:0 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Inter',sans-serif;font-size:13px;color:#333;box-sizing:border-box}
+#bk-all-table tbody td{padding:0 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Inter',sans-serif;font-size:13px;color:#333;box-sizing:border-box;max-width:none}
 .bk-date-cell{white-space:normal!important;line-height:1.4}
 .bk-date-day{font-size:12px;font-weight:700;color:#111}
 .bk-date-time{font-size:11px;color:#AAAAAA}
-.bk-status-pill{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;white-space:nowrap}
+/* Status pill — no dot, overflow-safe */
+.bk-status-pill{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+/* Desktop action buttons */
 .bk-edit-btn{border:1px solid #E0E0E0;color:#888;background:#fff;font-family:'Inter',sans-serif;font-size:11px;border-radius:20px;padding:3px 10px;cursor:pointer;transition:all .15s;margin-right:4px}
 .bk-edit-btn:hover{border-color:#aaa;color:#444}
 .bk-paid-btn{border:1px solid #C9A96E;color:#C9A96E;background:#fff;font-family:'Inter',sans-serif;font-size:11px;border-radius:20px;padding:3px 10px;cursor:pointer;transition:all .15s}
 .bk-paid-btn:hover{background:#C9A96E;color:#fff}
-.bk-mob-icon{width:28px;height:28px;border-radius:50%;border:1px solid #E0E0E0;background:#fff;color:#C9A96E;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all .15s;min-width:44px;min-height:44px;border-radius:8px}
+/* Mobile "..." dropdown trigger */
+.bk-dd-btn{display:none;width:32px;height:32px;background:transparent;border:none;cursor:pointer;font-family:'Inter',sans-serif;font-size:16px;color:#888888;align-items:center;justify-content:center;line-height:1;padding:0}
+/* Dropdown menu */
+.bk-dropdown{display:none;position:absolute;right:4px;top:100%;z-index:100;background:#fff;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.1);min-width:130px;overflow:hidden;max-width:none}
+.bk-dropdown.open{display:block}
+.bk-dropdown-item{display:block;width:100%;text-align:left;font-family:'Inter',sans-serif;font-size:13px;color:#111;padding:10px 16px;border:none;background:transparent;cursor:pointer;border-bottom:1px solid #F5F5F5;white-space:nowrap}
+.bk-dropdown-item:last-child{border-bottom:none}
+.bk-dropdown-item:hover{background:#FAFAFA}
+.bk-dropdown-item.danger{color:#e53935}
+.bk-actions-cell{position:relative;text-align:center}
 /* Desktop column widths */
 #bk-all-table .bk-col-date{width:16%}
-#bk-all-table .bk-col-client{width:18%}
+#bk-all-table .bk-col-client{width:16%}
 #bk-all-table .bk-col-treat{width:22%}
 #bk-all-table .bk-col-price{width:10%;text-align:right}
 #bk-all-table .bk-col-dep{width:12%;text-align:center}
 #bk-all-table .bk-col-status{width:12%;text-align:center}
-#bk-all-table .bk-col-actions{width:10%;text-align:center}
+#bk-all-table .bk-col-actions{width:12%;text-align:center}
 @media(max-width:650px){
   #bk-all-table .bk-col-treat,#bk-all-table .bk-col-dep{display:none}
-  #bk-all-table .bk-col-date{width:20%}
-  #bk-all-table .bk-col-client{width:28%}
+  #bk-all-table .bk-col-date{width:22%}
+  #bk-all-table .bk-col-client{width:30%}
   #bk-all-table .bk-col-price{width:16%}
   #bk-all-table .bk-col-status{width:20%}
-  #bk-all-table .bk-col-actions{width:16%}
-  .bk-edit-btn span,.bk-paid-btn{display:none}
-  .bk-mob-icon{display:inline-flex!important}
+  #bk-all-table .bk-col-actions{width:12%}
+  .bk-status-pill{max-width:80px;font-size:9px;padding:3px 6px}
+  .bk-edit-btn,.bk-paid-btn{display:none}
+  .bk-dd-btn{display:inline-flex!important}
 }
 .fin-export-btn{width:100%;border:1px solid #E0E0E0;color:#888888;background:#fff;border-radius:8px;padding:12px;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;margin-top:16px;transition:border-color .15s,color .15s;display:block}
 .fin-export-btn:hover{border-color:#AAAAAA;color:#555}
@@ -434,7 +448,7 @@ tr:hover td{background:#FDFBF8}
   #sidebar.open{transform:translateX(0)}
   #sidebar-overlay.open{display:block}
   #mobile-toggle{display:flex}
-  #main-content{margin-left:0}
+  #main-content{margin-left:0;width:100%;max-width:100vw}
   .kpi-grid{grid-template-columns:1fr 1fr;gap:8px}
   .kpi-card{padding:12px}
   .kpi-value{font-size:24px}
@@ -656,7 +670,7 @@ tr:hover td{background:#FDFBF8}
         <span class="topbar-title serif">New Bookings</span>
         <button class="btn-gold" style="border-radius:20px;font-size:12px;padding:8px 16px" onclick="openBookingModal()">+ New Booking</button>
       </div>
-      <div style="padding:20px 24px;padding-bottom:100px;box-sizing:border-box">
+      <div style="padding:20px 24px;padding-bottom:100px;box-sizing:border-box;width:100%;max-width:100%;overflow-x:hidden;position:relative">
         <div class="bk-filter-row">
           <button class="bk-filter-btn active" onclick="setBookingsFilter('all',this)">All</button>
           <button class="bk-filter-btn" onclick="setBookingsFilter('Pending',this)">Pending</button>
@@ -1606,13 +1620,45 @@ function renderBookings(){
       <td class="bk-col-price" style="font-weight:700;color:#C9A96E">£${Number(b.price||0).toFixed(0)}</td>
       <td class="bk-col-dep">${dep}</td>
       <td class="bk-col-status"><span class="bk-status-pill" style="${style}">${b.status}</span></td>
-      <td class="bk-col-actions">
-        <button class="bk-edit-btn" onclick="openBookingModal('${b.id}')"><span>Edit</span></button>
-        <button class="bk-mob-icon" style="display:none" onclick="openBookingModal('${b.id}')" title="Edit">✏</button>
+      <td class="bk-col-actions bk-actions-cell">
+        <button class="bk-edit-btn" onclick="openBookingModal('${b.id}')">Edit</button>
         ${b.status==='Pending'?`<button class="bk-paid-btn" onclick="markPaid('${b.id}')">Mark Paid</button>`:''}
+        <button class="bk-dd-btn" onclick="toggleBkDropdown(event,'bk-dd-${b.id}')">&#8943;</button>
+        <div class="bk-dropdown" id="bk-dd-${b.id}">
+          ${b.status==='Pending'?`<button class="bk-dropdown-item" onclick="markPaid('${b.id}');closeBkDropdowns()">Mark Paid</button>`:''}
+          <button class="bk-dropdown-item" onclick="openBookingModal('${b.id}');closeBkDropdowns()">Edit</button>
+          <button class="bk-dropdown-item danger" onclick="cancelBookingFromTable('${b.id}')">Cancel</button>
+        </div>
       </td>
     </tr>`;
   }).join('');
+}
+
+function toggleBkDropdown(e,id){
+  e.stopPropagation();
+  const el=document.getElementById(id);
+  if(!el)return;
+  const isOpen=el.classList.contains('open');
+  closeBkDropdowns();
+  if(!isOpen)el.classList.add('open');
+}
+function closeBkDropdowns(){
+  document.querySelectorAll('.bk-dropdown.open').forEach(d=>d.classList.remove('open'));
+}
+document.addEventListener('click',function(){closeBkDropdowns();});
+
+async function cancelBookingFromTable(id){
+  closeBkDropdowns();
+  if(!confirm('Cancel this booking?'))return;
+  const all=getBookings();
+  const idx=all.findIndex(b=>b.id===id);
+  if(idx<0)return;
+  all[idx].status='Cancelled';
+  await BookingAPI.update(all[idx]);
+  showToast('Booking cancelled');
+  await BookingAPI.init();
+  renderBookings();
+  updateSidebarBadges();
 }
 
 // ═══════════════════════════════════════════════════
