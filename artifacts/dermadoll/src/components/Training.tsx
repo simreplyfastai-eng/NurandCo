@@ -393,9 +393,6 @@ export default function Training() {
                     </div>
                   )}
 
-                  {/* Gradient overlay */}
-                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)", pointerEvents: "none" }} />
-
                   {/* Gold corner — top-left */}
                   <div style={{ position: "absolute", top: "12px", left: "12px", width: "20px", height: "2px", background: "#C9A96E", zIndex: 2 }} />
                   <div style={{ position: "absolute", top: "12px", left: "12px", width: "2px", height: "20px", background: "#C9A96E", zIndex: 2 }} />
@@ -404,22 +401,6 @@ export default function Training() {
                   <div style={{ position: "absolute", bottom: "12px", right: "12px", width: "20px", height: "2px", background: "#C9A96E", zIndex: 2 }} />
                   <div style={{ position: "absolute", bottom: "12px", right: "12px", width: "2px", height: "20px", background: "#C9A96E", zIndex: 2 }} />
 
-                  {/* Name tag */}
-                  <div style={{
-                    position: "absolute", bottom: 0, left: 0, right: 0,
-                    background: "rgba(0,0,0,0.4)",
-                    backdropFilter: "blur(4px)",
-                    borderRadius: "0 0 16px 16px",
-                    padding: "12px 16px",
-                    zIndex: 1,
-                  }}>
-                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", color: "white", marginBottom: "2px" }}>
-                      {grad.name}
-                    </div>
-                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", color: "#C9A96E", letterSpacing: "1px", textTransform: "uppercase" }}>
-                      {grad.course}
-                    </div>
-                  </div>
                 </motion.div>
               ))}
             </div>
