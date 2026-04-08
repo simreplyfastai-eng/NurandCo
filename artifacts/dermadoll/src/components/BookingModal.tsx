@@ -64,7 +64,7 @@ function Calendar({
         >
           ‹
         </button>
-        <span className="font-serif" style={{ fontSize: "18px" }}>
+        <span className="font-serif leading-snug" style={{ fontSize: "18px" }}>
           {MONTH_NAMES[viewMonth]} {viewYear}
         </span>
         <button
@@ -135,10 +135,26 @@ function Calendar({
   );
 }
 
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+}
+
+function fmtDate(d: Date) {
+  return d.toISOString().slice(0, 10);
+}
+
+function parsePrice(priceStr: string): number {
+  return parseInt(priceStr.replace(/[^0-9]/g, ""), 10) || 0;
+}
+
 export default function BookingModal({ treatment, onClose }: BookingModalProps) {
   const [step, setStep] = useState<1 | 2 | 3 | "success">(1);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [nameError, setNameError] = useState("");
   const firstFocusRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -166,9 +182,53 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
     setStep(3);
   };
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
+    if (!name.trim()) {
+      setNameError("Please enter your name");
+      return;
+    }
+    setNameError("");
+    setSubmitting(true);
+
+    const price = parsePrice(treatment?.price ?? "0");
+    const deposit = Math.round(price * 0.5);
+
+    const booking = {
+      id: uid(),
+      clientName: name.trim(),
+      clientEmail: email.trim(),
+      treatment: treatment?.name ?? "",
+      category: "",
+      price,
+      deposit,
+      depositPaid: true, // STRIPE INTEGRATION POINT — set to false when Stripe is live
+      balancePaid: false,
+      date: selectedDate ? fmtDate(selectedDate) : "",
+      time: selectedTime ?? "",
+      status: "Pending",
+      paymentMethod: "Stripe",
+      stripePaymentId: null,
+      notes: "",
+      createdAt: Date.now(),
+      source: "Website",
+      // TODO: Integrate Stripe checkout here
+      // Stripe will POST to /api/bookings/confirm/:id
+      // with stripePaymentId on successful payment
+    };
+
+    try {
+      await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(booking),
+      });
+    } catch (err) {
+      console.warn("Booking API error — continuing to success screen", err);
+    }
+
+    setSubmitting(false);
     setStep("success");
-    setTimeout(onClose, 3000);
+    setTimeout(onClose, 4000);
   };
 
   const formatDate = (d: Date) =>
@@ -180,6 +240,10 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
     });
 
   if (!treatment) return null;
+
+  const price = parsePrice(treatment.price);
+  const deposit = Math.round(price * 0.5);
+  const balance = price - deposit;
 
   return (
     <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center">
@@ -221,10 +285,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
         {/* Treatment info */}
         <div className="mb-7 pr-8">
-          <h2
-            className="font-serif leading-snug mb-1"
-            style={{ fontSize: "24px" }}
-          >
+          <h2 className="font-serif leading-snug mb-1" style={{ fontSize: "24px" }}>
             {treatment.name}
           </h2>
           <span className="font-serif" style={{ fontSize: "20px", color: "#C9A96E" }}>
@@ -234,50 +295,25 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
         {/* Step 1 — Calendar */}
         {step === 1 && (
-          <motion.div
-            key="step1"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.25 }}
-          >
-            <h3 className="font-serif mb-5" style={{ fontSize: "20px" }}>
-              Select a Date
-            </h3>
+          <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
+            <h3 className="font-serif mb-5" style={{ fontSize: "20px" }}>Select a Date</h3>
             <Calendar onSelect={handleDateSelect} selected={selectedDate} />
           </motion.div>
         )}
 
         {/* Step 2 — Time slots */}
         {step === 2 && (
-          <motion.div
-            key="step2"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
+          <motion.div key="step2" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-2">
-              <button
-                onClick={() => setStep(1)}
-                className="text-sm hover:opacity-70 transition-opacity"
-                style={{ color: "#C9A96E" }}
-              >
+              <button onClick={() => setStep(1)} className="text-sm hover:opacity-70 transition-opacity" style={{ color: "#C9A96E" }}>
                 ← Back
               </button>
-              <h3 className="font-serif" style={{ fontSize: "20px" }}>
-                Select a Time
-              </h3>
+              <h3 className="font-serif" style={{ fontSize: "20px" }}>Select a Time</h3>
             </div>
             {selectedDate && (
-              <p className="text-sm mb-5" style={{ color: "#999" }}>
-                {formatDate(selectedDate)}
-              </p>
+              <p className="text-sm mb-5" style={{ color: "#999" }}>{formatDate(selectedDate)}</p>
             )}
-            <motion.div
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3, delay: 0.05 }}
-              className="grid grid-cols-3 sm:grid-cols-4 gap-2"
-            >
+            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
               {TIME_SLOTS.map((slot) => {
                 const isActive = selectedTime === slot;
                 return (
@@ -295,83 +331,122 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
                       cursor: "pointer",
                       transition: "all 0.15s",
                     }}
-                    onMouseEnter={(e) => {
-                      if (!isActive) {
-                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.08)";
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isActive) {
-                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
-                      }
-                    }}
+                    onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.08)"; }}
+                    onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
                   >
                     {slot}
                   </button>
                 );
               })}
-            </motion.div>
+            </div>
           </motion.div>
         )}
 
-        {/* Step 3 — Confirm */}
+        {/* Step 3 — Your details + Confirm */}
         {step === 3 && (
-          <motion.div
-            key="step3"
-            initial={{ opacity: 0, y: 8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h3 className="font-serif mb-6" style={{ fontSize: "20px" }}>
-              Confirm Booking
-            </h3>
+          <motion.div key="step3" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <div className="flex items-center gap-3 mb-5">
+              <button onClick={() => setStep(2)} className="text-sm hover:opacity-70 transition-opacity" style={{ color: "#C9A96E" }}>
+                ← Back
+              </button>
+              <h3 className="font-serif" style={{ fontSize: "20px" }}>Your Details</h3>
+            </div>
 
+            {/* Booking summary */}
             <div
-              className="mb-7 p-5 rounded-xl space-y-3"
-              style={{
-                border: "1px solid rgba(201,169,110,0.35)",
-                backgroundColor: "#FEFDFB",
-              }}
+              className="mb-6 p-4 rounded-xl space-y-2"
+              style={{ border: "1px solid rgba(201,169,110,0.25)", backgroundColor: "#FEFDFB" }}
             >
-              <div className="flex justify-between gap-4">
-                <span className="text-sm flex-shrink-0" style={{ color: "#888" }}>Treatment</span>
-                <span className="text-sm font-medium text-right">{treatment.name}</span>
+              <div className="flex justify-between gap-4 text-sm">
+                <span style={{ color: "#888" }}>Treatment</span>
+                <span className="font-medium text-right">{treatment.name}</span>
               </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-sm flex-shrink-0" style={{ color: "#888" }}>Date</span>
-                <span className="text-sm font-medium text-right">
-                  {selectedDate ? formatDate(selectedDate) : "—"}
-                </span>
+              <div className="flex justify-between gap-4 text-sm">
+                <span style={{ color: "#888" }}>Date</span>
+                <span className="font-medium text-right">{selectedDate ? formatDate(selectedDate) : "—"}</span>
               </div>
-              <div className="flex justify-between gap-4">
-                <span className="text-sm flex-shrink-0" style={{ color: "#888" }}>Time</span>
-                <span className="text-sm font-medium">{selectedTime}</span>
+              <div className="flex justify-between gap-4 text-sm">
+                <span style={{ color: "#888" }}>Time</span>
+                <span className="font-medium">{selectedTime}</span>
               </div>
-              <div
-                className="flex justify-between pt-3"
-                style={{ borderTop: "1px solid rgba(201,169,110,0.2)" }}
-              >
-                <span className="text-sm" style={{ color: "#888" }}>Price</span>
-                <span className="font-serif" style={{ fontSize: "18px", color: "#C9A96E" }}>
-                  {treatment.price}
-                </span>
+              <div className="border-t pt-2 mt-2 space-y-1" style={{ borderColor: "rgba(201,169,110,0.15)" }}>
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: "#888" }}>Total price</span>
+                  <span className="font-serif" style={{ fontSize: "16px", color: "#111" }}>{treatment.price}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: "#888" }}>Deposit due today (50%)</span>
+                  <span className="font-medium" style={{ color: "#C9A96E" }}>£{deposit}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span style={{ color: "#888" }}>Remaining balance (due on arrival)</span>
+                  <span className="font-medium" style={{ color: "#666" }}>£{balance}</span>
+                </div>
               </div>
             </div>
 
+            {/* Name field */}
+            <div className="mb-4">
+              <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
+                Full Name <span style={{ color: "#C9A96E" }}>*</span>
+              </label>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => { setName(e.target.value); if (nameError) setNameError(""); }}
+                placeholder="Jane Smith"
+                className="w-full"
+                style={{
+                  border: nameError ? "1px solid #C62828" : "1px solid #E0E0E0",
+                  borderRadius: "8px",
+                  padding: "12px 14px",
+                  fontSize: "14px",
+                  fontFamily: "Inter, sans-serif",
+                  outline: "none",
+                  transition: "border-color 0.15s",
+                }}
+                onFocus={(e) => { if (!nameError) (e.currentTarget as HTMLInputElement).style.borderColor = "#C9A96E"; }}
+                onBlur={(e) => { if (!nameError) (e.currentTarget as HTMLInputElement).style.borderColor = "#E0E0E0"; }}
+              />
+              {nameError && <p className="text-xs mt-1" style={{ color: "#C62828" }}>{nameError}</p>}
+            </div>
+
+            {/* Email field */}
+            <div className="mb-6">
+              <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
+                Email Address <span style={{ color: "#AAA", fontSize: "10px", textTransform: "none" }}>(optional)</span>
+              </label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="jane@email.com"
+                className="w-full"
+                style={{
+                  border: "1px solid #E0E0E0",
+                  borderRadius: "8px",
+                  padding: "12px 14px",
+                  fontSize: "14px",
+                  fontFamily: "Inter, sans-serif",
+                  outline: "none",
+                }}
+                onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "#C9A96E"; }}
+                onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "#E0E0E0"; }}
+              />
+            </div>
+
+            {/* Confirm button */}
             <button
               onClick={handleConfirm}
+              disabled={submitting}
               className="w-full py-4 text-white font-medium text-sm uppercase tracking-wider transition-all duration-200 hover:opacity-90 active:scale-[0.99]"
-              style={{ backgroundColor: "#C9A96E", borderRadius: "8px" }}
+              style={{ backgroundColor: submitting ? "#D4B98A" : "#C9A96E", borderRadius: "8px", cursor: submitting ? "default" : "pointer" }}
             >
-              Confirm Booking
+              {submitting ? "Sending…" : `Request Booking — Pay £${deposit} Deposit`}
             </button>
-            <button
-              onClick={() => setStep(2)}
-              className="w-full mt-3 text-sm py-2 hover:opacity-60 transition-opacity"
-              style={{ color: "#bbb" }}
-            >
-              ← Change Time
-            </button>
+            <p className="text-center text-xs mt-3" style={{ color: "#AAA", fontFamily: "Inter, sans-serif" }}>
+              Deposit secures your appointment. Balance paid on the day.
+            </p>
           </motion.div>
         )}
 
@@ -393,9 +468,10 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
             <h2 className="font-serif mb-3" style={{ fontSize: "28px" }}>
               Booking Request Sent!
             </h2>
-            <p className="font-light leading-relaxed" style={{ color: "#777" }}>
+            <p className="font-light leading-relaxed mb-2" style={{ color: "#777" }}>
               We'll confirm your appointment via Instagram DM or WhatsApp shortly.
             </p>
+            <p className="text-sm" style={{ color: "#AAA" }}>This window will close automatically.</p>
           </motion.div>
         )}
       </motion.div>

@@ -433,6 +433,18 @@ tr:hover td{background:#FDFBF8}
   .fin-kpi-value{font-size:20px}
   .fin-col-treat{display:none}
   .fin-export-btn{display:none}
+  /* Finance table mobile column widths — Treatment column hidden, redistribute */
+  .fin-table{table-layout:fixed;min-width:unset}
+  .fin-table thead th{font-size:9px;padding:8px 6px;white-space:nowrap;overflow:hidden;text-overflow:clip}
+  .fin-table tbody td{padding:0 6px;font-size:12px}
+  .fin-table thead th:nth-child(1){width:22%}   /* Date */
+  .fin-table thead th:nth-child(2){width:30%}   /* Client */
+  .fin-table thead th:nth-child(3){display:none} /* Treatment — hidden */
+  .fin-table thead th:nth-child(4){width:18%}   /* Total */
+  .fin-table thead th:nth-child(5){width:18%}   /* Status */
+  .fin-table thead th:nth-child(6){width:12%}   /* Action */
+  /* Status pill smaller on mobile */
+  .fin-pill{font-size:9px;padding:2px 6px}
 }
 @media(max-width:480px){
   .kpi-grid{grid-template-columns:1fr 1fr}
@@ -2593,13 +2605,21 @@ function saveSettings(){
   alert('Settings saved!');
 }
 
-function clearBookings(){
+async function clearBookings(){
   const conf=prompt('Type CONFIRM to clear all bookings:');
-  if(conf==='CONFIRM'){saveBookings([]);renderDashboard();updateSidebarBadges();alert('All bookings cleared.')}
+  if(conf==='CONFIRM'){
+    await BookingAPI.clearAll();
+    renderDashboard();updateSidebarBadges();
+    alert('All bookings cleared.');
+  }
 }
-function resetPortal(){
+async function resetPortal(){
   const conf=prompt('Type CONFIRM to reset all portal data:');
-  if(conf==='CONFIRM'){['dd_bookings','dd_clients','dd_settings','dd_treatment_overrides','dd_video_labels'].forEach(k=>localStorage.removeItem(k));location.reload();}
+  if(conf==='CONFIRM'){
+    await BookingAPI.clearAll();
+    ['dd_bookings','dd_clients','dd_settings','dd_treatment_overrides','dd_video_labels'].forEach(k=>localStorage.removeItem(k));
+    location.reload();
+  }
 }
 
 // ═══════════════════════════════════════════════════
