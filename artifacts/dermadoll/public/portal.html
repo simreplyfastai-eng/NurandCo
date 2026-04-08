@@ -850,7 +850,10 @@ tr:hover td{background:#FDFBF8}
     <div id="page-media" class="page">
       <div class="topbar" style="display:flex;align-items:center;justify-content:space-between">
         <span class="topbar-title serif">Media</span>
-        <button id="media-save-btn" onclick="publishMediaToCloud()" style="background:#C9A96E;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Save to Live Site</button>
+        <div style="display:flex;align-items:center;gap:14px">
+          <span id="media-autosave-status" style="font-family:Inter,sans-serif;font-size:12px;color:#4CAF50;opacity:0;transition:opacity .4s"></span>
+          <button id="media-save-btn" onclick="publishMediaToCloud()" style="background:#C9A96E;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Save to Live Site</button>
+        </div>
       </div>
       <div style="padding:28px;max-width:860px;margin:0 auto" id="media-root"></div>
     </div>
@@ -3001,7 +3004,41 @@ function exportFinance(){
 
 /* ── helpers ── */
 function getMediaData(){return JSON.parse(localStorage.getItem('dd_media')||'{}')}
-function saveMediaData(d){localStorage.setItem('dd_media',JSON.stringify(d));CloudStore.set('dd_media',d);}
+
+let _mediaSaveTimer=null;
+function _showMediaSaveStatus(state){
+  const el=document.getElementById('media-autosave-status');
+  if(!el)return;
+  clearTimeout(el._hideTimer);
+  if(state==='syncing'){
+    el.textContent='\u2191 Syncing\u2026';
+    el.style.color='#C9A96E';
+    el.style.opacity='1';
+  }else if(state==='saved'){
+    el.textContent='\u2713 Saved to cloud';
+    el.style.color='#4CAF50';
+    el.style.opacity='1';
+    el._hideTimer=setTimeout(function(){el.style.opacity='0';},3000);
+  }else if(state==='error'){
+    el.textContent='\u26a0 Sync failed \u2014 click Save to retry';
+    el.style.color='#e53935';
+    el.style.opacity='1';
+  }
+}
+
+function saveMediaData(d){
+  localStorage.setItem('dd_media',JSON.stringify(d));
+  _showMediaSaveStatus('syncing');
+  clearTimeout(_mediaSaveTimer);
+  _mediaSaveTimer=setTimeout(async function(){
+    try{
+      await CloudStore.set('dd_media',d);
+      _showMediaSaveStatus('saved');
+    }catch(e){
+      _showMediaSaveStatus('error');
+    }
+  },400);
+}
 
 // Base config — static site files treated as always "live"
 const HERO_SRC='hero.mp4';
@@ -3062,12 +3099,16 @@ function livePill(text,green){
 async function publishMediaToCloud(){
   const btn=document.getElementById('media-save-btn');
   const orig=btn?btn.textContent:'';
-  if(btn){btn.textContent='Saving…';btn.disabled=true;btn.style.opacity='.6';}
+  clearTimeout(_mediaSaveTimer);
+  if(btn){btn.textContent='Saving\u2026';btn.disabled=true;btn.style.opacity='.6';}
+  _showMediaSaveStatus('syncing');
   try{
     await CloudStore.set('dd_media',getMediaData());
-    showToast('Changes saved to live site ✓');
+    _showMediaSaveStatus('saved');
+    showToast('\u2713 Saved \u2014 live site & all devices updated');
   }catch(e){
-    showToast('Save failed — '+e.message);
+    _showMediaSaveStatus('error');
+    showToast('Save failed \u2014 '+e.message);
   }
   if(btn){btn.textContent=orig;btn.disabled=false;btn.style.opacity='1';}
 }
