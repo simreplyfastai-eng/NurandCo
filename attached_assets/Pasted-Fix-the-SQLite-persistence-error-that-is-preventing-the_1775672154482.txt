@@ -1,0 +1,81 @@
+Fix the SQLite persistence error that 
+is preventing the portal from loading.
+
+Error: "Failed to connect: sync error: 
+Failed to initialize SQLite persistence"
+
+Do not change any working functionality.
+Only fix the database connection issue.
+
+DIAGNOSIS STEPS:
+1. Check if the SQLite database file 
+   path exists and is accessible
+2. Check if there are any permission 
+   issues with the database file
+3. Check if the database initialization 
+   code is failing silently
+4. Check if there is a conflict between 
+   SQLite and PostgreSQL — both should 
+   not be running simultaneously
+
+LIKELY FIXES:
+
+If SQLite is being used as a fallback 
+when PostgreSQL is unavailable:
+- Remove SQLite entirely
+- PostgreSQL is the only database
+- If PostgreSQL connection fails, 
+  return a clear error message instead 
+  of trying to fall back to SQLite
+
+If SQLite is used for local caching:
+- Remove it
+- Use in-memory caching only for 
+  temporary data
+- All persistent data goes to PostgreSQL
+
+If the error is in the portal frontend:
+- Check if any localStorage sync code 
+  is trying to use SQLite
+- Remove any SQLite references from 
+  the frontend entirely
+
+DATABASE CONNECTION:
+Make sure PostgreSQL connection uses 
+the DATABASE_URL environment variable 
+from Replit Secrets.
+Add proper error handling:
+
+try {
+  await pool.connect()
+  console.log('PostgreSQL connected')
+} catch (err) {
+  console.error('Database connection 
+  failed:', err.message)
+  // Do not fall back to SQLite
+  // Return 503 on all API calls 
+  // until DB is available
+}
+
+If PostgreSQL is unavailable:
+Return HTTP 503 on all API calls with:
+{
+  error: "Service temporarily 
+  unavailable. Please try again."
+}
+
+Show a clear error screen in the portal:
+"Unable to connect to database. 
+Please refresh the page or contact 
+your developer."
+
+Do not show a broken portal with 
+no data — show the error clearly.
+
+AFTER FIXING:
+Confirm:
+- SQLite is completely removed
+- PostgreSQL is the only database
+- Connection errors are handled cleanly
+- The portal loads correctly
+- All existing data is still intact
