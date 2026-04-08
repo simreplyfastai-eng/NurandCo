@@ -1597,7 +1597,7 @@ document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key===
 
 function doLogout(){
   clearSession();
-  location.reload();
+  window.location.href='/';
 }
 
 let _sessionWatcherStarted=false;
