@@ -153,6 +153,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [nameError, setNameError] = useState("");
   const firstFocusRef = useRef<HTMLButtonElement>(null);
@@ -197,6 +198,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       id: uid(),
       clientName: name.trim(),
       clientEmail: email.trim(),
+      clientPhone: phone.trim(),
       treatment: treatment?.name ?? "",
       category: "",
       price,
@@ -412,7 +414,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
             </div>
 
             {/* Email field */}
-            <div className="mb-6">
+            <div className="mb-4">
               <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
                 Email Address <span style={{ color: "#AAA", fontSize: "10px", textTransform: "none" }}>(optional)</span>
               </label>
@@ -421,6 +423,30 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="jane@email.com"
+                className="w-full"
+                style={{
+                  border: "1px solid #E0E0E0",
+                  borderRadius: "8px",
+                  padding: "12px 14px",
+                  fontSize: "14px",
+                  fontFamily: "Inter, sans-serif",
+                  outline: "none",
+                }}
+                onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "#C9A96E"; }}
+                onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "#E0E0E0"; }}
+              />
+            </div>
+
+            {/* Phone field */}
+            <div className="mb-6">
+              <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
+                Phone Number <span style={{ color: "#AAA", fontSize: "10px", textTransform: "none" }}>(optional)</span>
+              </label>
+              <input
+                type="tel"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                placeholder="07700 900000"
                 className="w-full"
                 style={{
                   border: "1px solid #E0E0E0",

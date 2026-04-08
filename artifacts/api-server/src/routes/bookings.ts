@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
+import { upsertClientFromBooking } from "./clients";
 
 const router = Router();
 
@@ -94,6 +95,14 @@ router.post("/bookings", async (req, res) => {
       ],
     );
     const result = await pool.query("SELECT * FROM bookings WHERE id=$1", [id]);
+    // Auto-upsert client profile (fire-and-forget, non-blocking)
+    upsertClientFromBooking({
+      name: b.clientName,
+      email: b.clientEmail ?? "",
+      phone: b.clientPhone ?? "",
+      date: b.date,
+      source: b.source ?? "Website",
+    }).catch(() => {});
     return res.status(201).json(rowToBooking(result.rows[0]));
   } catch (err) {
     console.error("POST /api/bookings", err);

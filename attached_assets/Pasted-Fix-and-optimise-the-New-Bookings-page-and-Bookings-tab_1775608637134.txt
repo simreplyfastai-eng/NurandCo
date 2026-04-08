@@ -1,0 +1,142 @@
+Fix and optimise the New Bookings page and Bookings 
+table in portal.html. Targeted fixes only.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+NEW BOOKINGS PAGE
+━━━━━━━━━━━━━━━━━━━━━━━━
+PAGE HEADER:
+- "New Bookings" title left — Cormorant Garamond 
+  26px #111111
+- "+ New Booking" button right — gold filled, 
+  white text, Inter 12px bold, border-radius 20px, 
+  padding 8px 16px
+- On mobile: both on same row, button stays right
+
+FILTER TABS:
+- All | Pending | Confirmed | Complete | Cancelled
+- Currently tabs are too large and spaced apart
+- Make compact: Inter 12px, padding 6px 14px, 
+  border-radius 20px, background #F5F5F5 default
+- Active: background #111111 color white
+- Gap between tabs: 6px
+- On mobile: horizontally scrollable row, 
+  scrollbar hidden, no wrapping
+
+TABLE — FULL REBUILD:
+Current issues: client name getting cut off, 
+too many columns on mobile, horizontal scroll visible
+
+Column structure desktop:
+DATE | CLIENT | TREATMENT | PRICE | DEPOSIT | 
+STATUS | ACTIONS
+Widths: 16% | 18% | 22% | 10% | 12% | 12% | 10%
+
+Column structure mobile (under 650px):
+Hide TREATMENT and DEPOSIT columns
+DATE | CLIENT | PRICE | STATUS | ACTIONS
+Widths: 20% | 28% | 16% | 20% | 16%
+
+TABLE STYLING:
+- table-layout: fixed, width: 100%
+- overflow-x: hidden on wrapper
+- Column headers: Inter 10px bold #AAAAAA uppercase 
+  letter-spacing 1px, padding 10px 12px, 
+  background #FAFAFA, border-bottom 1px solid #F0F0F0
+- Row height: 56px
+- Row border-bottom: 1px solid #F5F5F5
+- Row hover: background #FAFAFA
+- All cells: padding 0 12px, vertical-align middle
+  overflow hidden, text-overflow ellipsis, 
+  white-space nowrap
+
+DATE cell:
+- Line 1: "24 Apr" Inter 12px bold #111111
+- Line 2: "13:30" Inter 11px #AAAAAA
+- white-space: normal, line-height 1.4
+
+CLIENT cell:
+- Inter 13px bold #111111
+- Single line, truncated with ellipsis
+
+TREATMENT cell (desktop only):
+- Inter 12px #888888, truncated
+
+PRICE cell:
+- Inter 13px bold #C9A96E
+
+DEPOSIT cell (desktop only):
+- If paid: "✓ Paid" — green tick + Inter 12px 
+  #2D6A4F, no background
+- If unpaid: "Unpaid" — Inter 12px #C1121F
+
+STATUS cell:
+- Pill badges only:
+  Pending: #FFF3E0 bg, #C9A96E text
+  Confirmed: #E8F4FD bg, #1A6EA8 text  
+  Complete: #D8F3DC bg, #2D6A4F text
+  Cancelled: #FFE5E5 bg, #C1121F text
+  Inter 11px bold, border-radius 20px, 
+  padding 3px 10px
+
+ACTIONS cell:
+- Desktop: "Edit" button + "Mark Paid" button 
+  side by side
+  Edit: border 1px solid #E0E0E0, color #888888,
+  Inter 11px, border-radius 20px, padding 3px 10px
+  Mark Paid: only show on Pending rows
+  border 1px solid #C9A96E, color #C9A96E,
+  Inter 11px, border-radius 20px, padding 3px 10px
+- Mobile: "Edit" icon only — pencil ✏ gold, 
+  28px × 28px touch target, no text
+
+DUPLICATE CLIENTS FIX:
+- "Test Client" appears twice with same treatment 
+  and time — these are duplicates from testing
+- Add a deduplication check: when a new booking 
+  is created, if a booking already exists with 
+  the same clientName + treatment + date + time 
+  do not create a duplicate, show an error instead:
+  "A booking for this client at this time already 
+  exists"
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+DASHBOARD — VIEW ALL LINK
+━━━━━━━━━━━━━━━━━━━━━━━━
+The "View all →" link on Recent Bookings card 
+on the dashboard must navigate to the New 
+Bookings page — not the Schedule page.
+Fix the onclick to: showPage('bookings')
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+SIDEBAR NAV
+━━━━━━━━━━━━━━━━━━━━━━━━
+Add "New Bookings" as a nav item in the sidebar 
+under OVERVIEW, below Schedule.
+Icon: bookmark or list icon
+Show a gold badge with the count of Pending 
+bookings next to it — updates live from API.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+CLIENT DEDUPLICATION
+━━━━━━━━━━━━━━━━━━━━━━━━
+When a booking comes in from the main website:
+1. Check if a client with the same email already 
+   exists in the clients DB
+2. If yes: add the booking to their existing 
+   profile — do not create a new client entry
+3. If no: create a new client profile with their 
+   name and email, then attach the booking
+4. This applies to both website bookings and 
+   portal-created bookings
+5. All client matching is done by email address 
+   as the unique identifier — not name
+6. All client data saves to Replit DB cloud — 
+   not localStorage
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+GENERAL MOBILE
+━━━━━━━━━━━━━━━━━━━━━━━━
+- padding-bottom: 100px on bookings page container
+- Zero horizontal scroll at 375px viewport
+- All touch targets minimum 44px height
+- box-sizing: border-box on all elements

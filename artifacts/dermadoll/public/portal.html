@@ -1212,6 +1212,102 @@ const BookingAPI = {
 };
 
 // ═══════════════════════════════════════════════════
+// CLIENT API — full CRUD + deduplication via PostgreSQL
+// ═══════════════════════════════════════════════════
+const ClientAPI = {
+  BASE: '/api/clients',
+
+  async init() {
+    try {
+      const r = await fetch(this.BASE);
+      if (!r.ok) return false;
+      const clients = await r.json();
+      if (clients.length > 0) {
+        localStorage.setItem('dd_clients', JSON.stringify(clients));
+        return true;
+      }
+      // API empty — migrate local data to cloud
+      const local = getClients();
+      if (local.length > 0) {
+        await fetch(`${this.BASE}/bulk`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(local)
+        });
+        // Re-fetch to get deduplicated result back
+        const r2 = await fetch(this.BASE);
+        if (r2.ok) { const c2=await r2.json(); localStorage.setItem('dd_clients',JSON.stringify(c2)); }
+        return true;
+      }
+      return false;
+    } catch(e) {
+      console.warn('ClientAPI.init failed — using local cache', e);
+      return false;
+    }
+  },
+
+  async upsert(client) {
+    try {
+      const r = await fetch(this.BASE, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(client)
+      });
+      if (!r.ok) throw new Error('API error');
+      const saved = await r.json();
+      // Refresh local cache from API to reflect any merge
+      const all = await fetch(this.BASE).then(x=>x.json()).catch(()=>null);
+      if (all) localStorage.setItem('dd_clients', JSON.stringify(all));
+      return saved;
+    } catch(e) {
+      console.warn('ClientAPI.upsert failed', e);
+      // Local fallback — deduplicate by name
+      const all = getClients();
+      const exists = all.find(c => c.name.toLowerCase() === client.name.toLowerCase()
+        || (client.email && c.email && c.email.toLowerCase() === client.email.toLowerCase())
+        || (client.phone && c.phone && c.phone === client.phone));
+      if (!exists) { all.push(client); localStorage.setItem('dd_clients', JSON.stringify(all)); }
+      return client;
+    }
+  },
+
+  async update(id, changes) {
+    try {
+      const r = await fetch(`${this.BASE}/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(changes)
+      });
+      if (!r.ok) throw new Error('API error');
+      const updated = await r.json();
+      const all = getClients();
+      const i = all.findIndex(c => c.id === id);
+      if (i > -1) all[i] = {...all[i], ...updated};
+      localStorage.setItem('dd_clients', JSON.stringify(all));
+      return updated;
+    } catch(e) {
+      console.warn('ClientAPI.update failed', e);
+      const all = getClients();
+      const i = all.findIndex(c => c.id === id);
+      if (i > -1) { all[i] = {...all[i], ...changes}; localStorage.setItem('dd_clients', JSON.stringify(all)); }
+    }
+  },
+
+  async delete(id) {
+    try {
+      await fetch(`${this.BASE}/${id}`, {method:'DELETE'});
+    } catch(e) { console.warn('ClientAPI.delete failed', e); }
+    const all = getClients().filter(c => c.id !== id);
+    localStorage.setItem('dd_clients', JSON.stringify(all));
+  },
+
+  async clearAll() {
+    try { await fetch(this.BASE, {method:'DELETE'}); } catch(e) { console.warn('ClientAPI.clearAll failed', e); }
+    localStorage.setItem('dd_clients', JSON.stringify([]));
+  }
+};
+
+// ═══════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════
 function doLogin(){
@@ -1244,6 +1340,7 @@ function showPortal(){
   CloudStore.init().then(async ()=>{
     // Load bookings from API into local cache
     const hasAPIData = await BookingAPI.init();
+    await ClientAPI.init();
     if (!hasAPIData) initSampleData();
     buildTreatmentSelect();
     renderMedia();
@@ -1847,12 +1944,8 @@ async function saveBooking(){
     await BookingAPI.update(editingBookingId, booking);
   } else {
     await BookingAPI.create(booking);
-    // Auto-add client if new
-    const clients=getClients();
-    if(!clients.find(c=>c.name.toLowerCase()===clientName.toLowerCase())){
-      clients.push({id:uid(),name:clientName,email:'',phone:'',joinDate:date,notes:'',source:'Portal'});
-      saveClients(clients);
-    }
+    // Upsert client — deduplicates by email/phone on the server
+    await ClientAPI.upsert({id:uid(),name:clientName,email:'',phone:'',joinDate:date,notes:'',source:'Portal'});
   }
   closeBookingModal();
   updateSidebarBadges();
@@ -1954,9 +2047,12 @@ function openClientPanel(id){
 function closeClientPanel(){document.getElementById('client-panel').classList.remove('open')}
 
 function saveClientNote(id){
-  const clients=getClients();
-  const c=clients.find(x=>x.id===id);
-  if(c){c.notes=document.getElementById('cp-notes').value;saveClients(clients);}
+  const notes=document.getElementById('cp-notes').value;
+  ClientAPI.update(id,{notes}).then(()=>{
+    const clients=getClients();
+    const c=clients.find(x=>x.id===id);
+    if(c){c.notes=notes;localStorage.setItem('dd_clients',JSON.stringify(clients));}
+  });
 }
 
 function openAddClientModal(){
@@ -1968,19 +2064,18 @@ function openAddClientModal(){
 }
 function closeClientModal(){document.getElementById('client-modal').classList.remove('open')}
 
-function saveClient(){
+async function saveClient(){
   const name=document.getElementById('cm-name').value.trim();
   if(!name){alert('Please enter a client name');return}
-  const clients=getClients();
-  clients.push({
+  const client={
     id:uid(),name,
-    email:document.getElementById('cm-email').value,
-    phone:document.getElementById('cm-phone').value,
+    email:document.getElementById('cm-email').value.trim(),
+    phone:document.getElementById('cm-phone').value.trim(),
     joinDate:fmt(new Date()),
     notes:document.getElementById('cm-notes').value,
     source:document.getElementById('cm-source').value
-  });
-  saveClients(clients);
+  };
+  await ClientAPI.upsert(client);
   closeClientModal();
   renderClients();
 }
@@ -2714,6 +2809,7 @@ async function resetPortal(){
   const conf=prompt('Type CONFIRM to reset all portal data:');
   if(conf==='CONFIRM'){
     await BookingAPI.clearAll();
+    await ClientAPI.clearAll();
     ['dd_bookings','dd_clients','dd_settings','dd_treatment_overrides','dd_video_labels'].forEach(k=>localStorage.removeItem(k));
     location.reload();
   }
