@@ -122,10 +122,12 @@ export default function Hero() {
             View Treatments
           </a>
           <a
-            href="https://facesconsent.com"
-            target="_blank"
-            rel="noopener noreferrer"
+            href="#treatments"
             className="w-full sm:w-auto border border-white text-white px-8 py-4 md:px-10 rounded-full text-sm md:text-[13px] uppercase tracking-wider md:tracking-[2px] font-medium hover:bg-white hover:text-black transition-all duration-300"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById("treatments")?.scrollIntoView({ behavior: "smooth" });
+            }}
           >
             Book a Consultation
           </a>

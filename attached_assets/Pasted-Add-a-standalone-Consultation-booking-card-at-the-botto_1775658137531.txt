@@ -1,0 +1,258 @@
+Add a standalone Consultation booking 
+card at the bottom of the Treatments 
+section on index.html, below all the 
+treatment accordion categories.
+
+CONSULTATION CARD DESIGN:
+Separate card that stands out from 
+the accordion sections above.
+Full width, max-width same as the 
+treatments container.
+
+Card styling:
+- Background: #111111 (dark, premium)
+- Border-radius: 16px
+- Padding: 40px on desktop, 24px mobile
+- Border: 1px solid #C9A96E
+
+Left side content:
+- Small gold label above heading:
+  "NOT SURE WHERE TO START?"
+  Inter 10px #C9A96E uppercase 
+  letter-spacing 2px, margin-bottom 12px
+
+- Heading: "Book a Consultation"
+  Cormorant Garamond 32px white bold
+
+- Body text below:
+  "Unsure which treatment is right 
+  for you? Book a 15-minute consultation 
+  with Niamh and get expert advice 
+  tailored to your skin and goals."
+  Inter 14px rgba(255,255,255,0.7) 
+  line-height 1.7, margin-top 12px
+
+- Bullet points below in white:
+  ✓ 15 minutes with Niamh
+  ✓ Personalised treatment advice
+  ✓ £25 consultation fee — redeemable 
+    against your treatment on the day
+  Inter 13px rgba(255,255,255,0.85)
+  Gold ✓ checkmarks (#C9A96E)
+  margin-top 20px, gap 10px between points
+
+Right side:
+- Price display:
+  "£25" in Cormorant Garamond 64px 
+  #C9A96E bold
+  "consultation fee" below in Inter 
+  12px rgba(255,255,255,0.5) 
+  uppercase letter-spacing 2px
+  "Redeemable against your treatment" 
+  in Inter 11px #C9A96E italic below that
+
+- "Book Now" button below price:
+  Background: #C9A96E
+  Color: white
+  Inter 13px bold, letter-spacing 2px
+  Border-radius: 8px
+  Padding: 16px 40px
+  Width: full width on mobile
+  Hover: background #B8934A
+
+LAYOUT:
+Desktop: two column flex row
+  Left content 60%, right price+button 40%
+Mobile: stack vertically
+  Content top, price and button bottom
+  Price centres on mobile
+
+BOOKING MODAL — CLIENT DETAILS:
+When "Book Now" is clicked on the 
+consultation card, open the booking 
+modal with a full client details form.
+
+The modal must collect ALL of these 
+fields before showing the calendar:
+
+STEP 1 — CLIENT DETAILS:
+- Full name (required)
+  Placeholder: "Your full name"
+- Email address (required, validated)
+  Placeholder: "your@email.com"
+- Phone number (required, UK format)
+  Placeholder: "07XXXXXXXXX"
+- Date of birth (required)
+  Placeholder: "DD/MM/YYYY"
+  Note below field: "Required for 
+  treatment records"
+- Any skin concerns or goals (optional)
+  Textarea, 3 rows
+  Placeholder: "e.g. fine lines, 
+  acne scarring, lip enhancement..."
+  Label: "What would you like to 
+  discuss? (optional)"
+
+All fields validated before 
+proceeding to Step 2.
+Red error text below each invalid field.
+
+STEP 2 — DATE & TIME PICKER:
+Same branded calendar as regular 
+bookings. Fetches availability from 
+GET /api/availability fresh.
+15 minute slot duration + 15 min buffer.
+Available days: Tue-Thu 10-19, 
+Fri 09-16, Sat 09-14.
+
+STEP 3 — PAYMENT SUMMARY:
+Show client details summary:
+Name: [name]
+Email: [email]
+Phone: [phone]
+
+Treatment: Consultation
+Date: [date]
+Time: [time]
+Duration: 15 minutes
+
+Payment: £25 (paid in full)
+"Your £25 is redeemable against 
+any treatment booked on the day"
+
+Then Stripe payment form below.
+
+PAYMENT LOGIC:
+Consultation is NOT subject to 
+the 50% deposit rule.
+Full £25 paid upfront via Stripe.
+Stripe PaymentIntent amount: 2500 pence.
+
+In the booking POST body send:
+- clientName: full name
+- clientEmail: email
+- clientPhone: phone
+- clientDOB: date of birth
+- clientNotes: skin concerns/goals
+- treatment: "Consultation"
+- price: 25
+- deposit: 25
+- depositPaid: true
+- balancePaid: true
+- duration_minutes: 15
+- category: "Consultation"
+- source: "Website"
+
+BACKEND — SAVE ALL CLIENT DETAILS:
+In POST /api/bookings when treatment 
+is "Consultation":
+Save all the above fields.
+
+In the clients table, upsert the 
+client record with:
+- name
+- email  
+- phone
+- date_of_birth (add this column 
+  if it doesn't exist)
+- notes (skin concerns from the form)
+
+The client record must be created 
+or updated with ALL details captured 
+from the consultation form.
+Deduplicate by email as normal.
+
+SUCCESS SCREEN:
+"Consultation Confirmed! ✓
+
+Name: [name]
+Date: [date]
+Time: [time]
+Duration: 15 minutes
+Paid in full: £25 ✓
+
+Your £25 will be redeemable against 
+any treatment you book on the day.
+
+A confirmation has been sent to [email]
+
+See you soon!
+Instagram: @dermadollaesthetics
+WhatsApp: [number from settings]"
+
+CONFIRMATION EMAIL TO CLIENT:
+Subject: "Consultation Confirmed — 
+Dermadoll Aesthetics"
+
+Body:
+Hi [first name],
+
+Your consultation is confirmed!
+
+Date: [date]
+Time: [time]
+Duration: 15 minutes
+Location: Birmingham | Solihull
+  (exact address sent on confirmation)
+
+Paid in full: £25 ✓
+Your £25 is redeemable against any 
+treatment booked on the day.
+
+We look forward to meeting you and 
+helping you achieve your skin goals.
+
+Instagram: @dermadollaesthetics
+WhatsApp: [number from settings]
+
+The Dermadoll Aesthetics Team
+
+ADMIN NOTIFICATION EMAIL:
+Subject: "New Consultation — 
+[Name] — [Date] at [Time]"
+
+Body:
+New consultation booking:
+
+Name: [full name]
+Email: [email]
+Phone: [phone]
+DOB: [date of birth]
+Skin concerns: [notes if provided]
+Date: [date]
+Time: [time]
+Paid: £25 ✓
+
+PORTAL — NEW BOOKINGS PAGE:
+Consultation bookings appear in the 
+same list as regular bookings.
+Status pill: soft blue background 
+#E8F4FD, blue text #1A6EA8
+labelled "Consultation" not "Pending"
+so Niamh can spot them instantly.
+
+In the booking detail/edit modal 
+in the portal, show the extra fields:
+- Date of birth
+- Skin concerns / goals
+These appear as read-only info fields 
+below the standard booking details.
+
+PORTAL — CLIENTS PAGE:
+When Niamh clicks on a client who 
+came through a consultation booking,
+their profile shows:
+- Date of birth
+- Skin concerns noted at consultation
+These appear as additional fields 
+in the client profile panel.
+
+FINANCE:
+Consultation revenue tracked under 
+category "Consultation" in the 
+Revenue by Treatment chart on dashboard.
+
+Do not change any existing treatment 
+accordion or booking flow.
+Do not change any other sections.
+Do not change mobile nav or hero.

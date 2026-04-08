@@ -197,6 +197,91 @@ export async function sendAdminNotificationEmail(params: {
   }
 }
 
+export async function sendConsultationConfirmationEmail(params: {
+  clientEmail: string;
+  clientName: string;
+  date: string;
+  time: string;
+  whatsapp: string;
+}): Promise<void> {
+  const resend = getResend();
+  if (!resend || !params.clientEmail) return;
+  const firstName = params.clientName.split(" ")[0] ?? params.clientName;
+  const dateStr = params.date ? fmtDateLong(params.date) : "to be confirmed";
+  const timeStr = params.time || "to be confirmed";
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: params.clientEmail,
+      subject: "Consultation Confirmed — Dermadoll Aesthetics",
+      html: `
+        <div style="font-family:Inter,Arial,sans-serif;max-width:540px;margin:0 auto;color:#111">
+          <div style="border-bottom:2px solid #C9A96E;padding-bottom:16px;margin-bottom:24px">
+            <h2 style="font-family:Georgia,serif;color:#111;margin:0;font-size:22px">Dermadoll Aesthetics</h2>
+          </div>
+          <p>Hi ${firstName},</p>
+          <p>Your consultation is confirmed!</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0" cellpadding="8">
+            <tr style="border-bottom:1px solid #eee"><td style="color:#888;width:40%">Date</td><td><strong>${dateStr}</strong></td></tr>
+            <tr style="border-bottom:1px solid #eee"><td style="color:#888">Time</td><td><strong>${timeStr}</strong></td></tr>
+            <tr style="border-bottom:1px solid #eee"><td style="color:#888">Duration</td><td>15 minutes</td></tr>
+            <tr style="border-bottom:1px solid #eee"><td style="color:#888">Location</td><td>Birmingham | Solihull<br/><span style="color:#888;font-size:12px">(Exact address sent on confirmation)</span></td></tr>
+          </table>
+          <div style="background:#FEFDFB;border:1px solid rgba(201,169,110,0.3);border-radius:8px;padding:16px;margin:20px 0">
+            <p style="margin:0 0 8px;font-weight:600">Payment</p>
+            <p style="margin:4px 0"><strong style="color:#2D6A4F">✓ Paid in full: £25</strong></p>
+            <p style="margin:8px 0 0;font-size:13px;color:#888;font-style:italic">Your £25 is redeemable against any treatment booked on the day.</p>
+          </div>
+          <p>We look forward to meeting you and helping you achieve your skin goals.</p>
+          <p>Instagram: <strong>${INSTAGRAM}</strong><br/>WhatsApp: <strong>${params.whatsapp || "available on request"}</strong></p>
+          <p>See you soon!</p>
+          <p style="color:#888;font-size:13px">The Dermadoll Aesthetics Team</p>
+        </div>
+      `,
+    });
+  } catch (err) {
+    console.error("sendConsultationConfirmationEmail error", err);
+  }
+}
+
+export async function sendConsultationAdminEmail(params: {
+  adminEmail: string;
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  clientDOB: string;
+  clientNotes: string;
+  date: string;
+  time: string;
+}): Promise<void> {
+  const resend = getResend();
+  if (!resend || !params.adminEmail) return;
+  const dateDisp = params.date ? fmtDateUK(params.date) : "TBC";
+  const timeDisp = params.time || "TBC";
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: params.adminEmail,
+      subject: `New Consultation — ${params.clientName} — ${dateDisp} at ${timeDisp}`,
+      html: `
+        <p><strong>New consultation booking:</strong></p>
+        <table cellpadding="4">
+          <tr><td>Name</td><td>${params.clientName}</td></tr>
+          <tr><td>Email</td><td>${params.clientEmail || "—"}</td></tr>
+          <tr><td>Phone</td><td>${params.clientPhone || "—"}</td></tr>
+          <tr><td>DOB</td><td>${params.clientDOB || "—"}</td></tr>
+          <tr><td>Skin concerns</td><td>${params.clientNotes || "—"}</td></tr>
+          <tr><td>Date</td><td>${dateDisp}</td></tr>
+          <tr><td>Time</td><td>${timeDisp}</td></tr>
+          <tr><td>Paid</td><td><strong style="color:#2D6A4F">£25 ✓</strong></td></tr>
+        </table>
+      `,
+    });
+  } catch (err) {
+    console.error("sendConsultationAdminEmail error", err);
+  }
+}
+
 export async function sendEnquiryEmails(params: {
   adminEmail: string;
   name: string;

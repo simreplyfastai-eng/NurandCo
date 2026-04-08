@@ -2,7 +2,7 @@ import { Router } from "express";
 import { pool } from "@workspace/db";
 import { upsertClientFromBooking } from "./clients";
 import { getTreatmentDuration, getTreatmentCategory, hasConflict } from "../lib/treatments";
-import { sendCancellationEmail, sendAdminNotificationEmail, sendClientConfirmationEmail } from "../lib/email";
+import { sendCancellationEmail, sendAdminNotificationEmail, sendClientConfirmationEmail, sendConsultationConfirmationEmail, sendConsultationAdminEmail } from "../lib/email";
 
 const router = Router();
 
@@ -15,6 +15,8 @@ function rowToBooking(row: Record<string, unknown>) {
     clientName: row.client_name,
     clientEmail: row.client_email ?? "",
     clientPhone: row.client_phone ?? "",
+    clientDOB: row.client_dob ?? "",
+    clientNotes: row.client_notes ?? "",
     treatment: row.treatment,
     category: row.category ?? "",
     price: row.price ?? 0,
@@ -170,6 +172,8 @@ router.post("/bookings", async (req, res) => {
       }
     }
 
+    const isConsultation = category === "Consultation" || b.treatment === "Consultation";
+
     // Resolve / upsert the client
     const clientId = await upsertClientFromBooking({
       name: b.clientName,
@@ -177,20 +181,25 @@ router.post("/bookings", async (req, res) => {
       phone: b.clientPhone ?? "",
       date: b.date,
       source: b.source ?? "Website",
+      dob: b.clientDOB ?? "",
+      notes: isConsultation ? (b.clientNotes ?? "") : "",
     });
 
     await pool.query(
       `INSERT INTO bookings
         (id,client_id,client_name,client_email,client_phone,treatment,category,price,deposit,
          deposit_paid,balance_paid,date,time,status,payment_method,
-         stripe_payment_id,notes,created_at,source,duration_minutes,reminder_sent)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
+         stripe_payment_id,notes,created_at,source,duration_minutes,reminder_sent,
+         client_dob,client_notes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)
        ON CONFLICT (id) DO UPDATE SET
         client_id=COALESCE(EXCLUDED.client_id,bookings.client_id),
         client_name=EXCLUDED.client_name,treatment=EXCLUDED.treatment,
         category=EXCLUDED.category,price=EXCLUDED.price,deposit=EXCLUDED.deposit,
         date=EXCLUDED.date,time=EXCLUDED.time,status=EXCLUDED.status,
-        notes=EXCLUDED.notes,duration_minutes=EXCLUDED.duration_minutes`,
+        notes=EXCLUDED.notes,duration_minutes=EXCLUDED.duration_minutes,
+        client_dob=COALESCE(EXCLUDED.client_dob,bookings.client_dob),
+        client_notes=COALESCE(EXCLUDED.client_notes,bookings.client_notes)`,
       [
         id, clientId ?? null, b.clientName, b.clientEmail ?? "", b.clientPhone ?? "",
         b.treatment, category,
@@ -201,6 +210,7 @@ router.post("/bookings", async (req, res) => {
         b.stripePaymentId ?? null, b.notes ?? "",
         b.createdAt ?? Date.now(), b.source ?? "Portal",
         durationMinutes, false,
+        b.clientDOB ?? null, b.clientNotes ?? null,
       ],
     );
 
@@ -209,39 +219,62 @@ router.post("/bookings", async (req, res) => {
 
     const whatsapp = await getWhatsApp();
 
-    // Client confirmation email — only send once Stripe payment is confirmed (depositPaid: true)
-    // Portal bookings without payment: email is sent later via "Confirm Deposit Received"
-    if (b.clientEmail && depositPaid) {
-      sendClientConfirmationEmail({
-        clientEmail: b.clientEmail,
-        clientName: b.clientName,
-        treatment: b.treatment,
-        date: b.date,
-        time: b.time ?? "",
-        durationMinutes,
-        deposit,
-        balance,
-        depositPaid: true,
-        whatsapp,
-      }).catch(() => {});
-    }
-
-    // Admin notification email (non-blocking)
     const adminEmail = process.env.ADMIN_EMAIL ?? "";
-    if (adminEmail) {
-      sendAdminNotificationEmail({
-        adminEmail,
-        clientName: b.clientName,
-        clientEmail: b.clientEmail ?? "",
-        clientPhone: b.clientPhone ?? "",
-        treatment: b.treatment,
-        durationMinutes,
-        date: b.date,
-        time: b.time ?? "",
-        deposit,
-        depositPaid,
-        source: b.source ?? "Portal",
-      }).catch(() => {});
+
+    if (isConsultation) {
+      // Consultation-specific emails
+      if (b.clientEmail && depositPaid) {
+        sendConsultationConfirmationEmail({
+          clientEmail: b.clientEmail,
+          clientName: b.clientName,
+          date: b.date,
+          time: b.time ?? "",
+          whatsapp,
+        }).catch(() => {});
+      }
+      if (adminEmail) {
+        sendConsultationAdminEmail({
+          adminEmail,
+          clientName: b.clientName,
+          clientEmail: b.clientEmail ?? "",
+          clientPhone: b.clientPhone ?? "",
+          clientDOB: b.clientDOB ?? "",
+          clientNotes: b.clientNotes ?? "",
+          date: b.date,
+          time: b.time ?? "",
+        }).catch(() => {});
+      }
+    } else {
+      // Standard booking emails
+      if (b.clientEmail && depositPaid) {
+        sendClientConfirmationEmail({
+          clientEmail: b.clientEmail,
+          clientName: b.clientName,
+          treatment: b.treatment,
+          date: b.date,
+          time: b.time ?? "",
+          durationMinutes,
+          deposit,
+          balance,
+          depositPaid: true,
+          whatsapp,
+        }).catch(() => {});
+      }
+      if (adminEmail) {
+        sendAdminNotificationEmail({
+          adminEmail,
+          clientName: b.clientName,
+          clientEmail: b.clientEmail ?? "",
+          clientPhone: b.clientPhone ?? "",
+          treatment: b.treatment,
+          durationMinutes,
+          date: b.date,
+          time: b.time ?? "",
+          deposit,
+          depositPaid,
+          source: b.source ?? "Portal",
+        }).catch(() => {});
+      }
     }
 
     return res.status(201).json(booking);

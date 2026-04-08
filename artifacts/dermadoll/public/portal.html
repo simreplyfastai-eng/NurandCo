@@ -1127,6 +1127,19 @@ tr:hover td{background:#FDFBF8}
       <label class="form-label">Notes</label>
       <textarea class="form-input" id="bm-notes" rows="2" placeholder="Any notes…"></textarea>
     </div>
+    <div id="bm-consultation-fields" style="display:none;background:#F8F4EF;border-radius:10px;padding:14px 16px;border:1px solid rgba(201,169,110,0.25);margin-top:4px">
+      <p style="font-family:'Inter',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#C9A96E;margin:0 0 12px;font-weight:700">Consultation Details</p>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Date of Birth</label>
+          <input class="form-input" id="bm-client-dob" type="text" placeholder="DD/MM/YYYY" readonly style="background:#fff;cursor:default"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Skin Concerns / Goals</label>
+          <textarea class="form-input" id="bm-client-notes" rows="3" placeholder="—" readonly style="background:#fff;cursor:default;resize:none"></textarea>
+        </div>
+      </div>
+    </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
       <button class="btn-outline" onclick="closeBookingModal()">Cancel</button>
       <button class="btn-gold" onclick="saveBooking()">Save Booking</button>
@@ -1836,6 +1849,7 @@ function kpiCard(label,value,dir,change,page){
   return`<div class="kpi-card${extra}"><div class="kpi-label">${label}</div><div class="kpi-value">${value}</div><div class="kpi-change ${dir}">${change}</div></div>`;
 }
 function statusPill(s){
+  if(s==='Consultation')return`<span class="bk-status-pill" style="background:#E8F4FD;color:#1A6EA8">Consultation</span>`;
   const cls={Confirmed:'pill-green',Pending:'pill-gold',Cancelled:'pill-red',Complete:'pill-grey'}[s]||'pill-grey';
   return`<span class="pill ${cls}">${s}</span>`;
 }
@@ -1890,7 +1904,8 @@ function renderBookings(){
     Pending:'background:#FFF3E0;color:#C9A96E',
     Confirmed:'background:#E8F4FD;color:#1A6EA8',
     Complete:'background:#D8F3DC;color:#2D6A4F',
-    Cancelled:'background:#FFE5E5;color:#C1121F'
+    Cancelled:'background:#FFE5E5;color:#C1121F',
+    Consultation:'background:#E8F4FD;color:#1A6EA8'
   };
   body.innerHTML=list.map(b=>{
     const style=STATUS_STYLE[b.status]||'background:#F5F5F5;color:#888';
@@ -2328,6 +2343,15 @@ function openBookingModal(prefill){
     const timeSel=document.getElementById('bm-time');
     const tOpt=[...timeSel.options].find(o=>o.value===booking.time);
     if(tOpt)timeSel.value=booking.time;
+    // Show consultation extra fields
+    const consultFields=document.getElementById('bm-consultation-fields');
+    if(booking.category==='Consultation'||booking.treatment==='Consultation'){
+      consultFields.style.display='';
+      document.getElementById('bm-client-dob').value=booking.clientDOB||'—';
+      document.getElementById('bm-client-notes').value=booking.clientNotes||'—';
+    } else {
+      consultFields.style.display='none';
+    }
   } else {
     // New booking
     editingBookingId=null;
@@ -2343,6 +2367,7 @@ function openBookingModal(prefill){
     document.getElementById('bm-date').value=fmt(new Date());
     document.getElementById('bm-deposit-group').style.display='none';
     document.getElementById('bm-balance-group').style.display='none';
+    document.getElementById('bm-consultation-fields').style.display='none';
     if(prefill&&typeof prefill==='string'){autofillClientContact(prefill);}
   }
   document.getElementById('booking-modal').classList.add('open');
@@ -2509,7 +2534,9 @@ function openClientPanel(id){
     </div>
     ${c.email?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">✉</span> ${c.email}</div>`:''}
     ${c.phone?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">📞</span> ${c.phone}</div>`:''}
+    ${c.dateOfBirth?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">🎂</span> DOB: ${c.dateOfBirth}</div>`:''}
     <div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">👤</span> ${c.source||'Direct'} · Joined ${formatDate(c.joinDate)}</div>
+    ${(()=>{const cb=bookings.find(b=>b.category==='Consultation'||b.treatment==='Consultation');return cb&&cb.clientNotes?`<div class="cp-meta-row" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="color:#C9A96E;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700">Skin Concerns (Consultation)</span><span style="color:#555;font-size:13px">${cb.clientNotes}</span></div>`:''})()}
     <div class="cp-section-label">Visit History</div>
     ${bookings.map(b=>`<div class="cp-visit-row">
       <div>

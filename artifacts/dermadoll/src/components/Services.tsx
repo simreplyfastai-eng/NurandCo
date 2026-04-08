@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
 import BookingModal from "./BookingModal";
+import ConsultationModal from "./ConsultationModal";
 
 type Treatment = {
   name: string;
@@ -211,9 +212,11 @@ function CategoryDropdown({
 
 export default function Services() {
   const [bookingTreatment, setBookingTreatment] = useState<{ name: string; price: string } | null>(null);
+  const [showConsultation, setShowConsultation] = useState(false);
 
   return (
     <section id="services" className="py-[100px] bg-white">
+      <span id="treatments" style={{ position: "absolute", marginTop: "-80px" }} />
       <div className="container mx-auto px-6 max-w-3xl">
         <div className="text-center mb-20">
           <motion.h2
@@ -247,6 +250,136 @@ export default function Services() {
             />
           ))}
         </div>
+
+        {/* Consultation Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          style={{
+            marginTop: "48px",
+            background: "#111111",
+            borderRadius: "16px",
+            border: "1px solid #C9A96E",
+          }}
+        >
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              gap: "32px",
+              padding: "clamp(24px, 4vw, 40px)",
+            }}
+            className="consultation-card-inner"
+          >
+            {/* Left */}
+            <div style={{ flex: "1 1 60%" }}>
+              <p style={{
+                fontFamily: "Inter, sans-serif",
+                fontSize: "10px",
+                color: "#C9A96E",
+                textTransform: "uppercase",
+                letterSpacing: "2px",
+                marginBottom: "12px",
+              }}>Not sure where to start?</p>
+
+              <h3 style={{
+                fontFamily: "Cormorant Garamond, Georgia, serif",
+                fontSize: "32px",
+                color: "#ffffff",
+                fontWeight: 700,
+                lineHeight: 1.2,
+                margin: 0,
+              }}>Book a Consultation</h3>
+
+              <p style={{
+                fontFamily: "Inter, sans-serif",
+                fontSize: "14px",
+                color: "rgba(255,255,255,0.7)",
+                lineHeight: 1.7,
+                marginTop: "12px",
+              }}>
+                Unsure which treatment is right for you? Book a 15-minute consultation with Niamh and get expert advice tailored to your skin and goals.
+              </p>
+
+              <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
+                {["15 minutes with Niamh", "Personalised treatment advice", "£25 consultation fee — redeemable against your treatment on the day"].map((pt) => (
+                  <div key={pt} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
+                    <span style={{ color: "#C9A96E", fontWeight: 700, flexShrink: 0 }}>✓</span>
+                    <span style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>{pt}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right */}
+            <div style={{ flex: "0 0 auto", textAlign: "center", minWidth: "160px" }} className="consultation-right">
+              <div style={{
+                fontFamily: "Cormorant Garamond, Georgia, serif",
+                fontSize: "64px",
+                color: "#C9A96E",
+                fontWeight: 700,
+                lineHeight: 1,
+              }}>£25</div>
+              <div style={{
+                fontFamily: "Inter, sans-serif",
+                fontSize: "12px",
+                color: "rgba(255,255,255,0.5)",
+                textTransform: "uppercase",
+                letterSpacing: "2px",
+                marginTop: "4px",
+              }}>consultation fee</div>
+              <div style={{
+                fontFamily: "Inter, sans-serif",
+                fontSize: "11px",
+                color: "#C9A96E",
+                fontStyle: "italic",
+                marginTop: "6px",
+              }}>Redeemable against your treatment</div>
+
+              <button
+                onClick={() => setShowConsultation(true)}
+                style={{
+                  marginTop: "20px",
+                  background: "#C9A96E",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "16px 40px",
+                  fontFamily: "Inter, sans-serif",
+                  fontSize: "13px",
+                  fontWeight: 700,
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                  cursor: "pointer",
+                  width: "100%",
+                  transition: "background 0.2s",
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "#B8934A")}
+                onMouseLeave={(e) => (e.currentTarget.style.background = "#C9A96E")}
+              >
+                Book Now
+              </button>
+            </div>
+          </div>
+        </motion.div>
+
+        <style>{`
+          @media (max-width: 600px) {
+            .consultation-card-inner {
+              flex-direction: column !important;
+            }
+            .consultation-right {
+              width: 100% !important;
+              min-width: unset !important;
+            }
+            .consultation-right button {
+              width: 100% !important;
+            }
+          }
+        `}</style>
       </div>
 
       <AnimatePresence>
@@ -255,6 +388,12 @@ export default function Services() {
             treatment={bookingTreatment}
             onClose={() => setBookingTreatment(null)}
           />
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showConsultation && (
+          <ConsultationModal onClose={() => setShowConsultation(false)} />
         )}
       </AnimatePresence>
     </section>

@@ -13,6 +13,7 @@ function rowToClient(row: Record<string, unknown>) {
     notes: row.notes ?? "",
     source: row.source ?? "Website",
     createdAt: Number(row.created_at ?? 0),
+    dateOfBirth: row.date_of_birth ?? "",
   };
 }
 
@@ -216,6 +217,8 @@ export async function upsertClientFromBooking(data: {
   phone: string;
   date: string;
   source: string;
+  dob?: string;
+  notes?: string;
 }): Promise<string | null> {
   if (!data.name) return null;
   const email = data.email.trim().toLowerCase();
@@ -234,7 +237,6 @@ export async function upsertClientFromBooking(data: {
       );
       if (r.rows.length) existing = r.rows[0];
     }
-    // Also try matching by exact name as a last resort (for portal bookings with no email/phone)
     if (!existing && !email && !phone && data.name) {
       const r = await pool.query(
         "SELECT * FROM clients WHERE LOWER(TRIM(name)) = $1 LIMIT 1",
@@ -247,17 +249,18 @@ export async function upsertClientFromBooking(data: {
       await pool.query(
         `UPDATE clients SET
           email = CASE WHEN $2 != '' THEN $2 ELSE email END,
-          phone = CASE WHEN $3 != '' THEN $3 ELSE phone END
+          phone = CASE WHEN $3 != '' THEN $3 ELSE phone END,
+          date_of_birth = CASE WHEN $4 IS NOT NULL AND $4 != '' THEN $4 ELSE date_of_birth END
          WHERE id = $1`,
-        [existing.id, email, phone],
+        [existing.id, email, phone, data.dob ?? null],
       );
       return String(existing.id);
     } else {
       const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       await pool.query(
-        `INSERT INTO clients (id, name, email, phone, join_date, notes, source, created_at)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO NOTHING`,
-        [id, data.name, email, phone, data.date, "", data.source, Date.now()],
+        `INSERT INTO clients (id, name, email, phone, join_date, notes, source, created_at, date_of_birth)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (id) DO NOTHING`,
+        [id, data.name, email, phone, data.date, data.notes ?? "", data.source, Date.now(), data.dob ?? null],
       );
       return id;
     }

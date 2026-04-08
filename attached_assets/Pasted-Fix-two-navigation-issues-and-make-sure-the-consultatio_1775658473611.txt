@@ -1,0 +1,140 @@
+Fix two navigation issues and make sure 
+the consultation card prompt was applied.
+
+1. FIX "BOOK A CONSULTATION" BUTTON 
+IN HERO SECTION:
+The "Book a Consultation" button in 
+the hero is currently linking to an 
+external Faces URL.
+
+Change it to smoothly scroll down to 
+the consultation card at the bottom 
+of the treatments section.
+
+Give the consultation card an id:
+id="consultation"
+
+Change the hero "Book a Consultation" 
+button to:
+onclick="document.getElementById(
+'consultation').scrollIntoView(
+{behavior:'smooth'})"
+
+Remove any href pointing to faces 
+or any external URL on this button.
+
+2. FIX "BOOK NOW" BUTTON IN FOOTER 
+CTA SECTION:
+The "Book Now" button at the bottom 
+of the page is also linking to Faces.
+
+Change it to smoothly scroll up to 
+the treatments section:
+onclick="document.getElementById(
+'treatments').scrollIntoView(
+{behavior:'smooth'})"
+
+Make sure the treatments section 
+has id="treatments" on its container.
+
+Remove any href pointing to faces 
+or any external URL on this button.
+
+3. CHECK CONSULTATION CARD EXISTS:
+Check if the dark consultation card 
+was added at the bottom of the 
+treatments section from the previous 
+prompt.
+
+If it exists: just add id="consultation" 
+to it and leave everything else.
+
+If it does NOT exist: build it now 
+with these exact specs:
+
+Card styling:
+- id="consultation"
+- Background: #111111
+- Border-radius: 16px
+- Padding: 40px desktop, 24px mobile
+- Border: 1px solid #C9A96E
+- margin-top: 48px
+
+Left side (60% desktop, full width mobile):
+- Label: "NOT SURE WHERE TO START?"
+  Inter 10px #C9A96E uppercase 
+  letter-spacing 2px
+- Heading: "Book a Consultation"
+  Cormorant Garamond 32px white bold
+- Body: "Unsure which treatment is 
+  right for you? Book a 15-minute 
+  consultation with Niamh and get 
+  expert advice tailored to your 
+  skin and goals."
+  Inter 14px rgba(255,255,255,0.7)
+- Bullet points:
+  ✓ 15 minutes with Niamh
+  ✓ Personalised treatment advice  
+  ✓ £25 fee — redeemable against 
+    your treatment on the day
+  Gold ✓ marks, white Inter 13px text
+
+Right side (40% desktop, full width mobile):
+- "£25" Cormorant Garamond 64px #C9A96E
+- "consultation fee" Inter 11px 
+  rgba(255,255,255,0.5) uppercase
+- "Redeemable against your treatment"
+  Inter 11px #C9A96E italic
+- "Book Now" button:
+  Background #C9A96E, white text,
+  Inter 13px bold, border-radius 8px,
+  padding 16px 40px, full width mobile
+  onclick opens the booking modal 
+  pre-filled with:
+  treatment: "Consultation"
+  price: 25
+  duration: 15 minutes
+  Full £25 charged upfront via Stripe
+  No 50% deposit split
+  depositPaid: true, balancePaid: true
+
+BOOKING MODAL FOR CONSULTATION:
+Must collect these fields before 
+showing the calendar:
+- Full name (required)
+- Email (required, validated)
+- Phone (required, UK format)
+- Date of birth (required, DD/MM/YYYY)
+- Skin concerns / goals (optional textarea)
+
+Then date and time picker (15 min slots).
+Then payment summary showing £25 full.
+Then Stripe payment form.
+
+On success save to PostgreSQL:
+clientName, clientEmail, clientPhone,
+clientDOB, clientNotes, treatment,
+price: 25, deposit: 25,
+depositPaid: true, balancePaid: true,
+duration_minutes: 15, 
+category: "Consultation"
+
+Send confirmation email to client.
+Send notification email to admin.
+
+4. ALSO FIX — REMOVE ALL REMAINING 
+FACES LINKS:
+Search the entire index.html for any 
+remaining href or link pointing to 
+facesconsent.com or any Faces URL.
+Replace every one with either:
+- A smooth scroll to #treatments
+- A smooth scroll to #consultation
+- Or remove the link entirely if 
+  it is not needed
+
+The only external links allowed on 
+the website are:
+- Instagram (@dermadollaesthetics)
+- WhatsApp number
+Nothing else should link externally.
