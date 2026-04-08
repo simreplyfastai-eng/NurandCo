@@ -113,6 +113,11 @@ tr:hover td{background:#FDFBF8}
 .feed-item:last-child{border-bottom:none}
 .feed-item:hover{background:#FAFAFA}
 .feed-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.feed-time{font-size:12px;color:var(--muted)}
+/* ── MOBILE SHOW/HIDE ───────────────────────────── */
+.date-full{display:inline}.date-mob{display:none}
+.bar-label-full{display:inline}.bar-label-short{display:none}
+#dash-mob-new{display:none}
 
 /* ── CHART ───────────────────────────────────────── */
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px}
@@ -346,9 +351,9 @@ tr:hover td{background:#FDFBF8}
   #sidebar-overlay.open{display:block}
   #mobile-toggle{display:flex}
   #main-content{margin-left:0}
-  .kpi-grid{grid-template-columns:1fr 1fr;gap:10px}
-  .kpi-card{padding:14px}
-  .kpi-value{font-size:26px}
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .kpi-card{padding:12px}
+  .kpi-value{font-size:24px}
   .kpi-label{font-size:10px}
   .kpi-change{font-size:10px}
   .two-col{grid-template-columns:1fr}
@@ -367,6 +372,15 @@ tr:hover td{background:#FDFBF8}
   .modal-box{padding:20px;margin:12px}
   .bar-label{width:80px;font-size:10px}
   .bar-val{font-size:10px}
+  .bar-label-full{display:none}
+  .bar-label-short{display:inline}
+  .date-full{display:none}
+  .date-mob{display:inline}
+  .feed-time{font-size:10px}
+  .feed-item{padding:8px 16px;margin:0;border-radius:0}
+  #today-schedule{padding:12px 16px}
+  #dash-topbar-new{display:none}
+  #dash-mob-new{display:block;width:100%;margin-bottom:12px}
   .timeline-time{font-size:11px;width:40px}
   #revenue-canvas{height:200px!important}
   #finance-month-sel{width:100%!important;max-width:100%!important;font-size:13px}
@@ -479,9 +493,10 @@ tr:hover td{background:#FDFBF8}
         <span class="topbar-title serif">Dashboard</span>
         <input class="topbar-search" placeholder="Search clients, treatments…" oninput="globalSearch(this.value)"/>
         <button class="btn-outline" onclick="exportData()">Export</button>
-        <button class="btn-gold" onclick="openBookingModal()">+ New Booking</button>
+        <button class="btn-gold" id="dash-topbar-new" onclick="openBookingModal()">+ New Booking</button>
       </div>
       <div style="padding:28px">
+        <button class="btn-gold" id="dash-mob-new" onclick="openBookingModal()">+ New Booking</button>
         <div class="kpi-grid" id="kpi-grid"></div>
         <div class="two-col">
           <div>
@@ -1066,7 +1081,7 @@ function renderDashboard(){
     <tr>
       <td><strong>${b.clientName}</strong></td>
       <td>${b.treatment}</td>
-      <td>${formatDate(b.date)}</td>
+      <td><span class="date-full">${formatDate(b.date)}</span><span class="date-mob">${formatDateShort(b.date)}</span></td>
       <td>${statusPill(b.status)}</td>
     </tr>
   `).join('');
@@ -1078,9 +1093,10 @@ function renderDashboard(){
   });
   const maxR=Math.max(...Object.values(catRevenue),1);
   const catLabels={FACE:'Dermal Filler / Botox',SKIN:'Skin Treatments',BODY:'Body',TEETH:'Teeth Whitening'};
+  const catLabelsMob={FACE:'Dermal Filler',SKIN:'Skin',BODY:'Body',TEETH:'Teeth'};
   document.getElementById('revenue-by-treatment').innerHTML=Object.entries(catRevenue).map(([k,v])=>`
     <div class="bar-row">
-      <div class="bar-label">${catLabels[k]||k}</div>
+      <div class="bar-label"><span class="bar-label-full">${catLabels[k]||k}</span><span class="bar-label-short">${catLabelsMob[k]||k}</span></div>
       <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/maxR*100)}%"></div></div>
       <div class="bar-val">£${v}</div>
     </div>
@@ -1104,7 +1120,7 @@ function renderDashboard(){
   const feed=[...bookings].sort((a,b)=>b.createdAt-a.createdAt).slice(0,10);
   document.getElementById('activity-feed').innerHTML=feed.map(b=>{
     const col=b.status==='Confirmed'?'#2e7d32':b.status==='Pending'?'var(--gold)':b.status==='Cancelled'?'#c62828':'#888';
-    return`<div class="feed-item" onclick="openClientByName('${b.clientName.replace(/'/g,"\\'")}')"><div class="feed-dot" style="background:${col}"></div><div><div style="font-weight:500;font-size:12px">${b.status} — ${b.clientName}</div><div style="color:var(--muted);margin-top:2px">${b.treatment} · £${b.price} · ${timeAgo(b.createdAt)}</div></div></div>`;
+    return`<div class="feed-item" onclick="openClientByName('${b.clientName.replace(/'/g,"\\'")}')"><div class="feed-dot" style="background:${col}"></div><div><div style="font-weight:500;font-size:12px">${b.status} — ${b.clientName}</div><div style="color:var(--muted);margin-top:2px">${b.treatment} · £${b.price} · <span class="feed-time">${timeAgo(b.createdAt)}</span></div></div></div>`;
   }).join('');
 }
 
@@ -1117,6 +1133,7 @@ function statusPill(s){
   return`<span class="pill ${cls}">${s}</span>`;
 }
 function formatDate(d){if(!d)return'';const[y,m,day]=d.split('-');const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${parseInt(day)} ${months[parseInt(m)-1]} ${y}`}
+function formatDateShort(d){if(!d)return'';const[,m,day]=d.split('-');const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];return`${parseInt(day)} ${months[parseInt(m)-1]}`}
 function timeAgo(ts){const s=Math.floor((Date.now()-ts)/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago'}
 
 function updateSidebarBadges(){
