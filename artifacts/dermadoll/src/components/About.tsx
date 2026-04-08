@@ -93,13 +93,26 @@ export default function About() {
 
           {/* Text — 60% on desktop */}
           <div className="w-full md:w-3/5 flex items-center justify-center">
-            <p className="text-foreground/80 leading-relaxed text-lg md:text-xl font-light text-center md:text-left">
+            {/* Desktop: single paragraph unchanged */}
+            <p className="hidden md:block text-foreground/80 leading-relaxed text-xl font-light text-left">
               Dermadoll Aesthetics is a premier face clinic dedicated to
               enhancing your natural beauty. Led by Niamh — a skilled,
               experienced practitioner — every treatment is tailored to you,
               combining the latest techniques with a warm, professional
               approach. Your comfort and results are our priority.
             </p>
+            {/* Mobile: 3 short paragraphs */}
+            <div className="md:hidden text-center">
+              <p style={{ fontSize: "15px", lineHeight: "1.7", marginBottom: "16px", color: "#555555" }}>
+                A premier face clinic dedicated to enhancing your natural beauty.
+              </p>
+              <p style={{ fontSize: "15px", lineHeight: "1.7", marginBottom: "16px", color: "#555555" }}>
+                Led by Niamh — every treatment is tailored to you, combining the latest techniques with a warm, professional approach.
+              </p>
+              <p style={{ fontSize: "15px", lineHeight: "1.7", marginBottom: "16px", color: "#555555" }}>
+                Your comfort and results are our priority.
+              </p>
+            </div>
           </div>
         </motion.div>
 
