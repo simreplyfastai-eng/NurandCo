@@ -204,8 +204,8 @@ router.post("/bookings", async (req, res) => {
 
     const whatsapp = await getWhatsApp();
 
-    // Client confirmation email — only send if deposit is already paid (Stripe)
-    // Manual/bank transfer bookings: email is sent later when "Mark Deposit Paid" is clicked
+    // Client confirmation email — only send once Stripe payment is confirmed (depositPaid: true)
+    // Portal bookings without payment: email is sent later via "Confirm Deposit Received"
     if (b.clientEmail && depositPaid) {
       sendClientConfirmationEmail({
         clientEmail: b.clientEmail,

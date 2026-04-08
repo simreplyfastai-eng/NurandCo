@@ -413,6 +413,12 @@ tr:hover td{background:#FDFBF8}
 .settings-row label{font-size:12px;font-weight:500;color:var(--muted);width:140px;flex-shrink:0}
 .settings-row input,.settings-row textarea{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;outline:none}
 .settings-row input:focus,.settings-row textarea:focus{border-color:var(--gold)}
+.checklist-item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:8px;background:#FAFAFA;border:1px solid var(--border)}
+.checklist-item.done{background:#F0FBF4;border-color:#B7E4C7}
+.chk-icon{font-size:15px;margin-top:1px;flex-shrink:0;width:18px;text-align:center}
+.chk-label{font-size:13px;font-weight:500;color:var(--text)}
+.chk-hint{font-size:11px;color:var(--muted);margin-top:1px;line-height:1.5}
+.chk-hint code{background:#eee;padding:1px 4px;border-radius:3px;font-size:10px}
 .danger-btn{padding:9px 20px;border:1px solid #e53935;border-radius:8px;background:transparent;color:#e53935;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;margin-right:10px}
 .danger-btn:hover{background:#fce8e6}
 
@@ -867,25 +873,36 @@ tr:hover td{background:#FDFBF8}
         </div>
 
         <div class="settings-section">
-          <div class="settings-section-header">Payment Settings</div>
+          <div class="settings-section-header">Payment — Stripe Setup</div>
           <div class="settings-body">
             <div class="settings-row">
               <label>Stripe Status</label>
-              <span style="display:inline-flex;align-items:center;gap:8px">
-                <span style="display:inline-block;background:#FFEBEE;color:#C62828;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'Inter',sans-serif;letter-spacing:.3px">NOT CONNECTED</span>
-                <span style="font-size:12px;color:var(--muted)">Setup required before accepting deposits</span>
+              <span id="stripe-status-badge" style="display:inline-flex;align-items:center;gap:8px">
+                <span style="display:inline-block;background:#FFEBEE;color:#C62828;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'Inter',sans-serif;letter-spacing:.3px">CHECKING…</span>
               </span>
             </div>
-            <div class="settings-row">
-              <label>Connect Stripe</label>
+            <div class="settings-row" style="align-items:flex-start">
+              <label>Webhook URL</label>
               <div style="flex:1">
-                <button class="btn-gold" onclick="alert('Stripe integration coming soon. Contact your developer to set up Stripe and start accepting online deposits.')" style="margin-bottom:8px">Connect Stripe Account</button>
-                <div style="font-size:11px;color:var(--muted);line-height:1.6">Once connected, clients will pay a 50% deposit at booking via Stripe. The remaining balance is collected in person. You will receive instant payment notifications.</div>
+                <input type="text" readonly id="stripe-webhook-url" value="/api/stripe/webhook" style="background:#FAFAFA;font-family:monospace;font-size:12px;color:#888;margin-bottom:6px"/>
+                <button class="btn-outline" style="font-size:11px;padding:4px 12px" onclick="navigator.clipboard.writeText(document.getElementById('stripe-webhook-url').value).then(()=>showToast('Copied!'))">Copy</button>
               </div>
             </div>
-            <div class="settings-row">
-              <label>Webhook URL</label>
-              <input type="text" readonly value="/api/stripe/webhook" style="background:#FAFAFA;font-family:monospace;font-size:12px;color:#888"/>
+            <div class="settings-row" style="align-items:flex-start">
+              <label style="padding-top:4px">How to activate</label>
+              <div style="flex:1;font-size:12px;color:var(--muted);line-height:1.9;background:#FAFAFA;border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+                <strong style="color:var(--text);display:block;margin-bottom:8px">To activate online payments:</strong>
+                <ol style="padding-left:18px;margin:0;list-style:decimal">
+                  <li>Go to <a href="https://stripe.com" target="_blank" style="color:#C9A96E">stripe.com</a> and create an account</li>
+                  <li>Copy your <strong>Secret Key</strong> and <strong>Publishable Key</strong> from the Stripe dashboard</li>
+                  <li>Add both to Replit Secrets as <code style="background:#eee;padding:1px 5px;border-radius:3px">STRIPE_SECRET_KEY</code> and <code style="background:#eee;padding:1px 5px;border-radius:3px">STRIPE_PUBLISHABLE_KEY</code></li>
+                  <li>In Stripe, go to <strong>Developers → Webhooks → Add endpoint</strong></li>
+                  <li>Set the endpoint URL to: <code style="background:#eee;padding:1px 5px;border-radius:3px">[your-site-url]/api/stripe/webhook</code></li>
+                  <li>Select event: <strong>payment_intent.succeeded</strong></li>
+                  <li>Copy the <strong>Webhook Secret</strong> and add it as <code style="background:#eee;padding:1px 5px;border-radius:3px">STRIPE_WEBHOOK_SECRET</code></li>
+                  <li>Restart the server — Stripe is now live. No code changes needed.</li>
+                </ol>
+              </div>
             </div>
           </div>
         </div>
@@ -912,14 +929,93 @@ tr:hover td{background:#FDFBF8}
         </div>
 
         <div class="settings-section" style="border-color:#FFF3E0">
-          <div class="settings-section-header" style="color:#E65100">Before Going Live</div>
+          <div class="settings-section-header" style="color:#E65100">Pre-Launch Checklist</div>
           <div class="settings-body">
-            <div class="settings-row" style="align-items:flex-start">
-              <label style="color:#E65100;font-weight:600">Remove Test Data</label>
-              <div style="flex:1">
-                <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6">Remove the fictional sample clients and bookings (Ellisha W., Donna S., Sophie M., etc.) that were created on first login. This will <strong>not</strong> delete your real bookings, treatments, availability or settings.</p>
-                <button class="btn-gold" onclick="clearSampleData()" style="background:#E65100">Remove Test Data Before Going Live</button>
+            <p style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6">Complete all of these before going live. Items refresh automatically.</p>
+
+            <div id="launch-checklist" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
+
+              <div style="font-size:11px;font-weight:700;color:#C9A96E;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Payments</div>
+
+              <div class="checklist-item" id="chk-stripe-secret">
+                <span class="chk-icon">○</span>
+                <div>
+                  <div class="chk-label">Stripe Secret Key added</div>
+                  <div class="chk-hint"><code>STRIPE_SECRET_KEY</code> in Replit Secrets</div>
+                </div>
               </div>
+              <div class="checklist-item" id="chk-stripe-pub">
+                <span class="chk-icon">○</span>
+                <div>
+                  <div class="chk-label">Stripe Publishable Key added</div>
+                  <div class="chk-hint"><code>STRIPE_PUBLISHABLE_KEY</code> in Replit Secrets</div>
+                </div>
+              </div>
+              <div class="checklist-item" id="chk-stripe-webhook">
+                <span class="chk-icon">○</span>
+                <div>
+                  <div class="chk-label">Stripe Webhook Secret added</div>
+                  <div class="chk-hint"><code>STRIPE_WEBHOOK_SECRET</code> in Replit Secrets</div>
+                </div>
+              </div>
+
+              <div style="font-size:11px;font-weight:700;color:#C9A96E;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Email</div>
+
+              <div class="checklist-item" id="chk-resend">
+                <span class="chk-icon">○</span>
+                <div>
+                  <div class="chk-label">Resend API key added</div>
+                  <div class="chk-hint"><code>RESEND_API_KEY</code> in Replit Secrets</div>
+                </div>
+              </div>
+              <div class="checklist-item" id="chk-admin-email">
+                <span class="chk-icon">○</span>
+                <div>
+                  <div class="chk-label">Admin email set</div>
+                  <div class="chk-hint"><code>ADMIN_EMAIL</code> in Replit Secrets — receives booking notifications</div>
+                </div>
+              </div>
+
+              <div style="font-size:11px;font-weight:700;color:#C9A96E;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Settings</div>
+
+              <div class="checklist-item" id="chk-whatsapp">
+                <span class="chk-icon">○</span>
+                <div>
+                  <div class="chk-label">WhatsApp number added</div>
+                  <div class="chk-hint">Add your number in Clinic Info above, then save</div>
+                </div>
+              </div>
+              <div class="checklist-item" id="chk-test-data">
+                <span class="chk-icon">○</span>
+                <div>
+                  <div class="chk-label">Test data cleared</div>
+                  <div class="chk-hint">Remove sample bookings and clients before going live</div>
+                </div>
+              </div>
+              <div class="checklist-item" id="chk-password">
+                <span class="chk-icon">○</span>
+                <div>
+                  <div class="chk-label">Admin password changed from default</div>
+                  <div class="chk-hint">Set a strong password in <code>ADMIN_PASSWORD</code> secret</div>
+                </div>
+              </div>
+
+              <div style="font-size:11px;font-weight:700;color:#C9A96E;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Deployment</div>
+
+              <div class="checklist-item" id="chk-domain">
+                <span class="chk-icon">○</span>
+                <div>
+                  <div class="chk-label">Custom domain connected (optional)</div>
+                  <div class="chk-hint">Connect via Replit Deployments settings</div>
+                </div>
+              </div>
+
+            </div>
+
+            <div style="border-top:1px solid var(--border);padding-top:16px">
+              <label style="color:#E65100;font-weight:600;font-size:13px;display:block;margin-bottom:8px">Remove Test Data</label>
+              <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Remove the fictional sample clients and bookings that were created on first login. This will <strong>not</strong> delete real bookings, treatments, availability or settings.</p>
+              <button class="btn-gold" onclick="clearSampleData()" style="background:#E65100">Remove Test Data</button>
             </div>
           </div>
         </div>
@@ -1581,6 +1677,7 @@ function showPage(id,el,fromKpi){
   if(id==='finance')renderFinance();
   if(id==='enquiries')renderEnquiries();
   if(id==='media')renderMedia();
+  if(id==='settings')loadLaunchChecklist();
   // manage back button visibility
   document.querySelectorAll('.back-to-dash').forEach(b=>b.classList.remove('visible'));
   if(fromKpi){
@@ -2159,7 +2256,8 @@ function openBookingModal(prefill){
     } else {
       const depAmt=Number(booking.deposit||0);
       depStatus.innerHTML=`<span style="color:#888;font-size:13px">Pending: £${depAmt}</span>
-        <button style="padding:5px 14px;border:none;background:#C9A96E;color:#fff;border-radius:6px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markDepositPaidFromModal()">Mark Deposit Paid</button>`;
+        <button style="padding:5px 14px;border:none;background:#C9A96E;color:#fff;border-radius:6px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markDepositPaidFromModal()">Confirm Deposit Received</button>
+        <span style="display:block;font-size:10px;color:#aaa;margin-top:4px;line-height:1.4">Only use if Stripe payment confirmed but booking shows as pending</span>`;
     }
     // Show balance paid row in edit mode
     const balGrp=document.getElementById('bm-balance-group');
@@ -3360,6 +3458,75 @@ async function updateEnquiryBadge(){
     const badge=document.getElementById('sb-enq-badge');
     if(badge){badge.textContent=newCount;badge.style.display=newCount>0?'inline-flex':'none';}
   }catch(e){}
+}
+
+// ═══════════════════════════════════════════════════
+// PRE-LAUNCH CHECKLIST
+// ═══════════════════════════════════════════════════
+async function loadLaunchChecklist(){
+  function setChk(id,done,extra){
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.classList.toggle('done',done);
+    const icon=el.querySelector('.chk-icon');
+    if(icon)icon.textContent=done?'✓':'○';
+    if(icon)icon.style.color=done?'#2D6A4F':'#ccc';
+    if(extra){
+      const hint=el.querySelector('.chk-hint');
+      if(hint)hint.textContent=extra;
+    }
+  }
+
+  // Stripe status badge
+  function setStripeBadge(connected){
+    const badge=document.getElementById('stripe-status-badge');
+    if(!badge)return;
+    if(connected){
+      badge.innerHTML=`<span style="display:inline-block;background:#E8F5E9;color:#2D6A4F;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'Inter',sans-serif;letter-spacing:.3px">CONNECTED</span>`;
+    } else {
+      badge.innerHTML=`<span style="display:inline-block;background:#FFEBEE;color:#C62828;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'Inter',sans-serif;letter-spacing:.3px">NOT CONNECTED</span><span style="font-size:12px;color:var(--muted);margin-left:6px">See setup instructions below</span>`;
+    }
+  }
+
+  try{
+    const res=await fetch('/api/config');
+    const cfg=await res.json();
+
+    const stripeReady=!!(cfg.hasStripeSecretKey&&cfg.hasStripePublishableKey&&cfg.hasStripeWebhookSecret);
+    setStripeBadge(stripeReady);
+
+    setChk('chk-stripe-secret',cfg.hasStripeSecretKey);
+    setChk('chk-stripe-pub',cfg.hasStripePublishableKey);
+    setChk('chk-stripe-webhook',cfg.hasStripeWebhookSecret);
+    setChk('chk-resend',cfg.hasResendKey);
+    setChk('chk-admin-email',cfg.hasAdminEmail);
+    setChk('chk-whatsapp',cfg.hasWhatsapp);
+
+    // Test data: check if sample client names are in the current bookings list
+    const bookings=getBookings();
+    const sampleNames=['Ellisha W','Donna S','Sophie M','Ellisha','Donna','Sophie'];
+    const hasTestData=bookings.some(b=>sampleNames.some(n=>b.clientName&&b.clientName.startsWith(n)));
+    setChk('chk-test-data',!hasTestData,hasTestData?'Sample data still present — use Remove Test Data button below':'No sample data found');
+
+    // Password: can't detect from client side — mark as done if ADMIN_PASSWORD env is set (truthy)
+    // We use a convention: if ADMIN_PASSWORD is non-default, it's considered changed
+    // Since we can't check this from the browser, default to unchecked and prompt the user
+    setChk('chk-password',false,'Cannot verify — ensure ADMIN_PASSWORD secret is changed from default');
+
+    // Domain: can only mark done if not on .replit.dev domain
+    const onReplitDev=window.location.hostname.includes('.replit.dev')||window.location.hostname.includes('.janeway.replit.dev');
+    setChk('chk-domain',!onReplitDev,onReplitDev?'Using Replit preview URL — connect a custom domain via Deployments':'Custom domain detected');
+
+    // Update webhook URL to actual domain
+    const webhookInput=document.getElementById('stripe-webhook-url');
+    if(webhookInput){
+      const baseUrl=window.location.origin.replace('janeway.replit.dev','replit.dev');
+      webhookInput.value=baseUrl+'/api/stripe/webhook';
+    }
+
+  }catch(e){
+    setStripeBadge(false);
+  }
 }
 </script>
 </body>

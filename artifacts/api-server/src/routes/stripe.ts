@@ -30,12 +30,19 @@ async function getWhatsApp(): Promise<string> {
   return "";
 }
 
-// GET /api/config — returns non-sensitive public config for frontend
+// GET /api/config — returns non-sensitive public config for frontend + portal checklist booleans
 router.get("/config", async (_req, res) => {
   const whatsapp = await getWhatsApp();
   return res.json({
     stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY ?? "",
     whatsapp,
+    // Checklist booleans — true/false only, never actual values
+    hasStripeSecretKey: !!process.env.STRIPE_SECRET_KEY,
+    hasStripePublishableKey: !!process.env.STRIPE_PUBLISHABLE_KEY,
+    hasStripeWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
+    hasResendKey: !!process.env.RESEND_API_KEY,
+    hasAdminEmail: !!process.env.ADMIN_EMAIL,
+    hasWhatsapp: !!whatsapp,
   });
 });
 

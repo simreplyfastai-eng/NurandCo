@@ -247,6 +247,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const [paymentLoading, setPaymentLoading] = useState(false);
   const [paymentError, setPaymentError] = useState("");
   const [stripeElementMounted, setStripeElementMounted] = useState(false);
+  const [stripeNotConfigured, setStripeNotConfigured] = useState(false);
   const [whatsapp, setWhatsapp] = useState("");
   const [bookingDuration, setBookingDuration] = useState(30);
 
@@ -339,7 +340,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
         if (!config.stripePublishableKey) {
           if (!cancelled) {
-            setPaymentError("Online payments are not yet configured. Please contact us directly to complete your booking.");
+            setStripeNotConfigured(true);
             setPaymentLoading(false);
           }
           return;
@@ -686,12 +687,12 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
           <motion.div key="step4" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-5">
               <button
-                onClick={() => { setStep(3); setPaymentError(""); }}
+                onClick={() => { setStep(3); setPaymentError(""); setStripeNotConfigured(false); }}
                 className="text-sm hover:opacity-70"
                 style={{ color: "#C9A96E" }}
                 disabled={submitting}
               >← Back</button>
-              <h3 className="font-serif" style={{ fontSize: "20px" }}>Secure Payment</h3>
+              <h3 className="font-serif" style={{ fontSize: "20px" }}>{stripeNotConfigured ? "Get in Touch" : "Secure Payment"}</h3>
             </div>
 
             {/* Booking summary */}
@@ -718,15 +719,69 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
               </div>
             </div>
 
+            {/* Stripe not configured — "Coming soon" contact screen */}
+            {stripeNotConfigured && (
+              <div className="text-center py-4">
+                <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-full" style={{ backgroundColor: "rgba(201,169,110,0.1)" }}>
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                  </svg>
+                </div>
+                <h3 className="font-serif mb-2" style={{ fontSize: "20px" }}>We're getting ready to take bookings!</h3>
+                <p className="text-sm mb-6" style={{ color: "#888", fontFamily: "Inter, sans-serif", lineHeight: "1.65" }}>
+                  Online booking will be available very soon. In the meantime, please contact us to book your appointment:
+                </p>
+                <div className="space-y-3">
+                  <a
+                    href="https://instagram.com/dermadollaesthetics"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 w-full py-3.5 font-medium text-sm transition-all duration-200 hover:opacity-90"
+                    style={{ backgroundColor: "#C9A96E", color: "#fff", borderRadius: "12px", fontFamily: "Inter, sans-serif", textDecoration: "none" }}
+                  >
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                    </svg>
+                    Message on Instagram
+                  </a>
+                  {whatsapp && (
+                    <a
+                      href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-3.5 font-medium text-sm transition-all duration-200 hover:opacity-90"
+                      style={{ backgroundColor: "#25D366", color: "#fff", borderRadius: "12px", fontFamily: "Inter, sans-serif", textDecoration: "none" }}
+                    >
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/>
+                      </svg>
+                      WhatsApp Us
+                    </a>
+                  )}
+                  {!whatsapp && (
+                    <a
+                      href="https://instagram.com/dermadollaesthetics"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full py-3.5 font-medium text-sm transition-all duration-200 hover:opacity-90"
+                      style={{ border: "1px solid #C9A96E", color: "#C9A96E", borderRadius: "12px", fontFamily: "Inter, sans-serif", textDecoration: "none" }}
+                    >
+                      @dermadollaesthetics
+                    </a>
+                  )}
+                </div>
+              </div>
+            )}
+
             {/* Payment error */}
-            {paymentError && (
+            {!stripeNotConfigured && paymentError && (
               <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: "#FFF3F3", color: "#C62828", border: "1px solid #FFCDD2" }}>
                 {paymentError}
               </div>
             )}
 
             {/* Stripe Elements mount point */}
-            {!paymentError && (
+            {!stripeNotConfigured && !paymentError && (
               <>
                 {paymentLoading && (
                   <div className="flex items-center justify-center py-10">
@@ -756,9 +811,11 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
               </>
             )}
 
-            <p className="text-xs text-center mt-4" style={{ color: "#bbb", fontFamily: "Inter, sans-serif" }}>
-              🔒 Payments are processed securely by Stripe. Your card details are never stored.
-            </p>
+            {!stripeNotConfigured && (
+              <p className="text-xs text-center mt-4" style={{ color: "#bbb", fontFamily: "Inter, sans-serif" }}>
+                🔒 Payments are processed securely by Stripe. Your card details are never stored.
+              </p>
+            )}
           </motion.div>
         )}
 
