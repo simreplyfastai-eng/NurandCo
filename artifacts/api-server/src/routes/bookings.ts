@@ -1,24 +1,11 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
-import jwt from "jsonwebtoken";
 import { upsertClientFromBooking } from "./clients";
 import { getTreatmentDuration, getTreatmentCategory, hasConflict } from "../lib/treatments";
 import { sendCancellationEmail, sendAdminNotificationEmail, sendClientConfirmationEmail, sendConsultationConfirmationEmail, sendConsultationAdminEmail } from "../lib/email";
+import { requireAuth } from "../lib/auth";
 
 const router = Router();
-
-function requireAuth(req: import("express").Request, res: import("express").Response): boolean {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret) { res.status(500).json({ error: "Server auth not configured" }); return false; }
-  const auth = req.headers.authorization ?? "";
-  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-  try {
-    const payload = jwt.verify(token, secret) as { role?: string };
-    if (payload?.role === "admin") return true;
-  } catch { /* invalid/expired */ }
-  res.status(401).json({ error: "Unauthorised" });
-  return false;
-}
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -310,8 +297,9 @@ router.post("/bookings", async (req, res) => {
   }
 });
 
-// POST /api/bookings/bulk  — upsert array (portal seeding/sync)
+// POST /api/bookings/bulk  — upsert array (portal seeding/sync) — requires admin JWT
 router.post("/bookings/bulk", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const bookings: unknown[] = req.body;
   if (!Array.isArray(bookings)) return res.status(400).json({ error: "array required" });
   try {
@@ -348,8 +336,9 @@ router.post("/bookings/bulk", async (req, res) => {
   }
 });
 
-// PUT /api/bookings/:id
+// PUT /api/bookings/:id — requires admin JWT
 router.put("/bookings/:id", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const { id } = req.params;
   const b = req.body;
   try {
@@ -444,8 +433,9 @@ router.put("/bookings/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/bookings/:id
+// DELETE /api/bookings/:id — requires admin JWT
 router.delete("/bookings/:id", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   try {
     await pool.query("DELETE FROM bookings WHERE id=$1", [req.params.id]);
     return res.json({ ok: true });
@@ -455,8 +445,9 @@ router.delete("/bookings/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/bookings/sample  — remove seeded test data only
+// DELETE /api/bookings/sample  — remove seeded test data only — requires admin JWT
 router.delete("/bookings/sample", async (_req, res) => {
+  if (!requireAuth(_req, res)) return;
   const SAMPLE_NAMES = ["Ellisha W.", "Donna S.", "Sophie M.", "Chloe R.", "Amara J.", "Priya K.", "Zara T."];
   const placeholders = SAMPLE_NAMES.map((_, i) => `$${i + 1}`).join(",");
   try {

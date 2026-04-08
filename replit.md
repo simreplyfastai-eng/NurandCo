@@ -35,25 +35,49 @@ Express 5 REST API on port 8080. All routes prefixed `/api/`.
 - `POST /api/auth/login` — JWT login (8h session, returns `token` + `expiresAt`)
 - `GET /api/auth/verify` — Validates + refreshes token
 
-**Booking routes:**
-- `GET /api/bookings` — All bookings (runs auto-complete first)
-- `GET /api/bookings/date/:date` — Active bookings for a date with `durationMinutes`
-- `POST /api/bookings` — Create booking (conflict check, duration lookup, admin email)
-- `PUT /api/bookings/:id` — Update (sends cancel email if status→Cancelled)
-- `DELETE /api/bookings/:id` — Delete
-- `DELETE /api/bookings/sample` — Remove seeded test data
+**Booking routes (JWT-protected unless noted):**
+- `GET /api/bookings` — All bookings (runs auto-complete first) [JWT]
+- `GET /api/bookings/date/:date` — Active bookings for a date with `durationMinutes` [public]
+- `POST /api/bookings` — Create booking (conflict check, duration lookup, admin email) [public]
+- `POST /api/bookings/bulk` — Bulk upsert bookings [JWT]
+- `PUT /api/bookings/:id` — Update (sends cancel email if status→Cancelled) [JWT]
+- `DELETE /api/bookings/:id` — Delete [JWT]
+- `DELETE /api/bookings/sample` — Remove seeded test data [JWT]
 
-**Enquiry routes** (protected by JWT auth for GET/PUT):
-- `GET /api/enquiries` — All training enquiries (`{ enquiries: [] }`)
-- `POST /api/enquiries` — Submit training enquiry (rate-limited, sends admin alert + client auto-reply)
-- `PUT /api/enquiries/:id` — Update enquiry status (New/Contacted/Closed)
+**Client routes (all JWT-protected):**
+- `GET /api/clients` — All clients [JWT]
+- `POST /api/clients` — Upsert client by email/phone [JWT]
+- `POST /api/clients/bulk` — Bulk upsert [JWT]
+- `PUT /api/clients/:id` — Update [JWT]
+- `DELETE /api/clients/:id` — Delete [JWT]
+- `DELETE /api/clients` — Clear all [JWT]
+- `DELETE /api/clients/sample` — Remove test data [JWT]
 
-**Other routes:**
-- `GET /api/availability` — Working hours from portal_kv (day-name keys)
+**Enquiry routes:**
+- `GET /api/enquiries` — All training enquiries [JWT]
+- `POST /api/enquiries` — Submit training enquiry (rate-limited) [public]
+- `PUT /api/enquiries/:id` — Update enquiry status [JWT]
+
+**Finance routes (all JWT-protected, always query PostgreSQL directly):**
+- `GET /api/finance/summary?month=YYYY-MM` — Revenue/deposits/balance summary [JWT]
+- `GET /api/finance/monthly?month=YYYY-MM` — Daily revenue chart data [JWT]
+
+**Portal store routes (all JWT-protected):**
+- `GET /api/portal/store?keys=k1,k2` — Bulk fetch portal settings [JWT]
+- `GET /api/portal/store/:key` — Fetch single setting [JWT]
+- `PUT /api/portal/store/:key` — Save setting [JWT]
+
+**Other public routes:**
+- `GET /api/availability` — Working hours from portal_kv (day-name keys) [public]
 - `POST /api/media/upload-url` — Presigned GCS upload URL
 - `GET /api/media/serve?path=` — Serve stored media objects
-- `GET /api/cron/autocomplete` — Mark past Confirmed bookings Complete
-- `GET /api/cron/reminders` — Send 24h reminder emails (set up as scheduled task)
+- `GET /api/cron/autocomplete` — Mark past Confirmed bookings Complete [CRON_SECRET]
+- `GET /api/cron/reminders` — Send 24h reminder emails [CRON_SECRET]
+
+**Shared auth middleware:** `artifacts/api-server/src/lib/auth.ts` — `requireAuth()` verifies JWT with admin role
+
+**Availability defaults (Niamh's schedule):**
+Mon: OFF, Tue–Thu: 10:00–19:00, Fri: 09:00–16:00, Sat: 09:00–14:00, Sun: OFF
 
 ## Database Schema
 

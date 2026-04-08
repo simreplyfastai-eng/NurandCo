@@ -1,0 +1,83 @@
+Fix these 3 issues found in the audit.
+Do not change anything else.
+
+1. MONDAY AVAILABILITY
+Change Monday to OFF in the default 
+availability settings.
+
+Niamh's correct working days are:
+Monday: OFF
+Tuesday: ON 10:00 - 19:00
+Wednesday: ON 10:00 - 19:00
+Thursday: ON 10:00 - 19:00
+Friday: ON 09:00 - 16:00
+Saturday: ON 09:00 - 14:00
+Sunday: OFF
+
+Update the default availability in 
+the backend so these are the defaults 
+if nothing has been saved yet.
+Also update the availability page in 
+the portal to show these correct defaults.
+
+2. MISSING JWT AUTH ON ADMIN ROUTES
+The following routes are unprotected 
+and must require a valid JWT token:
+
+PUT /api/bookings/:id
+DELETE /api/bookings/:id
+GET /api/finance/summary
+GET /api/finance/monthly
+PUT /api/portal/store/:key
+DELETE /api/bookings (all)
+DELETE /api/clients
+DELETE /api/clients/:id
+PUT /api/clients/:id
+POST /api/clients
+GET /api/clients
+
+Add the requireAuth middleware to 
+every one of these routes.
+
+The only routes that should be 
+publicly accessible without auth are:
+POST /api/bookings (website bookings)
+GET /api/bookings/date/:date (slot checking)
+GET /api/availability (booking calendar)
+POST /api/enquiries (training enquiries)
+POST /api/auth/login (login)
+POST /api/stripe/webhook (Stripe)
+GET /api/config/stripe (publishable key)
+GET /api/cron/reminders (protected by CRON_SECRET)
+GET /api/cron/autocomplete (protected by CRON_SECRET)
+
+Everything else requires a valid JWT.
+
+Test after adding auth:
+- Portal still works when logged in
+- All portal pages still load data
+- Unauthenticated requests to protected 
+  routes return 401
+- Login still works correctly
+
+3. LOCALSTORAGE CACHE — CLARIFY
+The dd_bookings localStorage cache 
+is fine to keep for performance.
+
+But add a comment in the code 
+clearly stating:
+// dd_bookings is a read cache only.
+// All writes go directly to PostgreSQL.
+// Cache is refreshed from API on 
+// every portal load and every 30s poll.
+// Never read from cache for 
+// financial calculations.
+// Finance page always queries 
+// PostgreSQL directly.
+
+Make sure the Finance page summary 
+cards and chart NEVER use the 
+localStorage cache — they must always 
+call the API directly.
+Confirm this is already the case 
+and add a comment if so.

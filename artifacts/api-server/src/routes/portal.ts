@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
+import { requireAuth } from "../lib/auth";
 
 const router = Router();
 
-// GET /api/portal/store  — fetch multiple keys at once (?keys=k1,k2,k3)
+// GET /api/portal/store  — fetch multiple keys at once (?keys=k1,k2,k3) — requires admin JWT
 router.get("/portal/store", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const raw = req.query["keys"];
   const keysStr = Array.isArray(raw) ? raw.join(",") : (raw as string || "");
   const keys = keysStr.split(",").filter(Boolean);
@@ -25,8 +27,9 @@ router.get("/portal/store", async (req, res) => {
   }
 });
 
-// GET /api/portal/store/:key
+// GET /api/portal/store/:key — requires admin JWT
 router.get("/portal/store/:key", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const { key } = req.params;
   try {
     const result = await pool.query(
@@ -43,8 +46,9 @@ router.get("/portal/store/:key", async (req, res) => {
   }
 });
 
-// PUT /api/portal/store/:key
+// PUT /api/portal/store/:key — requires admin JWT
 router.put("/portal/store/:key", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const { key } = req.params;
   const { value } = req.body;
   if (value === undefined) {

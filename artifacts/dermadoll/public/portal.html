@@ -870,7 +870,7 @@ tr:hover td{background:#FDFBF8}
             <div class="settings-row"><label>Practitioner</label><input type="text" id="s-practitioner" value="Niamh"/></div>
             <div class="settings-row"><label>Instagram</label><input type="text" id="s-instagram" value="@dermadollaesthetics"/></div>
             <div class="settings-row"><label>WhatsApp</label><input type="text" id="s-whatsapp" placeholder="+44 7…"/></div>
-            <div class="settings-row" style="align-items:flex-start"><label>Working hours</label><div style="font-size:12px;color:var(--muted);line-height:1.8">Tue–Thu: 10:00–19:00<br/>Fri: 09:00–16:00<br/>Sat: 09:00–14:00<br/><em style="font-size:11px">Contact developer to update availability</em></div></div>
+            <div class="settings-row" style="align-items:flex-start"><label>Working hours</label><div style="font-size:12px;color:var(--muted);line-height:1.8">Mon: OFF<br/>Tue–Thu: 10:00–19:00<br/>Fri: 09:00–16:00<br/>Sat: 09:00–14:00<br/>Sun: OFF<br/><em style="font-size:11px">Edit in Availability page</em></div></div>
             <button class="btn-gold" onclick="saveSettings()">Save Changes</button>
           </div>
         </div>
@@ -1266,8 +1266,14 @@ const TREATMENTS = [
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
+// dd_bookings is a read cache only.
+// All writes go directly to PostgreSQL.
+// Cache is refreshed from API on every portal load and every 30s poll.
+// Never read from cache for financial calculations.
+// Finance page always queries PostgreSQL directly.
 function getBookings(){try{const v=JSON.parse(localStorage.getItem('dd_bookings')||'[]');if(Array.isArray(v))return v;localStorage.removeItem('dd_bookings');return[];}catch(e){localStorage.removeItem('dd_bookings');return[];}}
 function saveBookings(b){localStorage.setItem('dd_bookings',JSON.stringify(b));}
+// dd_clients follows the same cache pattern as dd_bookings.
 function getClients(){try{const v=JSON.parse(localStorage.getItem('dd_clients')||'[]');if(Array.isArray(v))return v;localStorage.removeItem('dd_clients');return[];}catch(e){localStorage.removeItem('dd_clients');return[];}}
 function saveClients(c){localStorage.setItem('dd_clients',JSON.stringify(c));}
 function getSettings(){return JSON.parse(localStorage.getItem('dd_settings')||'{}')}
@@ -1323,7 +1329,7 @@ const CloudStore = {
   async init() {
     try {
       const params = this.KEYS.map(k=>'keys='+encodeURIComponent(k)).join('&');
-      const r = await fetch(`${this.BASE}?${params}`);
+      const r = await fetch(`${this.BASE}?${params}`, {headers:authHdr()});
       if (!r.ok) return;
       const data = await r.json();
       this.KEYS.forEach(key => {
@@ -1348,7 +1354,7 @@ const CloudStore = {
     try {
       await fetch(`${this.BASE}/${key}`, {
         method: 'PUT',
-        headers: {'Content-Type':'application/json'},
+        headers: {...authHdr(), 'Content-Type':'application/json'},
         body: JSON.stringify({value})
       });
     } catch(e) {
@@ -1378,7 +1384,7 @@ const BookingAPI = {
       if (local.length > 0) {
         await fetch(`${this.BASE}/bulk`, {
           method: 'POST',
-          headers: {'Content-Type':'application/json'},
+          headers: {...authHdr(), 'Content-Type':'application/json'},
           body: JSON.stringify(local)
         });
         return true;
@@ -1394,7 +1400,7 @@ const BookingAPI = {
     try {
       const r = await fetch(this.BASE, {
         method: 'POST',
-        headers: {'Content-Type':'application/json'},
+        headers: {...authHdr(), 'Content-Type':'application/json'},
         body: JSON.stringify(booking)
       });
       if (!r.ok) throw new Error('API error');
@@ -1416,7 +1422,7 @@ const BookingAPI = {
     try {
       const r = await fetch(`${this.BASE}/${id}`, {
         method: 'PUT',
-        headers: {'Content-Type':'application/json'},
+        headers: {...authHdr(), 'Content-Type':'application/json'},
         body: JSON.stringify(changes)
       });
       if (!r.ok) throw new Error('API error');
@@ -1437,7 +1443,7 @@ const BookingAPI = {
 
   async delete(id) {
     try {
-      await fetch(`${this.BASE}/${id}`, {method: 'DELETE'});
+      await fetch(`${this.BASE}/${id}`, {method: 'DELETE', headers:authHdr()});
       const all = getBookings().filter(b => b.id !== id);
       saveBookings(all);
     } catch(e) {
@@ -1449,7 +1455,7 @@ const BookingAPI = {
   async clearAll() {
     try {
       const all = getBookings();
-      await Promise.all(all.map(b => fetch(`${this.BASE}/${b.id}`, {method:'DELETE'})));
+      await Promise.all(all.map(b => fetch(`${this.BASE}/${b.id}`, {method:'DELETE', headers:authHdr()})));
       saveBookings([]);
     } catch(e) {
       console.warn('BookingAPI.clearAll failed', e);
@@ -1457,20 +1463,22 @@ const BookingAPI = {
     }
   },
 
+  // Finance data always queries PostgreSQL directly via these API calls.
+  // Never uses localStorage cache for financial calculations.
   async getFinanceSummary(month) {
-    const r = await fetch(`/api/finance/summary?month=${month}`);
+    const r = await fetch(`/api/finance/summary?month=${month}`, {headers:authHdr()});
     if (!r.ok) throw new Error('API error');
     return r.json();
   },
 
   async getFinanceMonthly(month) {
-    const r = await fetch(`/api/finance/monthly?month=${month}`);
+    const r = await fetch(`/api/finance/monthly?month=${month}`, {headers:authHdr()});
     if (!r.ok) throw new Error('API error');
     return r.json();
   },
 
   async getByMonth(month) {
-    const r = await fetch(`${this.BASE}?month=${month}`);
+    const r = await fetch(`${this.BASE}?month=${month}`, {headers:authHdr()});
     if (!r.ok) throw new Error('API error');
     return r.json();
   },
@@ -1503,7 +1511,7 @@ const ClientAPI = {
       if (local.length > 0) {
         await fetch(`${this.BASE}/bulk`, {
           method: 'POST',
-          headers: {'Content-Type':'application/json'},
+          headers: {...authHdr(), 'Content-Type':'application/json'},
           body: JSON.stringify(local)
         });
         // Re-fetch to get deduplicated result back
@@ -1522,7 +1530,7 @@ const ClientAPI = {
     try {
       const r = await fetch(this.BASE, {
         method: 'POST',
-        headers: {'Content-Type':'application/json'},
+        headers: {...authHdr(), 'Content-Type':'application/json'},
         body: JSON.stringify(client)
       });
       if (!r.ok) throw new Error('API error');
@@ -1547,7 +1555,7 @@ const ClientAPI = {
     try {
       const r = await fetch(`${this.BASE}/${id}`, {
         method: 'PUT',
-        headers: {'Content-Type':'application/json'},
+        headers: {...authHdr(), 'Content-Type':'application/json'},
         body: JSON.stringify(changes)
       });
       if (!r.ok) throw new Error('API error');
@@ -1567,14 +1575,14 @@ const ClientAPI = {
 
   async delete(id) {
     try {
-      await fetch(`${this.BASE}/${id}`, {method:'DELETE'});
+      await fetch(`${this.BASE}/${id}`, {method:'DELETE', headers:authHdr()});
     } catch(e) { console.warn('ClientAPI.delete failed', e); }
     const all = getClients().filter(c => c.id !== id);
     localStorage.setItem('dd_clients', JSON.stringify(all));
   },
 
   async clearAll() {
-    try { await fetch(this.BASE, {method:'DELETE'}); } catch(e) { console.warn('ClientAPI.clearAll failed', e); }
+    try { await fetch(this.BASE, {method:'DELETE', headers:authHdr()}); } catch(e) { console.warn('ClientAPI.clearAll failed', e); }
     localStorage.setItem('dd_clients', JSON.stringify([]));
   }
 };
@@ -2046,11 +2054,11 @@ const AVAIL_DEFAULT={
   defaults:{
     0:{on:false},
     1:{on:false},
-    2:{on:true,start:'09:00',end:'18:00'},
-    3:{on:true,start:'09:00',end:'18:00'},
-    4:{on:true,start:'09:00',end:'18:00'},
-    5:{on:true,start:'09:00',end:'18:00'},
-    6:{on:true,start:'09:00',end:'18:00'}
+    2:{on:true,start:'10:00',end:'19:00'},
+    3:{on:true,start:'10:00',end:'19:00'},
+    4:{on:true,start:'10:00',end:'19:00'},
+    5:{on:true,start:'09:00',end:'16:00'},
+    6:{on:true,start:'09:00',end:'14:00'}
   },
   overrides:{}
 };

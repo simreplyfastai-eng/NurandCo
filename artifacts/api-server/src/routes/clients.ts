@@ -1,21 +1,8 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
-import jwt from "jsonwebtoken";
+import { requireAuth } from "../lib/auth";
 
 const router = Router();
-
-function requireAuth(req: import("express").Request, res: import("express").Response): boolean {
-  const secret = process.env.SESSION_SECRET;
-  if (!secret) { res.status(500).json({ error: "Server auth not configured" }); return false; }
-  const auth = req.headers.authorization ?? "";
-  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-  try {
-    const payload = jwt.verify(token, secret) as { role?: string };
-    if (payload?.role === "admin") return true;
-  } catch { /* invalid/expired */ }
-  res.status(401).json({ error: "Unauthorised" });
-  return false;
-}
 
 function rowToClient(row: Record<string, unknown>) {
   return {
@@ -45,8 +32,9 @@ router.get("/clients", async (req, res) => {
   }
 });
 
-// POST /api/clients  — upsert by email (if non-empty) or phone (if non-empty), else create new
+// POST /api/clients  — upsert by email (if non-empty) or phone (if non-empty), else create new — requires admin JWT
 router.post("/clients", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const c = req.body;
   if (!c.name) return res.status(400).json({ error: "name required" });
 
@@ -105,8 +93,9 @@ router.post("/clients", async (req, res) => {
   }
 });
 
-// POST /api/clients/bulk  — batch upsert (for portal seeding, runs deduplication)
+// POST /api/clients/bulk  — batch upsert (for portal seeding, runs deduplication) — requires admin JWT
 router.post("/clients/bulk", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const clients: unknown[] = req.body;
   if (!Array.isArray(clients)) return res.status(400).json({ error: "array required" });
   let upserted = 0;
@@ -158,8 +147,9 @@ router.post("/clients/bulk", async (req, res) => {
   }
 });
 
-// PUT /api/clients/:id
+// PUT /api/clients/:id — requires admin JWT
 router.put("/clients/:id", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const { id } = req.params;
   const c = req.body;
   try {
@@ -184,8 +174,9 @@ router.put("/clients/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/clients/:id
+// DELETE /api/clients/:id — requires admin JWT
 router.delete("/clients/:id", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   try {
     await pool.query("DELETE FROM clients WHERE id=$1", [req.params.id]);
     return res.json({ ok: true });
@@ -195,8 +186,9 @@ router.delete("/clients/:id", async (req, res) => {
   }
 });
 
-// DELETE /api/clients/sample  — remove seeded test clients only
+// DELETE /api/clients/sample  — remove seeded test clients only — requires admin JWT
 router.delete("/clients/sample", async (_req, res) => {
+  if (!requireAuth(_req, res)) return;
   const SAMPLE_NAMES = ["Ellisha W.", "Donna S.", "Sophie M.", "Chloe R.", "Amara J.", "Priya K.", "Zara T."];
   const placeholders = SAMPLE_NAMES.map((_, i) => `$${i + 1}`).join(",");
   try {
@@ -211,8 +203,9 @@ router.delete("/clients/sample", async (_req, res) => {
   }
 });
 
-// DELETE /api/clients  — clear all (used by resetPortal)
+// DELETE /api/clients  — clear all (used by resetPortal) — requires admin JWT
 router.delete("/clients", async (_req, res) => {
+  if (!requireAuth(_req, res)) return;
   try {
     await pool.query("DELETE FROM clients");
     return res.json({ ok: true });

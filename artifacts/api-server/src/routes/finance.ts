@@ -1,10 +1,13 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
+import { requireAuth } from "../lib/auth";
 
 const router = Router();
 
-// GET /api/finance/summary?month=YYYY-MM
+// GET /api/finance/summary?month=YYYY-MM — requires admin JWT
+// Finance data always queries PostgreSQL directly — never uses localStorage cache.
 router.get("/finance/summary", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const { month } = req.query as Record<string, string>;
   if (!month || !/^\d{4}-\d{2}$/.test(month)) {
     return res.status(400).json({ error: "month=YYYY-MM required" });
@@ -33,9 +36,11 @@ router.get("/finance/summary", async (req, res) => {
   }
 });
 
-// GET /api/finance/monthly?month=YYYY-MM
+// GET /api/finance/monthly?month=YYYY-MM — requires admin JWT
+// Finance data always queries PostgreSQL directly — never uses localStorage cache.
 // Returns { day: number, revenue: number, cumulative: number }[]
 router.get("/finance/monthly", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const { month } = req.query as Record<string, string>;
   if (!month || !/^\d{4}-\d{2}$/.test(month)) {
     return res.status(400).json({ error: "month=YYYY-MM required" });
