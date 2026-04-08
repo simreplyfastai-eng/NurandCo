@@ -37,6 +37,79 @@ function rowToBooking(row: Record<string, unknown>) {
   };
 }
 
+// Day-index (0=Sun … 6=Sat) → short name used in availability config
+const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
+
+// Availability defaults (mirrors availability.ts — Mon & Sun closed)
+const AVAIL_DEFAULT: Record<string, { on: boolean; start?: string; end?: string }> = {
+  Mon: { on: false },
+  Tue: { on: true, start: "10:00", end: "19:00" },
+  Wed: { on: true, start: "10:00", end: "19:00" },
+  Thu: { on: true, start: "10:00", end: "19:00" },
+  Fri: { on: true, start: "09:00", end: "16:00" },
+  Sat: { on: true, start: "09:00", end: "14:00" },
+  Sun: { on: false },
+};
+
+/**
+ * Checks whether `date` (YYYY-MM-DD) and optional `time` (HH:MM) fall within
+ * the clinic's availability configuration.  On any DB error, returns ok:true
+ * so the conflict check still runs.
+ */
+async function checkAvailability(
+  date: string,
+  time: string,
+): Promise<{ ok: boolean; error?: string; status?: number }> {
+  let defaults: Record<string, { on: boolean; start?: string; end?: string }> = AVAIL_DEFAULT;
+  let overrides: Record<string, { on: boolean; start?: string; end?: string }> = {};
+
+  try {
+    const result = await pool.query(
+      "SELECT value FROM portal_kv WHERE key = 'dd_availability'",
+    );
+    if (result.rows.length) {
+      const raw = result.rows[0].value as {
+        defaults?: Record<string, { on: boolean; start?: string; end?: string }>;
+        overrides?: Record<string, { on: boolean; start?: string; end?: string }>;
+      };
+      // Normalise numeric keys (legacy portal format) to named keys
+      if (raw.defaults) {
+        const firstKey = Object.keys(raw.defaults)[0];
+        if (firstKey !== undefined && /^\d$/.test(firstKey)) {
+          const named: Record<string, { on: boolean; start?: string; end?: string }> = {};
+          for (const [k, v] of Object.entries(raw.defaults)) {
+            const name = DAY_NAMES[Number(k)];
+            if (name) named[name] = v;
+          }
+          defaults = named;
+        } else {
+          defaults = raw.defaults;
+        }
+      }
+      if (raw.overrides) overrides = raw.overrides;
+    }
+  } catch {
+    // Fail open — conflict check still protects against double-bookings
+    return { ok: true };
+  }
+
+  // Override for specific date takes priority over weekly default
+  const dayName = DAY_NAMES[new Date(date).getDay()];
+  const config = overrides[date] ?? defaults[dayName];
+
+  if (!config || !config.on) {
+    return { ok: false, error: "Sorry, we are not available on this day.", status: 400 };
+  }
+
+  if (time && config.start && config.end) {
+    if (time < config.start || time >= config.end) {
+      return { ok: false, error: "Sorry, this time is outside our working hours.", status: 400 };
+    }
+  }
+
+  return { ok: true };
+}
+
 /** Fetch WhatsApp number from settings stored in portal_kv */
 async function getWhatsApp(): Promise<string> {
   try {
@@ -150,6 +223,12 @@ router.post("/bookings", async (req, res) => {
   try {
     // Run autocomplete before inserting
     await runAutoComplete();
+
+    // Server-side availability check — rejects bookings on closed days / outside hours
+    const avail = await checkAvailability(b.date, b.time ?? "");
+    if (!avail.ok) {
+      return res.status(avail.status ?? 400).json({ error: avail.error });
+    }
 
     // Conflict check — fetch all non-cancelled bookings on that date
     if (b.time) {
