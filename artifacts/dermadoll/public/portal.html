@@ -664,7 +664,6 @@ tr:hover td{background:#FDFBF8}
           <button class="cal-new-mobile" onclick="openBookingModal()">+ New Booking</button>
           <div id="cal-day-names"></div>
           <div id="cal-grid"></div>
-          <div id="cal-month-empty" style="display:none;text-align:center;padding:20px 0;color:#AAAAAA;font-size:13px;font-style:italic">No bookings this month</div>
         </div>
         <div class="day-panel" id="day-panel">
           <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;margin-bottom:14px" id="day-panel-title">Select a day</div>
@@ -1956,9 +1955,12 @@ function buildCalendar(){
     cells.push(`<div class="cal-cell other-month"><div class="cal-date">${d}</div></div>`);
   }
   document.getElementById('cal-grid').innerHTML=cells.join('');
+  // Reset day panel to reflect whether this month has any bookings
   const monthBookings=bookings.filter(b=>{const d=new Date(b.date);return d.getFullYear()===y&&d.getMonth()===m&&b.status!=='Cancelled';});
-  const calEmpty=document.getElementById('cal-month-empty');
-  if(calEmpty)calEmpty.style.display=monthBookings.length?'none':'';
+  const dpBody=document.getElementById('day-panel-body');
+  const dpTitle=document.getElementById('day-panel-title');
+  if(dpBody){dpBody.innerHTML=monthBookings.length?'<p class="cal-empty-state">Click a date to see bookings</p>':'<p class="cal-empty-state">No bookings this month</p>';}
+  if(dpTitle)dpTitle.textContent='Select a day';
 }
 
 function changeMonth(dir){
@@ -2442,7 +2444,7 @@ function renderClients(filter){
   const countEl=document.getElementById('client-count');
   if(countEl)countEl.textContent=clients.length;
   if(!clients.length){
-    document.getElementById('client-grid').innerHTML=`<div class="cl-empty"><p style="font-family:'Cormorant Garamond',serif;font-size:20px;color:#111;margin:0 0 8px">No clients yet</p><p class="cl-empty-sub">Clients will appear automatically when they book</p></div>`;
+    document.getElementById('client-grid').innerHTML=`<div class="cl-empty"><div class="cl-empty-title">No clients yet</div><div class="cl-empty-sub">Clients will appear automatically when they book</div></div>`;
     return;
   }
   document.getElementById('client-grid').innerHTML='<div class="client-list">'+clients.map(c=>{
