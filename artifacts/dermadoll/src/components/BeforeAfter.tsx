@@ -181,37 +181,6 @@ export default function BeforeAfter() {
                   (e.currentTarget as HTMLElement).style.borderColor = "#C9A96E";
                 }}
               >
-                {/* BEFORE & AFTER label */}
-                <div
-                  aria-hidden="true"
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    background: "rgba(0,0,0,0.35)",
-                    backdropFilter: "blur(4px)",
-                    WebkitBackdropFilter: "blur(4px)",
-                    borderRadius: "0 0 8px 8px",
-                    padding: "5px 14px",
-                    zIndex: 2,
-                    whiteSpace: "nowrap",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontFamily: "Inter, sans-serif",
-                      fontSize: 9,
-                      color: "#ffffff",
-                      letterSpacing: "2px",
-                      textTransform: "uppercase" as const,
-                      fontWeight: 600,
-                    }}
-                  >
-                    BEFORE &amp; AFTER
-                  </span>
-                </div>
-
                 <div style={{ aspectRatio: "1 / 1", width: "100%", overflow: "hidden" }}>
                   <img
                     src={isLocal(item.src) ? `${import.meta.env.BASE_URL}${item.src}` : item.src}
