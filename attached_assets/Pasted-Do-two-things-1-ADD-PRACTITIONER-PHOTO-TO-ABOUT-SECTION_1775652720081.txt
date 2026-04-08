@@ -1,0 +1,104 @@
+Do two things:
+
+1. ADD PRACTITIONER PHOTO TO ABOUT SECTION
+In the "Meet Dermadoll Aesthetics" section 
+on index.html, add a practitioner photo 
+to the left of the text content.
+
+LAYOUT ON DESKTOP:
+Two column layout side by side:
+- Left column (40%): practitioner photo
+- Right column (60%): existing text content
+
+Photo element:
+- Fetch the practitioner image URL from 
+  GET /api/media/config 
+  Use the field: practitionerImage
+- If no image uploaded yet: show a 
+  placeholder — soft grey (#F5F5F5) 
+  rounded rectangle with a subtle 
+  silhouette icon centred and text 
+  "Photo coming soon" in Inter 13px 
+  #AAAAAA
+- If image exists: show it with 
+  border-radius: 16px, 
+  object-fit: cover,
+  width: 100%,
+  aspect-ratio: 3/4 (portrait)
+- Subtle gold border: 
+  border: 1px solid #C9A96E
+
+LAYOUT ON MOBILE:
+Stack vertically:
+- Photo on top, full width, 
+  aspect-ratio: 1/1 (square crop)
+- Text content below
+
+The existing text, stats row (62 treatments, 
+5.0 rating, 5 reviews) and all styling 
+stay exactly the same — just add the 
+photo column to the left on desktop.
+
+2. ADD PRACTITIONER PHOTO TO PORTAL 
+MEDIA MANAGER
+
+In portal.html Media page, add a new 
+card ABOVE the Hero Video card:
+
+Card title: "Practitioner Photo"
+Status pill: "● Live" if image uploaded, 
+"Not set" if empty
+Subtitle: "Your photo shown in the 
+About section on the website"
+
+Card content:
+- Square image preview (1:1 ratio, 
+  border-radius 12px, object-fit cover,
+  width 100%, max-width 280px, 
+  centred in card)
+- If no image: soft grey placeholder 
+  with silhouette icon and 
+  "No photo uploaded" text
+- "● LIVE" green pill overlaid 
+  top-left if image exists
+- Below preview: "⟳ Replace Photo" 
+  gold outlined button
+
+UPLOAD BEHAVIOUR:
+- Clicking Replace Photo opens 
+  file input (accept image/*)
+- On file selected: upload to 
+  Replit Object Storage via 
+  POST /api/media/upload-url 
+  (same system as other media)
+- Save the returned object path to 
+  portal_kv under key dd_media with 
+  field practitionerImage
+- This must save to PostgreSQL via 
+  CloudStore — NOT localStorage
+- Update the preview immediately 
+  after upload without page reload
+
+API:
+GET /api/media/config must include 
+practitionerImage in its response:
+{
+  practitionerImage: "path/to/photo.jpg" 
+  or null,
+  heroVideo: ...,
+  beforeAfter: [...],
+  videos: [...]
+}
+
+The website fetches this on load and 
+displays the practitioner image in 
+the About section automatically.
+
+When Niamh uploads her photo in the 
+portal, the website updates instantly 
+with no code changes needed.
+
+Do not change any existing styling 
+on the website or portal.
+Do not touch mobile styles that are 
+already working.

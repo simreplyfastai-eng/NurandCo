@@ -1278,7 +1278,7 @@ const CloudStore = {
   BASE: '/api/portal/store',
   // dd_bookings and dd_clients are managed by the REST API, not the KV store
   KEYS: ['dd_settings','dd_custom_treats',
-         'dd_custom_cats','dd_cat_states','dd_treatment_overrides','dd_video_labels','dd_availability','dd_initialized'],
+         'dd_custom_cats','dd_cat_states','dd_treatment_overrides','dd_video_labels','dd_availability','dd_initialized','dd_media'],
 
   async init() {
     try {
@@ -2998,7 +2998,7 @@ function exportFinance(){
 
 /* ── helpers ── */
 function getMediaData(){return JSON.parse(localStorage.getItem('dd_media')||'{}')}
-function saveMediaData(d){localStorage.setItem('dd_media',JSON.stringify(d))}
+function saveMediaData(d){localStorage.setItem('dd_media',JSON.stringify(d));CloudStore.set('dd_media',d);}
 
 // Base config — static site files treated as always "live"
 const HERO_SRC='hero.mp4';
@@ -3058,6 +3058,36 @@ function livePill(text,green){
 
 function renderMedia(){
   const data=getMediaData();
+
+  /* ── CARD 0: PRACTITIONER PHOTO ── */
+  const practSrc=cloudSrc(data.practitionerImage)||'';
+  const practLive=!!practSrc;
+  const practPill=practLive
+    ?'<span style="color:#4CAF50;font-family:Inter,sans-serif;font-size:11px;font-weight:600">● Live</span>'
+    :'<span style="color:#888;font-family:Inter,sans-serif;font-size:11px">Not set</span>';
+  const practPreview=practLive
+    ?`<img src="${practSrc}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px"/>
+       <div style="position:absolute;top:10px;left:10px">${livePill('● LIVE',true)}</div>`
+    :`<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#CCCCCC" stroke-width="1.2">
+          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+        <span style="font-family:Inter,sans-serif;font-size:13px;color:#AAAAAA">No photo uploaded</span>
+      </div>`;
+  const practCard=mCard(`
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111">Practitioner Photo</div>
+      ${practPill}
+    </div>
+    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;font-style:italic;margin-bottom:18px">Your photo shown in the About section on the website</div>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
+      <div style="position:relative;width:100%;max-width:280px;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#F5F5F5;border:1px solid #E8E8E8">
+        ${practPreview}
+      </div>
+      <input type="file" id="file-practitioner" accept="image/*" style="display:none" onchange="handlePractitionerUpload(this)"/>
+      ${mBtn('⟳ Replace Photo','document.getElementById(\'file-practitioner\').click()',true)}
+    </div>
+  `);
 
   /* ── CARD 1: HERO VIDEO ── */
   const heroSrc=cloudSrc(data.heroSrc)||HERO_SRC;
@@ -3152,7 +3182,7 @@ function renderMedia(){
     ${mDropZone('vid-lib','video/mp4,video/*','handleVidLibUpload(this)')}
   `);
 
-  document.getElementById('media-root').innerHTML=heroCard+galleryCard+vidCard;
+  document.getElementById('media-root').innerHTML=practCard+heroCard+galleryCard+vidCard;
 }
 
 /* ── Cloud upload helper ── */
@@ -3178,6 +3208,16 @@ function cloudSrc(objectPath){
 function showUploadProgress(id,msg){
   const el=document.getElementById('upload-progress-'+id);
   if(el)el.textContent=msg;
+}
+
+/* ── Practitioner photo upload ── */
+async function handlePractitionerUpload(input){
+  const file=input.files[0];if(!file)return;
+  try{
+    const objectPath=await uploadToCloud(file);
+    const d=getMediaData();d.practitionerImage=objectPath;saveMediaData(d);
+    renderMedia();
+  }catch(e){alert('Upload failed: '+e.message);}
 }
 
 /* ── Hero upload ── */

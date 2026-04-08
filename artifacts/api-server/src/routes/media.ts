@@ -1,8 +1,29 @@
 import { Router } from "express";
+import { pool } from "@workspace/db";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 
 const router = Router();
 const storage = new ObjectStorageService();
+
+// GET /api/media/config — public config served to the website
+router.get("/media/config", async (req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT value FROM portal_kv WHERE key = 'dd_media'"
+    );
+    const data: Record<string, unknown> =
+      result.rows.length > 0 ? (result.rows[0].value as Record<string, unknown>) : {};
+    return res.json({
+      practitionerImage: (data?.practitionerImage as string) || null,
+      heroVideo: (data?.heroSrc as string) || null,
+      beforeAfter: (data?.baImages as Record<string, string>) || {},
+      videos: (data?.vidSrcs as Record<string, string>) || {},
+    });
+  } catch (err) {
+    console.error("GET /api/media/config", err);
+    return res.json({ practitionerImage: null, heroVideo: null, beforeAfter: {}, videos: {} });
+  }
+});
 
 // POST /api/media/upload-url
 // Returns { uploadURL: string, objectPath: string }
