@@ -3161,7 +3161,7 @@ function renderMedia(){
     ${mSubheader('VIDEO LIBRARY',mBtn('+ Upload Video','document.getElementById("file-hero-upload").click()',true))}
     <input type="file" id="file-hero-upload" accept="video/mp4,video/*" style="display:none" onchange="handleHeroUpload(this)"/>
     ${mDropZone('hero-drop','video/mp4,video/*','handleHeroUpload(this)')}
-    <div id="hero-library" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:14px"></div>
+    <div id="hero-library" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-top:14px"></div>
   `);
 
   /* ── CARD 2: GALLERY PHOTOS ── */
@@ -3199,16 +3199,15 @@ function renderMedia(){
     +'<option value="grad-1">Graduate \u00b7 Slot 2</option>'
     +'<option value="grad-2">Graduate \u00b7 Slot 3</option>';
 
-  const baLibItems=Object.entries(baImages).map(function(entry){
+  const baLibItems=Object.entries(baImages).filter(function(entry){
+    return entry[0].startsWith('ba-lib-');
+  }).map(function(entry){
     const k=entry[0],src=entry[1];
     const label=baLabels[k]||k;
-    const isLive=BA_SLOTS.some(function(s){return s.key===k;});
-    const livePillHtml=isLive?'<span style="position:absolute;top:6px;left:6px;background:#4CAF50;color:#fff;font-size:9px;font-weight:700;border-radius:4px;padding:2px 6px;font-family:Inter,sans-serif">\u25cf LIVE</span>':'';
     const nameVal=label.replace(/"/g,'&quot;');
-    return '<div style="width:200px;border-radius:10px;border:1px solid #F0F0F0;overflow:hidden;flex-shrink:0">'
-      +'<div style="position:relative;height:120px">'
-      +'<img src="'+cloudSrc(src)+'" style="width:100%;height:100%;object-fit:cover"/>'
-      +livePillHtml
+    return '<div style="border-radius:10px;border:1px solid #F0F0F0;overflow:hidden;min-width:0">'
+      +'<div style="position:relative;padding-top:75%">'
+      +'<img src="'+cloudSrc(src)+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>'
       +'</div>'
       +'<div style="padding:8px">'
       +'<input type="text" value="'+nameVal+'" placeholder="File name"'
@@ -3231,7 +3230,7 @@ function renderMedia(){
     ${mDivider()}
     ${mSubheader('SAVED LIBRARY',mBtn('+ Add Photo','document.getElementById("file-ba-lib").click()',true))}
     <input type="file" id="file-ba-lib" accept="image/*" style="display:none" onchange="handleBALibUpload(this)"/>
-    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px" id="ba-lib-row">${baLibItems||'<span style="font-family:Inter,sans-serif;font-size:12px;color:#BBB">No saved photos yet</span>'}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px;margin-bottom:14px" id="ba-lib-row">${baLibItems||'<span style="font-family:Inter,sans-serif;font-size:12px;color:#BBB">No saved photos yet</span>'}</div>
     ${mDropZone('ba-lib','image/*','handleBALibUpload(this)')}
   `);
 
@@ -3269,9 +3268,9 @@ function renderMedia(){
     :vidLibData.map(function(v){
       const vsrc=cloudSrc(v.url)||'';
       const vNameVal=(v.label||'').replace(/"/g,'&quot;');
-      return '<div style="width:220px;border-radius:10px;border:1px solid #F0F0F0;overflow:hidden;flex-shrink:0">'
-        +'<div style="position:relative;height:124px;background:#111">'
-        +(vsrc?'<video src="'+vsrc+'" muted autoplay loop playsinline style="width:100%;height:100%;object-fit:cover"></video>':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px">\ud83c\udfa5</div>')
+      return '<div style="border-radius:10px;border:1px solid #F0F0F0;overflow:hidden;min-width:0">'
+        +'<div style="position:relative;padding-top:56.25%;background:#111">'
+        +(vsrc?'<video src="'+vsrc+'" muted autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>':'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px">\ud83c\udfa5</div>')
         +'</div>'
         +'<div style="padding:8px">'
         +'<input type="text" value="'+vNameVal+'" placeholder="Video name"'
@@ -3293,7 +3292,7 @@ function renderMedia(){
     +mDivider()
     +mSubheader('VIDEO LIBRARY',mBtn('+ Upload Video','document.getElementById("file-vid-lib").click()',true))
     +'<input type="file" id="file-vid-lib" accept="video/mp4,video/*" style="display:none" onchange="handleVidLibUpload(this)"/>'
-    +'<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px">'+vidLibHtml+'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;margin-bottom:14px">'+vidLibHtml+'</div>'
     +mDropZone('vid-lib','video/mp4,video/*','handleVidLibUpload(this)');
   const vidCard=mCard(vidCardContent);
 
