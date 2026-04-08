@@ -1,0 +1,54 @@
+Small targeted fixes to the Treatments page in portal.html:
+
+PAGE HEADER:
+- "Treatments" and the search bar are on the same line 
+  but the search bar is too wide and pushes things apart
+- On mobile: stack them vertically — title on top, 
+  search bar full width below, margin-top 10px
+- Search bar: border-radius 20px, border 1px solid 
+  #E0E0E0, padding 10px 16px, Inter 13px
+
+CATEGORY ACCORDION HEADERS:
+- The triangle arrow (▶ / ▼) — replace with a cleaner 
+  + / - icon instead. Plus when collapsed, minus when 
+  expanded. Color #C9A96E, font-size 18px, font-weight 300
+- Category name: Cormorant Garamond 20px #111111, 
+  not too bold — currently feels slightly heavy
+- Count badge (e.g. "6"): keep as is — looks good
+- "+ Add" button: keep gold outlined — looks good
+- Header row background: #FAFAFA, border-radius 
+  10px 10px 0 0 when open, 10px when closed
+- Add a subtle left border when expanded: 
+  3px solid #C9A96E on the accordion card
+
+TREATMENT ROWS:
+- Row height is a bit tall — reduce to 48px per row
+- Remove the large gap between rows — 
+  currently there's too much whitespace between each 
+  treatment. Use a single thin #F0F0F0 divider only
+- Treatment name: Inter 13px bold #111111 (currently 
+  looks slightly too large/heavy on mobile)
+- Price: Inter 13px #C9A96E bold — looks good, keep
+- Revenue: Inter 13px #C9A96E — looks good, keep
+- Edit pencil icon: make it slightly larger touch 
+  target — 36px × 36px, still icon only on mobile
+
+COLUMN HEADERS (TREATMENT / PRICE / REVENUE):
+- Font size 10px, letter-spacing 1.5px — currently 
+  looks correct, just ensure they stay visible at 
+  all screen sizes and don't get cut off
+
+BOTTOM BUTTON:
+- "+ New Category" button — make full width on mobile
+- border: 1px solid #E0E0E0, color #888888, 
+  border-radius 8px, padding 14px
+- Cormorant Garamond 16px, centred
+- margin-top 16px, margin-bottom 80px 
+  (clearance for floating hamburger button)
+
+OVERALL CARD:
+- Each category card: border-radius 10px, 
+  border 1px solid #F0F0F0, overflow hidden
+- No box-shadow — currently the shadow feels 
+  slightly heavy, remove it for a flatter cleaner look
+- background white
