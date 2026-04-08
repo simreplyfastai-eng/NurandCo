@@ -200,7 +200,8 @@ export default function Training() {
           <motion.p
             initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-foreground/70 font-light text-sm md:text-lg max-w-2xl mx-auto"
+            className="font-light text-sm md:text-lg max-w-2xl mx-auto"
+            style={{ color: "#C9A96E" }}
           >
             CPD accredited · No background needed · Birmingham & Solihull
           </motion.p>
