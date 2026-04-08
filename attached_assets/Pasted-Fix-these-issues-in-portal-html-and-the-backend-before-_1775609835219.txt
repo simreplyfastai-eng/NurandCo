@@ -1,0 +1,75 @@
+Fix these issues in portal.html and the backend 
+before the site goes live:
+
+1. ADMIN CREDENTIALS — URGENT
+The email and password are hardcoded in 
+client-side JavaScript and visible to anyone 
+who opens browser dev tools.
+Move credentials to backend environment 
+variables (Replit Secrets). 
+Create a POST /api/auth/login endpoint that 
+checks against the secret values server-side 
+and returns a signed session token.
+Never expose credentials in frontend code.
+
+2. MEDIA UPLOADS — NOT CLOUD BACKED
+All photos and videos uploaded in the Media 
+section save to localStorage only.
+They are lost on logout or on a different device.
+Fix: store media files in Replit Object Storage 
+or convert to a server-side file upload endpoint 
+that saves to the Replit filesystem under /public.
+Return a URL that the main site references 
+directly. Update dd_media references to use 
+these URLs instead of base64 strings.
+
+3. CLIENT VISIT HISTORY — NAME MATCHING
+The bookings table has no client_id foreign key.
+Visit history is matched by clientName string only.
+A slightly different name spelling creates 
+duplicate clients.
+Fix: add a client_id column to the bookings table.
+When a booking is created (from website or portal), 
+resolve the client first and store their id on 
+the booking row.
+Update the client panel to JOIN on client_id 
+instead of matching by name string.
+
+4. PORTAL BOOKINGS MISSING EMAIL/PHONE
+When admin creates a booking in the portal, 
+the client record is created with name only — 
+email and phone are blank.
+Fix: add email and phone fields to the admin 
+booking creation modal so contact details 
+are always captured.
+
+5. BALANCE PAID — NEVER UPDATED
+The balancePaid column exists but is never set.
+Fix: add a "Mark Balance Paid" button to each 
+booking in the New Bookings page and the 
+booking edit modal. 
+On click: PUT /api/bookings/:id { balancePaid: true }
+This should also update the Finance page 
+Balance Outstanding figure.
+
+6. AVAILABILITY NOT ENFORCED ON WEBSITE
+The admin sets working hours in the portal 
+but the website booking form ignores them.
+Clients can still pick Sundays or days off.
+Fix: the website booking calendar must call 
+GET /api/availability before rendering.
+Disable any dates that fall outside working 
+hours or are marked as overrides.
+Disable time slots outside the working hours 
+for that day.
+
+7. SAMPLE DATA STILL IN THE DATABASE
+Fictional clients (Ellisha W., Donna S. etc) 
+were seeded on first login and are still 
+in PostgreSQL.
+Fix: add a "Clear Sample Data" button in 
+Settings clearly labelled:
+"Remove test data before going live"
+This should delete all seeded bookings and 
+clients but NOT wipe custom treatments, 
+availability or settings.
