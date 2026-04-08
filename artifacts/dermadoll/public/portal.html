@@ -1304,6 +1304,8 @@ function fmt(d){return d.toISOString().slice(0,10)}
 // CLOUD STORE — real-time sync to PostgreSQL via API
 // Falls back gracefully to localStorage if API is down
 // ═══════════════════════════════════════════════════
+function authHdr(){const t=localStorage.getItem('dd_token');return t?{'Authorization':'Bearer '+t}:{};}
+
 const CloudStore = {
   BASE: '/api/portal/store',
   // dd_bookings and dd_clients are managed by the REST API, not the KV store
@@ -1356,7 +1358,7 @@ const BookingAPI = {
 
   async init() {
     try {
-      const r = await fetch(this.BASE);
+      const r = await fetch(this.BASE, {headers:authHdr()});
       if (!r.ok) return false;
       const bookings = await r.json();
       if (bookings.length > 0) {
@@ -1481,7 +1483,7 @@ const ClientAPI = {
 
   async init() {
     try {
-      const r = await fetch(this.BASE);
+      const r = await fetch(this.BASE, {headers:authHdr()});
       if (!r.ok) return false;
       const clients = await r.json();
       if (clients.length > 0) {
@@ -1497,7 +1499,7 @@ const ClientAPI = {
           body: JSON.stringify(local)
         });
         // Re-fetch to get deduplicated result back
-        const r2 = await fetch(this.BASE);
+        const r2 = await fetch(this.BASE, {headers:authHdr()});
         if (r2.ok) { const c2=await r2.json(); localStorage.setItem('dd_clients',JSON.stringify(c2)); }
         return true;
       }
@@ -1518,7 +1520,7 @@ const ClientAPI = {
       if (!r.ok) throw new Error('API error');
       const saved = await r.json();
       // Refresh local cache from API to reflect any merge
-      const all = await fetch(this.BASE).then(x=>x.json()).catch(()=>null);
+      const all = await fetch(this.BASE, {headers:authHdr()}).then(x=>x.json()).catch(()=>null);
       if (all) localStorage.setItem('dd_clients', JSON.stringify(all));
       return saved;
     } catch(e) {
@@ -1672,9 +1674,9 @@ function showPortal(){
     buildTreatmentSelect();
     renderMedia();
     updateSidebarBadges();
-    const savedPage=sessionStorage.getItem('dd_page')||'dashboard';
-    const sidebarEl=document.querySelector(`.sb-item[onclick*="'${savedPage}'"]`);
-    showPage(savedPage,sidebarEl,false);
+    const sidebarEl=document.querySelector(`.sb-item[onclick*="'dashboard'"]`);
+    showPage('dashboard',sidebarEl,false);
+    sessionStorage.setItem('dd_page','dashboard');
     // Auto-refresh dashboard every 60s
     setInterval(()=>{
       if(document.getElementById('page-dashboard').classList.contains('active')){
