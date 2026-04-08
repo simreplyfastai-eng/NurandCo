@@ -8,6 +8,8 @@ const DEFAULT_SLOTS = [
   { key: "ba3", src: "result-3.jpg", label: "Glass Skin Facial & Microneedling" },
 ];
 
+const IMAGE_DELAYS = [0.2, 0.4, 0.6, 0.8];
+
 interface Slot { key: string; src: string; label: string; }
 
 export default function BeforeAfter() {
@@ -34,24 +36,84 @@ export default function BeforeAfter() {
   const isLocal = (src: string) => !src.startsWith("http") && !src.startsWith("/api/");
 
   return (
-    <section className="py-[100px] bg-secondary">
+    <section
+      className="py-[100px]"
+      style={{
+        background: "linear-gradient(180deg, #FFFFFF 0%, #FAF8F4 50%, #FFFFFF 100%)",
+        position: "relative",
+        overflow: "hidden",
+      }}
+    >
+      {/* Top-left decorative cross */}
+      <span
+        style={{
+          position: "absolute",
+          top: 40,
+          left: 40,
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: 32,
+          color: "#C9A96E",
+          opacity: 0.4,
+          lineHeight: 1,
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+        aria-hidden="true"
+      >
+        +
+      </span>
+
+      {/* Bottom-right decorative cross */}
+      <span
+        style={{
+          position: "absolute",
+          bottom: 40,
+          right: 40,
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: 32,
+          color: "#C9A96E",
+          opacity: 0.4,
+          lineHeight: 1,
+          pointerEvents: "none",
+          userSelect: "none",
+        }}
+        aria-hidden="true"
+      >
+        +
+      </span>
+
       <div className="container mx-auto px-6 max-w-5xl">
 
+        {/* Heading block */}
         <div className="text-center mb-20">
           <motion.h2
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
             className="font-serif text-[2rem] md:text-[56px] mb-5"
           >
             The Doll Gallery
           </motion.h2>
-          <div className="w-[60px] h-px bg-primary mx-auto mb-5" />
+
+          {/* Animated gold divider */}
+          <motion.div
+            initial={{ width: 0 }}
+            whileInView={{ width: 60 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
+            style={{
+              height: 1,
+              background: "#C9A96E",
+              margin: "0 auto 20px",
+            }}
+          />
+
           <motion.p
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
+            transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
             className="font-light text-lg"
             style={{ color: "#C9A96E" }}
           >
@@ -59,60 +121,137 @@ export default function BeforeAfter() {
           </motion.p>
         </div>
 
-        <div
-          className="py-12"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "1fr 1fr",
-            gap: "12px",
-          }}
-        >
-          {results.map((item, i) => (
-            <motion.div
-              key={item.key}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08, duration: 0.6 }}
-              whileHover={{
-                y: -4,
-                boxShadow: "0 8px 24px rgba(201,169,110,0.2)",
-              }}
-              style={{
-                justifySelf: "center",
-                width: "100%",
-                maxWidth: "420px",
-                borderRadius: "12px",
-                border: "2px solid #C9A96E",
-                overflow: "hidden",
-                cursor: "default",
-                transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "#B8934A";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLElement).style.borderColor = "#C9A96E";
-              }}
-            >
-              <div style={{ aspectRatio: "1 / 1", width: "100%", overflow: "hidden" }}>
-                <img
-                  src={isLocal(item.src) ? `${import.meta.env.BASE_URL}${item.src}` : item.src}
-                  alt={item.label}
+        {/* Grid wrapper — relative so the background circle stays inside */}
+        <div style={{ position: "relative" }}>
+
+          {/* Faint gold circle behind grid */}
+          <div
+            aria-hidden="true"
+            style={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 500,
+              height: 500,
+              border: "1px solid #C9A96E",
+              borderRadius: "50%",
+              opacity: 0.06,
+              pointerEvents: "none",
+              zIndex: 0,
+            }}
+          />
+
+          <div
+            className="py-12"
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "12px",
+              position: "relative",
+              zIndex: 1,
+            }}
+          >
+            {results.map((item, i) => (
+              <motion.div
+                key={item.key}
+                initial={{ opacity: 0, y: 40 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: IMAGE_DELAYS[i], duration: 0.6, ease: "easeOut" }}
+                whileHover={{
+                  y: -4,
+                  boxShadow: "0 8px 24px rgba(201,169,110,0.2)",
+                }}
+                style={{
+                  justifySelf: "center",
+                  width: "100%",
+                  maxWidth: "420px",
+                  borderRadius: "12px",
+                  border: "2px solid #C9A96E",
+                  overflow: "hidden",
+                  cursor: "default",
+                  transition: "border-color 0.3s ease, box-shadow 0.3s ease",
+                  position: "relative",
+                }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "#B8934A";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLElement).style.borderColor = "#C9A96E";
+                }}
+              >
+                {/* BEFORE & AFTER label */}
+                <div
+                  aria-hidden="true"
                   style={{
-                    width: "100%",
-                    height: "100%",
-                    objectFit: "cover",
-                    display: "block",
+                    position: "absolute",
+                    top: 0,
+                    left: "50%",
+                    transform: "translateX(-50%)",
+                    background: "rgba(0,0,0,0.35)",
+                    backdropFilter: "blur(4px)",
+                    WebkitBackdropFilter: "blur(4px)",
+                    borderRadius: "0 0 8px 8px",
+                    padding: "5px 14px",
+                    zIndex: 2,
+                    whiteSpace: "nowrap",
                   }}
-                />
-              </div>
+                >
+                  <span
+                    style={{
+                      fontFamily: "Inter, sans-serif",
+                      fontSize: 9,
+                      color: "#ffffff",
+                      letterSpacing: "2px",
+                      textTransform: "uppercase" as const,
+                      fontWeight: 600,
+                    }}
+                  >
+                    BEFORE &amp; AFTER
+                  </span>
+                </div>
 
-            </motion.div>
-          ))}
+                <div style={{ aspectRatio: "1 / 1", width: "100%", overflow: "hidden" }}>
+                  <img
+                    src={isLocal(item.src) ? `${import.meta.env.BASE_URL}${item.src}` : item.src}
+                    alt={item.label}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "cover",
+                      display: "block",
+                    }}
+                  />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Mobile swipe hint */}
+          <p
+            style={{
+              display: "none",
+              textAlign: "center",
+              fontFamily: "Inter, sans-serif",
+              fontSize: 11,
+              color: "#C9A96E",
+              fontStyle: "italic",
+              marginTop: 16,
+            }}
+            className="mobile-swipe-hint"
+          >
+            Swipe through our results →
+          </p>
+
         </div>
-
       </div>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .mobile-swipe-hint { display: block !important; }
+        }
+      `}</style>
     </section>
   );
 }
