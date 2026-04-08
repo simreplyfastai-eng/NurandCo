@@ -1,0 +1,237 @@
+Connect all Finance page data in portal.html to the 
+booking system and calendar. Everything must be 
+fully linked — no dummy data anywhere.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+DATA ARCHITECTURE
+━━━━━━━━━━━━━━━━━━━━━━━━
+All booking and financial data must be stored in 
+Replit's built-in key-value database (not localStorage) 
+so data persists across devices and sessions for all 
+users of the portal.
+
+Use the Replit DB client on the backend:
+import Database from "@replit/database"
+const db = new Database()
+
+Create a REST API in the Replit backend with these 
+endpoints:
+
+GET  /api/bookings         — get all bookings
+POST /api/bookings         — create new booking
+PUT  /api/bookings/:id     — update booking (status, 
+                             payment etc)
+DELETE /api/bookings/:id   — delete booking
+GET  /api/bookings/date/:date — get bookings for 
+                               a specific date
+GET  /api/finance/summary  — get revenue totals, 
+                             deposits, outstanding
+GET  /api/finance/monthly  — get day-by-day revenue 
+                             for chart
+
+BOOKING DATA STRUCTURE:
+Each booking object saved to DB:
+{
+  id: unique string (Date.now() + random),
+  clientName: string,
+  clientEmail: string,
+  treatment: string,
+  category: string,
+  price: number,
+  deposit: number,        // always 50% of price
+  depositPaid: boolean,   // false until Stripe confirms
+  balancePaid: boolean,   // false until marked paid
+  date: "YYYY-MM-DD",
+  time: "HH:MM",
+  status: "Pending" | "Confirmed" | "Complete" | 
+          "Cancelled",
+  paymentMethod: "Stripe",
+  stripePaymentId: null,  // populated when Stripe live
+  notes: string,
+  createdAt: timestamp,
+  source: "Website" | "Portal"
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+BOOKING FLOW (main site index.html)
+━━━━━━━━━━━━━━━━━━━━━━━━
+When a client books on the main site:
+
+Step 1 — They select treatment, date, time
+Step 2 — They see the price breakdown:
+  Treatment: [name]
+  Total price: £XXX
+  Deposit due today: £XXX (50%)
+  Remaining balance: £XXX (due on arrival)
+Step 3 — Payment button: "Pay Deposit — £XXX"
+  Currently: on click, POST to /api/bookings to 
+  save the booking with depositPaid: false and 
+  status: "Pending"
+  Show success message: "Booking request sent! 
+  We'll confirm shortly."
+  NOTE: Stripe is not connected yet — add a comment 
+  in the code: 
+  // TODO: Integrate Stripe checkout here
+  // Stripe will POST to /api/bookings/confirm/:id
+  // with stripePaymentId on successful payment
+  For now: save booking and mark depositPaid: true 
+  as placeholder until Stripe is live
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+CALENDAR (portal Schedule page)
+━━━━━━━━━━━━━━━━━━━━━━━━
+On load: fetch GET /api/bookings
+Populate calendar dots and day detail panels 
+from live API data — not localStorage.
+
+When a new booking is created in the portal:
+POST /api/bookings with source: "Portal"
+Calendar updates immediately without page reload.
+
+When a booking status is changed (Confirm / 
+Complete / Cancel buttons in day detail panel):
+PUT /api/bookings/:id with updated status
+Calendar dot and detail panel update instantly.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+FINANCE PAGE — FULLY CONNECTED
+━━━━━━━━━━━━━━━━━━━━━━━━
+All finance data fetched from API — never hardcoded.
+
+On Finance page load:
+1. Fetch GET /api/finance/summary?month=YYYY-MM
+   Returns:
+   {
+     totalRevenue: number,    // sum of all booking 
+                              // prices this month
+     depositsCollected: number, // sum of deposits 
+                                // where depositPaid:true
+     balanceOutstanding: number // totalRevenue minus 
+                                // depositsCollected
+   }
+   Populate the 3 summary cards.
+
+2. Fetch GET /api/finance/monthly?month=YYYY-MM
+   Returns array of { day: number, cumulative: number }
+   for each day of the month.
+   Use this to draw the revenue chart.
+
+3. Fetch GET /api/bookings?month=YYYY-MM
+   Returns all bookings for the month.
+   Populate the transactions table.
+
+When month selector changes:
+Re-fetch all three endpoints with new month and 
+update all sections simultaneously.
+
+Mark Paid button:
+PUT /api/bookings/:id { balancePaid: true }
+Recalculate and refresh summary cards instantly.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+DASHBOARD — FULLY CONNECTED
+━━━━━━━━━━━━━━━━━━━━━━━━
+All dashboard KPI cards fetch from API on load:
+
+Revenue This Month:
+GET /api/finance/summary?month=current
+→ totalRevenue value
+
+Appointments:
+GET /api/bookings?month=current
+→ count of all bookings
+
+Active Clients:
+GET /api/bookings
+→ count of unique clientName values
+
+Avg Spend:
+totalRevenue / total booking count
+
+Recent Bookings table:
+GET /api/bookings?limit=5&sort=newest
+→ last 5 bookings across all time
+
+Recent Activity feed:
+GET /api/bookings?limit=10&sort=newest
+→ derive activity events from booking 
+  status and createdAt timestamps
+
+Revenue by Treatment chart:
+GET /api/bookings
+→ group by category, sum prices
+→ render bars proportionally
+
+Today's Schedule:
+GET /api/bookings/date/TODAY
+→ show all bookings for today sorted by time
+
+All dashboard data refreshes every 60 seconds 
+automatically via setInterval.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+STRIPE — PLACEHOLDER SETUP
+━━━━━━━━━━━━━━━━━━━━━━━━
+Do not integrate Stripe yet — just prepare the 
+structure cleanly:
+
+In the backend add a placeholder route:
+POST /api/stripe/webhook
+// TODO: Stripe webhook handler
+// Will receive payment confirmation events
+// On payment_intent.succeeded:
+//   Find booking by stripePaymentId
+//   Set depositPaid: true, status: "Confirmed"
+//   Trigger confirmation email to client
+
+Add a comment in the booking creation flow:
+// STRIPE INTEGRATION POINT
+// When Stripe is ready:
+// 1. Create Stripe PaymentIntent for deposit amount
+// 2. Return clientSecret to frontend
+// 3. Frontend shows Stripe payment form
+// 4. On success Stripe webhook confirms payment
+// 5. Booking status updates to Confirmed
+
+In Settings page add a section:
+"Payment Settings"
+- Stripe Status: "Not connected — setup required"
+  shown as a red pill
+- "Connect Stripe" button — gold filled, 
+  links to instructions (placeholder for now)
+- Deposit %: number input defaulting to 50, 
+  saves to DB via PUT /api/settings
+- This deposit % is used in all booking 
+  price calculations automatically
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+TRANSACTIONS TABLE FIX
+━━━━━━━━━━━━━━━━━━━━━━━━
+The column headers are being truncated to 
+"DA..." "T..." "S..." on mobile.
+Fix immediately:
+- table-layout: fixed, width: 100%
+- Column widths mobile (under 600px):
+  Date: 22%, Client: 30%, Total: 18%, 
+  Status: 18%, Action: 12%
+- All header text: overflow hidden, 
+  text-overflow: ellipsis only on data cells
+- Header cells: use abbreviations on mobile:
+  DATE → DATE, CLIENT → CLIENT, 
+  TOTAL → £, STATUS → hide label show pill only,
+  ACTION → hide label
+- Min-width on the table wrapper: 
+  unset — no min-width at all
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+GENERAL
+━━━━━━━━━━━━━━━━━━━━━━━━
+- All fetch calls use async/await with try/catch
+- Show a subtle loading spinner (gold spinning ring) 
+  while data is fetching
+- If API fails: show "Unable to load data" in grey 
+  italic with a Retry button
+- All writes to DB are immediate — no batching
+- The portal and main site share the same Replit 
+  backend so bookings from the website appear in 
+  the portal instantly

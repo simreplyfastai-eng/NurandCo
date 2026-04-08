@@ -738,9 +738,33 @@ tr:hover td{background:#FDFBF8}
         <div class="settings-section">
           <div class="settings-section-header">Booking Settings</div>
           <div class="settings-body">
-            <div class="settings-row"><label>Deposit %</label><input type="number" id="s-deposit" value="50" min="0" max="100" style="width:80px;flex:unset"/><span style="font-size:12px;color:var(--muted)">% of treatment price</span></div>
+            <div class="settings-row"><label>Deposit %</label><input type="number" id="s-deposit" value="50" min="0" max="100" style="width:80px;flex:unset"/><span style="font-size:12px;color:var(--muted)">% of treatment price (taken via Stripe on booking)</span></div>
             <div class="settings-row" style="align-items:flex-start"><label>Confirmation msg</label><textarea id="s-confirm-msg" rows="3" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;resize:vertical">Thank you for booking with Dermadoll Aesthetics! We'll be in touch to confirm your appointment shortly.</textarea></div>
             <div class="settings-row"><label>Notify email</label><input type="email" id="s-notify-email" placeholder="niamh@dermadoll.com"/></div>
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="settings-section-header">Payment Settings</div>
+          <div class="settings-body">
+            <div class="settings-row">
+              <label>Stripe Status</label>
+              <span style="display:inline-flex;align-items:center;gap:8px">
+                <span style="display:inline-block;background:#FFEBEE;color:#C62828;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'Inter',sans-serif;letter-spacing:.3px">NOT CONNECTED</span>
+                <span style="font-size:12px;color:var(--muted)">Setup required before accepting deposits</span>
+              </span>
+            </div>
+            <div class="settings-row">
+              <label>Connect Stripe</label>
+              <div style="flex:1">
+                <button class="btn-gold" onclick="alert('Stripe integration coming soon. Contact your developer to set up Stripe and start accepting online deposits.')" style="margin-bottom:8px">Connect Stripe Account</button>
+                <div style="font-size:11px;color:var(--muted);line-height:1.6">Once connected, clients will pay a 50% deposit at booking via Stripe. The remaining balance is collected in person. You will receive instant payment notifications.</div>
+              </div>
+            </div>
+            <div class="settings-row">
+              <label>Webhook URL</label>
+              <input type="text" readonly value="/api/stripe/webhook" style="background:#FAFAFA;font-family:monospace;font-size:12px;color:#888"/>
+            </div>
           </div>
         </div>
 
@@ -924,7 +948,7 @@ const TREATMENTS = [
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
 function getBookings(){return JSON.parse(localStorage.getItem('dd_bookings')||'[]')}
-function saveBookings(b){localStorage.setItem('dd_bookings',JSON.stringify(b));CloudStore.set('dd_bookings',b);}
+function saveBookings(b){localStorage.setItem('dd_bookings',JSON.stringify(b));}
 function getClients(){return JSON.parse(localStorage.getItem('dd_clients')||'[]')}
 function saveClients(c){localStorage.setItem('dd_clients',JSON.stringify(c));CloudStore.set('dd_clients',c);}
 function getSettings(){return JSON.parse(localStorage.getItem('dd_settings')||'{}')}
@@ -1004,6 +1028,132 @@ const CloudStore = {
 };
 
 // ═══════════════════════════════════════════════════
+// BOOKING API — REST layer backed by PostgreSQL
+// Keeps localStorage in sync as a local cache
+// ═══════════════════════════════════════════════════
+const BookingAPI = {
+  BASE: '/api/bookings',
+
+  async init() {
+    try {
+      const r = await fetch(this.BASE);
+      if (!r.ok) return false;
+      const bookings = await r.json();
+      if (bookings.length > 0) {
+        saveBookings(bookings);
+        return true;
+      }
+      // API is empty — migrate local data to API if present
+      const local = getBookings();
+      if (local.length > 0) {
+        await fetch(`${this.BASE}/bulk`, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(local)
+        });
+        return true;
+      }
+      return false;
+    } catch(e) {
+      console.warn('BookingAPI.init failed — using local cache', e);
+      return false;
+    }
+  },
+
+  async create(booking) {
+    try {
+      const r = await fetch(this.BASE, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(booking)
+      });
+      if (!r.ok) throw new Error('API error');
+      const saved = await r.json();
+      const all = getBookings();
+      all.push(saved);
+      saveBookings(all);
+      return saved;
+    } catch(e) {
+      console.warn('BookingAPI.create failed', e);
+      const all = getBookings();
+      all.push(booking);
+      saveBookings(all);
+      return booking;
+    }
+  },
+
+  async update(id, changes) {
+    try {
+      const r = await fetch(`${this.BASE}/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify(changes)
+      });
+      if (!r.ok) throw new Error('API error');
+      const updated = await r.json();
+      const all = getBookings();
+      const i = all.findIndex(b => b.id === id);
+      if (i > -1) all[i] = {...all[i], ...updated};
+      saveBookings(all);
+      return updated;
+    } catch(e) {
+      console.warn('BookingAPI.update failed', e);
+      const all = getBookings();
+      const i = all.findIndex(b => b.id === id);
+      if (i > -1) { all[i] = {...all[i], ...changes}; saveBookings(all); }
+      return changes;
+    }
+  },
+
+  async delete(id) {
+    try {
+      await fetch(`${this.BASE}/${id}`, {method: 'DELETE'});
+      const all = getBookings().filter(b => b.id !== id);
+      saveBookings(all);
+    } catch(e) {
+      console.warn('BookingAPI.delete failed', e);
+      saveBookings(getBookings().filter(b => b.id !== id));
+    }
+  },
+
+  async clearAll() {
+    try {
+      const all = getBookings();
+      await Promise.all(all.map(b => fetch(`${this.BASE}/${b.id}`, {method:'DELETE'})));
+      saveBookings([]);
+    } catch(e) {
+      console.warn('BookingAPI.clearAll failed', e);
+      saveBookings([]);
+    }
+  },
+
+  async getFinanceSummary(month) {
+    const r = await fetch(`/api/finance/summary?month=${month}`);
+    if (!r.ok) throw new Error('API error');
+    return r.json();
+  },
+
+  async getFinanceMonthly(month) {
+    const r = await fetch(`/api/finance/monthly?month=${month}`);
+    if (!r.ok) throw new Error('API error');
+    return r.json();
+  },
+
+  async getByMonth(month) {
+    const r = await fetch(`${this.BASE}?month=${month}`);
+    if (!r.ok) throw new Error('API error');
+    return r.json();
+  },
+
+  async getToday() {
+    const today = fmt(new Date());
+    const r = await fetch(`${this.BASE}/date/${today}`);
+    if (!r.ok) return getBookings().filter(b => b.date === today);
+    return r.json();
+  }
+};
+
+// ═══════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════
 function doLogin(){
@@ -1033,14 +1183,23 @@ function doLogout(){
 function showPortal(){
   document.getElementById('login-page').style.display='none';
   document.getElementById('portal').classList.add('visible');
-  CloudStore.init().then(()=>{
-    initSampleData();
+  CloudStore.init().then(async ()=>{
+    // Load bookings from API into local cache
+    const hasAPIData = await BookingAPI.init();
+    if (!hasAPIData) initSampleData();
     buildTreatmentSelect();
     renderMedia();
     updateSidebarBadges();
     const savedPage=sessionStorage.getItem('dd_page')||'dashboard';
     const sidebarEl=document.querySelector(`.sb-item[onclick*="'${savedPage}'"]`);
     showPage(savedPage,sidebarEl,false);
+    // Auto-refresh dashboard every 60s
+    setInterval(()=>{
+      if(document.getElementById('page-dashboard').classList.contains('active')){
+        renderDashboard();
+      }
+      updateSidebarBadges();
+    },60000);
   });
 }
 
@@ -1562,13 +1721,13 @@ function openBookingModal(prefill){
 }
 function closeBookingModal(){document.getElementById('booking-modal').classList.remove('open')}
 
-function saveBooking(){
+async function saveBooking(){
   const clientName=document.getElementById('bm-client').value.trim();
   const treatment=document.getElementById('bm-treatment').value;
   const date=document.getElementById('bm-date').value;
   const time=document.getElementById('bm-time').value;
   const price=Number(document.getElementById('bm-price').value)||0;
-  const deposit=Number(document.getElementById('bm-deposit').value)||0;
+  const deposit=Number(document.getElementById('bm-deposit').value)||Math.round(price*0.5);
   const status=document.getElementById('bm-status').value;
   const notes=document.getElementById('bm-notes').value;
   if(!clientName||!treatment||!date){alert('Please fill in client, treatment and date');return}
@@ -1577,14 +1736,16 @@ function saveBooking(){
   const opt=sel.options[sel.selectedIndex];
   const category=opt&&opt.dataset.cat?opt.dataset.cat:'';
 
-  const bookings=getBookings();
-  const booking={id:editingBookingId||uid(),clientName,treatment,category,date,time,price,deposit,status,notes,createdAt:Date.now()};
+  const booking={
+    id:editingBookingId||uid(),clientName,clientEmail:'',treatment,category,
+    date,time,price,deposit,depositPaid:true,balancePaid:false,
+    status,notes,createdAt:Date.now(),source:'Portal',paymentMethod:'Stripe'
+  };
 
   if(editingBookingId){
-    const i=bookings.findIndex(b=>b.id===editingBookingId);
-    if(i>-1)bookings[i]=booking;
+    await BookingAPI.update(editingBookingId, booking);
   } else {
-    bookings.push(booking);
+    await BookingAPI.create(booking);
     // Auto-add client if new
     const clients=getClients();
     if(!clients.find(c=>c.name.toLowerCase()===clientName.toLowerCase())){
@@ -1592,7 +1753,6 @@ function saveBooking(){
       saveClients(clients);
     }
   }
-  saveBookings(bookings);
   closeBookingModal();
   updateSidebarBadges();
   renderDashboard();
@@ -2007,7 +2167,7 @@ function initChartTooltip(){
   canvas.addEventListener('touchend',()=>{tip.style.display='none';drawRevenueChart();});
 }
 
-function renderFinance(){
+async function renderFinance(){
   const sel=document.getElementById('finance-month-sel');
   const now=new Date();
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2020,57 +2180,93 @@ function renderFinance(){
     sel.innerHTML=opts;
     initChartTooltip();
   }
-  const [y,m]=sel.value.split('-').map(Number);
-  const allMonthBookings=getBookings().filter(b=>{
-    const d=new Date(b.date);
-    return d.getFullYear()===y&&d.getMonth()+1===m&&b.status!=='Cancelled';
-  });
-  const filtered=financeFilter==='All'?allMonthBookings:allMonthBookings.filter(b=>b.status===financeFilter);
-  // KPI cards
-  const totalRev=allMonthBookings.reduce((s,b)=>s+Number(b.price),0);
-  const deposits=allMonthBookings.reduce((s,b)=>s+Number(b.deposit||0),0);
-  const outstanding=allMonthBookings.filter(b=>b.status!=='Complete').reduce((s,b)=>s+(Number(b.price)-Number(b.deposit||0)),0);
+  const month=sel.value;
+  const [y,m]=month.split('-').map(Number);
+
+  // Show loading state
   document.getElementById('finance-kpi').innerHTML=`
-    <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C9A96E">£${totalRev.toLocaleString()}</div></div>
-    <div class="fin-kpi-card"><div class="fin-kpi-label">Deposits Collected</div><div class="fin-kpi-value" style="color:#2D6A4F">£${deposits.toLocaleString()}</div></div>
-    <div class="fin-kpi-card"><div class="fin-kpi-label">Balance Outstanding</div><div class="fin-kpi-value" style="color:#C1121F">£${outstanding.toLocaleString()}</div></div>
+    <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#DDD">—</div></div>
+    <div class="fin-kpi-card"><div class="fin-kpi-label">Deposits Collected</div><div class="fin-kpi-value" style="color:#DDD">—</div></div>
+    <div class="fin-kpi-card"><div class="fin-kpi-label">Balance Outstanding</div><div class="fin-kpi-value" style="color:#DDD">—</div></div>
   `;
-  document.getElementById('fin-total-pill').textContent='£'+totalRev.toLocaleString();
-  // Chart
-  const days=new Date(y,m,0).getDate();
-  const daily=Array(days).fill(0);
-  allMonthBookings.forEach(b=>{const d=parseInt(b.date.split('-')[2]);if(d>=1&&d<=days)daily[d-1]+=Number(b.price);});
-  const cumulative=daily.reduce((acc,v,i)=>{acc.push((acc[i-1]||0)+v);return acc;},[]);
-  financeChartData={cumulative,days,_daily:daily};
-  const wrap=document.getElementById('fin-chart-wrap');
-  if(wrap){
-    if(financeResizeObserver)financeResizeObserver.disconnect();
-    financeResizeObserver=new ResizeObserver(()=>drawRevenueChart());
-    financeResizeObserver.observe(wrap);
+
+  try {
+    // Fetch all three data sources in parallel
+    const [summary, chartData, allMonthBookings] = await Promise.all([
+      BookingAPI.getFinanceSummary(month),
+      BookingAPI.getFinanceMonthly(month),
+      BookingAPI.getByMonth(month)
+    ]);
+
+    // KPI cards
+    document.getElementById('finance-kpi').innerHTML=`
+      <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C9A96E">£${summary.totalRevenue.toLocaleString()}</div></div>
+      <div class="fin-kpi-card"><div class="fin-kpi-label">Deposits Collected</div><div class="fin-kpi-value" style="color:#2D6A4F">£${summary.depositsCollected.toLocaleString()}</div></div>
+      <div class="fin-kpi-card"><div class="fin-kpi-label">Balance Outstanding</div><div class="fin-kpi-value" style="color:#C1121F">£${summary.balanceOutstanding.toLocaleString()}</div></div>
+    `;
+    const pillEl=document.getElementById('fin-total-pill');
+    if(pillEl)pillEl.textContent='£'+summary.totalRevenue.toLocaleString();
+
+    // Chart from API monthly endpoint
+    const cumulative=chartData.map(d=>d.cumulative);
+    const daily=chartData.map(d=>d.revenue);
+    const days=new Date(y,m,0).getDate();
+    financeChartData={cumulative,days,_daily:daily};
+    const wrap=document.getElementById('fin-chart-wrap');
+    if(wrap){
+      if(financeResizeObserver)financeResizeObserver.disconnect();
+      financeResizeObserver=new ResizeObserver(()=>drawRevenueChart());
+      financeResizeObserver.observe(wrap);
+      drawRevenueChart();
+    }
+
+    // Table — use API data, apply client-side filter
+    const filtered=financeFilter==='All'?allMonthBookings:allMonthBookings.filter(b=>b.status===financeFilter);
+    const isMob=window.innerWidth<600;
+    document.getElementById('finance-tbody').innerHTML=filtered.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(b=>{
+      const status=b.status;
+      const pillCls={Complete:'complete',Pending:'pending',Confirmed:'confirmed',Cancelled:'cancelled'}[status]||'pending';
+      const canPay=b.status!=='Complete'&&b.status!=='Cancelled';
+      const actionBtn=canPay
+        ?(isMob?`<button class="fin-mark-circle" onclick="markPaid('${b.id}')" title="Mark Paid">✓</button>`
+               :`<button class="fin-mark-btn" onclick="markPaid('${b.id}')">Mark Paid</button>`)
+        :`<span style="color:#D0D0D0;font-size:14px;text-align:center;display:block">✓</span>`;
+      return`<tr>
+        <td><span class="date-full">${formatDate(b.date)}</span><span class="date-mob">${formatDateShort(b.date)}</span></td>
+        <td style="font-weight:700">${b.clientName}</td>
+        <td class="fin-col-treat">${b.treatment}</td>
+        <td style="font-weight:700;color:#C9A96E">£${b.price}</td>
+        <td><span class="fin-pill ${pillCls}">${status}</span></td>
+        <td style="text-align:center">${actionBtn}</td>
+      </tr>`;
+    }).join('')||`<tr><td colspan="6" style="text-align:center;padding:40px 0">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:#111;margin-bottom:8px">No transactions yet</div>
+      <div style="font-family:'Inter',sans-serif;font-size:13px;color:#AAAAAA">Bookings will appear here automatically</div>
+    </td></tr>`;
+
+  } catch(err) {
+    console.error('renderFinance API error', err);
+    // Fallback to local data
+    const allMonthBookings=getBookings().filter(b=>{
+      const d=new Date(b.date);
+      return d.getFullYear()===y&&d.getMonth()+1===m&&b.status!=='Cancelled';
+    });
+    const totalRev=allMonthBookings.reduce((s,b)=>s+Number(b.price),0);
+    const deposits=allMonthBookings.reduce((s,b)=>s+Number(b.deposit||0),0);
+    const outstanding=allMonthBookings.filter(b=>b.status!=='Complete').reduce((s,b)=>s+(Number(b.price)-Number(b.deposit||0)),0);
+    document.getElementById('finance-kpi').innerHTML=`
+      <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C9A96E">£${totalRev.toLocaleString()}</div></div>
+      <div class="fin-kpi-card"><div class="fin-kpi-label">Deposits Collected</div><div class="fin-kpi-value" style="color:#2D6A4F">£${deposits.toLocaleString()}</div></div>
+      <div class="fin-kpi-card"><div class="fin-kpi-label">Balance Outstanding</div><div class="fin-kpi-value" style="color:#C1121F">£${outstanding.toLocaleString()}</div></div>
+    `;
+    const days=new Date(y,m,0).getDate();
+    const daily=Array(days).fill(0);
+    allMonthBookings.forEach(b=>{const d=parseInt(b.date.split('-')[2]);if(d>=1&&d<=days)daily[d-1]+=Number(b.price);});
+    const cumulative=daily.reduce((acc,v,i)=>{acc.push((acc[i-1]||0)+v);return acc;},[]);
+    financeChartData={cumulative,days,_daily:daily};
     drawRevenueChart();
+    document.getElementById('finance-tbody').innerHTML=`<tr><td colspan="6" style="text-align:center;color:#AAA;padding:20px;font-style:italic">Unable to load live data — showing cached results</td></tr>`;
   }
-  // Table
-  const isMob=window.innerWidth<600;
-  document.getElementById('finance-tbody').innerHTML=filtered.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(b=>{
-    const status=b.status;
-    const pillCls={Complete:'complete',Pending:'pending',Confirmed:'confirmed',Cancelled:'cancelled'}[status]||'pending';
-    const canPay=b.status!=='Complete'&&b.status!=='Cancelled';
-    const actionBtn=canPay
-      ?(isMob?`<button class="fin-mark-circle" onclick="markPaid('${b.id}')" title="Mark Paid">✓</button>`
-             :`<button class="fin-mark-btn" onclick="markPaid('${b.id}')">Mark Paid</button>`)
-      :`<span style="color:#D0D0D0;font-size:14px;text-align:center;display:block">✓</span>`;
-    return`<tr>
-      <td style="font-size:12px;color:#888"><span class="date-full">${formatDate(b.date)}</span><span class="date-mob">${formatDateShort(b.date)}</span></td>
-      <td style="font-size:13px;font-weight:700;color:#111">${b.clientName}</td>
-      <td class="fin-col-treat" style="font-size:12px;color:#888">${b.treatment}</td>
-      <td style="font-size:13px;font-weight:700;color:#C9A96E">£${b.price}</td>
-      <td><span class="fin-pill ${pillCls}">${status}</span></td>
-      <td style="text-align:center">${actionBtn}</td>
-    </tr>`;
-  }).join('')||`<tr><td colspan="6" style="text-align:center;padding:40px 0">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:#111;margin-bottom:8px">No transactions yet</div>
-    <div style="font-family:'Inter',sans-serif;font-size:13px;color:#AAAAAA">Bookings will appear here automatically</div>
-  </td></tr>`;
 }
 function setFilter(f,el){
   financeFilter=f;
@@ -2079,24 +2275,24 @@ function setFilter(f,el){
   renderFinance();
 }
 let _undoId=null,_undoPrev=null,_undoTimer=null;
-function markPaid(id){
+async function markPaid(id){
   const b=getBookings();const i=b.findIndex(x=>x.id===id);
   if(i>-1){
     _undoId=id;_undoPrev=b[i].status;
-    b[i].status='Complete';
-    saveBookings(b);renderFinance();updateSidebarBadges();
+    await BookingAPI.update(id,{status:'Complete',balancePaid:true});
+    renderFinance();updateSidebarBadges();
     clearTimeout(_undoTimer);
     const t=document.getElementById('undo-toast');
     t.classList.add('visible');
     _undoTimer=setTimeout(()=>{t.classList.remove('visible');_undoId=null;_undoPrev=null;},5000);
   }
 }
-function undoMarkPaid(){
+async function undoMarkPaid(){
   clearTimeout(_undoTimer);
   document.getElementById('undo-toast').classList.remove('visible');
   if(_undoId&&_undoPrev!==null){
-    const b=getBookings();const i=b.findIndex(x=>x.id===_undoId);
-    if(i>-1){b[i].status=_undoPrev;saveBookings(b);renderFinance();updateSidebarBadges();}
+    await BookingAPI.update(_undoId,{status:_undoPrev,balancePaid:false});
+    renderFinance();updateSidebarBadges();
     _undoId=null;_undoPrev=null;
   }
 }
