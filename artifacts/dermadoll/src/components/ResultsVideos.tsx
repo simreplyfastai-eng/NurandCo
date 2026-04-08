@@ -23,7 +23,7 @@ function VideoCard({ vid, i }: { vid: VidSlot; i: number }) {
       transition={{ delay: i * 0.08, duration: 0.6 }}
       className="flex flex-col gap-2"
     >
-      <div className="rounded-sm overflow-hidden bg-[#FAF9F7] aspect-square">
+      <div className="rounded-sm overflow-hidden bg-[#FAF9F7] aspect-square border border-[#C9A96E]">
         <video
           key={src}
           autoPlay
