@@ -1,6 +1,26 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+function mediaUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  if (path.startsWith("/objects/"))
+    return `/api/media/serve?path=${encodeURIComponent(path)}`;
+  return path;
+}
+
+interface Graduate {
+  slot: number;
+  name: string;
+  course: string;
+  src: string;
+}
+
+const DEFAULT_GRADUATES: Graduate[] = [
+  { slot: 1, name: "Sarah M.", course: "Foundation Anti-Wrinkle", src: "" },
+  { slot: 2, name: "Jessica T.", course: "Advanced Dermal Filler", src: "" },
+  { slot: 3, name: "Priya K.", course: "Pathway to Aesthetics", src: "" },
+];
 
 const COURSES = [
   {
@@ -53,6 +73,7 @@ function validateEnquiryPhone(v: string) {
 export default function Training() {
   const [showForm, setShowForm] = useState(false);
   const [preselect, setPreselect] = useState("");
+  const [graduates, setGraduates] = useState<Graduate[]>(DEFAULT_GRADUATES);
 
   const [enqName, setEnqName] = useState("");
   const [enqEmail, setEnqEmail] = useState("");
@@ -68,6 +89,24 @@ export default function Training() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState("");
+
+  useEffect(() => {
+    fetch("/api/media/config")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.graduates && Array.isArray(data.graduates) && data.graduates.length === 3) {
+          setGraduates(
+            data.graduates.map((g: Partial<Graduate>, i: number) => ({
+              slot: g.slot ?? i + 1,
+              name: g.name || DEFAULT_GRADUATES[i].name,
+              course: g.course || DEFAULT_GRADUATES[i].course,
+              src: mediaUrl(g.src || "") || "",
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const openForm = (courseName?: string) => {
     setPreselect(courseName ?? "");
@@ -131,9 +170,9 @@ export default function Training() {
 
   return (
     <section id="training" className="py-14 md:py-[100px] bg-secondary">
-      {/* Mobile-only styles */}
       <style>{`
         .courses-scroll::-webkit-scrollbar { display: none; }
+        .graduates-scroll::-webkit-scrollbar { display: none; }
         @media (max-width: 767px) {
           .courses-scroll {
             display: flex !important;
@@ -183,6 +222,17 @@ export default function Training() {
             letter-spacing: normal !important;
             text-transform: uppercase;
           }
+          .graduates-scroll {
+            display: flex !important;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            gap: 12px !important;
+            padding-bottom: 8px;
+          }
+          .graduates-scroll .grad-card {
+            min-width: 260px !important;
+            flex-shrink: 0 !important;
+          }
         }
       `}</style>
 
@@ -219,7 +269,6 @@ export default function Training() {
               {COURSES[0].inclusions.map((item, i) => (
                 <li key={i} className="flex items-start gap-2 md:gap-3">
                   <Check className="text-primary mt-0.5 flex-shrink-0" size={14} />
-                  {/* Mobile: 13px / line-height 1.6 — Desktop: base / snug */}
                   <span className="text-foreground/80 font-light text-[13px] leading-[1.6] md:text-base md:leading-snug">{item}</span>
                 </li>
               ))}
@@ -231,7 +280,6 @@ export default function Training() {
                 Pathway to Aesthetics
               </h3>
               <div className="font-serif text-3xl md:text-5xl text-primary mb-3 md:mb-6">£2,000</div>
-              {/* Mobile: 13px — Desktop: base */}
               <ul className="space-y-2 md:space-y-4 text-foreground/80 font-light text-[13px] md:text-base mb-4 md:mb-8">
                 <li><strong className="font-medium text-foreground">Add-on:</strong> Skin Boosters or Advanced Dermal Filler +£500</li>
                 <li><strong className="font-medium text-foreground">Duration:</strong> 3-day course | Max 3 students</li>
@@ -281,12 +329,123 @@ export default function Training() {
               </motion.div>
             ))}
           </div>
-
           {/* Scroll fade hint — mobile only */}
           <div
             className="pointer-events-none absolute inset-y-0 right-0 w-10 md:hidden"
             style={{ background: "linear-gradient(to right, transparent, #FAF9F7)" }}
           />
+        </div>
+
+        {/* Our Graduates */}
+        <div className="mb-10 md:mb-16">
+          <div className="text-center mb-10">
+            <motion.h3
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "32px", color: "#111111", marginBottom: "8px", fontWeight: 700 }}
+            >
+              Our Graduates
+            </motion.h3>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+              transition={{ delay: 0.1 }}
+              style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", color: "#C9A96E", fontStyle: "italic", letterSpacing: "1px" }}
+            >
+              Real students. Real results. Real careers.
+            </motion.p>
+          </div>
+
+          {/* Photo strip */}
+          <div className="relative">
+            <div
+              className="graduates-scroll grid md:grid-cols-3 gap-4"
+              style={{ scrollbarWidth: "none" } as React.CSSProperties}
+            >
+              {graduates.map((grad, i) => (
+                <motion.div
+                  key={grad.slot}
+                  className="grad-card"
+                  initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                  transition={{ duration: 0.6, delay: i * 0.1 }}
+                  whileHover={{ scale: 1.02, transition: { duration: 0.4 } }}
+                  style={{
+                    position: "relative",
+                    borderRadius: "16px",
+                    overflow: "hidden",
+                    aspectRatio: "3 / 4",
+                  }}
+                >
+                  {/* Image or placeholder */}
+                  {grad.src ? (
+                    <img
+                      src={grad.src}
+                      alt={grad.name}
+                      style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  ) : (
+                    <div style={{ position: "absolute", inset: 0, background: "#1A1A1A", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "12px" }}>
+                      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.2">
+                        <circle cx="12" cy="8" r="4" />
+                        <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+                      </svg>
+                      <span style={{ fontFamily: "Inter, sans-serif", fontSize: "12px", color: "#C9A96E", textAlign: "center", padding: "0 16px" }}>
+                        Graduate photo coming soon
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Gradient overlay */}
+                  <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%)", pointerEvents: "none" }} />
+
+                  {/* Gold corner — top-left */}
+                  <div style={{ position: "absolute", top: "12px", left: "12px", width: "20px", height: "2px", background: "#C9A96E", zIndex: 2 }} />
+                  <div style={{ position: "absolute", top: "12px", left: "12px", width: "2px", height: "20px", background: "#C9A96E", zIndex: 2 }} />
+
+                  {/* Gold corner — bottom-right */}
+                  <div style={{ position: "absolute", bottom: "12px", right: "12px", width: "20px", height: "2px", background: "#C9A96E", zIndex: 2 }} />
+                  <div style={{ position: "absolute", bottom: "12px", right: "12px", width: "2px", height: "20px", background: "#C9A96E", zIndex: 2 }} />
+
+                  {/* Name tag */}
+                  <div style={{
+                    position: "absolute", bottom: 0, left: 0, right: 0,
+                    background: "rgba(0,0,0,0.4)",
+                    backdropFilter: "blur(4px)",
+                    borderRadius: "0 0 16px 16px",
+                    padding: "12px 16px",
+                    zIndex: 1,
+                  }}>
+                    <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "18px", color: "white", marginBottom: "2px" }}>
+                      {grad.name}
+                    </div>
+                    <div style={{ fontFamily: "Inter, sans-serif", fontSize: "11px", color: "#C9A96E", letterSpacing: "1px", textTransform: "uppercase" }}>
+                      {grad.course}
+                    </div>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Mobile scroll fade */}
+            <div
+              className="pointer-events-none absolute inset-y-0 right-0 w-10 md:hidden"
+              style={{ background: "linear-gradient(to right, transparent, #FAF9F7)" }}
+            />
+          </div>
+
+          {/* Quote */}
+          <motion.p
+            initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+            transition={{ delay: 0.2 }}
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontSize: "20px",
+              fontStyle: "italic",
+              color: "#C9A96E",
+              textAlign: "center",
+              marginTop: "40px",
+            }}
+          >
+            "Join the next generation of aesthetic professionals."
+          </motion.p>
         </div>
 
         {/* Enquiry form */}

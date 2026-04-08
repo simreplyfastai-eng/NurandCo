@@ -13,11 +13,20 @@ router.get("/media/config", async (req, res) => {
     );
     const data: Record<string, unknown> =
       result.rows.length > 0 ? (result.rows[0].value as Record<string, unknown>) : {};
+    const defaultGraduates = [
+      { slot: 1, name: "Sarah M.", course: "Foundation Anti-Wrinkle", src: "" },
+      { slot: 2, name: "Jessica T.", course: "Advanced Dermal Filler", src: "" },
+      { slot: 3, name: "Priya K.", course: "Pathway to Aesthetics", src: "" },
+    ];
+    const graduates = Array.isArray(data?.graduates) && (data.graduates as unknown[]).length === 3
+      ? data.graduates
+      : defaultGraduates;
     return res.json({
       practitionerImage: (data?.practitionerImage as string) || null,
       heroVideo: (data?.heroSrc as string) || null,
       beforeAfter: (data?.baImages as Record<string, string>) || {},
       videos: (data?.vidSrcs as Record<string, string>) || {},
+      graduates,
     });
   } catch (err) {
     console.error("GET /api/media/config", err);

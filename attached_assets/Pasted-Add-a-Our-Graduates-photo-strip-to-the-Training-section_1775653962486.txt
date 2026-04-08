@@ -1,0 +1,109 @@
+Add a "Our Graduates" photo strip 
+to the Training section on index.html, 
+directly below the 6 course cards 
+and above the enquiry form / CTA.
+
+DESIGN:
+
+Section heading centred:
+"Our Graduates" in Cormorant Garamond 
+32px #111111
+Subtitle below: "Real students. 
+Real results. Real careers." 
+in Inter 13px #C9A96E italic, 
+letter-spacing 1px, margin-bottom 40px
+
+PHOTO STRIP — 3 IMAGES SIDE BY SIDE:
+
+Desktop:
+- 3 column grid, equal width
+- Gap: 16px
+- Each image card: 
+  aspect-ratio: 3/4 (portrait)
+  border-radius: 16px
+  overflow: hidden
+  position: relative
+
+Mobile:
+- Horizontal scroll row (same as 
+  course cards)
+- Each card: min-width: 260px, 
+  aspect-ratio: 3/4
+- Scrollable, no scrollbar shown
+
+Each image card styling:
+- Image fills card fully: 
+  object-fit: cover, width: 100%, 
+  height: 100%
+- Subtle dark gradient overlay at 
+  bottom: linear-gradient(to top, 
+  rgba(0,0,0,0.5) 0%, transparent 50%)
+- Gold corner accent: thin gold lines 
+  in top-left and bottom-right corners
+  (2px solid #C9A96E, 20px long, 
+  positioned absolute, 12px from edge)
+- On hover (desktop): 
+  transform: scale(1.02)
+  transition: 0.4s ease
+
+Name tag overlaid bottom of each card:
+- Background: rgba(0,0,0,0.4)
+  backdrop-filter: blur(4px)
+  border-radius: 0 0 16px 16px
+  padding: 12px 16px
+- Name: Cormorant Garamond 18px white
+- Course completed: Inter 11px 
+  #C9A96E letter-spacing 1px uppercase
+  e.g. "Foundation Anti-Wrinkle"
+
+Image sources (placeholder — 
+Niamh will replace with real graduate 
+photos):
+graduate-1.jpg
+graduate-2.jpg  
+graduate-3.jpg
+
+All in artifacts/dermadoll/public/
+
+If image doesn't exist show elegant 
+placeholder: dark grey (#1A1A1A) 
+background with gold silhouette icon 
+centred and "Graduate photo coming soon" 
+in Inter 12px #C9A96E
+
+Placeholder name tags (Niamh will 
+update with real names):
+Card 1: "Sarah M." — Foundation Anti-Wrinkle
+Card 2: "Jessica T." — Advanced Dermal Filler  
+Card 3: "Priya K." — Pathway to Aesthetics
+
+BELOW THE PHOTO STRIP:
+Add a small gold quote in Cormorant 
+Garamond italic 20px centred:
+"Join the next generation of 
+aesthetic professionals."
+margin-top: 40px
+color: #C9A96E
+
+Then existing Enquire Now / 
+DM button below that as normal.
+
+Connect to portal media library:
+Fetch graduate photo URLs from 
+GET /api/media/config 
+under field: graduates: [
+  { slot: 1, name: "", course: "", src: "" },
+  { slot: 2, name: "", course: "", src: "" },
+  { slot: 3, name: "", course: "", src: "" }
+]
+
+Add 3 graduate slots to the portal 
+Media Manager page under a new card:
+Title: "Graduate Photos"
+Subtitle: "Shown in the Training 
+section on your website"
+3 portrait slot previews in a row
+Each with: Replace button, 
+editable name field, editable course field
+All saves to portal_kv dd_media 
+cloud storage — not localStorage.
