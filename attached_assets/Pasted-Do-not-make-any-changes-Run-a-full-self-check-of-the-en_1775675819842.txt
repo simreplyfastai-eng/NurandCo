@@ -1,0 +1,110 @@
+Do not make any changes.
+Run a full self-check of the entire 
+project and report back honestly.
+
+Check every item below and tell me 
+✅ Working, ⚠️ Partial, or ❌ Broken 
+for each one.
+
+WEBSITE (index.html):
+- Booking modal opens correctly
+- GET /api/availability is called 
+  when modal opens
+- Monday and Sunday are blocked
+- Working hours enforced per day
+- Time slots load when date selected
+- Booked slots are greyed out
+- Duration + 15 min buffer applied 
+  to blocked slots
+- Name validation works (2-60 chars)
+- Email validation works
+- Phone validation works (UK format)
+- Treatment dropdown populated
+- Stripe payment form loads when 
+  STRIPE_PUBLISHABLE_KEY is set
+- When key not set: shows contact 
+  message not broken form
+- Success screen does not auto-close
+- Success screen shows correct 
+  deposit/balance split
+- All 7 training courses showing
+- Training enquiry form works
+- Enquiry POST /api/enquiries works
+- No bank transfer details anywhere
+- No hardcoded credentials anywhere
+
+PORTAL (portal.html):
+- Login works with JWT
+- Session expires after 8 hours
+- Expired session redirects to login
+- Dashboard loads real data from API
+- Dashboard auto-refreshes every 60s
+- New booking toast notification works
+- Schedule calendar loads correctly
+- Gold dot shows on booked dates
+- Cancelled bookings filtered from 
+  day panel
+- Phone number shows in day panel
+- New Bookings page loads
+- Deposit column shows correctly
+- Confirm Deposit Received button works
+- Mark Balance Paid button works
+- Clients page loads as compact list
+- Client profile panel opens
+- Visit history shows correctly
+- Finance page loads without 
+  horizontal scroll
+- Finance data is live from PostgreSQL
+- Chart renders correctly
+- Treatments page accordion works
+- Media page has clean 2x2 grids
+- Bin icons present on all media
+- Availability page shows correct hours
+- Settings page has all fields
+- Pre-launch checklist shows correctly
+- Enquiries section in sidebar
+- Enquiries table loads correctly
+
+BACKEND:
+- POST /api/bookings works
+- Double booking prevention works
+- Duration + buffer enforced server side
+- client_id stored on every booking
+- duration_minutes stored on booking
+- category stored on booking
+- Auto-complete runs on GET /api/bookings
+- GET /api/cron/reminders protected 
+  by CRON_SECRET
+- GET /api/cron/autocomplete protected 
+  by CRON_SECRET
+- Rate limiting on POST /api/bookings
+- Rate limiting on POST /api/auth/login
+- Rate limiting on POST /api/enquiries
+- JWT auth working on all protected routes
+- No SQLite anywhere in codebase
+- All data saving to PostgreSQL
+- Media saving to cloud storage
+- No localStorage used for booking data
+
+EMAILS (will activate with RESEND_API_KEY):
+- Client confirmation email code written
+- Admin notification email code written
+- 24hr reminder email includes date
+- Cancellation email code written
+- Success screen shows screenshot 
+  message when RESEND not configured
+
+SECURITY:
+- Admin credentials in Replit Secrets only
+- No API keys in frontend code
+- Stripe keys referenced from backend only
+- CRON_SECRET protecting cron endpoints
+- Rate limiting active
+- JWT expiry working
+- Webhook signature verification ready
+
+Give me the full list with 
+✅ ⚠️ or ❌ for every single item.
+Be completely honest.
+If something is partial tell me 
+exactly what is missing.
