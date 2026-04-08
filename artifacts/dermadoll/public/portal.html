@@ -350,7 +350,6 @@ tr:hover td{background:#FDFBF8}
 .fin-pill{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block}
 .fin-pill.complete,.fin-pill.confirmed{background:#D8F3DC;color:#2D6A4F}
 .fin-pill.pending{background:#FFF3E0;color:#C9A96E}
-.fin-pill.overdue{background:#FFE5E5;color:#C1121F}
 .fin-pill.cancelled{background:#EEEEEE;color:#888}
 .fin-mark-btn{border:1px solid #C9A96E;color:#C9A96E;background:#fff;font-family:'Inter',sans-serif;font-size:11px;border-radius:20px;padding:4px 12px;cursor:pointer;white-space:nowrap;transition:all .15s}
 .fin-mark-btn:hover{background:#C9A96E;color:#fff}
@@ -693,7 +692,6 @@ tr:hover td{background:#FDFBF8}
               <button class="fin-tab active" id="f-all" onclick="setFilter('All',this)">All</button>
               <button class="fin-tab" id="f-paid" onclick="setFilter('Complete',this)">Paid</button>
               <button class="fin-tab" id="f-pending" onclick="setFilter('Pending',this)">Pending</button>
-              <button class="fin-tab" id="f-overdue" onclick="setFilter('Overdue',this)">Overdue</button>
             </div>
           </div>
           <div id="finance-table-wrap">
@@ -2023,20 +2021,11 @@ function renderFinance(){
     initChartTooltip();
   }
   const [y,m]=sel.value.split('-').map(Number);
-  const todayStr=fmt(new Date());
   const allMonthBookings=getBookings().filter(b=>{
     const d=new Date(b.date);
     return d.getFullYear()===y&&d.getMonth()+1===m&&b.status!=='Cancelled';
   });
-  const isOverdue=b=>b.status==='Pending'&&b.date<todayStr;
-  const filterFn=b=>{
-    if(financeFilter==='All')return true;
-    if(financeFilter==='Overdue')return isOverdue(b);
-    if(financeFilter==='Complete')return b.status==='Complete';
-    if(financeFilter==='Pending')return b.status==='Pending';
-    return true;
-  };
-  const filtered=allMonthBookings.filter(filterFn);
+  const filtered=financeFilter==='All'?allMonthBookings:allMonthBookings.filter(b=>b.status===financeFilter);
   // KPI cards
   const totalRev=allMonthBookings.reduce((s,b)=>s+Number(b.price),0);
   const deposits=allMonthBookings.reduce((s,b)=>s+Number(b.deposit||0),0);
@@ -2063,8 +2052,8 @@ function renderFinance(){
   // Table
   const isMob=window.innerWidth<600;
   document.getElementById('finance-tbody').innerHTML=filtered.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(b=>{
-    const status=isOverdue(b)?'Overdue':b.status;
-    const pillCls={Complete:'complete',Pending:'pending',Overdue:'overdue',Confirmed:'confirmed',Cancelled:'cancelled'}[status]||'pending';
+    const status=b.status;
+    const pillCls={Complete:'complete',Pending:'pending',Confirmed:'confirmed',Cancelled:'cancelled'}[status]||'pending';
     const canPay=b.status!=='Complete'&&b.status!=='Cancelled';
     const actionBtn=canPay
       ?(isMob?`<button class="fin-mark-circle" onclick="markPaid('${b.id}')" title="Mark Paid">✓</button>`
