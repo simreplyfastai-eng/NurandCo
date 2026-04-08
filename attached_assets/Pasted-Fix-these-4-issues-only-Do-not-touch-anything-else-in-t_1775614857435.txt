@@ -1,0 +1,105 @@
+Fix these 4 issues only. Do not touch 
+anything else in the codebase.
+
+1. BUG FIX — depositPaid hardcoded to false
+In bookings.ts line 139, replace the 
+current depositPaid logic with:
+
+const depositPaid = (b.stripePaymentId && b.depositPaid) ? true
+  : b.source === "Website" ? false
+  : (b.depositPaid ?? false);
+
+This ensures that when a Stripe payment 
+has been made, depositPaid is saved as 
+true regardless of the booking source.
+
+2. BUG FIX — stripePaymentId never passed
+In BookingModal.tsx:
+
+Step 1: When the PaymentIntent clientSecret 
+is received, store it in a ref:
+const clientSecretRef = useRef(null)
+// when clientSecret is received:
+clientSecretRef.current = clientSecret
+
+Step 2: In handlePayment(), extract the 
+PaymentIntent ID from the clientSecret 
+and include it in the booking object:
+stripePaymentId: clientSecretRef.current
+  ?.split("_secret_")[0] ?? null
+
+This fixes both the duplicate booking 
+bug in the webhook AND ensures the 
+client confirmation email fires correctly.
+
+3. ADD MANUAL CRON TRIGGER BUTTONS
+In the portal Settings page under 
+the Developer section, add two buttons:
+
+Button 1:
+Label: "Run Reminders Now"
+On click: fetch GET /api/cron/reminders 
+with header x-cron-secret from 
+CRON_SECRET env variable
+On success: show toast "Reminders sent ✓"
+On fail: show toast "Failed — check 
+CRON_SECRET in Replit Secrets"
+
+Button 2:
+Label: "Run Autocomplete Now"  
+On click: fetch GET /api/cron/autocomplete
+with same auth header
+On success: show toast "Autocomplete 
+ran successfully ✓"
+On fail: show toast "Failed — check 
+CRON_SECRET in Replit Secrets"
+
+Both buttons: gold outlined, Inter 13px, 
+border-radius 8px, padding 10px 20px,
+side by side with 8px gap.
+
+4. ADD REPLIT SCHEDULED TASK INSTRUCTIONS
+In the Settings page Developer section, 
+replace the current vague text with 
+these exact actionable instructions:
+
+"How to set up automatic scheduled tasks:
+
+1. In your Replit project click the 
+   three dots menu (⋯) top left
+2. Select 'Scheduled tasks'
+3. Click 'Add scheduled task'
+4. Task 1 — Hourly reminders:
+   Schedule: every 1 hour
+   Command: curl -H 'x-cron-secret: 
+   YOUR_CRON_SECRET' 
+   https://YOUR-REPLIT-URL/api/cron/reminders
+5. Task 2 — Daily autocomplete:
+   Schedule: every day at 00:01
+   Command: curl -H 'x-cron-secret: 
+   YOUR_CRON_SECRET'
+   https://YOUR-REPLIT-URL/api/cron/autocomplete
+6. Replace YOUR_CRON_SECRET with your 
+   CRON_SECRET value from Replit Secrets
+7. Replace YOUR-REPLIT-URL with your 
+   actual Replit project URL
+
+Until these are set up, reminder emails 
+will not send automatically."
+
+Also fix the deposit percentage setting:
+The deposit % field in Settings saves 
+to the database but is never used — 
+the booking flow hardcodes 50%.
+
+Wire it up properly:
+- On portal load fetch the saved 
+  deposit % from settings
+- Pass it to the booking calculation:
+  const depositPct = settings.depositPercent ?? 50
+  const deposit = Math.floor(price * depositPct / 100)
+  const balance = price - deposit
+- Use this value everywhere deposit 
+  is calculated — booking modal, 
+  success screen, emails, portal display
+- Default to 50 if not set
