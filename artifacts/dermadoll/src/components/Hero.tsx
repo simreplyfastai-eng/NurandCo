@@ -27,7 +27,7 @@ export default function Hero() {
   }, []);
 
   return (
-    <section className="relative h-[100dvh] md:h-[150dvh] w-full overflow-hidden flex items-center md:items-start justify-center">
+    <section className="relative h-[100dvh] w-full overflow-hidden flex items-center justify-center">
       {/* Background Video */}
       <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-br from-[#1a1a1a] to-[#2d2520]">
         <video
@@ -48,7 +48,7 @@ export default function Hero() {
       </div>
 
       {/* Content */}
-      <div className="relative z-10 text-center px-6 flex flex-col items-center justify-center w-full max-w-5xl mx-auto py-28 md:py-0 md:pt-[28dvh]">
+      <div className="relative z-10 text-center px-6 flex flex-col items-center justify-center w-full max-w-5xl mx-auto py-28 md:py-0">
         {/* Logo wordmark */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
@@ -57,16 +57,15 @@ export default function Hero() {
           className="flex flex-col items-center mb-10 md:mb-12"
         >
           <span
-            className="font-serif tracking-[0.18em] font-bold leading-none text-white"
+            className="font-serif tracking-[0.18em] font-bold leading-none text-white text-[clamp(3.2rem,12vw,8rem)] md:text-[96px]"
             style={{
-              fontSize: "clamp(3.2rem, 12vw, 8rem)",
               textShadow: "0 0 30px rgba(201,169,110,0.3), 0 0 60px rgba(201,169,110,0.12)",
             }}
           >
             DERMADOLL
           </span>
           <span
-            className="font-sans text-sm md:text-base tracking-[0.45em] font-light mt-4 text-white/85"
+            className="font-sans text-sm md:text-[14px] tracking-[0.45em] md:tracking-[8px] font-light mt-4 md:mt-[8px] text-white/85"
             style={{ textShadow: "0 0 15px rgba(201,169,110,0.2)" }}
           >
             AESTHETICS
@@ -78,10 +77,10 @@ export default function Hero() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.45 }}
-          className="mb-8 relative inline-block"
+          className="mb-8 md:mb-4 relative inline-block"
         >
           <h1
-            className="font-serif text-[1.85rem] md:text-[3.25rem] text-white font-medium leading-tight"
+            className="font-serif text-[1.85rem] md:text-[52px] text-white font-medium leading-tight"
             style={{ textShadow: "0 0 20px rgba(201,169,110,0.2), 0 0 40px rgba(201,169,110,0.08)" }}
           >
             Redefining Natural Beauty
@@ -99,7 +98,7 @@ export default function Hero() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.85 }}
-          className="text-white/85 font-light text-base md:text-xl max-w-2xl mx-auto mb-14 md:mb-16"
+          className="text-white/85 font-light text-base md:text-[16px] max-w-2xl mx-auto mb-14 md:mb-12"
           style={{ textShadow: "0 0 15px rgba(201,169,110,0.15)" }}
         >
           Premium aesthetics treatments in Birmingham & Solihull
@@ -114,7 +113,7 @@ export default function Hero() {
         >
           <a
             href="#services"
-            className="w-full sm:w-auto bg-primary text-white px-8 py-4 rounded-full text-sm uppercase tracking-wider font-medium hover:bg-primary/90 transition-all duration-300"
+            className="w-full sm:w-auto bg-primary text-white px-8 py-4 md:px-10 rounded-full text-sm md:text-[13px] uppercase tracking-wider md:tracking-[2px] font-medium hover:bg-primary/90 transition-all duration-300"
             onClick={(e) => {
               e.preventDefault();
               document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" });
@@ -126,7 +125,7 @@ export default function Hero() {
             href="https://facesconsent.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full sm:w-auto border border-white text-white px-8 py-4 rounded-full text-sm uppercase tracking-wider font-medium hover:bg-white hover:text-black transition-all duration-300"
+            className="w-full sm:w-auto border border-white text-white px-8 py-4 md:px-10 rounded-full text-sm md:text-[13px] uppercase tracking-wider md:tracking-[2px] font-medium hover:bg-white hover:text-black transition-all duration-300"
           >
             Book a Consultation
           </a>
