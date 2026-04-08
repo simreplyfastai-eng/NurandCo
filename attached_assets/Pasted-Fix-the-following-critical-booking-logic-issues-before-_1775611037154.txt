@@ -1,0 +1,401 @@
+Fix the following critical booking logic issues 
+before the site goes live. All data must save 
+to PostgreSQL via the backend API — nothing 
+to localStorage.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+1. DOUBLE BOOKING PREVENTION
+━━━━━━━━━━━━━━━━━━━━━━━━
+Add a unique constraint to the bookings table 
+on date + time so the database rejects duplicates 
+at the row level.
+
+When POST /api/bookings receives a request:
+- Check if any booking exists on that date 
+  where the requested time falls within 
+  that booking's start time + duration + 
+  15 minute buffer
+- If conflict found: return HTTP 409 with:
+  "This time slot is no longer available. 
+  Please select another time."
+
+On the website booking form:
+- When a client selects a date, fetch all 
+  bookings for that date fresh from 
+  GET /api/bookings/date/:date
+- Never use a cached version of this data
+- Calculate blocked slots from the response 
+  (see slot blocking logic below)
+- Grey out and disable all blocked slots 
+  in the time picker
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+2. RACE CONDITION PROTECTION
+━━━━━━━━━━━━━━━━━━━━━━━━
+Two clients selecting the same slot at the 
+same time must be handled safely.
+The database unique constraint is the last 
+line of defence — the second INSERT fails.
+Catch this conflict error in the API and 
+return the same 409 response.
+
+Frontend must handle 409 gracefully:
+- Show: "Sorry, that slot was just taken. 
+  Please choose another time."
+- Automatically refresh available slots 
+  for that date from the API
+- Do not require the user to reload the page
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+3. TREATMENT DURATION + 15 MIN BUFFER
+━━━━━━━━━━━━━━━━━━━━━━━━
+Every booking blocks out its treatment 
+duration PLUS a 15 minute buffer after.
+
+Treatment durations (these are fixed — 
+read from this list, store on each booking):
+
+BOTOX:
+Botox 1 Area = 15 mins
+Botox 2 Areas = 15 mins
+Botox 3 Areas = 15 mins
+Botox 4 Areas = 15 mins
+Masseter Botox = 15 mins
+Nefertiti Lift Botox (Neck) = 30 mins
+Chin Botox (Mentalis Muscle) = 30 mins
+Nose Slimming Botox = 30 mins
+Gummy Smile / Lip Flip Botox = 30 mins
+Hyperhidrosis (Underarm) Botox = 30 mins
+Botox Topup = 15 mins
+
+DERMAL FILLER:
+0.5ml Lip Filler = 30 mins
+0.7ml Lip Filler = 45 mins
+1.1ml Lip Filler = 45 mins
+1.1ml Nasal Labials = 30 mins
+1.1ml Cheek Filler = 30 mins
+1.5ml Cheek Filler = 45 mins
+2.2ml Cheek Filler = 45 mins
+1.1ml Chin Filler = 45 mins
+2.2ml Jawline Filler = 60 mins
+Liquid Rhinoplasty = 45 mins
+Teartrough Filler = 45 mins
+2.2ml Facial Contouring = 45 mins
+3.3ml Facial Contouring = 60 mins
+4.4ml Facial Contouring = 60 mins
+
+FACIALS:
+Glass Skin Facial = 60 mins
+Glass Skin Facial + Microneedling = 60 mins
+
+SKIN BOOSTERS:
+1x Skin Booster = 30 mins
+3x Lumi Pro Skin Booster = 30 mins
+Plenhyage XL Strong = 30 mins
+Plenhyage XL Strong 2 Treatments = 30 mins
+Vitarin I - Eye Polynucleotide = 30 mins
+Vitarin I - Eye Polynucleotide x2 = 30 mins
+B12 Injection = 15 mins
+
+FAT DISSOLVING:
+Lemon Bottle Small Area = 30 mins
+Lemon Bottle Large Area = 30 mins
+
+TREATMENT BUNDLES:
+Botox 3 Areas + 1.1ml Dermal Filler = 45 mins
+Botox 3 Areas + 1.1ml Lips + Lumi Pro = 60 mins
+Botox 3 Areas + 1x Lumi Pro Skin Booster = 45 mins
+Botox 3 Areas + 1x Plenhyage XL = 45 mins
+Botox 3 Areas + Vitarin I Eye = 45 mins
+
+Add a duration_minutes column (integer, 
+default 30) to the bookings table in 
+PostgreSQL.
+
+When POST /api/bookings is called:
+- Look up the treatment name in the list above
+- Store the duration_minutes on the booking row
+- This must save to PostgreSQL — not localStorage
+
+GET /api/bookings/date/:date must return 
+both time AND duration_minutes for every 
+booking so the frontend can calculate 
+blocked slots.
+
+SLOT BLOCKING LOGIC (run on frontend 
+when a date is selected):
+For each existing booking on that date:
+  blocked_until = start_time 
+                + duration_minutes 
+                + 15 (buffer)
+  Block all 30-minute slots from 
+  start_time up to and including 
+  blocked_until
+
+Example 1:
+1.1ml Lip Filler (45 mins) booked at 10:00
+blocked_until = 10:00 + 45 + 15 = 11:00
+Blocks: 10:00, 10:30
+11:00 is free
+
+Example 2:
+2.2ml Jawline Filler (60 mins) booked at 14:00
+blocked_until = 14:00 + 60 + 15 = 15:15
+Blocks: 14:00, 14:30, 15:00
+15:30 is free
+
+Example 3:
+Botox 1 Area (15 mins) booked at 09:00
+blocked_until = 09:00 + 15 + 15 = 09:30
+Blocks: 09:00
+09:30 is free
+
+Run the same blocking logic on the backend 
+inside POST /api/bookings before inserting 
+to prevent any slot that overlaps with an 
+existing booking + buffer from being accepted.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+4. TIMEZONE HANDLING
+━━━━━━━━━━━━━━━━━━━━━━━━
+All timestamps in PostgreSQL must use 
+timestamptz not timestamp.
+
+All date/time inputs from the website and 
+portal must be converted to UTC before 
+storing.
+
+All date/time displays in the portal and 
+website must use:
+new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/London',
+  ...
+})
+
+This prevents appointments showing 1 hour 
+wrong during BST (late March to late October).
+
+Store working hours in the availability 
+table as plain HH:MM strings (no timezone) 
+since they represent local time regardless 
+of DST. When checking availability, convert 
+the stored HH:MM to UTC using the 
+Europe/London timezone for that specific date.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+5. PAST BOOKINGS AUTO-COMPLETE
+━━━━━━━━━━━━━━━━━━━━━━━━
+Any Confirmed booking where date + time 
+has passed (in Europe/London time) must 
+automatically update to Complete.
+
+Create a function runAutoComplete() that:
+- Queries all Confirmed bookings where 
+  date + time in UTC is more than 
+  (duration_minutes + 15) minutes in the past
+- Updates their status to Complete in bulk
+- Saves directly to PostgreSQL bookings table
+
+Run this function:
+- At the start of every GET /api/bookings 
+  request before returning data
+- Via GET /api/cron/autocomplete endpoint 
+  for scheduled tasks
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+6. CANCELLATION EMAIL
+━━━━━━━━━━━━━━━━━━━━━━━━
+When a booking status is changed to 
+Cancelled in the portal, send a 
+cancellation email to the client 
+if they have an email address stored.
+
+Email content:
+Subject: "Your Dermadoll appointment 
+has been cancelled"
+Body:
+Hi [first name],
+
+We're sorry to let you know that your 
+[treatment] appointment on [date] at 
+[time] has been cancelled.
+
+Please get in touch to rebook at a 
+time that suits you.
+
+Instagram: @dermadollaesthetics
+WhatsApp: [number from settings]
+
+The Dermadoll Team
+
+Use Resend as the email provider.
+Add RESEND_API_KEY to Replit Secrets.
+Install resend npm package if not 
+already installed.
+Send from: bookings@dermadollaesthetics.co.uk
+(or noreply@[replit-domain] as fallback 
+until domain is connected)
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+7. 24 HOUR REMINDER EMAIL
+━━━━━━━━━━━━━━━━━━━━━━━━
+Add reminder_sent boolean column 
+(default false) to the bookings table 
+in PostgreSQL.
+
+Create sendReminders() function that:
+- Queries all Confirmed bookings where:
+  date + time is between now+23hrs 
+  and now+25hrs
+  AND reminder_sent = false
+  AND client has an email address
+- For each: sends email via Resend:
+
+Subject: "See you tomorrow — 
+Dermadoll Aesthetics"
+Body:
+Hi [first name],
+
+Just a reminder that your [treatment] 
+appointment is tomorrow at [time].
+
+We look forward to seeing you!
+
+Dermadoll Aesthetics
+Instagram: @dermadollaesthetics
+WhatsApp: [number from settings]
+
+- Sets reminder_sent = true in PostgreSQL 
+  for each booking after sending
+
+Expose as GET /api/cron/reminders
+Run via Replit scheduled tasks every hour.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+8. ADMIN NOTIFICATION EMAIL
+━━━━━━━━━━━━━━━━━━━━━━━━
+When any booking is created via 
+POST /api/bookings (website or portal):
+Send immediate email to ADMIN_EMAIL secret.
+
+Subject: 
+"New booking — [Client Name] — 
+[Treatment] — [Date] at [Time]"
+
+Body:
+New booking received:
+
+Client: [full name]
+Email: [email]
+Phone: [phone]
+Treatment: [treatment]
+Duration: [X] mins
+Date: [date in UK format DD/MM/YYYY]
+Time: [time in UK format HH:MM]
+Deposit: £[deposit amount]
+Status: Pending
+Booked via: Website / Portal
+
+Use the same Resend setup as above.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+9. WEBSITE BOOKING FORM VALIDATION
+━━━━━━━━━━━━━━━━━━━━━━━━
+Validate all fields in index.html booking 
+form before calling POST /api/bookings:
+
+Name: 
+- Required
+- Minimum 2 characters
+- Maximum 60 characters
+- Error: "Please enter your full name"
+
+Email: 
+- Required
+- Must match /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+- Error: "Please enter a valid email address"
+
+Phone: 
+- Required
+- Must be valid UK number 
+  (07XXXXXXXXX or +447XXXXXXXXX, 11 digits)
+- Strip spaces before validating
+- Error: "Please enter a valid UK 
+  phone number"
+
+Treatment: 
+- Required, must be selected from list
+- Error: "Please select a treatment"
+
+Date: 
+- Required
+- Must be today or future date
+- Must be an available working day 
+  per GET /api/availability
+- Error: "Please select an available date"
+
+Time: 
+- Required
+- Must be a valid unblocked slot for 
+  that date (accounting for duration 
+  + 15 min buffer logic)
+- Error: "Please select an available time"
+
+Show red error text directly below each 
+invalid field.
+Disable the submit button until all 
+fields pass validation.
+Never call the API with invalid data.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+10. SESSION EXPIRY
+━━━━━━━━━━━━━━━━━━━━━━━━
+Admin JWT session expires after 8 hours 
+of inactivity.
+
+On every successful API response: return 
+a refreshed JWT token with a new 8 hour 
+expiry in the response headers or body.
+Store token + expiry time in localStorage.
+
+On every portal page load and every API 
+call: check token expiry time.
+If expired:
+- Clear token from localStorage
+- Redirect to login page
+- Show message: "Your session has expired. 
+  Please log in again."
+
+After successful login: redirect back to 
+the page the user was on before expiry 
+using sessionStorage to remember the 
+last active page.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+CRITICAL — ALL DATA TO POSTGRESQL
+━━━━━━━━━━━━━━━━━━━━━━━━
+Every piece of data touched by the above 
+fixes must read from and write to 
+PostgreSQL via the backend API.
+
+Specifically:
+- duration_minutes column: PostgreSQL 
+  bookings table
+- reminder_sent column: PostgreSQL 
+  bookings table  
+- Blocked slot calculations: computed 
+  from live PostgreSQL data fetched via 
+  GET /api/bookings/date/:date
+- Auto-complete status updates: written 
+  to PostgreSQL bookings table
+- All email send logs: written to 
+  PostgreSQL if an email_logs table 
+  exists, otherwise skip logging
+
+Nothing in this prompt should touch 
+localStorage for booking or availability 
+data. localStorage is only acceptable for:
+- The JWT session token
+- The last active portal page 
+  (for post-login redirect)
+That is all.

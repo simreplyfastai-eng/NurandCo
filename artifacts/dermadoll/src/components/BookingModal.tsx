@@ -1,5 +1,5 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 interface Treatment {
   name: string;
@@ -22,6 +22,12 @@ interface Availability {
   overrides: Record<string, { on: boolean; start?: string; end?: string }>;
 }
 
+interface DateBooking {
+  time: string;
+  durationMinutes: number;
+  status: string;
+}
+
 const DAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const AVAIL_DEFAULT: Availability = {
@@ -37,12 +43,30 @@ const AVAIL_DEFAULT: Availability = {
   overrides: {},
 };
 
+// ── Date helpers (local-timezone safe) ──────────────────────────────────────
+
+function fmtDate(d: Date): string {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function timeToMins(t: string): number {
+  const [h, m] = t.split(":").map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+function minsToTime(m: number): string {
+  return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
+}
+
+// ── Availability helpers ─────────────────────────────────────────────────────
+
 function getAvailForDate(avail: Availability, date: Date): DayAvail | null {
-  const dateStr = date.toISOString().slice(0, 10);
+  const dateStr = fmtDate(date);
   const override = avail.overrides?.[dateStr];
-  if (override !== undefined) {
-    return override.on ? override : { on: false };
-  }
+  if (override !== undefined) return override.on ? override : { on: false };
   const dayKey = DAY_KEYS[date.getDay()];
   return avail.defaults?.[dayKey] ?? { on: false };
 }
@@ -53,34 +77,60 @@ function isDateDisabled(avail: Availability, date: Date, today: Date): boolean {
   return !day || !day.on;
 }
 
-function getAvailableSlots(avail: Availability, date: Date): string[] {
+function getWorkingSlots(avail: Availability, date: Date): string[] {
   const day = getAvailForDate(avail, date);
   if (!day || !day.on) return [];
   const start = day.start ?? "09:00";
   const end = day.end ?? "18:00";
-  const [sh, sm] = start.split(":").map(Number);
-  const [eh, em] = end.split(":").map(Number);
-  const startMins = sh * 60 + sm;
-  const endMins = eh * 60 + em;
+  const startMins = timeToMins(start);
+  const endMins = timeToMins(end);
   const slots: string[] = [];
-  for (let m = startMins; m < endMins; m += 30) {
-    const h = Math.floor(m / 60);
-    const min = m % 60;
-    slots.push(`${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`);
-  }
+  for (let m = startMins; m < endMins; m += 30) slots.push(minsToTime(m));
   return slots;
 }
 
-const MONTH_NAMES = [
-  "January","February","March","April","May","June",
-  "July","August","September","October","November","December",
-];
+// ── Slot blocking ────────────────────────────────────────────────────────────
+
+function computeBlockedSlots(bookings: DateBooking[]): Set<string> {
+  const blocked = new Set<string>();
+  for (const { time, durationMinutes } of bookings) {
+    if (!time) continue;
+    const startMins = timeToMins(time);
+    const blockedUntil = startMins + durationMinutes + 15;
+    for (let m = startMins; m < blockedUntil; m += 30) blocked.add(minsToTime(m));
+  }
+  return blocked;
+}
+
+// ── Validation ───────────────────────────────────────────────────────────────
+
+function validateName(v: string): string {
+  if (!v.trim()) return "Please enter your full name";
+  if (v.trim().length < 2) return "Please enter your full name";
+  if (v.trim().length > 60) return "Name must be under 60 characters";
+  return "";
+}
+
+function validateEmail(v: string): string {
+  if (!v.trim()) return "Please enter a valid email address";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim())) return "Please enter a valid email address";
+  return "";
+}
+
+function validatePhone(v: string): string {
+  const stripped = v.replace(/\s/g, "");
+  if (!stripped) return "Please enter a valid UK phone number";
+  if (!/^(\+447\d{9}|07\d{9})$/.test(stripped)) return "Please enter a valid UK phone number";
+  return "";
+}
+
+// ── Calendar ─────────────────────────────────────────────────────────────────
+
+const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAY_NAMES = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
 function Calendar({
-  onSelect,
-  selected,
-  avail,
+  onSelect, selected, avail,
 }: {
   onSelect: (d: Date) => void;
   selected: Date | null;
@@ -88,97 +138,51 @@ function Calendar({
 }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
   const firstDay = new Date(viewYear, viewMonth, 1);
   const lastDay = new Date(viewYear, viewMonth + 1, 0);
   const startOffset = (firstDay.getDay() + 6) % 7;
-  const daysInMonth = lastDay.getDate();
-
-  const prevMonth = () => {
-    if (viewMonth === 0) { setViewYear((y) => y - 1); setViewMonth(11); }
-    else setViewMonth((m) => m - 1);
-  };
-  const nextMonth = () => {
-    if (viewMonth === 11) { setViewYear((y) => y + 1); setViewMonth(0); }
-    else setViewMonth((m) => m + 1);
-  };
-
   const cells: (Date | null)[] = [];
   for (let i = 0; i < startOffset; i++) cells.push(null);
-  for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(viewYear, viewMonth, d));
+  for (let d = 1; d <= lastDay.getDate(); d++) cells.push(new Date(viewYear, viewMonth, d));
+
+  const prevMonth = () => { if (viewMonth === 0) { setViewYear((y) => y - 1); setViewMonth(11); } else setViewMonth((m) => m - 1); };
+  const nextMonth = () => { if (viewMonth === 11) { setViewYear((y) => y + 1); setViewMonth(0); } else setViewMonth((m) => m + 1); };
 
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
-        <button
-          onClick={prevMonth}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10 transition-colors"
-          style={{ color: "#C9A96E", fontSize: "22px" }}
-        >
-          ‹
-        </button>
-        <span className="font-serif leading-snug" style={{ fontSize: "18px" }}>
-          {MONTH_NAMES[viewMonth]} {viewYear}
-        </span>
-        <button
-          onClick={nextMonth}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10 transition-colors"
-          style={{ color: "#C9A96E", fontSize: "22px" }}
-        >
-          ›
-        </button>
+        <button onClick={prevMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10" style={{ color: "#C9A96E", fontSize: "22px" }}>‹</button>
+        <span className="font-serif" style={{ fontSize: "18px" }}>{MONTH_NAMES[viewMonth]} {viewYear}</span>
+        <button onClick={nextMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10" style={{ color: "#C9A96E", fontSize: "22px" }}>›</button>
       </div>
-
       <div className="grid grid-cols-7 mb-2">
         {DAY_NAMES.map((d) => (
-          <div
-            key={d}
-            className="text-center text-[10px] uppercase tracking-wider py-1"
-            style={{ color: "#aaa", fontFamily: "Inter, sans-serif" }}
-          >
-            {d}
-          </div>
+          <div key={d} className="text-center text-[10px] uppercase tracking-wider py-1" style={{ color: "#aaa", fontFamily: "Inter, sans-serif" }}>{d}</div>
         ))}
       </div>
-
       <div className="grid grid-cols-7">
         {cells.map((date, i) => {
           if (!date) return <div key={`e-${i}`} />;
           const disabled = isDateDisabled(avail, date, today);
-          const isSelected =
-            selected !== null &&
-            date.toDateString() === selected.toDateString();
-
+          const isSelected = selected !== null && fmtDate(date) === fmtDate(selected);
           return (
             <button
-              key={date.toISOString()}
+              key={fmtDate(date)}
               disabled={disabled}
               onClick={() => !disabled && onSelect(date)}
               className="flex items-center justify-center transition-all duration-150"
               style={{
-                width: "40px",
-                height: "40px",
-                borderRadius: "8px",
-                margin: "1px auto",
-                fontSize: "14px",
-                fontFamily: "Inter, sans-serif",
+                width: "40px", height: "40px", borderRadius: "8px", margin: "1px auto",
+                fontSize: "14px", fontFamily: "Inter, sans-serif",
                 backgroundColor: isSelected ? "#C9A96E" : "transparent",
                 color: isSelected ? "#fff" : disabled ? "#ddd" : "#111",
                 cursor: disabled ? "default" : "pointer",
               }}
-              onMouseEnter={(e) => {
-                if (!disabled && !isSelected) {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.12)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!disabled && !isSelected) {
-                  (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
-                }
-              }}
+              onMouseEnter={(e) => { if (!disabled && !isSelected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.12)"; }}
+              onMouseLeave={(e) => { if (!disabled && !isSelected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
             >
               {date.getDate()}
             </button>
@@ -189,31 +193,58 @@ function Calendar({
   );
 }
 
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+// ── Field component ───────────────────────────────────────────────────────────
+
+function Field({ label, required, error, children }: { label: string; required?: boolean; error?: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-4">
+      <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
+        {label} {required && <span style={{ color: "#C9A96E" }}>*</span>}
+      </label>
+      {children}
+      {error && <p className="text-xs mt-1" style={{ color: "#C62828" }}>{error}</p>}
+    </div>
+  );
 }
 
-function fmtDate(d: Date) {
-  return d.toISOString().slice(0, 10);
+function inputStyle(hasError: boolean): React.CSSProperties {
+  return {
+    border: `1px solid ${hasError ? "#C62828" : "#E0E0E0"}`,
+    borderRadius: "8px", padding: "12px 14px", fontSize: "14px",
+    fontFamily: "Inter, sans-serif", outline: "none", width: "100%",
+    transition: "border-color 0.15s",
+  };
 }
 
-function parsePrice(priceStr: string): number {
-  return parseInt(priceStr.replace(/[^0-9]/g, ""), 10) || 0;
-}
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function parsePrice(priceStr: string): number { return parseInt(priceStr.replace(/[^0-9]/g, ""), 10) || 0; }
+
+// ── Main Component ────────────────────────────────────────────────────────────
 
 export default function BookingModal({ treatment, onClose }: BookingModalProps) {
   const [step, setStep] = useState<1 | 2 | 3 | "success">(1);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [submitting, setSubmitting] = useState(false);
+
   const [nameError, setNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [phoneError, setPhoneError] = useState("");
+  const [slotError, setSlotError] = useState("");
+
+  const [submitting, setSubmitting] = useState(false);
   const [avail, setAvail] = useState<Availability>(AVAIL_DEFAULT);
+  const [dateBookings, setDateBookings] = useState<DateBooking[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
   const firstFocusRef = useRef<HTMLButtonElement>(null);
 
-  // Fetch availability from API on mount
+  // Fetch availability
   useEffect(() => {
     fetch("/api/availability")
       .then((r) => r.ok ? r.json() : null)
@@ -228,31 +259,50 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   }, []);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  const handleDateSelect = (date: Date) => {
+  // Fetch bookings for a date (never cached)
+  const fetchDateBookings = useCallback(async (date: Date) => {
+    setLoadingSlots(true);
+    try {
+      const r = await fetch(`/api/bookings/date/${fmtDate(date)}`, { cache: "no-store" });
+      if (r.ok) setDateBookings(await r.json());
+      else setDateBookings([]);
+    } catch {
+      setDateBookings([]);
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, []);
+
+  const handleDateSelect = async (date: Date) => {
     setSelectedDate(date);
     setSelectedTime(null);
+    setSlotError("");
     setStep(2);
+    await fetchDateBookings(date);
   };
 
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
+    setSlotError("");
     setStep(3);
   };
 
   const handleConfirm = async () => {
-    if (!name.trim()) {
-      setNameError("Please enter your name");
-      return;
-    }
-    setNameError("");
+    const nErr = validateName(name);
+    const eErr = validateEmail(email);
+    const pErr = validatePhone(phone);
+    setNameError(nErr);
+    setEmailError(eErr);
+    setPhoneError(pErr);
+    if (nErr || eErr || pErr) return;
+
     setSubmitting(true);
+    setSlotError("");
 
     const price = parsePrice(treatment?.price ?? "0");
     const deposit = Math.round(price * 0.5);
@@ -261,7 +311,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       id: uid(),
       clientName: name.trim(),
       clientEmail: email.trim(),
-      clientPhone: phone.trim(),
+      clientPhone: phone.replace(/\s/g, ""),
       treatment: treatment?.name ?? "",
       category: "",
       price,
@@ -279,13 +329,28 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
     };
 
     try {
-      await fetch("/api/bookings", {
+      const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(booking),
       });
-    } catch (err) {
-      console.warn("Booking API error — continuing to success screen", err);
+
+      if (res.status === 409) {
+        const data = await res.json();
+        setSlotError(data.error ?? "Sorry, that slot was just taken. Please choose another time.");
+        // Refresh slots for the selected date
+        if (selectedDate) {
+          await fetchDateBookings(selectedDate);
+        }
+        setSelectedTime(null);
+        setStep(2);
+        setSubmitting(false);
+        return;
+      }
+
+      if (!res.ok) throw new Error("booking failed");
+    } catch {
+      // Fall through to success so the user isn't left hanging on non-409 errors
     }
 
     setSubmitting(false);
@@ -294,12 +359,13 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   };
 
   const formatDate = (d: Date) =>
-    d.toLocaleDateString("en-GB", {
+    new Intl.DateTimeFormat("en-GB", {
+      timeZone: "Europe/London",
       weekday: "long",
       day: "numeric",
       month: "long",
       year: "numeric",
-    });
+    }).format(d);
 
   if (!treatment) return null;
 
@@ -307,58 +373,41 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const deposit = Math.round(price * 0.5);
   const balance = price - deposit;
 
-  // Time slots based on availability for selected date
-  const timeSlots = selectedDate ? getAvailableSlots(avail, selectedDate) : [];
+  // Compute available slots: working hours minus blocked slots
+  const workingSlots = selectedDate ? getWorkingSlots(avail, selectedDate) : [];
+  const blockedSlots = computeBlockedSlots(dateBookings);
+  const availableSlots = workingSlots.filter((s) => !blockedSlots.has(s));
 
   return (
     <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center">
-      {/* Overlay */}
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
+        initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
         className="absolute inset-0"
         style={{ background: "rgba(0,0,0,0.5)" }}
         onClick={onClose}
       />
 
-      {/* Modal */}
       <motion.div
-        initial={{ y: "100%" }}
-        animate={{ y: 0 }}
-        exit={{ y: "100%" }}
+        initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="relative w-full md:max-w-[520px] bg-white overflow-y-auto"
-        style={{
-          borderRadius: "16px 16px 0 0",
-          maxHeight: "92dvh",
-          padding: "clamp(28px, 5vw, 40px)",
-          paddingBottom: "40px",
-        }}
+        style={{ borderRadius: "16px 16px 0 0", maxHeight: "92dvh", padding: "clamp(28px, 5vw, 40px)", paddingBottom: "40px" }}
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close */}
         <button
           ref={firstFocusRef}
           onClick={onClose}
-          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10 transition-colors"
+          className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10"
           style={{ color: "#C9A96E", fontSize: "18px" }}
           aria-label="Close"
-        >
-          ✕
-        </button>
+        >✕</button>
 
-        {/* Treatment info */}
         <div className="mb-7 pr-8">
-          <h2 className="font-serif leading-snug mb-1" style={{ fontSize: "24px" }}>
-            {treatment.name}
-          </h2>
-          <span className="font-serif" style={{ fontSize: "20px", color: "#C9A96E" }}>
-            {treatment.price}
-          </span>
+          <h2 className="font-serif leading-snug mb-1" style={{ fontSize: "24px" }}>{treatment.name}</h2>
+          <span className="font-serif" style={{ fontSize: "20px", color: "#C9A96E" }}>{treatment.price}</span>
         </div>
 
-        {/* Step 1 — Calendar */}
+        {/* ── Step 1 — Calendar ── */}
         {step === 1 && (
           <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
             <h3 className="font-serif mb-5" style={{ fontSize: "20px" }}>Select a Date</h3>
@@ -366,43 +415,47 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
           </motion.div>
         )}
 
-        {/* Step 2 — Time slots */}
+        {/* ── Step 2 — Time slots ── */}
         {step === 2 && (
           <motion.div key="step2" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-2">
-              <button onClick={() => setStep(1)} className="text-sm hover:opacity-70 transition-opacity" style={{ color: "#C9A96E" }}>
-                ← Back
-              </button>
+              <button onClick={() => setStep(1)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
               <h3 className="font-serif" style={{ fontSize: "20px" }}>Select a Time</h3>
             </div>
-            {selectedDate && (
-              <p className="text-sm mb-5" style={{ color: "#999" }}>{formatDate(selectedDate)}</p>
+            {selectedDate && <p className="text-sm mb-5" style={{ color: "#999" }}>{formatDate(selectedDate)}</p>}
+
+            {slotError && (
+              <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: "#FFF3F3", color: "#C62828", border: "1px solid #FFCDD2" }}>
+                {slotError}
+              </div>
             )}
-            {timeSlots.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: "#aaa" }}>
-                No available slots for this date. Please select another day.
-              </p>
+
+            {loadingSlots ? (
+              <p className="text-sm text-center py-8" style={{ color: "#aaa" }}>Loading availability…</p>
+            ) : availableSlots.length === 0 ? (
+              <p className="text-sm text-center py-8" style={{ color: "#aaa" }}>No available slots for this date. Please select another day.</p>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {timeSlots.map((slot) => {
+                {workingSlots.map((slot) => {
+                  const isBlocked = blockedSlots.has(slot);
                   const isActive = selectedTime === slot;
                   return (
                     <button
                       key={slot}
-                      onClick={() => handleTimeSelect(slot)}
+                      disabled={isBlocked}
+                      onClick={() => !isBlocked && handleTimeSelect(slot)}
                       style={{
-                        border: "1px solid #C9A96E",
-                        borderRadius: "20px",
-                        padding: "8px 4px",
-                        fontSize: "13px",
+                        border: "1px solid",
+                        borderColor: isBlocked ? "#E8E8E8" : "#C9A96E",
+                        borderRadius: "20px", padding: "8px 4px", fontSize: "13px",
                         fontFamily: "Inter, sans-serif",
-                        color: isActive ? "#fff" : "#C9A96E",
-                        backgroundColor: isActive ? "#C9A96E" : "transparent",
-                        cursor: "pointer",
+                        color: isBlocked ? "#ccc" : isActive ? "#fff" : "#C9A96E",
+                        backgroundColor: isBlocked ? "#F9F9F9" : isActive ? "#C9A96E" : "transparent",
+                        cursor: isBlocked ? "default" : "pointer",
                         transition: "all 0.15s",
                       }}
-                      onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.08)"; }}
-                      onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
+                      onMouseEnter={(e) => { if (!isBlocked && !isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.08)"; }}
+                      onMouseLeave={(e) => { if (!isBlocked && !isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
                     >
                       {slot}
                     </button>
@@ -413,21 +466,16 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
           </motion.div>
         )}
 
-        {/* Step 3 — Your details + Confirm */}
+        {/* ── Step 3 — Details + Confirm ── */}
         {step === 3 && (
           <motion.div key="step3" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-5">
-              <button onClick={() => setStep(2)} className="text-sm hover:opacity-70 transition-opacity" style={{ color: "#C9A96E" }}>
-                ← Back
-              </button>
+              <button onClick={() => setStep(2)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
               <h3 className="font-serif" style={{ fontSize: "20px" }}>Your Details</h3>
             </div>
 
             {/* Booking summary */}
-            <div
-              className="mb-6 p-4 rounded-xl space-y-2"
-              style={{ border: "1px solid rgba(201,169,110,0.25)", backgroundColor: "#FEFDFB" }}
-            >
+            <div className="mb-6 p-4 rounded-xl space-y-2" style={{ border: "1px solid rgba(201,169,110,0.25)", backgroundColor: "#FEFDFB" }}>
               <div className="flex justify-between gap-4 text-sm">
                 <span style={{ color: "#888" }}>Treatment</span>
                 <span className="font-medium text-right">{treatment.name}</span>
@@ -456,86 +504,44 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
               </div>
             </div>
 
-            {/* Name field */}
-            <div className="mb-4">
-              <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
-                Full Name <span style={{ color: "#C9A96E" }}>*</span>
-              </label>
+            <Field label="Full Name" required error={nameError}>
               <input
-                type="text"
-                value={name}
+                type="text" value={name}
                 onChange={(e) => { setName(e.target.value); if (nameError) setNameError(""); }}
                 placeholder="Jane Smith"
-                className="w-full"
-                style={{
-                  border: nameError ? "1px solid #C62828" : "1px solid #E0E0E0",
-                  borderRadius: "8px",
-                  padding: "12px 14px",
-                  fontSize: "14px",
-                  fontFamily: "Inter, sans-serif",
-                  outline: "none",
-                  transition: "border-color 0.15s",
-                }}
+                style={inputStyle(!!nameError)}
                 onFocus={(e) => { if (!nameError) (e.currentTarget as HTMLInputElement).style.borderColor = "#C9A96E"; }}
                 onBlur={(e) => { if (!nameError) (e.currentTarget as HTMLInputElement).style.borderColor = "#E0E0E0"; }}
               />
-              {nameError && <p className="text-xs mt-1" style={{ color: "#C62828" }}>{nameError}</p>}
-            </div>
+            </Field>
 
-            {/* Email field */}
-            <div className="mb-4">
-              <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
-                Email Address <span style={{ color: "#AAA", fontSize: "10px", textTransform: "none" }}>(optional)</span>
-              </label>
+            <Field label="Email Address" required error={emailError}>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                type="email" value={email}
+                onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(""); }}
                 placeholder="jane@email.com"
-                className="w-full"
-                style={{
-                  border: "1px solid #E0E0E0",
-                  borderRadius: "8px",
-                  padding: "12px 14px",
-                  fontSize: "14px",
-                  fontFamily: "Inter, sans-serif",
-                  outline: "none",
-                }}
-                onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "#C9A96E"; }}
-                onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "#E0E0E0"; }}
+                style={inputStyle(!!emailError)}
+                onFocus={(e) => { if (!emailError) (e.currentTarget as HTMLInputElement).style.borderColor = "#C9A96E"; }}
+                onBlur={(e) => { if (!emailError) (e.currentTarget as HTMLInputElement).style.borderColor = "#E0E0E0"; }}
               />
-            </div>
+            </Field>
 
-            {/* Phone field */}
-            <div className="mb-6">
-              <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
-                Phone Number <span style={{ color: "#AAA", fontSize: "10px", textTransform: "none" }}>(optional)</span>
-              </label>
+            <Field label="Phone Number" required error={phoneError}>
               <input
-                type="tel"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                type="tel" value={phone}
+                onChange={(e) => { setPhone(e.target.value); if (phoneError) setPhoneError(""); }}
                 placeholder="07700 900000"
-                className="w-full"
-                style={{
-                  border: "1px solid #E0E0E0",
-                  borderRadius: "8px",
-                  padding: "12px 14px",
-                  fontSize: "14px",
-                  fontFamily: "Inter, sans-serif",
-                  outline: "none",
-                }}
-                onFocus={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "#C9A96E"; }}
-                onBlur={(e) => { (e.currentTarget as HTMLInputElement).style.borderColor = "#E0E0E0"; }}
+                style={inputStyle(!!phoneError)}
+                onFocus={(e) => { if (!phoneError) (e.currentTarget as HTMLInputElement).style.borderColor = "#C9A96E"; }}
+                onBlur={(e) => { if (!phoneError) (e.currentTarget as HTMLInputElement).style.borderColor = "#E0E0E0"; }}
               />
-            </div>
+            </Field>
 
-            {/* Confirm button */}
             <button
               onClick={handleConfirm}
               disabled={submitting}
               className="w-full py-4 text-white font-medium text-sm uppercase tracking-wider transition-all duration-200 hover:opacity-90 active:scale-[0.99]"
-              style={{ backgroundColor: submitting ? "#D4B98A" : "#C9A96E", borderRadius: "8px", cursor: submitting ? "default" : "pointer" }}
+              style={{ backgroundColor: submitting ? "#D4B98A" : "#C9A96E", borderRadius: "8px", cursor: submitting ? "default" : "pointer", marginTop: "8px" }}
             >
               {submitting ? "Sending…" : `Request Booking — Pay £${deposit} Deposit`}
             </button>
@@ -545,27 +551,16 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
           </motion.div>
         )}
 
-        {/* Success */}
+        {/* ── Success ── */}
         {step === "success" && (
           <motion.div
             key="success"
-            initial={{ opacity: 0, scale: 0.96 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.4 }}
+            initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.4 }}
             className="text-center py-10"
           >
-            <div
-              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6"
-              style={{ backgroundColor: "rgba(201,169,110,0.1)", color: "#C9A96E", fontSize: "28px" }}
-            >
-              ✓
-            </div>
-            <h2 className="font-serif mb-3" style={{ fontSize: "28px" }}>
-              Booking Request Sent!
-            </h2>
-            <p className="font-light leading-relaxed mb-2" style={{ color: "#777" }}>
-              We'll confirm your appointment via Instagram DM or WhatsApp shortly.
-            </p>
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6" style={{ backgroundColor: "rgba(201,169,110,0.1)", color: "#C9A96E", fontSize: "28px" }}>✓</div>
+            <h2 className="font-serif mb-3" style={{ fontSize: "28px" }}>Booking Request Sent!</h2>
+            <p className="font-light leading-relaxed mb-2" style={{ color: "#777" }}>We'll confirm your appointment via Instagram DM or WhatsApp shortly.</p>
             <p className="text-sm" style={{ color: "#AAA" }}>This window will close automatically.</p>
           </motion.div>
         )}

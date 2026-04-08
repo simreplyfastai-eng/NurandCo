@@ -1366,6 +1366,56 @@ const ClientAPI = {
 // ═══════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════
+/* ── Session helpers ── */
+const SESSION_KEYS=['dd_session','dd_token','dd_token_expires','dd_bookings','dd_clients',
+  'dd_settings','dd_custom_treats','dd_custom_cats','dd_cat_states',
+  'dd_treatment_overrides','dd_video_labels','dd_availability','dd_media'];
+
+function saveSession(token,expiresAt){
+  localStorage.setItem('dd_token',token);
+  localStorage.setItem('dd_token_expires',String(expiresAt));
+  localStorage.setItem('dd_session','1');
+}
+
+function clearSession(message){
+  SESSION_KEYS.forEach(k=>localStorage.removeItem(k));
+  if(message){
+    // Show message briefly on login page
+    const errEl=document.getElementById('login-error');
+    if(errEl)errEl.textContent=message;
+  }
+}
+
+function isSessionExpired(){
+  const exp=Number(localStorage.getItem('dd_token_expires')||'0');
+  return !exp||Date.now()>exp;
+}
+
+/* Refresh the session token on every successful API call */
+async function refreshSessionIfNeeded(){
+  const token=localStorage.getItem('dd_token');
+  if(!token)return;
+  try{
+    const r=await fetch('/api/auth/verify',{headers:{Authorization:'Bearer '+token}});
+    if(r.ok){
+      const d=await r.json();
+      if(d.valid&&d.token)saveSession(d.token,d.expiresAt||Date.now()+8*3600*1000);
+    }
+  }catch{}
+}
+
+/* Check session expiry every 60s while portal is open */
+function startSessionWatcher(){
+  setInterval(()=>{
+    if(isSessionExpired()){
+      clearSession('Your session has expired. Please log in again.');
+      location.reload();
+    }else{
+      refreshSessionIfNeeded();
+    }
+  },60000);
+}
+
 async function doLogin(){
   const e=document.getElementById('login-email').value.trim();
   const p=document.getElementById('login-pass').value;
@@ -1378,9 +1428,8 @@ async function doLogin(){
       body:JSON.stringify({email:e,password:p})
     });
     if(r.ok){
-      const {token}=await r.json();
-      localStorage.setItem('dd_token',token);
-      localStorage.setItem('dd_session','1');
+      const {token,expiresAt}=await r.json();
+      saveSession(token,expiresAt||Date.now()+8*3600*1000);
       showPortal();
     } else {
       const card=document.getElementById('login-card');
@@ -1399,15 +1448,15 @@ document.getElementById('login-email').addEventListener('keydown',e=>{if(e.key==
 document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 
 function doLogout(){
-  ['dd_session','dd_token','dd_bookings','dd_clients','dd_settings','dd_custom_treats',
-   'dd_custom_cats','dd_cat_states','dd_treatment_overrides','dd_video_labels',
-   'dd_availability','dd_media'].forEach(k=>localStorage.removeItem(k));
+  clearSession();
   location.reload();
 }
 
+let _sessionWatcherStarted=false;
 function showPortal(){
   document.getElementById('login-page').style.display='none';
   document.getElementById('portal').classList.add('visible');
+  if(!_sessionWatcherStarted){_sessionWatcherStarted=true;startSessionWatcher();}
   CloudStore.init().then(async ()=>{
     // Load bookings from API into local cache
     const hasAPIData = await BookingAPI.init();
@@ -1432,15 +1481,23 @@ function showPortal(){
 window.addEventListener('DOMContentLoaded',async()=>{
   const token=localStorage.getItem('dd_token');
   if(token&&localStorage.getItem('dd_session')==='1'){
-    // Verify token is still valid server-side
+    // Fast client-side expiry check
+    if(isSessionExpired()){
+      clearSession('Your session has expired. Please log in again.');
+      return;
+    }
+    // Verify token server-side and get a refreshed token
     try{
       const r=await fetch('/api/auth/verify',{headers:{Authorization:'Bearer '+token}});
-      const {valid}=await r.json();
-      if(valid){showPortal();return;}
+      const d=await r.json();
+      if(d.valid){
+        if(d.token)saveSession(d.token,d.expiresAt||Date.now()+8*3600*1000);
+        showPortal();
+        return;
+      }
     }catch(e){}
     // Token invalid — clear and show login
-    localStorage.removeItem('dd_token');
-    localStorage.removeItem('dd_session');
+    clearSession('Your session has expired. Please log in again.');
   }
 });
 let _calResizeTimer;

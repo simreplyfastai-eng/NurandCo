@@ -2,6 +2,7 @@ import { Router } from "express";
 import jwt from "jsonwebtoken";
 
 const router = Router();
+const SESSION_HOURS = 8;
 
 // POST /api/auth/login
 router.post("/auth/login", (req, res) => {
@@ -23,11 +24,13 @@ router.post("/auth/login", (req, res) => {
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  const token = jwt.sign({ role: "admin" }, secret, { expiresIn: "30d" });
-  return res.json({ token });
+  const expiresAt = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
+  const token = jwt.sign({ role: "admin", expiresAt }, secret, { expiresIn: `${SESSION_HOURS}h` });
+  return res.json({ token, expiresAt });
 });
 
 // GET /api/auth/verify  — used by portal on page load to validate stored token
+// Also returns a refreshed token to reset the 8h inactivity window
 router.get("/auth/verify", (req, res) => {
   const auth = req.headers.authorization ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
@@ -35,7 +38,10 @@ router.get("/auth/verify", (req, res) => {
   if (!secret) return res.status(500).json({ valid: false });
   try {
     jwt.verify(token, secret);
-    return res.json({ valid: true });
+    // Issue a fresh token to refresh the inactivity window
+    const expiresAt = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
+    const refreshed = jwt.sign({ role: "admin", expiresAt }, secret, { expiresIn: `${SESSION_HOURS}h` });
+    return res.json({ valid: true, token: refreshed, expiresAt });
   } catch {
     return res.json({ valid: false });
   }

@@ -1,8 +1,12 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
 import { upsertClientFromBooking } from "./clients";
+import { getTreatmentDuration, hasConflict } from "../lib/treatments";
+import { sendCancellationEmail, sendAdminNotificationEmail } from "../lib/email";
 
 const router = Router();
+
+// ─── helpers ────────────────────────────────────────────────────────────────
 
 function rowToBooking(row: Record<string, unknown>) {
   return {
@@ -10,6 +14,7 @@ function rowToBooking(row: Record<string, unknown>) {
     clientId: row.client_id ?? null,
     clientName: row.client_name,
     clientEmail: row.client_email ?? "",
+    clientPhone: row.client_phone ?? "",
     treatment: row.treatment,
     category: row.category ?? "",
     price: row.price ?? 0,
@@ -24,11 +29,52 @@ function rowToBooking(row: Record<string, unknown>) {
     notes: row.notes ?? "",
     createdAt: Number(row.created_at ?? 0),
     source: row.source ?? "Portal",
+    durationMinutes: Number(row.duration_minutes ?? 30),
+    reminderSent: row.reminder_sent ?? false,
   };
 }
 
+/** Fetch WhatsApp number from settings stored in portal_kv */
+async function getWhatsApp(): Promise<string> {
+  try {
+    const res = await pool.query("SELECT value FROM portal_kv WHERE key='dd_settings'");
+    if (res.rows.length) {
+      const settings = res.rows[0].value as Record<string, string>;
+      return settings.whatsapp ?? "";
+    }
+  } catch { /* ignore */ }
+  return "";
+}
+
+/**
+ * Auto-complete: mark all Confirmed bookings as Complete if their appointment
+ * time (date + time in Europe/London) is more than (duration + 15) mins in the past.
+ */
+export async function runAutoComplete(): Promise<number> {
+  try {
+    const result = await pool.query(`
+      UPDATE bookings
+      SET status = 'Complete'
+      WHERE status = 'Confirmed'
+        AND (
+          -- Convert local date+time to UTC and check if past + buffer
+          (date || ' ' || COALESCE(NULLIF(time,''), '00:00'))::timestamptz AT TIME ZONE 'Europe/London'
+          + make_interval(mins => duration_minutes + 15)
+          < NOW()
+        )
+    `);
+    return result.rowCount ?? 0;
+  } catch (err) {
+    console.error("runAutoComplete error", err);
+    return 0;
+  }
+}
+
+// ─── routes ─────────────────────────────────────────────────────────────────
+
 // GET /api/bookings  — optional ?month=YYYY-MM  ?limit=N  ?sort=newest
 router.get("/bookings", async (req, res) => {
+  await runAutoComplete();
   const { month, limit, sort } = req.query as Record<string, string>;
   try {
     const params: unknown[] = [];
@@ -49,14 +95,25 @@ router.get("/bookings", async (req, res) => {
   }
 });
 
-// GET /api/bookings/date/:date
+// GET /api/bookings/date/:date — returns all active bookings for a date including durationMinutes
 router.get("/bookings/date/:date", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT * FROM bookings WHERE date = $1 ORDER BY time ASC",
+      `SELECT id, time, duration_minutes, status, treatment
+       FROM bookings
+       WHERE date = $1 AND status != 'Cancelled'
+       ORDER BY time ASC`,
       [req.params.date],
     );
-    return res.json(result.rows.map(rowToBooking));
+    return res.json(
+      result.rows.map((r) => ({
+        id: r.id,
+        time: r.time ?? "",
+        durationMinutes: Number(r.duration_minutes ?? 30),
+        status: r.status ?? "Pending",
+        treatment: r.treatment ?? "",
+      })),
+    );
   } catch (err) {
     console.error("GET /api/bookings/date/:date", err);
     return res.status(500).json({ error: "db error" });
@@ -69,11 +126,40 @@ router.post("/bookings", async (req, res) => {
   if (!b.clientName || !b.treatment || !b.date) {
     return res.status(400).json({ error: "clientName, treatment, date required" });
   }
+
+  const durationMinutes = getTreatmentDuration(b.treatment);
   const id = b.id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
   const price = Number(b.price) || 0;
   const deposit = b.deposit !== undefined ? Number(b.deposit) : Math.round(price * 0.5);
+
   try {
-    // Resolve / upsert the client first so we can store client_id on the booking
+    // Run autocomplete before inserting
+    await runAutoComplete();
+
+    // Conflict check — fetch all non-cancelled bookings on that date
+    if (b.time) {
+      const existing = await pool.query(
+        `SELECT time, duration_minutes, status FROM bookings
+         WHERE date = $1 AND status != 'Cancelled' AND time != ''`,
+        [b.date],
+      );
+      const conflict = hasConflict(
+        b.time,
+        durationMinutes,
+        existing.rows.map((r) => ({
+          time: r.time,
+          durationMinutes: Number(r.duration_minutes ?? 30),
+          status: r.status,
+        })),
+      );
+      if (conflict) {
+        return res.status(409).json({
+          error: "This time slot is no longer available. Please select another time.",
+        });
+      }
+    }
+
+    // Resolve / upsert the client
     const clientId = await upsertClientFromBooking({
       name: b.clientName,
       email: b.clientEmail ?? "",
@@ -86,14 +172,14 @@ router.post("/bookings", async (req, res) => {
       `INSERT INTO bookings
         (id,client_id,client_name,client_email,treatment,category,price,deposit,
          deposit_paid,balance_paid,date,time,status,payment_method,
-         stripe_payment_id,notes,created_at,source)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+         stripe_payment_id,notes,created_at,source,duration_minutes,reminder_sent)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
        ON CONFLICT (id) DO UPDATE SET
         client_id=COALESCE(EXCLUDED.client_id,bookings.client_id),
         client_name=EXCLUDED.client_name,treatment=EXCLUDED.treatment,
         category=EXCLUDED.category,price=EXCLUDED.price,deposit=EXCLUDED.deposit,
         date=EXCLUDED.date,time=EXCLUDED.time,status=EXCLUDED.status,
-        notes=EXCLUDED.notes`,
+        notes=EXCLUDED.notes,duration_minutes=EXCLUDED.duration_minutes`,
       [
         id, clientId ?? null, b.clientName, b.clientEmail ?? "",
         b.treatment, b.category ?? "",
@@ -103,17 +189,49 @@ router.post("/bookings", async (req, res) => {
         b.status ?? "Pending", b.paymentMethod ?? "Stripe",
         b.stripePaymentId ?? null, b.notes ?? "",
         b.createdAt ?? Date.now(), b.source ?? "Portal",
+        durationMinutes, false,
       ],
     );
+
     const result = await pool.query("SELECT * FROM bookings WHERE id=$1", [id]);
-    return res.status(201).json(rowToBooking(result.rows[0]));
-  } catch (err) {
+    const booking = rowToBooking(result.rows[0]);
+
+    // Admin notification email (non-blocking)
+    const adminEmail = process.env.ADMIN_EMAIL ?? "";
+    if (adminEmail) {
+      sendAdminNotificationEmail({
+        adminEmail,
+        clientName: b.clientName,
+        clientEmail: b.clientEmail ?? "",
+        clientPhone: b.clientPhone ?? "",
+        treatment: b.treatment,
+        durationMinutes,
+        date: b.date,
+        time: b.time ?? "",
+        deposit,
+        source: b.source ?? "Portal",
+      }).catch(() => {});
+    }
+
+    return res.status(201).json(booking);
+  } catch (err: unknown) {
+    // Unique constraint violation = race condition — slot taken by another request
+    if (
+      err &&
+      typeof err === "object" &&
+      "code" in err &&
+      (err as { code: string }).code === "23505"
+    ) {
+      return res.status(409).json({
+        error: "Sorry, that slot was just taken. Please choose another time.",
+      });
+    }
     console.error("POST /api/bookings", err);
     return res.status(500).json({ error: "db error" });
   }
 });
 
-// POST /api/bookings/bulk  — upsert array (used for portal seeding/sync)
+// POST /api/bookings/bulk  — upsert array (portal seeding/sync)
 router.post("/bookings/bulk", async (req, res) => {
   const bookings: unknown[] = req.body;
   if (!Array.isArray(bookings)) return res.status(400).json({ error: "array required" });
@@ -122,12 +240,13 @@ router.post("/bookings/bulk", async (req, res) => {
       const id = b.id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
       const price = Number(b.price) || 0;
       const deposit = b.deposit !== undefined ? Number(b.deposit) : Math.round(price * 0.5);
+      const durationMinutes = getTreatmentDuration(String(b.treatment ?? ""));
       await pool.query(
         `INSERT INTO bookings
           (id,client_name,client_email,treatment,category,price,deposit,
            deposit_paid,balance_paid,date,time,status,payment_method,
-           stripe_payment_id,notes,created_at,source)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+           stripe_payment_id,notes,created_at,source,duration_minutes,reminder_sent)
+         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
          ON CONFLICT (id) DO NOTHING`,
         [
           id, String(b.clientName ?? ""), String(b.clientEmail ?? ""),
@@ -138,6 +257,7 @@ router.post("/bookings/bulk", async (req, res) => {
           String(b.status ?? "Pending"), String(b.paymentMethod ?? "Stripe"),
           b.stripePaymentId ?? null, String(b.notes ?? ""),
           Number(b.createdAt ?? Date.now()), String(b.source ?? "Portal"),
+          durationMinutes, false,
         ],
       );
     }
@@ -156,6 +276,13 @@ router.put("/bookings/:id", async (req, res) => {
     const existing = await pool.query("SELECT * FROM bookings WHERE id=$1", [id]);
     if (!existing.rows.length) return res.status(404).json({ error: "not found" });
     const cur = existing.rows[0];
+    const prevStatus = cur.status;
+    const newStatus: string | null = b.status ?? null;
+
+    // If treatment changed, update duration
+    const treatmentName: string | null = b.treatment ?? null;
+    const newDuration = treatmentName ? getTreatmentDuration(treatmentName) : null;
+
     await pool.query(
       `UPDATE bookings SET
         client_name=COALESCE($2,client_name),
@@ -170,22 +297,43 @@ router.put("/bookings/:id", async (req, res) => {
         time=COALESCE($11,time),
         status=COALESCE($12,status),
         notes=COALESCE($13,notes),
-        stripe_payment_id=COALESCE($14,stripe_payment_id)
+        stripe_payment_id=COALESCE($14,stripe_payment_id),
+        duration_minutes=COALESCE($15,duration_minutes)
        WHERE id=$1`,
       [
         id,
         b.clientName ?? null, b.clientEmail ?? null,
-        b.treatment ?? null, b.category ?? null,
+        treatmentName, b.category ?? null,
         b.price != null ? Number(b.price) : null,
         b.deposit != null ? Number(b.deposit) : null,
         b.depositPaid ?? null, b.balancePaid ?? null,
         b.date ?? null, b.time ?? null,
-        b.status ?? null, b.notes ?? null,
+        newStatus, b.notes ?? null,
         b.stripePaymentId ?? null,
+        newDuration,
       ],
     );
+
     const updated = await pool.query("SELECT * FROM bookings WHERE id=$1", [id]);
-    return res.json(rowToBooking(updated.rows[0] ?? cur));
+    const booking = rowToBooking(updated.rows[0] ?? cur);
+
+    // Send cancellation email if status just changed to Cancelled
+    if (newStatus === "Cancelled" && prevStatus !== "Cancelled") {
+      const email = booking.clientEmail;
+      if (email) {
+        const whatsapp = await getWhatsApp();
+        sendCancellationEmail({
+          clientEmail: email,
+          clientName: booking.clientName as string,
+          treatment: booking.treatment as string,
+          date: booking.date as string,
+          time: booking.time as string,
+          whatsapp,
+        }).catch(() => {});
+      }
+    }
+
+    return res.json(booking);
   } catch (err) {
     console.error("PUT /api/bookings/:id", err);
     return res.status(500).json({ error: "db error" });
@@ -221,12 +369,6 @@ router.delete("/bookings/sample", async (_req, res) => {
 
 // POST /api/stripe/webhook  — placeholder
 router.post("/stripe/webhook", (req, res) => {
-  // TODO: Stripe webhook handler
-  // Will receive payment confirmation events
-  // On payment_intent.succeeded:
-  //   Find booking by stripePaymentId
-  //   Set depositPaid: true, status: "Confirmed"
-  //   Trigger confirmation email to client
   console.log("Stripe webhook received (placeholder):", req.body);
   return res.json({ received: true });
 });
