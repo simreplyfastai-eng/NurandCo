@@ -47,8 +47,14 @@ async function sendReminders(): Promise<number> {
 }
 
 function requireCronSecret(req: import("express").Request, res: import("express").Response): boolean {
+  // Block everything if CRON_SECRET is not configured
+  const secret = process.env.CRON_SECRET;
+  if (!secret) {
+    res.status(503).json({ error: "Cron secret not configured. Add CRON_SECRET to Replit Secrets." });
+    return false;
+  }
+
   // Accept a valid admin JWT — only when SESSION_SECRET is explicitly configured
-  // (no fallback, so a missing secret never allows forged tokens through)
   const jwtSecret = process.env.SESSION_SECRET;
   const auth = req.headers.authorization;
   if (jwtSecret && auth?.startsWith("Bearer ")) {
@@ -59,9 +65,8 @@ function requireCronSecret(req: import("express").Request, res: import("express"
     } catch { /* invalid/expired token — fall through */ }
   }
 
-  // Accept x-cron-secret header when CRON_SECRET is configured
-  const secret = process.env.CRON_SECRET;
-  if (secret && req.headers["x-cron-secret"] !== secret) {
+  // Accept x-cron-secret header
+  if (req.headers["x-cron-secret"] !== secret) {
     res.status(401).json({ error: "Unauthorised" });
     return false;
   }

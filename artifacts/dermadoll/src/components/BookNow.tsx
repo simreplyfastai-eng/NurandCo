@@ -13,7 +13,7 @@ export default function BookNow() {
           <h2 className="font-serif text-[2rem] md:text-[56px] mb-5">Ready to Book?</h2>
           <div className="w-[60px] h-px bg-primary mx-auto mb-5" />
           <p className="text-foreground/70 font-light text-lg mb-14">
-            Book directly via our Faces profile or reach out on Instagram
+            Book your appointment online or get in touch on Instagram
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center gap-6">

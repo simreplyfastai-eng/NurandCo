@@ -1,7 +1,21 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
+import jwt from "jsonwebtoken";
 
 const router = Router();
+
+function requireAuth(req: import("express").Request, res: import("express").Response): boolean {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) { res.status(500).json({ error: "Server auth not configured" }); return false; }
+  const auth = req.headers.authorization ?? "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  try {
+    const payload = jwt.verify(token, secret) as { role?: string };
+    if (payload?.role === "admin") return true;
+  } catch { /* invalid/expired */ }
+  res.status(401).json({ error: "Unauthorised" });
+  return false;
+}
 
 function rowToClient(row: Record<string, unknown>) {
   return {
@@ -17,8 +31,9 @@ function rowToClient(row: Record<string, unknown>) {
   };
 }
 
-// GET /api/clients
-router.get("/clients", async (_req, res) => {
+// GET /api/clients — requires admin JWT
+router.get("/clients", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   try {
     const result = await pool.query(
       "SELECT * FROM clients ORDER BY created_at DESC",

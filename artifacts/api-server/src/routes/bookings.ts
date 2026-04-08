@@ -1,10 +1,24 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
+import jwt from "jsonwebtoken";
 import { upsertClientFromBooking } from "./clients";
 import { getTreatmentDuration, getTreatmentCategory, hasConflict } from "../lib/treatments";
 import { sendCancellationEmail, sendAdminNotificationEmail, sendClientConfirmationEmail, sendConsultationConfirmationEmail, sendConsultationAdminEmail } from "../lib/email";
 
 const router = Router();
+
+function requireAuth(req: import("express").Request, res: import("express").Response): boolean {
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) { res.status(500).json({ error: "Server auth not configured" }); return false; }
+  const auth = req.headers.authorization ?? "";
+  const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
+  try {
+    const payload = jwt.verify(token, secret) as { role?: string };
+    if (payload?.role === "admin") return true;
+  } catch { /* invalid/expired */ }
+  res.status(401).json({ error: "Unauthorised" });
+  return false;
+}
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -74,8 +88,9 @@ export async function runAutoComplete(): Promise<number> {
 
 // ─── routes ─────────────────────────────────────────────────────────────────
 
-// GET /api/bookings  — optional ?month=YYYY-MM  ?limit=N  ?sort=newest
+// GET /api/bookings  — optional ?month=YYYY-MM  ?limit=N  ?sort=newest — requires admin JWT
 router.get("/bookings", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   await runAutoComplete();
   const { month, limit, sort } = req.query as Record<string, string>;
   try {

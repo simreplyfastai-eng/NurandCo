@@ -18,7 +18,7 @@ export default function FAQ() {
     },
     {
       question: "How do I book?",
-      answer: "You can book directly via our Faces profile using the Book Now button, or send us a DM on Instagram @dermadollaesthetics and we'll get you booked in."
+      answer: "You can book directly on our website using the Book Now button on any treatment, or contact us on Instagram @dermadollaesthetics"
     },
     {
       question: "What should I do before my appointment?",
