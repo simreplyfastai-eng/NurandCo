@@ -1228,9 +1228,9 @@ const TREATMENTS = [
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
 
-function getBookings(){return JSON.parse(localStorage.getItem('dd_bookings')||'[]')}
+function getBookings(){try{const v=JSON.parse(localStorage.getItem('dd_bookings')||'[]');if(Array.isArray(v))return v;localStorage.removeItem('dd_bookings');return[];}catch(e){localStorage.removeItem('dd_bookings');return[];}}
 function saveBookings(b){localStorage.setItem('dd_bookings',JSON.stringify(b));}
-function getClients(){return JSON.parse(localStorage.getItem('dd_clients')||'[]')}
+function getClients(){try{const v=JSON.parse(localStorage.getItem('dd_clients')||'[]');if(Array.isArray(v))return v;localStorage.removeItem('dd_clients');return[];}catch(e){localStorage.removeItem('dd_clients');return[];}}
 function saveClients(c){localStorage.setItem('dd_clients',JSON.stringify(c));CloudStore.set('dd_clients',c);}
 function getSettings(){return JSON.parse(localStorage.getItem('dd_settings')||'{}')}
 function saveSettingsData(s){localStorage.setItem('dd_settings',JSON.stringify(s));CloudStore.set('dd_settings',s);}
@@ -1276,7 +1276,8 @@ function fmt(d){return d.toISOString().slice(0,10)}
 // ═══════════════════════════════════════════════════
 const CloudStore = {
   BASE: '/api/portal/store',
-  KEYS: ['dd_bookings','dd_clients','dd_settings','dd_custom_treats',
+  // dd_bookings and dd_clients are managed by the REST API, not the KV store
+  KEYS: ['dd_settings','dd_custom_treats',
          'dd_custom_cats','dd_cat_states','dd_treatment_overrides','dd_video_labels','dd_availability','dd_initialized'],
 
   async init() {
@@ -1287,7 +1288,10 @@ const CloudStore = {
       const data = await r.json();
       this.KEYS.forEach(key => {
         if (data[key] !== undefined && data[key] !== null) {
-          localStorage.setItem(key, JSON.stringify(data[key]));
+          const val = data[key];
+          // Strings are stored as-is (already serialised by CloudStore.set)
+          // Objects/arrays need JSON.stringify for localStorage
+          localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
         }
       });
     } catch(e) {
@@ -3412,14 +3416,11 @@ async function pollBookings(){
     if(res.status===401){clearSession('Session expired — please log in again.');return;}
     if(!res.ok)return;
     const data=await res.json();
-    const fresh=data.bookings||[];
+    const fresh=Array.isArray(data)?data:(data.bookings||[]);
     const prev=getBookings();
     const prevCount=prev.length;
-    // Merge into CloudStore
-    if(typeof CloudStore!=='undefined'){
-      CloudStore.set('dd_bookings',JSON.stringify(fresh));
-      localStorage.setItem('dd_bookings',JSON.stringify(fresh));
-    }
+    // Update local cache (bookings are managed by REST API, not CloudStore KV)
+    localStorage.setItem('dd_bookings',JSON.stringify(fresh));
     if(fresh.length>prevCount){
       const diff=fresh.length-prevCount;
       showToast(`${diff} new booking${diff>1?'s':''} received!`);
