@@ -54,7 +54,8 @@ export default function ResultsVideos() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-foreground/70 font-light text-lg"
+            className="font-light text-lg"
+            style={{ color: "#C9A96E" }}
           >
             Watch real treatments and transformations
           </motion.p>
