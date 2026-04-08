@@ -3144,19 +3144,41 @@ function renderMedia(){
     </div>`;
   }).join('');
 
-  const baLibItems=Object.entries(baImages).map(([k,src])=>{
+  const imgSlotOpts=''
+    +'<option value="">Use in slot\u2026</option>'
+    +'<option value="practitioner">Practitioner Photo</option>'
+    +'<option value="ba0">Before &amp; After \u00b7 Top Left</option>'
+    +'<option value="ba1">Before &amp; After \u00b7 Top Right</option>'
+    +'<option value="ba2">Before &amp; After \u00b7 Bottom Left</option>'
+    +'<option value="ba3">Before &amp; After \u00b7 Bottom Right</option>'
+    +'<option value="grad-0">Graduate \u00b7 Slot 1</option>'
+    +'<option value="grad-1">Graduate \u00b7 Slot 2</option>'
+    +'<option value="grad-2">Graduate \u00b7 Slot 3</option>';
+
+  const baLibItems=Object.entries(baImages).map(function(entry){
+    const k=entry[0],src=entry[1];
     const label=baLabels[k]||k;
-    const isLive=BA_SLOTS.some(s=>s.key===k);
-    return`<div style="width:130px;border-radius:10px;border:1px solid #F0F0F0;overflow:hidden;flex-shrink:0">
-      <div style="position:relative;height:90px">
-        <img src="${cloudSrc(src)}" style="width:100%;height:100%;object-fit:cover"/>
-        ${isLive?'<span style="position:absolute;top:6px;left:6px;background:#4CAF50;color:#fff;font-size:9px;font-weight:700;border-radius:4px;padding:2px 6px;font-family:Inter,sans-serif">● LIVE</span>':''}
-      </div>
-      <div style="padding:6px 8px;display:flex;align-items:center;justify-content:space-between">
-        <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:70px">${label}</span>
-        <button onclick="deleteBAImage('${k}')" style="border:none;background:none;cursor:pointer;color:#ccc;font-size:14px" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#ccc'">🗑</button>
-      </div>
-    </div>`;
+    const isLive=BA_SLOTS.some(function(s){return s.key===k;});
+    const livePillHtml=isLive?'<span style="position:absolute;top:6px;left:6px;background:#4CAF50;color:#fff;font-size:9px;font-weight:700;border-radius:4px;padding:2px 6px;font-family:Inter,sans-serif">\u25cf LIVE</span>':'';
+    const nameVal=label.replace(/"/g,'&quot;');
+    return '<div style="width:200px;border-radius:10px;border:1px solid #F0F0F0;overflow:hidden;flex-shrink:0">'
+      +'<div style="position:relative;height:120px">'
+      +'<img src="'+cloudSrc(src)+'" style="width:100%;height:100%;object-fit:cover"/>'
+      +livePillHtml
+      +'</div>'
+      +'<div style="padding:8px">'
+      +'<input type="text" value="'+nameVal+'" placeholder="File name"'
+      +' style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:5px 8px;font-family:Inter,sans-serif;font-size:12px;box-sizing:border-box;margin-bottom:6px;outline:none"'
+      +' onchange="saveBALabel(\''+k+'\',this.value)"/>'
+      +'<div style="display:flex;gap:6px;align-items:center">'
+      +'<select onchange="assignImageToSlot(\''+k+'\',this.value);this.value=\'\'"'
+      +' style="flex:1;border:1px solid #E8E8E8;border-radius:6px;padding:5px 6px;font-family:Inter,sans-serif;font-size:11px;background:#fff;color:#666;cursor:pointer;outline:none">'
+      +imgSlotOpts
+      +'</select>'
+      +'<button onclick="deleteBAImage(\''+k+'\')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;padding:2px 4px;line-height:1" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">\ud83d\uddd1</button>'
+      +'</div>'
+      +'</div>'
+      +'</div>';
   }).join('');
 
   const galleryCard=mCard(`
@@ -3189,14 +3211,47 @@ function renderMedia(){
     </div>`;
   }).join('');
 
-  const vidCard=mCard(`
-    ${mCardHeader('Showcase Videos','4 live · 4 total','These 4 slots match the See the Results section on your site. Tap Replace to swap any video instantly.')}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">${vidGrid}</div>
-    ${mDivider()}
-    ${mSubheader('VIDEO LIBRARY',mBtn('+ Upload Video','document.getElementById("file-vid-lib").click()',true))}
-    <input type="file" id="file-vid-lib" accept="video/mp4,video/*" style="display:none" onchange="handleVidLibUpload(this)"/>
-    ${mDropZone('vid-lib','video/mp4,video/*','handleVidLibUpload(this)')}
-  `);
+  const vidSlotOpts=''
+    +'<option value="">Use in slot\u2026</option>'
+    +'<option value="hero">Hero Section (full screen)</option>'
+    +'<option value="vid0">Results Videos \u00b7 Top Left</option>'
+    +'<option value="vid1">Results Videos \u00b7 Top Right</option>'
+    +'<option value="vid2">Results Videos \u00b7 Bottom Left</option>'
+    +'<option value="vid3">Results Videos \u00b7 Bottom Right</option>';
+
+  const vidLibData=data.vidLib||[];
+  const vidLibHtml=vidLibData.length===0
+    ?'<span style="font-family:Inter,sans-serif;font-size:12px;color:#BBB">No saved videos yet \u2014 uploaded videos will appear here</span>'
+    :vidLibData.map(function(v){
+      const vsrc=cloudSrc(v.url)||'';
+      const vNameVal=(v.label||'').replace(/"/g,'&quot;');
+      return '<div style="width:220px;border-radius:10px;border:1px solid #F0F0F0;overflow:hidden;flex-shrink:0">'
+        +'<div style="position:relative;height:124px;background:#111">'
+        +(vsrc?'<video src="'+vsrc+'" muted autoplay loop playsinline style="width:100%;height:100%;object-fit:cover"></video>':'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:24px">\ud83c\udfa5</div>')
+        +'</div>'
+        +'<div style="padding:8px">'
+        +'<input type="text" value="'+vNameVal+'" placeholder="Video name"'
+        +' style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:5px 8px;font-family:Inter,sans-serif;font-size:12px;box-sizing:border-box;margin-bottom:6px;outline:none"'
+        +' onchange="saveVidLibLabel(\''+v.id+'\',this.value)"/>'
+        +'<div style="display:flex;gap:6px;align-items:center">'
+        +'<select onchange="assignVideoToSlot(\''+v.id+'\',this.value);this.value=\'\'"'
+        +' style="flex:1;border:1px solid #E8E8E8;border-radius:6px;padding:5px 6px;font-family:Inter,sans-serif;font-size:11px;background:#fff;color:#666;cursor:pointer;outline:none">'
+        +vidSlotOpts
+        +'</select>'
+        +'<button onclick="deleteVidLibItem(\''+v.id+'\')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;padding:2px 4px;line-height:1" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">\ud83d\uddd1</button>'
+        +'</div>'
+        +'</div>'
+        +'</div>';
+    }).join('');
+
+  const vidCardContent=mCardHeader('Showcase Videos','4 live · 4 total','These 4 slots match the See the Results section on your site. Tap Replace to swap any video instantly.')
+    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">'+vidGrid+'</div>'
+    +mDivider()
+    +mSubheader('VIDEO LIBRARY',mBtn('+ Upload Video','document.getElementById("file-vid-lib").click()',true))
+    +'<input type="file" id="file-vid-lib" accept="video/mp4,video/*" style="display:none" onchange="handleVidLibUpload(this)"/>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px">'+vidLibHtml+'</div>'
+    +mDropZone('vid-lib','video/mp4,video/*','handleVidLibUpload(this)');
+  const vidCard=mCard(vidCardContent);
 
   /* ── CARD 5: GRADUATE PHOTOS ── */
   const grads=data.graduates||[
@@ -3244,6 +3299,69 @@ function renderMedia(){
   document.getElementById('media-root').innerHTML=practCard+heroCard+galleryCard+vidCard+gradCard;
 }
 
+/* ── Library helpers ── */
+function addToImageLib(d,objectPath,filename){
+  if(!d.baImages)d.baImages={};
+  if(!d.baLabels)d.baLabels={};
+  const key='ba-lib-'+Date.now();
+  d.baImages[key]=objectPath;
+  d.baLabels[key]=(filename||'').replace(/\.[^.]+$/,'');
+}
+
+function addToVideoLib(d,objectPath,filename){
+  if(!d.vidLib)d.vidLib=[];
+  d.vidLib.push({url:objectPath,label:(filename||'').replace(/\.[^.]+$/,''),id:'vl-'+Date.now()});
+}
+
+function assignImageToSlot(libKey,targetSlot){
+  if(!targetSlot)return;
+  const d=getMediaData();
+  const src=(d.baImages||{})[libKey];
+  if(!src)return;
+  if(targetSlot==='practitioner'){
+    d.practitionerImage=src;
+  }else if(targetSlot.startsWith('ba')){
+    if(!d.baImages)d.baImages={};
+    d.baImages[targetSlot]=src;
+  }else if(targetSlot.startsWith('grad-')){
+    const idx=parseInt(targetSlot.split('-')[1]);
+    if(!d.graduates)d.graduates=[
+      {slot:1,name:'Sarah M.',course:'Foundation Anti-Wrinkle',src:''},
+      {slot:2,name:'Jessica T.',course:'Advanced Dermal Filler',src:''},
+      {slot:3,name:'Priya K.',course:'Pathway to Aesthetics',src:''},
+    ];
+    if(d.graduates[idx])d.graduates[idx].src=src;
+  }
+  saveMediaData(d);renderMedia();
+}
+
+function assignVideoToSlot(libId,targetSlot){
+  if(!targetSlot)return;
+  const d=getMediaData();
+  const item=(d.vidLib||[]).find(function(v){return v.id===libId;});
+  if(!item)return;
+  if(targetSlot==='hero'){
+    d.heroSrc=item.url;
+  }else{
+    if(!d.vidSrcs)d.vidSrcs={};
+    d.vidSrcs[targetSlot]=item.url;
+  }
+  saveMediaData(d);renderMedia();
+}
+
+function saveVidLibLabel(id,text){
+  const d=getMediaData();
+  const item=(d.vidLib||[]).find(function(v){return v.id===id;});
+  if(item){item.label=text.trim();saveMediaData(d);}
+}
+
+function deleteVidLibItem(id){
+  if(!confirm('Remove this video from the library?'))return;
+  const d=getMediaData();
+  d.vidLib=(d.vidLib||[]).filter(function(v){return v.id!==id;});
+  saveMediaData(d);renderMedia();
+}
+
 /* ── Cloud upload helper ── */
 async function uploadToCloud(file){
   const res=await fetch('/api/media/upload-url',{
@@ -3274,8 +3392,10 @@ async function handlePractitionerUpload(input){
   const file=input.files[0];if(!file)return;
   try{
     const objectPath=await uploadToCloud(file);
-    const d=getMediaData();d.practitionerImage=objectPath;saveMediaData(d);
-    renderMedia();
+    const d=getMediaData();
+    d.practitionerImage=objectPath;
+    addToImageLib(d,objectPath,file.name);
+    saveMediaData(d);renderMedia();
   }catch(e){alert('Upload failed: '+e.message);}
 }
 
@@ -3302,6 +3422,7 @@ async function handleGradUpload(idx,input){
       {slot:3,name:'Priya K.',course:'Pathway to Aesthetics',src:''},
     ];
     d.graduates[idx].src=objectPath;
+    addToImageLib(d,objectPath,file.name);
     saveMediaData(d);renderMedia();
   }catch(e){alert('Upload failed: '+e.message);}
 }
@@ -3312,8 +3433,10 @@ async function handleHeroUpload(input){
   showUploadProgress('hero','Uploading…');
   try{
     const objectPath=await uploadToCloud(file);
-    const d=getMediaData();d.heroSrc=objectPath;saveMediaData(d);
-    renderMedia();
+    const d=getMediaData();
+    d.heroSrc=objectPath;
+    addToVideoLib(d,objectPath,file.name);
+    saveMediaData(d);renderMedia();
   }catch(e){showUploadProgress('hero','Upload failed: '+e.message);}
 }
 
@@ -3329,8 +3452,9 @@ async function handleBAImage(key,input){
     if(!d.baImages)d.baImages={};
     if(!d.baLabels)d.baLabels={};
     d.baImages[key]=objectPath;
-    const slot=BA_SLOTS.find(s=>s.key===key);
+    const slot=BA_SLOTS.find(function(s){return s.key===key;});
     if(slot&&!d.baLabels[key])d.baLabels[key]=slot.label;
+    addToImageLib(d,objectPath,file.name);
     saveMediaData(d);renderMedia();
   }catch(e){showUploadProgress('ba-'+key,'Upload failed: '+e.message);}
 }
@@ -3376,6 +3500,7 @@ async function handleVidReplace(key,input){
     const d=getMediaData();
     if(!d.vidSrcs)d.vidSrcs={};
     d.vidSrcs[key]=objectPath;
+    addToVideoLib(d,objectPath,file.name);
     saveMediaData(d);renderMedia();
   }catch(e){showUploadProgress('vid-'+key,'Upload failed: '+e.message);}
 }
