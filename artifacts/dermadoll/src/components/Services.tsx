@@ -259,7 +259,7 @@ export default function Services() {
           transition={{ duration: 0.6 }}
           style={{
             marginTop: "48px",
-            background: "#111111",
+            background: "hsl(30, 18%, 97%)",
             borderRadius: "16px",
             border: "1px solid #C9A96E",
           }}
@@ -288,7 +288,7 @@ export default function Services() {
               <h3 style={{
                 fontFamily: "Cormorant Garamond, Georgia, serif",
                 fontSize: "32px",
-                color: "#ffffff",
+                color: "#111111",
                 fontWeight: 700,
                 lineHeight: 1.2,
                 margin: 0,
@@ -297,7 +297,7 @@ export default function Services() {
               <p style={{
                 fontFamily: "Inter, sans-serif",
                 fontSize: "14px",
-                color: "rgba(255,255,255,0.7)",
+                color: "rgba(17,17,17,0.65)",
                 lineHeight: 1.7,
                 marginTop: "12px",
               }}>
@@ -308,7 +308,7 @@ export default function Services() {
                 {["15 minutes with Niamh", "Personalised treatment advice", "£25 consultation fee — redeemable against your treatment on the day"].map((pt) => (
                   <div key={pt} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
                     <span style={{ color: "#C9A96E", fontWeight: 700, flexShrink: 0 }}>✓</span>
-                    <span style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", color: "rgba(255,255,255,0.85)", lineHeight: 1.5 }}>{pt}</span>
+                    <span style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", color: "rgba(17,17,17,0.8)", lineHeight: 1.5 }}>{pt}</span>
                   </div>
                 ))}
               </div>
@@ -326,7 +326,7 @@ export default function Services() {
               <div style={{
                 fontFamily: "Inter, sans-serif",
                 fontSize: "12px",
-                color: "rgba(255,255,255,0.5)",
+                color: "rgba(17,17,17,0.45)",
                 textTransform: "uppercase",
                 letterSpacing: "2px",
                 marginTop: "4px",
