@@ -3066,12 +3066,15 @@ function mCard(content){
   return`<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:32px;margin-bottom:32px">${content}</div>`;
 }
 
-function mCardHeader(title,pill,subtitle){
-  return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111">${title}</div>
-    <span style="background:#F3F3F3;border-radius:20px;padding:4px 12px;font-family:Inter,sans-serif;font-size:11px;color:#666">${pill}</span>
-  </div>
-  <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;font-style:italic;margin-bottom:18px">${subtitle}</div>`;
+function mCardHeader(title,pill,subtitle,green){
+  const pillHtml=green
+    ?'<span style="color:#4CAF50;font-family:Inter,sans-serif;font-size:11px;font-weight:600">'+pill+'</span>'
+    :'<span style="background:#F3F3F3;border-radius:20px;padding:4px 12px;font-family:Inter,sans-serif;font-size:11px;color:#666">'+pill+'</span>';
+  return'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
+    +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:20px;font-weight:700;color:#111">'+title+'</div>'
+    +pillHtml
+    +'</div>'
+    +'<div style="font-family:Inter,sans-serif;font-size:13px;color:#888;font-style:italic;margin-bottom:18px">'+subtitle+'</div>';
 }
 
 function mDivider(){return`<div style="height:1px;background:#F0F0F0;margin:18px 0"></div>`}
@@ -3149,7 +3152,7 @@ function renderMedia(){
   /* ── CARD 1: HERO VIDEO ── */
   const heroSrc=cloudSrc(data.heroSrc)||HERO_SRC;
   const heroCard=mCard(`
-    ${mCardHeader('Hero Section Video','● Live','This video plays full screen on your homepage hero')}
+    ${mCardHeader('Hero Section Video','● Live','This video plays full screen on your homepage hero',true)}
     <div style="position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#111;margin-bottom:18px">
       <video src="${heroSrc}" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
       <div style="position:absolute;bottom:12px;left:12px">${livePill('● LIVE NOW',true)}</div>
