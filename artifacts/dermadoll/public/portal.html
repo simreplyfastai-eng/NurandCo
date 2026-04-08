@@ -1231,7 +1231,7 @@ function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2
 function getBookings(){try{const v=JSON.parse(localStorage.getItem('dd_bookings')||'[]');if(Array.isArray(v))return v;localStorage.removeItem('dd_bookings');return[];}catch(e){localStorage.removeItem('dd_bookings');return[];}}
 function saveBookings(b){localStorage.setItem('dd_bookings',JSON.stringify(b));}
 function getClients(){try{const v=JSON.parse(localStorage.getItem('dd_clients')||'[]');if(Array.isArray(v))return v;localStorage.removeItem('dd_clients');return[];}catch(e){localStorage.removeItem('dd_clients');return[];}}
-function saveClients(c){localStorage.setItem('dd_clients',JSON.stringify(c));CloudStore.set('dd_clients',c);}
+function saveClients(c){localStorage.setItem('dd_clients',JSON.stringify(c));}
 function getSettings(){return JSON.parse(localStorage.getItem('dd_settings')||'{}')}
 function saveSettingsData(s){localStorage.setItem('dd_settings',JSON.stringify(s));CloudStore.set('dd_settings',s);}
 function getVideoLabels(){return JSON.parse(localStorage.getItem('dd_video_labels')||'{"video1":"Medical Needling","video2":"Lip Filler","video3":"Masseter Botox","video4":"Skin Booster Results"}')}
@@ -1288,9 +1288,14 @@ const CloudStore = {
       const data = await r.json();
       this.KEYS.forEach(key => {
         if (data[key] !== undefined && data[key] !== null) {
-          const val = data[key];
-          // Strings are stored as-is (already serialised by CloudStore.set)
-          // Objects/arrays need JSON.stringify for localStorage
+          let val = data[key];
+          // Strings are stored as-is (already serialised by CloudStore.set).
+          // Objects/arrays need JSON.stringify for localStorage.
+          // Recovery: strip one layer of outer quotes from double-encoded strings
+          // (legacy bug: some installs stored values double-JSON-encoded in the KV).
+          if (typeof val === 'string' && val.startsWith('"') && val.endsWith('"')) {
+            try { const inner = JSON.parse(val); if (typeof inner === 'string') val = inner; } catch(e) {}
+          }
           localStorage.setItem(key, typeof val === 'string' ? val : JSON.stringify(val));
         }
       });
