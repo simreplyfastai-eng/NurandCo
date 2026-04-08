@@ -1,0 +1,146 @@
+Fix the Media page layout in portal.html.
+Do not rebuild from scratch — only fix 
+the layout and organisation issues.
+
+OVERALL FIXES:
+- Add consistent 24px gap between 
+  all sections
+- Every section must have a clear 
+  heading in Cormorant Garamond 20px
+- Every section must have a grey 
+  subtitle in Inter 13px #888888
+- White card style on every section:
+  border-radius 12px
+  box-shadow 0 2px 16px rgba(0,0,0,0.06)
+  padding 24px
+- Nothing should look cramped or 
+  overlapping
+
+HERO VIDEO SECTION:
+- Clean 16:9 preview container
+- border-radius 12px, background #111111
+- "● LIVE NOW" pill bottom-left 
+  if video exists
+- Dashed border placeholder if no video:
+  centred film icon + "No video uploaded"
+  in grey Inter 13px
+- Below preview: "VIDEO LIBRARY" label 
+  left in Inter 10px bold #AAAAAA caps
+  "+ Upload Video" button right in 
+  gold outlined style
+- Upload drop zone: dashed border, 
+  rounded, "Drag video here or click 
+  to upload" centred in grey
+- Library thumbnails in a row below 
+  drop zone — each 160px wide
+
+BEFORE & AFTER IMAGES:
+- Display as a clean 2x2 grid
+- 2 images on top row, 2 on bottom row
+- Equal size square cards
+- Each card: border-radius 10px, 
+  overflow hidden, position relative
+- Position label overlaid top-left:
+  dark semi-transparent pill
+  "TOP LEFT" "TOP RIGHT" 
+  "BOTTOM LEFT" "BOTTOM RIGHT"
+  Inter 9px bold white uppercase
+- If image exists: show it, 
+  object-fit cover, full card size
+  with "● LIVE" green pill top-right
+- If no image: #F5F5F5 background, 
+  centred image icon + "No image" 
+  in grey
+- Below each card:
+  Treatment label Inter 13px bold 
+  (editable on click)
+  "⟳ Replace" gold outlined button
+  🗑 bin icon button — red, 
+  border none, background transparent
+  32px × 32px touch target
+  On click: confirm("Delete this image?")
+  then remove from cloud storage 
+  and clear the slot
+
+RESULTS VIDEOS:
+- Same 2x2 grid layout as images
+- 2 videos top row, 2 bottom row
+- Each card: black background, 
+  border-radius 10px, overflow hidden
+- Video inside: muted autoplay loop 
+  playsinline object-fit cover
+- Position label top-left same style
+- "● LIVE" green pill top-right 
+  if video exists
+- If no video: dashed border, 
+  film icon centred, "No video" grey
+- Below each card:
+  Editable label Inter 13px bold
+  "⟳ Replace" gold outlined button
+  🗑 bin icon — same red delete 
+  behaviour as images
+  On delete: confirm first, then 
+  remove from cloud storage, 
+  clear the slot
+
+SAVED LIBRARY (below each grid):
+- "SAVED LIBRARY" label in Inter 10px 
+  bold #AAAAAA caps letter-spaced
+- Thumbnails in a horizontal flex row, 
+  wrap allowed, gap 12px
+- Each thumbnail: 130px wide, 
+  border-radius 10px, overflow hidden,
+  border 1px solid #F0F0F0
+- Top: media preview 90px tall, 
+  object-fit cover
+  "● LIVE" green pill top-left if active
+- Bottom: white area 40px, padding 6px 8px
+  Label Inter 11px bold truncated left
+  🗑 bin icon right — red, 
+  same delete behaviour
+- Upload drop zone below library:
+  same dashed style as hero section
+
+DEVELOPER NOTE CARD:
+- Thin gold left border 4px solid #C9A96E
+- background #FFFBF4, border-radius 8px
+- padding 20px
+- Gold ⚠ icon left
+- Text: "All media files are stored in 
+  cloud storage. For major structural 
+  changes contact your developer."
+  Inter 13px #888888 italic
+- "Contact Developer" button right:
+  gold filled, Inter 12px bold, 
+  border-radius 20px, padding 8px 20px
+
+BIN/DELETE BEHAVIOUR (all media):
+- Every media item must have a 
+  🗑 bin icon
+- Clicking bin shows browser confirm:
+  "Are you sure you want to delete 
+  this? This cannot be undone."
+- On confirm: delete from cloud storage 
+  via DELETE /api/media/:path
+- Clear the slot or remove from library
+- Update the UI immediately without 
+  page reload
+- If deletion fails: show error toast
+  "Failed to delete. Please try again."
+
+MOBILE:
+- 2x2 grids become 1x2 on mobile 
+  (2 columns, 2 rows)
+- All cards full width
+- Padding reduced to 16px
+- Bin and replace buttons 
+  minimum 44px touch target
+- padding-bottom 80px to clear 
+  floating hamburger button
+
+DO NOT CHANGE:
+- The actual upload logic
+- The cloud storage connections
+- Any other portal pages
+- Any backend API endpoints
+- Any CSS outside the media page

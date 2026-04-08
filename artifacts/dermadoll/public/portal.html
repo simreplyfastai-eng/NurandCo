@@ -3112,7 +3112,7 @@ function mBtn(label,onclick,ghost){
 }
 
 function mCard(content){
-  return`<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:32px;margin-bottom:32px">${content}</div>`;
+  return`<div style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:24px;margin-bottom:24px">${content}</div>`;
 }
 
 function mCardHeader(title,pill,subtitle,green){
@@ -3168,78 +3168,92 @@ async function publishMediaToCloud(){
 function renderMedia(){
   const data=getMediaData();
 
+  /* ── MOBILE STYLES ── */
+  const mobileStyles=`<style>
+    @media(max-width:640px){
+      .mgrid{grid-template-columns:1fr 1fr!important}
+      .mcard{padding:16px!important}
+      #media-root{padding-bottom:80px!important}
+      .mlib{flex-wrap:wrap}
+    }
+  </style>`;
+
   /* ── CARD 0: PRACTITIONER PHOTO ── */
   const practSrc=cloudSrc(data.practitionerImage)||'';
   const practLive=!!practSrc;
-  const practPill=practLive
-    ?'<span style="color:#4CAF50;font-family:Inter,sans-serif;font-size:11px;font-weight:600">● Live</span>'
-    :'<span style="color:#888;font-family:Inter,sans-serif;font-size:11px">Not set</span>';
   const practPreview=practLive
-    ?`<img src="${practSrc}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:12px"/>
-       <div style="position:absolute;top:10px;left:10px">${livePill('● LIVE',true)}</div>`
+    ?`<img src="${practSrc}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>
+       <div style="position:absolute;top:10px;right:10px">${livePill('● LIVE',true)}</div>`
     :`<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#CCCCCC" stroke-width="1.2">
           <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
         </svg>
         <span style="font-family:Inter,sans-serif;font-size:13px;color:#AAAAAA">No photo uploaded</span>
       </div>`;
-  const practCard=mCard(`
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
-      <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111">Practitioner Photo</div>
-      ${practPill}
-    </div>
-    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;font-style:italic;margin-bottom:18px">Your photo shown in the About section on the website</div>
+  const practCard=`<div class="mcard" style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:24px;margin-bottom:24px">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111;margin-bottom:4px">Practitioner Photo</div>
+    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;margin-bottom:18px">Your photo shown in the About section on the website</div>
     <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
-      <div style="position:relative;width:100%;max-width:280px;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#F5F5F5;border:1px solid #E8E8E8">
+      <div style="position:relative;width:100%;max-width:260px;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#F5F5F5;border:1px solid #E8E8E8">
         ${practPreview}
       </div>
       <input type="file" id="file-practitioner" accept="image/*" style="display:none" onchange="handlePractitionerUpload(this)"/>
       <div style="display:flex;gap:8px;align-items:center">
         ${mBtn('⟳ Replace Photo','document.getElementById(\'file-practitioner\').click()',true)}
-        <button onclick="clearPractitioner()" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:20px;padding:4px;line-height:1" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑</button>
+        <button onclick="clearPractitioner()" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:18px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:6px" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑</button>
       </div>
     </div>
-  `);
+  </div>`;
 
   /* ── CARD 1: HERO VIDEO ── */
-  const heroSrc=cloudSrc(data.heroSrc)||HERO_SRC;
-  const heroCard=mCard(`
-    ${mCardHeader('Hero Section Video','● Live','This video plays full screen on your homepage hero',true)}
-    <div style="position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#111;margin-bottom:10px">
-      <video src="${heroSrc}" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
-      <div style="position:absolute;bottom:12px;left:12px">${livePill('● LIVE NOW',true)}</div>
+  const heroCloudUrl=cloudSrc(data.heroSrc)||'';
+  const heroHasCloud=!!heroCloudUrl;
+  const heroPreviewContent=heroHasCloud
+    ?`<video src="${heroCloudUrl}" autoplay muted loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
+       <div style="position:absolute;bottom:12px;left:12px">${livePill('● LIVE NOW',true)}</div>
+       <button onclick="clearHeroVideo()" style="position:absolute;top:10px;right:10px;border:none;background:rgba(0,0,0,0.55);color:#fff;font-size:14px;width:34px;height:34px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center" onmouseover="this.style.background='rgba(229,57,53,0.85)'" onmouseout="this.style.background='rgba(0,0,0,0.55)'">🗑</button>`
+    :`<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.2">
+          <rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-4v12l-6-4"/>
+        </svg>
+        <span style="font-family:Inter,sans-serif;font-size:13px;color:#AAAAAA">No video uploaded</span>
+      </div>`;
+  const heroCard=`<div class="mcard" style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:24px;margin-bottom:24px">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111;margin-bottom:4px">Hero Section Video</div>
+    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;margin-bottom:18px">This video plays full screen on your homepage</div>
+    <div style="position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#111111;margin-bottom:20px">
+      ${heroPreviewContent}
     </div>
-    <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
-      <button onclick="clearHeroVideo()" style="border:none;background:none;cursor:pointer;color:#CCC;font-family:Inter,sans-serif;font-size:12px;display:flex;align-items:center;gap:5px;padding:4px 0" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑 Clear video</button>
-    </div>
-    ${mDivider()}
     ${mSubheader('VIDEO LIBRARY',mBtn('+ Upload Video','document.getElementById("file-hero-upload").click()',true))}
     <input type="file" id="file-hero-upload" accept="video/mp4,video/*" style="display:none" onchange="handleHeroUpload(this)"/>
     ${mDropZone('hero-drop','video/mp4,video/*','handleHeroUpload(this)')}
-    <div id="hero-library" style="display:grid;grid-template-columns:repeat(auto-fill,140px);justify-content:start;gap:12px;margin-top:14px"></div>
-  `);
+    <div id="hero-library" class="mlib" style="display:flex;flex-wrap:wrap;gap:12px;margin-top:14px"></div>
+  </div>`;
 
   /* ── CARD 2: GALLERY PHOTOS ── */
   const baLabels=data.baLabels||{};
   const baImages=data.baImages||{};
-  const baGrid=BA_SLOTS.map((s,i)=>{
-    const src=cloudSrc(baImages[s.key])||s.file;
+  const baGrid=BA_SLOTS.map((s)=>{
+    const cloudUrl=cloudSrc(baImages[s.key])||'';
+    const hasCloud=!!cloudUrl;
+    const imgContent=hasCloud
+      ?`<img src="${cloudUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>
+         <div style="position:absolute;top:8px;right:8px"><span style="background:#4CAF50;color:#fff;font-family:Inter,sans-serif;font-size:9px;font-weight:700;border-radius:4px;padding:3px 7px">● LIVE</span></div>`
+      :`<div style="position:absolute;inset:0;background:#F5F5F5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CCC" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          <span style="font-size:12px;color:#BBB;font-family:Inter,sans-serif">No image</span>
+        </div>`;
     const label=baLabels[s.key]||s.label;
     return`<div>
-      <div style="position:relative;width:100%;padding-top:100%;border-radius:10px;overflow:hidden;background:#F5F5F5">
-        <img src="${src}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
-        <div style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:6px">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#CCC" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          <span style="font-size:12px;color:#BBB;font-family:Inter,sans-serif">No image</span>
-        </div>
+      <div style="position:relative;width:100%;padding-top:100%;border-radius:10px;overflow:hidden">
+        ${imgContent}
         <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.55);color:#fff;font-family:Inter,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;border-radius:4px;padding:3px 7px">${s.pos}</div>
-        <div style="position:absolute;top:8px;right:8px"><span style="background:#4CAF50;color:#fff;font-family:Inter,sans-serif;font-size:9px;font-weight:700;border-radius:4px;padding:3px 7px">● LIVE</span></div>
       </div>
-      <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px">
-        <span contenteditable="true" id="ba-label-${s.key}" style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:#111;min-width:60px;outline:none;cursor:text" onblur="saveBALabel('${s.key}',this.innerText)">${label}</span>
-        <div style="display:flex;gap:6px;align-items:center">
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:6px">
+        <span contenteditable="true" id="ba-label-${s.key}" style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:#111;min-width:40px;outline:none;cursor:text;flex:1;overflow:hidden" onblur="saveBALabel('${s.key}',this.innerText)">${label}</span>
+        <div style="display:flex;gap:4px;align-items:center;flex-shrink:0">
           ${mBtn('⟳ Replace',`replaceBAImage('${s.key}')`,false)}
-          <button onclick="clearBASlot('${s.key}')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;padding:2px 4px;line-height:1" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑</button>
+          <button onclick="clearBASlot('${s.key}')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:16px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:6px" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑</button>
         </div>
       </div>
       <input type="file" id="ba-file-${s.key}" accept="image/*" style="display:none" onchange="handleBAImage('${s.key}',this)"/>
@@ -3249,10 +3263,10 @@ function renderMedia(){
   const imgSlotOpts=''
     +'<option value="">Use in slot\u2026</option>'
     +'<option value="practitioner">Practitioner Photo</option>'
-    +'<option value="ba0">Before &amp; After \u00b7 Top Left</option>'
-    +'<option value="ba1">Before &amp; After \u00b7 Top Right</option>'
-    +'<option value="ba2">Before &amp; After \u00b7 Bottom Left</option>'
-    +'<option value="ba3">Before &amp; After \u00b7 Bottom Right</option>'
+    +'<option value="ba0">Gallery \u00b7 Top Left</option>'
+    +'<option value="ba1">Gallery \u00b7 Top Right</option>'
+    +'<option value="ba2">Gallery \u00b7 Bottom Left</option>'
+    +'<option value="ba3">Gallery \u00b7 Bottom Right</option>'
     +'<option value="grad-0">Graduate \u00b7 Slot 1</option>'
     +'<option value="grad-1">Graduate \u00b7 Slot 2</option>'
     +'<option value="grad-2">Graduate \u00b7 Slot 3</option>';
@@ -3263,52 +3277,55 @@ function renderMedia(){
     const k=entry[0],src=entry[1];
     const label=baLabels[k]||k;
     const nameVal=label.replace(/"/g,'&quot;');
-    return '<div style="border-radius:10px;border:1px solid #F0F0F0;overflow:hidden;min-width:0">'
-      +'<div style="position:relative;padding-top:75%">'
+    return '<div style="width:130px;flex-shrink:0;border-radius:10px;border:1px solid #F0F0F0;overflow:hidden">'
+      +'<div style="position:relative;height:90px;background:#F5F5F5">'
       +'<img src="'+cloudSrc(src)+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>'
       +'</div>'
-      +'<div style="padding:8px">'
-      +'<input type="text" value="'+nameVal+'" placeholder="File name"'
-      +' style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:5px 8px;font-family:Inter,sans-serif;font-size:12px;box-sizing:border-box;margin-bottom:6px;outline:none"'
-      +' onchange="saveBALabel(\''+k+'\',this.value)"/>'
-      +'<div style="display:flex;gap:6px;align-items:center">'
-      +'<select onchange="assignImageToSlot(\''+k+'\',this.value);this.value=\'\'"'
-      +' style="flex:1;border:1px solid #E8E8E8;border-radius:6px;padding:5px 6px;font-family:Inter,sans-serif;font-size:11px;background:#fff;color:#666;cursor:pointer;outline:none">'
-      +imgSlotOpts
-      +'</select>'
-      +'<button onclick="deleteBAImage(\''+k+'\')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;padding:2px 4px;line-height:1" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">\ud83d\uddd1</button>'
-      +'</div>'
+      +'<div style="padding:6px 8px;background:#fff;display:flex;align-items:center;gap:4px;height:40px;box-sizing:border-box">'
+      +'<span style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;color:#111;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nameVal+'</span>'
+      +'<select onchange="assignImageToSlot(\''+k+'\',this.value);this.value=\'\'" style="display:none"></select>'
+      +'<button onclick="deleteBAImage(\''+k+'\')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;min-width:30px;height:30px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">\ud83d\uddd1</button>'
       +'</div>'
       +'</div>';
   }).join('');
 
-  const galleryCard=mCard(`
-    ${mCardHeader('Gallery Photos','4 live · 4 total','The 2×2 grid matches exactly what visitors see on your site. Tap Replace on any photo to swap it instantly.')}
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">${baGrid}</div>
+  const galleryCard=`<div class="mcard" style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:24px;margin-bottom:24px">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111;margin-bottom:4px">The Doll Gallery</div>
+    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;margin-bottom:18px">The 2×2 grid matches exactly what visitors see on your site. Tap Replace on any photo to swap it instantly.</div>
+    <div class="mgrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">${baGrid}</div>
     ${mDivider()}
     ${mSubheader('SAVED LIBRARY',mBtn('+ Add Photo','document.getElementById("file-ba-lib").click()',true))}
     <input type="file" id="file-ba-lib" accept="image/*" style="display:none" onchange="handleBALibUpload(this)"/>
-    <div style="display:grid;grid-template-columns:repeat(auto-fill,140px);justify-content:start;gap:12px;margin-bottom:14px" id="ba-lib-row">${baLibItems||'<span style="font-family:Inter,sans-serif;font-size:12px;color:#BBB">No saved photos yet</span>'}</div>
+    <div class="mlib" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px" id="ba-lib-row">${baLibItems||'<span style="font-family:Inter,sans-serif;font-size:12px;color:#BBB">No saved photos yet</span>'}</div>
     ${mDropZone('ba-lib','image/*','handleBALibUpload(this)')}
-  `);
+  </div>`;
 
   /* ── CARD 3: RESULTS VIDEOS ── */
   const vidLabels=data.vidLabels||{};
   const vidSrcs=data.vidSrcs||{};
   const vidGrid=VID_SLOTS.map(s=>{
-    const src=cloudSrc(vidSrcs[s.key])||s.file;
+    const cloudUrl=cloudSrc(vidSrcs[s.key])||'';
+    const hasCloud=!!cloudUrl;
+    const vidContent=hasCloud
+      ?`<video src="${cloudUrl}" muted autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
+         <div style="position:absolute;top:8px;right:8px"><span style="background:#4CAF50;color:#fff;font-family:Inter,sans-serif;font-size:9px;font-weight:700;border-radius:4px;padding:3px 7px">● LIVE</span></div>`
+      :`<div style="position:absolute;inset:0;border:2px dashed #333;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.2">
+            <rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-4v12l-6-4"/>
+          </svg>
+          <span style="font-family:Inter,sans-serif;font-size:12px;color:#666">No video</span>
+        </div>`;
     const label=vidLabels[s.key]||s.label;
     return`<div>
       <div style="position:relative;width:100%;padding-top:100%;border-radius:10px;overflow:hidden;background:#111">
-        <video src="${src}" muted autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
+        ${vidContent}
         <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.55);color:#fff;font-family:Inter,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;border-radius:4px;padding:3px 7px">${s.pos}</div>
-        <div style="position:absolute;top:8px;right:8px"><span style="background:#4CAF50;color:#fff;font-family:Inter,sans-serif;font-size:9px;font-weight:700;border-radius:4px;padding:3px 7px">● LIVE</span></div>
       </div>
-      <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:8px">
-        <span contenteditable="true" id="vid-label-${s.key}" style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:#111;min-width:60px;outline:none;cursor:text" onblur="saveVidLabel('${s.key}',this.innerText)">${label}</span>
-        <div style="display:flex;gap:6px;align-items:center">
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:6px">
+        <span contenteditable="true" id="vid-label-${s.key}" style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:#111;min-width:40px;outline:none;cursor:text;flex:1;overflow:hidden" onblur="saveVidLabel('${s.key}',this.innerText)">${label}</span>
+        <div style="display:flex;gap:4px;align-items:center;flex-shrink:0">
           ${mBtn('⟳ Replace',`replaceVid('${s.key}')`,false)}
-          <button onclick="clearVidSlot('${s.key}')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;padding:2px 4px;line-height:1" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑</button>
+          <button onclick="clearVidSlot('${s.key}')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:16px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:6px" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑</button>
         </div>
       </div>
       <input type="file" id="vid-file-${s.key}" accept="video/mp4,video/*" style="display:none" onchange="handleVidReplace('${s.key}',this)"/>
@@ -3329,35 +3346,29 @@ function renderMedia(){
     :vidLibData.map(function(v){
       const vsrc=cloudSrc(v.url)||'';
       const vNameVal=(v.label||'').replace(/"/g,'&quot;');
-      return '<div style="border-radius:10px;border:1px solid #F0F0F0;overflow:hidden;min-width:0">'
-        +'<div style="position:relative;padding-top:56.25%;background:#111">'
-        +(vsrc?'<video src="'+vsrc+'" muted autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>':'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px">\ud83c\udfa5</div>')
+      return '<div style="width:130px;flex-shrink:0;border-radius:10px;border:1px solid #F0F0F0;overflow:hidden">'
+        +'<div style="position:relative;height:90px;background:#111">'
+        +(vsrc?'<video src="'+vsrc+'" muted autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>':'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-4v12l-6-4"/></svg></div>')
         +'</div>'
-        +'<div style="padding:8px">'
-        +'<input type="text" value="'+vNameVal+'" placeholder="Video name"'
-        +' style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:5px 8px;font-family:Inter,sans-serif;font-size:12px;box-sizing:border-box;margin-bottom:6px;outline:none"'
-        +' onchange="saveVidLibLabel(\''+v.id+'\',this.value)"/>'
-        +'<div style="display:flex;gap:6px;align-items:center">'
-        +'<select onchange="assignVideoToSlot(\''+v.id+'\',this.value);this.value=\'\'"'
-        +' style="flex:1;border:1px solid #E8E8E8;border-radius:6px;padding:5px 6px;font-family:Inter,sans-serif;font-size:11px;background:#fff;color:#666;cursor:pointer;outline:none">'
-        +vidSlotOpts
-        +'</select>'
-        +'<button onclick="deleteVidLibItem(\''+v.id+'\')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;padding:2px 4px;line-height:1" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">\ud83d\uddd1</button>'
-        +'</div>'
+        +'<div style="padding:6px 8px;background:#fff;display:flex;align-items:center;gap:4px;height:40px;box-sizing:border-box">'
+        +'<span style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;color:#111;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vNameVal+'</span>'
+        +'<button onclick="deleteVidLibItem(\''+v.id+'\')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;min-width:30px;height:30px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">\ud83d\uddd1</button>'
         +'</div>'
         +'</div>';
     }).join('');
 
-  const vidCardContent=mCardHeader('Showcase Videos','4 live · 4 total','These 4 slots match the See the Results section on your site. Tap Replace to swap any video instantly.')
-    +'<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px">'+vidGrid+'</div>'
-    +mDivider()
-    +mSubheader('VIDEO LIBRARY',mBtn('+ Upload Video','document.getElementById("file-vid-lib").click()',true))
-    +'<input type="file" id="file-vid-lib" accept="video/mp4,video/*" style="display:none" onchange="handleVidLibUpload(this)"/>'
-    +'<div style="display:grid;grid-template-columns:repeat(auto-fill,140px);justify-content:start;gap:12px;margin-bottom:14px">'+vidLibHtml+'</div>'
-    +mDropZone('vid-lib','video/mp4,video/*','handleVidLibUpload(this)');
-  const vidCard=mCard(vidCardContent);
+  const vidCard=`<div class="mcard" style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:24px;margin-bottom:24px">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111;margin-bottom:4px">Results Videos</div>
+    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;margin-bottom:18px">These 4 slots match the See the Results section on your site. Tap Replace to swap any video instantly.</div>
+    <div class="mgrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">${vidGrid}</div>
+    ${mDivider()}
+    ${mSubheader('SAVED LIBRARY',mBtn('+ Upload Video','document.getElementById("file-vid-lib").click()',true))}
+    <input type="file" id="file-vid-lib" accept="video/mp4,video/*" style="display:none" onchange="handleVidLibUpload(this)"/>
+    <div class="mlib" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px">${vidLibHtml}</div>
+    ${mDropZone('vid-lib','video/mp4,video/*','handleVidLibUpload(this)')}
+  </div>`;
 
-  /* ── CARD 5: GRADUATE PHOTOS ── */
+  /* ── CARD 4: GRADUATE PHOTOS ── */
   const grads=data.graduates||[
     {slot:1,name:'Sarah M.',course:'Foundation Anti-Wrinkle',src:''},
     {slot:2,name:'Jessica T.',course:'Advanced Dermal Filler',src:''},
@@ -3368,19 +3379,20 @@ function renderMedia(){
     const src=cloudSrc(g.src)||'';
     const imgHtml=src
       ?('<img src="'+src+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>'
-        +'<div style="position:absolute;top:8px;left:8px">'+livePill('● LIVE',true)+'</div>')
+        +'<div style="position:absolute;top:8px;right:8px">'+livePill('● LIVE',true)+'</div>')
       :('<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">'
         +'<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="1.2">'
         +'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>'
         +'</svg>'
-        +'<span style="font-family:Inter,sans-serif;font-size:12px;color:#C9A96E;text-align:center;padding:0 8px">Graduate photo coming soon</span>'
+        +'<span style="font-family:Inter,sans-serif;font-size:12px;color:#C9A96E;text-align:center;padding:0 8px">Coming soon</span>'
         +'</div>');
     const nameVal=(g.name||'').replace(/"/g,'&quot;');
     const courseVal=(g.course||'').replace(/"/g,'&quot;');
-    const replBtn=mBtn('\u27f3 Replace Photo',"document.getElementById('grad-file-"+idx+"').click()",true);
+    const replBtn=mBtn('\u27f3 Replace',"document.getElementById('grad-file-"+idx+"').click()",true);
     return '<div style="flex:1;min-width:0">'
       +'<div style="position:relative;width:100%;padding-top:133.33%;border-radius:12px;overflow:hidden;background:#1A1A1A;margin-bottom:10px">'
       +imgHtml+'</div>'
+      +'<input type="file" id="grad-file-'+idx+'" accept="image/*" style="display:none" onchange="handleGradUpload('+idx+',this)"/>'
       +'<div style="margin-bottom:6px">'
       +'<div style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#AAA;margin-bottom:4px">Name</div>'
       +'<input type="text" value="'+nameVal+'" placeholder="Graduate name"'
@@ -3393,17 +3405,28 @@ function renderMedia(){
       +' style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:6px 10px;font-family:Inter,sans-serif;font-size:13px;box-sizing:border-box;outline:none"'
       +' onchange="saveGradField('+idx+',\'course\',this.value)"/>'
       +'</div>'
-      +'<input type="file" id="grad-file-'+idx+'" accept="image/*" style="display:none" onchange="handleGradUpload('+idx+',this)"/>'
-      +'<div style="display:flex;gap:8px;align-items:center">'
+      +'<div style="display:flex;gap:6px;align-items:center;justify-content:center">'
       +replBtn
-      +'<button onclick="clearGrad('+idx+')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;padding:2px 4px;line-height:1" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">\ud83d\uddd1</button>'
+      +'<button onclick="clearGrad('+idx+')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:16px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:6px" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">\ud83d\uddd1</button>'
       +'</div>'
       +'</div>';
   }).join('');
-  const gradHeader=mCardHeader('Graduate Photos',gradLiveCount+' set \u00b7 3 total','Shown in the Training section on your website');
-  const gradCard=mCard(gradHeader+'<div style="display:flex;gap:16px">'+gradSlots+'</div>');
+  const gradCard=`<div class="mcard" style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:24px;margin-bottom:24px">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111;margin-bottom:4px">Graduate Photos</div>
+    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;margin-bottom:18px">Shown in the Training section on your website \u00b7 ${gradLiveCount} of 3 set</div>
+    <div style="display:flex;gap:16px">${gradSlots}</div>
+  </div>`;
 
-  document.getElementById('media-root').innerHTML=practCard+heroCard+galleryCard+vidCard+gradCard;
+  /* ── DEVELOPER NOTE ── */
+  const devNote='<div style="border-left:4px solid #C9A96E;background:#FFFBF4;border-radius:8px;padding:20px;margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">'
+    +'<div style="display:flex;align-items:flex-start;gap:10px;flex:1;min-width:200px">'
+    +'<span style="font-size:16px;line-height:1.4;color:#C9A96E;flex-shrink:0">\u26a0</span>'
+    +'<span style="font-family:Inter,sans-serif;font-size:13px;color:#888;font-style:italic;line-height:1.6">All media files are stored in cloud storage. For major structural changes contact your developer.</span>'
+    +'</div>'
+    +'<a href="mailto:hello@dermadollaesthetics.co.uk" style="background:#C9A96E;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:Inter,sans-serif;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;display:inline-block;line-height:1.4">Contact Developer</a>'
+    +'</div>';
+
+  document.getElementById('media-root').innerHTML=mobileStyles+practCard+heroCard+galleryCard+vidCard+gradCard+devNote;
 }
 
 /* ── Library helpers ── */
