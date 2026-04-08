@@ -131,6 +131,61 @@ export default function Training() {
 
   return (
     <section id="training" className="py-14 md:py-[100px] bg-secondary">
+      {/* Mobile-only styles */}
+      <style>{`
+        .courses-scroll::-webkit-scrollbar { display: none; }
+        @media (max-width: 767px) {
+          .courses-scroll {
+            display: flex !important;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            gap: 12px !important;
+            padding-bottom: 8px;
+          }
+          .courses-scroll .course-card-m {
+            min-width: 200px !important;
+            max-width: 200px !important;
+            flex-shrink: 0 !important;
+            border-radius: 12px !important;
+            border: 1px solid #E8E0D0 !important;
+            padding: 16px !important;
+            box-shadow: none !important;
+          }
+          .courses-scroll .card-name {
+            font-family: 'Cormorant Garamond', serif !important;
+            font-size: 16px !important;
+            font-weight: 700 !important;
+            margin-bottom: 4px !important;
+            line-height: 1.3 !important;
+          }
+          .courses-scroll .card-detail {
+            font-family: Inter, sans-serif !important;
+            font-size: 11px !important;
+            color: #AAAAAA !important;
+            margin-bottom: 8px !important;
+          }
+          .courses-scroll .card-price {
+            font-family: 'Cormorant Garamond', serif !important;
+            font-size: 20px !important;
+            color: #C9A96E !important;
+            font-weight: 700 !important;
+            margin-bottom: 12px !important;
+          }
+          .courses-scroll .card-btn {
+            width: 100% !important;
+            border: 1px solid #C9A96E !important;
+            color: #C9A96E !important;
+            font-family: Inter, sans-serif !important;
+            font-size: 11px !important;
+            border-radius: 20px !important;
+            padding: 8px !important;
+            background: white !important;
+            letter-spacing: normal !important;
+            text-transform: uppercase;
+          }
+        }
+      `}</style>
+
       <div className="container mx-auto px-6 max-w-5xl">
 
         {/* Section header */}
@@ -163,7 +218,8 @@ export default function Training() {
               {COURSES[0].inclusions.map((item, i) => (
                 <li key={i} className="flex items-start gap-2 md:gap-3">
                   <Check className="text-primary mt-0.5 flex-shrink-0" size={14} />
-                  <span className="text-foreground/80 font-light text-xs md:text-base leading-snug">{item}</span>
+                  {/* Mobile: 13px / line-height 1.6 — Desktop: base / snug */}
+                  <span className="text-foreground/80 font-light text-[13px] leading-[1.6] md:text-base md:leading-snug">{item}</span>
                 </li>
               ))}
             </ul>
@@ -174,7 +230,8 @@ export default function Training() {
                 Pathway to Aesthetics
               </h3>
               <div className="font-serif text-3xl md:text-5xl text-primary mb-3 md:mb-6">£2,000</div>
-              <ul className="space-y-2 md:space-y-4 text-foreground/80 font-light text-xs md:text-base mb-4 md:mb-8">
+              {/* Mobile: 13px — Desktop: base */}
+              <ul className="space-y-2 md:space-y-4 text-foreground/80 font-light text-[13px] md:text-base mb-4 md:mb-8">
                 <li><strong className="font-medium text-foreground">Add-on:</strong> Skin Boosters or Advanced Dermal Filler +£500</li>
                 <li><strong className="font-medium text-foreground">Duration:</strong> 3-day course | Max 3 students</li>
                 <li><strong className="font-medium text-foreground">Location:</strong> Birmingham | Solihull</li>
@@ -196,28 +253,39 @@ export default function Training() {
           </div>
         </motion.div>
 
-        {/* Other 6 courses — grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-10 md:mb-14">
-          {COURSES.slice(1).map((course, i) => (
-            <motion.div
-              key={course.name}
-              initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.06 }}
-              className="bg-white p-6 shadow-sm rounded-sm flex flex-col"
-            >
-              <h4 className="font-serif text-base md:text-lg mb-2 leading-snug">{course.name}</h4>
-              <p className="text-xs text-foreground/50 mb-3 font-light" style={{ fontFamily: "Inter, sans-serif" }}>{course.detail}</p>
-              <div className="font-serif text-2xl text-primary mb-4">{course.price}</div>
-              <div className="mt-auto">
-                <button
-                  onClick={() => openForm(course.name)}
-                  className="w-full text-center border border-primary text-primary px-6 py-2.5 rounded-full text-xs uppercase tracking-wider font-medium hover:bg-primary hover:text-white transition-colors duration-300"
-                >
-                  Enquire
-                </button>
-              </div>
-            </motion.div>
-          ))}
+        {/* Other 6 courses — grid on desktop, horizontal scroll on mobile */}
+        <div className="relative mb-10 md:mb-14">
+          <div
+            className="courses-scroll grid sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            style={{ scrollbarWidth: "none" } as React.CSSProperties}
+          >
+            {COURSES.slice(1).map((course, i) => (
+              <motion.div
+                key={course.name}
+                initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.06 }}
+                className="course-card-m bg-white p-6 shadow-sm rounded-sm flex flex-col"
+              >
+                <h4 className="card-name font-serif text-base md:text-lg mb-2 leading-snug">{course.name}</h4>
+                <p className="card-detail text-xs text-foreground/50 mb-3 font-light" style={{ fontFamily: "Inter, sans-serif" }}>{course.detail}</p>
+                <div className="card-price font-serif text-2xl text-primary mb-4">{course.price}</div>
+                <div className="mt-auto">
+                  <button
+                    onClick={() => openForm(course.name)}
+                    className="card-btn w-full text-center border border-primary text-primary px-6 py-2.5 rounded-full text-xs uppercase tracking-wider font-medium hover:bg-primary hover:text-white transition-colors duration-300"
+                  >
+                    Enquire
+                  </button>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+
+          {/* Scroll fade hint — mobile only */}
+          <div
+            className="pointer-events-none absolute inset-y-0 right-0 w-10 md:hidden"
+            style={{ background: "linear-gradient(to right, transparent, #FAF9F7)" }}
+          />
         </div>
 
         {/* Enquiry form */}
