@@ -107,9 +107,9 @@ export default function About() {
                 A premier face clinic dedicated to enhancing your natural beauty.
               </p>
               <p style={{ fontSize: "15px", lineHeight: "1.7", marginBottom: "16px", color: "#555555" }}>
-                Led by Niamh — every treatment is tailored to you, combining the latest techniques with a warm, professional approach.
+                Led by <span style={{ color: "#C9A96E" }}>Niamh</span> — every treatment is tailored to you, combining the latest techniques with a warm, professional approach.
               </p>
-              <p style={{ fontSize: "15px", lineHeight: "1.7", marginBottom: "16px", color: "#555555" }}>
+              <p style={{ fontSize: "15px", lineHeight: "1.7", marginBottom: "16px", color: "#C9A96E" }}>
                 Your comfort and results are our priority.
               </p>
             </div>
