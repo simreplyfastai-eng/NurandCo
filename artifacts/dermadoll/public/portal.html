@@ -964,12 +964,12 @@ function showPortal(){
   document.getElementById('portal').classList.add('visible');
   CloudStore.init().then(()=>{
     initSampleData();
-    renderDashboard();
     buildTreatmentSelect();
-    buildCalendar();
-    renderAvailability();
     renderMedia();
     updateSidebarBadges();
+    const savedPage=sessionStorage.getItem('dd_page')||'dashboard';
+    const sidebarEl=document.querySelector(`.sb-item[onclick*="'${savedPage}'"]`);
+    showPage(savedPage,sidebarEl,false);
   });
 }
 
@@ -988,6 +988,7 @@ window.addEventListener('resize',()=>{
 // NAVIGATION
 // ═══════════════════════════════════════════════════
 function showPage(id,el,fromKpi){
+  sessionStorage.setItem('dd_page',id);
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
