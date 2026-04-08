@@ -44,7 +44,7 @@ export default function BeforeAfter() {
             viewport={{ once: true }}
             className="font-serif text-[2rem] md:text-[56px] mb-5"
           >
-            Before & After
+            The Doll Gallery
           </motion.h2>
           <div className="w-[60px] h-px bg-primary mx-auto mb-5" />
           <motion.p
@@ -108,22 +108,6 @@ export default function BeforeAfter() {
                 />
               </div>
 
-              <div
-                style={{
-                  fontFamily: "Inter, sans-serif",
-                  fontSize: "11px",
-                  color: "#C9A96E",
-                  letterSpacing: "2px",
-                  textTransform: "uppercase",
-                  textAlign: "center",
-                  marginTop: "10px",
-                  paddingBottom: "14px",
-                  paddingLeft: "8px",
-                  paddingRight: "8px",
-                }}
-              >
-                {item.label}
-              </div>
             </motion.div>
           ))}
         </div>
