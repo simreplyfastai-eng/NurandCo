@@ -321,16 +321,43 @@ tr:hover td{background:#FDFBF8}
   .cat-accordion-header{padding:12px 14px}
 }
 
-/* ── FINANCE CHART ───────────────────────────────── */
-#revenue-canvas{width:100%!important;max-width:100%!important;height:260px;display:block}
-#page-finance{overflow-x:hidden}
+/* ── FINANCE (rebuilt) ──────────────────────────── */
+#page-finance{overflow-x:hidden;background:#fff}
 #page-finance *{box-sizing:border-box}
-#finance-table-wrap{width:100%;overflow-x:hidden}
-#finance-table-wrap table{width:100%;table-layout:fixed}
-#finance-table-wrap th,#finance-table-wrap td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.finance-filter-row{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.finance-filter-row::-webkit-scrollbar{display:none}
-.finance-filter-row .btn-outline{flex-shrink:0;white-space:nowrap}
+.fin-header{display:flex;align-items:center;gap:12px;padding:20px 24px 0;flex-wrap:wrap}
+.fin-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:#111111;flex:1}
+.fin-month-sel{border:1px solid #E0E0E0;border-radius:8px;padding:6px 28px 6px 14px;font-family:'Inter',sans-serif;font-size:13px;color:#111111;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23C9A96E'/%3E%3C/svg%3E") no-repeat right 10px center;-webkit-appearance:none;appearance:none;cursor:pointer;outline:none}
+.fin-body{padding:16px 24px 100px}
+.fin-kpi-row{display:flex;border:1px solid #F0F0F0;border-radius:12px;overflow:hidden}
+.fin-kpi-card{flex:1;padding:16px 12px;text-align:center;border-right:1px solid #F0F0F0}
+.fin-kpi-card:last-child{border-right:none}
+.fin-kpi-label{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;color:#AAAAAA;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.fin-kpi-value{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;line-height:1.1}
+.fin-card{background:#fff;border:1px solid #F0F0F0;border-radius:12px;padding:20px}
+.fin-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.fin-card-title{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:#111111}
+.fin-total-pill{background:#F5F5F5;color:#888888;font-family:'Inter',sans-serif;font-size:12px;border-radius:20px;padding:4px 12px}
+.fin-filter-row{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.fin-filter-row::-webkit-scrollbar{display:none}
+.fin-tab{font-family:'Inter',sans-serif;font-size:12px;padding:6px 14px;border-radius:20px;background:#F5F5F5;color:#888;border:none;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.fin-tab.active{background:#111111;color:#fff}
+#revenue-canvas{width:100%!important;max-width:100%!important;height:220px;display:block}
+.fin-table{width:100%;table-layout:fixed;border-collapse:collapse}
+.fin-table thead th{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;color:#AAAAAA;letter-spacing:1px;text-transform:uppercase;padding:10px 12px;text-align:left;background:#FAFAFA;border-bottom:1px solid #F0F0F0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fin-table tbody td{padding:0 12px;height:52px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-bottom:1px solid #F5F5F5;font-family:'Inter',sans-serif}
+.fin-table tbody tr:last-child td{border-bottom:none}
+.fin-table tbody tr:hover td{background:#FAFAFA}
+.fin-pill{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block}
+.fin-pill.complete,.fin-pill.confirmed{background:#D8F3DC;color:#2D6A4F}
+.fin-pill.pending{background:#FFF3E0;color:#C9A96E}
+.fin-pill.overdue{background:#FFE5E5;color:#C1121F}
+.fin-pill.cancelled{background:#EEEEEE;color:#888}
+.fin-mark-btn{border:1px solid #C9A96E;color:#C9A96E;background:#fff;font-family:'Inter',sans-serif;font-size:11px;border-radius:20px;padding:4px 12px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.fin-mark-btn:hover{background:#C9A96E;color:#fff}
+.fin-mark-circle{width:28px;height:28px;border-radius:50%;border:1px solid #C9A96E;color:#C9A96E;background:#fff;font-size:14px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;margin:auto;display:flex}
+.fin-mark-circle:hover{background:#C9A96E;color:#fff}
+.fin-export-btn{width:100%;border:1px solid #E0E0E0;color:#888888;background:#fff;border-radius:8px;padding:12px;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;margin-top:16px;transition:border-color .15s,color .15s;display:block}
+.fin-export-btn:hover{border-color:#AAAAAA;color:#555}
 
 /* ── MODAL ───────────────────────────────────────── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center}
@@ -401,28 +428,25 @@ tr:hover td{background:#FDFBF8}
   #dash-topbar-new{display:none}
   #dash-mob-new{display:block;width:100%;margin-bottom:12px}
   .timeline-time{font-size:11px;width:40px}
-  #revenue-canvas{height:200px!important}
-  #finance-month-sel{width:100%!important;max-width:100%!important;font-size:13px}
-  #finance-export-btn{display:none!important}
-  #page-finance .page-inner{padding:12px}
-  #finance-kpi{grid-template-columns:repeat(3,1fr)!important;gap:8px}
-  #finance-kpi .kpi-card{padding:12px}
-  #finance-kpi .kpi-value{font-size:20px}
-  #finance-kpi .kpi-label{font-size:9px}
-  #finance-table-wrap th:nth-child(3),#finance-table-wrap td:nth-child(3){display:none}
-  #finance-table-wrap th:nth-child(4){width:18%}
-  #finance-table-wrap th:nth-child(5){width:20%}
-  #finance-table-wrap th:nth-child(6){width:17%}
-  #finance-table-wrap th,#finance-table-wrap td{padding:8px 6px;font-size:11px}
-  .finance-filter-row{margin-top:8px}
+  #revenue-canvas{height:180px!important}
+  .fin-header{padding:14px 16px 0}
+  .fin-body{padding:12px 16px 100px}
+  .fin-kpi-value{font-size:20px}
+  .fin-col-treat{display:none}
+  .fin-export-btn{display:none}
 }
 @media(max-width:480px){
   .kpi-grid{grid-template-columns:1fr 1fr}
   .three-col{grid-template-columns:1fr}
-  #finance-kpi{grid-template-columns:1fr!important}
+  .fin-kpi-value{font-size:20px}
   .kpi-value{font-size:22px}
   .topbar{padding:10px 12px}
   .btn-gold{font-size:11px;padding:7px 12px}
+}
+@media(max-width:380px){
+  .fin-kpi-value{font-size:18px}
+  .fin-kpi-label{font-size:9px}
+  .fin-kpi-card{padding:12px 6px}
 }
 </style>
 </head>
@@ -642,36 +666,51 @@ tr:hover td{background:#FDFBF8}
 
     <!-- ── FINANCE ── -->
     <div id="page-finance" class="page">
-      <div class="topbar">
+      <div class="fin-header">
         <button class="back-to-dash" id="back-finance" onclick="goBackToDash()">← Dashboard</button>
-        <span class="topbar-title serif">Finance</span>
-        <select id="finance-month-sel" class="form-input" style="width:auto;max-width:180px;padding:8px 12px" onchange="renderFinance()"></select>
-        <button id="finance-export-btn" class="btn-outline" onclick="exportFinance()">Export</button>
+        <span class="fin-title">Finance</span>
+        <select id="finance-month-sel" class="fin-month-sel" onchange="renderFinance()"></select>
       </div>
-      <div class="page-inner" style="padding:20px;overflow-x:hidden">
-        <div class="three-col" id="finance-kpi" style="margin-bottom:16px"></div>
-        <div class="card" style="margin-bottom:16px">
-          <div class="card-header"><span class="card-title">Revenue — This Month</span></div>
-          <div style="padding:12px 16px;position:relative;width:100%;overflow:hidden" id="chart-container">
+      <div class="fin-body">
+        <!-- KPI row -->
+        <div class="fin-kpi-row" id="finance-kpi"></div>
+        <!-- Revenue chart -->
+        <div class="fin-card" style="margin-top:16px">
+          <div class="fin-card-hdr">
+            <span class="fin-card-title">Revenue — This Month</span>
+            <span class="fin-total-pill" id="fin-total-pill"></span>
+          </div>
+          <div id="fin-chart-wrap" style="position:relative">
             <canvas id="revenue-canvas"></canvas>
+            <div id="fin-tooltip" style="position:absolute;display:none;background:#fff;border-radius:8px;padding:5px 10px;font-family:'Inter',sans-serif;font-size:12px;color:#111;box-shadow:0 2px 8px rgba(0,0,0,.1);pointer-events:none;white-space:nowrap"></div>
           </div>
         </div>
-        <div class="card">
-          <div class="card-header" style="flex-wrap:wrap;gap:8px">
-            <span class="card-title">Transactions</span>
-            <div class="finance-filter-row">
-              <button class="btn-outline active-filter" id="f-all" onclick="setFilter('All',this)">All</button>
-              <button class="btn-outline" id="f-paid" onclick="setFilter('Complete',this)">Paid</button>
-              <button class="btn-outline" id="f-pending" onclick="setFilter('Pending',this)">Pending</button>
+        <!-- Transactions -->
+        <div class="fin-card" style="margin-top:16px">
+          <div class="fin-card-hdr" style="flex-wrap:wrap;gap:8px">
+            <span class="fin-card-title" style="font-size:14px;font-weight:700">Transactions</span>
+            <div class="fin-filter-row">
+              <button class="fin-tab active" id="f-all" onclick="setFilter('All',this)">All</button>
+              <button class="fin-tab" id="f-paid" onclick="setFilter('Complete',this)">Paid</button>
+              <button class="fin-tab" id="f-pending" onclick="setFilter('Pending',this)">Pending</button>
+              <button class="fin-tab" id="f-overdue" onclick="setFilter('Overdue',this)">Overdue</button>
             </div>
           </div>
           <div id="finance-table-wrap">
-            <table>
-              <thead><tr><th>Date</th><th>Client</th><th>Treatment</th><th>Total</th><th>Status</th><th></th></tr></thead>
+            <table class="fin-table">
+              <thead><tr>
+                <th style="width:16%">Date</th>
+                <th style="width:24%">Client</th>
+                <th class="fin-col-treat" style="width:22%">Treatment</th>
+                <th style="width:14%">Total</th>
+                <th style="width:14%">Status</th>
+                <th style="width:10%"></th>
+              </tr></thead>
               <tbody id="finance-tbody"></tbody>
             </table>
           </div>
         </div>
+        <button class="fin-export-btn" id="finance-export-btn" onclick="exportFinance()">↓ Export Transactions</button>
       </div>
     </div>
 
@@ -1903,28 +1942,71 @@ let financeResizeObserver=null;
 function drawRevenueChart(){
   if(!financeChartData)return;
   const {cumulative,days}=financeChartData;
-  const container=document.getElementById('chart-container');
+  const wrap=document.getElementById('fin-chart-wrap');
   const canvas=document.getElementById('revenue-canvas');
-  if(!container||!canvas)return;
-  const W=container.clientWidth-32;
-  const H=canvas.clientHeight||200;
+  if(!wrap||!canvas)return;
+  const W=wrap.clientWidth;
+  const H=canvas.clientHeight||180;
   canvas.width=Math.max(W,100);
   canvas.height=H;
   const ctx=canvas.getContext('2d');
+  ctx.clearRect(0,0,W,H);
   const maxV=Math.max(...cumulative,1);
-  const pad2=30;
-  ctx.clearRect(0,0,canvas.width,canvas.height);
-  const cW=canvas.width,cH=canvas.height;
-  ctx.fillStyle='rgba(201,169,110,.08)';
-  ctx.beginPath();ctx.moveTo(pad2,cH-pad2);
-  cumulative.forEach((v,i)=>{const x=pad2+(cW-2*pad2)*i/Math.max(days-1,1);const y2=cH-pad2-(cH-2*pad2)*v/maxV;ctx.lineTo(x,y2)});
-  ctx.lineTo(cW-pad2,cH-pad2);ctx.closePath();ctx.fill();
-  ctx.strokeStyle='#C9A96E';ctx.lineWidth=2;
+  const padL=42,padR=12,padT=14,padB=26;
+  const cW=W-padL-padR,cH=H-padT-padB;
+  const pts=cumulative.map((v,i)=>({x:padL+cW*i/Math.max(days-1,1),y:padT+cH*(1-v/maxV)}));
+  // Gradient fill
+  const grad=ctx.createLinearGradient(0,padT,0,padT+cH);
+  grad.addColorStop(0,'rgba(201,169,110,0.15)');
+  grad.addColorStop(1,'rgba(201,169,110,0)');
   ctx.beginPath();
-  cumulative.forEach((v,i)=>{const x=pad2+(cW-2*pad2)*i/Math.max(days-1,1);const y2=cH-pad2-(cH-2*pad2)*v/maxV;i===0?ctx.moveTo(x,y2):ctx.lineTo(x,y2)});
-  ctx.stroke();
-  ctx.fillStyle='#aaa';ctx.font='10px Inter';ctx.textAlign='center';
-  [1,Math.ceil(days/2),days].forEach(d=>{const x=pad2+(cW-2*pad2)*(d-1)/Math.max(days-1,1);ctx.fillText(d,x,cH-8)});
+  ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){const cpx=(pts[i-1].x+pts[i].x)/2;ctx.bezierCurveTo(cpx,pts[i-1].y,cpx,pts[i].y,pts[i].x,pts[i].y);}
+  ctx.lineTo(pts[pts.length-1].x,padT+cH);ctx.lineTo(pts[0].x,padT+cH);ctx.closePath();
+  ctx.fillStyle=grad;ctx.fill();
+  // Line
+  ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
+  for(let i=1;i<pts.length;i++){const cpx=(pts[i-1].x+pts[i].x)/2;ctx.bezierCurveTo(cpx,pts[i-1].y,cpx,pts[i].y,pts[i].x,pts[i].y);}
+  ctx.strokeStyle='#C9A96E';ctx.lineWidth=2;ctx.stroke();
+  // X axis labels
+  ctx.fillStyle='#AAAAAA';ctx.font='10px Inter';ctx.textAlign='center';
+  [1,15,days].forEach(d=>{const x=padL+cW*(d-1)/Math.max(days-1,1);ctx.fillText(d,x,H-6);});
+  // Y axis labels
+  ctx.textAlign='right';
+  [0,Math.round(maxV/2),maxV].forEach(v=>{const y=padT+cH*(1-v/maxV);ctx.fillText('£'+v.toLocaleString(),padL-4,y+4);});
+  // Store pts for tooltip
+  financeChartData._pts=pts;financeChartData._daily=financeChartData._daily||[];
+}
+
+function initChartTooltip(){
+  const canvas=document.getElementById('revenue-canvas');
+  const tip=document.getElementById('fin-tooltip');
+  if(!canvas||!tip)return;
+  function showTip(px,py){
+    if(!financeChartData||!financeChartData._pts)return;
+    const rect=canvas.getBoundingClientRect();
+    const x=px-rect.left;
+    const pts=financeChartData._pts;
+    let closest=0,minD=Infinity;
+    pts.forEach((p,i)=>{const d=Math.abs(p.x-x);if(d<minD){minD=d;closest=i;}});
+    if(minD>40){tip.style.display='none';return;}
+    const p=pts[closest];
+    const rev=financeChartData._daily[closest]||0;
+    tip.textContent='Day '+(closest+1)+' · £'+rev.toLocaleString();
+    const scaleX=canvas.clientWidth/canvas.width;
+    const scaleY=canvas.clientHeight/canvas.height;
+    let tx=p.x*scaleX+8;const ty=p.y*scaleY-28;
+    if(tx+100>canvas.clientWidth)tx=p.x*scaleX-110;
+    tip.style.left=tx+'px';tip.style.top=ty+'px';tip.style.display='block';
+    // Draw hover dot
+    const ctx=canvas.getContext('2d');
+    drawRevenueChart();
+    ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fillStyle='#C9A96E';ctx.fill();
+  }
+  canvas.addEventListener('mousemove',e=>showTip(e.clientX,e.clientY));
+  canvas.addEventListener('mouseleave',()=>{tip.style.display='none';drawRevenueChart();});
+  canvas.addEventListener('touchmove',e=>{e.preventDefault();showTip(e.touches[0].clientX,e.touches[0].clientY);},{passive:false});
+  canvas.addEventListener('touchend',()=>{tip.style.display='none';drawRevenueChart();});
 }
 
 function renderFinance(){
@@ -1933,64 +2015,78 @@ function renderFinance(){
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   if(!sel.innerHTML){
     let opts='';
-    for(let i=0;i<6;i++){
+    for(let i=0;i<12;i++){
       const d=new Date(now.getFullYear(),now.getMonth()-i,1);
       opts+=`<option value="${d.getFullYear()}-${pad(d.getMonth()+1)}">${months[d.getMonth()]} ${d.getFullYear()}</option>`;
     }
     sel.innerHTML=opts;
+    initChartTooltip();
   }
   const [y,m]=sel.value.split('-').map(Number);
-  const bookings=getBookings().filter(b=>{
+  const todayStr=fmt(new Date());
+  const allMonthBookings=getBookings().filter(b=>{
     const d=new Date(b.date);
-    return d.getFullYear()===y&&d.getMonth()+1===m;
-  }).filter(b=>b.status!=='Cancelled');
-
-  const filtered=financeFilter==='All'?bookings:bookings.filter(b=>b.status===financeFilter);
-
-  // KPI
-  const totalRev=bookings.reduce((s,b)=>s+Number(b.price),0);
-  const deposits=bookings.reduce((s,b)=>s+Number(b.deposit),0);
-  const outstanding=bookings.filter(b=>b.status!=='Complete').reduce((s,b)=>s+(Number(b.price)-Number(b.deposit)),0);
+    return d.getFullYear()===y&&d.getMonth()+1===m&&b.status!=='Cancelled';
+  });
+  const isOverdue=b=>b.status==='Pending'&&b.date<todayStr;
+  const filterFn=b=>{
+    if(financeFilter==='All')return true;
+    if(financeFilter==='Overdue')return isOverdue(b);
+    if(financeFilter==='Complete')return b.status==='Complete';
+    if(financeFilter==='Pending')return b.status==='Pending';
+    return true;
+  };
+  const filtered=allMonthBookings.filter(filterFn);
+  // KPI cards
+  const totalRev=allMonthBookings.reduce((s,b)=>s+Number(b.price),0);
+  const deposits=allMonthBookings.reduce((s,b)=>s+Number(b.deposit||0),0);
+  const outstanding=allMonthBookings.filter(b=>b.status!=='Complete').reduce((s,b)=>s+(Number(b.price)-Number(b.deposit||0)),0);
   document.getElementById('finance-kpi').innerHTML=`
-    ${fKpi('Total Revenue','£'+totalRev.toLocaleString(),'var(--gold)')}
-    ${fKpi('Deposits Collected','£'+deposits.toLocaleString(),'#2e7d32')}
-    ${fKpi('Balance Outstanding','£'+outstanding.toLocaleString(),'#c62828')}
+    <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C9A96E">£${totalRev.toLocaleString()}</div></div>
+    <div class="fin-kpi-card"><div class="fin-kpi-label">Deposits Collected</div><div class="fin-kpi-value" style="color:#2D6A4F">£${deposits.toLocaleString()}</div></div>
+    <div class="fin-kpi-card"><div class="fin-kpi-label">Balance Outstanding</div><div class="fin-kpi-value" style="color:#C1121F">£${outstanding.toLocaleString()}</div></div>
   `;
-
-  // Chart data
+  document.getElementById('fin-total-pill').textContent='£'+totalRev.toLocaleString();
+  // Chart
   const days=new Date(y,m,0).getDate();
   const daily=Array(days).fill(0);
-  bookings.forEach(b=>{const d=parseInt(b.date.split('-')[2]);if(d>=1&&d<=days)daily[d-1]+=Number(b.price)});
+  allMonthBookings.forEach(b=>{const d=parseInt(b.date.split('-')[2]);if(d>=1&&d<=days)daily[d-1]+=Number(b.price);});
   const cumulative=daily.reduce((acc,v,i)=>{acc.push((acc[i-1]||0)+v);return acc;},[]);
-  financeChartData={cumulative,days};
-
-  // ResizeObserver for responsive chart
-  const container=document.getElementById('chart-container');
-  if(container){
+  financeChartData={cumulative,days,_daily:daily};
+  const wrap=document.getElementById('fin-chart-wrap');
+  if(wrap){
     if(financeResizeObserver)financeResizeObserver.disconnect();
     financeResizeObserver=new ResizeObserver(()=>drawRevenueChart());
-    financeResizeObserver.observe(container);
+    financeResizeObserver.observe(wrap);
     drawRevenueChart();
   }
-
-  // Table — 6 columns: Date | Client | Treatment | Total | Status | Action
+  // Table
+  const isMob=window.innerWidth<600;
   document.getElementById('finance-tbody').innerHTML=filtered.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(b=>{
-    const bal=Math.max(0,Number(b.price)-Number(b.deposit));
+    const status=isOverdue(b)?'Overdue':b.status;
+    const pillCls={Complete:'complete',Pending:'pending',Overdue:'overdue',Confirmed:'confirmed',Cancelled:'cancelled'}[status]||'pending';
+    const canPay=b.status!=='Complete'&&b.status!=='Cancelled';
+    const actionBtn=canPay
+      ?(isMob?`<button class="fin-mark-circle" onclick="markPaid('${b.id}')" title="Mark Paid">✓</button>`
+             :`<button class="fin-mark-btn" onclick="markPaid('${b.id}')">Mark Paid</button>`)
+      :`<span style="color:#D0D0D0;font-size:14px;text-align:center;display:block">✓</span>`;
     return`<tr>
-      <td>${formatDate(b.date)}</td>
-      <td>${b.clientName}</td>
-      <td>${b.treatment}</td>
-      <td style="font-weight:600">£${b.price}</td>
-      <td>${statusPill(b.status)}</td>
-      <td>${bal>0?`<button class="btn-outline" onclick="markPaid('${b.id}')" style="padding:4px 8px;font-size:10px;white-space:nowrap">Mark Paid</button>`:''}</td>
+      <td style="font-size:12px;color:#888"><span class="date-full">${formatDate(b.date)}</span><span class="date-mob">${formatDateShort(b.date)}</span></td>
+      <td style="font-size:13px;font-weight:700;color:#111">${b.clientName}</td>
+      <td class="fin-col-treat" style="font-size:12px;color:#888">${b.treatment}</td>
+      <td style="font-size:13px;font-weight:700;color:#C9A96E">£${b.price}</td>
+      <td><span class="fin-pill ${pillCls}">${status}</span></td>
+      <td style="text-align:center">${actionBtn}</td>
     </tr>`;
-  }).join('')||'<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:20px">No transactions for this period</td></tr>';
+  }).join('')||`<tr><td colspan="6" style="text-align:center;padding:40px 0">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:#111;margin-bottom:8px">No transactions yet</div>
+    <div style="font-family:'Inter',sans-serif;font-size:13px;color:#AAAAAA">Bookings will appear here automatically</div>
+  </td></tr>`;
 }
-function fKpi(label,val,col){return`<div class="kpi-card"><div class="kpi-label">${label}</div><div class="kpi-value" style="color:${col}">${val}</div></div>`}
 function setFilter(f,el){
   financeFilter=f;
-  document.querySelectorAll('[id^="f-"]').forEach(b=>b.classList.remove('active-filter'));
-  el.classList.add('active-filter');
+  document.querySelectorAll('.fin-tab').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
   renderFinance();
 }
 let _undoId=null,_undoPrev=null,_undoTimer=null;
@@ -2016,10 +2112,15 @@ function undoMarkPaid(){
   }
 }
 function exportFinance(){
-  const b=getBookings();
-  let txt='DERMADOLL AESTHETICS — Finance Export\n\n';
-  b.forEach(x=>{txt+=`${x.date} | ${x.clientName} | ${x.treatment} | £${x.price} | Status: ${x.status}\n`});
-  const a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(txt);a.download='dermadoll-finance.txt';a.click();
+  const sel=document.getElementById('finance-month-sel');
+  const [y,m]=sel?sel.value.split('-').map(Number):[new Date().getFullYear(),new Date().getMonth()+1];
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  const b=getBookings().filter(x=>{const d=new Date(x.date);return d.getFullYear()===y&&d.getMonth()+1===m;});
+  let txt=`DERMADOLL AESTHETICS — Finance Export\n${months[m-1]} ${y}\n${'─'.repeat(40)}\n\n`;
+  b.forEach(x=>{txt+=`${x.date} | ${x.clientName} | ${x.treatment} | £${x.price} | ${x.status}\n`;});
+  const total=b.filter(x=>x.status!=='Cancelled').reduce((s,x)=>s+Number(x.price),0);
+  txt+=`\n${'─'.repeat(40)}\nTotal: £${total.toLocaleString()}`;
+  const a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(txt);a.download=`dermadoll-finance-${months[m-1].toLowerCase()}-${y}.txt`;a.click();
 }
 
 // ═══════════════════════════════════════════════════
