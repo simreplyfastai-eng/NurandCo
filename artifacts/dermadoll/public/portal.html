@@ -1545,8 +1545,10 @@ function updateSidebarBadges(){
   const pending=b.filter(x=>x.status==='Pending').length;
   const fb=document.getElementById('sb-finance-badge');
   fb.style.display=pending?'inline':'none';
+  // New Bookings badge — only active (non-expired) pending bookings
+  const activePending=b.filter(x=>x.status==='Pending'&&!bkTabExpired(x)).length;
   const bb=document.getElementById('sb-bookings-badge');
-  if(bb){bb.textContent=pending;bb.style.display=pending?'inline':'none';}
+  if(bb){bb.textContent=activePending;bb.style.display=activePending?'inline':'none';}
 }
 
 // ═══════════════════════════════════════════════════
@@ -1559,8 +1561,20 @@ function setBookingsFilter(f,el){
   if(el)el.classList.add('active');
   renderBookings();
 }
+// Returns true if the booking's slot + 2 hours is in the past
+// (used to auto-retire entries from the New Bookings view only — data stays in cloud)
+function bkTabExpired(b){
+  if(!b.date)return false;
+  const timeStr=b.time&&/^\d{2}:\d{2}$/.test(b.time)?b.time:'23:59';
+  const slot=new Date(`${b.date}T${timeStr}:00`);
+  if(isNaN(slot.getTime()))return false;
+  return Date.now()>slot.getTime()+2*60*60*1000;
+}
+
 function renderBookings(){
-  const all=getBookings().sort((a,b)=>new Date(b.date)-new Date(a.date)||b.createdAt-a.createdAt);
+  // Only show bookings whose slot + 2 hrs hasn't passed yet
+  const active=getBookings().filter(b=>!bkTabExpired(b));
+  const all=active.sort((a,b)=>new Date(b.date)-new Date(a.date)||b.createdAt-a.createdAt);
   const list=bookingsFilter==='all'?all:all.filter(b=>b.status===bookingsFilter);
   const body=document.getElementById('bk-all-body');
   const empty=document.getElementById('bk-all-empty');
