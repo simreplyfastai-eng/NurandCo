@@ -919,10 +919,17 @@ tr:hover td{background:#FDFBF8}
             <div class="settings-row" style="align-items:flex-start">
               <label>Scheduled Tasks</label>
               <div style="font-size:12px;color:var(--muted);line-height:1.8">
-                <strong style="color:var(--text)">Reminders:</strong> GET /api/cron/reminders — runs hourly (sends 24h reminder emails to clients)<br/>
-                <strong style="color:var(--text)">Autocomplete:</strong> GET /api/cron/autocomplete — runs daily at 00:01 UK time (marks past Confirmed bookings as Complete)<br/>
-                <em style="font-size:11px">These endpoints are registered as scheduled tasks in Replit's project settings. Contact your developer if emails are not being sent.</em>
+                <strong style="color:var(--text)">How to set up in Replit:</strong><br/>
+                1. Open your Replit project and go to <strong style="color:var(--text)">Tools → Scheduled Tasks</strong><br/>
+                2. Add a task: GET <code style="background:#F5F5F5;padding:1px 5px;border-radius:3px">/api/cron/reminders</code> — every <strong style="color:var(--text)">1 hour</strong> (sends 24h reminder emails)<br/>
+                3. Add a task: GET <code style="background:#F5F5F5;padding:1px 5px;border-radius:3px">/api/cron/autocomplete</code> — every <strong style="color:var(--text)">day at 00:01 UTC</strong> (marks past bookings Complete)<br/>
+                4. Set the <strong style="color:var(--text)">CRON_SECRET</strong> environment variable and add it as the <code style="background:#F5F5F5;padding:1px 5px;border-radius:3px">x-cron-secret</code> header in each task<br/>
+                <em style="font-size:11px">Use the buttons below to run either job manually at any time.</em>
               </div>
+            </div>
+            <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap">
+              <button class="btn-outline" onclick="triggerCron('reminders')">Run Reminders Now</button>
+              <button class="btn-outline" onclick="triggerCron('autocomplete')">Run Autocomplete Now</button>
             </div>
             <div style="display:flex;gap:10px;margin-top:8px">
               <button class="btn-gold" onclick="window.open('https://wa.me/447000000000','_blank')">Contact Developer</button>
@@ -3353,6 +3360,26 @@ function showToast(msg,duration=3500){
     t.classList.remove('show');
     setTimeout(()=>t.remove(),350);
   },duration);
+}
+
+// ═══════════════════════════════════════════════════
+// CRON TRIGGER (manual run from portal)
+// ═══════════════════════════════════════════════════
+async function triggerCron(job){
+  const token=localStorage.getItem('dd_token');
+  if(!token){showToast('Not logged in');return;}
+  try{
+    const r=await fetch('/api/cron/'+job,{headers:{Authorization:'Bearer '+token}});
+    const d=await r.json().catch(()=>({}));
+    if(r.ok){
+      const detail=job==='reminders'?('Sent: '+(d.sent??0)):('Updated: '+(d.updated??0));
+      showToast('Done — '+detail);
+    }else{
+      showToast('Error: '+(d.error||r.status));
+    }
+  }catch(e){
+    showToast('Request failed');
+  }
 }
 
 // ═══════════════════════════════════════════════════

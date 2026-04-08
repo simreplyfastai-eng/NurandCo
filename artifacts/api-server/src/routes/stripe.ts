@@ -19,23 +19,28 @@ function getStripe(): Stripe | null {
   return new Stripe(key, { apiVersion: "2025-02-24.acacia" });
 }
 
-async function getWhatsApp(): Promise<string> {
+async function getSettings(): Promise<Record<string, string>> {
   try {
     const res = await pool.query("SELECT value FROM portal_kv WHERE key='dd_settings'");
-    if (res.rows.length) {
-      const settings = res.rows[0].value as Record<string, string>;
-      return settings.whatsapp ?? "";
-    }
+    if (res.rows.length) return (res.rows[0].value as Record<string, string>) ?? {};
   } catch { /* ignore */ }
-  return "";
+  return {};
+}
+
+async function getWhatsApp(): Promise<string> {
+  const settings = await getSettings();
+  return settings.whatsapp ?? "";
 }
 
 // GET /api/config — returns non-sensitive public config for frontend + portal checklist booleans
 router.get("/config", async (_req, res) => {
-  const whatsapp = await getWhatsApp();
+  const settings = await getSettings();
+  const whatsapp = settings.whatsapp ?? "";
+  const depositPercent = Number(settings.deposit ?? 50);
   return res.json({
     stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY ?? "",
     whatsapp,
+    depositPercent,
     // Checklist booleans — true/false only, never actual values
     hasStripeSecretKey: !!process.env.STRIPE_SECRET_KEY,
     hasStripePublishableKey: !!process.env.STRIPE_PUBLISHABLE_KEY,

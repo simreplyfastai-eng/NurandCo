@@ -251,10 +251,12 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const [whatsapp, setWhatsapp] = useState("");
   const [bookingDuration, setBookingDuration] = useState(30);
   const [hasResendKey, setHasResendKey] = useState(false);
+  const [depositPercent, setDepositPercent] = useState(50);
 
   const stripeRef = useRef<Stripe | null>(null);
   const elementsRef = useRef<StripeElements | null>(null);
   const paymentElementRef = useRef<HTMLDivElement>(null);
+  const clientSecretRef = useRef<string | null>(null);
 
   const firstFocusRef = useRef<HTMLButtonElement>(null);
 
@@ -269,6 +271,9 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       .then((data) => {
         if (data?.whatsapp) setWhatsapp(data.whatsapp);
         if (data?.hasResendKey) setHasResendKey(true);
+        if (typeof data?.depositPercent === "number" && data.depositPercent > 0) {
+          setDepositPercent(data.depositPercent);
+        }
       })
       .catch(() => {});
   }, []);
@@ -339,9 +344,12 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       try {
         // Get publishable key from backend
         const configRes = await fetch("/api/config");
-        const config = await configRes.json() as { stripePublishableKey?: string; whatsapp?: string; hasResendKey?: boolean };
+        const config = await configRes.json() as { stripePublishableKey?: string; whatsapp?: string; hasResendKey?: boolean; depositPercent?: number };
         if (config.whatsapp) setWhatsapp(config.whatsapp);
         if (config.hasResendKey) setHasResendKey(true);
+        if (typeof config.depositPercent === "number" && config.depositPercent > 0) {
+          setDepositPercent(config.depositPercent);
+        }
 
         if (!config.stripePublishableKey) {
           if (!cancelled) {
@@ -353,7 +361,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
         // Create payment intent
         const price = parsePrice(treatment?.price ?? "0");
-        const depositAmount = Math.floor(price / 2);
+        const depositAmount = Math.floor(price * (config.depositPercent ?? depositPercent) / 100);
 
         const piRes = await fetch("/api/stripe/create-payment-intent", {
           method: "POST",
@@ -377,6 +385,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
         const { clientSecret } = await piRes.json() as { clientSecret: string };
         if (cancelled || !clientSecret) return;
+        clientSecretRef.current = clientSecret;
 
         // Load Stripe
         const { loadStripe } = await import("@stripe/stripe-js");
@@ -449,7 +458,8 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
     // Payment succeeded — create booking
     const price = parsePrice(treatment?.price ?? "0");
-    const depositAmt = Math.floor(price / 2);
+    const depositAmt = Math.floor(price * depositPercent / 100);
+    const stripePaymentId = clientSecretRef.current?.split("_secret_")[0] ?? null;
 
     const booking = {
       id: uid(),
@@ -465,6 +475,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       time: selectedTime ?? "",
       status: "Confirmed",
       paymentMethod: "Stripe",
+      stripePaymentId,
       notes: "",
       createdAt: Date.now(),
       source: "Website",
@@ -502,7 +513,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   if (!treatment) return null;
 
   const price = parsePrice(treatment.price);
-  const deposit = Math.floor(price / 2);
+  const deposit = Math.floor(price * depositPercent / 100);
   const balance = price - deposit;
 
   // Compute available slots

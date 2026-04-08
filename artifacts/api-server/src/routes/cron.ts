@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { pool } from "@workspace/db";
+import jwt from "jsonwebtoken";
 import { runAutoComplete } from "./bookings";
 import { sendReminderEmail } from "../lib/email";
 
@@ -46,6 +47,18 @@ async function sendReminders(): Promise<number> {
 }
 
 function requireCronSecret(req: import("express").Request, res: import("express").Response): boolean {
+  // Accept a valid admin JWT (from a logged-in portal user)
+  const auth = req.headers.authorization;
+  if (auth?.startsWith("Bearer ")) {
+    const token = auth.slice(7);
+    const jwtSecret = process.env.SESSION_SECRET ?? "dev-secret";
+    try {
+      jwt.verify(token, jwtSecret);
+      return true;
+    } catch { /* fall through to CRON_SECRET check */ }
+  }
+
+  // Accept x-cron-secret header when CRON_SECRET is configured
   const secret = process.env.CRON_SECRET;
   if (secret && req.headers["x-cron-secret"] !== secret) {
     res.status(401).json({ error: "Unauthorised" });

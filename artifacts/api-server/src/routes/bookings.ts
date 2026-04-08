@@ -134,9 +134,14 @@ router.post("/bookings", async (req, res) => {
   const deposit = b.deposit !== undefined ? Number(b.deposit) : Math.round(price * 0.5);
   const balance = price - deposit;
 
-  // Website bookings: depositPaid starts as false (no payment taken yet)
+  // Website bookings with a Stripe payment ID: payment was taken, honour depositPaid:true
+  // Website bookings without a payment ID: depositPaid stays false (webhook hasn't fired yet)
   // Portal bookings: respect whatever the portal sends
-  const depositPaid = b.source === "Website" ? false : (b.depositPaid ?? false);
+  const depositPaid = (b.stripePaymentId && b.depositPaid)
+    ? true
+    : b.source === "Website"
+      ? false
+      : (b.depositPaid ?? false);
 
   try {
     // Run autocomplete before inserting
