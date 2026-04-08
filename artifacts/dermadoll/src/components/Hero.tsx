@@ -39,7 +39,7 @@ export default function Hero() {
           preload="auto"
           poster={`${import.meta.env.BASE_URL}opengraph.jpg`}
           {...{ "webkit-playsinline": "true" } as any}
-          className="absolute inset-0 w-full h-full object-cover object-top"
+          className="absolute inset-0 w-full h-full object-cover object-top md:object-[center_35%]"
         >
           <source src={`${import.meta.env.BASE_URL}hero.mp4`} type="video/mp4" />
         </video>
