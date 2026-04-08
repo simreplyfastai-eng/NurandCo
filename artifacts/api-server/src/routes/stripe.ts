@@ -129,7 +129,9 @@ router.post("/stripe/webhook", async (req, res) => {
           const category = getTreatmentCategory(treatment);
           const depositAmountPence = pi.amount; // already in pence
           const deposit = Math.round(depositAmountPence / 100);
-          const price = deposit * 2;
+          const settings = await getSettings();
+          const depositPercent = Number(settings.deposit ?? 50);
+          const price = Math.round(deposit * 100 / depositPercent);
 
           const clientId = await upsertClientFromBooking({
             name: clientName,

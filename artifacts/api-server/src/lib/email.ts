@@ -69,7 +69,7 @@ export async function sendClientConfirmationEmail(params: {
             <p style="margin:0 0 8px;font-weight:600">Payment</p>
             ${depositPaid
               ? `<p style="margin:4px 0"><strong style="color:#2D6A4F">✓ Deposit paid: £${params.deposit}</strong></p>`
-              : `<p style="margin:4px 0;color:#888">Deposit (50%): <strong style="color:#C9A96E">£${params.deposit}</strong></p>`
+              : `<p style="margin:4px 0;color:#888">Deposit (${Math.round(params.deposit / (params.deposit + params.balance) * 100)}%): <strong style="color:#C9A96E">£${params.deposit}</strong></p>`
             }
             <p style="margin:4px 0;color:#888">Balance due on arrival: <strong style="color:#111">£${params.balance}</strong></p>
           </div>
