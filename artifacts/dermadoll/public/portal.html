@@ -1778,8 +1778,16 @@ let clientFilter='';
 function renderClients(filter){
   filter=filter!==undefined?filter:clientFilter;
   clientFilter=filter;
-  const clients=getClients().filter(c=>!filter||c.name.toLowerCase().includes(filter.toLowerCase()));
   const bookings=getBookings();
+  const clients=getClients()
+    .filter(c=>!filter||c.name.toLowerCase().includes(filter.toLowerCase()))
+    .sort((a,b)=>{
+      const lastA=[...bookings.filter(x=>x.clientName===a.name)].sort((p,q)=>new Date(q.date)-new Date(p.date))[0];
+      const lastB=[...bookings.filter(x=>x.clientName===b.name)].sort((p,q)=>new Date(q.date)-new Date(p.date))[0];
+      const dA=lastA?new Date(lastA.date).getTime():0;
+      const dB=lastB?new Date(lastB.date).getTime():0;
+      return dB-dA;
+    });
   const countEl=document.getElementById('client-count');
   if(countEl)countEl.textContent=clients.length;
   if(!clients.length){
