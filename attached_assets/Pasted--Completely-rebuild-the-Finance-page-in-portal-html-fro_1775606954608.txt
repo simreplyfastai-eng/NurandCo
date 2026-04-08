@@ -1,0 +1,201 @@
+```
+Completely rebuild the Finance page in portal.html from scratch.
+
+OVERALL PAGE STYLE:
+- White (#FFFFFF) background
+- Max-width: 100%, box-sizing border-box on everything
+- Padding: 24px on desktop, 16px on mobile
+- No horizontal scrolling at any screen size
+- overflow-x: hidden on the page container
+- Font: Inter for all UI, Cormorant Garamond for 
+  large number displays only
+- Gold accent: #C9A96E throughout
+
+PAGE HEADER ROW:
+- Left: "Finance" in Cormorant Garamond 26px #111111
+- Right: month selector dropdown — 
+  border: 1px solid #E0E0E0, border-radius 8px, 
+  padding 6px 14px, Inter 13px #111111, 
+  background white, dropdown arrow in gold #C9A96E
+  Options: January through December + current year
+- On mobile: header row stays side by side, 
+  month selector shrinks to fit
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+SUMMARY CARDS ROW
+━━━━━━━━━━━━━━━━━━━━━━━━
+3 cards in a single horizontal row at all screen sizes.
+Each card: equal width (33.33%), no individual shadows.
+Separated by thin #F0F0F0 vertical dividers only.
+Outer container: border 1px solid #F0F0F0, 
+border-radius 12px, overflow hidden.
+
+Card 1 — TOTAL REVENUE:
+- Label: "TOTAL REVENUE" Inter 10px #AAAAAA 
+  uppercase letter-spacing 1px
+- Value: Cormorant Garamond 26px #C9A96E bold
+- Pull from localStorage — sum of all booking 
+  prices in the selected month
+
+Card 2 — DEPOSITS COLLECTED:
+- Label: "DEPOSITS COLLECTED" same style
+- Value: Cormorant Garamond 26px #2D6A4F bold (green)
+- Sum of all deposit amounts collected this month
+
+Card 3 — BALANCE OUTSTANDING:
+- Label: "BALANCE OUTSTANDING" same style  
+- Value: Cormorant Garamond 26px #C1121F bold (red)
+- Total revenue minus deposits collected
+
+All cards: padding 16px 12px, text-align centre
+On mobile under 380px: reduce value font to 20px
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+REVENUE CHART
+━━━━━━━━━━━━━━━━━━━━━━━━
+White card, border 1px solid #F0F0F0, 
+border-radius 12px, padding 20px, margin-top 16px.
+
+Header row:
+- Left: "Revenue — This Month" Inter 13px bold #111111
+- Right: small grey pill showing total e.g. "£2,029" 
+  Inter 12px #888888 background #F5F5F5 
+  border-radius 20px padding 4px 12px
+
+Chart:
+- Pure vanilla JS canvas — no libraries whatsoever
+- Width: 100%, height: 180px on mobile, 220px desktop
+- canvas element: width 100% max-width 100% 
+  display block
+- X axis: day numbers 1, 15, 30 — Inter 10px #AAAAAA
+- Y axis: £0 up to max revenue, 3-4 labels — 
+  Inter 10px #AAAAAA, right-aligned left of chart
+- Line: smooth curved line, stroke #C9A96E, 
+  stroke-width 2px
+- Fill below line: gradient from rgba(201,169,110,0.15) 
+  at top to rgba(201,169,110,0) at bottom
+- Data points: small gold circle 4px radius 
+  on hover only
+- Tooltip on hover/touch: white pill, 
+  box-shadow 0 2px 8px rgba(0,0,0,0.1), 
+  "Day X · £XXX" Inter 12px
+- Redraws on window resize using ResizeObserver
+- Data pulled from localStorage bookings 
+  for selected month
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+TRANSACTIONS TABLE
+━━━━━━━━━━━━━━━━━━━━━━━━
+White card, border 1px solid #F0F0F0,
+border-radius 12px, padding 20px, margin-top 16px.
+
+Header row:
+- Left: "Transactions" Inter 14px bold #111111
+- Right: filter tabs — All | Paid | Pending | Overdue
+  Each tab: Inter 12px, padding 6px 14px, 
+  border-radius 20px, background #F5F5F5 default,
+  Active tab: background #111111 color white
+  Gap 6px between tabs
+  On mobile: tabs scroll horizontally in their own 
+  container, scrollbar hidden, 
+  -webkit-overflow-scrolling: touch
+
+TABLE:
+- width: 100%, table-layout: fixed
+- overflow-x: hidden on wrapper
+- border-collapse: collapse
+- No outer border
+
+Column headers row:
+- Background #FAFAFA, border-bottom 1px solid #F0F0F0
+- Inter 10px bold #AAAAAA uppercase letter-spacing 1px
+- Padding 10px 12px
+- Columns and widths (mobile under 600px):
+  DATE: 22%
+  CLIENT: 28%
+  TOTAL: 18%
+  STATUS: 20%
+  ACTION: 12%
+- Columns on desktop:
+  DATE: 16%
+  CLIENT: 24%
+  TREATMENT: 22%
+  TOTAL: 14%
+  STATUS: 14%
+  ACTION: 10%
+- Hide TREATMENT column on mobile under 600px
+
+Table rows:
+- Height: 52px
+- Border-bottom: 1px solid #F5F5F5
+- Hover: background #FAFAFA
+- All cells: padding 0 12px, vertical-align middle
+- overflow hidden, text-overflow ellipsis, 
+  white-space nowrap
+
+DATE cell:
+- Inter 12px #888888
+- Format: "24 Apr" on mobile, "24 Apr 2026" desktop
+
+CLIENT cell:
+- Inter 13px bold #111111
+
+TREATMENT cell (desktop only):
+- Inter 12px #888888
+
+TOTAL cell:
+- Inter 13px bold #C9A96E
+
+STATUS cell:
+- Pill badges only, no extra text:
+  Complete: background #D8F3DC color #2D6A4F 
+  Inter 11px bold border-radius 20px padding 3px 10px
+  Pending: background #FFF3E0 color #C9A96E 
+  same sizing
+  Overdue: background #FFE5E5 color #C1121F 
+  same sizing
+
+ACTION cell:
+- Desktop: "Mark Paid" button — 
+  border: 1px solid #C9A96E, color #C9A96E,
+  Inter 11px, border-radius 20px, padding 4px 12px,
+  background white, hover fills gold white text
+  Only show on Pending/Overdue rows
+  Complete rows: show nothing or a faint grey tick ✓
+- Mobile: replace button text with tick icon only —
+  gold circle 28px × 28px, border-radius 50%,
+  border 1px solid #C9A96E, gold ✓ symbol centred
+  Same hover behaviour
+
+EMPTY STATE:
+- If no transactions: centred content, padding 40px 0
+- "No transactions yet" Cormorant Garamond 20px #111111
+- "Bookings will appear here automatically" 
+  Inter 13px #AAAAAA
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+EXPORT BUTTON
+━━━━━━━━━━━━━━━━━━━━━━━━
+- Below the transactions card, full width on mobile
+- border: 1px solid #E0E0E0, color #888888,
+  border-radius 8px, padding 12px, Inter 13px
+- "↓ Export Transactions" centred
+- On click: generates a plain text summary of all 
+  visible transactions and triggers download as .txt
+- Desktop only — hide on mobile under 600px
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+TECHNICAL
+━━━━━━━━━━━━━━━━━━━━━━━━
+- All data pulled from localStorage bookings array
+- Month selector filters all three sections 
+  simultaneously — cards, chart and table all update
+- Chart redraws on month change and window resize
+- Mark Paid button updates booking status in 
+  localStorage and refreshes the table instantly
+- padding-bottom: 100px on page container to clear 
+  the floating hamburger button
+- Zero horizontal scroll at 375px viewport width
+- box-sizing: border-box on all elements
+- All transitions: 150ms ease
+```
