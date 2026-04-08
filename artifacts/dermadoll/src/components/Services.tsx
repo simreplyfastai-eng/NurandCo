@@ -230,7 +230,8 @@ export default function Services() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-foreground/60 font-light text-lg"
+            className="font-light text-lg"
+            style={{ color: "#C9A96E" }}
           >
             Explore our full range of aesthetic treatments
           </motion.p>
