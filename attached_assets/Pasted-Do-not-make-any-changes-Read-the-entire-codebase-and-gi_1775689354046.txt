@@ -1,0 +1,141 @@
+Do not make any changes.
+Read the entire codebase and give me 
+a complete honest status report.
+
+Check every item and tell me:
+✅ Working
+⚠️ Partial — what is missing
+❌ Not done
+
+1. AUTHENTICATION
+- Is the hardcoded password removed 
+  from frontend code?
+- Is POST /api/auth/login implemented?
+- Are credentials in Replit Secrets only?
+- Is JWT token returned on login?
+- Is session expiry working?
+- Does expired session redirect to login?
+
+2. PROTECTED ROUTES
+List every route and whether it 
+requires JWT auth:
+- PUT /api/bookings/:id
+- DELETE /api/bookings/:id
+- GET /api/finance/summary
+- GET /api/finance/monthly
+- PUT /api/portal/store/:key
+- DELETE /api/bookings
+- DELETE /api/clients
+- DELETE /api/clients/:id
+- PUT /api/clients/:id
+- POST /api/clients
+- GET /api/clients
+Are all admin routes protected?
+Can any be accessed without a token?
+
+3. STRIPE
+- Is GET /api/config/stripe implemented?
+- Is POST /api/stripe/create-payment-intent 
+  implemented?
+- Does the booking form load Stripe.js 
+  from the backend key?
+- Does the Stripe payment element 
+  mount correctly?
+- Is the booking ONLY saved after 
+  payment succeeds?
+- Is depositPaid: true set correctly 
+  only after payment?
+- Is POST /api/stripe/webhook implemented?
+- Is webhook signature verification working?
+- Is raw body parsing before express.json?
+- On checkout.session.completed or 
+  payment_intent.succeeded:
+  does it set status to confirmed?
+  does it set depositPaid to true?
+  does it send client confirmation email?
+  does it send admin notification email?
+- Is it a safe no-op if already confirmed?
+- Are Stripe keys in Secrets only?
+
+4. GHOST BOOKING CLEANUP
+- Are awaiting_payment bookings older 
+  than 2 hours being deleted?
+- When does this cleanup run?
+
+5. RATE LIMITING
+- Is express-rate-limit installed?
+- Applied to:
+  POST /api/bookings
+  POST /api/auth/login
+  POST /api/stripe/create-payment-intent
+  POST /api/enquiries
+- What are the exact limits?
+
+6. CORS
+- Is CORS restricted to the 
+  Dermadoll domain only?
+- Is open cors() removed?
+
+7. SERVER SIDE CHECKS
+- Does POST /api/bookings check for 
+  slot conflicts server side?
+- Does it account for treatment 
+  duration + 15 min buffer?
+- Does it check availability server side?
+- Does it return 409 on conflict?
+- Does it return 400 if day is closed?
+
+8. EMAILS
+- Is client confirmation email written?
+- Is admin notification email written?
+- Is 24hr reminder email written 
+  with date included?
+- Is cancellation email written?
+- What provider is being used?
+- Will they all fire once RESEND_API_KEY 
+  is added to Secrets?
+- Does success screen show screenshot 
+  message when Resend not configured?
+
+9. BOOKING LOGIC
+- Is double booking prevention working?
+- Is treatment duration stored on 
+  every booking row?
+- Is client_id stored on every booking?
+- Is category stored on every booking?
+- Is 15 minute buffer enforced?
+- Do past bookings auto complete?
+- Are booked slots greyed out 
+  on the website?
+
+10. TRAINING ENQUIRIES
+- Are all 7 courses showing on website?
+- Does the enquiry form work?
+- Does it save to PostgreSQL?
+- Does it appear in portal Enquiries?
+- Does it send admin notification?
+- Does it send confirmation to enquirer?
+
+11. SECURITY
+- Any API keys visible in frontend?
+- Any hardcoded passwords anywhere?
+- Any unprotected admin routes?
+- Is CRON_SECRET protecting cron endpoints?
+- Is Stripe webhook signature verified?
+
+12. DATA
+- Is everything saving to PostgreSQL?
+- Is anything still using localStorage 
+  for critical data?
+- Is media saving to cloud storage?
+- Is client deduplication working?
+
+13. ANYTHING BROKEN
+Be completely honest.
+List anything broken, incomplete 
+or that could cause problems with 
+real clients and real payments.
+
+14. WHAT IS LEFT
+Simple numbered list of everything 
+still needed before going live.
