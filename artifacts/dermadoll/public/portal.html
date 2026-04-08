@@ -355,13 +355,45 @@ tr:hover td{background:#FDFBF8}
 .fin-mark-btn:hover{background:#C9A96E;color:#fff}
 .fin-mark-circle{width:28px;height:28px;border-radius:50%;border:1px solid #C9A96E;color:#C9A96E;background:#fff;font-size:14px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;margin:auto;display:flex}
 .fin-mark-circle:hover{background:#C9A96E;color:#fff}
-.bk-filter-btn{font-family:'Inter',sans-serif;font-size:12px;padding:6px 16px;border-radius:20px;background:#F5F5F5;color:#888;border:none;cursor:pointer;white-space:nowrap;transition:all .15s}
+.bk-filter-btn{font-family:'Inter',sans-serif;font-size:12px;padding:6px 14px;border-radius:20px;background:#F5F5F5;color:#888;border:none;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
 .bk-filter-btn.active{background:#111;color:#fff}
 .bk-filter-btn:hover:not(.active){background:#e8e8e8;color:#444}
-#bk-all-body tr{border-bottom:1px solid #f3f3f3}
-#bk-all-body tr:last-child{border-bottom:none}
-#bk-all-body tr:hover td{background:#fafaf8}
-#bk-all-body td{padding:13px 16px;font-size:13px;font-family:'Inter',sans-serif;color:#333;vertical-align:middle}
+.bk-filter-row{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;margin-bottom:18px}
+.bk-filter-row::-webkit-scrollbar{display:none}
+#bk-all-wrap{overflow-x:hidden;box-sizing:border-box}
+#bk-all-table{width:100%;table-layout:fixed;border-collapse:collapse}
+#bk-all-table thead th{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;color:#AAAAAA;letter-spacing:1px;text-transform:uppercase;padding:10px 12px;text-align:left;background:#FAFAFA;border-bottom:1px solid #F0F0F0;overflow:hidden;white-space:nowrap}
+#bk-all-table tbody tr{border-bottom:1px solid #F5F5F5;height:56px}
+#bk-all-table tbody tr:last-child{border-bottom:none}
+#bk-all-table tbody tr:hover td{background:#FAFAFA}
+#bk-all-table tbody td{padding:0 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Inter',sans-serif;font-size:13px;color:#333;box-sizing:border-box}
+.bk-date-cell{white-space:normal!important;line-height:1.4}
+.bk-date-day{font-size:12px;font-weight:700;color:#111}
+.bk-date-time{font-size:11px;color:#AAAAAA}
+.bk-status-pill{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;white-space:nowrap}
+.bk-edit-btn{border:1px solid #E0E0E0;color:#888;background:#fff;font-family:'Inter',sans-serif;font-size:11px;border-radius:20px;padding:3px 10px;cursor:pointer;transition:all .15s;margin-right:4px}
+.bk-edit-btn:hover{border-color:#aaa;color:#444}
+.bk-paid-btn{border:1px solid #C9A96E;color:#C9A96E;background:#fff;font-family:'Inter',sans-serif;font-size:11px;border-radius:20px;padding:3px 10px;cursor:pointer;transition:all .15s}
+.bk-paid-btn:hover{background:#C9A96E;color:#fff}
+.bk-mob-icon{width:28px;height:28px;border-radius:50%;border:1px solid #E0E0E0;background:#fff;color:#C9A96E;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;transition:all .15s;min-width:44px;min-height:44px;border-radius:8px}
+/* Desktop column widths */
+#bk-all-table .bk-col-date{width:16%}
+#bk-all-table .bk-col-client{width:18%}
+#bk-all-table .bk-col-treat{width:22%}
+#bk-all-table .bk-col-price{width:10%;text-align:right}
+#bk-all-table .bk-col-dep{width:12%;text-align:center}
+#bk-all-table .bk-col-status{width:12%;text-align:center}
+#bk-all-table .bk-col-actions{width:10%;text-align:center}
+@media(max-width:650px){
+  #bk-all-table .bk-col-treat,#bk-all-table .bk-col-dep{display:none}
+  #bk-all-table .bk-col-date{width:20%}
+  #bk-all-table .bk-col-client{width:28%}
+  #bk-all-table .bk-col-price{width:16%}
+  #bk-all-table .bk-col-status{width:20%}
+  #bk-all-table .bk-col-actions{width:16%}
+  .bk-edit-btn span,.bk-paid-btn{display:none}
+  .bk-mob-icon{display:inline-flex!important}
+}
 .fin-export-btn{width:100%;border:1px solid #E0E0E0;color:#888888;background:#fff;border-radius:8px;padding:12px;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;margin-top:16px;transition:border-color .15s,color .15s;display:block}
 .fin-export-btn:hover{border-color:#AAAAAA;color:#555}
 
@@ -622,27 +654,27 @@ tr:hover td{background:#FDFBF8}
     <div id="page-bookings" class="page">
       <div class="topbar">
         <span class="topbar-title serif">New Bookings</span>
-        <button class="btn-gold" onclick="openBookingModal()">+ New Booking</button>
+        <button class="btn-gold" style="border-radius:20px;font-size:12px;padding:8px 16px" onclick="openBookingModal()">+ New Booking</button>
       </div>
-      <div style="padding:20px 24px">
-        <div style="display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap">
+      <div style="padding:20px 24px;padding-bottom:100px;box-sizing:border-box">
+        <div class="bk-filter-row">
           <button class="bk-filter-btn active" onclick="setBookingsFilter('all',this)">All</button>
           <button class="bk-filter-btn" onclick="setBookingsFilter('Pending',this)">Pending</button>
           <button class="bk-filter-btn" onclick="setBookingsFilter('Confirmed',this)">Confirmed</button>
           <button class="bk-filter-btn" onclick="setBookingsFilter('Complete',this)">Complete</button>
           <button class="bk-filter-btn" onclick="setBookingsFilter('Cancelled',this)">Cancelled</button>
         </div>
-        <div class="card" style="padding:0;overflow:hidden">
-          <table id="bk-all-table" style="width:100%;border-collapse:collapse">
+        <div class="card" style="padding:0;overflow:hidden" id="bk-all-wrap">
+          <table id="bk-all-table">
             <thead>
-              <tr style="background:#faf9f7;border-bottom:1px solid var(--border)">
-                <th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.06em;color:#888;text-transform:uppercase">Date</th>
-                <th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.06em;color:#888;text-transform:uppercase">Client</th>
-                <th style="padding:11px 16px;text-align:left;font-size:11px;font-weight:600;letter-spacing:.06em;color:#888;text-transform:uppercase">Treatment</th>
-                <th style="padding:11px 16px;text-align:right;font-size:11px;font-weight:600;letter-spacing:.06em;color:#888;text-transform:uppercase">Price</th>
-                <th style="padding:11px 16px;text-align:center;font-size:11px;font-weight:600;letter-spacing:.06em;color:#888;text-transform:uppercase">Deposit</th>
-                <th style="padding:11px 16px;text-align:center;font-size:11px;font-weight:600;letter-spacing:.06em;color:#888;text-transform:uppercase">Status</th>
-                <th style="padding:11px 16px;text-align:center;font-size:11px;font-weight:600;letter-spacing:.06em;color:#888;text-transform:uppercase">Actions</th>
+              <tr>
+                <th class="bk-col-date">Date</th>
+                <th class="bk-col-client">Client</th>
+                <th class="bk-col-treat">Treatment</th>
+                <th class="bk-col-price">Price</th>
+                <th class="bk-col-dep">Deposit</th>
+                <th class="bk-col-status">Status</th>
+                <th class="bk-col-actions">Actions</th>
               </tr>
             </thead>
             <tbody id="bk-all-body"></tbody>
@@ -1536,22 +1568,34 @@ function renderBookings(){
   if(!body)return;
   if(!list.length){body.innerHTML='';table.style.display='none';empty.style.display='block';return;}
   table.style.display='';empty.style.display='none';
-  const STATUS_COLORS={Confirmed:'#D8F3DC|#2D6A4F',Complete:'#D8F3DC|#2D6A4F',Pending:'#FFF3E0|#C9A96E',Cancelled:'#EEEEEE|#888'};
+  const STATUS_STYLE={
+    Pending:'background:#FFF3E0;color:#C9A96E',
+    Confirmed:'background:#E8F4FD;color:#1A6EA8',
+    Complete:'background:#D8F3DC;color:#2D6A4F',
+    Cancelled:'background:#FFE5E5;color:#C1121F'
+  };
   body.innerHTML=list.map(b=>{
-    const [bg,fg]=(STATUS_COLORS[b.status]||'#F5F5F5|#888').split('|');
-    const dep=b.depositPaid?`<span style="color:#2D6A4F;font-weight:600">✓ Paid</span>`:`<span style="color:#C9A96E">Pending</span>`;
+    const style=STATUS_STYLE[b.status]||'background:#F5F5F5;color:#888';
+    const dep=b.depositPaid
+      ?`<span style="color:#2D6A4F;font-size:12px">✓ Paid</span>`
+      :`<span style="color:#C1121F;font-size:12px">Unpaid</span>`;
     const d=new Date(b.date);
-    const dateStr=isNaN(d)?b.date:d.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+    const dateDay=isNaN(d)?b.date:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    const dateYear=isNaN(d)?'':d.getFullYear();
     return`<tr>
-      <td style="color:#555;white-space:nowrap">${dateStr}${b.time?' · <span style="color:#aaa">'+b.time+'</span>':''}</td>
-      <td style="font-weight:500;color:#111">${b.clientName||'—'}</td>
-      <td style="color:#555">${b.treatment||'—'}</td>
-      <td style="text-align:right;font-weight:600;color:#111">£${Number(b.price||0).toFixed(0)}</td>
-      <td style="text-align:center;font-size:12px">${dep}</td>
-      <td style="text-align:center"><span style="background:${bg};color:${fg};font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block">${b.status}</span></td>
-      <td style="text-align:center;white-space:nowrap">
-        <button class="fin-mark-btn" style="font-size:11px;padding:4px 10px;margin-right:4px" onclick="openBookingModal('${b.id}')">Edit</button>
-        ${b.status==='Pending'?`<button class="fin-mark-btn" style="font-size:11px;padding:4px 10px" onclick="markPaid('${b.id}')">Mark Paid</button>`:''}
+      <td class="bk-col-date bk-date-cell">
+        <div class="bk-date-day">${dateDay}</div>
+        ${b.time?`<div class="bk-date-time">${b.time}</div>`:''}
+      </td>
+      <td class="bk-col-client" style="font-weight:700;color:#111">${b.clientName||'—'}</td>
+      <td class="bk-col-treat" style="color:#888888;font-size:12px">${b.treatment||'—'}</td>
+      <td class="bk-col-price" style="font-weight:700;color:#C9A96E">£${Number(b.price||0).toFixed(0)}</td>
+      <td class="bk-col-dep">${dep}</td>
+      <td class="bk-col-status"><span class="bk-status-pill" style="${style}">${b.status}</span></td>
+      <td class="bk-col-actions">
+        <button class="bk-edit-btn" onclick="openBookingModal('${b.id}')"><span>Edit</span></button>
+        <button class="bk-mob-icon" style="display:none" onclick="openBookingModal('${b.id}')" title="Edit">✏</button>
+        ${b.status==='Pending'?`<button class="bk-paid-btn" onclick="markPaid('${b.id}')">Mark Paid</button>`:''}
       </td>
     </tr>`;
   }).join('');
@@ -1933,6 +1977,18 @@ async function saveBooking(){
   const sel=document.getElementById('bm-treatment');
   const opt=sel.options[sel.selectedIndex];
   const category=opt&&opt.dataset.cat?opt.dataset.cat:'';
+
+  // Duplicate booking guard — same client + treatment + date + time
+  if(!editingBookingId){
+    const existing=getBookings().find(b=>
+      b.clientName.toLowerCase()===clientName.toLowerCase()&&
+      b.treatment===treatment&&b.date===date&&b.time===time
+    );
+    if(existing){
+      alert('A booking for this client at this time already exists.');
+      return;
+    }
+  }
 
   const booking={
     id:editingBookingId||uid(),clientName,clientEmail:'',treatment,category,
