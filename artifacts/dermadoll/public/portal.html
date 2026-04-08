@@ -629,10 +629,7 @@ tr:hover td{background:#FDFBF8}
                 <thead><tr><th>Client</th><th>Treatment</th><th>Date</th><th>Status</th></tr></thead>
                 <tbody id="recent-bookings-body"></tbody>
               </table>
-              <div id="dash-recent-empty" style="display:none;padding:40px 20px;text-align:center">
-                <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:#111;margin-bottom:8px">No bookings yet</div>
-                <div style="font-size:13px;color:#AAAAAA;line-height:1.6">Your data will appear here once clients start booking</div>
-              </div>
+              <div id="dash-recent-empty" style="display:none;padding:40px 20px;text-align:center;font-size:13px;color:#AAAAAA;font-style:italic">No bookings yet — your data will appear here once clients start booking</div>
             </div>
             <div class="card" style="margin-top:20px">
               <div class="card-header"><span class="card-title">Revenue by Treatment</span></div>
@@ -705,10 +702,7 @@ tr:hover td{background:#FDFBF8}
             </thead>
             <tbody id="bk-all-body"></tbody>
           </table>
-          <div id="bk-all-empty" style="display:none;padding:60px 20px;text-align:center">
-            <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:#111;margin-bottom:8px">No bookings yet</div>
-            <div style="font-size:13px;color:#AAAAAA">Bookings from clients will appear here once they start coming in</div>
-          </div>
+          <div id="bk-all-empty" style="display:none;padding:60px 20px;text-align:center;font-size:13px;color:#AAAAAA;font-style:italic">No bookings yet</div>
         </div>
       </div>
     </div>
@@ -1988,7 +1982,7 @@ function selectDay(dateStr){
       </div>
       <div class="timeline-status">${statusPill(b.status)}</div>
     </div>
-  `).join(''):`<p class="cal-empty-state">No bookings for this day</p>`;
+  `).join(''):`<p class="cal-empty-state">No bookings for this date</p>`;
 }
 
 // ═══════════════════════════════════════════════════
@@ -2448,7 +2442,7 @@ function renderClients(filter){
   const countEl=document.getElementById('client-count');
   if(countEl)countEl.textContent=clients.length;
   if(!clients.length){
-    document.getElementById('client-grid').innerHTML=`<div class="cl-empty"><div class="cl-empty-title">No clients yet</div><div class="cl-empty-sub">Clients will appear automatically when they book</div></div>`;
+    document.getElementById('client-grid').innerHTML=`<div class="cl-empty"><p style="font-family:'Cormorant Garamond',serif;font-size:20px;color:#111;margin:0 0 8px">No clients yet</p><p class="cl-empty-sub">Clients will appear automatically when they book</p></div>`;
     return;
   }
   document.getElementById('client-grid').innerHTML='<div class="client-list">'+clients.map(c=>{
