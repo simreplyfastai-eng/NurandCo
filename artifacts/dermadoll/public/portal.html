@@ -848,7 +848,10 @@ tr:hover td{background:#FDFBF8}
 
     <!-- ── MEDIA ── -->
     <div id="page-media" class="page">
-      <div class="topbar"><span class="topbar-title serif">Media</span></div>
+      <div class="topbar" style="display:flex;align-items:center;justify-content:space-between">
+        <span class="topbar-title serif">Media</span>
+        <button id="media-save-btn" onclick="publishMediaToCloud()" style="background:#C9A96E;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Save to Live Site</button>
+      </div>
       <div style="padding:28px;max-width:860px;margin:0 auto" id="media-root"></div>
     </div>
 
@@ -3054,6 +3057,19 @@ function livePill(text,green){
   const bg=green?'rgba(0,0,0,0.6)':'rgba(0,0,0,0.6)';
   const dot=green?'#4CAF50':'#C9A96E';
   return`<span style="background:${bg};color:#fff;font-family:Inter,sans-serif;font-size:11px;font-weight:700;border-radius:6px;padding:5px 10px;display:inline-flex;align-items:center;gap:5px"><span style="color:${dot};font-size:9px">●</span>${text}</span>`;
+}
+
+async function publishMediaToCloud(){
+  const btn=document.getElementById('media-save-btn');
+  const orig=btn?btn.textContent:'';
+  if(btn){btn.textContent='Saving…';btn.disabled=true;btn.style.opacity='.6';}
+  try{
+    await CloudStore.set('dd_media',getMediaData());
+    showToast('Changes saved to live site ✓');
+  }catch(e){
+    showToast('Save failed — '+e.message);
+  }
+  if(btn){btn.textContent=orig;btn.disabled=false;btn.style.opacity='1';}
 }
 
 function renderMedia(){
