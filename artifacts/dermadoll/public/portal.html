@@ -15,7 +15,9 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 
 /* ── LOGIN ─────────────────────────────────────── */
 #login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#FAF9F7}
-.login-card{background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.1);padding:48px 40px;width:100%;max-width:400px}
+.login-card{position:relative;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.1);padding:48px 40px;width:100%;max-width:400px}
+.login-close{position:absolute;top:16px;right:16px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;border-radius:50%;color:#bbb;font-size:18px;line-height:1;transition:background .15s,color .15s}
+.login-close:hover{background:#f5f5f5;color:#555}
 .login-wordmark{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;letter-spacing:.18em;color:var(--gold);text-align:center}
 .login-sub{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);text-align:center;margin-top:6px;margin-bottom:36px;letter-spacing:.05em}
 .login-label{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.05em;display:block;margin-bottom:6px;text-transform:uppercase}
@@ -517,6 +519,7 @@ tr:hover td{background:#FDFBF8}
 <!-- ═══ LOGIN ════════════════════════════════════════ -->
 <div id="login-page">
   <div class="login-card" id="login-card">
+    <button class="login-close" onclick="window.location.href='/'" aria-label="Back to site">✕</button>
     <div class="login-wordmark">DERMADOLL</div>
     <div class="login-sub">Admin Portal</div>
     <label class="login-label">Email</label>
