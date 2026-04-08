@@ -1,0 +1,166 @@
+URGENT — The portal media manager is 
+uploading files correctly but the 
+website is completely ignoring them.
+The website still shows hardcoded 
+files from public/ and never reads 
+from the portal media config.
+
+This needs to be fully fixed right now.
+
+DIAGNOSIS FIRST:
+Read these specific things and tell 
+me the exact current state:
+
+1. Does GET /api/media/config exist?
+   What does it currently return?
+   Is it reading from portal_kv 
+   dd_media in PostgreSQL?
+   Or is it returning hardcoded paths?
+
+2. In index.html, when the page loads:
+   Does it actually call 
+   GET /api/media/config?
+   Show me the exact JavaScript code 
+   that handles this on page load.
+   Does it use the returned URLs to 
+   set image and video src attributes?
+   Or does it just use hardcoded 
+   filenames and never call the API?
+
+3. When an image is uploaded or 
+   assigned to a slot in the portal:
+   Does it save the cloud URL to 
+   portal_kv dd_media via CloudStore?
+   Show me the exact save function.
+
+THEN FIX ALL THREE GAPS:
+
+FIX 1 — /api/media/config:
+Must read dd_media from PostgreSQL 
+via CloudStore.get('dd_media').
+Convert all stored object storage 
+paths to full serve URLs using 
+/api/media/serve?path=[path]
+Return the complete config object 
+with all slots populated.
+If a slot has no upload: return null.
+
+FIX 2 — index.html on page load:
+Add this fetch call that runs 
+immediately when the page loads:
+
+fetch('/api/media/config')
+  .then(r => r.json())
+  .then(config => {
+    
+    // Before & After images
+    if (config.beforeAfter) {
+      config.beforeAfter.forEach((item, i) => {
+        if (item.src) {
+          const img = document.querySelector(
+            '[data-ba-slot="' + (i+1) + '"] img'
+          )
+          if (img) img.src = item.src
+          const label = document.querySelector(
+            '[data-ba-slot="' + (i+1) + '"] .ba-label'
+          )
+          if (label && item.label) 
+            label.textContent = item.label
+        }
+      })
+    }
+    
+    // Results videos
+    if (config.videos) {
+      config.videos.forEach((item, i) => {
+        if (item.src) {
+          const video = document.querySelector(
+            '[data-video-slot="' + (i+1) + '"] video'
+          )
+          if (video) {
+            video.src = item.src
+            video.load()
+          }
+          const label = document.querySelector(
+            '[data-video-slot="' + (i+1) + '"] .video-label'
+          )
+          if (label && item.label) 
+            label.textContent = item.label
+        }
+      })
+    }
+    
+    // Practitioner image
+    if (config.practitionerImage) {
+      const img = document.getElementById(
+        'practitioner-photo'
+      )
+      if (img) img.src = config.practitionerImage
+    }
+    
+    // Graduate photos
+    if (config.graduates) {
+      config.graduates.forEach((item, i) => {
+        if (item.src) {
+          const img = document.querySelector(
+            '[data-grad-slot="' + (i+1) + '"] img'
+          )
+          if (img) img.src = item.src
+          const name = document.querySelector(
+            '[data-grad-slot="' + (i+1) + '"] .grad-name'
+          )
+          if (name && item.name) 
+            name.textContent = item.name
+          const course = document.querySelector(
+            '[data-grad-slot="' + (i+1) + '"] .grad-course'
+          )
+          if (course && item.course) 
+            course.textContent = item.course
+        }
+      })
+    }
+  })
+  .catch(() => {
+    // Silently fall back to existing 
+    // public/ files if API fails
+  })
+
+Add the correct data attributes to 
+all relevant HTML elements:
+- Before/after image containers: 
+  data-ba-slot="1" through "4"
+- Before/after labels: class="ba-label"
+- Video containers: 
+  data-video-slot="1" through "4"
+- Video labels: class="video-label"
+- Practitioner photo: 
+  id="practitioner-photo"
+- Graduate containers: 
+  data-grad-slot="1" through "3"
+- Graduate name: class="grad-name"
+- Graduate course: class="grad-course"
+
+FIX 3 — Portal save function:
+When a file is uploaded to a slot 
+OR assigned from the library to a slot
+the save must:
+1. Upload file to Object Storage
+2. Get back the object path/URL
+3. Update the dd_media object in memory
+4. Immediately call 
+   CloudStore.set('dd_media', updatedMedia)
+5. Show "✓ Saved to cloud" confirmation
+
+This must happen for:
+- Gallery photo slot assignments
+- Video slot assignments  
+- Practitioner photo upload
+- Graduate photo uploads and 
+  name/course edits
+
+After all fixes verify:
+Upload a test image to Gallery slot 1 
+in the portal, then check that 
+visiting index.html shows the new 
+image instead of the old one.
+Confirm yes or no.

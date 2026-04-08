@@ -1,0 +1,112 @@
+Do not make any changes yet. Read the 
+entire codebase and give me a complete 
+honest audit of all data flows before 
+the site goes live.
+
+Check every single form and interaction 
+on the website and confirm for each one:
+
+1. CONSULTATION BOOKING (new)
+When a client books a consultation 
+on index.html:
+- Are all fields captured: name, email, 
+  phone, DOB, skin concerns?
+- Does it POST to /api/bookings?
+- Does it save to PostgreSQL 
+  bookings table?
+- Is category saved as "Consultation"?
+- Is price saved as 25?
+- Are depositPaid and balancePaid 
+  both saved as true?
+- Is duration_minutes saved as 15?
+- Is the client record created or 
+  updated in the clients table?
+- Is DOB saved to the clients table?
+- Is skin concerns/notes saved?
+- Does the client receive a 
+  confirmation email?
+- Does Niamh receive an admin 
+  notification email?
+- Does the booking appear in the 
+  portal New Bookings page?
+- Does it show with the blue 
+  "Consultation" status pill?
+- Does the client profile in the 
+  portal show DOB and skin concerns?
+
+2. TREATMENT BOOKING
+When a client books a treatment 
+on index.html:
+- Are all fields captured: name, 
+  email, phone, treatment, date, time?
+- Does it POST to /api/bookings?
+- Does it save to PostgreSQL?
+- Is category assigned correctly 
+  based on treatment type?
+- Is duration_minutes saved correctly?
+- Is the 50% deposit calculated 
+  from the deposit % setting?
+- Is client record created/updated?
+- Does client receive confirmation email?
+- Does Niamh receive admin notification?
+- Does it appear in portal calendar?
+- Does it appear in New Bookings?
+- Does Finance page update?
+
+3. TRAINING ENQUIRIES
+When someone submits a training 
+enquiry form on index.html:
+- Are all fields captured: name, 
+  email, phone, course, message?
+- Does it POST to /api/enquiries?
+- Does it save to PostgreSQL 
+  enquiries table?
+- Does it appear in the portal 
+  Enquiries section?
+- Does Niamh receive an email?
+- Does the enquirer receive a 
+  confirmation email?
+
+4. PORTAL DATA CONNECTIONS
+- Do bookings from the website 
+  appear in the portal immediately 
+  (within 30 seconds via polling)?
+- Does the portal calendar show 
+  the correct gold dots?
+- Does the Finance page pull real 
+  data from PostgreSQL?
+- Does the Dashboard KPI cards 
+  show real data?
+- Does the Clients section show 
+  all clients from all booking types?
+- Does the Revenue by Treatment 
+  chart include Consultation category?
+
+5. MEDIA
+- Is media metadata saving to 
+  PostgreSQL via CloudStore?
+- Does the website read media 
+  from /api/media/config?
+- Does uploading in the portal 
+  update the website?
+- Does media survive logout and 
+  device switch?
+
+6. SETTINGS
+- Is the WhatsApp number saving 
+  to PostgreSQL?
+- Is the deposit % saving and 
+  being used correctly?
+- Are all settings used in emails 
+  and success screens?
+
+7. ANYTHING MISSING OR BROKEN
+Be completely honest.
+List every gap, every piece of data 
+that might be lost, every flow that 
+is incomplete, every place where 
+data saves to localStorage instead 
+of PostgreSQL.
+
+Give me a simple table at the end:
+Feature | Saves to cloud | Shows in portal | Emails fire | Working?
