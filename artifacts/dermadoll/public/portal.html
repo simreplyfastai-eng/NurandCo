@@ -981,6 +981,13 @@ tr:hover td{background:#FDFBF8}
 
               <div style="font-size:11px;font-weight:700;color:#C9A96E;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Settings</div>
 
+              <div class="checklist-item" id="chk-cron">
+                <span class="chk-icon">○</span>
+                <div>
+                  <div class="chk-label">CRON_SECRET set</div>
+                  <div class="chk-hint">Add a random secret to Replit Secrets to protect scheduled job endpoints</div>
+                </div>
+              </div>
               <div class="checklist-item" id="chk-whatsapp">
                 <span class="chk-icon">○</span>
                 <div>
@@ -3503,6 +3510,7 @@ async function loadLaunchChecklist(){
     setChk('chk-stripe-webhook',cfg.hasStripeWebhookSecret);
     setChk('chk-resend',cfg.hasResendKey);
     setChk('chk-admin-email',cfg.hasAdminEmail);
+    setChk('chk-cron',cfg.hasCronSecret);
     setChk('chk-whatsapp',cfg.hasWhatsapp);
 
     // Test data: check if sample client names are in the current bookings list

@@ -31,6 +31,7 @@ async function sendReminders(): Promise<number> {
         clientEmail: row.client_email,
         clientName: row.client_name,
         treatment: row.treatment,
+        date: row.date,
         time: row.time,
         whatsapp,
       });
@@ -44,14 +45,25 @@ async function sendReminders(): Promise<number> {
   }
 }
 
+function requireCronSecret(req: import("express").Request, res: import("express").Response): boolean {
+  const secret = process.env.CRON_SECRET;
+  if (secret && req.headers["x-cron-secret"] !== secret) {
+    res.status(401).json({ error: "Unauthorised" });
+    return false;
+  }
+  return true;
+}
+
 // GET /api/cron/autocomplete
-router.get("/cron/autocomplete", async (_req, res) => {
+router.get("/cron/autocomplete", async (req, res) => {
+  if (!requireCronSecret(req, res)) return;
   const updated = await runAutoComplete();
   return res.json({ ok: true, updated });
 });
 
 // GET /api/cron/reminders
-router.get("/cron/reminders", async (_req, res) => {
+router.get("/cron/reminders", async (req, res) => {
+  if (!requireCronSecret(req, res)) return;
   const sent = await sendReminders();
   return res.json({ ok: true, sent });
 });

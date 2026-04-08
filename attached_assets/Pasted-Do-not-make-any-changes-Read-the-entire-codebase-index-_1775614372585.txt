@@ -1,0 +1,148 @@
+Do not make any changes. Read the entire 
+codebase — index.html, portal.html and 
+all backend files — and give me a complete 
+honest status report.
+
+1. STRIPE — full flow status
+Walk me through exactly what happens 
+when a client books and pays right now:
+- Does GET /api/config/stripe exist 
+  and return the publishable key?
+- Does POST /api/stripe/create-payment-intent 
+  exist and create a real PaymentIntent?
+- Does the booking form load Stripe.js 
+  using the key from the backend?
+- Does the Stripe payment element mount 
+  correctly in the booking modal?
+- After payment succeeds, is the booking 
+  saved to PostgreSQL?
+- Is depositPaid: true set correctly?
+- Is the booking ONLY saved after 
+  payment — never before?
+- Does the webhook handler at 
+  POST /api/stripe/webhook verify the 
+  signature and handle 
+  payment_intent.succeeded correctly?
+- What happens if the webhook fires but 
+  the booking already exists?
+- What happens if payment succeeds but 
+  the webhook never fires?
+
+2. EMAILS — exact status
+For each of these 4 emails tell me:
+- Is the code written?
+- What exactly triggers it?
+- Will it work the moment RESEND_API_KEY 
+  is added to Replit Secrets?
+- Is the sending address set correctly?
+
+Email 1: Client confirmation after booking
+Email 2: Admin notification on new booking
+Email 3: 24hr reminder (cron)
+Email 4: Cancellation email
+
+3. RATE LIMITING
+Is express-rate-limit installed and 
+applied to these endpoints:
+- POST /api/bookings
+- POST /api/auth/login
+- POST /api/stripe/create-payment-intent
+- POST /api/enquiries
+What are the exact limits?
+
+4. ANYTHING BROKEN
+Be completely honest — is there anything 
+that is broken, incomplete, or that could 
+cause a real problem when real clients 
+use the site?
+Include:
+- Edge cases that could break the 
+  booking flow
+- Anything that silently fails without 
+  showing an error
+- Anything that looks right on the surface 
+  but has broken logic underneath
+- Any data that could be lost or 
+  corrupted in normal use
+- Any security gaps that are still open
+- Anything that works in testing but 
+  could fail under real traffic
+Do not skip anything. This is going live 
+with real clients and real money.
+
+5. CRON JOBS
+Do these endpoints exist and work:
+- GET /api/cron/reminders
+- GET /api/cron/autocomplete
+Are they protected with CRON_SECRET?
+Are they set up as Replit scheduled tasks?
+Are the manual trigger buttons in 
+Settings working?
+
+6. TRAINING COURSES
+On index.html:
+- Are all 7 courses showing with prices?
+- Does the enquiry form work?
+- Does it POST to /api/enquiries?
+- Does it save to PostgreSQL?
+- Does it appear in the portal 
+  Enquiries section?
+- Does it send an email to admin?
+- Does it send a confirmation to 
+  the enquirer?
+
+7. PORTAL SETTINGS PAGE
+Are all these fields present and 
+saving to PostgreSQL:
+- Clinic name
+- Practitioner name
+- Instagram handle
+- WhatsApp number
+- Location
+- Deposit percentage
+- Booking confirmation message
+Is the pre-launch checklist showing 
+real-time status for all items?
+
+8. DEPOSIT AND BALANCE FLOW
+In the portal New Bookings page:
+- Does the DEPOSIT column show 
+  correctly (Paid/Pending)?
+- Does "Confirm Deposit Received" 
+  button exist on Pending bookings?
+- Does "Mark Balance Paid" button 
+  exist on confirmed bookings?
+- Do both buttons update PostgreSQL 
+  and refresh the UI without page reload?
+
+9. SECURITY
+- Are admin credentials stored in 
+  Replit Secrets only — not in code?
+- Is JWT session expiry working — 
+  8 hours, redirects to login?
+- Is rate limiting active?
+- Is the Stripe webhook signature 
+  verification in place?
+- Is CRON_SECRET protecting cron endpoints?
+- Are there any API keys or secrets 
+  visible anywhere in frontend code?
+
+10. DATA INTEGRITY
+- Is all booking data saving to PostgreSQL?
+- Is anything still using localStorage 
+  for booking or payment data?
+- Is the 15 minute buffer between 
+  bookings enforced on the backend?
+- Is treatment duration stored on 
+  every booking row?
+- Is client_id stored on every booking?
+
+11. WHAT IS LEFT
+Give me a simple numbered list of 
+everything that is not yet done or 
+not fully working.
+Be completely honest.
+This is going live with real clients 
+and real Stripe payments — I need to 
+know exactly where every gap is before 
+we go live.

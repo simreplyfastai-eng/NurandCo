@@ -43,6 +43,7 @@ router.get("/config", async (_req, res) => {
     hasResendKey: !!process.env.RESEND_API_KEY,
     hasAdminEmail: !!process.env.ADMIN_EMAIL,
     hasWhatsapp: !!whatsapp,
+    hasCronSecret: !!process.env.CRON_SECRET,
   });
 });
 

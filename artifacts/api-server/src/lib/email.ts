@@ -119,22 +119,33 @@ export async function sendReminderEmail(params: {
   clientEmail: string;
   clientName: string;
   treatment: string;
+  date: string;
   time: string;
   whatsapp: string;
 }): Promise<void> {
   const resend = getResend();
   if (!resend || !params.clientEmail) return;
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
+  const dateStr = params.date ? fmtDateLong(params.date) : "to be confirmed";
   try {
     await resend.emails.send({
       from: FROM,
       to: params.clientEmail,
       subject: "See you tomorrow — Dermadoll Aesthetics",
       html: `
-        <p>Hi ${firstName},</p>
-        <p>Just a reminder that your <strong>${params.treatment}</strong> appointment is tomorrow at <strong>${params.time}</strong>.</p>
-        <p>We look forward to seeing you!</p>
-        <p>Dermadoll Aesthetics<br/>Instagram: ${INSTAGRAM}<br/>WhatsApp: ${params.whatsapp || "available on request"}</p>
+        <div style="font-family:Inter,Arial,sans-serif;max-width:540px;margin:0 auto;color:#111">
+          <div style="border-bottom:2px solid #C9A96E;padding-bottom:16px;margin-bottom:24px">
+            <h2 style="font-family:Georgia,serif;color:#111;margin:0;font-size:22px">Dermadoll Aesthetics</h2>
+          </div>
+          <p>Hi ${firstName},</p>
+          <p>Just a reminder that your <strong>${params.treatment}</strong> appointment is tomorrow:</p>
+          <table style="width:100%;border-collapse:collapse;margin:16px 0" cellpadding="8">
+            <tr style="border-bottom:1px solid #eee"><td style="color:#888;width:40%">Date</td><td><strong>${dateStr}</strong></td></tr>
+            <tr style="border-bottom:1px solid #eee"><td style="color:#888">Time</td><td><strong>${params.time}</strong></td></tr>
+          </table>
+          <p>We look forward to seeing you!</p>
+          <p>Dermadoll Aesthetics<br/>Instagram: <strong>${INSTAGRAM}</strong><br/>WhatsApp: <strong>${params.whatsapp || "available on request"}</strong></p>
+        </div>
       `,
     });
   } catch (err) {

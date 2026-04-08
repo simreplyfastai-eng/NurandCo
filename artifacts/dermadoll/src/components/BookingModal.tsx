@@ -250,6 +250,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const [stripeNotConfigured, setStripeNotConfigured] = useState(false);
   const [whatsapp, setWhatsapp] = useState("");
   const [bookingDuration, setBookingDuration] = useState(30);
+  const [hasResendKey, setHasResendKey] = useState(false);
 
   const stripeRef = useRef<Stripe | null>(null);
   const elementsRef = useRef<StripeElements | null>(null);
@@ -265,7 +266,10 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       .catch(() => {});
     fetch("/api/config")
       .then((r) => r.ok ? r.json() : null)
-      .then((data) => { if (data?.whatsapp) setWhatsapp(data.whatsapp); })
+      .then((data) => {
+        if (data?.whatsapp) setWhatsapp(data.whatsapp);
+        if (data?.hasResendKey) setHasResendKey(true);
+      })
       .catch(() => {});
   }, []);
 
@@ -335,8 +339,9 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       try {
         // Get publishable key from backend
         const configRes = await fetch("/api/config");
-        const config = await configRes.json() as { stripePublishableKey?: string; whatsapp?: string };
+        const config = await configRes.json() as { stripePublishableKey?: string; whatsapp?: string; hasResendKey?: boolean };
         if (config.whatsapp) setWhatsapp(config.whatsapp);
+        if (config.hasResendKey) setHasResendKey(true);
 
         if (!config.stripePublishableKey) {
           if (!cancelled) {
@@ -837,7 +842,10 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
             <h2 className="font-serif mb-1" style={{ fontSize: "26px" }}>Booking Confirmed!</h2>
             <p className="text-sm mb-6" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
-              A confirmation has been sent to <strong style={{ color: "#111" }}>{email}</strong>
+              {hasResendKey
+                ? <>A confirmation has been sent to <strong style={{ color: "#111" }}>{email}</strong></>
+                : "Please screenshot this page for your records."
+              }
             </p>
 
             {/* Booking details */}
