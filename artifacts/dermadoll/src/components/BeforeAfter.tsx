@@ -56,7 +56,7 @@ export default function BeforeAfter() {
       <section
         className="py-[100px]"
         style={{
-          background: "linear-gradient(180deg, #FFFFFF 0%, #FAF8F4 50%, #FFFFFF 100%)",
+          background: "linear-gradient(180deg, #F0EBE3 0%, #EAE3D9 50%, #F0EBE3 100%)",
           position: "relative",
           overflow: "hidden",
         }}
