@@ -47,15 +47,16 @@ async function sendReminders(): Promise<number> {
 }
 
 function requireCronSecret(req: import("express").Request, res: import("express").Response): boolean {
-  // Accept a valid admin JWT (from a logged-in portal user)
+  // Accept a valid admin JWT — only when SESSION_SECRET is explicitly configured
+  // (no fallback, so a missing secret never allows forged tokens through)
+  const jwtSecret = process.env.SESSION_SECRET;
   const auth = req.headers.authorization;
-  if (auth?.startsWith("Bearer ")) {
+  if (jwtSecret && auth?.startsWith("Bearer ")) {
     const token = auth.slice(7);
-    const jwtSecret = process.env.SESSION_SECRET ?? "dev-secret";
     try {
-      jwt.verify(token, jwtSecret);
-      return true;
-    } catch { /* fall through to CRON_SECRET check */ }
+      const payload = jwt.verify(token, jwtSecret) as { role?: string };
+      if (payload?.role === "admin") return true;
+    } catch { /* invalid/expired token — fall through */ }
   }
 
   // Accept x-cron-secret header when CRON_SECRET is configured

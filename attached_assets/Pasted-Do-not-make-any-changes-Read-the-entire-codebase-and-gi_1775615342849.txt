@@ -1,0 +1,97 @@
+Do not make any changes. Read the entire 
+codebase and give me an honest status report 
+on the last prompt that was run.
+
+1. DID ALL 4 FIXES COMPLETE SUCCESSFULLY?
+
+Fix 1 — depositPaid logic:
+Is the depositPaid logic in bookings.ts 
+now correctly set to true when a 
+stripePaymentId is present?
+Show me the exact line of code as it 
+currently reads.
+
+Fix 2 — stripePaymentId stored:
+Is the clientSecret being stored in a ref 
+in BookingModal.tsx?
+Is the stripePaymentId being extracted 
+and passed in the booking POST body?
+Show me the exact lines as they currently read.
+
+Fix 3 — Cron trigger buttons:
+Do the "Run Reminders Now" and 
+"Run Autocomplete Now" buttons exist 
+in the portal Settings page?
+Do they call the cron endpoints using 
+the admin JWT token?
+Do they show a success/fail toast?
+
+Fix 4 — Deposit % wired up:
+Is the deposit % from Settings being 
+read and used in the booking modal?
+Is it used in the Stripe PaymentIntent 
+amount calculation?
+Is it used in the success screen?
+Is it used in the confirmation email?
+Show me the exact calculation as it 
+currently reads.
+
+2. ANYTHING BROKEN OR INCOMPLETE
+Is there anything broken, incomplete 
+or fragile right now that has nothing 
+to do with Stripe or Resend keys 
+not being added yet?
+Be completely honest.
+List everything no matter how small.
+
+3. IS THE SITE READY TO REPUBLISH?
+Is there anything that would break 
+or look wrong on the live site 
+if I republish right now?
+Yes or no — and if no, tell me 
+exactly what needs fixing first.
+
+4. DATA STORAGE AUDIT
+For every piece of data in the entire 
+project tell me exactly where it saves:
+
+Go through each of these and tell me:
+- Bookings
+- Clients
+- Availability schedule
+- Business settings
+- Deposit percentage
+- Treatment list and overrides
+- Custom categories
+- Media files (hero video, before/after 
+  images, results videos)
+- Training enquiries
+- Admin credentials
+- Session token
+- Portal KV settings
+- Reminder sent flag
+- Balance paid flag
+- Stripe payment ID
+
+For each one tell me:
+A) Where it saves — PostgreSQL / 
+   Replit Object Storage / localStorage / 
+   hardcoded / Replit Secrets
+B) Is it accessible across devices? 
+   Yes or No
+C) Is it lost on logout? Yes or No
+D) Is it lost if the browser clears 
+   storage? Yes or No
+
+If anything is saving to localStorage 
+that should be saving to the cloud 
+tell me what it is and why it matters.
+
+5. COMPLETE LIST OF WHAT IS LEFT
+Give me a simple numbered list of 
+every single thing that still needs 
+to be done before this site can go 
+live with real clients.
+Do not include Stripe keys or Resend 
+keys — I know about those.
+Everything else only.
