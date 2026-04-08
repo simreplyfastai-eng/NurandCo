@@ -28,7 +28,8 @@ export default function BeforeAfter() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-foreground/70 font-light text-lg"
+            className="font-light text-lg"
+            style={{ color: "#C9A96E" }}
           >
             Every result is natural, tailored and uniquely yours
           </motion.p>
