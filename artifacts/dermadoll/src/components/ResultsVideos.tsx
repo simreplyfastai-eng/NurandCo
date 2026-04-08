@@ -5,7 +5,7 @@ const DEFAULT_SLOTS = [
   { key: "vid0", label: "Medical Needling", src: "video1.mp4" },
   { key: "vid1", label: "Lip Filler", src: "video2.mp4" },
   { key: "vid2", label: "Masseter Botox", src: "video3.mp4" },
-  { key: "vid3", label: "Skin Booster Results", src: "video4.mp4" },
+  { key: "vid3", label: "Skin Booster Results", src: "video1.mp4" },
 ];
 
 interface VidSlot { key: string; label: string; src: string; }

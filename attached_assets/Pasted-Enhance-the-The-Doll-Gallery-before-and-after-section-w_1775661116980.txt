@@ -1,0 +1,99 @@
+Enhance the "The Doll Gallery" before 
+and after section with animations and 
+decorative elements. Do not change 
+image sizes, borders or layout.
+
+1. SECTION ENTRANCE ANIMATION:
+When the section scrolls into view, 
+animate the elements in using 
+IntersectionObserver:
+
+- Heading "The Doll Gallery": 
+  fades in from bottom (translateY 30px → 0)
+  duration: 0.6s ease
+  
+- Gold divider line below heading:
+  animates width from 0 to full width
+  duration: 0.8s ease
+  delay: 0.3s
+
+- Subtitle text:
+  fades in from bottom
+  duration: 0.6s ease  
+  delay: 0.4s
+
+- Images stagger in one by one:
+  Each card fades in + slides up 
+  from translateY 40px → 0
+  duration: 0.6s ease
+  Delays: 0.2s, 0.4s, 0.6s, 0.8s
+  (top left, top right, 
+  bottom left, bottom right)
+
+2. DECORATIVE ELEMENTS:
+Add subtle gold decorative elements 
+to make the section feel premium:
+
+- Top left corner of the section:
+  Small decorative gold cross/plus 
+  symbol (+) in Cormorant Garamond 
+  32px #C9A96E opacity 0.4
+  position: absolute, top 40px, left 40px
+
+- Bottom right corner:
+  Same gold cross symbol
+  position: absolute, bottom 40px, 
+  right 40px, opacity 0.4
+
+- Behind the image grid, centred:
+  A very faint gold circle outline
+  width: 500px, height: 500px
+  border: 1px solid #C9A96E
+  opacity: 0.06
+  border-radius: 50%
+  position: absolute
+  pointer-events: none
+  z-index: 0
+  centred behind the grid
+
+3. BEFORE/AFTER LABEL OVERLAY:
+On each image card add a subtle 
+"BEFORE & AFTER" label:
+- Position: top centre of each card
+- Background: rgba(0,0,0,0.35)
+  backdrop-filter: blur(4px)
+  border-radius: 0 0 8px 8px
+- Text: "BEFORE & AFTER" 
+  Inter 9px white letter-spacing 2px
+- Only visible — no animation needed
+
+4. BOTTOM ACCENT:
+Below the image grid add a centred 
+gold text accent:
+"Swipe through our results →"
+on mobile only (hidden on desktop)
+Inter 11px #C9A96E italic
+margin-top: 16px
+This hints to mobile users they 
+can scroll/swipe
+
+5. SECTION BACKGROUND:
+Change the section background from 
+plain white to a very subtle warm 
+texture feel:
+background: linear-gradient(
+  180deg, 
+  #FFFFFF 0%, 
+  #FAF8F4 50%, 
+  #FFFFFF 100%
+)
+
+Make sure position: relative is set 
+on the section container so absolute 
+positioned decorative elements 
+stay within it.
+
+Do not change image sources.
+Do not change gold borders.
+Do not change layout or sizing.
+Do not change mobile responsiveness.
