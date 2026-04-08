@@ -641,7 +641,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
                   <span className="font-serif" style={{ fontSize: "16px", color: "#111" }}>{treatment.price}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: "#888" }}>Deposit to pay now (50%)</span>
+                  <span style={{ color: "#888" }}>Deposit to pay now ({depositPercent}%)</span>
                   <span className="font-medium" style={{ color: "#C9A96E" }}>£{deposit}</span>
                 </div>
                 <div className="flex justify-between text-sm">
