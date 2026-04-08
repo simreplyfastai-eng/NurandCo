@@ -11,11 +11,65 @@ interface BookingModalProps {
   onClose: () => void;
 }
 
-const TIME_SLOTS = [
-  "09:00", "09:30", "10:00", "10:30", "11:00", "11:30",
-  "12:00", "12:30", "13:00", "14:00", "14:30", "15:00",
-  "15:30", "16:00", "16:30", "17:00",
-];
+interface DayAvail {
+  on: boolean;
+  start?: string;
+  end?: string;
+}
+
+interface Availability {
+  defaults: Record<string, DayAvail>;
+  overrides: Record<string, { on: boolean; start?: string; end?: string }>;
+}
+
+const DAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+const AVAIL_DEFAULT: Availability = {
+  defaults: {
+    Mon: { on: false },
+    Tue: { on: true, start: "10:00", end: "19:00" },
+    Wed: { on: true, start: "10:00", end: "19:00" },
+    Thu: { on: true, start: "10:00", end: "19:00" },
+    Fri: { on: true, start: "09:00", end: "16:00" },
+    Sat: { on: true, start: "09:00", end: "14:00" },
+    Sun: { on: false },
+  },
+  overrides: {},
+};
+
+function getAvailForDate(avail: Availability, date: Date): DayAvail | null {
+  const dateStr = date.toISOString().slice(0, 10);
+  const override = avail.overrides?.[dateStr];
+  if (override !== undefined) {
+    return override.on ? override : { on: false };
+  }
+  const dayKey = DAY_KEYS[date.getDay()];
+  return avail.defaults?.[dayKey] ?? { on: false };
+}
+
+function isDateDisabled(avail: Availability, date: Date, today: Date): boolean {
+  if (date < today) return true;
+  const day = getAvailForDate(avail, date);
+  return !day || !day.on;
+}
+
+function getAvailableSlots(avail: Availability, date: Date): string[] {
+  const day = getAvailForDate(avail, date);
+  if (!day || !day.on) return [];
+  const start = day.start ?? "09:00";
+  const end = day.end ?? "18:00";
+  const [sh, sm] = start.split(":").map(Number);
+  const [eh, em] = end.split(":").map(Number);
+  const startMins = sh * 60 + sm;
+  const endMins = eh * 60 + em;
+  const slots: string[] = [];
+  for (let m = startMins; m < endMins; m += 30) {
+    const h = Math.floor(m / 60);
+    const min = m % 60;
+    slots.push(`${String(h).padStart(2, "0")}:${String(min).padStart(2, "0")}`);
+  }
+  return slots;
+}
 
 const MONTH_NAMES = [
   "January","February","March","April","May","June",
@@ -26,9 +80,11 @@ const DAY_NAMES = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 function Calendar({
   onSelect,
   selected,
+  avail,
 }: {
   onSelect: (d: Date) => void;
   selected: Date | null;
+  avail: Availability;
 }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -91,9 +147,7 @@ function Calendar({
       <div className="grid grid-cols-7">
         {cells.map((date, i) => {
           if (!date) return <div key={`e-${i}`} />;
-          const isPast = date < today;
-          const isSunday = date.getDay() === 0;
-          const disabled = isPast || isSunday;
+          const disabled = isDateDisabled(avail, date, today);
           const isSelected =
             selected !== null &&
             date.toDateString() === selected.toDateString();
@@ -156,7 +210,16 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const [phone, setPhone] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [nameError, setNameError] = useState("");
+  const [avail, setAvail] = useState<Availability>(AVAIL_DEFAULT);
   const firstFocusRef = useRef<HTMLButtonElement>(null);
+
+  // Fetch availability from API on mount
+  useEffect(() => {
+    fetch("/api/availability")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data) setAvail(data); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -203,7 +266,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       category: "",
       price,
       deposit,
-      depositPaid: true, // STRIPE INTEGRATION POINT — set to false when Stripe is live
+      depositPaid: true,
       balancePaid: false,
       date: selectedDate ? fmtDate(selectedDate) : "",
       time: selectedTime ?? "",
@@ -213,9 +276,6 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       notes: "",
       createdAt: Date.now(),
       source: "Website",
-      // TODO: Integrate Stripe checkout here
-      // Stripe will POST to /api/bookings/confirm/:id
-      // with stripePaymentId on successful payment
     };
 
     try {
@@ -246,6 +306,9 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const price = parsePrice(treatment.price);
   const deposit = Math.round(price * 0.5);
   const balance = price - deposit;
+
+  // Time slots based on availability for selected date
+  const timeSlots = selectedDate ? getAvailableSlots(avail, selectedDate) : [];
 
   return (
     <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center">
@@ -299,7 +362,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
         {step === 1 && (
           <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
             <h3 className="font-serif mb-5" style={{ fontSize: "20px" }}>Select a Date</h3>
-            <Calendar onSelect={handleDateSelect} selected={selectedDate} />
+            <Calendar onSelect={handleDateSelect} selected={selectedDate} avail={avail} />
           </motion.div>
         )}
 
@@ -315,32 +378,38 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
             {selectedDate && (
               <p className="text-sm mb-5" style={{ color: "#999" }}>{formatDate(selectedDate)}</p>
             )}
-            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-              {TIME_SLOTS.map((slot) => {
-                const isActive = selectedTime === slot;
-                return (
-                  <button
-                    key={slot}
-                    onClick={() => handleTimeSelect(slot)}
-                    style={{
-                      border: "1px solid #C9A96E",
-                      borderRadius: "20px",
-                      padding: "8px 4px",
-                      fontSize: "13px",
-                      fontFamily: "Inter, sans-serif",
-                      color: isActive ? "#fff" : "#C9A96E",
-                      backgroundColor: isActive ? "#C9A96E" : "transparent",
-                      cursor: "pointer",
-                      transition: "all 0.15s",
-                    }}
-                    onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.08)"; }}
-                    onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
-                  >
-                    {slot}
-                  </button>
-                );
-              })}
-            </div>
+            {timeSlots.length === 0 ? (
+              <p className="text-sm text-center py-8" style={{ color: "#aaa" }}>
+                No available slots for this date. Please select another day.
+              </p>
+            ) : (
+              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                {timeSlots.map((slot) => {
+                  const isActive = selectedTime === slot;
+                  return (
+                    <button
+                      key={slot}
+                      onClick={() => handleTimeSelect(slot)}
+                      style={{
+                        border: "1px solid #C9A96E",
+                        borderRadius: "20px",
+                        padding: "8px 4px",
+                        fontSize: "13px",
+                        fontFamily: "Inter, sans-serif",
+                        color: isActive ? "#fff" : "#C9A96E",
+                        backgroundColor: isActive ? "#C9A96E" : "transparent",
+                        cursor: "pointer",
+                        transition: "all 0.15s",
+                      }}
+                      onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.08)"; }}
+                      onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
+                    >
+                      {slot}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </motion.div>
         )}
 

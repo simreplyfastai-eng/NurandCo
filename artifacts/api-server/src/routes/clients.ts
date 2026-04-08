@@ -179,6 +179,22 @@ router.delete("/clients/:id", async (req, res) => {
   }
 });
 
+// DELETE /api/clients/sample  — remove seeded test clients only
+router.delete("/clients/sample", async (_req, res) => {
+  const SAMPLE_NAMES = ["Ellisha W.", "Donna S.", "Sophie M.", "Chloe R.", "Amara J.", "Priya K.", "Zara T."];
+  const placeholders = SAMPLE_NAMES.map((_, i) => `$${i + 1}`).join(",");
+  try {
+    const result = await pool.query(
+      `DELETE FROM clients WHERE name IN (${placeholders})`,
+      SAMPLE_NAMES,
+    );
+    return res.json({ ok: true, deleted: result.rowCount });
+  } catch (err) {
+    console.error("DELETE /api/clients/sample", err);
+    return res.status(500).json({ error: "db error" });
+  }
+});
+
 // DELETE /api/clients  — clear all (used by resetPortal)
 router.delete("/clients", async (_req, res) => {
   try {
@@ -193,14 +209,15 @@ router.delete("/clients", async (_req, res) => {
 export default router;
 
 // Helper exported for use in bookings route — upsert a client silently
+// Returns the client id so callers can store it as a FK on bookings
 export async function upsertClientFromBooking(data: {
   name: string;
   email: string;
   phone: string;
   date: string;
   source: string;
-}) {
-  if (!data.name) return;
+}): Promise<string | null> {
+  if (!data.name) return null;
   const email = data.email.trim().toLowerCase();
   const phone = data.phone.trim().replace(/\s/g, "");
   try {
@@ -217,6 +234,14 @@ export async function upsertClientFromBooking(data: {
       );
       if (r.rows.length) existing = r.rows[0];
     }
+    // Also try matching by exact name as a last resort (for portal bookings with no email/phone)
+    if (!existing && !email && !phone && data.name) {
+      const r = await pool.query(
+        "SELECT * FROM clients WHERE LOWER(TRIM(name)) = $1 LIMIT 1",
+        [data.name.trim().toLowerCase()],
+      );
+      if (r.rows.length) existing = r.rows[0];
+    }
 
     if (existing) {
       await pool.query(
@@ -226,6 +251,7 @@ export async function upsertClientFromBooking(data: {
          WHERE id = $1`,
         [existing.id, email, phone],
       );
+      return String(existing.id);
     } else {
       const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
       await pool.query(
@@ -233,8 +259,17 @@ export async function upsertClientFromBooking(data: {
          VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO NOTHING`,
         [id, data.name, email, phone, data.date, "", data.source, Date.now()],
       );
+      return id;
     }
   } catch (err) {
     console.error("upsertClientFromBooking", err);
+    return null;
   }
+}
+
+// DELETE /api/clients/sample  — remove seeded test data only
+export async function clearSampleClients(): Promise<void> {
+  const SAMPLE_NAMES = ["Ellisha W.", "Donna S.", "Sophie M.", "Chloe R.", "Amara J.", "Priya K.", "Zara T."];
+  const placeholders = SAMPLE_NAMES.map((_, i) => `$${i + 1}`).join(",");
+  await pool.query(`DELETE FROM clients WHERE name IN (${placeholders})`, SAMPLE_NAMES);
 }

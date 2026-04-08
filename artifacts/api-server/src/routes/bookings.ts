@@ -7,6 +7,7 @@ const router = Router();
 function rowToBooking(row: Record<string, unknown>) {
   return {
     id: row.id,
+    clientId: row.client_id ?? null,
     clientName: row.client_name,
     clientEmail: row.client_email ?? "",
     treatment: row.treatment,
@@ -72,19 +73,29 @@ router.post("/bookings", async (req, res) => {
   const price = Number(b.price) || 0;
   const deposit = b.deposit !== undefined ? Number(b.deposit) : Math.round(price * 0.5);
   try {
+    // Resolve / upsert the client first so we can store client_id on the booking
+    const clientId = await upsertClientFromBooking({
+      name: b.clientName,
+      email: b.clientEmail ?? "",
+      phone: b.clientPhone ?? "",
+      date: b.date,
+      source: b.source ?? "Website",
+    });
+
     await pool.query(
       `INSERT INTO bookings
-        (id,client_name,client_email,treatment,category,price,deposit,
+        (id,client_id,client_name,client_email,treatment,category,price,deposit,
          deposit_paid,balance_paid,date,time,status,payment_method,
          stripe_payment_id,notes,created_at,source)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
        ON CONFLICT (id) DO UPDATE SET
+        client_id=COALESCE(EXCLUDED.client_id,bookings.client_id),
         client_name=EXCLUDED.client_name,treatment=EXCLUDED.treatment,
         category=EXCLUDED.category,price=EXCLUDED.price,deposit=EXCLUDED.deposit,
         date=EXCLUDED.date,time=EXCLUDED.time,status=EXCLUDED.status,
         notes=EXCLUDED.notes`,
       [
-        id, b.clientName, b.clientEmail ?? "",
+        id, clientId ?? null, b.clientName, b.clientEmail ?? "",
         b.treatment, b.category ?? "",
         price, deposit,
         b.depositPaid ?? true, b.balancePaid ?? false,
@@ -95,14 +106,6 @@ router.post("/bookings", async (req, res) => {
       ],
     );
     const result = await pool.query("SELECT * FROM bookings WHERE id=$1", [id]);
-    // Auto-upsert client profile (fire-and-forget, non-blocking)
-    upsertClientFromBooking({
-      name: b.clientName,
-      email: b.clientEmail ?? "",
-      phone: b.clientPhone ?? "",
-      date: b.date,
-      source: b.source ?? "Website",
-    }).catch(() => {});
     return res.status(201).json(rowToBooking(result.rows[0]));
   } catch (err) {
     console.error("POST /api/bookings", err);
@@ -196,6 +199,22 @@ router.delete("/bookings/:id", async (req, res) => {
     return res.json({ ok: true });
   } catch (err) {
     console.error("DELETE /api/bookings/:id", err);
+    return res.status(500).json({ error: "db error" });
+  }
+});
+
+// DELETE /api/bookings/sample  — remove seeded test data only
+router.delete("/bookings/sample", async (_req, res) => {
+  const SAMPLE_NAMES = ["Ellisha W.", "Donna S.", "Sophie M.", "Chloe R.", "Amara J.", "Priya K.", "Zara T."];
+  const placeholders = SAMPLE_NAMES.map((_, i) => `$${i + 1}`).join(",");
+  try {
+    const result = await pool.query(
+      `DELETE FROM bookings WHERE client_name IN (${placeholders})`,
+      SAMPLE_NAMES,
+    );
+    return res.json({ ok: true, deleted: result.rowCount });
+  } catch (err) {
+    console.error("DELETE /api/bookings/sample", err);
     return res.status(500).json({ error: "db error" });
   }
 });

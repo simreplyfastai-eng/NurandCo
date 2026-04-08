@@ -15,7 +15,7 @@ router.get("/finance/summary", async (req, res) => {
       `SELECT
          COALESCE(SUM(CASE WHEN status != 'Cancelled' THEN price ELSE 0 END),0) AS total_revenue,
          COALESCE(SUM(CASE WHEN deposit_paid = true THEN deposit ELSE 0 END),0) AS deposits_collected,
-         COALESCE(SUM(CASE WHEN status != 'Complete' AND status != 'Cancelled' THEN GREATEST(price - deposit, 0) ELSE 0 END),0) AS balance_outstanding,
+         COALESCE(SUM(CASE WHEN balance_paid = false AND status != 'Cancelled' THEN GREATEST(price - deposit, 0) ELSE 0 END),0) AS balance_outstanding,
          COUNT(CASE WHEN status != 'Cancelled' THEN 1 END) AS booking_count
        FROM bookings WHERE date LIKE $1`,
       [pattern],

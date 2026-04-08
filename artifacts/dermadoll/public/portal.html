@@ -866,6 +866,19 @@ tr:hover td{background:#FDFBF8}
           </div>
         </div>
 
+        <div class="settings-section" style="border-color:#FFF3E0">
+          <div class="settings-section-header" style="color:#E65100">Before Going Live</div>
+          <div class="settings-body">
+            <div class="settings-row" style="align-items:flex-start">
+              <label style="color:#E65100;font-weight:600">Remove Test Data</label>
+              <div style="flex:1">
+                <p style="font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.6">Remove the fictional sample clients and bookings (Ellisha W., Donna S., Sophie M., etc.) that were created on first login. This will <strong>not</strong> delete your real bookings, treatments, availability or settings.</p>
+                <button class="btn-gold" onclick="clearSampleData()" style="background:#E65100">Remove Test Data Before Going Live</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div class="settings-section" style="border-color:#ffcdd2">
           <div class="settings-section-header" style="color:#c62828">Danger Zone</div>
           <div class="settings-body">
@@ -883,16 +896,26 @@ tr:hover td{background:#FDFBF8}
 <!-- BOOKING MODAL -->
 <div class="modal-overlay" id="booking-modal">
   <div class="modal-box">
-    <div class="modal-title">New Booking</div>
+    <div class="modal-title" id="bm-title">New Booking</div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Client Name</label>
-        <input class="form-input" id="bm-client" list="client-list" placeholder="Jane Smith" autocomplete="off"/>
+        <input class="form-input" id="bm-client" list="client-list" placeholder="Jane Smith" autocomplete="off" oninput="autofillClientContact(this.value)"/>
         <datalist id="client-list"></datalist>
       </div>
       <div class="form-group">
         <label class="form-label">Treatment</label>
         <select class="form-input" id="bm-treatment" onchange="updateDeposit()"></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="bm-email" type="email" placeholder="jane@email.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Phone</label>
+        <input class="form-input" id="bm-phone" type="tel" placeholder="07700 900000"/>
       </div>
     </div>
     <div class="form-row">
@@ -915,11 +938,17 @@ tr:hover td{background:#FDFBF8}
         <input class="form-input" id="bm-deposit" type="number" placeholder="100"/>
       </div>
     </div>
-    <div class="form-group">
-      <label class="form-label">Status</label>
-      <select class="form-input" id="bm-status">
-        <option>Confirmed</option><option>Pending</option><option>Complete</option><option>Cancelled</option>
-      </select>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="bm-status">
+          <option>Confirmed</option><option>Pending</option><option>Complete</option><option>Cancelled</option>
+        </select>
+      </div>
+      <div class="form-group" id="bm-balance-group" style="display:none">
+        <label class="form-label">Balance</label>
+        <div id="bm-balance-status" style="display:flex;align-items:center;gap:8px;padding-top:8px"></div>
+      </div>
     </div>
     <div class="form-group">
       <label class="form-label">Notes</label>
@@ -1337,25 +1366,40 @@ const ClientAPI = {
 // ═══════════════════════════════════════════════════
 // AUTH
 // ═══════════════════════════════════════════════════
-function doLogin(){
+async function doLogin(){
   const e=document.getElementById('login-email').value.trim();
   const p=document.getElementById('login-pass').value;
-  if(e==='admin@dermadoll.com'&&p==='dermadoll2024'){
-    localStorage.setItem('dd_session','1');
-    showPortal();
-  } else {
-    const card=document.getElementById('login-card');
-    document.getElementById('login-error').textContent='Incorrect email or password';
-    card.classList.remove('shake');
-    void card.offsetWidth;
-    card.classList.add('shake');
+  const btn=document.querySelector('.login-btn');
+  btn.disabled=true;btn.textContent='Logging in…';
+  try {
+    const r=await fetch('/api/auth/login',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:e,password:p})
+    });
+    if(r.ok){
+      const {token}=await r.json();
+      localStorage.setItem('dd_token',token);
+      localStorage.setItem('dd_session','1');
+      showPortal();
+    } else {
+      const card=document.getElementById('login-card');
+      document.getElementById('login-error').textContent='Incorrect email or password';
+      card.classList.remove('shake');
+      void card.offsetWidth;
+      card.classList.add('shake');
+    }
+  } catch(err){
+    document.getElementById('login-error').textContent='Connection error — please try again';
+  } finally {
+    btn.disabled=false;btn.textContent='Login';
   }
 }
 document.getElementById('login-email').addEventListener('keydown',e=>{if(e.key==='Enter')document.getElementById('login-pass').focus()});
 document.getElementById('login-pass').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 
 function doLogout(){
-  ['dd_session','dd_bookings','dd_clients','dd_settings','dd_custom_treats',
+  ['dd_session','dd_token','dd_bookings','dd_clients','dd_settings','dd_custom_treats',
    'dd_custom_cats','dd_cat_states','dd_treatment_overrides','dd_video_labels',
    'dd_availability','dd_media'].forEach(k=>localStorage.removeItem(k));
   location.reload();
@@ -1385,8 +1429,19 @@ function showPortal(){
   });
 }
 
-window.addEventListener('DOMContentLoaded',()=>{
-  if(localStorage.getItem('dd_session')==='1'){showPortal();}
+window.addEventListener('DOMContentLoaded',async()=>{
+  const token=localStorage.getItem('dd_token');
+  if(token&&localStorage.getItem('dd_session')==='1'){
+    // Verify token is still valid server-side
+    try{
+      const r=await fetch('/api/auth/verify',{headers:{Authorization:'Bearer '+token}});
+      const {valid}=await r.json();
+      if(valid){showPortal();return;}
+    }catch(e){}
+    // Token invalid — clear and show login
+    localStorage.removeItem('dd_token');
+    localStorage.removeItem('dd_session');
+  }
 });
 let _calResizeTimer;
 window.addEventListener('resize',()=>{
@@ -1952,24 +2007,93 @@ function updateDeposit(){
   document.getElementById('bm-deposit').value=Math.round(pVal*pct);
 }
 
+function autofillClientContact(name){
+  if(!name)return;
+  const c=getClients().find(x=>x.name.toLowerCase()===name.toLowerCase());
+  if(c){
+    if(c.email)document.getElementById('bm-email').value=c.email;
+    if(c.phone)document.getElementById('bm-phone').value=c.phone;
+  }
+}
+
 function openBookingModal(prefill){
-  editingBookingId=null;
-  document.getElementById('bm-client').value=prefill||'';
-  document.getElementById('bm-treatment').selectedIndex=0;
-  document.getElementById('bm-price').value='';
-  document.getElementById('bm-deposit').value='';
-  document.getElementById('bm-notes').value='';
-  document.getElementById('bm-status').value='Confirmed';
-  document.getElementById('bm-date').value=fmt(new Date());
-  // Update datalist
+  // prefill can be a string (client name) or a booking ID to edit
   const clients=getClients();
   document.getElementById('client-list').innerHTML=clients.map(c=>`<option value="${c.name}"/>`).join('');
+
+  const isId=prefill&&typeof prefill==='string'&&!clients.find(c=>c.name===prefill)&&prefill.length<20;
+  const booking=isId?getBookings().find(b=>b.id===prefill):null;
+
+  if(booking){
+    // Edit mode
+    editingBookingId=booking.id;
+    document.getElementById('bm-title').textContent='Edit Booking';
+    document.getElementById('bm-client').value=booking.clientName||'';
+    document.getElementById('bm-email').value=booking.clientEmail||'';
+    document.getElementById('bm-phone').value=booking.clientPhone||'';
+    document.getElementById('bm-date').value=booking.date||'';
+    document.getElementById('bm-notes').value=booking.notes||'';
+    document.getElementById('bm-price').value=booking.price||'';
+    document.getElementById('bm-deposit').value=booking.deposit||'';
+    document.getElementById('bm-status').value=booking.status||'Confirmed';
+    // Show balance paid row in edit mode
+    const balGrp=document.getElementById('bm-balance-group');
+    balGrp.style.display='';
+    const bal=document.getElementById('bm-balance-status');
+    if(booking.balancePaid){
+      bal.innerHTML=`<span style="color:#2D6A4F;font-weight:600;font-size:13px">✓ Balance Paid</span>`;
+    } else {
+      const remaining=Math.max(0,Number(booking.price||0)-Number(booking.deposit||0));
+      bal.innerHTML=`<span style="color:#888;font-size:13px">Outstanding: £${remaining}</span>
+        <button style="padding:5px 14px;border:none;background:#C9A96E;color:#fff;border-radius:6px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markBalancePaidFromModal()">Mark Paid</button>`;
+    }
+    // Set treatment
+    const sel=document.getElementById('bm-treatment');
+    const opt=[...sel.options].find(o=>o.value===booking.treatment);
+    if(opt)sel.value=booking.treatment; else sel.selectedIndex=0;
+    // Set time
+    const timeSel=document.getElementById('bm-time');
+    const tOpt=[...timeSel.options].find(o=>o.value===booking.time);
+    if(tOpt)timeSel.value=booking.time;
+  } else {
+    // New booking
+    editingBookingId=null;
+    document.getElementById('bm-title').textContent='New Booking';
+    document.getElementById('bm-client').value=typeof prefill==='string'?prefill:'';
+    document.getElementById('bm-email').value='';
+    document.getElementById('bm-phone').value='';
+    document.getElementById('bm-treatment').selectedIndex=0;
+    document.getElementById('bm-price').value='';
+    document.getElementById('bm-deposit').value='';
+    document.getElementById('bm-notes').value='';
+    document.getElementById('bm-status').value='Confirmed';
+    document.getElementById('bm-date').value=fmt(new Date());
+    document.getElementById('bm-balance-group').style.display='none';
+    if(prefill&&typeof prefill==='string'){autofillClientContact(prefill);}
+  }
   document.getElementById('booking-modal').classList.add('open');
 }
 function closeBookingModal(){document.getElementById('booking-modal').classList.remove('open')}
 
+async function markBalancePaidFromModal(){
+  if(!editingBookingId)return;
+  await BookingAPI.update(editingBookingId,{balancePaid:true,status:'Complete'});
+  // Refresh balance status display
+  const bal=document.getElementById('bm-balance-status');
+  bal.innerHTML=`<span style="color:#2D6A4F;font-weight:600;font-size:13px">✓ Balance Paid</span>`;
+  // Update status dropdown
+  document.getElementById('bm-status').value='Complete';
+  renderFinance();updateSidebarBadges();renderBookings();
+  // Update local cache
+  const bookings=getBookings();
+  const b=bookings.find(x=>x.id===editingBookingId);
+  if(b){b.balancePaid=true;b.status='Complete';saveBookings(bookings);}
+}
+
 async function saveBooking(){
   const clientName=document.getElementById('bm-client').value.trim();
+  const clientEmail=document.getElementById('bm-email').value.trim();
+  const clientPhone=document.getElementById('bm-phone').value.trim();
   const treatment=document.getElementById('bm-treatment').value;
   const date=document.getElementById('bm-date').value;
   const time=document.getElementById('bm-time').value;
@@ -1996,7 +2120,7 @@ async function saveBooking(){
   }
 
   const booking={
-    id:editingBookingId||uid(),clientName,clientEmail:'',treatment,category,
+    id:editingBookingId||uid(),clientName,clientEmail,clientPhone,treatment,category,
     date,time,price,deposit,depositPaid:true,balancePaid:false,
     status,notes,createdAt:Date.now(),source:'Portal',paymentMethod:'Stripe'
   };
@@ -2005,13 +2129,22 @@ async function saveBooking(){
     await BookingAPI.update(editingBookingId, booking);
   } else {
     await BookingAPI.create(booking);
-    // Upsert client — deduplicates by email/phone on the server
-    await ClientAPI.upsert({id:uid(),name:clientName,email:'',phone:'',joinDate:date,notes:'',source:'Portal'});
+    // Client upsert now happens server-side in POST /api/bookings
+    // But also update local cache
+    const clients=getClients();
+    const existing=clients.find(c=>c.name.toLowerCase()===clientName.toLowerCase());
+    if(!existing){
+      await ClientAPI.upsert({id:uid(),name:clientName,email:clientEmail,phone:clientPhone,joinDate:date,notes:'',source:'Portal'});
+    } else if(clientEmail&&!existing.email||clientPhone&&!existing.phone){
+      await ClientAPI.update(existing.id,{email:clientEmail||existing.email,phone:clientPhone||existing.phone});
+    }
   }
   closeBookingModal();
   updateSidebarBadges();
   renderDashboard();
   buildCalendar();
+  if(document.getElementById('page-bookings').classList.contains('active'))renderBookings();
+  if(document.getElementById('page-clients').classList.contains('active'))renderClients();
 }
 
 // ═══════════════════════════════════════════════════
@@ -2641,7 +2774,7 @@ function renderMedia(){
   const data=getMediaData();
 
   /* ── CARD 1: HERO VIDEO ── */
-  const heroSrc=data.heroSrc||HERO_SRC;
+  const heroSrc=cloudSrc(data.heroSrc)||HERO_SRC;
   const heroCard=mCard(`
     ${mCardHeader('Hero Section Video','● Live','This video plays full screen on your homepage hero')}
     <div style="position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#111;margin-bottom:18px">
@@ -2659,7 +2792,7 @@ function renderMedia(){
   const baLabels=data.baLabels||{};
   const baImages=data.baImages||{};
   const baGrid=BA_SLOTS.map((s,i)=>{
-    const src=baImages[s.key]||s.file;
+    const src=cloudSrc(baImages[s.key])||s.file;
     const label=baLabels[s.key]||s.label;
     return`<div>
       <div style="position:relative;width:100%;padding-top:100%;border-radius:10px;overflow:hidden;background:#F5F5F5">
@@ -2684,7 +2817,7 @@ function renderMedia(){
     const isLive=BA_SLOTS.some(s=>s.key===k);
     return`<div style="width:130px;border-radius:10px;border:1px solid #F0F0F0;overflow:hidden;flex-shrink:0">
       <div style="position:relative;height:90px">
-        <img src="${src}" style="width:100%;height:100%;object-fit:cover"/>
+        <img src="${cloudSrc(src)}" style="width:100%;height:100%;object-fit:cover"/>
         ${isLive?'<span style="position:absolute;top:6px;left:6px;background:#4CAF50;color:#fff;font-size:9px;font-weight:700;border-radius:4px;padding:2px 6px;font-family:Inter,sans-serif">● LIVE</span>':''}
       </div>
       <div style="padding:6px 8px;display:flex;align-items:center;justify-content:space-between">
@@ -2708,7 +2841,7 @@ function renderMedia(){
   const vidLabels=data.vidLabels||{};
   const vidSrcs=data.vidSrcs||{};
   const vidGrid=VID_SLOTS.map(s=>{
-    const src=vidSrcs[s.key]||s.file;
+    const src=cloudSrc(vidSrcs[s.key])||s.file;
     const label=vidLabels[s.key]||s.label;
     return`<div>
       <div style="position:relative;width:100%;padding-top:100%;border-radius:10px;overflow:hidden;background:#111">
@@ -2736,45 +2869,73 @@ function renderMedia(){
   document.getElementById('media-root').innerHTML=heroCard+galleryCard+vidCard;
 }
 
+/* ── Cloud upload helper ── */
+async function uploadToCloud(file){
+  const res=await fetch('/api/media/upload-url',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contentType:file.type||'application/octet-stream'})
+  });
+  if(!res.ok)throw new Error('Failed to get upload URL');
+  const {uploadURL,objectPath}=await res.json();
+  const put=await fetch(uploadURL,{method:'PUT',body:file,headers:{'Content-Type':file.type||'application/octet-stream'}});
+  if(!put.ok)throw new Error('Upload failed: '+put.status);
+  return objectPath;
+}
+
+function cloudSrc(objectPath){
+  if(!objectPath)return '';
+  if(objectPath.startsWith('/objects/'))return '/api/media/serve?path='+encodeURIComponent(objectPath);
+  return objectPath;
+}
+
+function showUploadProgress(id,msg){
+  const el=document.getElementById('upload-progress-'+id);
+  if(el)el.textContent=msg;
+}
+
 /* ── Hero upload ── */
-function handleHeroUpload(input){
+async function handleHeroUpload(input){
   const file=input.files[0];if(!file)return;
-  const url=URL.createObjectURL(file);
-  const d=getMediaData();d.heroSrc=url;saveMediaData(d);
-  renderMedia();
+  showUploadProgress('hero','Uploading…');
+  try{
+    const objectPath=await uploadToCloud(file);
+    const d=getMediaData();d.heroSrc=objectPath;saveMediaData(d);
+    renderMedia();
+  }catch(e){showUploadProgress('hero','Upload failed: '+e.message);}
 }
 
 /* ── BA image handlers ── */
 function replaceBAImage(key){document.getElementById('ba-file-'+key).click()}
 
-function handleBAImage(key,input){
+async function handleBAImage(key,input){
   const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
+  showUploadProgress('ba-'+key,'Uploading…');
+  try{
+    const objectPath=await uploadToCloud(file);
     const d=getMediaData();
     if(!d.baImages)d.baImages={};
     if(!d.baLabels)d.baLabels={};
-    d.baImages[key]=e.target.result;
+    d.baImages[key]=objectPath;
     const slot=BA_SLOTS.find(s=>s.key===key);
     if(slot&&!d.baLabels[key])d.baLabels[key]=slot.label;
     saveMediaData(d);renderMedia();
-  };
-  reader.readAsDataURL(file);
+  }catch(e){showUploadProgress('ba-'+key,'Upload failed: '+e.message);}
 }
 
-function handleBALibUpload(input){
+async function handleBALibUpload(input){
   const file=input.files[0];if(!file)return;
-  const reader=new FileReader();
-  reader.onload=e=>{
+  showUploadProgress('ba-lib','Uploading…');
+  try{
+    const objectPath=await uploadToCloud(file);
     const d=getMediaData();
     if(!d.baImages)d.baImages={};
     if(!d.baLabels)d.baLabels={};
     const key='ba-lib-'+Date.now();
-    d.baImages[key]=e.target.result;
+    d.baImages[key]=objectPath;
     d.baLabels[key]=file.name.replace(/\.[^.]+$/,'');
     saveMediaData(d);renderMedia();
-  };
-  reader.readAsDataURL(file);
+  }catch(e){showUploadProgress('ba-lib','Upload failed: '+e.message);}
 }
 
 function saveBALabel(key,text){
@@ -2795,22 +2956,28 @@ function deleteBAImage(key){
 /* ── Video handlers ── */
 function replaceVid(key){document.getElementById('vid-file-'+key).click()}
 
-function handleVidReplace(key,input){
+async function handleVidReplace(key,input){
   const file=input.files[0];if(!file)return;
-  const url=URL.createObjectURL(file);
-  const d=getMediaData();
-  if(!d.vidSrcs)d.vidSrcs={};
-  d.vidSrcs[key]=url;
-  saveMediaData(d);renderMedia();
+  showUploadProgress('vid-'+key,'Uploading…');
+  try{
+    const objectPath=await uploadToCloud(file);
+    const d=getMediaData();
+    if(!d.vidSrcs)d.vidSrcs={};
+    d.vidSrcs[key]=objectPath;
+    saveMediaData(d);renderMedia();
+  }catch(e){showUploadProgress('vid-'+key,'Upload failed: '+e.message);}
 }
 
-function handleVidLibUpload(input){
+async function handleVidLibUpload(input){
   const file=input.files[0];if(!file)return;
-  const url=URL.createObjectURL(file);
-  const d=getMediaData();
-  if(!d.vidLib)d.vidLib=[];
-  d.vidLib.push({url,label:file.name.replace(/\.[^.]+$/,''),id:'vl-'+Date.now()});
-  saveMediaData(d);renderMedia();
+  showUploadProgress('vid-lib','Uploading…');
+  try{
+    const objectPath=await uploadToCloud(file);
+    const d=getMediaData();
+    if(!d.vidLib)d.vidLib=[];
+    d.vidLib.push({url:objectPath,label:file.name.replace(/\.[^.]+$/,''),id:'vl-'+Date.now()});
+    saveMediaData(d);renderMedia();
+  }catch(e){showUploadProgress('vid-lib','Upload failed: '+e.message);}
 }
 
 function saveVidLabel(key,text){
@@ -2856,6 +3023,31 @@ function saveSettings(){
   };
   saveSettingsData(s);
   alert('Settings saved!');
+}
+
+async function clearSampleData(){
+  const SAMPLE_NAMES=['Ellisha W.','Donna S.','Sophie M.','Chloe R.','Amara J.','Priya K.','Zara T.'];
+  if(!confirm('This will permanently delete the sample clients and their bookings from the database. Your real data, treatments and settings will not be affected.\n\nContinue?'))return;
+  try{
+    const [bRes,cRes]=await Promise.all([
+      fetch('/api/bookings/sample',{method:'DELETE'}),
+      fetch('/api/clients/sample',{method:'DELETE'})
+    ]);
+    const bData=await bRes.json();
+    const cData=await cRes.json();
+    // Remove from local cache
+    const bookings=getBookings().filter(b=>!SAMPLE_NAMES.includes(b.clientName));
+    saveBookings(bookings);
+    const clients=getClients().filter(c=>!SAMPLE_NAMES.includes(c.name));
+    saveClients(clients);
+    localStorage.removeItem('dd_initialized');
+    CloudStore.set('dd_initialized',null);
+    renderDashboard();updateSidebarBadges();
+    if(document.getElementById('page-clients').classList.contains('active'))renderClients();
+    alert(`Done! Removed ${bData.deleted||0} sample bookings and ${cData.deleted||0} sample clients.`);
+  }catch(e){
+    alert('Error removing sample data — please try again.');
+  }
 }
 
 async function clearBookings(){
