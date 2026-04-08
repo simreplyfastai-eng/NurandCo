@@ -990,6 +990,12 @@ tr:hover td{background:#FDFBF8}
           <option>Confirmed</option><option>Pending</option><option>Complete</option><option>Cancelled</option>
         </select>
       </div>
+      <div class="form-group" id="bm-deposit-group" style="display:none">
+        <label class="form-label">Deposit</label>
+        <div id="bm-deposit-status" style="display:flex;align-items:center;gap:8px;padding-top:8px"></div>
+      </div>
+    </div>
+    <div class="form-row">
       <div class="form-group" id="bm-balance-group" style="display:none">
         <label class="form-label">Balance</label>
         <div id="bm-balance-status" style="display:flex;align-items:center;gap:8px;padding-top:8px"></div>
@@ -1748,8 +1754,8 @@ function renderBookings(){
   body.innerHTML=list.map(b=>{
     const style=STATUS_STYLE[b.status]||'background:#F5F5F5;color:#888';
     const dep=b.depositPaid
-      ?`<span style="color:#2D6A4F;font-size:12px">✓ Paid</span>`
-      :`<span style="color:#C1121F;font-size:12px">Unpaid</span>`;
+      ?`<span style="color:#2D6A4F;font-size:12px;font-weight:600">✓ Paid</span>`
+      :`<span style="color:#C9A96E;font-size:12px;font-weight:600">Pending</span>`;
     const d=new Date(b.date);
     const dateDay=isNaN(d)?b.date:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     const dateYear=isNaN(d)?'':d.getFullYear();
@@ -2144,6 +2150,17 @@ function openBookingModal(prefill){
     document.getElementById('bm-price').value=booking.price||'';
     document.getElementById('bm-deposit').value=booking.deposit||'';
     document.getElementById('bm-status').value=booking.status||'Confirmed';
+    // Show deposit paid row in edit mode
+    const depGrp=document.getElementById('bm-deposit-group');
+    depGrp.style.display='';
+    const depStatus=document.getElementById('bm-deposit-status');
+    if(booking.depositPaid){
+      depStatus.innerHTML=`<span style="color:#2D6A4F;font-weight:600;font-size:13px">✓ Deposit Paid</span>`;
+    } else {
+      const depAmt=Number(booking.deposit||0);
+      depStatus.innerHTML=`<span style="color:#888;font-size:13px">Pending: £${depAmt}</span>
+        <button style="padding:5px 14px;border:none;background:#C9A96E;color:#fff;border-radius:6px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markDepositPaidFromModal()">Mark Deposit Paid</button>`;
+    }
     // Show balance paid row in edit mode
     const balGrp=document.getElementById('bm-balance-group');
     balGrp.style.display='';
@@ -2176,6 +2193,7 @@ function openBookingModal(prefill){
     document.getElementById('bm-notes').value='';
     document.getElementById('bm-status').value='Confirmed';
     document.getElementById('bm-date').value=fmt(new Date());
+    document.getElementById('bm-deposit-group').style.display='none';
     document.getElementById('bm-balance-group').style.display='none';
     if(prefill&&typeof prefill==='string'){autofillClientContact(prefill);}
   }
@@ -2196,6 +2214,24 @@ async function markBalancePaidFromModal(){
   const bookings=getBookings();
   const b=bookings.find(x=>x.id===editingBookingId);
   if(b){b.balancePaid=true;b.status='Complete';saveBookings(bookings);}
+}
+
+async function markDepositPaidFromModal(){
+  if(!editingBookingId)return;
+  await BookingAPI.update(editingBookingId,{depositPaid:true,status:'Confirmed'});
+  // Refresh deposit status display
+  const depStatus=document.getElementById('bm-deposit-status');
+  depStatus.innerHTML=`<span style="color:#2D6A4F;font-weight:600;font-size:13px">✓ Deposit Paid</span>`;
+  // Update status dropdown to Confirmed
+  if(document.getElementById('bm-status').value==='Pending'){
+    document.getElementById('bm-status').value='Confirmed';
+  }
+  renderFinance();updateSidebarBadges();renderBookings();
+  // Update local cache
+  const bookings=getBookings();
+  const b=bookings.find(x=>x.id===editingBookingId);
+  if(b){b.depositPaid=true;if(b.status==='Pending')b.status='Confirmed';saveBookings(bookings);}
+  showToast('Deposit marked as paid');
 }
 
 async function saveBooking(){

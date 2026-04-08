@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState, useCallback } from "react";
+import type { Stripe, StripeElements } from "@stripe/stripe-js";
 
 interface Treatment {
   name: string;
@@ -43,7 +44,7 @@ const AVAIL_DEFAULT: Availability = {
   overrides: {},
 };
 
-// ── Date helpers (local-timezone safe) ──────────────────────────────────────
+// ── Date helpers ─────────────────────────────────────────────────────────────
 
 function fmtDate(d: Date): string {
   const y = d.getFullYear();
@@ -61,7 +62,7 @@ function minsToTime(m: number): string {
   return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
 
-// ── Availability helpers ─────────────────────────────────────────────────────
+// ── Availability helpers ──────────────────────────────────────────────────────
 
 function getAvailForDate(avail: Availability, date: Date): DayAvail | null {
   const dateStr = fmtDate(date);
@@ -89,7 +90,7 @@ function getWorkingSlots(avail: Availability, date: Date): string[] {
   return slots;
 }
 
-// ── Slot blocking ────────────────────────────────────────────────────────────
+// ── Slot blocking ─────────────────────────────────────────────────────────────
 
 function computeBlockedSlots(bookings: DateBooking[]): Set<string> {
   const blocked = new Set<string>();
@@ -102,7 +103,7 @@ function computeBlockedSlots(bookings: DateBooking[]): Set<string> {
   return blocked;
 }
 
-// ── Validation ───────────────────────────────────────────────────────────────
+// ── Validation ────────────────────────────────────────────────────────────────
 
 function validateName(v: string): string {
   if (!v.trim()) return "Please enter your full name";
@@ -124,7 +125,7 @@ function validatePhone(v: string): string {
   return "";
 }
 
-// ── Calendar ─────────────────────────────────────────────────────────────────
+// ── Calendar ──────────────────────────────────────────────────────────────────
 
 const MONTH_NAMES = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const DAY_NAMES = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
@@ -224,7 +225,7 @@ function parsePrice(priceStr: string): number { return parseInt(priceStr.replace
 // ── Main Component ────────────────────────────────────────────────────────────
 
 export default function BookingModal({ treatment, onClose }: BookingModalProps) {
-  const [step, setStep] = useState<1 | 2 | 3 | "success">(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | "success">(1);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
 
@@ -242,13 +243,28 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const [dateBookings, setDateBookings] = useState<DateBooking[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
+  // Stripe payment state
+  const [paymentLoading, setPaymentLoading] = useState(false);
+  const [paymentError, setPaymentError] = useState("");
+  const [stripeElementMounted, setStripeElementMounted] = useState(false);
+  const [whatsapp, setWhatsapp] = useState("");
+  const [bookingDuration, setBookingDuration] = useState(30);
+
+  const stripeRef = useRef<Stripe | null>(null);
+  const elementsRef = useRef<StripeElements | null>(null);
+  const paymentElementRef = useRef<HTMLDivElement>(null);
+
   const firstFocusRef = useRef<HTMLButtonElement>(null);
 
-  // Fetch availability
+  // Fetch availability and config on mount
   useEffect(() => {
     fetch("/api/availability")
       .then((r) => r.ok ? r.json() : null)
       .then((data) => { if (data) setAvail(data); })
+      .catch(() => {});
+    fetch("/api/config")
+      .then((r) => r.ok ? r.json() : null)
+      .then((data) => { if (data?.whatsapp) setWhatsapp(data.whatsapp); })
       .catch(() => {});
   }, []);
 
@@ -259,10 +275,10 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   }, []);
 
   useEffect(() => {
-    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape" && step !== "success") onClose(); };
     window.addEventListener("keydown", handler);
     return () => window.removeEventListener("keydown", handler);
-  }, [onClose]);
+  }, [onClose, step]);
 
   // Fetch bookings for a date (never cached)
   const fetchDateBookings = useCallback(async (date: Date) => {
@@ -292,7 +308,8 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
     setStep(3);
   };
 
-  const handleConfirm = async () => {
+  // Step 3 → Step 4: validate details then proceed to payment
+  const handleContinueToPayment = () => {
     const nErr = validateName(name);
     const eErr = validateEmail(email);
     const pErr = validatePhone(phone);
@@ -300,12 +317,133 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
     setEmailError(eErr);
     setPhoneError(pErr);
     if (nErr || eErr || pErr) return;
+    setPaymentError("");
+    setStripeElementMounted(false);
+    setStep(4);
+  };
+
+  // Step 4: initialise Stripe Elements
+  useEffect(() => {
+    if (step !== 4) return;
+    let cancelled = false;
+
+    async function initStripe() {
+      setPaymentLoading(true);
+      setPaymentError("");
+
+      try {
+        // Get publishable key from backend
+        const configRes = await fetch("/api/config");
+        const config = await configRes.json() as { stripePublishableKey?: string; whatsapp?: string };
+        if (config.whatsapp) setWhatsapp(config.whatsapp);
+
+        if (!config.stripePublishableKey) {
+          if (!cancelled) {
+            setPaymentError("Online payments are not yet configured. Please contact us directly to complete your booking.");
+            setPaymentLoading(false);
+          }
+          return;
+        }
+
+        // Create payment intent
+        const price = parsePrice(treatment?.price ?? "0");
+        const depositAmount = Math.floor(price / 2);
+
+        const piRes = await fetch("/api/stripe/create-payment-intent", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            amount: depositAmount * 100, // pence
+            treatment: treatment?.name ?? "",
+            clientName: name,
+            clientEmail: email,
+          }),
+        });
+
+        if (!piRes.ok) {
+          const d = await piRes.json() as { error?: string };
+          if (!cancelled) {
+            setPaymentError(d.error ?? "Failed to set up payment. Please try again.");
+            setPaymentLoading(false);
+          }
+          return;
+        }
+
+        const { clientSecret } = await piRes.json() as { clientSecret: string };
+        if (cancelled || !clientSecret) return;
+
+        // Load Stripe
+        const { loadStripe } = await import("@stripe/stripe-js");
+        const stripe = await loadStripe(config.stripePublishableKey);
+        if (!stripe || cancelled) return;
+        stripeRef.current = stripe;
+
+        // Create and mount Elements
+        const elements = stripe.elements({
+          clientSecret,
+          appearance: {
+            theme: "stripe",
+            variables: {
+              colorPrimary: "#C9A96E",
+              colorText: "#111111",
+              fontFamily: "Inter, sans-serif",
+              borderRadius: "8px",
+            },
+          },
+        });
+        elementsRef.current = elements;
+
+        const paymentEl = elements.create("payment");
+        if (paymentElementRef.current) {
+          paymentEl.mount(paymentElementRef.current);
+        }
+
+        paymentEl.on("ready", () => {
+          if (!cancelled) {
+            setStripeElementMounted(true);
+            setPaymentLoading(false);
+          }
+        });
+      } catch {
+        if (!cancelled) {
+          setPaymentError("Failed to load payment form. Please refresh and try again.");
+          setPaymentLoading(false);
+        }
+      }
+    }
+
+    initStripe();
+    return () => {
+      cancelled = true;
+      // Unmount payment element on cleanup
+      try { elementsRef.current?.getElement("payment")?.unmount(); } catch { /* ignore */ }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step]);
+
+  // Handle Stripe payment confirmation
+  const handlePayment = async () => {
+    const stripe = stripeRef.current;
+    const elements = elementsRef.current;
+    if (!stripe || !elements) return;
 
     setSubmitting(true);
-    setSlotError("");
+    setPaymentError("");
 
+    const { error } = await stripe.confirmPayment({
+      elements,
+      redirect: "if_required",
+    });
+
+    if (error) {
+      setPaymentError(`Payment failed: ${error.message ?? "Unknown error"}. Please check your card details and try again.`);
+      setSubmitting(false);
+      return;
+    }
+
+    // Payment succeeded — create booking
     const price = parsePrice(treatment?.price ?? "0");
-    const deposit = Math.round(price * 0.5);
+    const depositAmt = Math.floor(price / 2);
 
     const booking = {
       id: uid(),
@@ -313,16 +451,14 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       clientEmail: email.trim(),
       clientPhone: phone.replace(/\s/g, ""),
       treatment: treatment?.name ?? "",
-      category: "",
       price,
-      deposit,
-      depositPaid: false,
+      deposit: depositAmt,
+      depositPaid: true,
       balancePaid: false,
       date: selectedDate ? fmtDate(selectedDate) : "",
       time: selectedTime ?? "",
-      status: "Pending",
+      status: "Confirmed",
       paymentMethod: "Stripe",
-      stripePaymentId: null,
       notes: "",
       createdAt: Date.now(),
       source: "Website",
@@ -335,31 +471,13 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
         body: JSON.stringify(booking),
       });
 
-      if (res.status === 409) {
-        const data = await res.json();
-        setSlotError(data.error ?? "Sorry, that slot was just taken. Please choose another time.");
-        if (selectedDate) await fetchDateBookings(selectedDate);
-        setSelectedTime(null);
-        setStep(2);
-        setSubmitting(false);
-        return;
-      }
-
-      if (res.status === 429) {
-        setSlotError("Too many booking attempts. Please try again in a few minutes.");
-        setSubmitting(false);
-        return;
-      }
-
-      if (!res.ok) {
-        setSlotError("Something went wrong. Please try again or contact us directly.");
-        setSubmitting(false);
-        return;
+      if (res.ok || res.status === 409) {
+        // Success or slot conflict — payment taken, webhook will handle edge cases
+        const data = res.ok ? await res.json() as { durationMinutes?: number } : null;
+        if (data?.durationMinutes) setBookingDuration(data.durationMinutes);
       }
     } catch {
-      setSlotError("Something went wrong. Please try again or contact us directly.");
-      setSubmitting(false);
-      return;
+      // Network failure — payment was taken, Stripe webhook will create the booking
     }
 
     setSubmitting(false);
@@ -378,13 +496,10 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   if (!treatment) return null;
 
   const price = parsePrice(treatment.price);
-  const deposit = Math.round(price * 0.5);
+  const deposit = Math.floor(price / 2);
   const balance = price - deposit;
-  const firstName = name.trim().split(" ")[0] || "there";
-  const treatmentRef = (treatment.name.length > 20 ? treatment.name.slice(0, 20) : treatment.name);
-  const bankRef = `${firstName} - ${treatmentRef}`;
 
-  // Compute available slots: working hours minus blocked slots
+  // Compute available slots
   const workingSlots = selectedDate ? getWorkingSlots(avail, selectedDate) : [];
   const blockedSlots = computeBlockedSlots(dateBookings);
   const availableSlots = workingSlots.filter((s) => !blockedSlots.has(s));
@@ -481,7 +596,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
           </motion.div>
         )}
 
-        {/* ── Step 3 — Details + Confirm ── */}
+        {/* ── Step 3 — Your Details ── */}
         {step === 3 && (
           <motion.div key="step3" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-5">
@@ -509,7 +624,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
                   <span className="font-serif" style={{ fontSize: "16px", color: "#111" }}>{treatment.price}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: "#888" }}>Deposit (50%)</span>
+                  <span style={{ color: "#888" }}>Deposit to pay now (50%)</span>
                   <span className="font-medium" style={{ color: "#C9A96E" }}>£{deposit}</span>
                 </div>
                 <div className="flex justify-between text-sm">
@@ -552,23 +667,97 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
               />
             </Field>
 
-            {slotError && (
-              <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: "#FFF3F3", color: "#C62828", border: "1px solid #FFCDD2" }}>
-                {slotError}
-              </div>
-            )}
-
             <button
-              onClick={handleConfirm}
-              disabled={submitting}
+              onClick={handleContinueToPayment}
               className="w-full py-4 text-white font-medium text-sm uppercase tracking-wider transition-all duration-200 hover:opacity-90 active:scale-[0.99]"
-              style={{ backgroundColor: "#C9A96E", borderRadius: "12px", fontFamily: "Inter, sans-serif", opacity: submitting ? 0.7 : 1 }}
+              style={{ backgroundColor: "#C9A96E", borderRadius: "12px", fontFamily: "Inter, sans-serif" }}
             >
-              {submitting ? "Submitting…" : "Confirm Booking Request"}
+              Continue to Payment →
             </button>
 
             <p className="text-xs text-center mt-3" style={{ color: "#bbb", fontFamily: "Inter, sans-serif" }}>
-              You will receive bank transfer details to secure your appointment.
+              You'll pay the £{deposit} deposit securely by card on the next screen.
+            </p>
+          </motion.div>
+        )}
+
+        {/* ── Step 4 — Payment ── */}
+        {step === 4 && (
+          <motion.div key="step4" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <div className="flex items-center gap-3 mb-5">
+              <button
+                onClick={() => { setStep(3); setPaymentError(""); }}
+                className="text-sm hover:opacity-70"
+                style={{ color: "#C9A96E" }}
+                disabled={submitting}
+              >← Back</button>
+              <h3 className="font-serif" style={{ fontSize: "20px" }}>Secure Payment</h3>
+            </div>
+
+            {/* Booking summary */}
+            <div className="mb-5 p-4 rounded-xl space-y-1.5" style={{ border: "1px solid rgba(201,169,110,0.25)", backgroundColor: "#FEFDFB" }}>
+              <div className="flex justify-between text-sm">
+                <span style={{ color: "#888" }}>Treatment</span>
+                <span className="font-medium text-right">{treatment.name}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span style={{ color: "#888" }}>Date</span>
+                <span className="font-medium text-right">{selectedDate ? formatDate(selectedDate) : "—"}</span>
+              </div>
+              <div className="flex justify-between text-sm">
+                <span style={{ color: "#888" }}>Time</span>
+                <span className="font-medium">{selectedTime}</span>
+              </div>
+              <div className="border-t pt-2 mt-1 flex justify-between" style={{ borderColor: "rgba(201,169,110,0.15)" }}>
+                <span className="text-sm font-semibold">Deposit to pay now</span>
+                <span className="font-serif font-semibold" style={{ color: "#C9A96E", fontSize: "17px" }}>£{deposit}</span>
+              </div>
+              <div className="flex justify-between text-xs" style={{ color: "#aaa" }}>
+                <span>Balance due on arrival</span>
+                <span>£{balance}</span>
+              </div>
+            </div>
+
+            {/* Payment error */}
+            {paymentError && (
+              <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: "#FFF3F3", color: "#C62828", border: "1px solid #FFCDD2" }}>
+                {paymentError}
+              </div>
+            )}
+
+            {/* Stripe Elements mount point */}
+            {!paymentError && (
+              <>
+                {paymentLoading && (
+                  <div className="flex items-center justify-center py-10">
+                    <div style={{
+                      width: "28px", height: "28px", borderRadius: "50%",
+                      border: "2px solid rgba(201,169,110,0.2)",
+                      borderTopColor: "#C9A96E",
+                      animation: "spin 0.8s linear infinite",
+                    }} />
+                    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+                  </div>
+                )}
+                <div
+                  ref={paymentElementRef}
+                  style={{ display: stripeElementMounted ? "block" : "none", marginBottom: "20px" }}
+                />
+                {stripeElementMounted && (
+                  <button
+                    onClick={handlePayment}
+                    disabled={submitting}
+                    className="w-full py-4 text-white font-medium text-sm uppercase tracking-wider transition-all duration-200 hover:opacity-90 active:scale-[0.99]"
+                    style={{ backgroundColor: "#C9A96E", borderRadius: "12px", fontFamily: "Inter, sans-serif", opacity: submitting ? 0.7 : 1 }}
+                  >
+                    {submitting ? "Processing…" : `Pay £${deposit} Securely`}
+                  </button>
+                )}
+              </>
+            )}
+
+            <p className="text-xs text-center mt-4" style={{ color: "#bbb", fontFamily: "Inter, sans-serif" }}>
+              🔒 Payments are processed securely by Stripe. Your card details are never stored.
             </p>
           </motion.div>
         )}
@@ -582,19 +771,20 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
             transition={{ duration: 0.35 }}
             className="text-center"
           >
-            <div className="flex items-center justify-center w-14 h-14 mx-auto mb-5 rounded-full" style={{ backgroundColor: "rgba(201,169,110,0.12)" }}>
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {/* Gold checkmark */}
+            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-5 rounded-full" style={{ backgroundColor: "rgba(201,169,110,0.12)" }}>
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
 
-            <h2 className="font-serif mb-2" style={{ fontSize: "24px" }}>Booking Request Received</h2>
+            <h2 className="font-serif mb-1" style={{ fontSize: "26px" }}>Booking Confirmed!</h2>
             <p className="text-sm mb-6" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
               A confirmation has been sent to <strong style={{ color: "#111" }}>{email}</strong>
             </p>
 
-            {/* Booking summary */}
-            <div className="text-left mb-6 p-4 rounded-xl space-y-2" style={{ border: "1px solid rgba(201,169,110,0.25)", backgroundColor: "#FEFDFB" }}>
+            {/* Booking details */}
+            <div className="text-left mb-5 p-4 rounded-xl space-y-2" style={{ border: "1px solid rgba(201,169,110,0.25)", backgroundColor: "#FEFDFB" }}>
               <div className="flex justify-between gap-4 text-sm">
                 <span style={{ color: "#888" }}>Treatment</span>
                 <span className="font-medium text-right">{treatment.name}</span>
@@ -607,45 +797,28 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
                 <span style={{ color: "#888" }}>Time</span>
                 <span className="font-medium">{selectedTime}</span>
               </div>
+              <div className="flex justify-between gap-4 text-sm">
+                <span style={{ color: "#888" }}>Duration</span>
+                <span className="font-medium">Approximately {bookingDuration} minutes</span>
+              </div>
               <div className="border-t pt-2 mt-2 space-y-1" style={{ borderColor: "rgba(201,169,110,0.15)" }}>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: "#888" }}>Deposit due</span>
-                  <span className="font-medium" style={{ color: "#C9A96E" }}>£{deposit}</span>
+                  <span style={{ color: "#888" }}>Deposit paid</span>
+                  <span className="font-semibold" style={{ color: "#2D6A4F" }}>£{deposit} ✓</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: "#888" }}>Balance due on arrival</span>
-                  <span className="font-medium" style={{ color: "#666" }}>£{balance}</span>
+                  <span style={{ color: "#888" }}>Remaining balance</span>
+                  <span className="font-medium" style={{ color: "#111" }}>£{balance} — due on arrival</span>
                 </div>
               </div>
             </div>
 
-            {/* Bank transfer section */}
-            <div className="text-left mb-6 p-4 rounded-xl" style={{ background: "#FFF8F0", border: "1px solid #F5DEB3" }}>
-              <p className="font-medium text-sm mb-3" style={{ fontFamily: "Inter, sans-serif" }}>
-                To secure your appointment, please send your deposit of <strong style={{ color: "#C9A96E" }}>£{deposit}</strong> via bank transfer:
-              </p>
-              <div className="space-y-1.5 text-sm" style={{ fontFamily: "Inter, sans-serif" }}>
-                <div className="flex justify-between">
-                  <span style={{ color: "#888" }}>Account name</span>
-                  <span className="font-medium">Simrandeep Sangha</span>
-                </div>
-                <div className="flex justify-between">
-                  <span style={{ color: "#888" }}>Sort code</span>
-                  <span className="font-medium">60-84-07</span>
-                </div>
-                <div className="flex justify-between">
-                  <span style={{ color: "#888" }}>Account number</span>
-                  <span className="font-medium">17575567</span>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <span style={{ color: "#888" }}>Reference</span>
-                  <span className="font-medium text-right">{bankRef}</span>
-                </div>
-              </div>
-              <p className="text-xs mt-3" style={{ color: "#999", fontFamily: "Inter, sans-serif" }}>
-                Your appointment will be confirmed once your deposit is received. If you have any questions contact us on Instagram{" "}
-                <strong>@dermadollaesthetics</strong> or WhatsApp.
-              </p>
+            <p className="text-sm mb-4" style={{ color: "#666", fontFamily: "Inter, sans-serif" }}>
+              See you soon! If you need to reschedule, please contact us:
+            </p>
+            <div className="text-sm mb-6 space-y-1" style={{ fontFamily: "Inter, sans-serif" }}>
+              <div style={{ color: "#888" }}>Instagram: <strong style={{ color: "#111" }}>@dermadollaesthetics</strong></div>
+              {whatsapp && <div style={{ color: "#888" }}>WhatsApp: <strong style={{ color: "#111" }}>{whatsapp}</strong></div>}
             </div>
 
             <button

@@ -204,8 +204,9 @@ router.post("/bookings", async (req, res) => {
 
     const whatsapp = await getWhatsApp();
 
-    // Client confirmation email (non-blocking)
-    if (b.clientEmail) {
+    // Client confirmation email — only send if deposit is already paid (Stripe)
+    // Manual/bank transfer bookings: email is sent later when "Mark Deposit Paid" is clicked
+    if (b.clientEmail && depositPaid) {
       sendClientConfirmationEmail({
         clientEmail: b.clientEmail,
         clientName: b.clientName,
@@ -215,6 +216,7 @@ router.post("/bookings", async (req, res) => {
         durationMinutes,
         deposit,
         balance,
+        depositPaid: true,
         whatsapp,
       }).catch(() => {});
     }
@@ -232,6 +234,7 @@ router.post("/bookings", async (req, res) => {
         date: b.date,
         time: b.time ?? "",
         deposit,
+        depositPaid,
         source: b.source ?? "Portal",
       }).catch(() => {});
     }
@@ -343,11 +346,12 @@ router.put("/bookings/:id", async (req, res) => {
     const updated = await pool.query("SELECT * FROM bookings WHERE id=$1", [id]);
     const booking = rowToBooking(updated.rows[0] ?? cur);
 
+    const whatsapp = await getWhatsApp();
+
     // Send cancellation email if status just changed to Cancelled
     if (newStatus === "Cancelled" && prevStatus !== "Cancelled") {
       const email = booking.clientEmail;
       if (email) {
-        const whatsapp = await getWhatsApp();
         sendCancellationEmail({
           clientEmail: email as string,
           clientName: booking.clientName as string,
@@ -357,6 +361,27 @@ router.put("/bookings/:id", async (req, res) => {
           whatsapp,
         }).catch(() => {});
       }
+    }
+
+    // Send confirmation email if depositPaid just changed from false to true (manual mark-deposit-paid)
+    const prevDepositPaid = Boolean(cur.deposit_paid);
+    const newDepositPaid = b.depositPaid;
+    if (newDepositPaid === true && !prevDepositPaid && booking.clientEmail) {
+      const dep = Number(booking.deposit ?? 0);
+      const bal = Number(booking.price ?? 0) - dep;
+      const dur = Number(booking.durationMinutes ?? 30);
+      sendClientConfirmationEmail({
+        clientEmail: booking.clientEmail as string,
+        clientName: booking.clientName as string,
+        treatment: booking.treatment as string,
+        date: booking.date as string,
+        time: booking.time as string,
+        durationMinutes: dur,
+        deposit: dep,
+        balance: bal,
+        depositPaid: true,
+        whatsapp,
+      }).catch(() => {});
     }
 
     return res.json(booking);
@@ -391,12 +416,6 @@ router.delete("/bookings/sample", async (_req, res) => {
     console.error("DELETE /api/bookings/sample", err);
     return res.status(500).json({ error: "db error" });
   }
-});
-
-// POST /api/stripe/webhook  — placeholder
-router.post("/stripe/webhook", (req, res) => {
-  console.log("Stripe webhook received (placeholder):", req.body);
-  return res.json({ received: true });
 });
 
 export default router;

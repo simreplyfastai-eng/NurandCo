@@ -1,0 +1,164 @@
+Remove all bank transfer references from 
+the entire codebase — index.html, portal.html 
+and all backend files.
+
+The ONLY payment method is Stripe. 
+There is no bank transfer option. Ever.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+BEFORE STRIPE KEYS ARE ADDED
+━━━━━━━━━━━━━━━━━━━━━━━━
+While STRIPE_PUBLISHABLE_KEY is not yet 
+set in Replit Secrets, the booking flow 
+must behave like this:
+
+When a client clicks "Book Now" on the 
+website and fills in the booking form, 
+on the final payment step show:
+
+"We're getting ready to take bookings!
+
+Online booking will be available very 
+soon. In the meantime, please contact 
+us to book your appointment:
+
+Instagram: @dermadollaesthetics
+WhatsApp: [number from settings]"
+
+Two buttons:
+"Message on Instagram" — opens 
+https://instagram.com/dermadollaesthetics
+"WhatsApp Us" — opens 
+https://wa.me/[number from settings]
+
+Do NOT show any booking form submission 
+or success screen until Stripe is live.
+Do NOT save any booking to the database 
+until payment has been taken.
+Do NOT show bank transfer details 
+anywhere under any circumstances.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+ONCE STRIPE KEYS ARE ADDED
+━━━━━━━━━━━━━━━━━━━━━━━━
+When STRIPE_PUBLISHABLE_KEY exists in 
+Replit Secrets the full booking flow 
+activates automatically — no code 
+changes needed.
+
+The flow:
+1. Client fills in name, email, phone, 
+   selects treatment, date, time
+2. Booking summary screen shows:
+   Treatment, date, time, duration
+   "Deposit to pay now: £[50% of price]"
+   "Balance due on arrival: £[remaining]"
+3. Stripe payment form loads below summary
+4. Client pays deposit via Stripe
+5. On payment success:
+   - Booking saved to PostgreSQL
+   - depositPaid: true
+   - status: "Confirmed"
+   - Client confirmation email sent
+   - Admin notification email sent
+6. Success screen shows:
+   Gold checkmark
+   "Booking Confirmed!"
+   Treatment, date, time
+   "Deposit paid: £[amount] ✓" in green
+   "Balance due on arrival: £[amount]"
+   "Confirmation sent to [email]"
+   Done button — no auto close
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+PORTAL — MARK DEPOSIT PAID BUTTON
+━━━━━━━━━━━━━━━━━━━━━━━━
+Since all payments go through Stripe, 
+the "Mark Deposit Paid" button in the 
+portal is only for edge cases where 
+Stripe has been confirmed outside the 
+system (e.g. Stripe dashboard shows 
+payment but webhook failed).
+
+Rename the button to:
+"Confirm Deposit Received"
+
+Add a note next to it in small grey text:
+"Only use if Stripe payment confirmed 
+but booking shows as pending"
+
+On click: same behaviour as before —
+PUT /api/bookings/:id 
+{ depositPaid: true, status: "Confirmed" }
+Sends confirmation email to client.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+PORTAL — PRE-LAUNCH CHECKLIST UPDATE
+━━━━━━━━━━━━━━━━━━━━━━━━
+Update the pre-launch checklist in 
+Settings to remove any bank transfer 
+related items.
+
+Checklist must include:
+✓/✗ Stripe Secret Key added 
+    (STRIPE_SECRET_KEY in Secrets)
+✓/✗ Stripe Publishable Key added 
+    (STRIPE_PUBLISHABLE_KEY in Secrets)
+✓/✗ Stripe Webhook Secret added 
+    (STRIPE_WEBHOOK_SECRET in Secrets)
+✓/✗ RESEND_API_KEY added
+✓/✗ Email domain verified
+✓/✗ ADMIN_EMAIL set
+✓/✗ WhatsApp number added in Settings
+✓/✗ Test data cleared
+✓/✗ Admin password changed from default
+✓/✗ Custom domain connected
+
+Add clear instruction text under the 
+Stripe section:
+"To activate payments:
+1. Go to stripe.com and create an account
+2. Copy your Secret Key and Publishable 
+   Key from the Stripe dashboard
+3. Add both to Replit Secrets
+4. Set up a webhook in Stripe pointing to:
+   [your-replit-url]/api/stripe/webhook
+5. Copy the Webhook Secret and add it 
+   to Replit Secrets as STRIPE_WEBHOOK_SECRET
+6. Stripe is now live — no code changes needed"
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+REMOVE COMPLETELY — NO EXCEPTIONS:
+━━━━━━━━━━━━━━━━━━━━━━━━
+Search the entire codebase and remove 
+every instance of:
+- Sort code: 60-84-07
+- Account number: 17575567
+- Account name: Simrandeep Sangha
+- "bank transfer"
+- "bank details"  
+- "transfer the deposit"
+- "send payment to"
+- "booking request has been received"
+- "We'll confirm once deposit received"
+- Any reference to manual payment
+- Any reference to paying outside of Stripe
+
+If any of these strings exist anywhere 
+in the code after this change, that is 
+a bug. They must all be gone.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+DO NOT CHANGE:
+━━━━━━━━━━━━━━━━━━━━━━━━
+Do not touch anything already working:
+- Slot blocking and duration logic
+- Availability enforcement
+- JWT authentication
+- Media cloud storage
+- Client deduplication
+- Portal pages and styling
+- Finance SQL queries
+- Email templates
+- Training enquiry form
+- All portal pages built so far

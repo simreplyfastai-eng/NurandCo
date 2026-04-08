@@ -1,0 +1,303 @@
+Do not change anything already working.
+Fix only the following remaining items:
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+1. STRIPE PUBLISHABLE KEY IN FRONTEND
+━━━━━━━━━━━━━━━━━━━━━━━━
+The frontend (index.html) needs the Stripe 
+publishable key to load Stripe.js.
+
+Create a new endpoint:
+GET /api/config/stripe
+Returns: { publishableKey: process.env.STRIPE_PUBLISHABLE_KEY }
+
+In index.html, on page load fetch this 
+endpoint and store the key:
+const { publishableKey } = await fetch(
+  '/api/config/stripe'
+).then(r => r.json())
+const stripe = Stripe(publishableKey)
+
+Never hardcode the publishable key in 
+the frontend HTML or JS.
+If STRIPE_PUBLISHABLE_KEY is not set yet, 
+the endpoint returns { publishableKey: null }
+and the booking form shows:
+"Online booking is temporarily unavailable. 
+Please contact us on Instagram or WhatsApp 
+to book."
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+2. RATE LIMITING
+━━━━━━━━━━━━━━━━━━━━━━━━
+Install express-rate-limit:
+npm install express-rate-limit
+
+Apply rate limiting to these endpoints:
+POST /api/bookings — max 3 per IP 
+  per 10 minutes
+POST /api/auth/login — max 5 per IP 
+  per 15 minutes
+POST /api/stripe/create-payment-intent 
+  — max 3 per IP per 10 minutes
+POST /api/enquiries — max 5 per IP 
+  per 10 minutes
+
+On limit exceeded return HTTP 429:
+{
+  error: "Too many requests. 
+  Please try again in a few minutes."
+}
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+3. CRON JOBS — SCHEDULED TASKS
+━━━━━━━━━━━━━━━━━━━━━━━━
+Set up Replit scheduled tasks for:
+
+Every hour — reminder emails:
+GET /api/cron/reminders
+
+Every day at 00:01 UK time — autocomplete:
+GET /api/cron/autocomplete
+
+Protect both cron endpoints with a 
+secret header check:
+if (req.headers['x-cron-secret'] !== 
+    process.env.CRON_SECRET) {
+  return res.status(401).json({ 
+    error: 'Unauthorised' 
+  })
+}
+
+Add CRON_SECRET to Replit Secrets.
+Use the same secret in the scheduled 
+task request headers.
+
+Also expose a manual trigger in the 
+portal Settings page under Developer:
+Two buttons:
+"Run Reminders Now" — calls 
+/api/cron/reminders with the auth header
+"Run Autocomplete Now" — calls 
+/api/cron/autocomplete with the auth header
+Both show a success/fail toast after 
+running.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+4. TRAINING COURSES — ALL 7 ON WEBSITE
+━━━━━━━━━━━━━━━━━━━━━━━━
+The website training section currently 
+only shows Pathway to Aesthetics.
+Add all 7 courses as individual cards 
+with prices:
+
+Pathway to Aesthetics — £2,000
+3-day course, max 3 students, 
+£300 deposit secures place, 
+finance available
+
+Foundation Anti-Wrinkle & Tox — £1,300
+Advanced Dermal Filler — £600
+Advanced Anti-Wrinkle — £600
+Skin Boosters & Polynucleotides — £600
+Glass Skin Facial & Microneedling — £700
+Russian Lip Masterclass — £600
+
+All courses: CPD accredited, no background 
+needed, Birmingham/Solihull location.
+
+Each course card has:
+- Course name in Cormorant Garamond
+- Price in gold
+- "CPD Accredited" badge
+- "No experience needed" note
+- "Enquire Now" gold button
+
+Enquire Now opens a modal with the 
+training enquiry form:
+- Full name (required)
+- Email (required)
+- Phone (required, UK format)
+- Course interested in (pre-filled with 
+  the course they clicked, but can change)
+- Message (optional)
+- "Send Enquiry" button
+
+On submit: POST /api/enquiries
+Validation same as booking form.
+Success message: "Thank you! We'll be in 
+touch shortly."
+No auto-close — show Done button.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+5. RESEND DOMAIN VERIFICATION REMINDER
+━━━━━━━━━━━━━━━━━━━━━━━━
+Add a visible warning banner in the 
+portal Settings page under the 
+Payment Settings section:
+
+If RESEND_API_KEY is not set:
+Show a red banner:
+"⚠ Email notifications are not active.
+Add RESEND_API_KEY to Replit Secrets 
+to enable booking confirmations, 
+reminders and admin notifications."
+
+If RESEND_API_KEY is set but sending 
+domain is not verified (check by 
+attempting a test send on settings load):
+Show an amber banner:
+"⚠ Email sending domain not verified.
+Visit resend.com/domains to verify 
+dermadollaesthetics.co.uk or your 
+sending domain. Until verified, emails 
+may be rejected or land in spam."
+
+If both are correctly set:
+Show a green banner:
+"✓ Email notifications active."
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+6. MARK DEPOSIT PAID — PORTAL
+━━━━━━━━━━━━━━━━━━━━━━━━
+In the New Bookings table, each row 
+with depositPaid: false must show a 
+"Mark Deposit Paid" button.
+
+On click:
+- Confirm dialog: "Mark deposit as paid 
+  for [client name]? This will confirm 
+  their booking and send a confirmation 
+  email."
+- On confirm: PUT /api/bookings/:id 
+  { depositPaid: true, status: "Confirmed" }
+- Send confirmation email to client via 
+  Resend (same template as Stripe flow)
+- Update the row immediately — 
+  deposit shows "✓ Paid" in green, 
+  status changes to Confirmed pill,
+  button disappears
+- Update Finance deposits collected 
+  figure without page reload
+
+In the booking edit modal:
+Same button if depositPaid: false
+Shows "✓ Deposit paid via Stripe" 
+in green if paid via Stripe
+Shows "✓ Deposit marked as paid" 
+in green if manually marked
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+7. MARK BALANCE PAID — PORTAL
+━━━━━━━━━━━━━━━━━━━━━━━━
+In the booking edit modal and New 
+Bookings table, add "Mark Balance Paid" 
+button for bookings where:
+depositPaid: true AND balancePaid: false
+
+On click:
+- PUT /api/bookings/:id 
+  { balancePaid: true }
+- Updates Finance outstanding balance 
+  immediately
+- Button changes to 
+  "✓ Balance paid" in green
+- No email needed for this action
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+8. CLEAR TEST DATA — SETTINGS
+━━━━━━━━━━━━━━━━━━━━━━━━
+In Settings page, under Danger Zone, 
+add a clearly labelled button:
+
+"Clear Test Data — Remove before going live"
+
+On click: show a confirmation modal:
+"This will permanently delete all test 
+bookings and clients from the database. 
+Your treatments, availability settings 
+and business info will not be affected.
+Type CONFIRM to proceed:"
+
+Input field — must type CONFIRM exactly.
+On confirm: call DELETE /api/test-data
+This endpoint deletes all bookings and 
+clients where the data was seeded or 
+created during testing.
+
+Also add a second button:
+"Delete ALL Bookings and Clients"
+
+Requires typing DELETE ALL to confirm.
+Calls DELETE /api/bookings (all) and 
+DELETE /api/clients (all).
+Use this for a full clean reset before 
+going live with real clients.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+9. SETTINGS PAGE — COMPLETE ALL FIELDS
+━━━━━━━━━━━━━━━━━━━━━━━━
+Make sure the following fields are in 
+the Settings page and save to PostgreSQL 
+via PUT /api/settings:
+
+Business Info:
+- Clinic name (default: Dermadoll Aesthetics)
+- Practitioner name (default: Niamh)
+- Instagram handle 
+  (default: @dermadollaesthetics)
+- WhatsApp number (used in all emails 
+  and success screens)
+- Location (default: Birmingham / Solihull)
+
+Booking Settings:
+- Deposit percentage (default: 50)
+  This value must be used everywhere 
+  deposit is calculated — not hardcoded
+- Booking confirmation message 
+  (editable — appears in success screen)
+
+All of these values are used throughout 
+the site and emails. If WhatsApp number 
+is blank, hide the WhatsApp line from 
+emails and success screens rather than 
+showing a blank.
+
+Save button: gold filled, full width 
+on mobile, shows "Saved ✓" for 2 seconds 
+after successful save.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+10. FINAL PRE-LAUNCH CHECKLIST 
+IN SETTINGS
+━━━━━━━━━━━━━━━━━━━━━━━━
+Add a "Pre-Launch Checklist" section 
+at the top of the Settings page.
+
+Show a checklist of items with 
+green tick or red cross for each:
+
+✓ / ✗ Stripe keys added to Replit Secrets
+✓ / ✗ RESEND_API_KEY added to Replit Secrets  
+✓ / ✗ Email sending domain verified
+✓ / ✗ Admin email set (ADMIN_EMAIL secret)
+✓ / ✗ WhatsApp number added in Settings
+✓ / ✗ Test data cleared
+✓ / ✗ Admin password changed from default
+✓ / ✗ Custom domain connected
+
+Each item checks the actual state 
+in real time — not hardcoded.
+Stripe check: GET /api/config/stripe 
+returns a non-null key
+Resend check: RESEND_API_KEY env exists
+Test data check: booking count where 
+client name is one of the 7 seeded names
+Password check: ADMIN_PASSWORD secret 
+is not equal to default "dermadoll2024"
+
+Show overall status at top:
+If all green: "✓ Ready to go live"
+  in green
+If any red: "X Not ready — 
+  [N] items need attention" in red

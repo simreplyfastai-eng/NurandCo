@@ -9,6 +9,7 @@ import availabilityRouter from "./availability";
 import mediaRouter from "./media";
 import cronRouter from "./cron";
 import enquiriesRouter from "./enquiries";
+import stripeRouter from "./stripe";
 
 const router: IRouter = Router();
 
@@ -22,5 +23,6 @@ router.use(bookingsRouter);
 router.use(financeRouter);
 router.use(clientsRouter);
 router.use(enquiriesRouter);
+router.use(stripeRouter);
 
 export default router;

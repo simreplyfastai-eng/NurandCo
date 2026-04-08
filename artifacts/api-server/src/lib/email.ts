@@ -38,15 +38,15 @@ export async function sendClientConfirmationEmail(params: {
   durationMinutes: number;
   deposit: number;
   balance: number;
+  depositPaid?: boolean;
   whatsapp: string;
 }): Promise<void> {
   const resend = getResend();
   if (!resend || !params.clientEmail) return;
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
-  const treatmentRef = params.treatment.length > 20
-    ? params.treatment.slice(0, 20)
-    : params.treatment;
-  const ref = `${firstName} - ${treatmentRef}`;
+  const depositPaid = params.depositPaid ?? true;
+  const dateStr = params.date ? fmtDateLong(params.date) : "to be confirmed";
+  const timeStr = params.time || "to be confirmed";
   try {
     await resend.emails.send({
       from: FROM,
@@ -58,32 +58,25 @@ export async function sendClientConfirmationEmail(params: {
             <h2 style="font-family:Georgia,serif;color:#111;margin:0;font-size:22px">Dermadoll Aesthetics</h2>
           </div>
           <p>Hi ${firstName},</p>
-          <p>Thank you for booking with Dermadoll Aesthetics. Here are your appointment details:</p>
+          <p>Your appointment is confirmed. Here are your details:</p>
           <table style="width:100%;border-collapse:collapse;margin:16px 0" cellpadding="8">
             <tr style="border-bottom:1px solid #eee"><td style="color:#888;width:40%">Treatment</td><td><strong>${params.treatment}</strong></td></tr>
-            <tr style="border-bottom:1px solid #eee"><td style="color:#888">Date</td><td><strong>${fmtDateLong(params.date)}</strong></td></tr>
-            <tr style="border-bottom:1px solid #eee"><td style="color:#888">Time</td><td><strong>${params.time}</strong></td></tr>
+            <tr style="border-bottom:1px solid #eee"><td style="color:#888">Date</td><td><strong>${dateStr}</strong></td></tr>
+            <tr style="border-bottom:1px solid #eee"><td style="color:#888">Time</td><td><strong>${timeStr}</strong></td></tr>
             <tr style="border-bottom:1px solid #eee"><td style="color:#888">Duration</td><td>Approximately ${params.durationMinutes} minutes</td></tr>
           </table>
           <div style="background:#FEFDFB;border:1px solid rgba(201,169,110,0.3);border-radius:8px;padding:16px;margin:20px 0">
             <p style="margin:0 0 8px;font-weight:600">Payment</p>
-            <p style="margin:4px 0;color:#888">Deposit due (50%): <strong style="color:#C9A96E">£${params.deposit}</strong></p>
+            ${depositPaid
+              ? `<p style="margin:4px 0"><strong style="color:#2D6A4F">✓ Deposit paid: £${params.deposit}</strong></p>`
+              : `<p style="margin:4px 0;color:#888">Deposit (50%): <strong style="color:#C9A96E">£${params.deposit}</strong></p>`
+            }
             <p style="margin:4px 0;color:#888">Balance due on arrival: <strong style="color:#111">£${params.balance}</strong></p>
           </div>
-          <div style="background:#FFF8F0;border:1px solid #F5DEB3;border-radius:8px;padding:16px;margin:20px 0">
-            <p style="margin:0 0 8px;font-weight:600">Securing your appointment</p>
-            <p style="margin:4px 0">Please send your deposit of <strong>£${params.deposit}</strong> via bank transfer:</p>
-            <table style="margin-top:8px" cellpadding="4">
-              <tr><td style="color:#888">Account name</td><td><strong>Simrandeep Sangha</strong></td></tr>
-              <tr><td style="color:#888">Sort code</td><td><strong>60-84-07</strong></td></tr>
-              <tr><td style="color:#888">Account number</td><td><strong>17575567</strong></td></tr>
-              <tr><td style="color:#888">Reference</td><td><strong>${ref}</strong></td></tr>
-            </table>
-            <p style="margin:12px 0 0;font-size:13px;color:#666">Your appointment will be confirmed once your deposit is received.</p>
-          </div>
-          <p>If you need to reschedule or have any questions, please contact us:</p>
+          <p style="margin:16px 0 4px">Please arrive 5 minutes before your appointment time.</p>
+          <p style="margin:4px 0">If you need to reschedule, please contact us at least 24 hours in advance:</p>
           <p>Instagram: <strong>${INSTAGRAM}</strong><br/>WhatsApp: <strong>${params.whatsapp || "available on request"}</strong></p>
-          <p>We look forward to seeing you!</p>
+          <p>See you soon!</p>
           <p style="color:#888;font-size:13px">The Dermadoll Aesthetics Team</p>
         </div>
       `,
@@ -159,15 +152,19 @@ export async function sendAdminNotificationEmail(params: {
   date: string;
   time: string;
   deposit: number;
+  depositPaid?: boolean;
   source: string;
 }): Promise<void> {
   const resend = getResend();
   if (!resend || !params.adminEmail) return;
+  const depositStatus = params.depositPaid ? "✓ Paid via Stripe" : "Pending";
+  const dateDisp = params.date ? fmtDateUK(params.date) : "TBC";
+  const timeDisp = params.time || "TBC";
   try {
     await resend.emails.send({
       from: FROM,
       to: params.adminEmail,
-      subject: `New booking — ${params.clientName} — ${params.treatment} — ${fmtDateUK(params.date)} at ${params.time}`,
+      subject: `New booking — ${params.clientName} — ${params.treatment} — ${dateDisp} at ${timeDisp}`,
       html: `
         <p><strong>New booking received:</strong></p>
         <table cellpadding="4">
@@ -176,10 +173,10 @@ export async function sendAdminNotificationEmail(params: {
           <tr><td>Phone</td><td>${params.clientPhone || "—"}</td></tr>
           <tr><td>Treatment</td><td>${params.treatment}</td></tr>
           <tr><td>Duration</td><td>${params.durationMinutes} mins</td></tr>
-          <tr><td>Date</td><td>${fmtDateUK(params.date)}</td></tr>
-          <tr><td>Time</td><td>${params.time}</td></tr>
-          <tr><td>Deposit</td><td>£${params.deposit}</td></tr>
-          <tr><td>Status</td><td>Pending</td></tr>
+          <tr><td>Date</td><td>${dateDisp}</td></tr>
+          <tr><td>Time</td><td>${timeDisp}</td></tr>
+          <tr><td>Deposit</td><td>£${params.deposit} — ${depositStatus}</td></tr>
+          <tr><td>Status</td><td>${params.depositPaid ? "Confirmed" : "Pending"}</td></tr>
           <tr><td>Booked via</td><td>${params.source}</td></tr>
         </table>
       `,
