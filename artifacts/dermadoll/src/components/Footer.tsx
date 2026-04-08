@@ -63,10 +63,9 @@ export default function Footer() {
               {link.name}
             </a>
           ))}
-          <a 
-            href="https://facesconsent.com"
-            target="_blank"
-            rel="noopener noreferrer"
+          <a
+            href="#treatments"
+            onClick={(e) => { e.preventDefault(); document.getElementById("treatments")?.scrollIntoView({ behavior: "smooth" }); }}
             className="text-primary hover:text-primary/80 transition-colors duration-300"
           >
             Book Now

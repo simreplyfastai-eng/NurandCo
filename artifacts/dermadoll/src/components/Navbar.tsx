@@ -63,9 +63,8 @@ export default function Navbar() {
               </a>
             ))}
             <a
-              href="https://facesconsent.com"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#treatments"
+              onClick={(e) => { e.preventDefault(); document.getElementById("treatments")?.scrollIntoView({ behavior: "smooth" }); }}
               className="bg-primary text-white px-6 py-2 rounded-full text-sm font-medium hover:bg-primary/90 transition-colors duration-300 shadow-sm"
             >
               Book Now
@@ -111,9 +110,8 @@ export default function Navbar() {
                 </motion.a>
               ))}
               <motion.a
-                href="https://facesconsent.com"
-                target="_blank"
-                rel="noopener noreferrer"
+                href="#treatments"
+                onClick={(e) => { e.preventDefault(); document.getElementById("treatments")?.scrollIntoView({ behavior: "smooth" }); setIsMobileMenuOpen(false); }}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.5 }}

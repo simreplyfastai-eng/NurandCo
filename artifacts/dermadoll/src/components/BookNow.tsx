@@ -18,9 +18,8 @@ export default function BookNow() {
 
           <div className="flex flex-col sm:flex-row justify-center gap-6">
             <a
-              href="https://facesconsent.com"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="#treatments"
+              onClick={(e) => { e.preventDefault(); document.getElementById("treatments")?.scrollIntoView({ behavior: "smooth" }); }}
               className="bg-primary text-white px-8 py-4 rounded-full text-sm uppercase tracking-wider font-medium hover:bg-primary/90 transition-all duration-300 w-full sm:w-auto shadow-sm hover:shadow-md"
             >
               Book Now
