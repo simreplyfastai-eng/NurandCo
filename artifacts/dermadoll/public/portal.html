@@ -3204,42 +3204,42 @@ function renderMedia(){
     {slot:2,name:'Jessica T.',course:'Advanced Dermal Filler',src:''},
     {slot:3,name:'Priya K.',course:'Pathway to Aesthetics',src:''},
   ];
-  const liveCount=grads.filter(g=>!!cloudSrc(g.src)).length;
-  const gradSlots=grads.map((g,idx)=>{
+  const gradLiveCount=grads.filter(function(g){return !!cloudSrc(g.src);}).length;
+  const gradSlots=grads.map(function(g,idx){
     const src=cloudSrc(g.src)||'';
-    return`<div style="flex:1;min-width:0">
-      <div style="position:relative;width:100%;padding-top:133.33%;border-radius:12px;overflow:hidden;background:#1A1A1A;margin-bottom:10px">
-        ${src
-          ?`<img src="${src}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>
-             <div style="position:absolute;top:8px;left:8px">${livePill('● LIVE',true)}</div>`
-          :`<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="1.2">
-                <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-              </svg>
-              <span style="font-family:Inter,sans-serif;font-size:12px;color:#C9A96E;text-align:center;padding:0 8px">Graduate photo coming soon</span>
-            </div>`
-        }
-      </div>
-      <div style="margin-bottom:6px">
-        <div style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#AAA;margin-bottom:4px">Name</div>
-        <input type="text" value="${(g.name||'').replace(/"/g,'&quot;')}" placeholder="Graduate name"
-          style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:6px 10px;font-family:Inter,sans-serif;font-size:13px;box-sizing:border-box;outline:none"
-          onchange="saveGradField(${idx},'name',this.value)"/>
-      </div>
-      <div style="margin-bottom:10px">
-        <div style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#AAA;margin-bottom:4px">Course</div>
-        <input type="text" value="${(g.course||'').replace(/"/g,'&quot;')}" placeholder="Course completed"
-          style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:6px 10px;font-family:Inter,sans-serif;font-size:13px;box-sizing:border-box;outline:none"
-          onchange="saveGradField(${idx},'course',this.value)"/>
-      </div>
-      <input type="file" id="grad-file-${idx}" accept="image/*" style="display:none" onchange="handleGradUpload(${idx},this)"/>
-      ${mBtn('⟳ Replace Photo',`document.getElementById('grad-file-${idx}').click()`,true)}
-    </div>`;
+    const imgHtml=src
+      ?('<img src="'+src+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>'
+        +'<div style="position:absolute;top:8px;left:8px">'+livePill('● LIVE',true)+'</div>')
+      :('<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">'
+        +'<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="1.2">'
+        +'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>'
+        +'</svg>'
+        +'<span style="font-family:Inter,sans-serif;font-size:12px;color:#C9A96E;text-align:center;padding:0 8px">Graduate photo coming soon</span>'
+        +'</div>');
+    const nameVal=(g.name||'').replace(/"/g,'&quot;');
+    const courseVal=(g.course||'').replace(/"/g,'&quot;');
+    const replBtn=mBtn('\u27f3 Replace Photo',"document.getElementById('grad-file-"+idx+"').click()",true);
+    return '<div style="flex:1;min-width:0">'
+      +'<div style="position:relative;width:100%;padding-top:133.33%;border-radius:12px;overflow:hidden;background:#1A1A1A;margin-bottom:10px">'
+      +imgHtml+'</div>'
+      +'<div style="margin-bottom:6px">'
+      +'<div style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#AAA;margin-bottom:4px">Name</div>'
+      +'<input type="text" value="'+nameVal+'" placeholder="Graduate name"'
+      +' style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:6px 10px;font-family:Inter,sans-serif;font-size:13px;box-sizing:border-box;outline:none"'
+      +' onchange="saveGradField('+idx+',\'name\',this.value)"/>'
+      +'</div>'
+      +'<div style="margin-bottom:10px">'
+      +'<div style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#AAA;margin-bottom:4px">Course</div>'
+      +'<input type="text" value="'+courseVal+'" placeholder="Course completed"'
+      +' style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:6px 10px;font-family:Inter,sans-serif;font-size:13px;box-sizing:border-box;outline:none"'
+      +' onchange="saveGradField('+idx+',\'course\',this.value)"/>'
+      +'</div>'
+      +'<input type="file" id="grad-file-'+idx+'" accept="image/*" style="display:none" onchange="handleGradUpload('+idx+',this)"/>'
+      +replBtn
+      +'</div>';
   }).join('');
-  const gradCard=mCard(`
-    ${mCardHeader('Graduate Photos',`${liveCount} set · 3 total`,'Shown in the Training section on your website')}
-    <div style="display:flex;gap:16px">${gradSlots}</div>
-  `);
+  const gradHeader=mCardHeader('Graduate Photos',gradLiveCount+' set \u00b7 3 total','Shown in the Training section on your website');
+  const gradCard=mCard(gradHeader+'<div style="display:flex;gap:16px">'+gradSlots+'</div>');
 
   document.getElementById('media-root').innerHTML=practCard+heroCard+galleryCard+vidCard+gradCard;
 }
