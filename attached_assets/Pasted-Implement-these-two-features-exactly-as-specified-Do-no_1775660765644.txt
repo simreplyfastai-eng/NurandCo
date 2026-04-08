@@ -1,0 +1,150 @@
+Implement these two features exactly 
+as specified. Do not change anything else.
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+1. PORTAL LINK IN NAV
+━━━━━━━━━━━━━━━━━━━━━━━━
+DESKTOP NAV:
+Add a small discreet lock icon to the 
+right of the "Book Now" button in the 
+desktop navigation.
+
+Styling:
+- A small padlock SVG icon
+- Color: #CCCCCC (faint grey) by default
+- On hover: color changes to #C9A96E (gold)
+- No text, icon only
+- No border, no background
+- Cursor: pointer
+- Links to /portal.html
+- Opens in same tab
+- margin-left: 12px from Book Now button
+- Icon size: 18px × 18px
+- No tooltip, no label
+- Completely unobtrusive — 
+  clients won't notice it
+
+MOBILE MENU:
+At the very bottom of the mobile 
+overlay menu, below all other nav links, 
+add a subtle "Admin Portal" link.
+
+Styling:
+- Small padlock icon + "Admin Portal" text
+- Color: #AAAAAA (muted grey)
+- Font: Inter 12px
+- Padding-top: 24px, border-top: 
+  1px solid rgba(255,255,255,0.1)
+- No gold styling, keep it discreet
+- Links to /portal.html
+- On hover: color #C9A96E
+
+━━━━━━━━━━━━━━━━━━━━━━━━
+2. CHANGE PASSWORD IN PORTAL SETTINGS
+━━━━━━━━━━━━━━━━━━━━━━━━
+In portal.html Settings page, add a 
+"Change Password" section below the 
+Business Info section.
+
+Section heading: "Change Password"
+Inter 14px bold #111111
+
+Three input fields:
+- Current Password (type="password")
+  Placeholder: "Current password"
+- New Password (type="password")
+  Placeholder: "New password 
+  (min. 8 characters)"
+- Confirm New Password (type="password")
+  Placeholder: "Confirm new password"
+
+All inputs: full width, border: 1px 
+solid #E0E0E0, border-radius: 8px, 
+padding: 12px 16px, Inter 13px,
+margin-bottom: 12px
+
+"Update Password" button:
+Gold filled, white text, Inter 13px bold,
+border-radius: 8px, padding: 12px 24px,
+hover background: #B8934A
+
+VALIDATION (client side before API call):
+- All three fields must be filled
+  Error: "Please fill in all fields"
+- New password minimum 8 characters
+  Error: "Password must be at least 
+  8 characters"
+- New password and confirm must match
+  Error: "Passwords do not match"
+- Show red error text below the 
+  relevant field
+
+BACKEND:
+Create a new endpoint:
+POST /api/auth/change-password
+
+Requires valid JWT (admin must be 
+logged in to use this).
+
+Request body:
+{
+  currentPassword: string,
+  newPassword: string
+}
+
+Logic:
+1. Get the current valid password by 
+   checking in this order:
+   a. Check portal_kv for key 
+      "admin_password_override" — 
+      if it exists use that value
+   b. If not found fall back to 
+      process.env.ADMIN_PASSWORD secret
+
+2. Compare currentPassword against 
+   the current valid password
+   If wrong: return 401
+   { error: "Current password is incorrect" }
+
+3. If correct: save the new password 
+   to portal_kv as 
+   "admin_password_override" via 
+   CloudStore.set('admin_password_override', 
+   newPassword)
+
+4. Return 200 { success: true }
+
+UPDATE LOGIN ENDPOINT:
+In POST /api/auth/login, update the 
+password check to use the same logic:
+1. Check portal_kv for 
+   "admin_password_override" first
+2. Fall back to ADMIN_PASSWORD secret 
+   if no override exists
+
+This means:
+- First login ever: uses ADMIN_PASSWORD 
+  from Replit Secrets
+- After Niamh changes her password 
+  in Settings: uses the new password 
+  stored in PostgreSQL permanently
+- If she forgets her password: you can 
+  reset it by clearing the override 
+  in portal_kv or updating the 
+  ADMIN_PASSWORD secret
+
+ON SUCCESS IN PORTAL:
+Show a green success toast:
+"Password updated successfully ✓"
+Clear all three input fields.
+
+ON ERROR:
+Show red error below the 
+Current Password field:
+"Current password is incorrect"
+
+The pre-launch checklist in Settings 
+must update its "Admin password changed 
+from default" check to verify against 
+the portal_kv override — not just 
+compare against the hardcoded default.

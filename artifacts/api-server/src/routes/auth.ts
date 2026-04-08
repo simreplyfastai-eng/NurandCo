@@ -8,7 +8,7 @@ const SESSION_HOURS = 8;
 /** Returns the active admin password — DB override wins over env var */
 async function getActivePassword(): Promise<string | null> {
   try {
-    const r = await pool.query("SELECT value FROM portal_kv WHERE key='dd_admin_password' LIMIT 1");
+    const r = await pool.query("SELECT value FROM portal_kv WHERE key='admin_password_override' LIMIT 1");
     if (r.rows.length > 0 && r.rows[0].value) return r.rows[0].value as string;
   } catch { /* fall through */ }
   return process.env.ADMIN_PASSWORD ?? null;
@@ -67,7 +67,7 @@ router.post("/auth/change-password", async (req, res) => {
 
   try {
     await pool.query(
-      "INSERT INTO portal_kv (key, value) VALUES ('dd_admin_password', $1) ON CONFLICT (key) DO UPDATE SET value=$1",
+      "INSERT INTO portal_kv (key, value) VALUES ('admin_password_override', $1) ON CONFLICT (key) DO UPDATE SET value=$1",
       [newPassword]
     );
     return res.json({ ok: true });

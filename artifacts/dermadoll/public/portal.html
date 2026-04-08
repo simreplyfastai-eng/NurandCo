@@ -876,6 +876,25 @@ tr:hover td{background:#FDFBF8}
         </div>
 
         <div class="settings-section">
+          <div class="settings-section-header" style="font-size:14px;font-weight:700;color:#111111;font-family:'Inter',sans-serif">Change Password</div>
+          <div class="settings-body">
+            <div style="margin-bottom:12px">
+              <input type="password" id="s-pw-current" placeholder="Current password" autocomplete="current-password" style="width:100%;box-sizing:border-box;border:1px solid #E0E0E0;border-radius:8px;padding:12px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;display:block"/>
+              <div id="pw-err-current" style="font-size:12px;color:#C62828;margin-top:4px;display:none"></div>
+            </div>
+            <div style="margin-bottom:12px">
+              <input type="password" id="s-pw-new" placeholder="New password (min. 8 characters)" autocomplete="new-password" style="width:100%;box-sizing:border-box;border:1px solid #E0E0E0;border-radius:8px;padding:12px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;display:block"/>
+              <div id="pw-err-new" style="font-size:12px;color:#C62828;margin-top:4px;display:none"></div>
+            </div>
+            <div style="margin-bottom:12px">
+              <input type="password" id="s-pw-confirm" placeholder="Confirm new password" autocomplete="new-password" style="width:100%;box-sizing:border-box;border:1px solid #E0E0E0;border-radius:8px;padding:12px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;display:block"/>
+              <div id="pw-err-confirm" style="font-size:12px;color:#C62828;margin-top:4px;display:none"></div>
+            </div>
+            <button onclick="changePassword()" style="background:#C9A96E;color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;border:none;border-radius:8px;padding:12px 24px;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#B8934A'" onmouseout="this.style.background='#C9A96E'">Update Password</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
           <div class="settings-section-header">Booking Settings</div>
           <div class="settings-body">
             <div class="settings-row"><label>Deposit %</label><input type="number" id="s-deposit" value="50" min="0" max="100" style="width:80px;flex:unset"/><span style="font-size:12px;color:var(--muted)">% of treatment price (taken via Stripe on booking)</span></div>
@@ -916,17 +935,6 @@ tr:hover td{background:#FDFBF8}
                 </ol>
               </div>
             </div>
-          </div>
-        </div>
-
-        <div class="settings-section">
-          <div class="settings-section-header">Change Password</div>
-          <div class="settings-body">
-            <div class="settings-row"><label>Current password</label><input type="password" id="s-pw-current" placeholder="Enter current password" autocomplete="current-password"/></div>
-            <div class="settings-row"><label>New password</label><input type="password" id="s-pw-new" placeholder="Min. 8 characters" autocomplete="new-password"/></div>
-            <div class="settings-row"><label>Confirm new</label><input type="password" id="s-pw-confirm" placeholder="Repeat new password" autocomplete="new-password"/></div>
-            <div id="pw-msg" style="font-size:12px;margin-bottom:12px;display:none"></div>
-            <button class="btn-gold" onclick="changePassword()">Update Password</button>
           </div>
         </div>
 
@@ -3700,21 +3708,24 @@ async function changePassword(){
   const current=document.getElementById('s-pw-current').value.trim();
   const newPw=document.getElementById('s-pw-new').value;
   const confirm=document.getElementById('s-pw-confirm').value;
-  const msg=document.getElementById('pw-msg');
-  function showMsg(text,color){msg.style.display='block';msg.style.color=color;msg.textContent=text;}
-  if(!current||!newPw||!confirm){showMsg('Please fill in all three fields.','#C62828');return;}
-  if(newPw.length<8){showMsg('New password must be at least 8 characters.','#C62828');return;}
-  if(newPw!==confirm){showMsg('New passwords do not match.','#C62828');return;}
+  function clearErrs(){['pw-err-current','pw-err-new','pw-err-confirm'].forEach(function(id){var el=document.getElementById(id);if(el){el.style.display='none';el.textContent='';}}); }
+  function showErr(id,msg){var el=document.getElementById(id);if(el){el.textContent=msg;el.style.display='block';}}
+  clearErrs();
+  if(!current){showErr('pw-err-current','Please fill in all fields');return;}
+  if(!newPw){showErr('pw-err-new','Please fill in all fields');return;}
+  if(!confirm){showErr('pw-err-confirm','Please fill in all fields');return;}
+  if(newPw.length<8){showErr('pw-err-new','Password must be at least 8 characters');return;}
+  if(newPw!==confirm){showErr('pw-err-confirm','Passwords do not match');return;}
   const token=localStorage.getItem('dd_token');
   try{
     const res=await fetch('/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({currentPassword:current,newPassword:newPw})});
     const data=await res.json();
-    if(!res.ok){showMsg(data.error||'Failed to update password.','#C62828');return;}
-    showMsg('Password updated successfully.','#2E7D32');
+    if(!res.ok){showErr('pw-err-current',data.error||'Current password is incorrect');return;}
+    showToast('Password updated successfully \u2713');
     document.getElementById('s-pw-current').value='';
     document.getElementById('s-pw-new').value='';
     document.getElementById('s-pw-confirm').value='';
-  }catch(e){showMsg('Network error — please try again.','#C62828');}
+  }catch(e){showErr('pw-err-current','Network error — please try again');}
 }
 
 async function clearSampleData(){
@@ -3998,10 +4009,19 @@ async function loadLaunchChecklist(){
     const hasTestData=bookings.some(b=>sampleNames.some(n=>b.clientName&&b.clientName.startsWith(n)));
     setChk('chk-test-data',!hasTestData,hasTestData?'Sample data still present — use Remove Test Data button below':'No sample data found');
 
-    // Password: can't detect from client side — mark as done if ADMIN_PASSWORD env is set (truthy)
-    // We use a convention: if ADMIN_PASSWORD is non-default, it's considered changed
-    // Since we can't check this from the browser, default to unchecked and prompt the user
-    setChk('chk-password',false,'Cannot verify — ensure ADMIN_PASSWORD secret is changed from default');
+    // Password: check if admin_password_override is set in portal_kv (means password was changed via Settings)
+    try{
+      const pwRes=await fetch('/api/portal/store?keys=admin_password_override');
+      if(pwRes.ok){
+        const pwData=await pwRes.json();
+        const changed=!!(pwData.admin_password_override);
+        setChk('chk-password',changed,changed?'Password changed from default \u2713':'Change your password in Settings \u2192 Change Password');
+      } else {
+        setChk('chk-password',false,'Change your password in Settings \u2192 Change Password');
+      }
+    }catch(e){
+      setChk('chk-password',false,'Change your password in Settings \u2192 Change Password');
+    }
 
     // Domain: can only mark done if not on .replit.dev domain
     const onReplitDev=window.location.hostname.includes('.replit.dev')||window.location.hostname.includes('.janeway.replit.dev');

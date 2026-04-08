@@ -71,10 +71,11 @@ export default function Navbar() {
             </a>
             <a
               href="/portal.html"
-              title="Admin Portal"
-              className="flex items-center gap-1 text-foreground/30 hover:text-primary transition-colors duration-300"
+              style={{ marginLeft: '12px', color: '#CCCCCC', cursor: 'pointer', display: 'flex', alignItems: 'center' }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = '#C9A96E')}
+              onMouseLeave={(e) => (e.currentTarget.style.color = '#CCCCCC')}
             >
-              <Lock size={13} />
+              <Lock size={18} strokeWidth={2} />
             </a>
           </div>
 
@@ -131,9 +132,21 @@ export default function Navbar() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.65 }}
-                className="flex items-center gap-1.5 text-xs text-foreground/30 hover:text-primary transition-colors mt-2"
+                style={{
+                  paddingTop: '24px',
+                  borderTop: '1px solid rgba(255,255,255,0.1)',
+                  fontFamily: 'Inter, sans-serif',
+                  fontSize: '12px',
+                  color: '#AAAAAA',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  transition: 'color 0.2s',
+                }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = '#C9A96E')}
+                onMouseLeave={(e) => (e.currentTarget.style.color = '#AAAAAA')}
               >
-                <Lock size={11} />
+                <Lock size={12} strokeWidth={2} />
                 Admin Portal
               </motion.a>
             </div>
