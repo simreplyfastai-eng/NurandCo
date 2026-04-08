@@ -37,9 +37,6 @@ function VideoCard({ vid, i }: { vid: VidSlot; i: number }) {
           <source src={src} type="video/mp4" />
         </video>
       </div>
-      <p className="text-center font-sans text-[10px] md:text-xs uppercase tracking-[0.18em] text-primary font-medium">
-        {vid.label}
-      </p>
     </motion.div>
   );
 }
