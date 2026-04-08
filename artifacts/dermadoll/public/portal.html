@@ -920,6 +920,17 @@ tr:hover td{background:#FDFBF8}
         </div>
 
         <div class="settings-section">
+          <div class="settings-section-header">Change Password</div>
+          <div class="settings-body">
+            <div class="settings-row"><label>Current password</label><input type="password" id="s-pw-current" placeholder="Enter current password" autocomplete="current-password"/></div>
+            <div class="settings-row"><label>New password</label><input type="password" id="s-pw-new" placeholder="Min. 8 characters" autocomplete="new-password"/></div>
+            <div class="settings-row"><label>Confirm new</label><input type="password" id="s-pw-confirm" placeholder="Repeat new password" autocomplete="new-password"/></div>
+            <div id="pw-msg" style="font-size:12px;margin-bottom:12px;display:none"></div>
+            <button class="btn-gold" onclick="changePassword()">Update Password</button>
+          </div>
+        </div>
+
+        <div class="settings-section">
           <div class="settings-section-header">Developer</div>
           <div class="settings-body">
             <div class="settings-row"><label>Site URL</label><input type="text" readonly value="dermadollaesthetics.replit.app" style="background:#FAFAFA"/></div>
@@ -3681,6 +3692,27 @@ function saveSettings(){
   };
   saveSettingsData(s);
   alert('Settings saved!');
+}
+
+async function changePassword(){
+  const current=document.getElementById('s-pw-current').value.trim();
+  const newPw=document.getElementById('s-pw-new').value;
+  const confirm=document.getElementById('s-pw-confirm').value;
+  const msg=document.getElementById('pw-msg');
+  function showMsg(text,color){msg.style.display='block';msg.style.color=color;msg.textContent=text;}
+  if(!current||!newPw||!confirm){showMsg('Please fill in all three fields.','#C62828');return;}
+  if(newPw.length<8){showMsg('New password must be at least 8 characters.','#C62828');return;}
+  if(newPw!==confirm){showMsg('New passwords do not match.','#C62828');return;}
+  const token=localStorage.getItem('dd_token');
+  try{
+    const res=await fetch('/api/auth/change-password',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+token},body:JSON.stringify({currentPassword:current,newPassword:newPw})});
+    const data=await res.json();
+    if(!res.ok){showMsg(data.error||'Failed to update password.','#C62828');return;}
+    showMsg('Password updated successfully.','#2E7D32');
+    document.getElementById('s-pw-current').value='';
+    document.getElementById('s-pw-new').value='';
+    document.getElementById('s-pw-confirm').value='';
+  }catch(e){showMsg('Network error — please try again.','#C62828');}
 }
 
 async function clearSampleData(){

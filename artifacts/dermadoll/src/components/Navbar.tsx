@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Lock } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
@@ -69,6 +69,13 @@ export default function Navbar() {
             >
               Book Now
             </a>
+            <a
+              href="/portal.html"
+              title="Admin Portal"
+              className="flex items-center gap-1 text-foreground/30 hover:text-primary transition-colors duration-300"
+            >
+              <Lock size={13} />
+            </a>
           </div>
 
           {/* Mobile Menu Toggle */}
@@ -118,6 +125,16 @@ export default function Navbar() {
                 className="mt-8 bg-primary text-white px-8 py-3 rounded-full text-lg hover:bg-primary/90 transition-colors"
               >
                 Book Now
+              </motion.a>
+              <motion.a
+                href="/portal.html"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.65 }}
+                className="flex items-center gap-1.5 text-xs text-foreground/30 hover:text-primary transition-colors mt-2"
+              >
+                <Lock size={11} />
+                Admin Portal
               </motion.a>
             </div>
           </motion.div>
