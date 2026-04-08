@@ -1,8 +1,18 @@
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
+  const [heroSrc, setHeroSrc] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/media/config")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.heroVideo) setHeroSrc(data.heroVideo);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -24,14 +34,16 @@ export default function Hero() {
       video.removeEventListener("loadedmetadata", tryPlay);
       video.removeEventListener("canplay", tryPlay);
     };
-  }, []);
+  }, [heroSrc]);
+
+  const defaultSrc = `${import.meta.env.BASE_URL}hero.mp4`;
 
   return (
     <section className="relative h-[100dvh] w-full overflow-hidden flex items-center justify-center">
-      {/* Background Video */}
       <div className="absolute inset-0 w-full h-full z-0 bg-gradient-to-br from-[#1a1a1a] to-[#2d2520]">
         <video
           ref={videoRef}
+          key={heroSrc ?? "default"}
           autoPlay
           muted
           loop
@@ -41,15 +53,13 @@ export default function Hero() {
           {...{ "webkit-playsinline": "true" } as any}
           className="absolute inset-0 w-full h-full object-cover object-top md:object-[center_35%]"
         >
-          <source src={`${import.meta.env.BASE_URL}hero.mp4`} type="video/mp4" />
+          <source src={heroSrc ?? defaultSrc} type="video/mp4" />
         </video>
         <div className="absolute inset-0 bg-black/60" />
         <div className="absolute inset-x-0 bottom-0 h-2/5" style={{ background: "linear-gradient(to top, rgba(0,0,0,0.95), transparent)" }} />
       </div>
 
-      {/* Content */}
       <div className="relative z-10 text-center px-6 flex flex-col items-center justify-center w-full max-w-5xl mx-auto py-28 md:py-0">
-        {/* Logo wordmark */}
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
@@ -72,7 +82,6 @@ export default function Hero() {
           </span>
         </motion.div>
 
-        {/* Headline */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -93,7 +102,6 @@ export default function Hero() {
           />
         </motion.div>
 
-        {/* Subheading */}
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -104,7 +112,6 @@ export default function Hero() {
           Premium aesthetics treatments in Birmingham & Solihull
         </motion.p>
 
-        {/* Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -1,16 +1,22 @@
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
-export default function ResultsVideos() {
-  const topVideos = [
-    { label: "Medical Needling", src: "video1.mp4" },
-    { label: "Lip Filler", src: "video2.mp4" },
-  ];
+const DEFAULT_SLOTS = [
+  { key: "vid0", label: "Medical Needling", src: "video1.mp4" },
+  { key: "vid1", label: "Lip Filler", src: "video2.mp4" },
+  { key: "vid2", label: "Masseter Botox", src: "video3.mp4" },
+  { key: "vid3", label: "Skin Booster Results", src: "video4.mp4" },
+];
 
-  const bottomVideo = { label: "Masseter Botox", src: "video3.mp4" };
+interface VidSlot { key: string; label: string; src: string; }
 
-  const VideoCard = ({ vid, i }: { vid: { label: string; src: string }; i: number }) => (
+function VideoCard({ vid, i }: { vid: VidSlot; i: number }) {
+  const isLocal = !vid.src.startsWith("http") && !vid.src.startsWith("/api/");
+  const src = isLocal ? `${import.meta.env.BASE_URL}${vid.src}` : vid.src;
+
+  return (
     <motion.div
-      key={vid.label}
+      key={vid.key}
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -19,6 +25,7 @@ export default function ResultsVideos() {
     >
       <div className="rounded-sm overflow-hidden bg-[#FAF9F7] aspect-square">
         <video
+          key={src}
           autoPlay
           muted
           loop
@@ -27,7 +34,7 @@ export default function ResultsVideos() {
           {...{ "webkit-playsinline": "true" } as any}
           className="w-full h-full object-cover"
         >
-          <source src={`${import.meta.env.BASE_URL}${vid.src}`} type="video/mp4" />
+          <source src={src} type="video/mp4" />
         </video>
       </div>
       <p className="text-center font-sans text-[10px] md:text-xs uppercase tracking-[0.18em] text-primary font-medium">
@@ -35,6 +42,31 @@ export default function ResultsVideos() {
       </p>
     </motion.div>
   );
+}
+
+export default function ResultsVideos() {
+  const [slots, setSlots] = useState<VidSlot[]>(DEFAULT_SLOTS);
+
+  useEffect(() => {
+    fetch("/api/media/config")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) return;
+        setSlots(DEFAULT_SLOTS.map((slot) => {
+          const overrideSrc = data.videos?.[slot.key];
+          const overrideLabel = data.vidLabels?.[slot.key];
+          return {
+            key: slot.key,
+            src: overrideSrc || slot.src,
+            label: overrideLabel || slot.label,
+          };
+        }));
+      })
+      .catch(() => {});
+  }, []);
+
+  const top = slots.slice(0, 2);
+  const bottom = slots.slice(2, 4);
 
   return (
     <section className="py-[100px] bg-white">
@@ -61,16 +93,12 @@ export default function ResultsVideos() {
           </motion.p>
         </div>
 
-        {/* Top row — 2 videos */}
         <div className="grid grid-cols-2 gap-3 md:gap-6 mb-3 md:mb-6">
-          {topVideos.map((vid, i) => <VideoCard key={vid.label} vid={vid} i={i} />)}
+          {top.map((vid, i) => <VideoCard key={vid.key} vid={vid} i={i} />)}
         </div>
 
-        {/* Bottom — 1 video centred */}
-        <div className="flex justify-center">
-          <div className="w-full max-w-[calc(50%-0.75rem)] md:max-w-[calc(50%-0.75rem)]">
-            <VideoCard vid={bottomVideo} i={2} />
-          </div>
+        <div className="grid grid-cols-2 gap-3 md:gap-6">
+          {bottom.map((vid, i) => <VideoCard key={vid.key} vid={vid} i={i + 2} />)}
         </div>
       </div>
     </section>

@@ -1,0 +1,114 @@
+Fix these issues found in the pre-launch 
+audit. Do not change anything else.
+
+1. REMOVE ALL "FACES" TEXT REFERENCES
+In BookNow.tsx find and update the 
+paragraph text that says:
+"Book directly via our Faces profile 
+or reach out on Instagram"
+
+Change to:
+"Book your appointment online or 
+get in touch on Instagram"
+
+In FAQ.tsx find the answer that says:
+"You can book directly via our Faces 
+profile using the Book Now button..."
+
+Change to:
+"You can book directly on our website 
+using the Book Now button on any 
+treatment, or contact us on Instagram 
+@dermadollaesthetics"
+
+Search the entire codebase for any 
+other remaining mention of "Faces" 
+or "facesconsent" and remove or 
+update every single one.
+
+2. ADD CONSULTATION TO REVENUE CHART
+In the Revenue by Treatment chart 
+on the portal dashboard, add 
+"Consultation" as a properly 
+formatted category label.
+
+In the category mapping object add:
+"Consultation": "Consultation"
+
+Give it a distinct colour on the 
+chart — use a soft blue #4A90D9 
+so it stands out from the gold 
+treatment categories.
+
+3. ADD AUTH TO CLIENT AND BOOKING 
+GET ENDPOINTS
+GET /api/clients and GET /api/bookings 
+are currently publicly accessible — 
+anyone who knows the URL can see 
+all client names, emails, phones 
+and booking details.
+
+Add authentication to these endpoints:
+- GET /api/clients — require valid 
+  JWT admin token
+- GET /api/bookings (full list) — 
+  require valid JWT admin token
+
+IMPORTANT EXCEPTIONS — these must 
+stay public (no auth required):
+- GET /api/bookings/date/:date — 
+  needed by the public booking form 
+  to check slot availability
+- POST /api/bookings — needed by 
+  the public booking form
+- GET /api/availability — needed 
+  by the public booking form
+- GET /api/config — needed by 
+  the public booking form
+- GET /api/media/config — needed 
+  by the website
+- GET /api/treatments/public — 
+  needed by the website
+
+4. FIX CLIENTS SECTION LIVE REFRESH
+The Clients section in the portal 
+reads from localStorage and doesn't 
+auto-refresh when new clients book 
+from the website.
+
+Fix: add clients to the 30-second 
+polling cycle alongside bookings.
+
+In the existing pollBookings() 
+function (or alongside it), also 
+poll GET /api/clients every 30 seconds.
+On each poll:
+- Compare new client IDs to cached IDs
+- If any new clients found:
+  - Update the localStorage dd_clients cache
+  - If currently on the Clients page: 
+    refresh the list automatically
+  - Show a toast if a new client 
+    was added: "New client — [name]"
+
+5. FIX CRON SECRET MISSING CHECK
+Currently if CRON_SECRET is not set 
+in Replit Secrets, the cron endpoints 
+are completely open.
+
+Fix: if CRON_SECRET env variable is 
+not set, block ALL requests to cron 
+endpoints with:
+return res.status(503).json({
+  error: "Cron secret not configured. 
+  Add CRON_SECRET to Replit Secrets."
+})
+
+This means the endpoints are locked 
+down even without the secret — they 
+just return a clear error instead of 
+executing or being open.
+
+Do not change anything else.
+Do not touch any styling or CSS.
+Do not touch the booking flow.

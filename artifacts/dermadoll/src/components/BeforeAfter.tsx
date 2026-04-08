@@ -1,18 +1,42 @@
 import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
 
-const results = [
-  { src: "result-1.jpg", label: "Liquid Rhinoplasty" },
-  { src: "result-4.jpg", label: "Teeth Whitening" },
-  { src: "result-2.jpg", label: "Lip Filler" },
-  { src: "result-3.jpg", label: "Glass Skin Facial & Microneedling" },
+const DEFAULT_SLOTS = [
+  { key: "ba0", src: "result-1.jpg", label: "Liquid Rhinoplasty" },
+  { key: "ba1", src: "result-4.jpg", label: "Teeth Whitening" },
+  { key: "ba2", src: "result-2.jpg", label: "Lip Filler" },
+  { key: "ba3", src: "result-3.jpg", label: "Glass Skin Facial & Microneedling" },
 ];
 
+interface Slot { key: string; src: string; label: string; }
+
 export default function BeforeAfter() {
+  const [results, setResults] = useState<Slot[]>(DEFAULT_SLOTS);
+
+  useEffect(() => {
+    fetch("/api/media/config")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (!data) return;
+        setResults(DEFAULT_SLOTS.map((slot) => {
+          const overrideSrc = data.beforeAfter?.[slot.key];
+          const overrideLabel = data.baLabels?.[slot.key];
+          return {
+            key: slot.key,
+            src: overrideSrc || slot.src,
+            label: overrideLabel || slot.label,
+          };
+        }));
+      })
+      .catch(() => {});
+  }, []);
+
+  const isLocal = (src: string) => !src.startsWith("http") && !src.startsWith("/api/");
+
   return (
     <section className="py-[100px] bg-secondary">
       <div className="container mx-auto px-6 max-w-5xl">
 
-        {/* Heading — unchanged */}
         <div className="text-center mb-20">
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -35,7 +59,6 @@ export default function BeforeAfter() {
           </motion.p>
         </div>
 
-        {/* Image grid */}
         <div
           className="py-12"
           style={{
@@ -46,7 +69,7 @@ export default function BeforeAfter() {
         >
           {results.map((item, i) => (
             <motion.div
-              key={item.src}
+              key={item.key}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -72,10 +95,9 @@ export default function BeforeAfter() {
                 (e.currentTarget as HTMLElement).style.borderColor = "#C9A96E";
               }}
             >
-              {/* Square image */}
               <div style={{ aspectRatio: "1 / 1", width: "100%", overflow: "hidden" }}>
                 <img
-                  src={`${import.meta.env.BASE_URL}${item.src}`}
+                  src={isLocal(item.src) ? `${import.meta.env.BASE_URL}${item.src}` : item.src}
                   alt={item.label}
                   style={{
                     width: "100%",
@@ -86,7 +108,6 @@ export default function BeforeAfter() {
                 />
               </div>
 
-              {/* Label */}
               <div
                 style={{
                   fontFamily: "Inter, sans-serif",

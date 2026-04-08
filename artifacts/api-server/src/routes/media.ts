@@ -5,6 +5,24 @@ import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage"
 const router = Router();
 const storage = new ObjectStorageService();
 
+function toServeUrl(path: string | null | undefined): string | null {
+  if (!path) return null;
+  if (path.startsWith("/objects/") || path.startsWith("objects/")) {
+    return `/api/media/serve?path=${encodeURIComponent(path)}`;
+  }
+  return path;
+}
+
+function convertMap(map: Record<string, string> | undefined): Record<string, string> {
+  if (!map || typeof map !== "object") return {};
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(map)) {
+    const url = toServeUrl(v);
+    if (url) out[k] = url;
+  }
+  return out;
+}
+
 // GET /api/media/config — public config served to the website
 router.get("/media/config", async (req, res) => {
   try {
@@ -13,24 +31,36 @@ router.get("/media/config", async (req, res) => {
     );
     const data: Record<string, unknown> =
       result.rows.length > 0 ? (result.rows[0].value as Record<string, unknown>) : {};
+
     const defaultGraduates = [
       { slot: 1, name: "Sarah M.", course: "Foundation Anti-Wrinkle", src: "" },
       { slot: 2, name: "Jessica T.", course: "Advanced Dermal Filler", src: "" },
       { slot: 3, name: "Priya K.", course: "Pathway to Aesthetics", src: "" },
     ];
-    const graduates = Array.isArray(data?.graduates) && (data.graduates as unknown[]).length === 3
-      ? data.graduates
-      : defaultGraduates;
+
+    const rawGraduates = Array.isArray(data?.graduates) && (data.graduates as unknown[]).length === 3
+      ? (data.graduates as Array<Record<string, unknown>>)
+      : defaultGraduates.map(g => ({ ...g }));
+
+    const graduates = rawGraduates.map(g => ({
+      slot: g.slot,
+      name: g.name,
+      course: g.course,
+      src: toServeUrl(g.src as string) ?? "",
+    }));
+
     return res.json({
-      practitionerImage: (data?.practitionerImage as string) || null,
-      heroVideo: (data?.heroSrc as string) || null,
-      beforeAfter: (data?.baImages as Record<string, string>) || {},
-      videos: (data?.vidSrcs as Record<string, string>) || {},
+      practitionerImage: toServeUrl(data?.practitionerImage as string),
+      heroVideo: toServeUrl(data?.heroSrc as string),
+      beforeAfter: convertMap(data?.baImages as Record<string, string>),
+      baLabels: (data?.baLabels as Record<string, string>) ?? {},
+      videos: convertMap(data?.vidSrcs as Record<string, string>),
+      vidLabels: (data?.vidLabels as Record<string, string>) ?? {},
       graduates,
     });
   } catch (err) {
     console.error("GET /api/media/config", err);
-    return res.json({ practitionerImage: null, heroVideo: null, beforeAfter: {}, videos: {} });
+    return res.json({ practitionerImage: null, heroVideo: null, beforeAfter: {}, baLabels: {}, videos: {}, vidLabels: {}, graduates: [] });
   }
 });
 
