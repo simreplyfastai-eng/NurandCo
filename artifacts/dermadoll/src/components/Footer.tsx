@@ -80,7 +80,7 @@ export default function Footer() {
             href="https://instagram.com/dermadollaesthetics" 
             target="_blank" 
             rel="noopener noreferrer"
-            className="hover:text-primary transition-colors"
+            className="text-primary hover:text-primary/80 transition-colors"
           >
             Instagram @dermadollaesthetics
           </a>
