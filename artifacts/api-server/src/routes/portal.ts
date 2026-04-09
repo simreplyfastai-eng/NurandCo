@@ -4,6 +4,118 @@ import { requireAuth } from "../lib/auth";
 
 const router = Router();
 
+const BUILT_IN_TREATMENTS = [
+  {cat:'BOTOX',name:'Botox 1 Area',duration:15,price:100},
+  {cat:'BOTOX',name:'Botox 2 Areas',duration:15,price:140},
+  {cat:'BOTOX',name:'Botox 3 Areas',duration:15,price:180},
+  {cat:'BOTOX',name:'Botox 4 Areas',duration:15,price:210},
+  {cat:'BOTOX',name:'Masseter Botox',duration:15,price:200},
+  {cat:'BOTOX',name:'Nefertiti Lift Botox (Neck)',duration:30,price:220},
+  {cat:'BOTOX',name:'Chin Botox (Mentalis Muscle)',duration:30,price:80},
+  {cat:'BOTOX',name:'Nose Slimming Botox',duration:30,price:80},
+  {cat:'BOTOX',name:'Gummy Smile / Lip Flip Botox',duration:30,price:80},
+  {cat:'BOTOX',name:'Hyperhidrosis (Underarm) Botox',duration:30,price:220},
+  {cat:'BOTOX',name:'Botox Topup',duration:15,price:20},
+  {cat:'FILLER',name:'0.5ml Lip Filler',duration:30,price:100},
+  {cat:'FILLER',name:'0.7ml Lip Filler',duration:45,price:120},
+  {cat:'FILLER',name:'1.1ml Lip Filler',duration:45,price:150},
+  {cat:'FILLER',name:'1.1ml Nasal Labials',duration:30,price:150},
+  {cat:'FILLER',name:'1.1ml Cheek Filler',duration:30,price:150},
+  {cat:'FILLER',name:'1.5ml Cheek Filler',duration:45,price:200},
+  {cat:'FILLER',name:'2.2ml Cheek Filler',duration:45,price:250},
+  {cat:'FILLER',name:'1.1ml Chin Filler',duration:45,price:150},
+  {cat:'FILLER',name:'2.2ml Jawline Filler',duration:60,price:250},
+  {cat:'FILLER',name:'Liquid Rhinoplasty',duration:45,price:180},
+  {cat:'FILLER',name:'Teartrough Filler',duration:45,price:180},
+  {cat:'FILLER',name:'2.2ml Facial Contouring',duration:45,price:230},
+  {cat:'FILLER',name:'3.3ml Facial Contouring',duration:60,price:330},
+  {cat:'FILLER',name:'4.4ml Facial Contouring',duration:60,price:440},
+  {cat:'FACIALS',name:'Glass Skin Facial',duration:60,price:80},
+  {cat:'FACIALS',name:'Glass Skin Facial + Microneedling',duration:60,price:120},
+  {cat:'SKINBOOST',name:'1x Skin Booster',duration:30,price:150},
+  {cat:'SKINBOOST',name:'3x Lumi Pro Skin Booster',duration:30,price:350},
+  {cat:'SKINBOOST',name:'Plenhyage XL Strong',duration:30,price:200},
+  {cat:'SKINBOOST',name:'Plenhyage XL Strong 2 Treatments',duration:30,price:350},
+  {cat:'SKINBOOST',name:'Vitarin I - Eye Polynucleotide',duration:30,price:170},
+  {cat:'SKINBOOST',name:'Vitarin I - Eye Polynucleotide x2',duration:30,price:300},
+  {cat:'SKINBOOST',name:'B12 Injection',duration:15,price:30},
+  {cat:'FATDISSOLVE',name:'Lemon Bottle Small Area',duration:30,price:70},
+  {cat:'FATDISSOLVE',name:'Lemon Bottle Large Area',duration:30,price:100},
+  {cat:'BUNDLES',name:'Botox 3 Areas + 1.1ml Dermal Filler',duration:45,price:320},
+  {cat:'BUNDLES',name:'Botox 3 Areas + 1.1ml Lips + Lumi Pro',duration:60,price:450},
+  {cat:'BUNDLES',name:'Botox 3 Areas + 1x Lumi Pro Skin Booster',duration:45,price:300},
+  {cat:'BUNDLES',name:'Botox 3 Areas + 1x Plenhyage XL',duration:45,price:350},
+  {cat:'BUNDLES',name:'Botox 3 Areas + Vitarin I Eye',duration:45,price:300},
+  {cat:'CONSULT',name:'Consultation',duration:15,price:25},
+];
+
+const CAT_LABELS: Record<string, string> = {
+  BOTOX:'Botox',FILLER:'Dermal Filler',FACIALS:'Facials',
+  SKINBOOST:'Skin Boosters',FATDISSOLVE:'Fat Dissolving',
+  BUNDLES:'Treatment Bundles',CONSULT:'Consultation',
+};
+
+const CAT_ORDER = ['BOTOX','FILLER','FACIALS','SKINBOOST','FATDISSOLVE','BUNDLES','CONSULT'];
+
+function formatDuration(mins: number): string {
+  if (mins >= 60) return mins === 60 ? '1 hr' : `${Math.floor(mins/60)} hr ${mins%60 ? mins%60 + ' mins' : ''}`.trim();
+  return `${mins} mins`;
+}
+
+router.get("/treatments", async (_req, res) => {
+  try {
+    const result = await pool.query(
+      "SELECT key, value FROM portal_kv WHERE key = ANY($1)",
+      [['dd_custom_treats', 'dd_custom_cats', 'dd_treatment_overrides']],
+    );
+    const kvData: Record<string, any> = {};
+    for (const row of result.rows) {
+      kvData[row.key] = row.value;
+    }
+
+    const customTreats: any[] = Array.isArray(kvData['dd_custom_treats']) ? kvData['dd_custom_treats'] : [];
+    const customCats: any[] = Array.isArray(kvData['dd_custom_cats']) ? kvData['dd_custom_cats'] : [];
+    const overrides: Record<string, any> = (kvData['dd_treatment_overrides'] && typeof kvData['dd_treatment_overrides'] === 'object') ? kvData['dd_treatment_overrides'] : {};
+
+    const allTreats = [...BUILT_IN_TREATMENTS, ...customTreats];
+
+    const allCatLabels: Record<string, string> = { ...CAT_LABELS };
+    for (const c of customCats) {
+      allCatLabels[c.key] = c.label;
+    }
+
+    const catOrder = [...CAT_ORDER];
+    for (const c of customCats) {
+      if (!catOrder.includes(c.key)) catOrder.push(c.key);
+    }
+
+    const grouped: Record<string, { name: string; price: string; duration: string }[]> = {};
+    for (const t of allTreats) {
+      const ov = overrides[t.name] || {};
+      const price = ov.price ?? t.price;
+      const dur = ov.duration ?? t.duration;
+      if (!grouped[t.cat]) grouped[t.cat] = [];
+      grouped[t.cat].push({
+        name: t.name,
+        price: `£${price}`,
+        duration: formatDuration(dur),
+      });
+    }
+
+    const categories = catOrder
+      .filter(k => grouped[k] && grouped[k].length > 0)
+      .map(k => ({
+        title: allCatLabels[k] || k,
+        items: grouped[k],
+      }));
+
+    res.json(categories);
+  } catch (err) {
+    console.error("GET /api/treatments error", err);
+    res.status(500).json({ error: "db error" });
+  }
+});
+
 // GET /api/portal/store  — fetch multiple keys at once (?keys=k1,k2,k3) — requires admin JWT
 router.get("/portal/store", async (req, res) => {
   if (!requireAuth(req, res)) return;

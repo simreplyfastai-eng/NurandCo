@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "framer-motion";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import BookingModal from "./BookingModal";
 import ConsultationModal from "./ConsultationModal";
 
@@ -14,7 +14,7 @@ type Category = {
   items: Treatment[];
 };
 
-const services: Category[] = [
+const FALLBACK_SERVICES: Category[] = [
   {
     title: "Botox",
     items: [
@@ -213,6 +213,19 @@ function CategoryDropdown({
 export default function Services() {
   const [bookingTreatment, setBookingTreatment] = useState<{ name: string; price: string } | null>(null);
   const [showConsultation, setShowConsultation] = useState(false);
+  const [services, setServices] = useState<Category[]>(FALLBACK_SERVICES);
+
+  useEffect(() => {
+    fetch("/api/treatments")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) {
+          const filtered = data.filter((c: Category) => c.title !== "Consultation");
+          if (filtered.length > 0) setServices(filtered);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <section id="services" className="py-[100px] bg-white">
