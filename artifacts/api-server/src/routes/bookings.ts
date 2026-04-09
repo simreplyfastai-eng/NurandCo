@@ -356,7 +356,7 @@ router.post("/bookings", async (req, res) => {
 
     if (isConsultation) {
       // Consultation-specific emails — skip if webhook already sent them
-      if (!alreadyConfirmed && b.clientEmail && depositPaid) {
+      if (!alreadyConfirmed && b.clientEmail) {
         sendConsultationConfirmationEmail({
           clientEmail: b.clientEmail,
           clientName: b.clientName,
@@ -373,6 +373,7 @@ router.post("/bookings", async (req, res) => {
           clientPhone: b.clientPhone ?? "",
           clientDOB: b.clientDOB ?? "",
           clientNotes: b.clientNotes ?? "",
+          treatmentInterest: b.notes ?? "",
           date: b.date,
           time: b.time ?? "",
         }).catch(() => {});

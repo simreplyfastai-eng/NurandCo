@@ -45,7 +45,7 @@ const TREATMENT_PRICES: Record<string, number> = {
   "Botox 3 Areas + 1x Lumi Pro Skin Booster": 300,
   "Botox 3 Areas + 1x Plenhyage XL": 350,
   "Botox 3 Areas + Vitarin I Eye": 300,
-  "Consultation": 1,
+  "Consultation": 0,
 };
 
 /**

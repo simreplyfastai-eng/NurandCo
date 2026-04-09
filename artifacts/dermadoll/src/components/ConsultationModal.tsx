@@ -1,6 +1,5 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState, useCallback } from "react";
-import type { Stripe, StripeElements } from "@stripe/stripe-js";
 
 interface DayAvail {
   on: boolean;
@@ -34,6 +33,19 @@ const AVAIL_DEFAULT: Availability = {
   overrides: {},
 };
 
+const TREATMENT_OPTIONS = [
+  "Botox / Anti-Wrinkle Injections",
+  "Lip Filler",
+  "Cheek Filler",
+  "Jawline & Chin Contouring",
+  "Facial Contouring",
+  "Skin Boosters",
+  "Facials & Skin Treatments",
+  "Fat Dissolving (Lemon Bottle)",
+  "Teeth Whitening",
+  "Not sure yet / General enquiry",
+];
+
 function fmtDate(d: Date): string {
   const y = d.getFullYear();
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -64,7 +76,6 @@ function isDateDisabled(avail: Availability, date: Date, today: Date): boolean {
   return !day || !day.on;
 }
 
-// Consultations are 15 minutes — 15-min grid, back-to-back, no buffer
 const CONSULTATION_DURATION = 15;
 
 function generateAvailableSlots(
@@ -227,12 +238,15 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [dob, setDob] = useState("");
-  const [notes, setNotes] = useState("");
 
   const [nameError, setNameError] = useState("");
   const [emailError, setEmailError] = useState("");
   const [phoneError, setPhoneError] = useState("");
   const [dobError, setDobError] = useState("");
+
+  const [treatmentInterest, setTreatmentInterest] = useState("");
+  const [treatmentError, setTreatmentError] = useState("");
+  const [skinConcerns, setSkinConcerns] = useState("");
 
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -241,19 +255,10 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
   const [avail, setAvail] = useState<Availability>(AVAIL_DEFAULT);
   const [dateBookings, setDateBookings] = useState<DateBooking[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
-
-  const [paymentLoading, setPaymentLoading] = useState(false);
-  const [paymentError, setPaymentError] = useState("");
-  const [stripeElementMounted, setStripeElementMounted] = useState(false);
-  const [stripeNotConfigured, setStripeNotConfigured] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
   const [whatsapp, setWhatsapp] = useState("");
 
-  const stripeRef = useRef<Stripe | null>(null);
-  const elementsRef = useRef<StripeElements | null>(null);
-  const paymentElementRef = useRef<HTMLDivElement>(null);
-  const clientSecretRef = useRef<string | null>(null);
-  const depositPoundsRef = useRef<number>(1);
   const bookingIdRef = useRef<string>(uid());
   const firstFocusRef = useRef<HTMLButtonElement>(null);
 
@@ -306,159 +311,67 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
     setStep(2);
   };
 
+  const handleTreatmentNext = () => {
+    if (!treatmentInterest) { setTreatmentError("Please select a treatment you're interested in"); return; }
+    setTreatmentError("");
+    setStep(3);
+  };
+
   const handleDateSelect = async (date: Date) => {
     setSelectedDate(date);
     setSelectedTime(null);
     setSlotError("");
-    setStep(3);
+    setStep(4);
     await fetchDateBookings(date);
   };
 
-  const handleTimeSelect = (time: string) => {
+  const handleTimeSelect = async (time: string) => {
     setSelectedTime(time);
     setSlotError("");
-    setPaymentError("");
-    setStripeElementMounted(false);
-    setStep(4);
-  };
-
-  useEffect(() => {
-    if (step !== 4) return;
-    let cancelled = false;
-
-    async function initStripe() {
-      setPaymentLoading(true);
-      setPaymentError("");
-
-      try {
-        const configRes = await fetch("/api/config");
-        const config = await configRes.json() as { stripePublishableKey?: string; whatsapp?: string };
-        if (config.whatsapp) setWhatsapp(config.whatsapp);
-
-        if (!config.stripePublishableKey) {
-          if (!cancelled) { setStripeNotConfigured(true); setPaymentLoading(false); }
-          return;
-        }
-
-        const piRes = await fetch("/api/stripe/create-payment-intent", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            amount: 100,
-            treatment: "Consultation",
-            clientName: name,
-            clientEmail: email,
-            bookingDate: selectedDate ? fmtDate(selectedDate) : "",
-            bookingTime: selectedTime ?? "",
-            bookingId: bookingIdRef.current,
-          }),
-        });
-
-        if (!piRes.ok) {
-          const d = await piRes.json() as { error?: string };
-          if (!cancelled) { setPaymentError(d.error ?? "Failed to set up payment. Please try again."); setPaymentLoading(false); }
-          return;
-        }
-
-        const piData = await piRes.json() as { clientSecret: string; depositAmountPence?: number };
-        const { clientSecret } = piData;
-        if (piData.depositAmountPence) depositPoundsRef.current = piData.depositAmountPence / 100;
-        if (cancelled || !clientSecret) return;
-        clientSecretRef.current = clientSecret;
-
-        const { loadStripe } = await import("@stripe/stripe-js");
-        const stripe = await loadStripe(config.stripePublishableKey);
-        if (!stripe || cancelled) return;
-        stripeRef.current = stripe;
-
-        const elements = stripe.elements({
-          clientSecret,
-          appearance: {
-            theme: "stripe",
-            variables: {
-              colorPrimary: "#C9A96E",
-              colorText: "#111111",
-              fontFamily: "Inter, sans-serif",
-              borderRadius: "8px",
-            },
-          },
-        });
-        elementsRef.current = elements;
-
-        const paymentEl = elements.create("payment");
-        if (paymentElementRef.current) paymentEl.mount(paymentElementRef.current);
-
-        paymentEl.on("ready", () => {
-          if (!cancelled) { setStripeElementMounted(true); setPaymentLoading(false); }
-        });
-      } catch {
-        if (!cancelled) { setPaymentError("Failed to load payment form. Please refresh and try again."); setPaymentLoading(false); }
-      }
-    }
-
-    initStripe();
-    return () => {
-      cancelled = true;
-      try { elementsRef.current?.getElement("payment")?.unmount(); } catch { /* ignore */ }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [step]);
-
-  const handlePayment = async () => {
-    const stripe = stripeRef.current;
-    const elements = elementsRef.current;
-    if (!stripe || !elements) return;
-
+    setSubmitError("");
     setSubmitting(true);
-    setPaymentError("");
 
-    const { error } = await stripe.confirmPayment({ elements, redirect: "if_required" });
-
-    if (error) {
-      setPaymentError(`Payment failed: ${error.message ?? "Unknown error"}. Please check your card details and try again.`);
-      setSubmitting(false);
-      return;
-    }
-
-    const stripePaymentId = clientSecretRef.current?.split("_secret_")[0] ?? null;
-
-    const depositPounds = depositPoundsRef.current;
     const booking = {
       id: bookingIdRef.current,
       clientName: name.trim(),
       clientEmail: email.trim(),
       clientPhone: phone.replace(/\s/g, ""),
       clientDOB: dob.trim(),
-      clientNotes: notes.trim(),
+      clientNotes: skinConcerns.trim(),
       treatment: "Consultation",
-      price: depositPounds,
-      deposit: depositPounds,
+      category: "Consultation",
+      notes: treatmentInterest,
+      price: 0,
+      deposit: 0,
       depositPaid: true,
       balancePaid: true,
       duration_minutes: 15,
-      category: "Consultation",
       date: selectedDate ? fmtDate(selectedDate) : "",
-      time: selectedTime ?? "",
+      time,
       status: "Confirmed",
-      paymentMethod: "Stripe",
-      stripePaymentId,
-      notes: notes.trim(),
+      paymentMethod: "None",
       createdAt: Date.now(),
       source: "Website",
     };
 
     try {
-      await fetch("/api/bookings", {
+      const r = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(booking),
       });
+      if (!r.ok) {
+        const d = await r.json() as { error?: string };
+        setSubmitError(d.error ?? "Something went wrong. Please try again.");
+        setSubmitting(false);
+        return;
+      }
+      setStep("success");
     } catch {
-      // Network failure — payment taken, webhook will handle
+      setSubmitError("Network error. Please check your connection and try again.");
+    } finally {
+      setSubmitting(false);
     }
-
-    setSubmitting(false);
-    setStep("success");
   };
 
   const formatDate = (d: Date) =>
@@ -474,7 +387,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
     ? generateAvailableSlots(avail, selectedDate, dateBookings)
     : [];
 
-  const stepLabels = ["Your Details", "Choose Date", "Choose Time", "Payment"];
+  const stepLabels = ["Your Details", "Treatment", "Choose Date", "Choose Time"];
   const currentStepIndex = step === "success" ? 4 : (step as number) - 1;
 
   return (
@@ -505,10 +418,9 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
 
         {step !== "success" && (
           <div className="mb-6 pr-8">
-            <h2 className="font-serif leading-snug mb-1" style={{ fontSize: "24px" }}>Book a Consultation</h2>
-            <span className="font-serif" style={{ fontSize: "20px", color: "#C9A96E" }}>£1</span>
+            <h2 className="font-serif leading-snug mb-1" style={{ fontSize: "24px" }}>Book Your Free Consultation</h2>
+            <span className="font-serif" style={{ fontSize: "18px", color: "#2D6A4F", fontWeight: 600 }}>Completely Free</span>
 
-            {/* Step progress */}
             <div className="flex items-center gap-1 mt-4">
               {stepLabels.map((label, i) => (
                 <div key={label} className="flex items-center gap-1 flex-1">
@@ -571,16 +483,6 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
               />
             </Field>
 
-            <Field label="What would you like to discuss? (optional)">
-              <textarea
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={3}
-                placeholder="e.g. fine lines, acne scarring, lip enhancement…"
-                style={{ ...inputStyle(false), resize: "vertical", minHeight: "80px" }}
-              />
-            </Field>
-
             <button
               onClick={handleDetailsNext}
               className="w-full mt-2"
@@ -588,8 +490,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
                 background: "#C9A96E", color: "#fff", border: "none",
                 borderRadius: "8px", padding: "16px", fontSize: "13px",
                 fontFamily: "Inter, sans-serif", fontWeight: 700,
-                letterSpacing: "2px", textTransform: "uppercase",
-                cursor: "pointer",
+                letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer",
               }}
             >
               Continue →
@@ -597,127 +498,115 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
           </motion.div>
         )}
 
-        {/* ── Step 2 — Calendar ── */}
+        {/* ── Step 2 — Treatment Interest ── */}
         {step === 2 && (
           <motion.div key="step2" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-5">
               <button onClick={() => setStep(1)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
+              <h3 className="font-serif" style={{ fontSize: "20px" }}>Your Treatment Interest</h3>
+            </div>
+
+            <Field label="What are you interested in?" required error={treatmentError}>
+              <select
+                value={treatmentInterest}
+                onChange={(e) => { setTreatmentInterest(e.target.value); if (treatmentError) setTreatmentError(""); }}
+                style={{ ...inputStyle(!!treatmentError), background: "#fff", cursor: "pointer" }}
+              >
+                <option value="">Select a treatment…</option>
+                {TREATMENT_OPTIONS.map((t) => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
+            </Field>
+
+            <Field label="Skin concerns or goals (optional)">
+              <textarea
+                value={skinConcerns}
+                onChange={(e) => setSkinConcerns(e.target.value)}
+                rows={4}
+                placeholder="e.g. fine lines around the eyes, acne scarring, want a more defined jawline…"
+                style={{ ...inputStyle(false), resize: "vertical", minHeight: "100px" }}
+              />
+            </Field>
+
+            <button
+              onClick={handleTreatmentNext}
+              className="w-full mt-2"
+              style={{
+                background: "#C9A96E", color: "#fff", border: "none",
+                borderRadius: "8px", padding: "16px", fontSize: "13px",
+                fontFamily: "Inter, sans-serif", fontWeight: 700,
+                letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer",
+              }}
+            >
+              Continue →
+            </button>
+          </motion.div>
+        )}
+
+        {/* ── Step 3 — Calendar ── */}
+        {step === 3 && (
+          <motion.div key="step3" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+            <div className="flex items-center gap-3 mb-5">
+              <button onClick={() => setStep(2)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
               <h3 className="font-serif" style={{ fontSize: "20px" }}>Select a Date</h3>
             </div>
             <Calendar onSelect={handleDateSelect} selected={selectedDate} avail={avail} />
           </motion.div>
         )}
 
-        {/* ── Step 3 — Time Slots ── */}
-        {step === 3 && (
-          <motion.div key="step3" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+        {/* ── Step 4 — Time Slots ── */}
+        {step === 4 && (
+          <motion.div key="step4" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-2">
-              <button onClick={() => setStep(2)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
+              <button onClick={() => setStep(3)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
               <h3 className="font-serif" style={{ fontSize: "20px" }}>Select a Time</h3>
             </div>
             {selectedDate && <p className="text-sm mb-5" style={{ color: "#999" }}>{formatDate(selectedDate)}</p>}
 
-            {slotError && (
+            {submitError && (
               <div className="mb-4 p-3 rounded-lg text-sm" style={{ background: "#FFF3F3", color: "#C62828", border: "1px solid #FFCDD2" }}>
-                {slotError}
+                {submitError}
               </div>
             )}
 
-            {loadingSlots ? (
+            {submitting ? (
+              <div className="flex flex-col items-center justify-center py-12 gap-4">
+                <div style={{ width: "28px", height: "28px", border: "3px solid #E8E8E8", borderTopColor: "#C9A96E", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                <p className="text-sm" style={{ color: "#aaa", fontFamily: "Inter, sans-serif" }}>Confirming your booking…</p>
+              </div>
+            ) : loadingSlots ? (
               <p className="text-sm text-center py-8" style={{ color: "#aaa" }}>Loading availability…</p>
             ) : availableSlots.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: "#aaa" }}>No available slots for this date. Please select another day.</p>
+              <div className="text-center py-8">
+                <p className="text-sm mb-4" style={{ color: "#aaa" }}>No available slots for this date. Please select another day.</p>
+                <button onClick={() => setStep(3)} style={{ color: "#C9A96E", fontSize: "14px", background: "none", border: "none", cursor: "pointer" }}>← Choose a different date</button>
+              </div>
             ) : (
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {availableSlots.map((slot) => {
-                  const isActive = selectedTime === slot;
-                  return (
+              <>
+                <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                  {availableSlots.map((slot) => (
                     <button
                       key={slot}
                       onClick={() => handleTimeSelect(slot)}
                       style={{
                         padding: "10px 6px", borderRadius: "8px",
                         fontSize: "13px", fontFamily: "Inter, sans-serif",
-                        border: isActive ? "2px solid #C9A96E" : "1px solid #E0E0E0",
-                        background: isActive ? "#C9A96E" : "transparent",
-                        color: isActive ? "#fff" : "#111",
+                        border: "1px solid #E0E0E0",
+                        background: "transparent",
+                        color: "#111",
                         cursor: "pointer",
-                        fontWeight: isActive ? 700 : 400,
                       }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#C9A96E"; (e.currentTarget as HTMLButtonElement).style.color = "#C9A96E"; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#E0E0E0"; (e.currentTarget as HTMLButtonElement).style.color = "#111"; }}
                     >
                       {slot}
                     </button>
-                  );
-                })}
-              </div>
-            )}
-          </motion.div>
-        )}
-
-        {/* ── Step 4 — Payment ── */}
-        {step === 4 && (
-          <motion.div key="step4" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
-            <div className="flex items-center gap-3 mb-5">
-              <button onClick={() => setStep(3)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
-              <h3 className="font-serif" style={{ fontSize: "20px" }}>Payment</h3>
-            </div>
-
-            {/* Summary */}
-            <div className="mb-5 p-4 rounded-xl" style={{ background: "#FAFAF8", border: "1px solid #E8E8E8" }}>
-              <p className="text-xs uppercase tracking-wider mb-3" style={{ color: "#aaa", fontFamily: "Inter, sans-serif" }}>Booking Summary</p>
-              <div className="text-sm space-y-1" style={{ fontFamily: "Inter, sans-serif", color: "#111" }}>
-                <div><span style={{ color: "#888" }}>Name: </span>{name}</div>
-                <div><span style={{ color: "#888" }}>Email: </span>{email}</div>
-                <div><span style={{ color: "#888" }}>Phone: </span>{phone}</div>
-                <div className="mt-2 pt-2" style={{ borderTop: "1px solid #E8E8E8" }}>
-                  <div><span style={{ color: "#888" }}>Treatment: </span><strong>Consultation</strong></div>
-                  <div><span style={{ color: "#888" }}>Date: </span>{selectedDate ? formatDate(selectedDate) : "—"}</div>
-                  <div><span style={{ color: "#888" }}>Time: </span>{selectedTime ?? "—"}</div>
-                  <div><span style={{ color: "#888" }}>Duration: </span>15 minutes</div>
+                  ))}
                 </div>
-                <div className="mt-2 pt-2" style={{ borderTop: "1px solid #E8E8E8" }}>
-                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <span style={{ color: "#888" }}>Payment (paid in full):</span>
-                    <strong style={{ color: "#C9A96E", fontSize: "18px", fontFamily: "Cormorant Garamond, Georgia, serif" }}>£1</strong>
-                  </div>
-                  <p className="mt-1" style={{ color: "#888", fontSize: "11px", fontStyle: "italic" }}>Your £1 is redeemable against any treatment booked on the day</p>
-                </div>
-              </div>
-            </div>
-
-            {stripeNotConfigured ? (
-              <div className="p-4 rounded-xl text-sm" style={{ background: "#FFF8F0", border: "1px solid #FFE0B2", color: "#E65100" }}>
-                Online payments aren't set up yet. Please contact us directly to complete your booking.
-              </div>
-            ) : (
-              <>
-                {paymentLoading && (
-                  <div className="flex items-center justify-center py-10">
-                    <div style={{ width: "24px", height: "24px", border: "3px solid #E8E8E8", borderTopColor: "#C9A96E", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-                  </div>
-                )}
-                <div ref={paymentElementRef} style={{ display: stripeElementMounted ? "block" : "none" }} />
-                {paymentError && (
-                  <div className="mt-3 p-3 rounded-lg text-sm" style={{ background: "#FFF3F3", color: "#C62828", border: "1px solid #FFCDD2" }}>
-                    {paymentError}
-                  </div>
-                )}
-                {stripeElementMounted && (
-                  <button
-                    onClick={handlePayment}
-                    disabled={submitting}
-                    className="w-full mt-4"
-                    style={{
-                      background: submitting ? "#E0C99A" : "#C9A96E", color: "#fff",
-                      border: "none", borderRadius: "8px", padding: "16px",
-                      fontSize: "13px", fontFamily: "Inter, sans-serif",
-                      fontWeight: 700, letterSpacing: "2px", textTransform: "uppercase",
-                      cursor: submitting ? "default" : "pointer",
-                    }}
-                  >
-                    {submitting ? "Processing…" : "Pay £1 — Confirm Consultation"}
-                  </button>
-                )}
+                <p className="text-xs mt-4 text-center" style={{ color: "#bbb", fontFamily: "Inter, sans-serif" }}>
+                  Tap a time to confirm your free consultation instantly
+                </p>
               </>
             )}
           </motion.div>
@@ -740,15 +629,11 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
                 <div><span style={{ color: "#888" }}>Date: </span>{selectedDate ? formatDate(selectedDate) : "—"}</div>
                 <div><span style={{ color: "#888" }}>Time: </span>{selectedTime}</div>
                 <div><span style={{ color: "#888" }}>Duration: </span>15 minutes</div>
+                <div><span style={{ color: "#888" }}>Treatment interest: </span>{treatmentInterest}</div>
                 <div className="pt-2 mt-2" style={{ borderTop: "1px solid #E8E8E8" }}>
-                  <span style={{ color: "#2D6A4F", fontWeight: 600 }}>✓ Paid in full: £1</span>
+                  <span style={{ color: "#2D6A4F", fontWeight: 600 }}>✓ Free consultation — no charge</span>
                 </div>
               </div>
-            </div>
-
-            <div className="p-4 rounded-xl mb-6 text-sm" style={{ background: "rgba(201,169,110,0.08)", border: "1px solid rgba(201,169,110,0.25)", fontFamily: "Inter, sans-serif" }}>
-              <p style={{ color: "#C9A96E", fontWeight: 600, marginBottom: "4px" }}>Your £1 is redeemable</p>
-              <p style={{ color: "#888" }}>Your consultation fee can be used against any treatment you book on the day.</p>
             </div>
 
             <div className="p-4 rounded-xl mb-4 text-sm" style={{ background: "#FAFAF8", border: "1px solid #E8E8E8", fontFamily: "Inter, sans-serif" }}>
@@ -772,7 +657,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
 
             <button
               onClick={onClose}
-              className="w-full mt-6"
+              className="w-full mt-2"
               style={{
                 background: "#111", color: "#fff", border: "none",
                 borderRadius: "8px", padding: "16px", fontSize: "13px",

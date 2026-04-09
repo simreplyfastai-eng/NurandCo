@@ -337,8 +337,8 @@ export async function sendConsultationConfirmationEmail(params: {
       detailRow("Location", CLINIC_ADDRESS)
     )}
     ${goldBox(`
-      <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#C9A96E;font-weight:700;">✓ Paid in full — £25</p>
-      <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);font-style:italic;">Your £25 is redeemable against any treatment booked on the day.</p>
+      <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#C9A96E;font-weight:700;">✓ Free consultation — no charge</p>
+      <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);font-style:italic;">We look forward to discussing your treatment goals with you.</p>
     `)}
     <p style="margin:16px 0 4px;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">Questions before your visit?</p>
     <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C9A96E;text-decoration:none;">${wa}</a></p>
@@ -365,6 +365,7 @@ export async function sendConsultationAdminEmail(params: {
   clientPhone: string;
   clientDOB: string;
   clientNotes: string;
+  treatmentInterest: string;
   date: string;
   time: string;
 }): Promise<void> {
@@ -384,10 +385,11 @@ export async function sendConsultationAdminEmail(params: {
       detailRow("Email", params.clientEmail || "—") +
       detailRow("Phone", params.clientPhone || "—") +
       detailRow("DOB", params.clientDOB || "—") +
+      detailRow("Treatment interest", params.treatmentInterest || "—") +
       detailRow("Skin concerns", params.clientNotes || "—") +
       detailRow("Date", dateDisp) +
       detailRow("Time", timeDisp) +
-      detailRow("Paid", `<span style="color:#4CAF50;">£25 ✓</span>`)
+      detailRow("Fee", `<span style="color:#4CAF50;">Free ✓</span>`)
     )}
     ${smallPrint("This is an automated notification from Dermadoll Aesthetics booking system.")}
   `;
