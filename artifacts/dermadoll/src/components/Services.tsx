@@ -340,7 +340,7 @@ export default function Services() {
               </p>
 
               <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                {["15 minutes with Niamh", "Personalised treatment advice", "£25 consultation fee — redeemable against your treatment on the day"].map((pt) => (
+                {["15 minutes with Niamh", "Personalised treatment advice", "Completely free — no charge"].map((pt) => (
                   <div key={pt} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
                     <span style={{ color: "#C9A96E", fontWeight: 700, flexShrink: 0 }}>✓</span>
                     <span style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", color: "rgba(17,17,17,0.8)", lineHeight: 1.5 }}>{pt}</span>
@@ -354,10 +354,10 @@ export default function Services() {
               <div style={{
                 fontFamily: "Cormorant Garamond, Georgia, serif",
                 fontSize: "64px",
-                color: "#C9A96E",
+                color: "#2D6A4F",
                 fontWeight: 700,
                 lineHeight: 1,
-              }}>£25</div>
+              }}>Free</div>
               <div style={{
                 fontFamily: "Inter, sans-serif",
                 fontSize: "12px",
@@ -365,14 +365,14 @@ export default function Services() {
                 textTransform: "uppercase",
                 letterSpacing: "2px",
                 marginTop: "4px",
-              }}>consultation fee</div>
+              }}>consultation</div>
               <div style={{
                 fontFamily: "Inter, sans-serif",
                 fontSize: "11px",
-                color: "#C9A96E",
+                color: "#2D6A4F",
                 fontStyle: "italic",
                 marginTop: "6px",
-              }}>Redeemable against your treatment</div>
+              }}>No charge — book in seconds</div>
 
               <button
                 onClick={() => setShowConsultation(true)}
