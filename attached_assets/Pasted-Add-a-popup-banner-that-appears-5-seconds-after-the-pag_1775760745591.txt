@@ -1,0 +1,155 @@
+Add a popup banner that appears 5 seconds after the page loads.
+Only show once per session using sessionStorage — if closed, 
+don't show again until next visit.
+
+TIMING:
+setTimeout(() => showPopup(), 5000)
+Check sessionStorage key "popupSeen" — if true, don't show.
+On close: set sessionStorage "popupSeen" = "true"
+
+OVERLAY:
+background: rgba(0,0,0,0.5)
+backdrop-filter: blur(8px)
+-webkit-backdrop-filter: blur(8px)
+position: fixed, full screen, z-index: 9999
+
+MODAL CARD:
+position: fixed
+top: 50%, left: 50%
+transform: translate(-50%, -50%)
+max-width: 400px
+width: 90%
+border-radius: 24px
+padding: 40px 32px
+background: rgba(255,255,255,0.18)
+backdrop-filter: blur(28px)
+-webkit-backdrop-filter: blur(28px)
+border: 1px solid rgba(255,255,255,0.35)
+box-shadow: 0 12px 48px rgba(201,169,110,0.2)
+text-align: centre
+
+Background blob decoration inside card:
+Two absolutely positioned divs, pointer-events: none, 
+overflow hidden, border-radius: 50%, filter: blur(60px),
+opacity: 0.25, z-index: 0
+Blob 1: 180px, background #C9A96E, top: -40px, right: -40px
+Blob 2: 140px, background #f0d898, bottom: -30px, left: -30px
+All card content z-index: 1 relative to blobs
+
+Close button:
+position: absolute, top: 16px, right: 20px
+font-size: 20px, color: #C9A96E
+background: none, border: none, cursor: pointer
+× character
+On click: close popup
+
+CONTENT (top to bottom):
+
+Gold pill label centred:
+background: rgba(201,169,110,0.15)
+border: 1px solid rgba(201,169,110,0.4)
+color: #C9A96E
+font: Inter, 11px, letter-spacing: 2px
+border-radius: 20px, padding: 5px 14px
+text: "LIMITED AVAILABILITY"
+
+Heading:
+Cormorant Garamond, 34px, font-weight: 600
+color: #ffffff
+margin-top: 16px
+line-height: 1.2
+text: "Book Your Treatment
+This Week ✨"
+
+Subtext:
+Inter, 14px, rgba(255,255,255,0.7)
+line-height: 1.6, margin-top: 12px
+text: "Spaces fill up fast. Secure your appointment 
+today and receive confirmation within minutes."
+
+Gold divider:
+width: 50px, height: 1px
+background: #C9A96E
+margin: 20px auto
+
+Dynamic availability line:
+Inter, 13px, #C9A96E, italic
+text: "⏰ Next available: [getNextAvailableSlot()]"
+
+Use this JS function for getNextAvailableSlot():
+
+Working hours:
+Tuesday:   10:00 — 19:00  (last slot 18:00)
+Wednesday: 10:00 — 19:00  (last slot 18:00)
+Thursday:  10:00 — 19:00  (last slot 18:00)
+Friday:    09:00 — 16:00  (last slot 15:00)
+Saturday:  09:00 — 14:00  (last slot 13:00)
+Sunday & Monday: closed
+
+Logic:
+1. Get current date + time
+2. Loop forward from today through next 7 days
+3. Skip Sunday (0) and Monday (1)
+4. If today is a working day and current time is 
+   before last slot — find next 30 min slot from now
+   and return "Today at HH:MM"
+5. If today is working day but past last slot —
+   move to next working day, return 
+   "Tomorrow from HH:MM" or "[Day] from HH:MM"
+6. If today is closed — find next working day,
+   return "Tomorrow from HH:MM" or "[Day] from HH:MM"
+
+Opening time format:
+Tue/Wed/Thu → "from 10:00"
+Fri → "from 09:00"
+Sat → "from 09:00"
+
+This same getNextAvailableSlot() function is also used 
+in the main booking calendar — show it as a subtle hint 
+line below the calendar heading in gold italic Inter 13px:
+"Next available: [getNextAvailableSlot()]"
+
+TWO BUTTONS stacked, full width, border-radius: 30px,
+margin-top: 24px, gap: 10px:
+
+Button 1 — PRIMARY:
+background: #C9A96E
+color: #000000
+font: Inter, 14px, bold
+padding: 14px
+text: "Book Now →"
+On click: close popup + smooth scroll to treatments section
+
+Button 2 — SECONDARY:
+background: rgba(255,255,255,0.1)
+border: 1px solid rgba(255,255,255,0.25)
+color: rgba(255,255,255,0.8)
+font: Inter, 13px
+padding: 12px
+text: "Maybe Later"
+On click: close popup only
+
+Small print below buttons:
+Inter, 11px, rgba(255,255,255,0.4), italic, centred
+text: "No card required to enquire. 
+Free cancellation 48hrs before."
+
+ANIMATIONS:
+Overlay: opacity 0 → 1, 0.3s ease
+Modal entry: translateY(40px) + opacity 0 → 
+             translateY(0) + opacity 1
+             0.45s cubic-bezier(0.34, 1.56, 0.64, 1)
+             triggers after 5000ms delay
+
+Modal exit on close: translateY(0) + opacity 1 → 
+                     translateY(20px) + opacity 0
+                     0.25s ease, then display none
+
+Close on overlay click (outside card)
+Close on ESC key press
+
+MOBILE:
+padding: 28px 20px
+heading: 28px
+buttons full width, stacked
+blobs scale down to 100px

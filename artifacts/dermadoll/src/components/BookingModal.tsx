@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState, useCallback } from "react";
 import type { Stripe, StripeElements } from "@stripe/stripe-js";
+import { getNextAvailableSlot } from "@/lib/nextSlot";
 
 interface Treatment {
   name: string;
@@ -776,7 +777,10 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
         {/* ── Step 1 — Calendar ── */}
         {step === 1 && (
           <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
-            <h3 className="font-serif mb-5" style={{ fontSize: "20px" }}>Select a Date</h3>
+            <h3 className="font-serif mb-1" style={{ fontSize: "20px" }}>Select a Date</h3>
+            <p className="mb-5" style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", color: "#C9A96E", fontStyle: "italic" }}>
+              Next available: {getNextAvailableSlot()}
+            </p>
             <Calendar onSelect={handleDateSelect} selected={selectedDate} avail={avail} />
           </motion.div>
         )}

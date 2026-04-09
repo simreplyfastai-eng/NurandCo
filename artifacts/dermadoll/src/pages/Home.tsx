@@ -12,6 +12,7 @@ import Reviews from "@/components/Reviews";
 import FAQ from "@/components/FAQ";
 import BookNow from "@/components/BookNow";
 import Footer from "@/components/Footer";
+import PopupBanner from "@/components/PopupBanner";
 
 function GoldDivider() {
   return (
@@ -85,6 +86,8 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <PopupBanner />
 
       {/* Floating WhatsApp button */}
       <a
