@@ -48,7 +48,7 @@ const BUILT_IN_TREATMENTS = [
   {cat:'BUNDLES',name:'Botox 3 Areas + 1x Lumi Pro Skin Booster',duration:45,price:300},
   {cat:'BUNDLES',name:'Botox 3 Areas + 1x Plenhyage XL',duration:45,price:350},
   {cat:'BUNDLES',name:'Botox 3 Areas + Vitarin I Eye',duration:45,price:300},
-  {cat:'CONSULT',name:'Consultation',duration:15,price:25},
+  {cat:'CONSULT',name:'Consultation',duration:15,price:0.10},
 ];
 
 const CAT_LABELS: Record<string, string> = {

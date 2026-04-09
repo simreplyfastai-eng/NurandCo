@@ -70,8 +70,10 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
   }
 
   const settings = await getSettings();
-  const depositPercent = Math.max(1, Math.min(100, Number(settings.deposit ?? 50) || 50));
-  const depositAmountPence = Math.max(50, Math.floor(treatmentPrice * depositPercent / 100) * 100); // in pence, minimum 50p
+  // Consultation is always paid in full; all other treatments use the configured deposit %
+  const isConsultation = treatment === "Consultation";
+  const depositPercent = isConsultation ? 100 : Math.max(1, Math.min(100, Number(settings.deposit ?? 50) || 50));
+  const depositAmountPence = Math.max(30, Math.round(treatmentPrice * depositPercent)); // in pence, minimum 30p (Stripe minimum)
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
