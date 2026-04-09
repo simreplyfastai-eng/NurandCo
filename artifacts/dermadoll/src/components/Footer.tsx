@@ -84,7 +84,7 @@ export default function Footer() {
             href="https://aesthetix-systems.co.uk"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-white/40 transition-colors"
+            className="text-primary hover:text-primary/70 transition-colors"
           >
             AESTHETIX
           </a>
