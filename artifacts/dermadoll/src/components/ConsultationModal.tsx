@@ -253,6 +253,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
   const elementsRef = useRef<StripeElements | null>(null);
   const paymentElementRef = useRef<HTMLDivElement>(null);
   const clientSecretRef = useRef<string | null>(null);
+  const depositPoundsRef = useRef<number>(0.10);
   const firstFocusRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -355,7 +356,9 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
           return;
         }
 
-        const { clientSecret } = await piRes.json() as { clientSecret: string };
+        const piData = await piRes.json() as { clientSecret: string; depositAmountPence?: number };
+        const { clientSecret } = piData;
+        if (piData.depositAmountPence) depositPoundsRef.current = piData.depositAmountPence / 100;
         if (cancelled || !clientSecret) return;
         clientSecretRef.current = clientSecret;
 
@@ -415,6 +418,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
 
     const stripePaymentId = clientSecretRef.current?.split("_secret_")[0] ?? null;
 
+    const depositPounds = depositPoundsRef.current;
     const booking = {
       id: uid(),
       clientName: name.trim(),
@@ -423,8 +427,8 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
       clientDOB: dob.trim(),
       clientNotes: notes.trim(),
       treatment: "Consultation",
-      price: 0.10,
-      deposit: 0.10,
+      price: depositPounds,
+      deposit: depositPounds,
       depositPaid: true,
       balancePaid: true,
       duration_minutes: 15,

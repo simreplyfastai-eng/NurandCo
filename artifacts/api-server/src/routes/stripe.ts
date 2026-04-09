@@ -133,12 +133,14 @@ router.post("/stripe/webhook", async (req, res) => {
     try {
       // 1. Primary path: update the pre-saved "awaiting_payment" booking
       if (bookingId) {
+        const depositFromStripe = Math.round(pi.amount / 100);
         const updated = await pool.query(
           `UPDATE bookings
-           SET deposit_paid=true, status='Confirmed', stripe_payment_id=$1
+           SET deposit_paid=true, status='Confirmed', stripe_payment_id=$1,
+               deposit=GREATEST(deposit, $3), price=GREATEST(price, $3)
            WHERE id=$2 AND status='awaiting_payment'
            RETURNING *`,
-          [paymentIntentId, bookingId],
+          [paymentIntentId, bookingId, depositFromStripe],
         );
 
         if (updated.rows.length) {

@@ -1,0 +1,155 @@
+Fix all date and time handling across the entire codebase 
+to use UK GMT/BST time correctly.
+
+THE PROBLEM:
+The server runs on UTC. The UK is:
+- GMT (UTC+0) from last Sunday of October → last Sunday of March
+- BST (UTC+1) from last Sunday of March → last Sunday of October
+
+Dates created with new Date("2026-04-17") are parsed as 
+UTC midnight which rolls back to the previous day when 
+displayed in UK local time. All dates and times must 
+display in UK local time always.
+
+SOLUTION — use the Europe/London timezone everywhere:
+
+1. SERVER-SIDE DATE HANDLING
+Install the date-fns-tz package:
+npm install date-fns-tz
+
+Use this timezone constant everywhere:
+const TIMEZONE = 'Europe/London'
+
+Import and use these helpers everywhere dates are handled:
+import { formatInTimeZone, toZonedTime, fromZonedTime } 
+from 'date-fns-tz'
+import { format } from 'date-fns'
+
+NEVER use:
+new Date("2026-04-17") — parsed as UTC, wrong
+date.toUTCString()
+date.getUTCDate() / getUTCMonth() / getUTCFullYear()
+date.toISOString() for display purposes
+
+ALWAYS use for display:
+formatInTimeZone(date, 'Europe/London', 'EEEE d MMMM yyyy')
+// outputs: "Friday 17 April 2026"
+
+formatInTimeZone(date, 'Europe/London', 'HH:mm')
+// outputs: "14:30"
+
+2. PARSING DATES FROM CALENDAR
+When user selects a date string "2026-04-17" from 
+the calendar, parse it as UK local midnight:
+
+function parseUKDate(dateStr) {
+  // Parse as local UK midnight using date-fns-tz
+  const [year, month, day] = dateStr.split('-').map(Number)
+  // Create date at midnight in Europe/London timezone
+  return fromZonedTime(
+    new Date(year, month - 1, day, 0, 0, 0), 
+    'Europe/London'
+  )
+}
+
+3. SLOT GENERATION
+When generating slots, all time comparisons must be 
+done in Europe/London timezone:
+
+function generateSlots(dateStr, durationMins) {
+  const ukDate = parseUKDate(dateStr)
+  const dayOfWeek = toZonedTime(ukDate, 'Europe/London').getDay()
+  
+  // Get opening and closing times for this day
+  // Generate slots in UK local time
+  // Compare current UK time for same-day filtering
+  
+  const nowUK = toZonedTime(new Date(), 'Europe/London')
+  // Use nowUK for same-day slot filtering
+}
+
+4. getNextAvailableSlot() FUNCTION
+Must use UK current time:
+const nowUK = toZonedTime(new Date(), 'Europe/London')
+const todayDayOfWeek = nowUK.getDay()
+const currentHour = nowUK.getHours()
+const currentMinute = nowUK.getMinutes()
+
+5. BOOKING SUMMARY DISPLAY
+Date shown to user must always be UK local:
+formatInTimeZone(bookingDate, 'Europe/London', 
+  'EEEE d MMMM yyyy')
+// "Friday 17 April 2026"
+
+Time shown to user:
+formatInTimeZone(slotDateTime, 'Europe/London', 'HH:mm')
+// "14:30"
+
+End time calculation:
+const endTime = new Date(slotDateTime.getTime() + 
+  durationMins * 60 * 1000)
+formatInTimeZone(endTime, 'Europe/London', 'HH:mm')
+// "15:15"
+
+6. STRIPE METADATA
+Pass date as formatted UK string — not ISO:
+date: formatInTimeZone(bookingDate, 'Europe/London', 
+  'EEEE d MMMM yyyy')
+time: formatInTimeZone(slotDateTime, 'Europe/London', 
+  'HH:mm')
+
+7. EMAIL CONFIRMATIONS via RESEND
+All dates and times in emails must use UK format:
+formatInTimeZone(bookingDate, 'Europe/London', 
+  'EEEE d MMMM yyyy')
+// "Friday 17 April 2026"
+
+Never send UTC times in emails to clients.
+
+8. THANK YOU PAGE
+Date and time pulled from Stripe session metadata — 
+already formatted as UK strings so display as-is.
+No further timezone conversion needed on the 
+thank you page.
+
+9. .ICS CALENDAR FILE
+For .ics files, DTSTART and DTEND must be in 
+local UK time with no Z suffix:
+Format: YYYYMMDDTHHMMSS (no Z = local time)
+
+function formatICSDate(date) {
+  return formatInTimeZone(date, 'Europe/London', 
+    "yyyyMMdd'T'HHmmss")
+  // outputs: 20260417T143000
+  // NO Z at the end — Z means UTC which is wrong
+}
+
+Also add TZID to the .ics file:
+DTSTART;TZID=Europe/London:20260417T143000
+DTEND;TZID=Europe/London:20260417T151500
+
+10. ADMIN PORTAL
+All booking dates and times displayed in admin 
+portal must use UK local time:
+formatInTimeZone(booking.datetime, 'Europe/London',
+  'EEE d MMM yyyy HH:mm')
+// "Fri 17 Apr 2026 14:30"
+
+11. DATABASE STORAGE
+Store all booking datetimes in the database as 
+UTC (standard practice).
+Convert to UK time only at display layer.
+Never store UK local time strings in the DB.
+
+AFTER FIXING — VERIFY:
+- Click 17 April → shows "Friday 17 April 2026" ✅
+- Click 1 April → shows "Wednesday 1 April 2026" ✅
+- Slot at 14:30 → shows "14:30 — 15:15" for 45 min ✅
+- .ics file downloads with correct UK date and time ✅
+- Email shows correct UK date and time ✅
+- Thank you page shows correct date ✅
+- Admin portal shows correct booking dates ✅
+- getNextAvailableSlot() returns correct UK time ✅
+- During BST (Mar-Oct): times are UTC+1 ✅
+- During GMT (Oct-Mar): times are UTC+0 ✅
+- No date is ever one day behind ✅
