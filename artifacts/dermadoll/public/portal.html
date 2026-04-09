@@ -768,7 +768,9 @@ tr:hover td{background:#FDFBF8}
     <div id="page-treatments" class="page">
       <div class="topbar" id="treatments-topbar">
         <span class="topbar-title serif">Treatments</span>
+        <span id="treat-save-status" style="font-size:12px;color:#C9A96E;opacity:0;transition:opacity 0.3s;margin-left:8px"></span>
         <input id="treat-search" style="flex:1;max-width:300px;padding:9px 14px;border:1px solid #E0E0E0;border-radius:20px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;box-sizing:border-box" placeholder="Search treatments…" oninput="filterTreatments(this.value)"/>
+        <button id="treat-save-btn" onclick="saveAllTreatmentsToCloud()" style="margin-left:8px;padding:8px 18px;background:#C9A96E;color:#fff;border:none;border-radius:20px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.5px;cursor:pointer;text-transform:uppercase;transition:background 0.2s">Save Changes</button>
       </div>
       <div id="treats-outer" style="padding:20px;overflow-x:hidden;box-sizing:border-box">
         <div id="treatments-table-wrap"></div>
@@ -1247,21 +1249,48 @@ tr:hover td{background:#FDFBF8}
 // DATA
 // ═══════════════════════════════════════════════════
 const TREATMENTS = [
-  {cat:'FACE',name:'Lip Filler',duration:45,price:200},
-  {cat:'FACE',name:'Liquid Rhinoplasty',duration:30,price:350},
-  {cat:'FACE',name:'Anti-Wrinkle Injections',duration:30,price:180},
-  {cat:'FACE',name:'Masseter Botox',duration:30,price:250},
-  {cat:'FACE',name:'Brow Lift',duration:30,price:200},
-  {cat:'FACE',name:'Jaw Slimming',duration:30,price:250},
-  {cat:'SKIN',name:'Glass Skin Facial',duration:60,price:150},
-  {cat:'SKIN',name:'Medical Needling',duration:60,price:200},
-  {cat:'SKIN',name:'Profhilo / Skin Booster',duration:45,price:300},
-  {cat:'SKIN',name:'Chemical Peel',duration:45,price:120},
-  {cat:'SKIN',name:'Dermaplaning',duration:30,price:80},
-  {cat:'BODY',name:'Fat Dissolving',duration:30,price:200},
-  {cat:'BODY',name:'B12 Injection',duration:15,price:30},
-  {cat:'BODY',name:'IV Drip Therapy',duration:60,price:200},
-  {cat:'TEETH',name:'Teeth Whitening',duration:60,price:199},
+  {cat:'BOTOX',name:'Botox 1 Area',duration:15,price:100},
+  {cat:'BOTOX',name:'Botox 2 Areas',duration:15,price:140},
+  {cat:'BOTOX',name:'Botox 3 Areas',duration:15,price:180},
+  {cat:'BOTOX',name:'Botox 4 Areas',duration:15,price:210},
+  {cat:'BOTOX',name:'Masseter Botox',duration:15,price:200},
+  {cat:'BOTOX',name:'Nefertiti Lift Botox (Neck)',duration:30,price:220},
+  {cat:'BOTOX',name:'Chin Botox (Mentalis Muscle)',duration:30,price:80},
+  {cat:'BOTOX',name:'Nose Slimming Botox',duration:30,price:80},
+  {cat:'BOTOX',name:'Gummy Smile / Lip Flip Botox',duration:30,price:80},
+  {cat:'BOTOX',name:'Hyperhidrosis (Underarm) Botox',duration:30,price:220},
+  {cat:'BOTOX',name:'Botox Topup',duration:15,price:20},
+  {cat:'FILLER',name:'0.5ml Lip Filler',duration:30,price:100},
+  {cat:'FILLER',name:'0.7ml Lip Filler',duration:45,price:120},
+  {cat:'FILLER',name:'1.1ml Lip Filler',duration:45,price:150},
+  {cat:'FILLER',name:'1.1ml Nasal Labials',duration:30,price:150},
+  {cat:'FILLER',name:'1.1ml Cheek Filler',duration:30,price:150},
+  {cat:'FILLER',name:'1.5ml Cheek Filler',duration:45,price:200},
+  {cat:'FILLER',name:'2.2ml Cheek Filler',duration:45,price:250},
+  {cat:'FILLER',name:'1.1ml Chin Filler',duration:45,price:150},
+  {cat:'FILLER',name:'2.2ml Jawline Filler',duration:60,price:250},
+  {cat:'FILLER',name:'Liquid Rhinoplasty',duration:45,price:180},
+  {cat:'FILLER',name:'Teartrough Filler',duration:45,price:180},
+  {cat:'FILLER',name:'2.2ml Facial Contouring',duration:45,price:230},
+  {cat:'FILLER',name:'3.3ml Facial Contouring',duration:60,price:330},
+  {cat:'FILLER',name:'4.4ml Facial Contouring',duration:60,price:440},
+  {cat:'FACIALS',name:'Glass Skin Facial',duration:60,price:80},
+  {cat:'FACIALS',name:'Glass Skin Facial + Microneedling',duration:60,price:120},
+  {cat:'SKINBOOST',name:'1x Skin Booster',duration:30,price:150},
+  {cat:'SKINBOOST',name:'3x Lumi Pro Skin Booster',duration:30,price:350},
+  {cat:'SKINBOOST',name:'Plenhyage XL Strong',duration:30,price:200},
+  {cat:'SKINBOOST',name:'Plenhyage XL Strong 2 Treatments',duration:30,price:350},
+  {cat:'SKINBOOST',name:'Vitarin I - Eye Polynucleotide',duration:30,price:170},
+  {cat:'SKINBOOST',name:'Vitarin I - Eye Polynucleotide x2',duration:30,price:300},
+  {cat:'SKINBOOST',name:'B12 Injection',duration:15,price:30},
+  {cat:'FATDISSOLVE',name:'Lemon Bottle Small Area',duration:30,price:70},
+  {cat:'FATDISSOLVE',name:'Lemon Bottle Large Area',duration:30,price:100},
+  {cat:'BUNDLES',name:'Botox 3 Areas + 1.1ml Dermal Filler',duration:45,price:320},
+  {cat:'BUNDLES',name:'Botox 3 Areas + 1.1ml Lips + Lumi Pro',duration:60,price:450},
+  {cat:'BUNDLES',name:'Botox 3 Areas + 1x Lumi Pro Skin Booster',duration:45,price:300},
+  {cat:'BUNDLES',name:'Botox 3 Areas + 1x Plenhyage XL',duration:45,price:350},
+  {cat:'BUNDLES',name:'Botox 3 Areas + Vitarin I Eye',duration:45,price:300},
+  {cat:'CONSULT',name:'Consultation',duration:15,price:25},
 ];
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
@@ -1286,16 +1315,16 @@ function initSampleData(){
   const now=new Date();
   const y=now.getFullYear(),m=now.getMonth();
   const sample=[
-    {id:uid(),clientName:'Ellisha W.',treatment:'Lip Filler',category:'FACE',date:fmt(new Date(y,m,3)),time:'11:00',price:200,deposit:100,status:'Complete',notes:'',createdAt:Date.now()-20*86400000},
-    {id:uid(),clientName:'Donna S.',treatment:'Anti-Wrinkle Injections',category:'FACE',date:fmt(new Date(y,m,5)),time:'13:00',price:180,deposit:90,status:'Complete',notes:'',createdAt:Date.now()-18*86400000},
-    {id:uid(),clientName:'Sophie M.',treatment:'Glass Skin Facial',category:'SKIN',date:fmt(new Date(y,m,8)),time:'10:00',price:150,deposit:75,status:'Complete',notes:'',createdAt:Date.now()-15*86400000},
-    {id:uid(),clientName:'Chloe R.',treatment:'Liquid Rhinoplasty',category:'FACE',date:fmt(new Date(y,m,10)),time:'14:00',price:350,deposit:175,status:'Complete',notes:'',createdAt:Date.now()-12*86400000},
-    {id:uid(),clientName:'Ellisha W.',treatment:'Profhilo / Skin Booster',category:'SKIN',date:fmt(new Date(y,m,14)),time:'11:30',price:300,deposit:150,status:'Complete',notes:'',createdAt:Date.now()-8*86400000},
-    {id:uid(),clientName:'Amara J.',treatment:'Masseter Botox',category:'FACE',date:fmt(new Date(y,m,15)),time:'15:00',price:250,deposit:125,status:'Confirmed',notes:'',createdAt:Date.now()-7*86400000},
-    {id:uid(),clientName:'Priya K.',treatment:'Dermaplaning',category:'SKIN',date:fmt(new Date(y,m,17)),time:'09:30',price:80,deposit:40,status:'Confirmed',notes:'',createdAt:Date.now()-5*86400000},
-    {id:uid(),clientName:'Donna S.',treatment:'Lip Filler',category:'FACE',date:fmt(new Date(y,m,20)),time:'12:00',price:200,deposit:100,status:'Pending',notes:'',createdAt:Date.now()-2*86400000},
-    {id:uid(),clientName:'Sophie M.',treatment:'Chemical Peel',category:'SKIN',date:fmt(new Date(y,m,22)),time:'10:30',price:120,deposit:60,status:'Pending',notes:'',createdAt:Date.now()-1*86400000},
-    {id:uid(),clientName:'Zara T.',treatment:'Teeth Whitening',category:'TEETH',date:fmt(new Date(y,m,25)),time:'13:30',price:199,deposit:99,status:'Pending',notes:'',createdAt:Date.now()},
+    {id:uid(),clientName:'Ellisha W.',treatment:'1.1ml Lip Filler',category:'FILLER',date:fmt(new Date(y,m,3)),time:'11:00',price:150,deposit:75,status:'Complete',notes:'',createdAt:Date.now()-20*86400000},
+    {id:uid(),clientName:'Donna S.',treatment:'Botox 3 Areas',category:'BOTOX',date:fmt(new Date(y,m,5)),time:'13:00',price:180,deposit:90,status:'Complete',notes:'',createdAt:Date.now()-18*86400000},
+    {id:uid(),clientName:'Sophie M.',treatment:'Glass Skin Facial',category:'FACIALS',date:fmt(new Date(y,m,8)),time:'10:00',price:80,deposit:40,status:'Complete',notes:'',createdAt:Date.now()-15*86400000},
+    {id:uid(),clientName:'Chloe R.',treatment:'Liquid Rhinoplasty',category:'FILLER',date:fmt(new Date(y,m,10)),time:'14:00',price:180,deposit:90,status:'Complete',notes:'',createdAt:Date.now()-12*86400000},
+    {id:uid(),clientName:'Ellisha W.',treatment:'1x Skin Booster',category:'SKINBOOST',date:fmt(new Date(y,m,14)),time:'11:30',price:150,deposit:75,status:'Complete',notes:'',createdAt:Date.now()-8*86400000},
+    {id:uid(),clientName:'Amara J.',treatment:'Masseter Botox',category:'BOTOX',date:fmt(new Date(y,m,15)),time:'15:00',price:200,deposit:100,status:'Confirmed',notes:'',createdAt:Date.now()-7*86400000},
+    {id:uid(),clientName:'Priya K.',treatment:'Lemon Bottle Small Area',category:'FATDISSOLVE',date:fmt(new Date(y,m,17)),time:'09:30',price:70,deposit:35,status:'Confirmed',notes:'',createdAt:Date.now()-5*86400000},
+    {id:uid(),clientName:'Donna S.',treatment:'0.7ml Lip Filler',category:'FILLER',date:fmt(new Date(y,m,20)),time:'12:00',price:120,deposit:60,status:'Pending',notes:'',createdAt:Date.now()-2*86400000},
+    {id:uid(),clientName:'Sophie M.',treatment:'Glass Skin Facial + Microneedling',category:'FACIALS',date:fmt(new Date(y,m,22)),time:'10:30',price:120,deposit:60,status:'Pending',notes:'',createdAt:Date.now()-1*86400000},
+    {id:uid(),clientName:'Zara T.',treatment:'Botox 3 Areas + 1.1ml Dermal Filler',category:'BUNDLES',date:fmt(new Date(y,m,25)),time:'13:30',price:320,deposit:160,status:'Pending',notes:'',createdAt:Date.now()},
   ];
   saveBookings(sample);
   const clients=[
@@ -1841,9 +1870,9 @@ function renderDashboard(){
     catRevenue[b.category]=(catRevenue[b.category]||0)+Number(b.price);
   });
   const maxR=Math.max(...Object.values(catRevenue),1);
-  const catLabels={FACE:'Dermal Filler / Botox',SKIN:'Skin Treatments',BODY:'Body',TEETH:'Teeth Whitening',Consultation:'Consultation'};
-  const catLabelsMob={FACE:'Dermal Filler',SKIN:'Skin',BODY:'Body',TEETH:'Teeth',Consultation:'Consult.'};
-  const catColors={Consultation:'background:#4A90D9'};
+  const catLabels={BOTOX:'Botox',FILLER:'Dermal Filler',FACIALS:'Facials',SKINBOOST:'Skin Boosters',FATDISSOLVE:'Fat Dissolving',BUNDLES:'Treatment Bundles',CONSULT:'Consultation'};
+  const catLabelsMob={BOTOX:'Botox',FILLER:'Filler',FACIALS:'Facials',SKINBOOST:'Skin Boost',FATDISSOLVE:'Fat Diss.',BUNDLES:'Bundles',CONSULT:'Consult.'};
+  const catColors={CONSULT:'background:#4A90D9'};
   document.getElementById('revenue-by-treatment').innerHTML=Object.entries(catRevenue).map(([k,v])=>`
     <div class="bar-row">
       <div class="bar-label"><span class="bar-label-full">${catLabels[k]||k}</span><span class="bar-label-short">${catLabelsMob[k]||k}</span></div>
@@ -2628,14 +2657,14 @@ async function saveClient(){
 // ═══════════════════════════════════════════════════
 // ── Treatment data helpers ──
 function getCustomTreatments(){return JSON.parse(localStorage.getItem('dd_custom_treats')||'[]')}
-function saveCustomTreatments(t){localStorage.setItem('dd_custom_treats',JSON.stringify(t));CloudStore.set('dd_custom_treats',t);}
+function saveCustomTreatments(t){localStorage.setItem('dd_custom_treats',JSON.stringify(t));CloudStore.set('dd_custom_treats',t).then(()=>showTreatSaveStatus('✓ Auto-saved')).catch(()=>showTreatSaveStatus('✕ Auto-save failed'));}
 function getCustomCats(){return JSON.parse(localStorage.getItem('dd_custom_cats')||'[]')}
-function saveCustomCats(c){localStorage.setItem('dd_custom_cats',JSON.stringify(c));CloudStore.set('dd_custom_cats',c);}
+function saveCustomCats(c){localStorage.setItem('dd_custom_cats',JSON.stringify(c));CloudStore.set('dd_custom_cats',c).then(()=>showTreatSaveStatus('✓ Auto-saved')).catch(()=>showTreatSaveStatus('✕ Auto-save failed'));}
 function getCatStates(){return JSON.parse(localStorage.getItem('dd_cat_states')||'{}')}
 function saveCatStates(s){localStorage.setItem('dd_cat_states',JSON.stringify(s));CloudStore.set('dd_cat_states',s);}
 function getTreatOverrides(){return JSON.parse(localStorage.getItem('dd_treatment_overrides')||'{}')}
 
-const CAT_LABELS={FACE:'Face',SKIN:'Skin',BODY:'Body',TEETH:'Teeth'};
+const CAT_LABELS={BOTOX:'Botox',FILLER:'Dermal Filler',FACIALS:'Facials',SKINBOOST:'Skin Boosters',FATDISSOLVE:'Fat Dissolving',BUNDLES:'Treatment Bundles',CONSULT:'Consultation'};
 
 function allTreatments(){
   const custom=getCustomTreatments();
@@ -2788,7 +2817,7 @@ function saveEditTreatment(){
     const overrides=getTreatOverrides();
     overrides[name]={price:newPrice,duration:newDur};
     localStorage.setItem('dd_treatment_overrides',JSON.stringify(overrides));
-    CloudStore.set('dd_treatment_overrides',overrides);
+    CloudStore.set('dd_treatment_overrides',overrides).then(()=>showTreatSaveStatus('✓ Auto-saved')).catch(()=>showTreatSaveStatus('✕ Auto-save failed'));
   }
   closeEditTreatModal();
   renderTreatments();
@@ -2835,6 +2864,32 @@ function deleteCat(key){
 // Legacy alias kept for any old references
 function editTreatment(name){
   openEditTreat(encodeURIComponent(name),'false');
+}
+
+function showTreatSaveStatus(msg){
+  const el=document.getElementById('treat-save-status');
+  if(!el)return;
+  el.textContent=msg;
+  el.style.opacity='1';
+  clearTimeout(el._hideTimer);
+  el._hideTimer=setTimeout(()=>{el.style.opacity='0';},3000);
+}
+
+async function saveAllTreatmentsToCloud(){
+  const btn=document.getElementById('treat-save-btn');
+  if(btn){btn.textContent='Saving…';btn.disabled=true;}
+  try{
+    await CloudStore.set('dd_custom_treats',getCustomTreatments());
+    await CloudStore.set('dd_custom_cats',getCustomCats());
+    await CloudStore.set('dd_treatment_overrides',getTreatOverrides());
+    await CloudStore.set('dd_cat_states',getCatStates());
+    showTreatSaveStatus('✓ Saved to cloud');
+  }catch(e){
+    showTreatSaveStatus('✕ Save failed');
+    console.error('saveAllTreatmentsToCloud error',e);
+  }finally{
+    if(btn){btn.textContent='Save Changes';btn.disabled=false;}
+  }
 }
 
 // ═══════════════════════════════════════════════════
