@@ -1859,7 +1859,7 @@ function renderDashboard(){
     if(recentTable)recentTable.style.display='';
     if(recentEmpty)recentEmpty.style.display='none';
     document.getElementById('recent-bookings-body').innerHTML=recent.map(b=>`
-      <tr>
+      <tr style="cursor:pointer" onclick="openBookingModal('${b.id}')" title="Click for full details">
         <td><strong>${b.clientName}</strong></td>
         <td>${b.treatment}</td>
         <td><span class="date-full">${formatDate(b.date)}</span><span class="date-mob">${formatDateShort(b.date)}</span></td>
@@ -1896,7 +1896,7 @@ function renderDashboard(){
   if(titleEl)titleEl.textContent='Today — '+formatDate(today);
   const todayBookings=bookings.filter(b=>b.date===today).sort((a,b)=>a.time.localeCompare(b.time));
   document.getElementById('today-schedule').innerHTML=todayBookings.length?todayBookings.map(b=>`
-    <div class="timeline-item">
+    <div class="timeline-item" onclick="openBookingModal('${b.id}')" style="cursor:pointer" title="Click for full details">
       <div class="timeline-time">${b.time}</div>
       <div class="timeline-body">
         <div class="timeline-name">${b.clientName}</div>
@@ -1910,7 +1910,7 @@ function renderDashboard(){
   const feed=[...bookings].sort((a,b)=>b.createdAt-a.createdAt).slice(0,10);
   document.getElementById('activity-feed').innerHTML=feed.length?feed.map(b=>{
     const col=b.status==='Confirmed'?'#2e7d32':b.status==='Pending'?'var(--gold)':b.status==='Cancelled'?'#c62828':'#888';
-    return`<div class="feed-item" onclick="openClientByName('${b.clientName.replace(/'/g,"\\'")}')"><div class="feed-dot" style="background:${col}"></div><div><div style="font-weight:500;font-size:12px">${b.status} — ${b.clientName}</div><div style="color:var(--muted);margin-top:2px">${b.treatment} · ${gbp(b.price)} · <span class="feed-time">${timeAgo(b.createdAt)}</span></div></div></div>`;
+    return`<div class="feed-item" onclick="openBookingModal('${b.id}')" title="Click for full details"><div class="feed-dot" style="background:${col}"></div><div><div style="font-weight:500;font-size:12px">${b.status} — ${b.clientName}</div><div style="color:var(--muted);margin-top:2px">${b.treatment} · ${gbp(b.price)} · <span class="feed-time">${timeAgo(b.createdAt)}</span></div></div></div>`;
   }).join(''):'<p style="color:var(--muted);font-size:13px;font-style:italic;padding:8px 0">No activity yet</p>';
 }
 
