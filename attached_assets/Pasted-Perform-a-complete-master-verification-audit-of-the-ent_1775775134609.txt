@@ -1,0 +1,379 @@
+Perform a complete master verification audit of the entire
+Dermadoll Aesthetics platform. Test every live system,
+verify all security, check cloud data integrity, and
+simulate the full user journey end to end.
+Fix every issue found. Report everything.
+
+══════════════════════════════════════
+1. ENVIRONMENT VARIABLES
+══════════════════════════════════════
+Verify every env var — DO NOT log actual values:
+
+STRIPE_SECRET_KEY → sk_live_ or sk_test_ ✅/❌
+STRIPE_PUBLISHABLE_KEY → pk_live_ or pk_test_ ✅/❌
+STRIPE_WEBHOOK_SECRET → whsec_ ✅/❌
+RESEND_API_KEY → re_ ✅/❌
+CRON_SECRET → non-empty string ✅/❌
+DATABASE_URL → postgres:// or postgresql:// ✅/❌
+SESSION_SECRET → non-empty min 32 chars ✅/❌
+ADMIN_EMAIL → valid email format ✅/❌
+ADMIN_PASSWORD → non-empty string ✅/❌
+
+Flag any missing or malformed immediately.
+
+══════════════════════════════════════
+2. DATABASE INTEGRITY
+══════════════════════════════════════
+- Verify database connection live and responding
+- Verify all tables exist:
+  bookings, treatments, enquiries,
+  admin_users, sessions
+- Verify correct columns on all tables
+- Verify treatments table has all 43 base treatments
+  plus any added via admin portal:
+  Botox: 11
+  Dermal Filler: 14
+  Facials: 2
+  Skin Boosters: 7
+  Fat Dissolving: 2
+  Injectables: 2
+  Treatment Bundles: 5
+- Verify every treatment has:
+  name, price, duration, category, active status
+- Verify no duplicate treatment names
+- Verify no orphaned bookings
+- Verify no bookings with null:
+  payment_status, date, time, treatment_name,
+  client_email, deposit_amount
+- Verify all bookings have valid status:
+  pending / confirmed / completed / cancelled
+- Verify stripe_payment_id is unique per booking
+- Verify database indexes exist on:
+  bookings.stripe_payment_id
+  bookings.date
+  bookings.status
+  bookings.client_email
+- Check database storage usage — flag if over 80%
+- Run VACUUM ANALYZE to optimise query performance
+
+══════════════════════════════════════
+3. STRIPE LIVE VERIFICATION
+══════════════════════════════════════
+- Verify Stripe mode:
+  sk_live_ = LIVE — real payments ✅
+  sk_test_ = TEST — flag as warning
+- Verify Stripe connection by fetching account info
+- Verify webhook endpoint is registered and active
+  in Stripe dashboard
+- Verify webhook is listening for:
+  checkout.session.completed
+  payment_intent.succeeded
+  payment_intent.payment_failed
+- Verify webhook secret matches registered endpoint
+- Verify deposit calculation server-side:
+  treatment price lookup from DB only
+  deposit = Math.round(price * 100 * 0.5) pence
+  balance = remaining 50%
+- Verify no way to manipulate payment amount
+  from client side
+- Verify Stripe metadata contains all fields:
+  treatment_name, treatment_duration,
+  full_price, deposit_amount, balance_due,
+  date, time, client_email
+- Verify idempotency — duplicate webhook events
+  do not create duplicate bookings
+- Verify failed payments handled gracefully
+
+══════════════════════════════════════
+4. RESEND EMAIL VERIFICATION
+══════════════════════════════════════
+- Verify Resend API key valid and active
+- Verify FROM address is verified domain sender:
+  bookings@dermadoll-aesthetics.co.uk
+- Send a live test email via Resend to ADMIN_EMAIL
+  Subject: "Dermadoll — Email System Test"
+  Body: "Email system verified at [current UK time]"
+  If this fails — log full error and fix
+- Verify client confirmation email template:
+  Correct HTML rendering — not plain text
+  DERMADOLL AESTHETICS header in gold #C9A96E
+  Booking summary table
+  Deposit paid + balance due on arrival
+  Clinic address placeholder
+  WhatsApp contact link
+  Instagram link
+  Footer: © 2026 Dermadoll Aesthetics
+- Verify Niamh notification email template:
+  Client name and email
+  Treatment, date, time
+  Deposit received amount
+- Verify neither email triggers spam filters:
+  FROM domain verified in Resend ✅
+  Reply-To set correctly ✅
+  No spam trigger words in subjects ✅
+
+══════════════════════════════════════
+5. FULL USER JOURNEY TEST
+══════════════════════════════════════
+Simulate a complete booking end to end:
+
+Step 1 — Homepage loads
+- Hero section renders correctly
+- Video background placeholder if no video
+- Nav links all work
+- Stats display correctly
+
+Step 2 — Popup banner
+- Appears after 5 seconds
+- getNextAvailableSlot() returns valid UK time
+- LIMITED AVAILABILITY pill shows
+- Book Now scrolls to treatments
+- Maybe Later closes popup
+- sessionStorage "popupSeen" set on close
+- Does NOT reappear in same session
+
+Step 3 — Treatments accordion
+- All 7 categories visible
+- Each category expands and collapses
+- Every treatment shows: name, price, duration
+- Every treatment has a Book Now button
+- Book Now opens modal with correct treatment
+
+Step 4 — Booking modal
+- Treatment name and price correct at top
+- Calendar renders correctly:
+  Current month shown
+  Sunday and Monday greyed out
+  Past dates greyed out
+  Working days selectable
+- Select a date → slots generate correctly:
+  15 min interval ✅
+  Back to back no gaps ✅
+  Last slot = closing time minus duration ✅
+  UK Europe/London timezone used ✅
+  Today filtered with 15 min buffer ✅
+- Select a slot → booking summary shows:
+  Treatment name ✅
+  Duration ✅
+  Date in UK format: Tuesday 14 April 2026 ✅
+  Time: HH:MM — HH:MM (start and end) ✅
+  Full price ✅
+  Deposit 50% ✅
+  Balance 50% ✅
+- Confirm Booking → Stripe checkout opens
+- Test payment with Stripe test card:
+  4242 4242 4242 4242
+  Any future expiry, any CVC
+- Payment succeeds → redirects to thank you page
+
+Step 5 — Thank you page
+- Loads only after successful payment
+- session_id verified with Stripe server-side
+- Glassmorphism styling renders
+- Animated checkmark draws correctly
+- Booking summary card correct
+- Clinic details card shows address placeholder
+- Copy Address button works
+- Save to Calendar generates valid .ics:
+  Correct DTSTART and DTEND in UK time
+  No Z suffix on datetime
+  TZID=Europe/London set
+  Treatment name in title
+  Clinic address in location
+- WhatsApp button pre-fills correct message
+- Instagram links to @dermadollaesthetics
+- Back to Home returns to homepage
+- All stagger animations work
+- Fully responsive on mobile
+
+Step 6 — Emails after payment
+- Client confirmation email received
+- Correct treatment, date, time in email
+- Deposit and balance amounts correct
+- All links working in email
+- Niamh notification email received
+- All booking details present
+
+Step 7 — Admin portal
+- Login page accessible at /admin
+- Incorrect credentials returns 401
+- Rate limiting on login (10 attempts / 10 min)
+- Correct credentials grants access
+- Dashboard shows the test booking just made
+- All booking fields visible and correct
+- Booking status shows as confirmed
+- Add Treatment form works:
+  All fields present
+  Duration dropdown: 15/30/45/60/75/90 mins
+  Save → appears in live site accordion
+  New treatment Book Now works with correct duration
+  generateSlots() uses new duration correctly
+- Edit treatment updates live site instantly
+- Inactive toggle hides from site instantly
+- Delete shows confirmation before removing
+- Logout invalidates session correctly
+
+══════════════════════════════════════
+6. CALENDAR & TIMEZONE VERIFICATION
+══════════════════════════════════════
+- Verify all dates use Europe/London timezone
+- Verify date-fns-tz installed and imported
+- Verify parseUKDate() uses fromZonedTime()
+- Verify no new Date("YYYY-MM-DD") anywhere
+- Verify no getUTC methods used for display
+- Test these specific cases:
+  Click 17 April → shows "Friday 17 April 2026" ✅
+  Click 1st of month → correct date shown ✅
+  Same day slots → filtered with 15 min buffer ✅
+  Friday last slot 45 min → 15:15 ✅
+  Saturday last slot 30 min → 13:30 ✅
+  Tuesday last slot 60 min → 18:00 ✅
+- Verify getNextAvailableSlot() correct for:
+  Today with slots remaining → "Today at HH:MM"
+  Today fully booked → "Tomorrow from 09:00"
+  Sunday → skips to Tuesday
+  Monday → skips to Tuesday
+- Verify .ics DTSTART has no Z suffix
+- Verify .ics has TZID=Europe/London
+
+══════════════════════════════════════
+7. SECURITY VERIFICATION
+══════════════════════════════════════
+- Scan all files for hardcoded secrets:
+  No sk_live_, sk_test_, whsec_, re_ in code
+  No passwords or tokens in source files
+  No .env files committed
+- Verify .gitignore includes:
+  .env, .env.*, .env.local, node_modules/
+- Verify client-side JS contains:
+  Only STRIPE_PUBLISHABLE_KEY (allowed)
+  Never STRIPE_SECRET_KEY
+  Never RESEND_API_KEY
+  Never DATABASE_URL
+  Never SESSION_SECRET
+- Verify webhook:
+  Uses express.raw() for body parsing
+  Validates Stripe signature before processing
+  Returns 400 on signature failure
+  POST only — GET returns 404 or 405
+- Verify admin routes:
+  All protected by requireAuth() middleware
+  JWT verified server-side on every request
+  Returns 401 without valid session
+  Brute force: rate limited 10/10min
+  Password stored as bcrypt hash
+- Verify payments:
+  Amount calculated server-side only
+  Treatment price from DB not client input
+  Unknown treatment returns 400
+- Verify security headers present:
+  Content-Security-Policy ✅
+  X-Content-Type-Options: nosniff ✅
+  X-Frame-Options: DENY ✅
+  X-XSS-Protection ✅
+  Referrer-Policy ✅
+- Verify HTTPS enforced
+- Verify no mixed content on page
+- Run npm audit — flag critical vulnerabilities
+
+══════════════════════════════════════
+8. PERFORMANCE VERIFICATION
+══════════════════════════════════════
+- Check all browser console errors — fix all
+- Check all broken image paths — fix placeholders
+- Check all broken video paths — fix placeholders
+- Verify Google Fonts loading:
+  Cormorant Garamond ✅
+  Inter ✅
+- Verify no text overflow on mobile 375px
+- Verify hero video autoplay muted on mobile
+- Verify all nav anchor links scroll correctly
+- Verify navbar transparent → solid on scroll
+- Verify all hover states working
+- Verify mobile hamburger menu works
+- Verify reviews carousel swipes on mobile
+- Verify FAQ accordion all questions work
+- Verify stats counter animates on load
+- Check page load time — flag if over 3 seconds
+- Verify "Powered by Aesthetix" in footer
+  links to correct Aesthetix URL
+
+══════════════════════════════════════
+9. CONTENT VERIFICATION
+══════════════════════════════════════
+- Verify all 43 treatments correct:
+  Names match exactly ✅
+  Prices match exactly ✅
+  Durations match exactly ✅
+- Verify clinic address placeholder:
+  "Solihull, Birmingham — full address
+  confirmed on booking" everywhere
+- Verify reviews:
+  Ellisha W. — February 2026 — ★★★★★
+  Donna S. — February 2026 — ★★★★★
+  Donna S. — December 2025 — ★★★★★
+  Overall: ★ 5.0 | 5 Reviews — Powered by Faces
+- Verify FAQ has all 8 questions and answers
+- Verify Training section:
+  Pathway to Aesthetics — £2,000
+  £300 deposit to secure
+  Finance available
+  DM to Enquire → Instagram link
+- Verify footer:
+  © 2026 Dermadoll Aesthetics
+  Powered by Aesthetix (with gold hyperlink)
+  Instagram @dermadollaesthetics
+  WhatsApp link
+
+══════════════════════════════════════
+10. CLOUD & UPTIME VERIFICATION
+══════════════════════════════════════
+- Verify Replit deployment is live and running
+- Verify server restarts cleanly with all env vars
+- Verify database reconnects after server restart
+- Verify persistent data store survives restart:
+  All treatments still in DB after restart ✅
+  All bookings still in DB after restart ✅
+- Verify CRON_SECRET used for any scheduled jobs
+- Verify no memory leaks — check server logs
+- Verify error handling on all routes:
+  No unhandled promise rejections
+  No uncaught exceptions crashing server
+  All errors return proper HTTP status codes
+- Verify server logs clean — no repeated errors
+
+══════════════════════════════════════
+FINAL MASTER REPORT
+══════════════════════════════════════
+After all 10 sections output:
+
+MASTER VERIFICATION COMPLETE
+──────────────────────────────
+Total checks performed: [n]
+Critical issues found: [n] — fixed immediately
+Medium issues found: [n] — fixed
+Low issues found: [n] — noted
+
+Systems verified live:
+Database ✅/❌
+Stripe ✅/❌
+Resend Email ✅/❌
+Admin Portal ✅/❌
+Booking Flow ✅/❌
+Calendar Logic ✅/❌
+Webhook ✅/❌
+Security Headers ✅/❌
+Environment Variables ✅/❌
+Cloud Uptime ✅/❌
+
+Still requires owner input:
+- Clinic street address
+- Hero video (hero.mp4)
+- Before & after photos
+- Results videos (video1-4.mp4)
+- Niamh WhatsApp number
+- Confirm Stripe switched to live keys
+- Niamh to change admin password via portal
+
+Overall system status: 
+FULLY OPERATIONAL ✅ / NEEDS ATTENTION ⚠️ / AT RISK ❌
