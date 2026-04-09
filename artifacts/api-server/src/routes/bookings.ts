@@ -43,9 +43,9 @@ const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"] as const;
 // Availability defaults (mirrors availability.ts — Mon & Sun closed)
 const AVAIL_DEFAULT: Record<string, { on: boolean; start?: string; end?: string }> = {
   Mon: { on: false },
-  Tue: { on: true, start: "10:00", end: "19:00" },
-  Wed: { on: true, start: "10:00", end: "19:00" },
-  Thu: { on: true, start: "10:00", end: "19:00" },
+  Tue: { on: true, start: "09:00", end: "19:00" },
+  Wed: { on: true, start: "09:00", end: "19:00" },
+  Thu: { on: true, start: "09:00", end: "19:00" },
   Fri: { on: true, start: "09:00", end: "16:00" },
   Sat: { on: true, start: "09:00", end: "14:00" },
   Sun: { on: false },

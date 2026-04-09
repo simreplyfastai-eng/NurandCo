@@ -1,9 +1,11 @@
-const SCHED: Record<number, { oH: number; lH: number; lM: number; label: string }> = {
-  2: { oH: 10, lH: 18, lM: 0, label: "from 10:00" },
-  3: { oH: 10, lH: 18, lM: 0, label: "from 10:00" },
-  4: { oH: 10, lH: 18, lM: 0, label: "from 10:00" },
-  5: { oH: 9,  lH: 15, lM: 0, label: "from 09:00" },
-  6: { oH: 9,  lH: 13, lM: 0, label: "from 09:00" },
+// Working hours: Tue-Thu 09:00-19:00, Fri 09:00-16:00, Sat 09:00-14:00
+// Slot interval: 15 minutes, back-to-back, no buffer
+const SCHED: Record<number, { oH: number; oM: number; closeH: number; closeM: number; label: string }> = {
+  2: { oH: 9, oM: 0, closeH: 19, closeM: 0, label: "from 09:00" },
+  3: { oH: 9, oM: 0, closeH: 19, closeM: 0, label: "from 09:00" },
+  4: { oH: 9, oM: 0, closeH: 19, closeM: 0, label: "from 09:00" },
+  5: { oH: 9, oM: 0, closeH: 16, closeM: 0, label: "from 09:00" },
+  6: { oH: 9, oM: 0, closeH: 14, closeM: 0, label: "from 09:00" },
 };
 
 const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
@@ -35,15 +37,16 @@ export function getNextAvailableSlot(): string {
 
     if (offset === 0) {
       const nowMins = h * 60 + m;
-      const openMins = sched.oH * 60;
-      const lastMins = sched.lH * 60 + sched.lM;
+      const openMins = sched.oH * 60 + sched.oM;
+      const closeMins = sched.closeH * 60 + sched.closeM;
 
       if (nowMins < openMins) {
         return `Today ${sched.label}`;
       }
 
-      const nextSlotMins = Math.ceil(nowMins / 30) * 30;
-      if (nextSlotMins <= lastMins) {
+      // Next 15-min slot at least 15 mins from now
+      const nextSlotMins = Math.ceil((nowMins + 15) / 15) * 15;
+      if (nextSlotMins < closeMins) {
         const sh = Math.floor(nextSlotMins / 60);
         const sm = nextSlotMins % 60;
         return `Today at ${String(sh).padStart(2, "0")}:${String(sm).padStart(2, "0")}`;

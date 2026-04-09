@@ -7,6 +7,7 @@ type Treatment = {
   name: string;
   price: string;
   duration: string;
+  durationMins?: number;
 };
 
 type Category = {
@@ -18,72 +19,72 @@ const FALLBACK_SERVICES: Category[] = [
   {
     title: "Botox",
     items: [
-      { name: "Botox 1 Area", price: "£100", duration: "15 mins" },
-      { name: "Botox 2 Areas", price: "£140", duration: "15 mins" },
-      { name: "Botox 3 Areas", price: "£180", duration: "15 mins" },
-      { name: "Botox 4 Areas", price: "£210", duration: "15 mins" },
-      { name: "Masseter Botox", price: "£200", duration: "15 mins" },
-      { name: "Nefertiti Lift Botox (Neck)", price: "£220", duration: "30 mins" },
-      { name: "Chin Botox (Mentalis Muscle)", price: "£80", duration: "30 mins" },
-      { name: "Nose Slimming Botox", price: "£80", duration: "30 mins" },
-      { name: "Gummy Smile / Lip Flip Botox", price: "£80", duration: "30 mins" },
-      { name: "Hyperhidrosis (Underarm) Botox", price: "£220", duration: "30 mins" },
-      { name: "Botox Topup", price: "£20", duration: "15 mins" },
+      { name: "Botox 1 Area", price: "£100", duration: "15 mins", durationMins: 15 },
+      { name: "Botox 2 Areas", price: "£140", duration: "15 mins", durationMins: 15 },
+      { name: "Botox 3 Areas", price: "£180", duration: "15 mins", durationMins: 15 },
+      { name: "Botox 4 Areas", price: "£210", duration: "15 mins", durationMins: 15 },
+      { name: "Masseter Botox", price: "£200", duration: "15 mins", durationMins: 15 },
+      { name: "Nefertiti Lift Botox (Neck)", price: "£220", duration: "30 mins", durationMins: 30 },
+      { name: "Chin Botox (Mentalis Muscle)", price: "£80", duration: "30 mins", durationMins: 30 },
+      { name: "Nose Slimming Botox", price: "£80", duration: "30 mins", durationMins: 30 },
+      { name: "Gummy Smile / Lip Flip Botox", price: "£80", duration: "30 mins", durationMins: 30 },
+      { name: "Hyperhidrosis (Underarm) Botox", price: "£220", duration: "30 mins", durationMins: 30 },
+      { name: "Botox Topup", price: "£20", duration: "15 mins", durationMins: 15 },
     ],
   },
   {
     title: "Dermal Filler",
     items: [
-      { name: "0.5ml Lip Filler", price: "£100", duration: "30 mins" },
-      { name: "0.7ml Lip Filler", price: "£120", duration: "45 mins" },
-      { name: "1.1ml Lip Filler", price: "£150", duration: "45 mins" },
-      { name: "1.1ml Nasal Labials", price: "£150", duration: "30 mins" },
-      { name: "1.1ml Cheek Filler", price: "£150", duration: "30 mins" },
-      { name: "1.5ml Cheek Filler", price: "£200", duration: "45 mins" },
-      { name: "2.2ml Cheek Filler", price: "£250", duration: "45 mins" },
-      { name: "1.1ml Chin Filler", price: "£150", duration: "45 mins" },
-      { name: "2.2ml Jawline Filler", price: "£250", duration: "1 hr" },
-      { name: "Liquid Rhinoplasty", price: "£180", duration: "45 mins" },
-      { name: "Teartrough Filler", price: "£180", duration: "45 mins" },
-      { name: "2.2ml Facial Contouring", price: "£230", duration: "45 mins" },
-      { name: "3.3ml Facial Contouring", price: "£330", duration: "1 hr" },
-      { name: "4.4ml Facial Contouring", price: "£440", duration: "1 hr" },
+      { name: "0.5ml Lip Filler", price: "£100", duration: "30 mins", durationMins: 30 },
+      { name: "0.7ml Lip Filler", price: "£120", duration: "45 mins", durationMins: 45 },
+      { name: "1.1ml Lip Filler", price: "£150", duration: "45 mins", durationMins: 45 },
+      { name: "1.1ml Nasal Labials", price: "£150", duration: "30 mins", durationMins: 30 },
+      { name: "1.1ml Cheek Filler", price: "£150", duration: "30 mins", durationMins: 30 },
+      { name: "1.5ml Cheek Filler", price: "£200", duration: "45 mins", durationMins: 45 },
+      { name: "2.2ml Cheek Filler", price: "£250", duration: "45 mins", durationMins: 45 },
+      { name: "1.1ml Chin Filler", price: "£150", duration: "45 mins", durationMins: 45 },
+      { name: "2.2ml Jawline Filler", price: "£250", duration: "1 hr", durationMins: 60 },
+      { name: "Liquid Rhinoplasty", price: "£180", duration: "45 mins", durationMins: 45 },
+      { name: "Teartrough Filler", price: "£180", duration: "45 mins", durationMins: 45 },
+      { name: "2.2ml Facial Contouring", price: "£230", duration: "45 mins", durationMins: 45 },
+      { name: "3.3ml Facial Contouring", price: "£330", duration: "1 hr", durationMins: 60 },
+      { name: "4.4ml Facial Contouring", price: "£440", duration: "1 hr", durationMins: 60 },
     ],
   },
   {
     title: "Facials",
     items: [
-      { name: "Glass Skin Facial", price: "£80", duration: "1 hr" },
-      { name: "Glass Skin Facial + Microneedling", price: "£120", duration: "1 hr" },
+      { name: "Glass Skin Facial", price: "£80", duration: "1 hr", durationMins: 60 },
+      { name: "Glass Skin Facial + Microneedling", price: "£120", duration: "1 hr", durationMins: 60 },
     ],
   },
   {
     title: "Skin Boosters",
     items: [
-      { name: "1x Skin Booster", price: "£150", duration: "30 mins" },
-      { name: "3x Lumi Pro Skin Booster", price: "£350", duration: "30 mins" },
-      { name: "Plenhyage XL Strong", price: "£200", duration: "30 mins" },
-      { name: "Plenhyage XL Strong 2 Treatments", price: "£350", duration: "30 mins" },
-      { name: "Vitarin I - Eye Polynucleotide", price: "£170", duration: "30 mins" },
-      { name: "Vitarin I - Eye Polynucleotide x2", price: "£300", duration: "30 mins" },
-      { name: "B12 Injection", price: "£30", duration: "15 mins" },
+      { name: "1x Skin Booster", price: "£150", duration: "30 mins", durationMins: 30 },
+      { name: "3x Lumi Pro Skin Booster", price: "£350", duration: "30 mins", durationMins: 30 },
+      { name: "Plenhyage XL Strong", price: "£200", duration: "30 mins", durationMins: 30 },
+      { name: "Plenhyage XL Strong 2 Treatments", price: "£350", duration: "30 mins", durationMins: 30 },
+      { name: "Vitarin I - Eye Polynucleotide", price: "£170", duration: "30 mins", durationMins: 30 },
+      { name: "Vitarin I - Eye Polynucleotide x2", price: "£300", duration: "30 mins", durationMins: 30 },
+      { name: "B12 Injection", price: "£30", duration: "15 mins", durationMins: 15 },
     ],
   },
   {
     title: "Fat Dissolving",
     items: [
-      { name: "Lemon Bottle Small Area", price: "£70", duration: "30 mins" },
-      { name: "Lemon Bottle Large Area", price: "£100", duration: "30 mins" },
+      { name: "Lemon Bottle Small Area", price: "£70", duration: "30 mins", durationMins: 30 },
+      { name: "Lemon Bottle Large Area", price: "£100", duration: "30 mins", durationMins: 30 },
     ],
   },
   {
     title: "Treatment Bundles",
     items: [
-      { name: "Botox 3 Areas + 1.1ml Dermal Filler", price: "£320", duration: "45 mins" },
-      { name: "Botox 3 Areas + 1.1ml Lips + Lumi Pro", price: "£450", duration: "1 hr" },
-      { name: "Botox 3 Areas + 1x Lumi Pro Skin Booster", price: "£300", duration: "45 mins" },
-      { name: "Botox 3 Areas + 1x Plenhyage XL", price: "£350", duration: "45 mins" },
-      { name: "Botox 3 Areas + Vitarin I Eye", price: "£300", duration: "45 mins" },
+      { name: "Botox 3 Areas + 1.1ml Dermal Filler", price: "£320", duration: "45 mins", durationMins: 45 },
+      { name: "Botox 3 Areas + 1.1ml Lips + Lumi Pro", price: "£450", duration: "1 hr", durationMins: 60 },
+      { name: "Botox 3 Areas + 1x Lumi Pro Skin Booster", price: "£300", duration: "45 mins", durationMins: 45 },
+      { name: "Botox 3 Areas + 1x Plenhyage XL", price: "£350", duration: "45 mins", durationMins: 45 },
+      { name: "Botox 3 Areas + Vitarin I Eye", price: "£300", duration: "45 mins", durationMins: 45 },
     ],
   },
 ];
@@ -125,7 +126,7 @@ function CategoryDropdown({
 }: {
   category: Category;
   index: number;
-  onBook: (t: { name: string; price: string }) => void;
+  onBook: (t: Treatment) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -197,7 +198,7 @@ function CategoryDropdown({
                       {item.price}
                     </span>
                     <BookNowPill
-                      onClick={() => onBook({ name: item.name, price: item.price })}
+                      onClick={() => onBook(item)}
                     />
                   </div>
                 </motion.div>
@@ -211,7 +212,7 @@ function CategoryDropdown({
 }
 
 export default function Services() {
-  const [bookingTreatment, setBookingTreatment] = useState<{ name: string; price: string } | null>(null);
+  const [bookingTreatment, setBookingTreatment] = useState<Treatment | null>(null);
   const [showConsultation, setShowConsultation] = useState(false);
   const [services, setServices] = useState<Category[]>(FALLBACK_SERVICES);
 

@@ -108,8 +108,8 @@ export function minsToTime(m: number): string {
 }
 
 /**
- * Given a list of booked slots (time + durationMinutes), compute all 30-minute
- * slot strings that are blocked for a given working window.
+ * Given a list of booked slots (time + durationMinutes), compute all 15-minute
+ * slot strings that are blocked (back-to-back allowed — no buffer).
  */
 export function computeBlockedSlots(
   bookings: { time: string; durationMinutes: number }[],
@@ -118,8 +118,8 @@ export function computeBlockedSlots(
   for (const { time, durationMinutes } of bookings) {
     if (!time) continue;
     const startMins = timeToMins(time);
-    const blockedUntil = startMins + durationMinutes + 15;
-    for (let m = startMins; m < blockedUntil; m += 30) {
+    const blockedUntil = startMins + durationMinutes;
+    for (let m = startMins; m < blockedUntil; m += 15) {
       blocked.add(minsToTime(m));
     }
   }
@@ -128,7 +128,7 @@ export function computeBlockedSlots(
 
 /**
  * Check whether a proposed booking (time + duration) overlaps with any existing booking.
- * Returns true if there is a conflict.
+ * Back-to-back is allowed — no buffer between appointments.
  */
 export function hasConflict(
   proposedTime: string,
@@ -137,13 +137,13 @@ export function hasConflict(
 ): boolean {
   if (!proposedTime) return false;
   const proposedStart = timeToMins(proposedTime);
-  const proposedEnd = proposedStart + proposedDuration + 15;
+  const proposedEnd = proposedStart + proposedDuration;
 
   for (const b of existingBookings) {
     if (!b.time) continue;
     if (b.status === "Cancelled") continue;
     const existStart = timeToMins(b.time);
-    const existEnd = existStart + (b.durationMinutes ?? 30) + 15;
+    const existEnd = existStart + (b.durationMinutes ?? 30);
     if (proposedStart < existEnd && proposedEnd > existStart) return true;
   }
   return false;

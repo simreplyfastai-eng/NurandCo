@@ -24,9 +24,9 @@ const DAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const AVAIL_DEFAULT: Availability = {
   defaults: {
     Mon: { on: false },
-    Tue: { on: true, start: "10:00", end: "19:00" },
-    Wed: { on: true, start: "10:00", end: "19:00" },
-    Thu: { on: true, start: "10:00", end: "19:00" },
+    Tue: { on: true, start: "09:00", end: "19:00" },
+    Wed: { on: true, start: "09:00", end: "19:00" },
+    Thu: { on: true, start: "09:00", end: "19:00" },
     Fri: { on: true, start: "09:00", end: "16:00" },
     Sat: { on: true, start: "09:00", end: "14:00" },
     Sun: { on: false },
@@ -64,27 +64,39 @@ function isDateDisabled(avail: Availability, date: Date, today: Date): boolean {
   return !day || !day.on;
 }
 
-function getWorkingSlots(avail: Availability, date: Date): string[] {
+// Consultations are 15 minutes — 15-min grid, back-to-back, no buffer
+const CONSULTATION_DURATION = 15;
+
+function generateAvailableSlots(
+  avail: Availability,
+  date: Date,
+  existingBookings: DateBooking[],
+): string[] {
   const day = getAvailForDate(avail, date);
   if (!day || !day.on) return [];
-  const start = day.start ?? "09:00";
-  const end = day.end ?? "18:00";
-  const startMins = timeToMins(start);
-  const endMins = timeToMins(end);
-  const slots: string[] = [];
-  for (let m = startMins; m < endMins; m += 30) slots.push(minsToTime(m));
-  return slots;
-}
+  const openMins = timeToMins(day.start ?? "09:00");
+  const closeMins = timeToMins(day.end ?? "18:00");
 
-function computeBlockedSlots(bookings: DateBooking[]): Set<string> {
-  const blocked = new Set<string>();
-  for (const { time, durationMinutes } of bookings) {
-    if (!time) continue;
-    const startMins = timeToMins(time);
-    const blockedUntil = startMins + durationMinutes + 15;
-    for (let m = startMins; m < blockedUntil; m += 30) blocked.add(minsToTime(m));
+  const todayStr = fmtDate(new Date());
+  const isToday = fmtDate(date) === todayStr;
+  let nowBuffer = 0;
+  if (isToday) {
+    const now = new Date();
+    nowBuffer = now.getHours() * 60 + now.getMinutes() + 15;
   }
-  return blocked;
+
+  const slots: string[] = [];
+  for (let t = openMins; t + CONSULTATION_DURATION <= closeMins; t += 15) {
+    if (isToday && t < nowBuffer) continue;
+    const conflict = existingBookings.some((b) => {
+      if (!b.time || b.status === "Cancelled") return false;
+      const bStart = timeToMins(b.time);
+      const bEnd = bStart + b.durationMinutes;
+      return t < bEnd && t + CONSULTATION_DURATION > bStart;
+    });
+    if (!conflict) slots.push(minsToTime(t));
+  }
+  return slots;
 }
 
 function validateName(v: string): string {
@@ -450,9 +462,9 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
       year: "numeric",
     }).format(d);
 
-  const workingSlots = selectedDate ? getWorkingSlots(avail, selectedDate) : [];
-  const blockedSlots = computeBlockedSlots(dateBookings);
-  const availableSlots = workingSlots.filter((s) => !blockedSlots.has(s));
+  const availableSlots = selectedDate
+    ? generateAvailableSlots(avail, selectedDate, dateBookings)
+    : [];
 
   const stepLabels = ["Your Details", "Choose Date", "Choose Time", "Payment"];
   const currentStepIndex = step === "success" ? 4 : (step as number) - 1;
@@ -609,21 +621,19 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
               <p className="text-sm text-center py-8" style={{ color: "#aaa" }}>No available slots for this date. Please select another day.</p>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {workingSlots.map((slot) => {
-                  const isBlocked = blockedSlots.has(slot);
+                {availableSlots.map((slot) => {
                   const isActive = selectedTime === slot;
                   return (
                     <button
                       key={slot}
-                      disabled={isBlocked}
                       onClick={() => handleTimeSelect(slot)}
                       style={{
                         padding: "10px 6px", borderRadius: "8px",
                         fontSize: "13px", fontFamily: "Inter, sans-serif",
-                        border: isActive ? "2px solid #C9A96E" : isBlocked ? "1px solid #F0F0F0" : "1px solid #E0E0E0",
+                        border: isActive ? "2px solid #C9A96E" : "1px solid #E0E0E0",
                         background: isActive ? "#C9A96E" : "transparent",
-                        color: isActive ? "#fff" : isBlocked ? "#ccc" : "#111",
-                        cursor: isBlocked ? "default" : "pointer",
+                        color: isActive ? "#fff" : "#111",
+                        cursor: "pointer",
                         fontWeight: isActive ? 700 : 400,
                       }}
                     >

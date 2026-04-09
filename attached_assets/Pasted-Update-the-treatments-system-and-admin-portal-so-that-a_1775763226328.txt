@@ -1,0 +1,134 @@
+Update the treatments system and admin portal so that any 
+treatment Niamh adds in future automatically works with 
+the booking calendar slot logic.
+
+TREATMENTS DATA STORE:
+All treatments must be stored in a persistent data store 
+(Replit database or JSON file) as a single TREATMENTS object.
+Every treatment must have these fields:
+- name (string)
+- category (string)
+- price (number)
+- duration (number — in minutes)
+- active (boolean — show/hide on site)
+- description (string — optional)
+
+The booking calendar must always read duration directly 
+from this data store when generating slots. Never hardcode 
+durations anywhere else.
+
+ADMIN PORTAL — ADD/EDIT TREATMENT:
+When Niamh adds or edits a treatment via the portal, 
+the form must have:
+
+- Treatment Name (text input, required)
+- Category (dropdown of existing categories:
+  Botox | Dermal Filler | Facials | Skin Boosters |
+  Fat Dissolving | Treatment Bundles | Injectables
+  + "Add New Category" option that reveals a text input)
+- Price £ (number input, required)
+- Duration (dropdown, required):
+  15 mins | 30 mins | 45 mins | 60 mins | 
+  75 mins | 90 mins
+- Description (textarea, optional)
+- Active toggle (on = visible on site, off = hidden)
+
+On save:
+1. Treatment is saved to persistent data store
+2. Treatments accordion on live site updates immediately
+3. Treatment appears under its correct category
+4. Book Now button opens booking modal with correct 
+   treatment name, price and duration auto-loaded
+5. generateSlots() uses the saved duration to calculate 
+   correct available time slots automatically
+
+SLOT GENERATION — generateSlots(date, durationMins):
+Always reads durationMins from TREATMENTS data store.
+Never hardcoded. Logic:
+
+Working hours:
+Tuesday:   09:00 — 19:00
+Wednesday: 09:00 — 19:00
+Thursday:  09:00 — 19:00
+Friday:    09:00 — 16:00
+Saturday:  09:00 — 14:00
+Sunday:    CLOSED
+Monday:    CLOSED
+
+Slot interval: every 15 minutes
+Back to back allowed — no breaks
+
+Only include slots where:
+slot start time + durationMins <= closing time
+(treatment must fully complete before closing)
+
+If date is today:
+filter out slots where slot start <= now + 15 mins
+
+Return array of time strings: 
+["09:00", "09:15", "09:30" ...]
+
+CORRECT LAST SLOT EXAMPLES:
+15 min treatment — Tue/Wed/Thu → last slot 18:45
+30 min treatment — Tue/Wed/Thu → last slot 18:30
+45 min treatment — Tue/Wed/Thu → last slot 18:15
+60 min treatment — Tue/Wed/Thu → last slot 18:00
+
+15 min treatment — Friday → last slot 15:45
+30 min treatment — Friday → last slot 15:30
+45 min treatment — Friday → last slot 15:15
+60 min treatment — Friday → last slot 15:00
+
+15 min treatment — Saturday → last slot 13:45
+30 min treatment — Saturday → last slot 13:30
+45 min treatment — Saturday → last slot 13:15
+60 min treatment — Saturday → last slot 13:00
+
+getNextAvailableSlot() FUNCTION:
+Also reads from TREATMENTS data store.
+Uses same working hours and 15 min slot logic.
+Returns:
+"Today at HH:MM" — if slots still available today
+"Tomorrow from HH:MM" — if tomorrow is working day
+"[Day name] from HH:MM" — any other working day
+Skips Sunday and Monday always.
+Used in popup banner and calendar hint text.
+
+BOOKING MODAL FLOW:
+1. "Book Now" clicked on any treatment
+2. Modal opens — treatment name, price, duration 
+   loaded from TREATMENTS data store
+3. Calendar shown — disabled days: Sun, Mon + past dates
+4. User selects date — generateSlots(date, duration) 
+   called using that treatment's duration from data store
+5. Slots displayed in 4 col grid (3 col mobile)
+   Each slot: gold outlined pill, selected = gold filled
+6. User selects time slot
+7. Booking summary shown:
+   - Treatment name
+   - Duration
+   - Date (e.g. Monday 14 April 2026)
+   - Time: HH:MM — HH:MM (start + end time)
+   - Full price: £[price]
+   - Deposit due now (50%): £[price/2]
+   - Balance due on arrival (50%): £[price/2]
+8. Confirm Booking → Stripe checkout
+   Metadata passed to Stripe:
+   treatment_name, duration, date, time, 
+   full_price, deposit_amount, client_email
+
+ADMIN PORTAL — EDIT/DELETE TREATMENTS:
+Each treatment in the portal has:
+- Edit button — opens pre-filled form
+- Toggle active/inactive — hides from site instantly
+- Delete button — removes from data store and site
+  with confirmation dialog before deleting
+
+If a treatment is set to inactive:
+- Hidden from treatments accordion on live site
+- Cannot be booked
+- Still visible in admin portal with inactive label
+
+All existing modal glassmorphism styling, animations,
+Stripe integration, webhook and email logic remain 
+completely unchanged.

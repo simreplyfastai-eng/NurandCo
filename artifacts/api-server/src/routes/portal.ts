@@ -105,6 +105,7 @@ function buildTreatmentCategories(kvData: Record<string, any>) {
       name: String(t.name),
       price: `£${price}`,
       duration: formatDuration(dur),
+      durationMins: dur,
     });
   }
 

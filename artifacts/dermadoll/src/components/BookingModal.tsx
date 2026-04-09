@@ -6,6 +6,8 @@ import { getNextAvailableSlot } from "@/lib/nextSlot";
 interface Treatment {
   name: string;
   price: string;
+  duration?: string;
+  durationMins?: number;
 }
 
 interface BookingModalProps {
@@ -35,9 +37,9 @@ const DAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const AVAIL_DEFAULT: Availability = {
   defaults: {
     Mon: { on: false },
-    Tue: { on: true, start: "10:00", end: "19:00" },
-    Wed: { on: true, start: "10:00", end: "19:00" },
-    Thu: { on: true, start: "10:00", end: "19:00" },
+    Tue: { on: true, start: "09:00", end: "19:00" },
+    Wed: { on: true, start: "09:00", end: "19:00" },
+    Thu: { on: true, start: "09:00", end: "19:00" },
     Fri: { on: true, start: "09:00", end: "16:00" },
     Sat: { on: true, start: "09:00", end: "14:00" },
     Sun: { on: false },
@@ -79,29 +81,41 @@ function isDateDisabled(avail: Availability, date: Date, today: Date): boolean {
   return !day || !day.on;
 }
 
-function getWorkingSlots(avail: Availability, date: Date): string[] {
+// ── Slot generation — 15-min intervals, back-to-back, duration-aware ─────────
+
+function generateAvailableSlots(
+  avail: Availability,
+  date: Date,
+  durationMins: number,
+  existingBookings: DateBooking[],
+): string[] {
   const day = getAvailForDate(avail, date);
   if (!day || !day.on) return [];
-  const start = day.start ?? "09:00";
-  const end = day.end ?? "18:00";
-  const startMins = timeToMins(start);
-  const endMins = timeToMins(end);
-  const slots: string[] = [];
-  for (let m = startMins; m < endMins; m += 30) slots.push(minsToTime(m));
-  return slots;
-}
+  const openMins = timeToMins(day.start ?? "09:00");
+  const closeMins = timeToMins(day.end ?? "18:00");
 
-// ── Slot blocking ─────────────────────────────────────────────────────────────
-
-function computeBlockedSlots(bookings: DateBooking[]): Set<string> {
-  const blocked = new Set<string>();
-  for (const { time, durationMinutes } of bookings) {
-    if (!time) continue;
-    const startMins = timeToMins(time);
-    const blockedUntil = startMins + durationMinutes + 15;
-    for (let m = startMins; m < blockedUntil; m += 30) blocked.add(minsToTime(m));
+  // Today: skip slots that start within the next 15 minutes
+  const todayStr = fmtDate(new Date());
+  const isToday = fmtDate(date) === todayStr;
+  let nowBuffer = 0;
+  if (isToday) {
+    const now = new Date();
+    nowBuffer = now.getHours() * 60 + now.getMinutes() + 15;
   }
-  return blocked;
+
+  const slots: string[] = [];
+  for (let t = openMins; t + durationMins <= closeMins; t += 15) {
+    if (isToday && t < nowBuffer) continue;
+    // Check for overlap with existing bookings (back-to-back OK — no buffer)
+    const conflict = existingBookings.some((b) => {
+      if (!b.time || b.status === "Cancelled") return false;
+      const bStart = timeToMins(b.time);
+      const bEnd = bStart + b.durationMinutes;
+      return t < bEnd && t + durationMins > bStart;
+    });
+    if (!conflict) slots.push(minsToTime(t));
+  }
+  return slots;
 }
 
 // ── Validation ────────────────────────────────────────────────────────────────
@@ -250,7 +264,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const [stripeElementMounted, setStripeElementMounted] = useState(false);
   const [stripeNotConfigured, setStripeNotConfigured] = useState(false);
   const [whatsapp, setWhatsapp] = useState("");
-  const [bookingDuration, setBookingDuration] = useState(30);
+  const bookingDuration = treatment?.durationMins ?? 30;
   const [hasResendKey, setHasResendKey] = useState(false);
   const [depositPercent, setDepositPercent] = useState(50);
 
@@ -523,10 +537,10 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const deposit = Math.floor(price * depositPercent / 100);
   const balance = price - deposit;
 
-  // Compute available slots
-  const workingSlots = selectedDate ? getWorkingSlots(avail, selectedDate) : [];
-  const blockedSlots = computeBlockedSlots(dateBookings);
-  const availableSlots = workingSlots.filter((s) => !blockedSlots.has(s));
+  // Compute available slots — 15-min grid, duration-aware, back-to-back
+  const availableSlots = selectedDate
+    ? generateAvailableSlots(avail, selectedDate, bookingDuration, dateBookings)
+    : [];
 
   // ── Full-page success overlay ─────────────────────────────────────────────
   if (step === "success") {
@@ -806,26 +820,23 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
               <p className="text-sm text-center py-8" style={{ color: "#aaa" }}>No available slots for this date. Please select another day.</p>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {workingSlots.map((slot) => {
-                  const isBlocked = blockedSlots.has(slot);
+                {availableSlots.map((slot) => {
                   const isActive = selectedTime === slot;
                   return (
                     <button
                       key={slot}
-                      disabled={isBlocked}
-                      onClick={() => !isBlocked && handleTimeSelect(slot)}
+                      onClick={() => handleTimeSelect(slot)}
                       style={{
-                        border: "1px solid",
-                        borderColor: isBlocked ? "#E8E8E8" : "#C9A96E",
+                        border: "1px solid #C9A96E",
                         borderRadius: "20px", padding: "8px 4px", fontSize: "13px",
                         fontFamily: "Inter, sans-serif",
-                        color: isBlocked ? "#ccc" : isActive ? "#fff" : "#C9A96E",
-                        backgroundColor: isBlocked ? "#F9F9F9" : isActive ? "#C9A96E" : "transparent",
-                        cursor: isBlocked ? "default" : "pointer",
+                        color: isActive ? "#fff" : "#C9A96E",
+                        backgroundColor: isActive ? "#C9A96E" : "transparent",
+                        cursor: "pointer",
                         transition: "all 0.15s",
                       }}
-                      onMouseEnter={(e) => { if (!isBlocked && !isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.08)"; }}
-                      onMouseLeave={(e) => { if (!isBlocked && !isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
+                      onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.08)"; }}
+                      onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
                     >
                       {slot}
                     </button>
