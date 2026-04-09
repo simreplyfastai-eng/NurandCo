@@ -1084,7 +1084,10 @@ tr:hover td{background:#FDFBF8}
 <!-- BOOKING MODAL -->
 <div class="modal-overlay" id="booking-modal">
   <div class="modal-box">
-    <div class="modal-title" id="bm-title">New Booking</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
+      <div class="modal-title" id="bm-title" style="margin-bottom:0">New Booking</div>
+      <button onclick="closeBookingModal()" style="background:none;border:none;cursor:pointer;color:#888;font-size:22px;line-height:1;padding:0 2px" title="Close">&times;</button>
+    </div>
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Client Name</label>
