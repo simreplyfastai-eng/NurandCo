@@ -552,7 +552,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
   // ── Full-page success overlay ─────────────────────────────────────────────
   if (step === "success") {
-    const CLINIC_ADDRESS = "Birmingham & Solihull\nFull address provided on confirmation";
+    const CLINIC_ADDRESS = "1500 Stratford Road, Lumi Salon, Hall Green, Birmingham B28 9ET";
     const waMsg = encodeURIComponent(`Hi Niamh! I've just booked ${treatment.name} — I had a quick question about my appointment 😊`);
     const waUrl = `https://wa.me/447535173072?text=${waMsg}`;
 
@@ -576,7 +576,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
         "BEGIN:VEVENT",
         `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`,
         `SUMMARY:${treatment.name} at Dermadoll Aesthetics`,
-        "LOCATION:Birmingham & Solihull",
+        "LOCATION:1500 Stratford Road\\, Lumi Salon\\, Hall Green\\, Birmingham B28 9ET",
         `DESCRIPTION:Deposit paid £${deposit}\\, balance £${balance} due on arrival`,
         "END:VEVENT", "END:VCALENDAR",
       ].join("\r\n");
@@ -700,8 +700,9 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
             </div>
             <div style={{ fontFamily:"Inter, sans-serif", fontSize:14, color:"#7a6a50", marginBottom:12 }}>Niamh</div>
             <div style={{ fontFamily:"Inter, sans-serif", fontSize:15, color:"#2a1f0e", marginBottom:20, lineHeight:1.6 }}>
-              Birmingham &amp; Solihull<br />
-              <span style={{ fontSize:13, color:"#7a6a50" }}>Full address provided on confirmation</span>
+              1500 Stratford Road<br />
+              Lumi Salon, Hall Green<br />
+              Birmingham, B28 9ET
             </div>
             <div style={{ display:"flex", gap:10 }}>
               <button

@@ -3,6 +3,7 @@ import { Resend } from "resend";
 const RESEND_KEY = process.env.RESEND_API_KEY ?? "";
 const FROM = "bookings@dermadoll-aesthetics.co.uk";
 const INSTAGRAM = "@dermadollaesthetics";
+const CLINIC_ADDRESS = "1500 Stratford Road, Lumi Salon, Hall Green, Birmingham B28 9ET";
 
 let _resend: Resend | null = null;
 function getResend(): Resend | null {
@@ -53,7 +54,7 @@ function emailShell(body: string): string {
 
         <!-- Footer -->
         <tr><td style="text-align:center;padding-top:28px;">
-          <p style="margin:0 0 6px;font-size:12px;color:#555;font-family:Arial,sans-serif;">Birmingham &amp; Solihull</p>
+          <p style="margin:0 0 6px;font-size:12px;color:#555;font-family:Arial,sans-serif;">${CLINIC_ADDRESS}</p>
           <p style="margin:0 0 6px;font-size:12px;color:#555;font-family:Arial,sans-serif;">Instagram: <a href="https://instagram.com/dermadollaesthetics" style="color:#C9A96E;text-decoration:none;">${INSTAGRAM}</a></p>
           <p style="margin:16px 0 0;font-size:11px;color:#333;font-family:Arial,sans-serif;">© 2026 Dermadoll Aesthetics. All rights reserved.</p>
         </td></tr>
@@ -140,7 +141,8 @@ export async function sendClientConfirmationEmail(params: {
       detailRow("Treatment", params.treatment) +
       detailRow("Date", dateStr) +
       detailRow("Time", timeStr) +
-      detailRow("Duration", `Approx. ${params.durationMinutes} minutes`)
+      detailRow("Duration", `Approx. ${params.durationMinutes} minutes`) +
+      detailRow("Location", CLINIC_ADDRESS)
     )}
     ${goldBox(
       depositPaid
@@ -232,12 +234,13 @@ export async function sendReminderEmail(params: {
     ${detailTable(
       detailRow("Treatment", params.treatment) +
       detailRow("Date", dateStr) +
-      detailRow("Time", params.time)
+      detailRow("Time", params.time) +
+      detailRow("Location", CLINIC_ADDRESS)
     )}
     ${goldBox(`<p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.65);">Please arrive <strong style="color:#ffffff;">5 minutes early</strong> and come with a clean face — no makeup on the treatment area.</p>`)}
     <p style="margin:16px 0 4px;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">Need to reschedule? Message us ASAP:</p>
     <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C9A96E;text-decoration:none;">${wa}</a></p>
-    ${smallPrint("Dermadoll Aesthetics — Birmingham &amp; Solihull")}
+    ${smallPrint(`Dermadoll Aesthetics — ${CLINIC_ADDRESS}`)}
   `;
 
   try {
@@ -330,7 +333,7 @@ export async function sendConsultationConfirmationEmail(params: {
       detailRow("Date", dateStr) +
       detailRow("Time", params.time) +
       detailRow("Duration", "15 minutes") +
-      detailRow("Location", "Birmingham | Solihull")
+      detailRow("Location", CLINIC_ADDRESS)
     )}
     ${goldBox(`
       <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#C9A96E;font-weight:700;">✓ Paid in full — £25</p>
@@ -338,7 +341,7 @@ export async function sendConsultationConfirmationEmail(params: {
     `)}
     <p style="margin:16px 0 4px;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">Questions before your visit?</p>
     <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C9A96E;text-decoration:none;">${wa}</a></p>
-    ${smallPrint("Exact address sent 24 hours before your appointment.")}
+    ${smallPrint("Please arrive 5 minutes early. We look forward to seeing you.")}
   `;
 
   try {
