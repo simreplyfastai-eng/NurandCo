@@ -197,11 +197,57 @@ router.get("/bookings/date/:date", async (req, res) => {
   }
 });
 
+/**
+ * Deletes "awaiting_payment" bookings that are older than 30 minutes —
+ * cleans up slots reserved by customers who abandoned the payment flow.
+ */
+export async function cleanupGhostBookings(): Promise<number> {
+  try {
+    const result = await pool.query(`
+      DELETE FROM bookings
+      WHERE status = 'awaiting_payment'
+        AND created_at < $1
+    `, [Date.now() - 30 * 60 * 1000]);
+    return result.rowCount ?? 0;
+  } catch (err) {
+    console.error("cleanupGhostBookings error", err);
+    return 0;
+  }
+}
+
 // POST /api/bookings
 router.post("/bookings", async (req, res) => {
   const b = req.body;
-  if (!b.clientName || !b.treatment || !b.date) {
-    return res.status(400).json({ error: "clientName, treatment, date required" });
+
+  // ── Field validation ──────────────────────────────────────────────────────
+  const name = (b.clientName ?? "").trim();
+  const email = (b.clientEmail ?? "").trim();
+  const phone = (b.clientPhone ?? "").trim();
+  const { date, time, treatment } = b;
+
+  if (!name || name.length < 2) {
+    return res.status(400).json({ error: "Please enter your name." });
+  }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return res.status(400).json({ error: "Please enter a valid email address." });
+  }
+  if (!phone || phone.replace(/\s/g, "").length < 7) {
+    return res.status(400).json({ error: "Please enter your phone number." });
+  }
+  if (!date || !time || !treatment) {
+    return res.status(400).json({ error: "Missing required booking fields." });
+  }
+
+  // ── Past-date check ───────────────────────────────────────────────────────
+  // Portal bookings (source === "Portal") are allowed to backdate
+  if (b.source !== "Portal") {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const requestedDate = new Date(date);
+    requestedDate.setHours(0, 0, 0, 0);
+    if (requestedDate < today) {
+      return res.status(400).json({ error: "Cannot book a date in the past." });
+    }
   }
 
   const durationMinutes = getTreatmentDuration(b.treatment);
@@ -368,7 +414,7 @@ router.post("/bookings", async (req, res) => {
       (err as { code: string }).code === "23505"
     ) {
       return res.status(409).json({
-        error: "Sorry, that slot was just taken. Please choose another time.",
+        error: "This slot was just taken. Please choose another time.",
       });
     }
     console.error("POST /api/bookings", err);

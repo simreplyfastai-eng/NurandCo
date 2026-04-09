@@ -8,6 +8,9 @@ import { logger } from "./lib/logger";
 
 const app: Express = express();
 
+// Trust the Replit proxy so each client's real IP is used for rate limiting
+app.set("trust proxy", 1);
+
 app.use(
   helmet({
     contentSecurityPolicy: false,
@@ -55,7 +58,6 @@ const bookingLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many booking attempts. Please try again in a few minutes." },
-  validate: { xForwardedForHeader: false },
 });
 
 const loginLimiter = rateLimit({
@@ -64,7 +66,6 @@ const loginLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many login attempts. Please try again in a few minutes." },
-  validate: { xForwardedForHeader: false },
 });
 
 const enquiryLimiter = rateLimit({
@@ -73,7 +74,6 @@ const enquiryLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many enquiry attempts. Please try again in a few minutes." },
-  validate: { xForwardedForHeader: false },
 });
 
 const piLimiter = rateLimit({
@@ -82,7 +82,6 @@ const piLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many requests. Please try again in a few minutes." },
-  validate: { xForwardedForHeader: false },
 });
 
 app.post("/api/bookings", bookingLimiter);

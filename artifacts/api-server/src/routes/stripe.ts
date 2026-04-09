@@ -58,7 +58,7 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
   if (!stripe) {
     return res.status(503).json({ error: "Stripe is not configured. Please contact the clinic to arrange payment." });
   }
-  const { amount, treatment, clientName, clientEmail, clientPhone, bookingDate, bookingTime } = req.body as Record<string, string>;
+  const { amount, treatment, clientName, clientEmail, clientPhone, bookingDate, bookingTime, bookingId } = req.body as Record<string, string>;
   if (!amount || !treatment) {
     return res.status(400).json({ error: "amount and treatment required" });
   }
@@ -74,6 +74,7 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
         clientPhone: clientPhone ?? "",
         bookingDate: bookingDate ?? "",
         bookingTime: bookingTime ?? "",
+        bookingId: bookingId ?? "",
       },
       automatic_payment_methods: { enabled: true },
     });
@@ -94,8 +95,8 @@ router.post("/stripe/webhook", async (req, res) => {
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET ?? "";
 
   if (!webhookSecret) {
-    console.error("STRIPE_WEBHOOK_SECRET not configured — rejecting webhook");
-    return res.status(503).json({ error: "Webhook not configured" });
+    console.error("CRITICAL: STRIPE_WEBHOOK_SECRET is not set. All Stripe payments will be taken but no bookings will be confirmed.");
+    return res.status(500).json({ error: "Webhook not configured" });
   }
 
   let event: Stripe.Event;
@@ -108,29 +109,80 @@ router.post("/stripe/webhook", async (req, res) => {
 
   if (event.type === "payment_intent.succeeded") {
     const pi = event.data.object as Stripe.PaymentIntent;
-    const { treatment, clientName, clientEmail, clientPhone, bookingDate, bookingTime } = pi.metadata ?? {};
+    const { treatment, clientName, clientEmail, clientPhone, bookingDate, bookingTime, bookingId } = pi.metadata ?? {};
     const paymentIntentId = pi.id;
 
     try {
-      // Idempotent: check if booking already exists with this payment intent id
-      const existing = await pool.query(
-        "SELECT * FROM bookings WHERE stripe_payment_id=$1",
+      // 1. Primary path: update the pre-saved "awaiting_payment" booking
+      if (bookingId) {
+        const updated = await pool.query(
+          `UPDATE bookings
+           SET deposit_paid=true, status='Confirmed', stripe_payment_id=$1
+           WHERE id=$2 AND status='awaiting_payment'
+           RETURNING *`,
+          [paymentIntentId, bookingId],
+        );
+
+        if (updated.rows.length) {
+          const row = updated.rows[0] as Record<string, unknown>;
+          const bDate = String(row.date ?? bookingDate ?? "");
+          const bTime = String(row.time ?? bookingTime ?? "");
+          const deposit = Number(row.deposit ?? 0);
+          const price = Number(row.price ?? 0);
+          const durationMinutes = Number(row.duration_minutes ?? 30);
+          const whatsapp = await getWhatsApp();
+          if (clientEmail) {
+            sendClientConfirmationEmail({
+              clientEmail,
+              clientName: clientName ?? "",
+              treatment: treatment ?? "",
+              date: bDate,
+              time: bTime,
+              durationMinutes,
+              deposit,
+              balance: price - deposit,
+              depositPaid: true,
+              whatsapp,
+            }).catch(() => {});
+          }
+          const adminEmail = process.env.ADMIN_EMAIL ?? "";
+          if (adminEmail) {
+            sendAdminNotificationEmail({
+              adminEmail,
+              clientName: clientName ?? "",
+              clientEmail: clientEmail ?? "",
+              clientPhone: clientPhone ?? "",
+              treatment: treatment ?? "",
+              durationMinutes,
+              date: bDate,
+              time: bTime,
+              deposit,
+              depositPaid: true,
+              source: "Website",
+            }).catch(() => {});
+          }
+          // Done — pre-saved booking confirmed successfully
+        }
+      }
+
+      // 2. Idempotency: check if already confirmed with this payment intent
+      const existingByPi = await pool.query(
+        "SELECT id FROM bookings WHERE stripe_payment_id=$1",
         [paymentIntentId],
       );
-
-      if (existing.rows.length) {
-        // Already exists — ensure depositPaid and status are correct
+      if (existingByPi.rows.length) {
         await pool.query(
           "UPDATE bookings SET deposit_paid=true, status='Confirmed' WHERE stripe_payment_id=$1 AND deposit_paid=false",
           [paymentIntentId],
         );
-      } else {
-        // Booking not yet created (network failure edge case) — create it now
+        // Already handled — nothing more to do
+      } else if (!bookingId) {
+        // 3. Fallback: no pre-saved booking found — create from metadata
         if (treatment && clientName) {
           const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
           const durationMinutes = getTreatmentDuration(treatment);
           const category = getTreatmentCategory(treatment);
-          const depositAmountPence = pi.amount; // already in pence
+          const depositAmountPence = pi.amount;
           const deposit = Math.round(depositAmountPence / 100);
           const settings = await getSettings();
           const depositPercent = Number(settings.deposit ?? 50) || 50;
@@ -164,7 +216,6 @@ router.post("/stripe/webhook", async (req, res) => {
             ],
           );
 
-          // Send emails
           const whatsapp = await getWhatsApp();
           if (clientEmail) {
             sendClientConfirmationEmail({

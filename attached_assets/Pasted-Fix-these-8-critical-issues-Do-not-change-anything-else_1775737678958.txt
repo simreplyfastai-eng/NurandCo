@@ -1,0 +1,234 @@
+Fix these 8 critical issues.
+Do not change anything else.
+Do not touch anything Stripe or 
+Resend related as keys are being 
+added tomorrow.
+
+1. TRUST PROXY
+Add this line at the very top of 
+app.ts BEFORE any middleware:
+app.set('trust proxy', 1)
+
+Without this all clients share the 
+same IP and 3 bookings from any 
+3 people locks everyone out of 
+the booking form.
+
+2. SILENT BOOKING SAVE FAILURE
+Find the POST /api/bookings call 
+in the booking modal on index.html.
+If it has a .catch(() => {}) 
+remove it entirely.
+
+Replace with proper error handling:
+const bookingRes = await fetch(
+  '/api/bookings', {
+  method: 'POST',
+  headers: { 
+    'Content-Type': 'application/json' 
+  },
+  body: JSON.stringify(bookingData)
+})
+
+if (!bookingRes.ok) {
+  const err = await bookingRes.json()
+  throw new Error(
+    err.error || 
+    'Failed to save booking. 
+    Please try again.'
+  )
+}
+
+If this throws:
+- Stop immediately
+- Do NOT proceed to create 
+  a Stripe payment intent
+- Show the error to the client
+- Never take payment for a booking 
+  that was not saved
+
+3. STRIPE WEBHOOK SECRET CHECK
+Find the webhook handler in 
+POST /api/stripe/webhook.
+
+If STRIPE_WEBHOOK_SECRET is not set
+replace any silent 200 response with:
+
+if (!webhookSecret) {
+  console.error('CRITICAL: 
+  STRIPE_WEBHOOK_SECRET is not set. 
+  All Stripe payments will be taken 
+  but no bookings will be confirmed.')
+  return res.status(500).json({ 
+    error: 'Webhook not configured' 
+  })
+}
+
+Add a startup check in server.ts 
+that logs on start but does NOT 
+crash the server for missing 
+Stripe or Resend keys since 
+these are being added tomorrow:
+
+const criticalVars = [
+  'DATABASE_URL',
+  'JWT_SECRET',
+  'ADMIN_EMAIL',
+  'ADMIN_PASSWORD'
+]
+
+const pendingVars = [
+  'STRIPE_SECRET_KEY',
+  'STRIPE_PUBLISHABLE_KEY',
+  'STRIPE_WEBHOOK_SECRET',
+  'RESEND_API_KEY',
+  'CRON_SECRET'
+]
+
+for (const key of criticalVars) {
+  if (!process.env[key]) {
+    console.error(
+      `CRITICAL: Missing required 
+      environment variable: ${key}`
+    )
+  }
+}
+
+for (const key of pendingVars) {
+  if (!process.env[key]) {
+    console.warn(
+      `PENDING: ${key} not yet set — 
+      will be added before go-live`
+    )
+  }
+}
+
+4. REMOVE HARDCODED PASSWORD FALLBACK
+Find any line in the backend that 
+looks like:
+process.env.ADMIN_PASSWORD || 
+"dermadoll2024"
+
+Or any hardcoded fallback password.
+Replace with:
+
+const adminPassword = 
+  process.env.ADMIN_PASSWORD
+
+if (!adminPassword) {
+  console.error('CRITICAL: 
+  ADMIN_PASSWORD not set in Secrets')
+  return res.status(500).json({ 
+    error: 'Server misconfigured' 
+  })
+}
+
+Never fall back to a hardcoded 
+default password under any 
+circumstances.
+
+5. PAST DATE VALIDATION
+In POST /api/bookings add this 
+check before inserting:
+
+const today = new Date()
+today.setHours(0, 0, 0, 0)
+const requestedDate = new Date(date)
+requestedDate.setHours(0, 0, 0, 0)
+
+if (requestedDate < today) {
+  return res.status(400).json({ 
+    error: 'Cannot book a date 
+    in the past.' 
+  })
+}
+
+6. SERVER SIDE FIELD VALIDATION
+In POST /api/bookings add 
+validation before any DB operation:
+
+if (!name || name.trim().length < 2) {
+  return res.status(400).json({ 
+    error: 'Please enter your name.' 
+  })
+}
+
+if (!email || 
+  !/^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  .test(email)) {
+  return res.status(400).json({ 
+    error: 'Please enter a valid 
+    email address.' 
+  })
+}
+
+if (!phone || 
+  phone.trim().length < 7) {
+  return res.status(400).json({ 
+    error: 'Please enter your 
+    phone number.' 
+  })
+}
+
+if (!date || !time || !treatment) {
+  return res.status(400).json({ 
+    error: 'Missing required 
+    booking fields.' 
+  })
+}
+
+7. GHOST BOOKING CLEANUP AUTO RUN
+In server.ts add a setInterval 
+to run cleanup automatically 
+every 30 minutes:
+
+setInterval(async () => {
+  try {
+    await cleanupGhostBookings()
+    console.log(
+      'Ghost booking cleanup 
+      ran successfully'
+    )
+  } catch (err) {
+    console.error(
+      'Ghost cleanup failed:', err
+    )
+  }
+}, 30 * 60 * 1000)
+
+Also run it once on server start:
+cleanupGhostBookings()
+  .catch(console.error)
+
+8. RACE CONDITION — UNIQUE CONSTRAINT
+Add a partial unique index to the 
+bookings table on (date, time) 
+for non-cancelled bookings:
+
+CREATE UNIQUE INDEX IF NOT EXISTS 
+unique_active_slot 
+ON bookings (date, time) 
+WHERE status NOT IN 
+('cancelled', 'awaiting_payment');
+
+If two clients submit simultaneously 
+for the same slot catch the unique 
+violation error (code 23505) in 
+POST /api/bookings and return:
+res.status(409).json({ 
+  error: 'This slot was just taken. 
+  Please choose another time.' 
+})
+
+DO NOT CHANGE:
+- Any portal pages or styling
+- Any existing API endpoints
+- Any email templates
+- Any Stripe payment flow
+- Any availability or booking logic
+- Any database schema beyond 
+  the index above
+- Any authentication system
+- Any media upload functionality
+- Anything Stripe related
+- Anything Resend related

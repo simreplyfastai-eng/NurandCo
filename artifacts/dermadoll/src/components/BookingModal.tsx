@@ -257,6 +257,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const elementsRef = useRef<StripeElements | null>(null);
   const paymentElementRef = useRef<HTMLDivElement>(null);
   const clientSecretRef = useRef<string | null>(null);
+  const pendingBookingIdRef = useRef<string | null>(null);
 
   const firstFocusRef = useRef<HTMLButtonElement>(null);
 
@@ -359,10 +360,45 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
           return;
         }
 
-        // Create payment intent
+        // Reserve the booking slot FIRST — never take payment for an unsaved booking
         const price = parsePrice(treatment?.price ?? "0");
         const depositAmount = Math.floor(price * (config.depositPercent ?? depositPercent) / 100);
+        const pendingBookingId = uid();
+        pendingBookingIdRef.current = pendingBookingId;
 
+        const bookingRes = await fetch("/api/bookings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: pendingBookingId,
+            clientName: name.trim(),
+            clientEmail: email.trim(),
+            clientPhone: phone.replace(/\s/g, ""),
+            treatment: treatment?.name ?? "",
+            price,
+            deposit: depositAmount,
+            depositPaid: false,
+            balancePaid: false,
+            date: selectedDate ? fmtDate(selectedDate) : "",
+            time: selectedTime ?? "",
+            status: "awaiting_payment",
+            paymentMethod: "Stripe",
+            notes: "",
+            createdAt: Date.now(),
+            source: "Website",
+          }),
+        });
+
+        if (!bookingRes.ok) {
+          const bookingErr = await bookingRes.json() as { error?: string };
+          if (!cancelled) {
+            setPaymentError(bookingErr.error ?? "Failed to reserve your slot. Please try again.");
+            setPaymentLoading(false);
+          }
+          return;
+        }
+
+        // Create payment intent
         const piRes = await fetch("/api/stripe/create-payment-intent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -374,6 +410,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
             clientPhone: phone,
             bookingDate: selectedDate ? fmtDate(selectedDate) : "",
             bookingTime: selectedTime,
+            bookingId: pendingBookingId,
           }),
         });
 
@@ -459,47 +496,8 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       return;
     }
 
-    // Payment succeeded — create booking
-    const price = parsePrice(treatment?.price ?? "0");
-    const depositAmt = Math.floor(price * depositPercent / 100);
-    const stripePaymentId = clientSecretRef.current?.split("_secret_")[0] ?? null;
-
-    const booking = {
-      id: uid(),
-      clientName: name.trim(),
-      clientEmail: email.trim(),
-      clientPhone: phone.replace(/\s/g, ""),
-      treatment: treatment?.name ?? "",
-      price,
-      deposit: depositAmt,
-      depositPaid: true,
-      balancePaid: false,
-      date: selectedDate ? fmtDate(selectedDate) : "",
-      time: selectedTime ?? "",
-      status: "Confirmed",
-      paymentMethod: "Stripe",
-      stripePaymentId,
-      notes: "",
-      createdAt: Date.now(),
-      source: "Website",
-    };
-
-    try {
-      const res = await fetch("/api/bookings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(booking),
-      });
-
-      if (res.ok || res.status === 409) {
-        // Success or slot conflict — payment taken, webhook will handle edge cases
-        const data = res.ok ? await res.json() as { durationMinutes?: number } : null;
-        if (data?.durationMinutes) setBookingDuration(data.durationMinutes);
-      }
-    } catch {
-      // Network failure — payment was taken, Stripe webhook will create the booking
-    }
-
+    // Payment succeeded — booking was already saved before payment was taken.
+    // Stripe webhook will update status from "awaiting_payment" to "Confirmed".
     setSubmitting(false);
     setStep("success");
   };
