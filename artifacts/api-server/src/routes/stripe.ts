@@ -197,10 +197,11 @@ router.post("/stripe/webhook", async (req, res) => {
           [paymentIntentId],
         );
         // Already handled — nothing more to do
-      } else if (!bookingId) {
+      } else {
         // 3. Fallback: no pre-saved booking found — create from metadata
+        // Use bookingId from metadata if provided (shared with client POST), else generate one
         if (treatment && clientName) {
-          const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+          const id = bookingId || (Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
           const durationMinutes = getTreatmentDuration(treatment);
           const category = getTreatmentCategory(treatment);
           const depositAmountPence = pi.amount;

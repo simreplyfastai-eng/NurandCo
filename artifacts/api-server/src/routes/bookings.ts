@@ -310,6 +310,14 @@ router.post("/bookings", async (req, res) => {
       notes: isConsultation ? (b.clientNotes ?? "") : "",
     });
 
+    // Check BEFORE INSERT: did Stripe webhook already confirm this booking?
+    // Webhook and client POST share the same booking ID — if row already exists
+    // with Confirmed status, webhook ran first and already sent emails.
+    const alreadyConfirmed = !!(b.stripePaymentId && (await pool.query(
+      "SELECT 1 FROM bookings WHERE id=$1 AND status='Confirmed'",
+      [id],
+    )).rows.length);
+
     await pool.query(
       `INSERT INTO bookings
         (id,client_id,client_name,client_email,client_phone,treatment,category,price,deposit,
@@ -347,8 +355,8 @@ router.post("/bookings", async (req, res) => {
     const adminEmail = process.env.ADMIN_EMAIL ?? "";
 
     if (isConsultation) {
-      // Consultation-specific emails
-      if (b.clientEmail && depositPaid) {
+      // Consultation-specific emails — skip if webhook already sent them
+      if (!alreadyConfirmed && b.clientEmail && depositPaid) {
         sendConsultationConfirmationEmail({
           clientEmail: b.clientEmail,
           clientName: b.clientName,
@@ -357,7 +365,7 @@ router.post("/bookings", async (req, res) => {
           whatsapp,
         }).catch(() => {});
       }
-      if (adminEmail) {
+      if (!alreadyConfirmed && adminEmail) {
         sendConsultationAdminEmail({
           adminEmail,
           clientName: b.clientName,

@@ -254,6 +254,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
   const paymentElementRef = useRef<HTMLDivElement>(null);
   const clientSecretRef = useRef<string | null>(null);
   const depositPoundsRef = useRef<number>(0.10);
+  const bookingIdRef = useRef<string>(uid());
   const firstFocusRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -347,6 +348,9 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
             treatment: "Consultation",
             clientName: name,
             clientEmail: email,
+            bookingDate: selectedDate ? fmtDate(selectedDate) : "",
+            bookingTime: selectedTime ?? "",
+            bookingId: bookingIdRef.current,
           }),
         });
 
@@ -420,7 +424,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
 
     const depositPounds = depositPoundsRef.current;
     const booking = {
-      id: uid(),
+      id: bookingIdRef.current,
       clientName: name.trim(),
       clientEmail: email.trim(),
       clientPhone: phone.replace(/\s/g, ""),
