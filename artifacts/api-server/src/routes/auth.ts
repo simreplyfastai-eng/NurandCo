@@ -6,7 +6,7 @@ import { pool } from "@workspace/db";
 const router = Router();
 const SESSION_HOURS = 8;
 
-/** Returns the active admin password — DB override wins over env var */
+/** Returns the active primary admin password — DB override wins over env var */
 async function getActivePassword(): Promise<string | null> {
   try {
     const r = await pool.query("SELECT value FROM portal_kv WHERE key='admin_password_override' LIMIT 1");
@@ -15,41 +15,51 @@ async function getActivePassword(): Promise<string | null> {
   return process.env.ADMIN_PASSWORD ?? null;
 }
 
+async function checkPassword(password: string, stored: string): Promise<boolean> {
+  if (stored.startsWith("$2") && stored.length >= 60) {
+    return bcrypt.compare(password, stored);
+  }
+  return password === stored;
+}
+
 // POST /api/auth/login
 router.post("/auth/login", async (req, res) => {
   const { email, password } = req.body as { email?: string; password?: string };
-
-  const adminEmail = process.env.ADMIN_EMAIL;
   const secret = process.env.SESSION_SECRET;
+  if (!secret) return res.status(500).json({ error: "Server auth not configured" });
 
-  if (!adminEmail || !secret) {
-    console.error("Auth env vars not configured");
-    return res.status(500).json({ error: "Server auth not configured" });
-  }
+  const inputEmail = (email ?? "").trim().toLowerCase();
+  const inputPassword = password ?? "";
 
-  const activePassword = await getActivePassword();
-  if (!activePassword) {
-    console.error("No admin password configured");
-    return res.status(500).json({ error: "Server auth not configured" });
-  }
-
-  const emailMatch = (email ?? "").trim().toLowerCase() === adminEmail.toLowerCase();
-
-  // Support both bcrypt hashes (new) and plain text (legacy migration path)
-  let passMatch = false;
-  if (activePassword.startsWith("$2") && activePassword.length >= 60) {
-    passMatch = await bcrypt.compare(password ?? "", activePassword);
-  } else {
-    passMatch = password === activePassword;
-  }
-
-  if (!emailMatch || !passMatch) {
+  // ── Primary admin (env var email + DB/env password) ──
+  const adminEmail = process.env.ADMIN_EMAIL ?? "";
+  if (inputEmail === adminEmail.toLowerCase()) {
+    const activePassword = await getActivePassword();
+    if (activePassword && await checkPassword(inputPassword, activePassword)) {
+      const expiresAt = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
+      const token = jwt.sign({ role: "admin", expiresAt }, secret, { expiresIn: `${SESSION_HOURS}h` });
+      return res.json({ token, expiresAt });
+    }
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  const expiresAt = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
-  const token = jwt.sign({ role: "admin", expiresAt }, secret, { expiresIn: `${SESSION_HOURS}h` });
-  return res.json({ token, expiresAt });
+  // ── Extra admins (stored in portal_kv) ──
+  try {
+    const r = await pool.query("SELECT value FROM portal_kv WHERE key='portal_extra_admins' LIMIT 1");
+    const extras = Array.isArray(r.rows[0]?.value) ? r.rows[0].value as { email: string; passwordHash: string }[] : [];
+    for (const extra of extras) {
+      if ((extra.email ?? "").toLowerCase() === inputEmail) {
+        if (extra.passwordHash && await checkPassword(inputPassword, extra.passwordHash)) {
+          const expiresAt = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
+          const token = jwt.sign({ role: "admin", expiresAt }, secret, { expiresIn: `${SESSION_HOURS}h` });
+          return res.json({ token, expiresAt });
+        }
+        return res.status(401).json({ error: "Invalid credentials" });
+      }
+    }
+  } catch { /* fall through */ }
+
+  return res.status(401).json({ error: "Invalid credentials" });
 });
 
 // POST /api/auth/change-password — requires valid admin JWT
