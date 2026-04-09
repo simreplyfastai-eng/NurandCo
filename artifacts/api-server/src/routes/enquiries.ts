@@ -1,22 +1,9 @@
-import { Router, type Request, type Response, type NextFunction } from "express";
+import { Router } from "express";
 import { pool } from "@workspace/db";
 import { sendEnquiryEmails } from "../lib/email";
-import jwt from "jsonwebtoken";
+import { requireAuth } from "../lib/auth";
 
 const router = Router();
-
-function requireAuth(req: Request, res: Response, next: NextFunction) {
-  const auth = req.headers.authorization;
-  if (!auth?.startsWith("Bearer ")) return res.status(401).json({ error: "Unauthorized" });
-  const token = auth.slice(7);
-  const secret = process.env.SESSION_SECRET ?? "dev-secret";
-  try {
-    jwt.verify(token, secret);
-    next();
-  } catch {
-    return res.status(401).json({ error: "Invalid or expired token" });
-  }
-}
 
 function rowToEnquiry(row: Record<string, unknown>) {
   return {
@@ -32,7 +19,8 @@ function rowToEnquiry(row: Record<string, unknown>) {
 }
 
 // GET /api/enquiries  — protected (admin portal only)
-router.get("/enquiries", requireAuth, async (_req, res) => {
+router.get("/enquiries", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   try {
     const result = await pool.query(
       "SELECT * FROM enquiries ORDER BY created_at DESC",
@@ -72,7 +60,8 @@ router.post("/enquiries", async (req, res) => {
 });
 
 // PUT /api/enquiries/:id  — update status (protected)
-router.put("/enquiries/:id", requireAuth, async (req, res) => {
+router.put("/enquiries/:id", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const { id } = req.params;
   const { status } = req.body as { status: string };
   if (!status) return res.status(400).json({ error: "status required" });

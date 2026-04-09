@@ -74,7 +74,16 @@ Express 5 REST API on port 8080. All routes prefixed `/api/`.
 - `GET /api/cron/autocomplete` — Mark past Confirmed bookings Complete [CRON_SECRET]
 - `GET /api/cron/reminders` — Send 24h reminder emails [CRON_SECRET]
 
-**Shared auth middleware:** `artifacts/api-server/src/lib/auth.ts` — `requireAuth()` verifies JWT with admin role
+**Shared auth middleware:** `artifacts/api-server/src/lib/auth.ts` — `requireAuth()` verifies JWT with admin role. Used by ALL protected routes (bookings, clients, finance, portal, enquiries).
+
+**Security hardening:**
+- `helmet` — HSTS, X-Frame-Options, X-Content-Type-Options, Referrer-Policy, etc.
+- CORS whitelist — only production domain + Replit dev domain
+- Rate limiting on sensitive POST endpoints (bookings, login, enquiries, payment)
+- Stripe webhook requires `STRIPE_WEBHOOK_SECRET` — rejects if not set
+- SQL injection protected via parameterized queries throughout
+- KV store key allowlist prevents arbitrary data writes
+- No fallback secrets — `SESSION_SECRET` must be set or auth returns 500
 
 **Availability defaults (Niamh's schedule):**
 Mon: OFF, Tue–Thu: 10:00–19:00, Fri: 09:00–16:00, Sat: 09:00–14:00, Sun: OFF
