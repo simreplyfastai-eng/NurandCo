@@ -1,0 +1,126 @@
+Replace the post-payment thank you page with a fully redesigned 
+glassmorphism success page that matches the Dermadoll brand.
+
+OVERALL PAGE STYLE:
+- Background: soft blurred background using a warm cream/gold 
+  gradient — background: linear-gradient(135deg, #f5e6c8, 
+  #fdf6ec, #e8d5b0)
+- Add 2-3 large blurred gold/cream blob shapes behind everything 
+  using absolutely positioned divs with border-radius: 50%, 
+  filter: blur(80px), opacity: 0.4, in shades of #C9A96E and 
+  #f0d898 — gives depth without being loud
+- All cards use glassmorphism: 
+  background: rgba(255,255,255,0.25)
+  backdrop-filter: blur(20px)
+  -webkit-backdrop-filter: blur(20px)
+  border: 1px solid rgba(255,255,255,0.4)
+  border-radius: 20px
+  box-shadow: 0 8px 32px rgba(180,140,60,0.15)
+- Font: Cormorant Garamond headings, Inter body — matching 
+  rest of Dermadoll site
+- All text: #2a1f0e dark warm brown (readable on glass)
+- Gold accent: #C9A96E throughout
+- Page centred, max-width 560px, padding 24px
+
+TOP SECTION — centred, no card:
+- Animated gold checkmark in a frosted glass circle
+  Circle: 80px, glass style, gold border 2px
+  SVG checkmark inside — stroke-dashoffset animation draws 
+  itself over 0.7s ease on load, stroke: #C9A96E, 
+  stroke-width: 3
+- Heading: "You're All Booked!" 
+  Cormorant Garamond, 40px, #2a1f0e, font-weight: 600
+- Subheading: "Your deposit has been received. 
+  We can't wait to see you ✨"
+  Inter, 15px, #7a6a50
+
+CARD 1 — BOOKING SUMMARY (glass card):
+- Small gold label at top: "YOUR APPOINTMENT" 
+  Inter, 11px, gold, letter-spacing: 2px
+- Treatment name — Space Grotesk bold, 20px, dark
+- Date and time — Inter, 15px, dark
+- Two inline pills side by side:
+  Pill 1 — "Deposit Paid: £[amount]" 
+  background: rgba(201,169,110,0.15), gold text, 
+  border: 1px solid rgba(201,169,110,0.3), border-radius: 20px
+  Pill 2 — "Balance Due on Arrival: £[amount]"
+  same style
+
+CARD 2 — CLINIC DETAILS (glass card):
+- Small gold label: "FIND US"
+- Clinic name: Dermadoll Aesthetics — bold, 17px
+- Practitioner: Niamh — Inter, grey
+- Address block — Inter, 15px, dark
+  [Address — Niamh to confirm, placeholder for now]
+- Two buttons side by side, full rounded, equal width:
+  Button 1 — "📋 Copy Address"
+    glass button style: background rgba(255,255,255,0.3), 
+    border: 1px solid rgba(201,169,110,0.5), 
+    color: #2a1f0e, border-radius: 30px
+    On click: copies address to clipboard, button text 
+    changes to "✓ Copied!" for 2 seconds then resets
+  Button 2 — "📅 Save to Calendar"
+    same glass button style
+    On click: generates and downloads .ics file with:
+    - Title: [Treatment] at Dermadoll Aesthetics
+    - Date/time from booking
+    - Duration from treatment length
+    - Location: clinic address
+    - Description: Deposit paid £[x], balance £[x] 
+      due on arrival
+
+CARD 3 — CONTACT & NEXT STEPS (glass card):
+- Small gold label: "NEED ANYTHING?"
+- Subtext: "Have a question or need to make changes?"
+  Inter, 14px, #7a6a50
+- Three buttons stacked, full width, border-radius: 30px:
+  
+  Button 1 — WhatsApp
+  background: rgba(37,211,102,0.15)
+  border: 1px solid rgba(37,211,102,0.4)
+  color: #1a7a3a
+  Inline WhatsApp SVG icon (green)
+  Text: "Message Niamh on WhatsApp"
+  Links to: wa.me with pre-filled message:
+  "Hi Niamh! I've just booked [treatment] — 
+  I had a quick question about my appointment 😊"
+
+  Button 2 — Instagram
+  background: rgba(201,169,110,0.12)
+  border: 1px solid rgba(201,169,110,0.35)
+  color: #C9A96E
+  Inline Instagram SVG icon (gold)
+  Text: "@dermadollaesthetics"
+  Links to: instagram.com/dermadollaesthetics
+
+  Button 3 — Back to Home
+  background: rgba(255,255,255,0.2)
+  border: 1px solid rgba(255,255,255,0.4)
+  color: #2a1f0e
+  Text: "← Back to Home"
+  Links back to homepage
+
+SMALL PRINT below all cards, centred:
+Inter, 12px, #a09070 italic:
+"Please arrive 5 minutes before your appointment. 
+Full aftercare advice will be provided on the day 🤍"
+
+ANIMATIONS:
+- Page fades in on load: opacity 0 → 1, 0.4s ease
+- Checkmark circle scales in: transform scale(0) → scale(1), 
+  0.4s cubic-bezier(0.34, 1.56, 0.64, 1) — bouncy
+- Checkmark SVG draws itself: stroke-dashoffset animation 0.7s 
+  ease, starts after circle animation completes (0.4s delay)
+- Cards stagger fade up: each card fades in with translateY(20px) 
+  → translateY(0), opacity 0 → 1, 0.4s ease
+  Card 1: delay 0.3s | Card 2: delay 0.5s | Card 3: delay 0.7s
+- Buttons: scale(0.97) on active press, smooth 150ms transitions
+- Background blobs: slow drift animation, 
+  keyframes moving x/y by 20px over 8s ease-in-out infinite 
+  alternate — subtle life to the background
+
+MOBILE:
+- All cards full width, padding 16px
+- Buttons full width and stacked where needed
+- Heading 32px on mobile
+- Blob shapes repositioned so they don't clip weirdly

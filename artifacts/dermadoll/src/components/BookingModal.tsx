@@ -527,6 +527,219 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const blockedSlots = computeBlockedSlots(dateBookings);
   const availableSlots = workingSlots.filter((s) => !blockedSlots.has(s));
 
+  // ── Full-page success overlay ─────────────────────────────────────────────
+  if (step === "success") {
+    const CLINIC_ADDRESS = "Birmingham & Solihull\nFull address provided on confirmation";
+    const waMsg = encodeURIComponent(`Hi Niamh! I've just booked ${treatment.name} — I had a quick question about my appointment 😊`);
+    const waUrl = `https://wa.me/447535173072?text=${waMsg}`;
+
+    const handleCopyAddress = (btn: HTMLButtonElement) => {
+      navigator.clipboard.writeText(CLINIC_ADDRESS.replace(/\n/g, ", "));
+      const orig = btn.textContent;
+      btn.textContent = "✓ Copied!";
+      setTimeout(() => { btn.textContent = orig; }, 2000);
+    };
+
+    const handleICSDownload = () => {
+      if (!selectedDate || !selectedTime) return;
+      const [h, m] = selectedTime.split(":").map(Number);
+      const start = new Date(selectedDate);
+      start.setHours(h, m, 0, 0);
+      const end = new Date(start.getTime() + bookingDuration * 60 * 1000);
+      const pad = (n: number) => String(n).padStart(2, "0");
+      const fmt = (d: Date) => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
+      const ics = [
+        "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Dermadoll Aesthetics//EN",
+        "BEGIN:VEVENT",
+        `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`,
+        `SUMMARY:${treatment.name} at Dermadoll Aesthetics`,
+        "LOCATION:Birmingham & Solihull",
+        `DESCRIPTION:Deposit paid £${deposit}\\, balance £${balance} due on arrival`,
+        "END:VEVENT", "END:VCALENDAR",
+      ].join("\r\n");
+      const blob = new Blob([ics], { type: "text/calendar" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "dermadoll-appointment.ics"; a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    const glassCard: React.CSSProperties = {
+      background: "rgba(255,255,255,0.25)",
+      backdropFilter: "blur(20px)",
+      WebkitBackdropFilter: "blur(20px)",
+      border: "1px solid rgba(255,255,255,0.4)",
+      borderRadius: 20,
+      boxShadow: "0 8px 32px rgba(180,140,60,0.15)",
+      padding: "clamp(16px,4vw,24px)",
+      marginBottom: 16,
+    };
+    const goldLabel: React.CSSProperties = {
+      fontFamily: "Inter, sans-serif", fontSize: 11,
+      color: "#C9A96E", letterSpacing: "2px",
+      textTransform: "uppercase", marginBottom: 16,
+    };
+    const glassBtn: React.CSSProperties = {
+      background: "rgba(255,255,255,0.3)",
+      border: "1px solid rgba(201,169,110,0.5)",
+      color: "#2a1f0e", borderRadius: 30,
+      padding: "12px 8px", fontFamily: "Inter, sans-serif",
+      fontSize: 13, fontWeight: 500, cursor: "pointer",
+      transition: "all 0.15s",
+    };
+
+    return (
+      <div style={{
+        position: "fixed", inset: 0, zIndex: 200,
+        background: "linear-gradient(135deg, #f5e6c8, #fdf6ec, #e8d5b0)",
+        overflowY: "auto", animation: "ddFadeIn 0.4s ease",
+      }}>
+        <style>{`
+          @keyframes ddFadeIn { from { opacity:0 } to { opacity:1 } }
+          @keyframes ddBlobDrift { from { transform:translate(0,0) } to { transform:translate(20px,20px) } }
+          @keyframes ddScaleBounce {
+            from { transform:scale(0); opacity:0 }
+            to   { transform:scale(1); opacity:1 }
+          }
+          @keyframes ddCheckDraw {
+            from { stroke-dashoffset:60 }
+            to   { stroke-dashoffset:0 }
+          }
+          @keyframes ddFadeUp {
+            from { opacity:0; transform:translateY(20px) }
+            to   { opacity:1; transform:translateY(0) }
+          }
+          .dd-gbtn { transition:all 0.15s; cursor:pointer; }
+          .dd-gbtn:active { transform:scale(0.97); }
+        `}</style>
+
+        {/* Background blobs */}
+        <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0 }}>
+          <div style={{ position:"absolute", top:"-10%", left:"-10%", width:400, height:400, borderRadius:"50%", background:"#C9A96E", filter:"blur(80px)", opacity:0.3, animation:"ddBlobDrift 8s ease-in-out infinite alternate" }} />
+          <div style={{ position:"absolute", top:"40%", right:"-5%", width:320, height:320, borderRadius:"50%", background:"#f0d898", filter:"blur(80px)", opacity:0.35, animation:"ddBlobDrift 10s ease-in-out infinite alternate-reverse" }} />
+          <div style={{ position:"absolute", bottom:"-10%", left:"30%", width:360, height:360, borderRadius:"50%", background:"#C9A96E", filter:"blur(80px)", opacity:0.25, animation:"ddBlobDrift 12s ease-in-out infinite alternate" }} />
+        </div>
+
+        {/* Centred content */}
+        <div style={{ position:"relative", zIndex:1, maxWidth:560, margin:"0 auto", padding:"clamp(32px,5vw,56px) 24px" }}>
+
+          {/* Top — checkmark + heading */}
+          <div style={{ textAlign:"center", marginBottom:36 }}>
+            <div style={{
+              width:80, height:80, borderRadius:"50%", margin:"0 auto 24px",
+              background:"rgba(255,255,255,0.25)", backdropFilter:"blur(20px)", WebkitBackdropFilter:"blur(20px)",
+              border:"2px solid #C9A96E",
+              display:"flex", alignItems:"center", justifyContent:"center",
+              animation:"ddScaleBounce 0.4s cubic-bezier(0.34,1.56,0.64,1) both",
+            }}>
+              <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style={{ overflow:"visible" }}>
+                <polyline
+                  points="7,18 15,26 29,10"
+                  stroke="#C9A96E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"
+                  strokeDasharray="60" strokeDashoffset="60"
+                  style={{ animation:"ddCheckDraw 0.7s ease 0.4s forwards" }}
+                />
+              </svg>
+            </div>
+            <h1 style={{ fontFamily:"'Cormorant Garamond', serif", fontSize:"clamp(32px,7vw,40px)", fontWeight:600, color:"#2a1f0e", margin:"0 0 12px" }}>
+              You're All Booked!
+            </h1>
+            <p style={{ fontFamily:"Inter, sans-serif", fontSize:15, color:"#7a6a50", margin:0 }}>
+              Your deposit has been received. We can't wait to see you ✨
+            </p>
+          </div>
+
+          {/* Card 1 — Booking summary */}
+          <div style={{ ...glassCard, animation:"ddFadeUp 0.4s ease 0.3s both" }}>
+            <div style={goldLabel}>Your Appointment</div>
+            <div style={{ fontFamily:"Inter, sans-serif", fontSize:20, fontWeight:700, color:"#2a1f0e", marginBottom:6 }}>
+              {treatment.name}
+            </div>
+            <div style={{ fontFamily:"Inter, sans-serif", fontSize:15, color:"#2a1f0e", marginBottom:18 }}>
+              {selectedDate ? formatDate(selectedDate) : ""}{selectedTime ? ` · ${selectedTime}` : ""}
+            </div>
+            <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
+              <div style={{ background:"rgba(201,169,110,0.15)", border:"1px solid rgba(201,169,110,0.3)", borderRadius:20, padding:"6px 14px", fontFamily:"Inter, sans-serif", fontSize:13, color:"#C9A96E" }}>
+                Deposit Paid: £{deposit}
+              </div>
+              <div style={{ background:"rgba(201,169,110,0.15)", border:"1px solid rgba(201,169,110,0.3)", borderRadius:20, padding:"6px 14px", fontFamily:"Inter, sans-serif", fontSize:13, color:"#C9A96E" }}>
+                Balance Due on Arrival: £{balance}
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2 — Clinic details */}
+          <div style={{ ...glassCard, animation:"ddFadeUp 0.4s ease 0.5s both" }}>
+            <div style={goldLabel}>Find Us</div>
+            <div style={{ fontFamily:"Inter, sans-serif", fontSize:17, fontWeight:700, color:"#2a1f0e", marginBottom:4 }}>
+              Dermadoll Aesthetics
+            </div>
+            <div style={{ fontFamily:"Inter, sans-serif", fontSize:14, color:"#7a6a50", marginBottom:12 }}>Niamh</div>
+            <div style={{ fontFamily:"Inter, sans-serif", fontSize:15, color:"#2a1f0e", marginBottom:20, lineHeight:1.6 }}>
+              Birmingham &amp; Solihull<br />
+              <span style={{ fontSize:13, color:"#7a6a50" }}>Full address provided on confirmation</span>
+            </div>
+            <div style={{ display:"flex", gap:10 }}>
+              <button
+                className="dd-gbtn"
+                onClick={(e) => handleCopyAddress(e.currentTarget)}
+                style={{ ...glassBtn, flex:1 }}
+              >
+                📋 Copy Address
+              </button>
+              <button
+                className="dd-gbtn"
+                onClick={handleICSDownload}
+                style={{ ...glassBtn, flex:1 }}
+              >
+                📅 Save to Calendar
+              </button>
+            </div>
+          </div>
+
+          {/* Card 3 — Contact */}
+          <div style={{ ...glassCard, animation:"ddFadeUp 0.4s ease 0.7s both", marginBottom:24 }}>
+            <div style={goldLabel}>Need Anything?</div>
+            <div style={{ fontFamily:"Inter, sans-serif", fontSize:14, color:"#7a6a50", marginBottom:20 }}>
+              Have a question or need to make changes?
+            </div>
+            <div style={{ display:"flex", flexDirection:"column", gap:10 }}>
+              <a
+                href={waUrl} target="_blank" rel="noopener noreferrer"
+                className="dd-gbtn"
+                style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10, background:"rgba(37,211,102,0.15)", border:"1px solid rgba(37,211,102,0.4)", color:"#1a7a3a", borderRadius:30, padding:"13px 20px", fontFamily:"Inter, sans-serif", fontSize:14, fontWeight:500, textDecoration:"none" }}
+              >
+                <svg viewBox="0 0 24 24" fill="#25D366" width="18" height="18"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.126.553 4.117 1.523 5.845L.057 23.704a.5.5 0 0 0 .614.632l6.054-1.572A11.94 11.94 0 0 0 12 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.818 9.818 0 0 1-5.01-1.373l-.36-.214-3.724.967.998-3.613-.236-.373A9.818 9.818 0 1 1 12 21.818z"/></svg>
+                Message Niamh on WhatsApp
+              </a>
+              <a
+                href="https://instagram.com/dermadollaesthetics" target="_blank" rel="noopener noreferrer"
+                className="dd-gbtn"
+                style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10, background:"rgba(201,169,110,0.12)", border:"1px solid rgba(201,169,110,0.35)", color:"#C9A96E", borderRadius:30, padding:"13px 20px", fontFamily:"Inter, sans-serif", fontSize:14, fontWeight:500, textDecoration:"none" }}
+              >
+                <svg viewBox="0 0 24 24" fill="#C9A96E" width="18" height="18"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                @dermadollaesthetics
+              </a>
+              <button
+                className="dd-gbtn"
+                onClick={onClose}
+                style={{ display:"flex", alignItems:"center", justifyContent:"center", background:"rgba(255,255,255,0.2)", border:"1px solid rgba(255,255,255,0.4)", color:"#2a1f0e", borderRadius:30, padding:"13px 20px", fontFamily:"Inter, sans-serif", fontSize:14, fontWeight:500, width:"100%" }}
+              >
+                ← Back to Home
+              </button>
+            </div>
+          </div>
+
+          {/* Small print */}
+          <p style={{ fontFamily:"Inter, sans-serif", fontSize:12, color:"#a09070", fontStyle:"italic", textAlign:"center", margin:"0 0 48px" }}>
+            Please arrive 5 minutes before your appointment. Full aftercare advice will be provided on the day 🤍
+          </p>
+        </div>
+      </div>
+    );
+  }
+  // ─────────────────────────────────────────────────────────────────────────────
+
   return (
     <div className="fixed inset-0 z-[200] flex items-end md:items-center justify-center">
       <motion.div
@@ -841,77 +1054,6 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
           </motion.div>
         )}
 
-        {/* ── Success screen ── */}
-        {step === "success" && (
-          <motion.div
-            key="success"
-            initial={{ opacity: 0, scale: 0.97 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.35 }}
-            className="text-center"
-          >
-            {/* Gold checkmark */}
-            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-5 rounded-full" style={{ backgroundColor: "rgba(201,169,110,0.12)" }}>
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <polyline points="20 6 9 17 4 12" />
-              </svg>
-            </div>
-
-            <h2 className="font-serif mb-1" style={{ fontSize: "26px" }}>Booking Confirmed!</h2>
-            <p className="text-sm mb-6" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
-              {hasResendKey
-                ? <>A confirmation has been sent to <strong style={{ color: "#111" }}>{email}</strong></>
-                : "Please screenshot this page for your records."
-              }
-            </p>
-
-            {/* Booking details */}
-            <div className="text-left mb-5 p-4 rounded-xl space-y-2" style={{ border: "1px solid rgba(201,169,110,0.25)", backgroundColor: "#FEFDFB" }}>
-              <div className="flex justify-between gap-4 text-sm">
-                <span style={{ color: "#888" }}>Treatment</span>
-                <span className="font-medium text-right">{treatment.name}</span>
-              </div>
-              <div className="flex justify-between gap-4 text-sm">
-                <span style={{ color: "#888" }}>Date</span>
-                <span className="font-medium text-right">{selectedDate ? formatDate(selectedDate) : "—"}</span>
-              </div>
-              <div className="flex justify-between gap-4 text-sm">
-                <span style={{ color: "#888" }}>Time</span>
-                <span className="font-medium">{selectedTime}</span>
-              </div>
-              <div className="flex justify-between gap-4 text-sm">
-                <span style={{ color: "#888" }}>Duration</span>
-                <span className="font-medium">Approximately {bookingDuration} minutes</span>
-              </div>
-              <div className="border-t pt-2 mt-2 space-y-1" style={{ borderColor: "rgba(201,169,110,0.15)" }}>
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: "#888" }}>Deposit paid</span>
-                  <span className="font-semibold" style={{ color: "#2D6A4F" }}>£{deposit} ✓</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: "#888" }}>Remaining balance</span>
-                  <span className="font-medium" style={{ color: "#111" }}>£{balance} — due on arrival</span>
-                </div>
-              </div>
-            </div>
-
-            <p className="text-sm mb-4" style={{ color: "#666", fontFamily: "Inter, sans-serif" }}>
-              See you soon! If you need to reschedule, please contact us:
-            </p>
-            <div className="text-sm mb-6 space-y-1" style={{ fontFamily: "Inter, sans-serif" }}>
-              <div style={{ color: "#888" }}>Instagram: <strong style={{ color: "#111" }}>@dermadollaesthetics</strong></div>
-              {whatsapp && <div style={{ color: "#888" }}>WhatsApp: <strong style={{ color: "#111" }}>{whatsapp}</strong></div>}
-            </div>
-
-            <button
-              onClick={onClose}
-              className="w-full py-4 text-white font-medium text-sm uppercase tracking-wider transition-all duration-200 hover:opacity-90"
-              style={{ backgroundColor: "#C9A96E", borderRadius: "12px", fontFamily: "Inter, sans-serif" }}
-            >
-              Done
-            </button>
-          </motion.div>
-        )}
       </motion.div>
     </div>
   );
