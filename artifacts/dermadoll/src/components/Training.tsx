@@ -1,6 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Check } from "lucide-react";
 import { useState, useEffect } from "react";
+import trainingPathwayImg from "@/assets/training-pathway.jpg";
 
 function mediaUrl(path: string | null | undefined): string | null {
   if (!path) return null;
@@ -256,6 +257,20 @@ export default function Training() {
             CPD accredited · No background needed · Birmingham & Solihull
           </motion.p>
         </div>
+
+        {/* Pathway to Aesthetics — promotional image */}
+        <motion.div
+          initial={{ opacity: 0, y: 24 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+          transition={{ duration: 0.7 }}
+          className="flex justify-center mb-8 md:mb-12"
+        >
+          <img
+            src={trainingPathwayImg}
+            alt="Pathway to Aesthetics — Dermadoll Training Course"
+            className="w-full max-w-sm md:max-w-md lg:max-w-lg rounded-2xl shadow-lg object-cover"
+            style={{ display: "block" }}
+          />
+        </motion.div>
 
         {/* Pathway to Aesthetics — featured card */}
         <motion.div
