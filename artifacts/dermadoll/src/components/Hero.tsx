@@ -20,19 +20,34 @@ export default function Hero() {
 
     const tryPlay = () => {
       video.muted = true;
-      video.play().catch(() => {});
+      video.playsInline = true;
+      const p = video.play();
+      if (p) p.catch(() => {});
     };
 
     tryPlay();
     video.addEventListener("loadedmetadata", tryPlay);
+    video.addEventListener("loadeddata", tryPlay);
     video.addEventListener("canplay", tryPlay);
-    document.addEventListener("visibilitychange", () => {
-      if (!document.hidden) tryPlay();
-    });
+
+    const onVisible = () => { if (!document.hidden) tryPlay(); };
+    document.addEventListener("visibilitychange", onVisible);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) tryPlay(); },
+      { threshold: 0.1 },
+    );
+    observer.observe(video);
+
+    const userGesture = () => { tryPlay(); window.removeEventListener("touchstart", userGesture); };
+    window.addEventListener("touchstart", userGesture, { once: true, passive: true });
 
     return () => {
       video.removeEventListener("loadedmetadata", tryPlay);
+      video.removeEventListener("loadeddata", tryPlay);
       video.removeEventListener("canplay", tryPlay);
+      document.removeEventListener("visibilitychange", onVisible);
+      observer.disconnect();
     };
   }, [heroSrc]);
 
@@ -51,6 +66,7 @@ export default function Hero() {
           preload="auto"
           {...{ "webkit-playsinline": "true" } as any}
           className="absolute inset-0 w-full h-full object-cover object-top md:object-[center_35%]"
+          style={{ pointerEvents: "none" }}
         >
           <source src={heroSrc ?? defaultSrc} type="video/mp4" />
         </video>

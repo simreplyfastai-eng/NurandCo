@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_SLOTS = [
   { key: "vid0", label: "Medical Needling", src: "video1.mp4" },
@@ -9,6 +9,63 @@ const DEFAULT_SLOTS = [
 ];
 
 interface VidSlot { key: string; label: string; src: string; }
+
+function AutoPlayVideo({ src }: { src: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+
+    const tryPlay = () => {
+      video.muted = true;
+      video.playsInline = true;
+      const p = video.play();
+      if (p) p.catch(() => {});
+    };
+
+    video.addEventListener("loadeddata", tryPlay);
+    video.addEventListener("canplay", tryPlay);
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          tryPlay();
+        } else {
+          video.pause();
+        }
+      },
+      { threshold: 0.25 },
+    );
+    observer.observe(video);
+
+    const userGesture = () => { tryPlay(); window.removeEventListener("touchstart", userGesture); };
+    window.addEventListener("touchstart", userGesture, { once: true, passive: true });
+
+    return () => {
+      video.removeEventListener("loadeddata", tryPlay);
+      video.removeEventListener("canplay", tryPlay);
+      observer.disconnect();
+    };
+  }, [src]);
+
+  return (
+    <video
+      ref={ref}
+      key={src}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      {...{ "webkit-playsinline": "true" } as any}
+      className="w-full h-full object-cover"
+      style={{ pointerEvents: "none" }}
+    >
+      <source src={src} type="video/mp4" />
+    </video>
+  );
+}
 
 function VideoCard({ vid, i }: { vid: VidSlot; i: number }) {
   const isLocal = !vid.src.startsWith("http") && !vid.src.startsWith("/api/");
@@ -24,18 +81,7 @@ function VideoCard({ vid, i }: { vid: VidSlot; i: number }) {
       className="flex flex-col gap-2"
     >
       <div className="rounded-sm overflow-hidden bg-[#FAF9F7] aspect-square border border-[#C9A96E]">
-        <video
-          key={src}
-          autoPlay
-          muted
-          loop
-          playsInline
-          preload="auto"
-          {...{ "webkit-playsinline": "true" } as any}
-          className="w-full h-full object-cover"
-        >
-          <source src={src} type="video/mp4" />
-        </video>
+        <AutoPlayVideo src={src} />
       </div>
     </motion.div>
   );
