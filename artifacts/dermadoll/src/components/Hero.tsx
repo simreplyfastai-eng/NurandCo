@@ -49,7 +49,6 @@ export default function Hero() {
           loop
           playsInline
           preload="auto"
-          poster={`${import.meta.env.BASE_URL}opengraph.jpg`}
           {...{ "webkit-playsinline": "true" } as any}
           className="absolute inset-0 w-full h-full object-cover object-top md:object-[center_35%]"
         >
@@ -67,7 +66,7 @@ export default function Hero() {
           className="flex flex-col items-center mb-10 md:mb-12"
         >
           <span
-            className="font-serif tracking-[0.18em] font-bold leading-none text-white text-[clamp(3.2rem,12vw,8rem)] md:text-[96px]"
+            className="font-serif tracking-[0.18em] font-bold leading-none text-white text-[clamp(1.8rem,10.5vw,8rem)] md:text-[96px]"
             style={{
               textShadow: "0 0 30px rgba(201,169,110,0.3), 0 0 60px rgba(201,169,110,0.12)",
             }}
