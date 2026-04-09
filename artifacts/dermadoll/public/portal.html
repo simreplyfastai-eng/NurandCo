@@ -2054,7 +2054,6 @@ function buildCalendar(){
   const dpBody=document.getElementById('day-panel-body');
   const dpTitle=document.getElementById('day-panel-title');
   // Auto-select today's date if this is the current month and there are bookings today
-  const todayStr=fmt(new Date());
   const todayIsThisMonth=todayStr.startsWith(String(y)+'-'+String(m+1).padStart(2,'0'));
   const hasTodayBookings=bookings.some(b=>b.date===todayStr&&b.status!=='Cancelled');
   if(todayIsThisMonth&&hasTodayBookings){
