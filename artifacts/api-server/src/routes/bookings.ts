@@ -500,7 +500,9 @@ router.put("/bookings/:id", async (req, res) => {
         status=COALESCE($13,status),
         notes=COALESCE($14,notes),
         stripe_payment_id=COALESCE($15,stripe_payment_id),
-        duration_minutes=COALESCE($16,duration_minutes)
+        duration_minutes=COALESCE($16,duration_minutes),
+        client_dob=COALESCE($17,client_dob),
+        client_notes=COALESCE($18,client_notes)
        WHERE id=$1`,
       [
         id,
@@ -513,6 +515,8 @@ router.put("/bookings/:id", async (req, res) => {
         newStatus, b.notes ?? null,
         b.stripePaymentId ?? null,
         newDuration,
+        b.clientDOB != null ? String(b.clientDOB) : null,
+        b.clientNotes != null ? String(b.clientNotes) : null,
       ],
     );
 

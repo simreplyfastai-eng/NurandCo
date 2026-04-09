@@ -1113,7 +1113,7 @@ tr:hover td{background:#FDFBF8}
       </div>
       <div class="form-group">
         <label class="form-label">Time</label>
-        <select class="form-input" id="bm-time"></select>
+        <input class="form-input" id="bm-time" type="time" step="900"/>
       </div>
     </div>
     <div class="form-row">
@@ -1153,11 +1153,11 @@ tr:hover td{background:#FDFBF8}
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Date of Birth</label>
-          <input class="form-input" id="bm-client-dob" type="text" placeholder="DD/MM/YYYY" readonly style="background:#fff;cursor:default"/>
+          <input class="form-input" id="bm-client-dob" type="text" placeholder="DD/MM/YYYY"/>
         </div>
         <div class="form-group">
           <label class="form-label">Skin Concerns / Goals</label>
-          <textarea class="form-input" id="bm-client-notes" rows="3" placeholder="—" readonly style="background:#fff;cursor:default;resize:none"></textarea>
+          <textarea class="form-input" id="bm-client-notes" rows="3" placeholder="Any skin concerns or goals…" style="resize:none"></textarea>
         </div>
       </div>
     </div>
@@ -2353,13 +2353,9 @@ function buildTreatmentSelect(){
     return`<option value="${t.name}" data-price="${ov.price||t.price}" data-cat="${t.cat}">${t.name}</option>`;
   }).join('');
 
-  // Time slots
-  const times=[];
-  for(let h=9;h<=18;h++){times.push(pad(h)+':00');times.push(pad(h)+':30');}
-  document.getElementById('bm-time').innerHTML=times.map(t=>`<option>${t}</option>`).join('');
-
   // Today as default date
   document.getElementById('bm-date').value=fmt(new Date());
+  document.getElementById('bm-time').value='09:00';
 }
 function pad(n){return n<10?'0'+n:n}
 
@@ -2431,15 +2427,13 @@ function openBookingModal(prefill){
     const opt=[...sel.options].find(o=>o.value===booking.treatment);
     if(opt)sel.value=booking.treatment; else sel.selectedIndex=0;
     // Set time
-    const timeSel=document.getElementById('bm-time');
-    const tOpt=[...timeSel.options].find(o=>o.value===booking.time);
-    if(tOpt)timeSel.value=booking.time;
+    document.getElementById('bm-time').value=booking.time||'09:00';
     // Show consultation extra fields
     const consultFields=document.getElementById('bm-consultation-fields');
     if(booking.category==='Consultation'||booking.treatment==='Consultation'){
       consultFields.style.display='';
-      document.getElementById('bm-client-dob').value=booking.clientDOB||'—';
-      document.getElementById('bm-client-notes').value=booking.clientNotes||'—';
+      document.getElementById('bm-client-dob').value=booking.clientDOB||'';
+      document.getElementById('bm-client-notes').value=booking.clientNotes||'';
     } else {
       consultFields.style.display='none';
     }
@@ -2456,6 +2450,7 @@ function openBookingModal(prefill){
     document.getElementById('bm-notes').value='';
     document.getElementById('bm-status').value='Confirmed';
     document.getElementById('bm-date').value=fmt(new Date());
+    document.getElementById('bm-time').value='09:00';
     document.getElementById('bm-deposit-group').style.display='none';
     document.getElementById('bm-balance-group').style.display='none';
     document.getElementById('bm-consultation-fields').style.display='none';
@@ -2527,10 +2522,18 @@ async function saveBooking(){
     }
   }
 
+  const clientDOB=document.getElementById('bm-client-dob').value.trim();
+  const clientNotes=document.getElementById('bm-client-notes').value.trim();
+
+  // Preserve existing deposit/balance paid status when editing
+  const existingForEdit=editingBookingId?getBookings().find(b=>b.id===editingBookingId):null;
+  const depositPaid=existingForEdit?existingForEdit.depositPaid:true;
+  const balancePaid=existingForEdit?existingForEdit.balancePaid:false;
+
   const booking={
     id:editingBookingId||uid(),clientName,clientEmail,clientPhone,treatment,category,
-    date,time,price,deposit,depositPaid:true,balancePaid:false,
-    status,notes,createdAt:Date.now(),source:'Portal',paymentMethod:'Stripe'
+    date,time,price,deposit,depositPaid,balancePaid,
+    status,notes,clientDOB,clientNotes,createdAt:Date.now(),source:'Portal',paymentMethod:'Stripe'
   };
 
   if(editingBookingId){
