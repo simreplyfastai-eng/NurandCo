@@ -53,8 +53,8 @@ const AVAIL_DEFAULT: Record<string, { on: boolean; start?: string; end?: string 
 
 /**
  * Checks whether `date` (YYYY-MM-DD) and optional `time` (HH:MM) fall within
- * the clinic's availability configuration.  On any DB error, returns ok:true
- * so the conflict check still runs.
+ * the clinic's availability configuration.  On DB error, falls back to the
+ * hardcoded default schedule so closed days/hours are still enforced.
  */
 async function checkAvailability(
   date: string,
@@ -88,9 +88,9 @@ async function checkAvailability(
       }
       if (raw.overrides) overrides = raw.overrides;
     }
-  } catch {
-    // Fail open — conflict check still protects against double-bookings
-    return { ok: true };
+  } catch (err) {
+    console.error("checkAvailability DB error — using hardcoded schedule", err);
+    // Fall back to the hardcoded default schedule instead of failing open
   }
 
   // Override for specific date takes priority over weekly default

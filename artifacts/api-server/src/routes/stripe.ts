@@ -58,7 +58,7 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
   if (!stripe) {
     return res.status(503).json({ error: "Stripe is not configured. Please contact the clinic to arrange payment." });
   }
-  const { amount, treatment, clientName, clientEmail } = req.body as Record<string, string>;
+  const { amount, treatment, clientName, clientEmail, clientPhone, bookingDate, bookingTime } = req.body as Record<string, string>;
   if (!amount || !treatment) {
     return res.status(400).json({ error: "amount and treatment required" });
   }
@@ -71,6 +71,9 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
         treatment,
         clientName: clientName ?? "",
         clientEmail: clientEmail ?? "",
+        clientPhone: clientPhone ?? "",
+        bookingDate: bookingDate ?? "",
+        bookingTime: bookingTime ?? "",
       },
       automatic_payment_methods: { enabled: true },
     });
@@ -105,7 +108,7 @@ router.post("/stripe/webhook", async (req, res) => {
 
   if (event.type === "payment_intent.succeeded") {
     const pi = event.data.object as Stripe.PaymentIntent;
-    const { treatment, clientName, clientEmail } = pi.metadata ?? {};
+    const { treatment, clientName, clientEmail, clientPhone, bookingDate, bookingTime } = pi.metadata ?? {};
     const paymentIntentId = pi.id;
 
     try {
@@ -133,24 +136,30 @@ router.post("/stripe/webhook", async (req, res) => {
           const depositPercent = Number(settings.deposit ?? 50) || 50;
           const price = Math.round(deposit * 100 / depositPercent);
 
+          const rawDate = bookingDate || new Date().toISOString().slice(0, 10);
+          const bDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : rawDate.slice(0, 10);
+          const rawTime = bookingTime || "";
+          const bTime = /^\d{2}:\d{2}$/.test(rawTime) ? rawTime : "";
+
           const clientId = await upsertClientFromBooking({
             name: clientName,
             email: clientEmail ?? "",
-            phone: "",
-            date: new Date().toISOString().slice(0, 10),
+            phone: clientPhone ?? "",
+            date: bDate,
             source: "Website",
           });
 
           await pool.query(
             `INSERT INTO bookings
-              (id,client_id,client_name,client_email,treatment,category,price,deposit,
+              (id,client_id,client_name,client_email,client_phone,treatment,category,price,deposit,
                deposit_paid,balance_paid,date,time,status,payment_method,
                stripe_payment_id,notes,created_at,source,duration_minutes,reminder_sent)
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,true,false,'','','Confirmed','Stripe',$9,'',
-               $10,'Website',$11,false)`,
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,true,false,$10,$11,'Confirmed','Stripe',$12,'',
+               $13,'Website',$14,false)`,
             [
-              id, clientId ?? null, clientName, clientEmail ?? "",
+              id, clientId ?? null, clientName, clientEmail ?? "", clientPhone ?? "",
               treatment, category, price, deposit,
+              bDate, bTime,
               paymentIntentId, Date.now(), durationMinutes,
             ],
           );
@@ -162,8 +171,8 @@ router.post("/stripe/webhook", async (req, res) => {
               clientEmail,
               clientName,
               treatment,
-              date: "",
-              time: "",
+              date: bDate,
+              time: bTime,
               durationMinutes,
               deposit,
               balance: price - deposit,
@@ -177,11 +186,11 @@ router.post("/stripe/webhook", async (req, res) => {
               adminEmail,
               clientName,
               clientEmail: clientEmail ?? "",
-              clientPhone: "",
+              clientPhone: clientPhone ?? "",
               treatment,
               durationMinutes,
-              date: "",
-              time: "",
+              date: bDate,
+              time: bTime,
               deposit,
               depositPaid: true,
               source: "Website",

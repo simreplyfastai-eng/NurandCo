@@ -10,7 +10,27 @@ if (!process.env.DATABASE_URL) {
   );
 }
 
-export const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+export const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  max: 20,
+  idleTimeoutMillis: 30_000,
+  connectionTimeoutMillis: 5_000,
+});
+
+pool.on("error", (err) => {
+  console.error("Unexpected PostgreSQL pool error:", err.message);
+});
+
 export const db = drizzle(pool, { schema });
+
+export async function ensureTables(): Promise<void> {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS portal_kv (
+      key   TEXT PRIMARY KEY,
+      value JSONB NOT NULL DEFAULT '{}',
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    );
+  `);
+}
 
 export * from "./schema";

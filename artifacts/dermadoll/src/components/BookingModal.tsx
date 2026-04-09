@@ -371,6 +371,9 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
             treatment: treatment?.name ?? "",
             clientName: name,
             clientEmail: email,
+            clientPhone: phone,
+            bookingDate: selectedDate ? fmtDate(selectedDate) : "",
+            bookingTime: selectedTime,
           }),
         });
 

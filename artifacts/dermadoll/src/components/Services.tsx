@@ -216,15 +216,29 @@ export default function Services() {
   const [services, setServices] = useState<Category[]>(FALLBACK_SERVICES);
 
   useEffect(() => {
-    fetch("/api/treatments")
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+    fetch("/api/treatments", { signal: controller.signal })
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (Array.isArray(data) && data.length > 0) {
-          const filtered = data.filter((c: Category) => c.title !== "Consultation");
-          if (filtered.length > 0) setServices(filtered);
-        }
+        if (!Array.isArray(data) || data.length === 0) return;
+        const valid = data.filter(
+          (c: any) =>
+            c &&
+            typeof c.title === "string" &&
+            c.title !== "Consultation" &&
+            Array.isArray(c.items) &&
+            c.items.length > 0 &&
+            c.items.every(
+              (i: any) =>
+                i && typeof i.name === "string" && typeof i.price === "string",
+            ),
+        ) as Category[];
+        if (valid.length > 0) setServices(valid);
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => clearTimeout(timeout));
+    return () => { controller.abort(); clearTimeout(timeout); };
   }, []);
 
   return (
