@@ -4,6 +4,7 @@ import { upsertClientFromBooking } from "./clients";
 import { getTreatmentDuration, getTreatmentCategory, hasConflict } from "../lib/treatments";
 import { sendCancellationEmail, sendAdminNotificationEmail, sendClientConfirmationEmail, sendConsultationConfirmationEmail, sendConsultationAdminEmail } from "../lib/email";
 import { requireAuth } from "../lib/auth";
+import { ukDateStr, ukDayOfWeek } from "../lib/tz";
 
 const router = Router();
 
@@ -94,7 +95,7 @@ async function checkAvailability(
   }
 
   // Override for specific date takes priority over weekly default
-  const dayName = DAY_NAMES[new Date(date).getDay()];
+  const dayName = DAY_NAMES[ukDayOfWeek(date)];
   const config = overrides[date] ?? defaults[dayName];
 
   if (!config || !config.on) {
@@ -241,11 +242,8 @@ router.post("/bookings", async (req, res) => {
   // ── Past-date check ───────────────────────────────────────────────────────
   // Portal bookings (source === "Portal") are allowed to backdate
   if (b.source !== "Portal") {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const requestedDate = new Date(date);
-    requestedDate.setHours(0, 0, 0, 0);
-    if (requestedDate < today) {
+    const todayUK = ukDateStr();
+    if (date < todayUK) {
       return res.status(400).json({ error: "Cannot book a date in the past." });
     }
   }

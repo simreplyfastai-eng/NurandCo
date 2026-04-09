@@ -572,13 +572,19 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
       const pad = (n: number) => String(n).padStart(2, "0");
       const fmt = (d: Date) => `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}T${pad(d.getHours())}${pad(d.getMinutes())}00`;
       const ics = [
-        "BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//Dermadoll Aesthetics//EN",
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Dermadoll Aesthetics//EN",
+        "X-WR-CALNAME:Dermadoll Aesthetics",
+        "X-WR-TIMEZONE:Europe/London",
         "BEGIN:VEVENT",
-        `DTSTART:${fmt(start)}`, `DTEND:${fmt(end)}`,
+        `DTSTART;TZID=Europe/London:${fmt(start)}`,
+        `DTEND;TZID=Europe/London:${fmt(end)}`,
         `SUMMARY:${treatment.name} at Dermadoll Aesthetics`,
         "LOCATION:1500 Stratford Road\\, Lumi Salon\\, Hall Green\\, Birmingham B28 9ET",
         `DESCRIPTION:Deposit paid £${deposit}\\, balance £${balance} due on arrival`,
-        "END:VEVENT", "END:VCALENDAR",
+        "END:VEVENT",
+        "END:VCALENDAR",
       ].join("\r\n");
       const blob = new Blob([ics], { type: "text/calendar" });
       const url = URL.createObjectURL(blob);

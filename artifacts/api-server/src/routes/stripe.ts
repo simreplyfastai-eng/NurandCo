@@ -10,6 +10,7 @@ import { pool } from "@workspace/db";
 import { getTreatmentDuration, getTreatmentCategory, getTreatmentPrice, hasConflict } from "../lib/treatments";
 import { sendClientConfirmationEmail, sendAdminNotificationEmail } from "../lib/email";
 import { upsertClientFromBooking } from "./clients";
+import { ukDateStr } from "../lib/tz";
 
 const router = Router();
 
@@ -208,7 +209,7 @@ router.post("/stripe/webhook", async (req, res) => {
           const depositPercent = Number(settings.deposit ?? 50) || 50;
           const price = Math.round(deposit * 100 / depositPercent);
 
-          const rawDate = bookingDate || new Date().toISOString().slice(0, 10);
+          const rawDate = bookingDate || ukDateStr();
           const bDate = /^\d{4}-\d{2}-\d{2}$/.test(rawDate) ? rawDate : rawDate.slice(0, 10);
           const rawTime = bookingTime || "";
           const bTime = /^\d{2}:\d{2}$/.test(rawTime) ? rawTime : "";

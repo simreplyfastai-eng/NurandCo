@@ -21,8 +21,9 @@ function fmtDateUK(dateStr: string): string {
 function fmtDateLong(dateStr: string): string {
   if (!dateStr) return dateStr;
   const [y, m, d] = dateStr.split("-").map(Number);
-  const date = new Date(y, m - 1, d);
+  const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
   return new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Europe/London",
     weekday: "long",
     day: "numeric",
     month: "long",
