@@ -88,7 +88,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 .kpi-label{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
 .kpi-value{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;color:var(--gold);line-height:1}
 .kpi-change{font-size:11px;margin-top:8px;display:flex;align-items:center;gap:4px}
-.kpi-change.up{color:#2e7d32}.kpi-change.down{color:#c62828}
+.kpi-change.up{color:#2e7d32}.kpi-change.down{color:#c62828}.kpi-change.neutral{color:#888}
 
 /* ── TABLES ──────────────────────────────────────── */
 .card{background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:var(--card-shadow);overflow:hidden}
@@ -1827,7 +1827,7 @@ function renderDashboard(){
 
   const rev=thisMonth.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+Number(b.price),0);
   const revLast=lastMonth.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+Number(b.price),0);
-  const revChange=revLast?Math.round((rev-revLast)/revLast*100):0;
+  const revChange=revLast?Math.round((rev-revLast)/revLast*100):(rev>0?100:0);
 
   const appts=thisMonth.length;
   const apptsDiff=appts-lastMonth.length;
@@ -1842,7 +1842,7 @@ function renderDashboard(){
 
   const kpiGrid=document.getElementById('kpi-grid');
   kpiGrid.innerHTML=`
-    ${kpiCard('Revenue This Month',gbp(rev),revChange>0?'up':'down',(revChange>0?'↑ ':'↓ ')+Math.abs(revChange)+'% vs last month','finance')}
+    ${kpiCard('Revenue This Month',gbp(rev),revChange>0?'up':revChange<0?'down':'neutral',revChange>0?'↑ '+revChange+'% vs last month':revChange<0?'↓ '+Math.abs(revChange)+'% vs last month':'→ No change vs last month','finance')}
     ${kpiCard('Appointments',appts,apptsDiff>=0?'up':'down',(apptsDiff>=0?'+':'')+apptsDiff+' from last month','schedule')}
     ${kpiCard('Active Clients',activeClients,'up','+'+newClients+' new this month','clients')}
     ${kpiCard('Avg. Spend',gbp(avgSpend),avgDiff>=0?'up':'down',(avgDiff>=0?'+':'')+gbp(avgDiff)+' per visit','finance')}
