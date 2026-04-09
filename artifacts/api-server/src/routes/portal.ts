@@ -63,7 +63,7 @@ const CAT_ORDER = ['BOTOX','FILLER','FACIALS','SKINBOOST','FATDISSOLVE','INJECTA
 const ALLOWED_KV_KEYS = new Set([
   'dd_settings','dd_custom_treats','dd_custom_cats','dd_cat_states',
   'dd_treatment_overrides','dd_video_labels','dd_availability',
-  'dd_initialized','dd_media',
+  'dd_initialized','dd_media','admin_password_override',
 ]);
 
 function formatDuration(mins: number): string {

@@ -1791,7 +1791,7 @@ function showPage(id,el,fromKpi){
   if(id==='finance')renderFinance();
   if(id==='enquiries')renderEnquiries();
   if(id==='media')renderMedia();
-  if(id==='settings')loadLaunchChecklist();
+  if(id==='settings'){populateSettingsForm();loadLaunchChecklist();}
   // manage back button visibility
   document.querySelectorAll('.back-to-dash').forEach(b=>b.classList.remove('visible'));
   if(fromKpi){
@@ -3837,7 +3837,19 @@ function editVideoLabel(key){
 // ═══════════════════════════════════════════════════
 // SETTINGS
 // ═══════════════════════════════════════════════════
-function saveSettings(){
+function populateSettingsForm(){
+  const s=getSettings();
+  const set=function(id,val){const el=document.getElementById(id);if(el&&val!==undefined&&val!==null&&val!=='')el.value=val;};
+  set('s-clinic',s.clinic);
+  set('s-practitioner',s.practitioner);
+  set('s-instagram',s.instagram);
+  set('s-whatsapp',s.whatsapp);
+  set('s-deposit',s.deposit);
+  set('s-confirm-msg',s.confirmMsg);
+  set('s-notify-email',s.notifyEmail);
+}
+
+async function saveSettings(){
   const s={
     clinic:document.getElementById('s-clinic').value,
     practitioner:document.getElementById('s-practitioner').value,
@@ -3847,8 +3859,13 @@ function saveSettings(){
     confirmMsg:document.getElementById('s-confirm-msg').value,
     notifyEmail:document.getElementById('s-notify-email').value,
   };
-  saveSettingsData(s);
-  alert('Settings saved!');
+  localStorage.setItem('dd_settings',JSON.stringify(s));
+  try{
+    await CloudStore.set('dd_settings',s);
+    showToast('\u2713 Settings saved \u2014 changes are live');
+  }catch(e){
+    showToast('Save failed \u2014 please try again');
+  }
 }
 
 async function changePassword(){
