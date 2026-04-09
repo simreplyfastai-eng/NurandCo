@@ -1,5 +1,6 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
 import { pool } from "@workspace/db";
 
 const router = Router();
@@ -33,7 +34,14 @@ router.post("/auth/login", async (req, res) => {
   }
 
   const emailMatch = (email ?? "").trim().toLowerCase() === adminEmail.toLowerCase();
-  const passMatch = password === activePassword;
+
+  // Support both bcrypt hashes (new) and plain text (legacy migration path)
+  let passMatch = false;
+  if (activePassword.startsWith("$2") && activePassword.length >= 60) {
+    passMatch = await bcrypt.compare(password ?? "", activePassword);
+  } else {
+    passMatch = password === activePassword;
+  }
 
   if (!emailMatch || !passMatch) {
     return res.status(401).json({ error: "Invalid credentials" });
@@ -63,12 +71,21 @@ router.post("/auth/change-password", async (req, res) => {
   if (newPassword.length < 8) return res.status(400).json({ error: "New password must be at least 8 characters" });
 
   const activePassword = await getActivePassword();
-  if (currentPassword !== activePassword) return res.status(401).json({ error: "Current password is incorrect" });
+  // Verify current password — support both bcrypt hashes and plain text (migration)
+  let currentMatch = false;
+  if (activePassword && activePassword.startsWith("$2") && activePassword.length >= 60) {
+    currentMatch = await bcrypt.compare(currentPassword, activePassword);
+  } else {
+    currentMatch = currentPassword === activePassword;
+  }
+  if (!currentMatch) return res.status(401).json({ error: "Current password is incorrect" });
 
+  // Always store new password as a bcrypt hash
+  const hashed = await bcrypt.hash(newPassword, 12);
   try {
     await pool.query(
       "INSERT INTO portal_kv (key, value) VALUES ('admin_password_override', $1) ON CONFLICT (key) DO UPDATE SET value=$1",
-      [newPassword]
+      [hashed]
     );
     return res.json({ ok: true });
   } catch (err) {

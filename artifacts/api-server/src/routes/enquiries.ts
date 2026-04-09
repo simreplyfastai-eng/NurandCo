@@ -32,11 +32,16 @@ router.get("/enquiries", async (req, res) => {
   }
 });
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 // POST /api/enquiries
 router.post("/enquiries", async (req, res) => {
   const { name, email, phone, course, message } = req.body as Record<string, string>;
   if (!name || !email || !phone || !course) {
     return res.status(400).json({ error: "name, email, phone, course required" });
+  }
+  if (!EMAIL_RE.test(email.trim())) {
+    return res.status(400).json({ error: "Invalid email address" });
   }
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   try {

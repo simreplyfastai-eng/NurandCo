@@ -7,7 +7,7 @@
 import { Router } from "express";
 import Stripe from "stripe";
 import { pool } from "@workspace/db";
-import { getTreatmentDuration, getTreatmentCategory, hasConflict } from "../lib/treatments";
+import { getTreatmentDuration, getTreatmentCategory, getTreatmentPrice, hasConflict } from "../lib/treatments";
 import { sendClientConfirmationEmail, sendAdminNotificationEmail } from "../lib/email";
 import { upsertClientFromBooking } from "./clients";
 
@@ -58,13 +58,24 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
   if (!stripe) {
     return res.status(503).json({ error: "Stripe is not configured. Please contact the clinic to arrange payment." });
   }
-  const { amount, treatment, clientName, clientEmail, clientPhone, bookingDate, bookingTime, bookingId } = req.body as Record<string, string>;
-  if (!amount || !treatment) {
-    return res.status(400).json({ error: "amount and treatment required" });
+  const { treatment, clientName, clientEmail, clientPhone, bookingDate, bookingTime, bookingId } = req.body as Record<string, string>;
+  if (!treatment) {
+    return res.status(400).json({ error: "treatment required" });
   }
+
+  // ── Server-side price lookup — never trust client-sent amount ──────────────
+  const treatmentPrice = await getTreatmentPrice(treatment);
+  if (treatmentPrice === null) {
+    return res.status(400).json({ error: "Unknown treatment. Please refresh and try again." });
+  }
+
+  const settings = await getSettings();
+  const depositPercent = Math.max(1, Math.min(100, Number(settings.deposit ?? 50) || 50));
+  const depositAmountPence = Math.max(50, Math.floor(treatmentPrice * depositPercent / 100) * 100); // in pence, minimum 50p
+
   try {
     const paymentIntent = await stripe.paymentIntents.create({
-      amount: Number(amount),
+      amount: depositAmountPence,
       currency: "gbp",
       receipt_email: clientEmail || undefined,
       metadata: {
@@ -78,7 +89,12 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
       },
       automatic_payment_methods: { enabled: true },
     });
-    return res.json({ clientSecret: paymentIntent.client_secret, paymentIntentId: paymentIntent.id });
+    return res.json({
+      clientSecret: paymentIntent.client_secret,
+      paymentIntentId: paymentIntent.id,
+      depositAmountPence,
+      depositPercent,
+    });
   } catch (err) {
     console.error("POST /api/stripe/create-payment-intent", err);
     return res.status(500).json({ error: "Failed to create payment intent" });

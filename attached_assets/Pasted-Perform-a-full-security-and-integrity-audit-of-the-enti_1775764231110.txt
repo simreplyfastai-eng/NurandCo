@@ -1,0 +1,253 @@
+Perform a full security and integrity audit of the entire 
+codebase. Check every file — server, client, config, 
+environment — and report every finding.
+
+══════════════════════════════════════
+1. SECRETS & API KEY AUDIT
+══════════════════════════════════════
+Scan every single file in the project for hardcoded secrets.
+Check for any of the following exposed in code:
+
+- Stripe publishable key (pk_live_ or pk_test_)
+- Stripe secret key (sk_live_ or sk_test_)
+- Stripe webhook secret (whsec_)
+- Resend API key (re_)
+- Any string matching pattern: [a-zA-Z0-9]{20,}
+  that could be an API key or token
+- Any email addresses hardcoded as FROM addresses
+- Any phone numbers hardcoded
+- Any database connection strings
+- Any passwords or admin credentials
+- Any JWT secrets or session secrets
+
+For each finding report:
+- File name and line number
+- What the exposed value is
+- Fix: move to environment variable immediately
+
+Verify all of these are loaded ONLY from env variables:
+- STRIPE_PUBLISHABLE_KEY
+- STRIPE_SECRET_KEY  
+- STRIPE_WEBHOOK_SECRET
+- RESEND_API_KEY
+- ADMIN_EMAIL
+- ADMIN_PASSWORD or session secret
+- Any database URL or connection string
+
+If any secret is found hardcoded — fix it immediately 
+by replacing with process.env.VARIABLE_NAME and add 
+the variable name to a list of required env variables.
+
+══════════════════════════════════════
+2. CLIENT-SIDE EXPOSURE AUDIT
+══════════════════════════════════════
+Inspect all JavaScript that is sent to the browser.
+Check the page source and all inline/external scripts for:
+
+- Any secret keys visible in rendered HTML
+- Any API keys bundled into client JS
+- Any server-side logic exposed to client
+- STRIPE_PUBLISHABLE_KEY — this one IS allowed 
+  client-side but must not be the SECRET key
+- Verify secret key never appears in any 
+  client-facing file, template or response
+- Verify /webhook endpoint not callable from 
+  client JS with fabricated payloads
+- Verify admin credentials not stored in 
+  localStorage, sessionStorage or cookies 
+  without proper encryption
+- Verify no sensitive booking data exposed 
+  in client JS variables or window objects
+
+══════════════════════════════════════
+3. WEBHOOK SECURITY AUDIT
+══════════════════════════════════════
+- Verify /webhook uses raw body for 
+  Stripe signature verification
+  (express.raw() or equivalent — NOT express.json())
+- Verify stripe.webhooks.constructEvent() is called 
+  with the raw buffer, not parsed JSON
+- Verify STRIPE_WEBHOOK_SECRET from env variable only
+- Verify webhook returns 400 immediately if 
+  signature verification fails
+- Verify webhook returns 400 if event type 
+  is not recognised
+- Verify no sensitive data logged to console 
+  in production (no console.log of full events)
+- Verify webhook endpoint is POST only — 
+  GET requests should return 404 or 405
+- Verify webhook has error handling — 
+  uncaught errors return 500 not crash the server
+
+══════════════════════════════════════
+4. ADMIN PORTAL SECURITY AUDIT
+══════════════════════════════════════
+- Verify admin routes are protected by 
+  authentication middleware
+- Verify every admin API endpoint checks 
+  auth before executing — not just the 
+  login page
+- Verify session tokens are:
+  HttpOnly (not accessible via JS)
+  Secure (HTTPS only)
+  SameSite: Strict or Lax
+  Have an expiry time set
+- Verify brute force protection on login:
+  Rate limiting on /admin/login endpoint
+  Lock out after failed attempts or add delay
+- Verify admin password is not stored in 
+  plain text — must be hashed (bcrypt or similar)
+- Verify if no ADMIN_PASSWORD env var is set 
+  the admin portal is completely inaccessible 
+  — not open by default
+- Verify admin logout invalidates session 
+  server-side — not just client-side redirect
+- Verify direct URL access to admin routes 
+  without auth redirects to login page
+- Verify admin API endpoints return 401 
+  without valid session — not 200 or 404
+
+══════════════════════════════════════
+5. PAYMENT SECURITY AUDIT
+══════════════════════════════════════
+- Verify all payment amounts calculated 
+  server-side — never trust client-sent price
+- Verify treatment price looked up from 
+  server-side TREATMENTS data store using 
+  treatment name — never from client input
+- Verify deposit = exactly 50% calculated 
+  server-side in pence
+- Verify no way for client to manipulate 
+  payment amount via request tampering
+- Verify Stripe checkout session created 
+  server-side only
+- Verify success page only shows booking 
+  details after verifying session_id with 
+  Stripe API server-side — not just from 
+  URL parameters
+- Verify cancelled payments cannot access 
+  the thank you page
+- Verify duplicate webhook events handled — 
+  check booking not confirmed twice if Stripe 
+  sends duplicate events
+
+══════════════════════════════════════
+6. INPUT VALIDATION & INJECTION AUDIT
+══════════════════════════════════════
+- Verify all user inputs sanitised before 
+  use in emails, database queries or responses
+- Verify contact form inputs sanitised:
+  Name, email, message fields
+  No raw HTML allowed through
+  Email format validated server-side
+- Verify treatment name from client validated 
+  against known TREATMENTS list server-side 
+  before creating Stripe session
+- Verify no SQL injection possible if using 
+  a database (use parameterised queries)
+- Verify no XSS possible — user input never 
+  rendered as raw HTML
+- Verify no path traversal possible on any 
+  file upload endpoints
+- Verify file uploads (images/videos) validated:
+  File type checked server-side (not just 
+  client-side extension check)
+  File size limit enforced
+  Files stored outside web root or in 
+  secure cloud storage
+  No executable files (.js, .php, .sh) 
+  can be uploaded
+
+══════════════════════════════════════
+7. HTTPS & HEADERS AUDIT
+══════════════════════════════════════
+- Verify site runs on HTTPS only
+- Verify HTTP requests redirect to HTTPS
+- Check and add these security headers 
+  if missing:
+  Content-Security-Policy (CSP)
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), 
+  geolocation=()
+- Verify Stripe.js loaded from 
+  https://js.stripe.com only
+- Verify Google Fonts loaded from 
+  https://fonts.googleapis.com only
+- Verify no mixed content (HTTP assets 
+  on HTTPS page)
+
+══════════════════════════════════════
+8. DATA & PRIVACY AUDIT
+══════════════════════════════════════
+- Verify client personal data (name, email, 
+  phone) stored securely in data store
+- Verify booking data not logged to console 
+  in plain text in production
+- Verify client email addresses not exposed 
+  in any client-side JS or API response 
+  visible to other users
+- Verify admin portal does not expose other 
+  clients' data to unauthorised users
+- Verify Stripe handles all card data — 
+  no card details ever touch the server
+- Verify no PII stored in URL parameters
+- Verify session data cleared properly on logout
+
+══════════════════════════════════════
+9. DEPENDENCY & CODE AUDIT
+══════════════════════════════════════
+- List all npm packages used in the project
+- Flag any packages with known critical 
+  vulnerabilities (run npm audit)
+- Flag any packages not actively maintained
+- Verify no unnecessary packages installed
+- Check package.json for any suspicious 
+  scripts (postinstall etc)
+- Verify node_modules not committed to repo
+- Verify .env file not committed to repo
+- Verify .gitignore includes:
+  node_modules/
+  .env
+  .env.local
+  Any files containing secrets
+
+══════════════════════════════════════
+10. RATE LIMITING & ABUSE AUDIT
+══════════════════════════════════════
+- Verify rate limiting on:
+  /webhook endpoint
+  /admin/login endpoint
+  Contact form submission endpoint
+  Any API endpoints that send emails
+- Verify contact form cannot be spammed 
+  to send unlimited emails via Resend
+- Verify booking flow cannot be abused to 
+  create unlimited Stripe checkout sessions
+- Verify no endpoint allows enumeration 
+  of client data or bookings without auth
+
+══════════════════════════════════════
+FINAL SECURITY REPORT
+══════════════════════════════════════
+After all 10 sections output this summary:
+
+SECURITY AUDIT COMPLETE
+────────────────────────
+Total checks performed: [n]
+Critical issues found: [n] — fix immediately
+Medium issues found: [n] — fix soon  
+Low issues found: [n] — best practice improvements
+Total issues fixed automatically: [n]
+
+CRITICAL (requires immediate action): [list]
+MEDIUM (should fix before go live): [list]
+LOW (best practice): [list]
+
+Required environment variables confirmed: [list]
+Missing environment variables: [list]
+
+Overall security rating: [SECURE / NEEDS ATTENTION / 
+AT RISK]

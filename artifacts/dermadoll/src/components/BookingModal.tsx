@@ -267,6 +267,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const bookingDuration = treatment?.durationMins ?? 30;
   const [hasResendKey, setHasResendKey] = useState(false);
   const [depositPercent, setDepositPercent] = useState(50);
+  const [serverDepositPence, setServerDepositPence] = useState<number | null>(null);
 
   const stripeRef = useRef<Stripe | null>(null);
   const elementsRef = useRef<StripeElements | null>(null);
@@ -299,6 +300,9 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
     firstFocusRef.current?.focus();
     return () => { document.body.style.overflow = ""; };
   }, []);
+
+  // Reset server-computed deposit when treatment changes
+  useEffect(() => { setServerDepositPence(null); }, [treatment?.name]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => { if (e.key === "Escape" && step !== "success") onClose(); };
@@ -413,12 +417,11 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
           return;
         }
 
-        // Create payment intent
+        // Create payment intent — server computes the authoritative deposit amount
         const piRes = await fetch("/api/stripe/create-payment-intent", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            amount: depositAmount * 100, // pence
             treatment: treatment?.name ?? "",
             clientName: name,
             clientEmail: email,
@@ -438,7 +441,12 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
           return;
         }
 
-        const { clientSecret } = await piRes.json() as { clientSecret: string };
+        const piData = await piRes.json() as { clientSecret: string; depositAmountPence?: number };
+        const { clientSecret } = piData;
+        // Sync displayed deposit to the server-authoritative value
+        if (piData.depositAmountPence && !cancelled) {
+          setServerDepositPence(piData.depositAmountPence);
+        }
         if (cancelled || !clientSecret) return;
         clientSecretRef.current = clientSecret;
 
@@ -534,7 +542,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   if (!treatment) return null;
 
   const price = parsePrice(treatment.price);
-  const deposit = Math.floor(price * depositPercent / 100);
+  const deposit = serverDepositPence !== null ? Math.round(serverDepositPence / 100) : Math.floor(price * depositPercent / 100);
   const balance = price - deposit;
 
   // Compute available slots — 15-min grid, duration-aware, back-to-back

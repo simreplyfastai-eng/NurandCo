@@ -1,3 +1,88 @@
+import { pool } from "@workspace/db";
+
+/** Fallback prices (£) for all built-in treatments — used when no DB override exists */
+const TREATMENT_PRICES: Record<string, number> = {
+  "Botox 1 Area": 100,
+  "Botox 2 Areas": 140,
+  "Botox 3 Areas": 180,
+  "Botox 4 Areas": 210,
+  "Masseter Botox": 200,
+  "Nefertiti Lift Botox (Neck)": 220,
+  "Chin Botox (Mentalis Muscle)": 80,
+  "Nose Slimming Botox": 80,
+  "Gummy Smile / Lip Flip Botox": 80,
+  "Hyperhidrosis (Underarm) Botox": 220,
+  "Botox Topup": 20,
+  "0.5ml Lip Filler": 100,
+  "0.7ml Lip Filler": 120,
+  "1.1ml Lip Filler": 150,
+  "1.1ml Nasal Labials": 150,
+  "1.1ml Cheek Filler": 150,
+  "1.5ml Cheek Filler": 200,
+  "2.2ml Cheek Filler": 250,
+  "1.1ml Chin Filler": 150,
+  "2.2ml Jawline Filler": 250,
+  "Liquid Rhinoplasty": 180,
+  "Teartrough Filler": 180,
+  "2.2ml Facial Contouring": 230,
+  "3.3ml Facial Contouring": 330,
+  "4.4ml Facial Contouring": 440,
+  "Glass Skin Facial": 80,
+  "Glass Skin Facial + Microneedling": 120,
+  "1x Skin Booster": 150,
+  "3x Lumi Pro Skin Booster": 350,
+  "Plenhyage XL Strong": 200,
+  "Plenhyage XL Strong 2 Treatments": 350,
+  "Vitarin I - Eye Polynucleotide": 170,
+  "Vitarin I - Eye Polynucleotide x2": 300,
+  "B12 Injection": 30,
+  "Lemon Bottle Small Area": 70,
+  "Lemon Bottle Large Area": 100,
+  "Hyaluronidase - Dissolving": 100,
+  "Hayfever Relief": 80,
+  "Botox 3 Areas + 1.1ml Dermal Filler": 320,
+  "Botox 3 Areas + 1.1ml Lips + Lumi Pro": 450,
+  "Botox 3 Areas + 1x Lumi Pro Skin Booster": 300,
+  "Botox 3 Areas + 1x Plenhyage XL": 350,
+  "Botox 3 Areas + Vitarin I Eye": 300,
+  "Consultation": 25,
+};
+
+/**
+ * Returns the price (£, whole number) for a treatment.
+ * Checks DB overrides (dd_treatment_overrides, dd_custom_treats) first,
+ * then falls back to TREATMENT_PRICES.
+ * Returns null if the treatment is completely unknown.
+ */
+export async function getTreatmentPrice(treatmentName: string): Promise<number | null> {
+  try {
+    const res = await pool.query(
+      "SELECT key, value FROM portal_kv WHERE key = ANY($1)",
+      [["dd_treatment_overrides", "dd_custom_treats"]],
+    );
+    const kv: Record<string, unknown> = {};
+    for (const row of res.rows) kv[row.key as string] = row.value;
+
+    // 1. Check built-in treatment override
+    const overrides = (kv["dd_treatment_overrides"] && typeof kv["dd_treatment_overrides"] === "object" && !Array.isArray(kv["dd_treatment_overrides"]))
+      ? kv["dd_treatment_overrides"] as Record<string, { price?: number }>
+      : {};
+    if (overrides[treatmentName]?.price != null) {
+      return Number(overrides[treatmentName].price);
+    }
+
+    // 2. Check custom treatments
+    const customs = Array.isArray(kv["dd_custom_treats"])
+      ? kv["dd_custom_treats"] as Array<{ name?: string; price?: number }>
+      : [];
+    const custom = customs.find((t) => t.name === treatmentName);
+    if (custom?.price != null) return Number(custom.price);
+  } catch { /* fall through to hardcoded */ }
+
+  // 3. Hardcoded fallback
+  return TREATMENT_PRICES[treatmentName] ?? null;
+}
+
 export const TREATMENT_DURATIONS: Record<string, number> = {
   "Botox 1 Area": 15,
   "Botox 2 Areas": 15,
