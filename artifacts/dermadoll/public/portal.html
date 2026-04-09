@@ -2091,7 +2091,7 @@ function selectDay(dateStr){
   const bookings=getBookings().filter(b=>b.date===dateStr&&b.status!=='Cancelled').sort((a,b)=>a.time.localeCompare(b.time));
   document.getElementById('day-panel-title').textContent=formatDate(dateStr);
   document.getElementById('day-panel-body').innerHTML=bookings.length?bookings.map(b=>`
-    <div class="timeline-item">
+    <div class="timeline-item" onclick="openBookingModal('${b.id}')" style="cursor:pointer" title="Click to edit">
       <div class="timeline-time">${b.time}</div>
       <div class="timeline-body">
         <div class="timeline-name">${b.clientName}</div>
