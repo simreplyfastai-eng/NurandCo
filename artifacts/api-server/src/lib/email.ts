@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const RESEND_KEY = process.env.RESEND_API_KEY ?? "";
-const FROM = "bookings@dermadollaesthetics.co.uk";
+const FROM = "bookings@dermadoll-aesthetics.co.uk";
 const INSTAGRAM = "@dermadollaesthetics";
 
 let _resend: Resend | null = null;
