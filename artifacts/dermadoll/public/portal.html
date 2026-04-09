@@ -638,7 +638,7 @@ tr:hover td{background:#FDFBF8}
           </div>
           <div>
             <div class="card" style="margin-bottom:20px">
-              <div class="card-header"><span class="card-title">Today's Schedule</span></div>
+              <div class="card-header"><span class="card-title" id="today-schedule-title">Today's Schedule</span></div>
               <div style="padding:12px 16px" id="today-schedule"></div>
             </div>
             <div class="card">
@@ -1868,22 +1868,26 @@ function renderDashboard(){
   // Revenue by treatment
   const catRevenue={};
   bookings.filter(b=>b.status!=='Cancelled').forEach(b=>{
-    catRevenue[b.category]=(catRevenue[b.category]||0)+Number(b.price);
+    const cat=b.category||'Other';
+    catRevenue[cat]=(catRevenue[cat]||0)+Number(b.price);
   });
   const maxR=Math.max(...Object.values(catRevenue),1);
-  const catLabels={BOTOX:'Botox',FILLER:'Dermal Filler',FACIALS:'Facials',SKINBOOST:'Skin Boosters',FATDISSOLVE:'Fat Dissolving',BUNDLES:'Treatment Bundles',CONSULT:'Consultation'};
-  const catLabelsMob={BOTOX:'Botox',FILLER:'Filler',FACIALS:'Facials',SKINBOOST:'Skin Boost',FATDISSOLVE:'Fat Diss.',BUNDLES:'Bundles',CONSULT:'Consult.'};
-  const catColors={CONSULT:'background:#4A90D9'};
-  document.getElementById('revenue-by-treatment').innerHTML=Object.entries(catRevenue).map(([k,v])=>`
+  const _builtInCatLabels={BOTOX:'Botox',FILLER:'Dermal Filler',FACIALS:'Facials',SKINBOOST:'Skin Boosters',FATDISSOLVE:'Fat Dissolving',INJECTABLES:'Injectables',BUNDLES:'Treatment Bundles',CONSULT:'Consultation','Botox':'Botox','Dermal Filler':'Dermal Filler','Facials':'Facials','Skin Boosters':'Skin Boosters','Fat Dissolving':'Fat Dissolving','Injectables':'Injectables','Treatment Bundles':'Treatment Bundles'};
+  const catLabels={..._builtInCatLabels};
+  getCustomCats().forEach(c=>{if(c.key&&c.label)catLabels[c.key]=c.label;});
+  const catColors={CONSULT:'background:#4A90D9',Consultation:'background:#4A90D9'};
+  document.getElementById('revenue-by-treatment').innerHTML=Object.entries(catRevenue).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
     <div class="bar-row">
-      <div class="bar-label"><span class="bar-label-full">${catLabels[k]||k}</span><span class="bar-label-short">${catLabelsMob[k]||k}</span></div>
+      <div class="bar-label"><span class="bar-label-full">${catLabels[k]||k}</span><span class="bar-label-short">${catLabels[k]||k}</span></div>
       <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/maxR*100)}%;${catColors[k]||''}"></div></div>
-      <div class="bar-val">£${v}</div>
+      <div class="bar-val">${gbp(v)}</div>
     </div>
   `).join('') || '<p style="color:var(--muted);font-size:13px">No revenue data yet</p>';
 
   // Today's schedule
   const today=fmt(now);
+  const titleEl=document.getElementById('today-schedule-title');
+  if(titleEl)titleEl.textContent='Today — '+formatDate(today);
   const todayBookings=bookings.filter(b=>b.date===today).sort((a,b)=>a.time.localeCompare(b.time));
   document.getElementById('today-schedule').innerHTML=todayBookings.length?todayBookings.map(b=>`
     <div class="timeline-item">
@@ -2049,8 +2053,26 @@ function buildCalendar(){
   const monthBookings=bookings.filter(b=>{const d=new Date(b.date);return d.getFullYear()===y&&d.getMonth()===m&&b.status!=='Cancelled';});
   const dpBody=document.getElementById('day-panel-body');
   const dpTitle=document.getElementById('day-panel-title');
-  if(dpBody){dpBody.innerHTML=monthBookings.length?'<p class="cal-empty-state">Click a date to see bookings</p>':'<p class="cal-empty-state">No bookings this month</p>';}
-  if(dpTitle)dpTitle.textContent='Select a day';
+  // Auto-select today's date if this is the current month and there are bookings today
+  const todayStr=fmt(new Date());
+  const todayIsThisMonth=todayStr.startsWith(String(y)+'-'+String(m+1).padStart(2,'0'));
+  const hasTodayBookings=bookings.some(b=>b.date===todayStr&&b.status!=='Cancelled');
+  if(todayIsThisMonth&&hasTodayBookings){
+    // Select today's cell visually
+    document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));
+    document.querySelectorAll('.cal-cell').forEach(c=>{if(c.getAttribute('onclick')==="selectDay('"+todayStr+"')")c.classList.add('selected');});
+    const todayBks=bookings.filter(b=>b.date===todayStr&&b.status!=='Cancelled').sort((a,b)=>a.time.localeCompare(b.time));
+    if(dpTitle)dpTitle.textContent=formatDate(todayStr)+' — Today';
+    if(dpBody)dpBody.innerHTML=todayBks.map(b=>`
+      <div class="timeline-item">
+        <div class="timeline-time">${b.time}</div>
+        <div class="timeline-body"><div class="timeline-name">${b.clientName}</div><div class="timeline-treat">${b.treatment} · ${gbp(b.price)}</div></div>
+        ${statusPill(b.status)}
+      </div>`).join('');
+  } else {
+    if(dpBody){dpBody.innerHTML=monthBookings.length?'<p class="cal-empty-state">Click a date to see bookings</p>':'<p class="cal-empty-state">No bookings this month</p>';}
+    if(dpTitle)dpTitle.textContent='Select a day';
+  }
 }
 
 function changeMonth(dir){
@@ -2093,12 +2115,22 @@ const AVAIL_DEFAULT={
   overrides:{}
 };
 
+const _AVAIL_NAMED_TO_NUM={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6,Sunday:0,Monday:1,Tuesday:2,Wednesday:3,Thursday:4,Friday:5,Saturday:6};
+function _normAvailDefaults(d){
+  if(!d)return JSON.parse(JSON.stringify(AVAIL_DEFAULT.defaults));
+  const firstKey=Object.keys(d)[0];
+  if(firstKey===undefined)return JSON.parse(JSON.stringify(AVAIL_DEFAULT.defaults));
+  if(!isNaN(Number(firstKey)))return d; // Already numeric keys — use as-is
+  // Convert named keys (Mon/Monday/…) to numeric
+  const out={};
+  for(const [k,v] of Object.entries(d)){const n=_AVAIL_NAMED_TO_NUM[k];if(n!==undefined)out[n]=v;}
+  return out;
+}
 function getAvailability(){
   const raw=localStorage.getItem('dd_availability');
   if(!raw)return JSON.parse(JSON.stringify(AVAIL_DEFAULT));
   const parsed=JSON.parse(raw);
-  // ensure defaults exist
-  if(!parsed.defaults)parsed.defaults=AVAIL_DEFAULT.defaults;
+  parsed.defaults=_normAvailDefaults(parsed.defaults||null);
   if(!parsed.overrides)parsed.overrides={};
   return parsed;
 }
