@@ -47,6 +47,9 @@ export default function PopupBanner() {
             background: "rgba(0,0,0,0.5)",
             backdropFilter: "blur(8px)",
             WebkitBackdropFilter: "blur(8px)",
+            display: "flex", alignItems: "center", justifyContent: "center",
+            padding: "20px",
+            boxSizing: "border-box",
           }}
         >
           <motion.div
@@ -56,9 +59,7 @@ export default function PopupBanner() {
             transition={{ duration: 0.45, ease: [0.34, 1.56, 0.64, 1] }}
             onClick={(e) => e.stopPropagation()}
             style={{
-              position: "absolute", top: "50%", left: "50%",
-              transform: "translate(-50%, -50%)",
-              maxWidth: 400, width: "90%",
+              width: "100%", maxWidth: 400,
               borderRadius: 24,
               padding: "clamp(28px,5vw,40px) clamp(20px,4vw,32px)",
               background: "rgba(255,255,255,0.18)",
@@ -66,6 +67,7 @@ export default function PopupBanner() {
               border: "1px solid rgba(255,255,255,0.35)",
               boxShadow: "0 12px 48px rgba(201,169,110,0.2)",
               textAlign: "center", overflow: "hidden",
+              position: "relative", flexShrink: 0,
             }}
           >
             <div style={{ position: "absolute", top: -40, right: -40, width: 180, height: 180, borderRadius: "50%", background: "#C9A96E", filter: "blur(60px)", opacity: 0.25, pointerEvents: "none", zIndex: 0 }} />
