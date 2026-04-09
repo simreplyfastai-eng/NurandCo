@@ -1164,9 +1164,12 @@ tr:hover td{background:#FDFBF8}
         </div>
       </div>
     </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px">
-      <button class="btn-outline" onclick="closeBookingModal()">Cancel</button>
-      <button class="btn-gold" onclick="saveBooking()">Save Booking</button>
+    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px;flex-wrap:wrap">
+      <button id="bm-cancel-booking-btn" onclick="cancelBookingFromModal()" style="display:none;padding:10px 18px;border:1px solid #c62828;background:#fff;color:#c62828;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px">Cancel Booking</button>
+      <div style="display:flex;gap:10px;margin-left:auto">
+        <button class="btn-outline" onclick="closeBookingModal()">Close</button>
+        <button class="btn-gold" onclick="saveBooking()">Save Booking</button>
+      </div>
     </div>
   </div>
 </div>
@@ -2429,6 +2432,8 @@ function openBookingModal(prefill){
     const sel=document.getElementById('bm-treatment');
     const opt=[...sel.options].find(o=>o.value===booking.treatment);
     if(opt)sel.value=booking.treatment; else sel.selectedIndex=0;
+    // Show cancel booking button in edit mode
+    document.getElementById('bm-cancel-booking-btn').style.display='';
     // Set time
     document.getElementById('bm-time').value=booking.time||'09:00';
     // Show consultation extra fields
@@ -2454,6 +2459,7 @@ function openBookingModal(prefill){
     document.getElementById('bm-status').value='Confirmed';
     document.getElementById('bm-date').value=fmt(new Date());
     document.getElementById('bm-time').value='09:00';
+    document.getElementById('bm-cancel-booking-btn').style.display='none';
     document.getElementById('bm-deposit-group').style.display='none';
     document.getElementById('bm-balance-group').style.display='none';
     document.getElementById('bm-consultation-fields').style.display='none';
@@ -2462,6 +2468,19 @@ function openBookingModal(prefill){
   document.getElementById('booking-modal').classList.add('open');
 }
 function closeBookingModal(){document.getElementById('booking-modal').classList.remove('open')}
+
+async function cancelBookingFromModal(){
+  if(!editingBookingId)return;
+  const bk=getBookings().find(b=>b.id===editingBookingId);
+  const label=bk?`${bk.clientName}'s ${bk.treatment} on ${formatDate(bk.date)}`:'this booking';
+  if(!confirm(`Cancel ${label}?\n\nThis will mark it as Cancelled. You can still view it in the bookings list.`))return;
+  await BookingAPI.update(editingBookingId,{status:'Cancelled'});
+  closeBookingModal();
+  updateSidebarBadges();
+  renderDashboard();
+  buildCalendar();
+  if(document.getElementById('page-bookings').classList.contains('active'))renderBookings();
+}
 
 async function markBalancePaidFromModal(){
   if(!editingBookingId)return;
@@ -2651,10 +2670,19 @@ function openClientPanel(id){
       <button style="flex:1;background:#C9A96E;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="saveClientNote('${c.id}')">Save Notes</button>
       <button style="flex:1;background:#fff;color:#C9A96E;border:1px solid #C9A96E;border-radius:8px;padding:10px 20px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="openBookingModal('${c.name}')">Book Again</button>
     </div>
+    <button style="width:100%;margin-top:8px;background:#fff;color:#c62828;border:1px solid #c62828;border-radius:8px;padding:10px 20px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="deleteClient('${c.id}','${c.name.replace(/'/g,"\\'")}')">Delete Client</button>
   `;
   document.getElementById('client-panel').classList.add('open');
 }
 function closeClientPanel(){document.getElementById('client-panel').classList.remove('open')}
+
+async function deleteClient(id,name){
+  if(!confirm(`Delete ${name}? This will permanently remove their client record. Their bookings will remain.`))return;
+  await ClientAPI.delete(id);
+  closeClientPanel();
+  updateSidebarBadges();
+  renderClients();
+}
 
 function saveClientNote(id){
   const notes=document.getElementById('cp-notes').value;
