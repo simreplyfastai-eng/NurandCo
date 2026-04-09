@@ -1,0 +1,432 @@
+Perform a complete master audit of the entire Dermadoll 
+Aesthetics website. Check every single system, fix every 
+issue found, and report back with a full summary.
+
+══════════════════════════════════════
+1. TREATMENTS DATA AUDIT
+══════════════════════════════════════
+- Verify TREATMENTS data store contains all treatments 
+  with correct name, price, duration and category
+- Verify these are all present and correct:
+
+BOTOX:
+Botox 1 Area — £100 — 15 mins
+Botox 2 Areas — £140 — 15 mins
+Botox 3 Areas — £180 — 15 mins
+Botox 4 Areas — £210 — 15 mins
+Masseter Botox — £200 — 15 mins
+Nefertiti Lift Botox (Neck) — £220 — 30 mins
+Chin Botox (Mentalis Muscle) — £80 — 30 mins
+Nose Slimming Botox — £80 — 30 mins
+Gummy Smile / Lip Flip Botox — £80 — 30 mins
+Hyperhidrosis (Underarm) Botox — £220 — 30 mins
+Botox Topup — £20 — 15 mins
+
+DERMAL FILLER:
+0.5ml Lip Filler — £100 — 30 mins
+0.7ml Lip Filler — £120 — 45 mins
+1.1ml Lip Filler — £150 — 45 mins
+1.1ml Nasal Labials — £150 — 30 mins
+1.1ml Cheek Filler — £150 — 30 mins
+1.5ml Cheek Filler — £200 — 45 mins
+2.2ml Cheek Filler — £250 — 45 mins
+1.1ml Chin Filler — £150 — 45 mins
+2.2ml Jawline Filler — £250 — 60 mins
+Liquid Rhinoplasty — £180 — 45 mins
+Teartrough Filler — £180 — 45 mins
+2.2ml Facial Contouring — £230 — 45 mins
+3.3ml Facial Contouring — £330 — 60 mins
+4.4ml Facial Contouring — £440 — 60 mins
+
+FACIALS:
+Glass Skin Facial — £80 — 60 mins
+Glass Skin Facial + Microneedling — £120 — 60 mins
+
+SKIN BOOSTERS:
+1x Skin Booster — £150 — 30 mins
+3x Lumi Pro Skin Booster — £350 — 30 mins
+Plenhyage XL Strong — £200 — 30 mins
+Plenhyage XL Strong 2 Treatments — £350 — 30 mins
+Vitarin I - Eye Polynucleotide — £170 — 30 mins
+Vitarin I - Eye Polynucleotide x2 — £300 — 30 mins
+B12 Injection — £30 — 15 mins
+
+FAT DISSOLVING:
+Lemon Bottle Small Area — £70 — 30 mins
+Lemon Bottle Large Area — £100 — 30 mins
+
+INJECTABLES:
+Hyaluronidase - Dissolving — £100 — 30 mins
+Hayfever Relief — £80 — 15 mins
+
+TREATMENT BUNDLES:
+Botox 3 Areas + 1.1ml Dermal Filler — £320 — 45 mins
+Botox 3 Areas + 1.1ml Lips + Lumi Pro — £450 — 60 mins
+Botox 3 Areas + 1x Lumi Pro Skin Booster — £300 — 45 mins
+Botox 3 Areas + 1x Plenhyage XL — £350 — 45 mins
+Botox 3 Areas + Vitarin I Eye — £300 — 45 mins
+
+- Verify every treatment has a Book Now button
+- Verify every Book Now button passes correct name, 
+  price and duration to the booking modal
+- Verify all categories show in the accordion
+- Verify accordion open/close animations work
+- Verify + rotates to × when open
+
+══════════════════════════════════════
+2. CALENDAR & SLOT LOGIC AUDIT
+══════════════════════════════════════
+- Verify working days are correct:
+  Tuesday/Wednesday/Thursday: 09:00 — 19:00
+  Friday: 09:00 — 16:00
+  Saturday: 09:00 — 14:00
+  Sunday/Monday: CLOSED
+
+- Verify slot interval is every 15 minutes
+- Verify slots are back to back — no forced gaps
+- Verify last slot calculation per duration per day:
+
+  15 min treatments:
+  Tue/Wed/Thu last slot → 18:45
+  Friday last slot → 15:45
+  Saturday last slot → 13:45
+
+  30 min treatments:
+  Tue/Wed/Thu last slot → 18:30
+  Friday last slot → 15:30
+  Saturday last slot → 13:30
+
+  45 min treatments:
+  Tue/Wed/Thu last slot → 18:15
+  Friday last slot → 15:15
+  Saturday last slot → 13:15
+
+  60 min treatments:
+  Tue/Wed/Thu last slot → 18:00
+  Friday last slot → 15:00
+  Saturday last slot → 13:00
+
+- Verify Sunday and Monday greyed out on calendar
+- Verify past dates greyed out and unclickable
+- Verify today greyed out if past last available slot
+- Verify 15 minute same-day notice buffer applied
+- Verify selecting date triggers generateSlots() 
+  using that treatment's exact duration from 
+  TREATMENTS data store
+- Verify slots display in 4 col desktop, 3 col mobile
+- Verify selected slot highlights gold
+- Verify "No availability" message if no slots exist
+
+══════════════════════════════════════
+3. BOOKING MODAL AUDIT
+══════════════════════════════════════
+- Verify modal opens on every Book Now click
+- Verify treatment name and price show at top in gold
+- Verify glassmorphism styling renders correctly
+- Verify close works: X button, overlay click, ESC
+- Verify slide up entry animation on open
+- Verify slide down exit animation on close
+- Verify booking summary shows:
+  Treatment name
+  Duration in mins
+  Date — formatted: Tuesday 14 April 2026
+  Time: HH:MM — HH:MM (start time and end time)
+  Full price: £[price]
+  Deposit due now (50%): £[price / 2]
+  Balance due on arrival (50%): £[price / 2]
+- Verify Confirm Booking triggers Stripe checkout
+- Verify modal is full screen on mobile
+
+══════════════════════════════════════
+4. STRIPE PAYMENT AUDIT
+══════════════════════════════════════
+- Verify STRIPE_PUBLISHABLE_KEY loaded from 
+  environment variable only — never hardcoded
+- Verify STRIPE_SECRET_KEY loaded from 
+  environment variable only — never hardcoded
+- Verify deposit = exactly 50% of treatment price
+- Verify amount passed to Stripe is in pence (x100)
+- Verify currency is set to "gbp"
+- Verify success_url redirects to thank you page 
+  with session_id parameter appended
+- Verify cancel_url returns user to site cleanly
+- Verify Stripe checkout metadata contains:
+  treatment_name
+  treatment_duration
+  full_price
+  deposit_amount
+  balance_due
+  date
+  time
+  client_email
+
+══════════════════════════════════════
+5. WEBHOOK AUDIT
+══════════════════════════════════════
+- Verify /webhook POST endpoint exists and is live
+- Verify Stripe signature validated using 
+  STRIPE_WEBHOOK_SECRET environment variable
+- Verify raw body used for signature verification 
+  (not parsed JSON — this is a common bug)
+- Verify checkout.session.completed event handled
+- Verify on successful webhook event:
+  Booking status updated to confirmed in data store
+  Client confirmation email sent via Resend with:
+    To: client email from Stripe session
+    From: branded Dermadoll email address
+    Subject: "Your Dermadoll Appointment is Confirmed ✨"
+    Body includes:
+      Treatment name and duration
+      Date and time (with end time)
+      Deposit paid: £[amount]
+      Balance due on arrival: £[amount]
+      Clinic address (or placeholder)
+      WhatsApp link to contact Niamh
+      Dermadoll branding — HTML email not plain text
+  Niamh notification email sent via Resend with:
+    To: Niamh's email address
+    From: branded sender
+    Subject: "New Booking — [Treatment] on [Date]"
+    Body includes:
+      Client name and email
+      Treatment booked
+      Date and time
+      Deposit amount received
+- Verify failed payment handled gracefully —
+  user returned to site with clear error message
+
+══════════════════════════════════════
+6. RESEND EMAIL AUDIT
+══════════════════════════════════════
+- Verify Resend API key loaded from environment 
+  variable RESEND_API_KEY — never hardcoded
+- Verify Resend SDK or API is correctly imported 
+  and initialised in the server code
+- Verify FROM address uses a verified domain sender
+  not a generic address — must match Resend 
+  verified domain settings
+- Send a test email via Resend to verify delivery:
+  If Resend throws an error — log the full error 
+  and fix the configuration
+- Verify client confirmation email renders as 
+  styled HTML — not plain text
+  Email HTML template must include:
+    DERMADOLL AESTHETICS header in gold
+    Warm white background #FAF9F7
+    Gold accent #C9A96E on headings and borders
+    Cormorant Garamond heading font via web font 
+    or fallback Georgia serif
+    Inter body font or fallback Arial
+    Booking summary in a clean table layout
+    Clinic contact section at the bottom
+    WhatsApp button linking to Niamh's number
+    Instagram link @dermadollaesthetics
+    Footer: © 2026 Dermadoll Aesthetics
+- Verify Niamh notification email is clean and 
+  readable with all booking details visible
+- Verify neither email is going to spam:
+  Check FROM domain is verified in Resend
+  Check Reply-To is set correctly
+  Check no spam trigger words in subject lines
+
+══════════════════════════════════════
+7. THANK YOU PAGE AUDIT
+══════════════════════════════════════
+- Verify page only accessible after successful payment
+- Verify booking details pulled from Stripe session 
+  using session_id from URL parameter
+- Verify full glassmorphism page renders correctly:
+  Warm cream/gold gradient background
+  Gold/cream background blobs with blur
+  All cards: frosted glass style
+- Verify animated gold checkmark on load:
+  Circle bounces in (0.4s cubic-bezier)
+  Checkmark stroke draws after (0.7s delay)
+- Verify booking summary card shows:
+  Treatment name
+  Date and time (with end time)
+  Deposit paid pill (gold border)
+  Balance due on arrival pill (gold border)
+- Verify clinic details card shows:
+  Dermadoll Aesthetics
+  Practitioner: Niamh
+  Address placeholder:
+  "Solihull, Birmingham — full address confirmed 
+  on booking"
+- Verify Copy Address button:
+  Copies text to clipboard using Clipboard API
+  Falls back gracefully on older browsers
+  Button text changes to "✓ Copied!" for 2 seconds
+- Verify Save to Calendar generates valid .ics file:
+  SUMMARY: [Treatment] at Dermadoll Aesthetics
+  DTSTART: booking date and start time
+  DTEND: booking date and end time 
+         (start time + treatment duration)
+  LOCATION: clinic address
+  DESCRIPTION: Deposit paid £[x]. Balance £[x] 
+  due on arrival.
+- Verify WhatsApp button:
+  Opens wa.me link with pre-filled message:
+  "Hi Niamh! I've just booked [treatment] on 
+  [date] — I had a quick question 😊"
+- Verify Instagram button links to 
+  instagram.com/dermadollaesthetics
+- Verify Back to Home returns to homepage
+- Verify stagger animations on all 3 cards:
+  Card 1: fade up delay 0.3s
+  Card 2: fade up delay 0.5s
+  Card 3: fade up delay 0.7s
+- Verify fully responsive on mobile
+
+══════════════════════════════════════
+8. POPUP BANNER AUDIT
+══════════════════════════════════════
+- Verify popup appears exactly 5 seconds after load
+- Verify sessionStorage "popupSeen" prevents repeat
+- Verify getNextAvailableSlot() logic is correct:
+  Working hours used:
+  Tue/Wed/Thu: open 09:00 close 19:00
+  Fri: open 09:00 close 16:00
+  Sat: open 09:00 close 14:00
+  Sun/Mon: CLOSED — always skipped
+  Returns:
+  "Today at HH:MM" if slots still available today
+  "Tomorrow from 09:00" if tomorrow is working day
+  "[Day name] from 09:00" for future working days
+  15 minute notice buffer applied for today
+- Verify same getNextAvailableSlot() function used 
+  in both popup and calendar hint text
+- Verify glassmorphism card renders correctly
+- Verify gold + cream background blobs render
+- Verify LIMITED AVAILABILITY gold pill shows
+- Verify Book Now scrolls to treatments section
+- Verify Maybe Later closes popup only
+- Verify close on X button, overlay click, ESC key
+- Verify slide up + fade in on entry (5s delay)
+- Verify slide down + fade out on close
+- Verify fully responsive on mobile
+
+══════════════════════════════════════
+9. ADMIN PORTAL AUDIT
+══════════════════════════════════════
+- Verify admin login page exists and is protected
+- Verify unauthenticated access is blocked
+- Verify dashboard shows all bookings:
+  Client name and email
+  Treatment name and duration
+  Date and time
+  Deposit paid
+  Balance due on arrival
+  Booking status: pending / confirmed / completed
+- Verify Add Treatment form has all required fields:
+  Treatment Name (text, required)
+  Category (dropdown + add new option)
+  Price £ (number, required)
+  Duration (dropdown: 15/30/45/60/75/90 mins)
+  Description (textarea, optional)
+  Active toggle (show/hide on site)
+- Verify new treatment saved to persistent store
+- Verify new treatment appears in accordion 
+  on live site immediately after saving
+- Verify new treatment's Book Now button works 
+  with correct duration passed to modal
+- Verify generateSlots() uses new treatment 
+  duration from data store automatically
+- Verify Edit treatment updates live site instantly
+- Verify inactive toggle hides from site instantly
+- Verify Delete shows confirmation dialog before 
+  removing from data store and live site
+- Verify media upload works for before/after images
+- Verify video upload works for results section
+
+══════════════════════════════════════
+10. PERFORMANCE & UI AUDIT
+══════════════════════════════════════
+- Fix all browser console errors
+- Fix all broken image src paths — replace with 
+  styled placeholder:
+  background: #F0EDE8
+  Gold treatment name centred in Cormorant Garamond
+  Small text: "Before & After — Coming Soon"
+- Fix all broken video src paths — replace with 
+  styled placeholder:
+  background: #F0EDE8
+  Gold SVG play icon centred
+  Gold label underneath
+- Verify Google Fonts loading correctly:
+  Cormorant Garamond and Inter
+- Verify all nav anchor links scroll to correct section
+- Verify navbar: transparent over hero, solid white 
+  with shadow on scroll
+- Verify all button hover states work correctly
+- Verify all card hover lift effects work
+- Verify mobile hamburger opens and closes correctly
+- Verify full screen mobile menu overlay works
+- Verify no text overflow on mobile at 375px
+- Verify all section headings correct size mobile
+- Verify hero video autoplays muted on mobile
+- Verify stats counter animates 0 → value on load
+- Verify FAQ accordion all 8 questions work
+- Verify reviews carousel swipes on mobile
+
+══════════════════════════════════════
+11. CONTENT AUDIT
+══════════════════════════════════════
+- Verify clinic address placeholder everywhere:
+  "Solihull, Birmingham — full address confirmed 
+  on booking"
+  Locations: thank you page, booking emails, .ics
+- Verify all treatment names match data store
+- Verify all prices match data store
+- Verify all durations match data store
+- Verify reviews section shows all 3 reviews:
+  Ellisha W. — February 2026 — ★★★★★
+  Donna S. — February 2026 — ★★★★★
+  Donna S. — December 2025 — ★★★★★
+  Overall: ★ 5.0 | 5 Reviews — Powered by Faces
+- Verify FAQ has all 8 questions and full answers
+- Verify Training section shows:
+  Pathway to Aesthetics — £2,000
+  All course inclusions listed correctly
+  £300 deposit to secure place
+  Finance options available
+  DM to Enquire button links to Instagram
+- Verify footer: © 2026 Dermadoll Aesthetics
+
+══════════════════════════════════════
+12. SECURITY AUDIT
+══════════════════════════════════════
+- Confirm zero API keys hardcoded in HTML/CSS/JS
+- Confirm all secrets from environment variables:
+  STRIPE_PUBLISHABLE_KEY
+  STRIPE_SECRET_KEY
+  STRIPE_WEBHOOK_SECRET
+  RESEND_API_KEY
+- Confirm webhook validates Stripe signature 
+  before processing any events
+- Confirm raw request body used for 
+  Stripe signature verification
+- Confirm admin portal requires authentication
+- Confirm no sensitive data in client-side JS
+- Confirm no secret keys visible in page source
+
+══════════════════════════════════════
+FINAL REPORT
+══════════════════════════════════════
+After all 12 sections output this summary:
+
+MASTER AUDIT COMPLETE
+─────────────────────
+Total checks performed: [n]
+Issues found: [n]
+Issues fixed: [n]
+
+Requires manual input from owner:
+- Clinic address (for thank you page, emails, .ics)
+- Hero video file (hero.mp4)
+- Before & after photos
+- Results videos (video1-4.mp4)
+- Niamh's WhatsApp number (for wa.me link)
+- Niamh's email address (for notification emails)
+- Confirm Resend verified sender domain
+- Switch Stripe from test keys to live keys when ready

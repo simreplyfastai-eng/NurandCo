@@ -55,7 +55,7 @@ function emailShell(body: string): string {
         <tr><td style="text-align:center;padding-top:28px;">
           <p style="margin:0 0 6px;font-size:12px;color:#555;font-family:Arial,sans-serif;">Birmingham &amp; Solihull</p>
           <p style="margin:0 0 6px;font-size:12px;color:#555;font-family:Arial,sans-serif;">Instagram: <a href="https://instagram.com/dermadollaesthetics" style="color:#C9A96E;text-decoration:none;">${INSTAGRAM}</a></p>
-          <p style="margin:16px 0 0;font-size:11px;color:#333;font-family:Arial,sans-serif;">© Dermadoll Aesthetics. All rights reserved.</p>
+          <p style="margin:16px 0 0;font-size:11px;color:#333;font-family:Arial,sans-serif;">© 2026 Dermadoll Aesthetics. All rights reserved.</p>
         </td></tr>
 
       </table>

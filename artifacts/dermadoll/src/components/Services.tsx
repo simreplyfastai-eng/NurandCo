@@ -78,6 +78,13 @@ const FALLBACK_SERVICES: Category[] = [
     ],
   },
   {
+    title: "Injectables",
+    items: [
+      { name: "Hyaluronidase - Dissolving", price: "£100", duration: "30 mins", durationMins: 30 },
+      { name: "Hayfever Relief", price: "£80", duration: "15 mins", durationMins: 15 },
+    ],
+  },
+  {
     title: "Treatment Bundles",
     items: [
       { name: "Botox 3 Areas + 1.1ml Dermal Filler", price: "£320", duration: "45 mins", durationMins: 45 },

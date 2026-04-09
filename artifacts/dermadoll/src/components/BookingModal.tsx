@@ -671,7 +671,8 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
               {treatment.name}
             </div>
             <div style={{ fontFamily:"Inter, sans-serif", fontSize:15, color:"#2a1f0e", marginBottom:18 }}>
-              {selectedDate ? formatDate(selectedDate) : ""}{selectedTime ? ` · ${selectedTime}` : ""}
+              {selectedDate ? formatDate(selectedDate) : ""}
+              {selectedTime ? ` · ${selectedTime} — ${minsToTime(timeToMins(selectedTime) + bookingDuration)}` : ""}
             </div>
             <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
               <div style={{ background:"rgba(201,169,110,0.15)", border:"1px solid rgba(201,169,110,0.3)", borderRadius:20, padding:"6px 14px", fontFamily:"Inter, sans-serif", fontSize:13, color:"#C9A96E" }}>
@@ -862,12 +863,21 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
                 <span className="font-medium text-right">{treatment.name}</span>
               </div>
               <div className="flex justify-between gap-4 text-sm">
+                <span style={{ color: "#888" }}>Duration</span>
+                <span className="font-medium">{treatment.duration ?? `${bookingDuration} mins`}</span>
+              </div>
+              <div className="flex justify-between gap-4 text-sm">
                 <span style={{ color: "#888" }}>Date</span>
                 <span className="font-medium text-right">{selectedDate ? formatDate(selectedDate) : "—"}</span>
               </div>
               <div className="flex justify-between gap-4 text-sm">
                 <span style={{ color: "#888" }}>Time</span>
-                <span className="font-medium">{selectedTime}</span>
+                <span className="font-medium">
+                  {selectedTime ? (() => {
+                    const endMins = timeToMins(selectedTime) + bookingDuration;
+                    return `${selectedTime} — ${minsToTime(endMins)}`;
+                  })() : "—"}
+                </span>
               </div>
               <div className="border-t pt-2 mt-2 space-y-1" style={{ borderColor: "rgba(201,169,110,0.15)" }}>
                 <div className="flex justify-between text-sm">
@@ -952,12 +962,21 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
                 <span className="font-medium text-right">{treatment.name}</span>
               </div>
               <div className="flex justify-between text-sm">
+                <span style={{ color: "#888" }}>Duration</span>
+                <span className="font-medium">{treatment.duration ?? `${bookingDuration} mins`}</span>
+              </div>
+              <div className="flex justify-between text-sm">
                 <span style={{ color: "#888" }}>Date</span>
                 <span className="font-medium text-right">{selectedDate ? formatDate(selectedDate) : "—"}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span style={{ color: "#888" }}>Time</span>
-                <span className="font-medium">{selectedTime}</span>
+                <span className="font-medium">
+                  {selectedTime ? (() => {
+                    const endMins = timeToMins(selectedTime) + bookingDuration;
+                    return `${selectedTime} — ${minsToTime(endMins)}`;
+                  })() : "—"}
+                </span>
               </div>
               <div className="border-t pt-2 mt-1 flex justify-between" style={{ borderColor: "rgba(201,169,110,0.15)" }}>
                 <span className="text-sm font-semibold">Deposit to pay now</span>

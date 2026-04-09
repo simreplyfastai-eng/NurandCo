@@ -91,7 +91,7 @@ export default function Reviews() {
               5.0 <span className="font-light mx-2">|</span> 5 Reviews
             </div>
             <div className="text-xs text-foreground/50 uppercase tracking-widest mt-2">
-              Verified Client Reviews
+              Powered by Faces
             </div>
           </motion.div>
         </div>

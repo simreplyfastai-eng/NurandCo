@@ -41,6 +41,8 @@ const BUILT_IN_TREATMENTS = [
   {cat:'SKINBOOST',name:'B12 Injection',duration:15,price:30},
   {cat:'FATDISSOLVE',name:'Lemon Bottle Small Area',duration:30,price:70},
   {cat:'FATDISSOLVE',name:'Lemon Bottle Large Area',duration:30,price:100},
+  {cat:'INJECTABLES',name:'Hyaluronidase - Dissolving',duration:30,price:100},
+  {cat:'INJECTABLES',name:'Hayfever Relief',duration:15,price:80},
   {cat:'BUNDLES',name:'Botox 3 Areas + 1.1ml Dermal Filler',duration:45,price:320},
   {cat:'BUNDLES',name:'Botox 3 Areas + 1.1ml Lips + Lumi Pro',duration:60,price:450},
   {cat:'BUNDLES',name:'Botox 3 Areas + 1x Lumi Pro Skin Booster',duration:45,price:300},
@@ -52,10 +54,11 @@ const BUILT_IN_TREATMENTS = [
 const CAT_LABELS: Record<string, string> = {
   BOTOX:'Botox',FILLER:'Dermal Filler',FACIALS:'Facials',
   SKINBOOST:'Skin Boosters',FATDISSOLVE:'Fat Dissolving',
+  INJECTABLES:'Injectables',
   BUNDLES:'Treatment Bundles',CONSULT:'Consultation',
 };
 
-const CAT_ORDER = ['BOTOX','FILLER','FACIALS','SKINBOOST','FATDISSOLVE','BUNDLES','CONSULT'];
+const CAT_ORDER = ['BOTOX','FILLER','FACIALS','SKINBOOST','FATDISSOLVE','INJECTABLES','BUNDLES','CONSULT'];
 
 const ALLOWED_KV_KEYS = new Set([
   'dd_settings','dd_custom_treats','dd_custom_cats','dd_cat_states',
