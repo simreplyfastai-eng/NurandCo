@@ -70,11 +70,11 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
     return res.status(400).json({ error: "Unknown treatment. Please refresh and try again." });
   }
 
-  const settings = await getSettings();
-  // Consultation is always paid in full; all other treatments use the configured deposit %
+  // Consultation is always paid in full; all other treatments take a flat £50 deposit
   const isConsultation = treatment === "Consultation";
-  const depositPercent = isConsultation ? 100 : Math.max(1, Math.min(100, Number(settings.deposit ?? 50) || 50));
-  const depositAmountPence = Math.max(30, Math.round(treatmentPrice * depositPercent)); // in pence, minimum 30p (Stripe minimum)
+  const depositAmountPence = isConsultation
+    ? Math.round(treatmentPrice * 100)  // consultation: full price
+    : 5000;                             // all treatments: flat £50
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
@@ -96,7 +96,6 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
       clientSecret: paymentIntent.client_secret,
       paymentIntentId: paymentIntent.id,
       depositAmountPence,
-      depositPercent,
     });
   } catch (err) {
     console.error("POST /api/stripe/create-payment-intent", err);

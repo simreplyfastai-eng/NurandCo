@@ -381,7 +381,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
         // Reserve the booking slot FIRST — never take payment for an unsaved booking
         const price = parsePrice(treatment?.price ?? "0");
-        const depositAmount = Math.floor(price * (config.depositPercent ?? depositPercent) / 100);
+        const depositAmount = 50; // flat £50 deposit for all treatments
         const pendingBookingId = uid();
         pendingBookingIdRef.current = pendingBookingId;
 
@@ -542,7 +542,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   if (!treatment) return null;
 
   const price = parsePrice(treatment.price);
-  const deposit = serverDepositPence !== null ? Math.round(serverDepositPence / 100) : Math.floor(price * depositPercent / 100);
+  const deposit = serverDepositPence !== null ? Math.round(serverDepositPence / 100) : 50;
   const balance = price - deposit;
 
   // Compute available slots — 15-min grid, duration-aware, back-to-back
@@ -900,7 +900,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
                   <span className="font-serif" style={{ fontSize: "16px", color: "#111" }}>{treatment.price}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span style={{ color: "#888" }}>Deposit to pay now ({depositPercent}%)</span>
+                  <span style={{ color: "#888" }}>Deposit to pay now</span>
                   <span className="font-medium" style={{ color: "#C9A96E" }}>£{deposit}</span>
                 </div>
                 <div className="flex justify-between text-sm">
