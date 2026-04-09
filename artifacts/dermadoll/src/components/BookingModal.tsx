@@ -485,9 +485,14 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
     setSubmitting(true);
     setPaymentError("");
 
+    const returnUrl = `${window.location.origin}${window.location.pathname}?booking=confirmed`;
+
     const { error } = await stripe.confirmPayment({
       elements,
       redirect: "if_required",
+      confirmParams: {
+        return_url: returnUrl,
+      },
     });
 
     if (error) {
