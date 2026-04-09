@@ -751,10 +751,23 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
               <p style={{ color: "#888" }}>Your consultation fee can be used against any treatment you book on the day.</p>
             </div>
 
-            <div className="text-center text-sm" style={{ fontFamily: "Inter, sans-serif", color: "#888" }}>
-              <p className="mb-1">See you soon!</p>
-              {whatsapp && <p>WhatsApp: <strong style={{ color: "#111" }}>{whatsapp}</strong></p>}
-              <p>Instagram: <strong style={{ color: "#111" }}>@dermadollaesthetics</strong></p>
+            <div className="p-4 rounded-xl mb-4 text-sm" style={{ background: "#FAFAF8", border: "1px solid #E8E8E8", fontFamily: "Inter, sans-serif" }}>
+              <p style={{ color: "#C9A96E", fontWeight: 700, fontSize: "10px", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px" }}>Find Us</p>
+              <p style={{ color: "#111", fontWeight: 600, marginBottom: "2px" }}>Lumi Salon</p>
+              <p style={{ color: "#666" }}>1500 Stratford Road</p>
+              <p style={{ color: "#666" }}>Hall Green, Birmingham B28 9ET</p>
+              {whatsapp && (
+                <a
+                  href={`https://wa.me/${whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 mt-3"
+                  style={{ color: "#2D6A4F", fontWeight: 600, textDecoration: "none" }}
+                >
+                  <span style={{ fontSize: "16px" }}>📱</span>
+                  <span>WhatsApp us: {whatsapp.replace("44", "0").replace(/(\d{4})(\d{3})(\d{4})/, "$1 $2 $3")}</span>
+                </a>
+              )}
             </div>
 
             <button
