@@ -99,6 +99,18 @@ export default function Footer() {
             </a>
           </div>
         </div>
+
+        <div className="text-center pt-6 text-[10px] text-white/20 tracking-widest uppercase">
+          Powered by{" "}
+          <a
+            href="https://aesthetix-systems.co.uk"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white/40 transition-colors"
+          >
+            AESTHETIX
+          </a>
+        </div>
       </div>
     </footer>
   );
