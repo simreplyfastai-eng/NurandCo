@@ -1,0 +1,141 @@
+Perform a full audit of this entire website and fix every issue 
+found. Go through each area below systematically and report what 
+was checked, what was broken, and what was fixed.
+
+1. BOOKING FLOW AUDIT
+- Test every "Book Now" button opens the modal correctly
+- Verify the calendar renders properly — no broken dates
+- Confirm working days only show as selectable: 
+  Tue/Wed/Thu 10-7, Fri 9-4, Sat 9-2
+- Confirm Sunday and Monday are disabled and greyed out
+- Confirm past dates are greyed out and unclickable
+- Verify time slots generate correctly per day:
+  Tue/Wed/Thu: 10:00 — 18:00 in 30 min intervals
+  Fri: 09:00 — 15:00 in 30 min intervals
+  Sat: 09:00 — 13:00 in 30 min intervals
+- Confirm clicking a date shows time slots
+- Confirm clicking a time slot shows booking summary
+- Confirm summary shows correct treatment, date, time, 
+  deposit amount (50% of treatment price) and 
+  balance due on arrival (remaining 50%)
+- Confirm "Confirm Booking" button triggers Stripe checkout
+
+2. STRIPE AUDIT
+- Verify Stripe publishable key is loaded from environment 
+  variable STRIPE_PUBLISHABLE_KEY — not hardcoded
+- Verify Stripe secret key is loaded from environment 
+  variable STRIPE_SECRET_KEY — not hardcoded
+- Verify deposit amount passed to Stripe is exactly 50% 
+  of the treatment price in pence (multiply by 50 not 100)
+- Verify currency is set to "gbp"
+- Verify success_url redirects to thank you page 
+  with session_id parameter
+- Verify cancel_url returns user to the site cleanly
+- Check Stripe checkout metadata includes: 
+  treatment name, full price, deposit amount, 
+  date, time, client email
+
+3. WEBHOOK AUDIT
+- Verify /webhook POST endpoint exists
+- Verify webhook signature validation using 
+  STRIPE_WEBHOOK_SECRET environment variable
+- Verify checkout.session.completed event is handled
+- Verify on successful payment:
+  - Booking is marked as confirmed
+  - Client confirmation email is sent with:
+    treatment name, date, time, deposit paid, 
+    balance due on arrival, clinic address, 
+    WhatsApp contact link
+  - Niamh notification email is sent with:
+    client name, client email, treatment name, 
+    date, time, deposit amount received
+- Verify failed payment is handled gracefully — 
+  user returned to site with error message
+
+4. EMAIL AUDIT
+- Verify email sending is working via configured provider
+- Verify client email contains all booking details
+- Verify Niamh notification email contains all details
+- Check emails are not going to spam — verify FROM address 
+  is set to a proper domain email not a generic address
+- Verify email HTML renders correctly — not plain text
+
+5. THANK YOU PAGE AUDIT
+- Verify thank you page only loads after successful payment
+- Verify booking details are pulled from Stripe session:
+  treatment name, date, time, deposit paid, balance due
+- Verify glassmorphism styling renders correctly
+- Verify animated gold checkmark draws on load
+- Verify "Copy Address" button copies to clipboard
+- Verify "Save to Calendar" generates valid .ics file with:
+  correct title, date, time, duration, location, description
+- Verify WhatsApp button pre-fills correct message
+- Verify Instagram button links to @dermadollaesthetics
+- Verify "Back to Home" returns to homepage
+- Verify all animations stagger correctly on load
+- Test fully on mobile — all cards stack, buttons full width
+
+6. POPUP AUDIT
+- Verify popup appears exactly 5 seconds after page load
+- Verify sessionStorage prevents popup showing again 
+  in same session after dismissal
+- Verify getNextAvailableSlot() logic is correct:
+  - Returns "Today at HH:MM" if slots still available today
+  - Returns "Tomorrow from HH:MM" if today is finished
+  - Returns "[Day] from HH:MM" for future days
+  - Correctly skips Sunday and Monday
+  - Correctly uses opening times per day
+- Verify popup close works on: X button, overlay click, 
+  ESC key press
+- Verify "Book Now" button in popup scrolls to treatments
+- Verify "Maybe Later" closes popup only
+- Verify glassmorphism styling and gold blobs render correctly
+- Verify all animations work: entry slide up, exit slide down
+
+7. ADMIN PORTAL AUDIT
+- Verify admin login page exists and is protected
+- Verify all bookings appear in the dashboard
+- Verify booking details shown: client name, email, 
+  treatment, date, time, deposit paid, balance due
+- Verify booking status updates correctly: 
+  pending → confirmed → completed
+- Verify media upload works for before/after images
+- Verify video upload works for results section
+- Verify lead capture is logging all enquiries
+
+8. PERFORMANCE AUDIT
+- Check for any console errors — fix all of them
+- Check for any broken image src paths — fix placeholders
+- Check for any missing video src paths — add fallbacks
+- Verify Google Fonts are loading correctly
+- Check all internal anchor links scroll to correct sections
+- Verify mobile hamburger menu opens and closes correctly
+- Verify nav becomes solid white on scroll
+- Verify all hover states work on buttons and cards
+- Check no text is overflowing containers on mobile
+- Check all section headings are correct sizes on mobile
+
+9. CONTENT AUDIT
+- Verify clinic address is filled in everywhere it appears:
+  thank you page, booking confirmation email, .ics file
+  If address is missing use placeholder: 
+  "Solihull, Birmingham — full address sent on booking confirmation"
+- Verify all treatment names match exactly
+- Verify all prices match exactly
+- Verify all durations match exactly
+- Check before/after image placeholders are styled correctly
+- Check video placeholders are styled correctly
+
+10. SECURITY AUDIT
+- Confirm no API keys or secrets are hardcoded anywhere 
+  in the HTML, CSS or JS — all must use environment variables
+- Confirm webhook endpoint validates Stripe signature 
+  before processing any events
+- Confirm admin portal requires authentication
+- Confirm no sensitive data is exposed in client-side JS
+
+After completing all checks, provide a summary:
+- Total issues found
+- Total issues fixed
+- Anything that needs manual input from the owner
+  (e.g. clinic address, live Stripe keys, real images/videos)
