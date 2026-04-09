@@ -253,7 +253,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
   const elementsRef = useRef<StripeElements | null>(null);
   const paymentElementRef = useRef<HTMLDivElement>(null);
   const clientSecretRef = useRef<string | null>(null);
-  const depositPoundsRef = useRef<number>(25);
+  const depositPoundsRef = useRef<number>(1);
   const bookingIdRef = useRef<string>(uid());
   const firstFocusRef = useRef<HTMLButtonElement>(null);
 
@@ -344,7 +344,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            amount: 2500,
+            amount: 100,
             treatment: "Consultation",
             clientName: name,
             clientEmail: email,
@@ -506,7 +506,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
         {step !== "success" && (
           <div className="mb-6 pr-8">
             <h2 className="font-serif leading-snug mb-1" style={{ fontSize: "24px" }}>Book a Consultation</h2>
-            <span className="font-serif" style={{ fontSize: "20px", color: "#C9A96E" }}>£25</span>
+            <span className="font-serif" style={{ fontSize: "20px", color: "#C9A96E" }}>£1</span>
 
             {/* Step progress */}
             <div className="flex items-center gap-1 mt-4">
@@ -678,9 +678,9 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
                 <div className="mt-2 pt-2" style={{ borderTop: "1px solid #E8E8E8" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <span style={{ color: "#888" }}>Payment (paid in full):</span>
-                    <strong style={{ color: "#C9A96E", fontSize: "18px", fontFamily: "Cormorant Garamond, Georgia, serif" }}>£25</strong>
+                    <strong style={{ color: "#C9A96E", fontSize: "18px", fontFamily: "Cormorant Garamond, Georgia, serif" }}>£1</strong>
                   </div>
-                  <p className="mt-1" style={{ color: "#888", fontSize: "11px", fontStyle: "italic" }}>Your £25 is redeemable against any treatment booked on the day</p>
+                  <p className="mt-1" style={{ color: "#888", fontSize: "11px", fontStyle: "italic" }}>Your £1 is redeemable against any treatment booked on the day</p>
                 </div>
               </div>
             </div>
@@ -715,7 +715,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
                       cursor: submitting ? "default" : "pointer",
                     }}
                   >
-                    {submitting ? "Processing…" : "Pay £25 — Confirm Consultation"}
+                    {submitting ? "Processing…" : "Pay £1 — Confirm Consultation"}
                   </button>
                 )}
               </>
@@ -741,13 +741,13 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
                 <div><span style={{ color: "#888" }}>Time: </span>{selectedTime}</div>
                 <div><span style={{ color: "#888" }}>Duration: </span>15 minutes</div>
                 <div className="pt-2 mt-2" style={{ borderTop: "1px solid #E8E8E8" }}>
-                  <span style={{ color: "#2D6A4F", fontWeight: 600 }}>✓ Paid in full: £25</span>
+                  <span style={{ color: "#2D6A4F", fontWeight: 600 }}>✓ Paid in full: £1</span>
                 </div>
               </div>
             </div>
 
             <div className="p-4 rounded-xl mb-6 text-sm" style={{ background: "rgba(201,169,110,0.08)", border: "1px solid rgba(201,169,110,0.25)", fontFamily: "Inter, sans-serif" }}>
-              <p style={{ color: "#C9A96E", fontWeight: 600, marginBottom: "4px" }}>Your £25 is redeemable</p>
+              <p style={{ color: "#C9A96E", fontWeight: 600, marginBottom: "4px" }}>Your £1 is redeemable</p>
               <p style={{ color: "#888" }}>Your consultation fee can be used against any treatment you book on the day.</p>
             </div>
 
