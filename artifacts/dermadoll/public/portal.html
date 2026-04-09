@@ -944,126 +944,14 @@ tr:hover td{background:#FDFBF8}
         <div class="settings-section">
           <div class="settings-section-header">Developer</div>
           <div class="settings-body">
-            <div class="settings-row"><label>Site URL</label><input type="text" readonly value="dermadollaesthetics.replit.app" style="background:#FAFAFA"/></div>
-            <div class="settings-row"><label>Last updated</label><span style="font-size:13px">08/04/2026</span></div>
-            <div class="settings-row"><label>Version</label><span style="font-size:13px">1.1.0</span></div>
-            <div class="settings-row" style="align-items:flex-start">
-              <label>Scheduled Tasks</label>
-              <div style="font-size:12px;color:var(--muted);line-height:1.8">
-                <strong style="color:var(--text)">How to set up in Replit:</strong><br/>
-                1. Open your Replit project and go to <strong style="color:var(--text)">Tools → Scheduled Tasks</strong><br/>
-                2. Add a task: GET <code style="background:#F5F5F5;padding:1px 5px;border-radius:3px">/api/cron/reminders</code> — every <strong style="color:var(--text)">1 hour</strong> (sends 24h reminder emails)<br/>
-                3. Add a task: GET <code style="background:#F5F5F5;padding:1px 5px;border-radius:3px">/api/cron/autocomplete</code> — every <strong style="color:var(--text)">day at 00:01 UTC</strong> (marks past bookings Complete)<br/>
-                4. Set the <strong style="color:var(--text)">CRON_SECRET</strong> environment variable and add it as the <code style="background:#F5F5F5;padding:1px 5px;border-radius:3px">x-cron-secret</code> header in each task<br/>
-                <em style="font-size:11px">Use the buttons below to run either job manually at any time.</em>
-              </div>
-            </div>
-            <div style="display:flex;gap:10px;margin-top:4px;flex-wrap:wrap">
-              <button class="btn-outline" onclick="triggerCron('reminders')">Run Reminders Now</button>
-              <button class="btn-outline" onclick="triggerCron('autocomplete')">Run Autocomplete Now</button>
-            </div>
-            <div style="display:flex;gap:10px;margin-top:8px">
-              <button class="btn-gold" onclick="window.open('https://wa.me/447535173072','_blank')">Contact Developer</button>
+            <div class="settings-row"><label>Built by</label><span style="font-size:13px;font-weight:600;color:#111">Simrandeep Sangha</span></div>
+            <div class="settings-row"><label>Email</label><a href="mailto:simrandeepssangha@icloud.com" style="font-size:13px;color:#C9A96E;text-decoration:none">simrandeepssangha@icloud.com</a></div>
+            <div class="settings-row"><label>Admin portal</label><span style="font-size:13px;color:#888">dermadoll-aesthetics.co.uk/portal.html</span></div>
+            <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+              <button class="btn-gold" onclick="window.open('mailto:simrandeepssangha@icloud.com','_blank')">Contact Developer</button>
               <button class="btn-outline" onclick="window.open('/','_blank')">View Site</button>
-            </div>
-          </div>
-        </div>
-
-        <div class="settings-section" style="border-color:#FFF3E0">
-          <div class="settings-section-header" style="color:#E65100">Pre-Launch Checklist</div>
-          <div class="settings-body">
-            <p style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6">Complete all of these before going live. Items refresh automatically.</p>
-
-            <div id="launch-checklist" style="display:flex;flex-direction:column;gap:10px;margin-bottom:20px">
-
-              <div style="font-size:11px;font-weight:700;color:#C9A96E;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Payments</div>
-
-              <div class="checklist-item" id="chk-stripe-secret">
-                <span class="chk-icon">○</span>
-                <div>
-                  <div class="chk-label">Stripe Secret Key added</div>
-                  <div class="chk-hint"><code>STRIPE_SECRET_KEY</code> in Replit Secrets</div>
-                </div>
-              </div>
-              <div class="checklist-item" id="chk-stripe-pub">
-                <span class="chk-icon">○</span>
-                <div>
-                  <div class="chk-label">Stripe Publishable Key added</div>
-                  <div class="chk-hint"><code>STRIPE_PUBLISHABLE_KEY</code> in Replit Secrets</div>
-                </div>
-              </div>
-              <div class="checklist-item" id="chk-stripe-webhook">
-                <span class="chk-icon">○</span>
-                <div>
-                  <div class="chk-label">Stripe Webhook Secret added</div>
-                  <div class="chk-hint"><code>STRIPE_WEBHOOK_SECRET</code> in Replit Secrets</div>
-                </div>
-              </div>
-
-              <div style="font-size:11px;font-weight:700;color:#C9A96E;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Email</div>
-
-              <div class="checklist-item" id="chk-resend">
-                <span class="chk-icon">○</span>
-                <div>
-                  <div class="chk-label">Resend API key added</div>
-                  <div class="chk-hint"><code>RESEND_API_KEY</code> in Replit Secrets</div>
-                </div>
-              </div>
-              <div class="checklist-item" id="chk-admin-email">
-                <span class="chk-icon">○</span>
-                <div>
-                  <div class="chk-label">Admin email set</div>
-                  <div class="chk-hint"><code>ADMIN_EMAIL</code> in Replit Secrets — receives booking notifications</div>
-                </div>
-              </div>
-
-              <div style="font-size:11px;font-weight:700;color:#C9A96E;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Settings</div>
-
-              <div class="checklist-item" id="chk-cron">
-                <span class="chk-icon">○</span>
-                <div>
-                  <div class="chk-label">CRON_SECRET set</div>
-                  <div class="chk-hint">Add a random secret to Replit Secrets to protect scheduled job endpoints</div>
-                </div>
-              </div>
-              <div class="checklist-item" id="chk-whatsapp">
-                <span class="chk-icon">○</span>
-                <div>
-                  <div class="chk-label">WhatsApp number added</div>
-                  <div class="chk-hint">Add your number in Clinic Info above, then save</div>
-                </div>
-              </div>
-              <div class="checklist-item" id="chk-test-data">
-                <span class="chk-icon">○</span>
-                <div>
-                  <div class="chk-label">Test data cleared</div>
-                  <div class="chk-hint">Remove sample bookings and clients before going live</div>
-                </div>
-              </div>
-              <div class="checklist-item" id="chk-password">
-                <span class="chk-icon">○</span>
-                <div>
-                  <div class="chk-label">Admin password changed from default</div>
-                  <div class="chk-hint">Set a strong password in <code>ADMIN_PASSWORD</code> secret</div>
-                </div>
-              </div>
-
-              <div style="font-size:11px;font-weight:700;color:#C9A96E;text-transform:uppercase;letter-spacing:.5px;margin-top:4px">Deployment</div>
-
-              <div class="checklist-item" id="chk-domain">
-                <span class="chk-icon">○</span>
-                <div>
-                  <div class="chk-label">Custom domain connected (optional)</div>
-                  <div class="chk-hint">Connect via Replit Deployments settings</div>
-                </div>
-              </div>
-
-            </div>
-
-            <div style="border-top:1px solid var(--border);padding-top:16px">
-              <label style="color:#E65100;font-weight:600;font-size:13px;display:block;margin-bottom:8px">Remove Test Data</label>
-              <p style="font-size:12px;color:var(--muted);margin-bottom:12px;line-height:1.6">Remove the fictional sample clients and bookings that were created on first login. This will <strong>not</strong> delete real bookings, treatments, availability or settings.</p>
-              <button class="btn-gold" onclick="clearSampleData()" style="background:#E65100">Remove Test Data</button>
+              <button class="btn-outline" onclick="triggerCron('reminders')">Run Reminders</button>
+              <button class="btn-outline" onclick="triggerCron('autocomplete')">Run Autocomplete</button>
             </div>
           </div>
         </div>
@@ -1072,6 +960,7 @@ tr:hover td{background:#FDFBF8}
           <div class="settings-section-header" style="color:#c62828">Danger Zone</div>
           <div class="settings-body">
             <p style="font-size:13px;color:var(--muted);margin-bottom:14px">These actions cannot be undone. You will be asked to confirm before anything is deleted.</p>
+            <button class="danger-btn" onclick="clearSampleData()">Remove Test Data</button>
             <button class="danger-btn" onclick="clearBookings()">Clear All Bookings</button>
             <button class="danger-btn" onclick="resetPortal()">Reset Portal Data</button>
           </div>
