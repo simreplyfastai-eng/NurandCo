@@ -1303,21 +1303,8 @@ const BookingAPI = {
       const r = await fetch(this.BASE, {headers:authHdr()});
       if (!r.ok) return false;
       const bookings = await r.json();
-      if (bookings.length > 0) {
-        saveBookings(bookings);
-        return true;
-      }
-      // API is empty — migrate local data to API if present
-      const local = getBookings();
-      if (local.length > 0) {
-        await fetch(`${this.BASE}/bulk`, {
-          method: 'POST',
-          headers: {...authHdr(), 'Content-Type':'application/json'},
-          body: JSON.stringify(local)
-        });
-        return true;
-      }
-      return false;
+      saveBookings(bookings);
+      return true;
     } catch(e) {
       console.warn('BookingAPI.init failed — using local cache', e);
       return false;
@@ -1430,24 +1417,8 @@ const ClientAPI = {
       const r = await fetch(this.BASE, {headers:authHdr()});
       if (!r.ok) return false;
       const clients = await r.json();
-      if (clients.length > 0) {
-        localStorage.setItem('dd_clients', JSON.stringify(clients));
-        return true;
-      }
-      // API empty — migrate local data to cloud
-      const local = getClients();
-      if (local.length > 0) {
-        await fetch(`${this.BASE}/bulk`, {
-          method: 'POST',
-          headers: {...authHdr(), 'Content-Type':'application/json'},
-          body: JSON.stringify(local)
-        });
-        // Re-fetch to get deduplicated result back
-        const r2 = await fetch(this.BASE, {headers:authHdr()});
-        if (r2.ok) { const c2=await r2.json(); localStorage.setItem('dd_clients',JSON.stringify(c2)); }
-        return true;
-      }
-      return false;
+      localStorage.setItem('dd_clients', JSON.stringify(clients));
+      return true;
     } catch(e) {
       console.warn('ClientAPI.init failed — using local cache', e);
       return false;
