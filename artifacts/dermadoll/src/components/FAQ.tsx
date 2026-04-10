@@ -2,39 +2,53 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 
+interface FAQItem {
+  question: string;
+  lines: string[];
+}
+
 export default function FAQ() {
-  const faqs = [
+  const faqs: FAQItem[] = [
     {
-      question: "Are your treatments safe?",
-      answer: "Absolutely. Niamh is a fully trained and insured aesthetic practitioner using only premium, CE-marked products. All treatments are carried out in a professional clinical environment with your safety as the top priority."
+      question: "How long do treatment results typically last?",
+      lines: [
+        "Results vary depending on the treatment:",
+        "• Anti-wrinkle injections (Botox) — typically 3 to 4 months, with results softening gradually.",
+        "• Dermal fillers — 6 to 18 months depending on the area treated and product used. Lips tend to last 6–9 months; cheeks and jawline can last longer.",
+        "• Skin boosters — results build cumulatively. Most clients see optimal results after 2–3 sessions spaced 4 weeks apart, lasting up to 6 months.",
+        "• Facial treatments — an immediate glow with cumulative improvement over regular sessions.",
+        "Niamh will give you a personalised timeline at your consultation."
+      ]
     },
     {
-      question: "Does it hurt?",
-      answer: "Most treatments involve minimal discomfort. Topical numbing cream is applied before filler treatments to keep you comfortable throughout. Botox injections are very quick and most clients find them virtually painless."
+      question: "How can I book an appointment?",
+      lines: [
+        "Booking is quick and easy:",
+        "• Use the Book Now button on any treatment page to secure your appointment online.",
+        "• Start with a free consultation if you're unsure which treatment is right for you — no charge, no obligation.",
+        "• You can also reach us on Instagram @dermadollaesthetics or via the WhatsApp link in the footer.",
+        "A £50 deposit is required to confirm all paid treatment bookings."
+      ]
     },
     {
-      question: "How long do results last?",
-      answer: "Results vary by treatment. Botox typically lasts 3–4 months, dermal fillers 6–18 months depending on the area and product used. Skin boosters and facials provide cumulative results with regular sessions."
+      question: "How should I prepare for my appointment?",
+      lines: [
+        "A little preparation goes a long way:",
+        "• Arrive with a clean face, free from makeup where possible.",
+        "• Avoid alcohol for at least 24 hours before any filler treatment.",
+        "• Avoid blood-thinning medications such as ibuprofen or aspirin (unless prescribed by your GP) for 48 hours prior.",
+        "• Stay hydrated and eat a light meal before your appointment.",
+        "• If you have any active skin concerns, cold sores, or are unwell on the day, please get in touch before attending.",
+        "Full aftercare guidance is always provided at your appointment."
+      ]
     },
     {
-      question: "How do I book?",
-      answer: "You can book directly on our website using the Book Now button on any treatment, or contact us on Instagram @dermadollaesthetics"
-    },
-    {
-      question: "What should I do before my appointment?",
-      answer: "Arrive with a clean face where possible. Avoid alcohol 24 hours before filler treatments and avoid blood-thinning medications (unless prescribed) 48 hours prior. Full aftercare advice is provided at your appointment."
-    },
-    {
-      question: "Do you offer finance or payment plans?",
-      answer: "Yes — finance options are available to help spread the cost of treatments. DM us on Instagram for more details."
-    },
-    {
-      question: "Where are you located?",
-      answer: "We are based in Birmingham and Solihull. Exact location details are provided upon booking confirmation."
-    },
-    {
-      question: "What is included in the Pathway to Aesthetics training?",
-      answer: "The 3-day course covers Level 3 Anatomy & Physiology, First Aid, Complications Management, Hyalase Dissolving, Dermaplaning, Microneedling, Foundation Dermal Filler, Foundation Anti-Wrinkle, B12, Insurance & Prescriber Advice, and more — all for £2,000 with a £300 deposit to secure your place."
+      question: "Where is your clinic located?",
+      lines: [
+        "Dermadoll Aesthetics is based at:",
+        "Lumi Salon\n1500 Stratford Road\nHall Green, Birmingham\nB28 9ET",
+        "We are conveniently located in Hall Green with parking available nearby. Exact directions will be sent with your booking confirmation."
+      ]
     }
   ];
 
@@ -97,8 +111,16 @@ export default function FAQ() {
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
-                    <div className="px-6 pb-5 text-foreground/70 font-light leading-relaxed border-t border-primary/5 pt-4">
-                      {faq.answer}
+                    <div className="px-6 pb-6 border-t border-primary/5 pt-4 space-y-2">
+                      {faq.lines.map((line, j) => (
+                        <p
+                          key={j}
+                          className="text-foreground/70 font-light leading-relaxed whitespace-pre-line"
+                          style={line.startsWith("•") ? { paddingLeft: "0.25rem" } : line === faq.lines[0] && faq.lines.length > 1 ? { fontWeight: 500, color: "var(--foreground)" } : {}}
+                        >
+                          {line}
+                        </p>
+                      ))}
                     </div>
                   </motion.div>
                 )}
