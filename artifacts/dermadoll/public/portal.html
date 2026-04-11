@@ -1240,7 +1240,7 @@ function initSampleData(){
 }
 
 function fmt(d){const y=d.getFullYear();const mo=String(d.getMonth()+1).padStart(2,'0');const dy=String(d.getDate()).padStart(2,'0');return y+'-'+mo+'-'+dy;}
-function gbp(v){const n=Number(v)||0;const i=n===Math.floor(n)?Math.floor(n):parseFloat(n.toFixed(2));return '£'+i.toLocaleString('en-GB');}
+function gbp(v){const n=Number(v)||0;return'£'+n.toLocaleString('en-GB',{minimumFractionDigits:0,maximumFractionDigits:2});}
 
 // ═══════════════════════════════════════════════════
 // CLOUD STORE — real-time sync to PostgreSQL via API
@@ -2274,7 +2274,7 @@ function openBookingModal(prefill){
       depStatus.innerHTML=`<span style="color:#2D6A4F;font-weight:600;font-size:13px">✓ Deposit Paid</span>`;
     } else {
       const depAmt=Number(booking.deposit||0);
-      depStatus.innerHTML=`<span style="color:#888;font-size:13px">Pending: £${depAmt}</span>
+      depStatus.innerHTML=`<span style="color:#888;font-size:13px">Pending: ${gbp(depAmt)}</span>
         <button style="padding:5px 14px;border:none;background:#C9A96E;color:#fff;border-radius:6px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markDepositPaidFromModal()">Confirm Deposit Received</button>
         <span style="display:block;font-size:10px;color:#aaa;margin-top:4px;line-height:1.4">Only use if Stripe payment confirmed but booking shows as pending</span>`;
     }
@@ -2286,7 +2286,7 @@ function openBookingModal(prefill){
       bal.innerHTML=`<span style="color:#2D6A4F;font-weight:600;font-size:13px">✓ Balance Paid</span>`;
     } else {
       const remaining=Math.max(0,Number(booking.price||0)-Number(booking.deposit||0));
-      bal.innerHTML=`<span style="color:#888;font-size:13px">Outstanding: £${remaining}</span>
+      bal.innerHTML=`<span style="color:#888;font-size:13px">Outstanding: ${gbp(remaining)}</span>
         <button style="padding:5px 14px;border:none;background:#C9A96E;color:#fff;border-radius:6px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markBalancePaidFromModal()">Mark Paid</button>`;
     }
     // Set treatment
@@ -2645,9 +2645,9 @@ function renderTreatments(filter){
             return`<tr>
               <td class="treat-name-cell col-name">${t.name}</td>
               <td class="col-dur" style="color:var(--muted)">${ov.duration||t.duration}m</td>
-              <td class="treat-price-cell col-price">£${ov.price||t.price}</td>
+              <td class="treat-price-cell col-price">${gbp(ov.price||t.price)}</td>
               <td class="col-bookings">${tBookings.length}</td>
-              <td class="treat-rev-cell col-rev">£${rev}</td>
+              <td class="treat-rev-cell col-rev">${gbp(rev)}</td>
               <td style="text-align:center;display:flex;gap:2px;justify-content:center">
                 <button class="edit-btn" onclick="openEditTreat('${safeId}','${isCustom}')" title="Edit">✏</button>
                 ${isCustom?`<button class="del-treat-btn" onclick="deleteCustomTreat('${t.id}')" title="Remove">✕</button>`:''}
