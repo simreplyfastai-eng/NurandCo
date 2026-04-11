@@ -1240,7 +1240,7 @@ function initSampleData(){
 }
 
 function fmt(d){const y=d.getFullYear();const mo=String(d.getMonth()+1).padStart(2,'0');const dy=String(d.getDate()).padStart(2,'0');return y+'-'+mo+'-'+dy;}
-function gbp(v){const n=Number(v)||0;return n===Math.floor(n)?'£'+Math.floor(n):'£'+n.toFixed(2);}
+function gbp(v){const n=Number(v)||0;const i=n===Math.floor(n)?Math.floor(n):parseFloat(n.toFixed(2));return '£'+i.toLocaleString('en-GB');}
 
 // ═══════════════════════════════════════════════════
 // CLOUD STORE — real-time sync to PostgreSQL via API
