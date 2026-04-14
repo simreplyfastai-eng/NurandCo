@@ -63,8 +63,54 @@ export default function Services() {
   };
 
   return (
-    <section id="services" style={{ background: "#FAF7F2", padding: "100px 0" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+    <section id="services" style={{ background: "#FAF7F2", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+
+      {/* Background decorative layer */}
+      {/* Large "N" watermark — top right */}
+      <div style={{
+        position: "absolute", top: "-60px", right: "-40px",
+        fontFamily: "'Cormorant Garamond', serif", fontSize: "28rem", fontWeight: 700,
+        color: "#C8860A", opacity: 0.04, lineHeight: 1, userSelect: "none", pointerEvents: "none",
+        letterSpacing: "-0.05em",
+      }}>N</div>
+
+      {/* Soft radial amber glow — bottom left */}
+      <div style={{
+        position: "absolute", bottom: "-80px", left: "-80px",
+        width: 400, height: 400,
+        background: "radial-gradient(circle, rgba(200,134,10,0.08) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+
+      {/* Scattered ✦ ornaments */}
+      {[
+        { top: "12%", left: "6%", size: "1.1rem", opacity: 0.13 },
+        { top: "70%", left: "3%", size: "0.7rem", opacity: 0.09 },
+        { top: "30%", right: "5%", size: "0.85rem", opacity: 0.11 },
+        { top: "80%", right: "8%", size: "1.3rem", opacity: 0.08 },
+        { top: "55%", left: "50%", size: "0.6rem", opacity: 0.07 },
+      ].map((pos, i) => (
+        <div key={i} style={{
+          position: "absolute", ...pos as any,
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: pos.size, color: "#C8860A", opacity: pos.opacity,
+          pointerEvents: "none", userSelect: "none",
+        }}>✦</div>
+      ))}
+
+      {/* Thin horizontal rule lines — decorative */}
+      <div style={{
+        position: "absolute", top: 48, left: "50%", transform: "translateX(-50%)",
+        width: "60%", height: 1, background: "linear-gradient(to right, transparent, rgba(200,134,10,0.15), transparent)",
+        pointerEvents: "none",
+      }} />
+      <div style={{
+        position: "absolute", bottom: 48, left: "50%", transform: "translateX(-50%)",
+        width: "60%", height: 1, background: "linear-gradient(to right, transparent, rgba(200,134,10,0.15), transparent)",
+        pointerEvents: "none",
+      }} />
+
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
