@@ -183,7 +183,7 @@ export default function Hero() {
         <div
           className="hero-left"
           style={{
-            width: "55%",
+            width: "50%",
             minHeight: "100dvh",
             background: "linear-gradient(145deg, #fdf9f3 0%, #FAF7F2 45%, #f3ede2 100%)",
             display: "flex",
@@ -328,7 +328,7 @@ export default function Hero() {
         <div
           className="hero-right"
           style={{
-            width: "45%",
+            width: "50%",
             minHeight: "100dvh",
             background: "#1A0F00",
             position: "relative",
