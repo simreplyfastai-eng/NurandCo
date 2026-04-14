@@ -64,7 +64,7 @@ function ParticleCanvas() {
         width: "100%",
         height: "100%",
         pointerEvents: "none",
-        zIndex: 2,
+        zIndex: 3,
       }}
     />
   );
@@ -80,7 +80,7 @@ function mediaUrl(path: string | null): string | null {
 export default function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [heroSrc, setHeroSrc] = useState<string | null>(null);
-  const [heroImage, setHeroImage] = useState<string | null>(null);
+  const [heroImage, setHeroImage] = useState<string | null>(`${import.meta.env.BASE_URL}hero-room.jpg`);
   const [consultOpen, setConsultOpen] = useState(false);
 
   useEffect(() => {
@@ -295,11 +295,20 @@ export default function Hero() {
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }}
             />
           ) : heroImage ? (
-            <img
-              src={heroImage}
-              alt="Face By Niamh clinic"
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }}
-            />
+            <>
+              <img
+                src={heroImage}
+                alt="Face By Niamh clinic"
+                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }}
+              />
+              {/* Dark overlay so particles + branding stay legible */}
+              <div style={{
+                position: "absolute",
+                inset: 0,
+                background: "linear-gradient(160deg, rgba(26,15,0,0.55) 0%, rgba(26,15,0,0.35) 60%, rgba(26,15,0,0.5) 100%)",
+                zIndex: 2,
+              }} />
+            </>
           ) : (
             <div style={{
               position: "absolute",
