@@ -1,0 +1,280 @@
+Do a complete separation audit. This 
+project must have ZERO connection to 
+Dermadoll or any previous client data.
+
+Check every single layer — frontend, 
+backend, database, storage, config, 
+secrets, emails — and confirm or fix 
+each one.
+
+===============================================================
+AUDIT 1 — CODEBASE: ZERO DERMADOLL REFERENCES
+===============================================================
+
+Run this and show me the full output:
+
+grep -ri "dermadoll\|permadoll\|DermaDoll\|Permadoll\|@dermadoll\|@permadoll\|dermadoll-aesthetics\|permadoll-aesthetics" \
+  --include="*.html" \
+  --include="*.js" \
+  --include="*.css" \
+  --include="*.json" \
+  --include="*.md" \
+  --include="*.txt" \
+  --include="*.env" \
+  --exclude-dir=node_modules \
+  --exclude-dir=.git \
+  . 2>/dev/null
+
+Every single result must be fixed.
+Replace with Face By Niamh equivalents.
+Show me the count before and after.
+
+===============================================================
+AUDIT 2 — DATABASE: CLEAN DATA
+===============================================================
+
+Run these queries and show me the results:
+
+-- Check for any Dermadoll data in bookings
+SELECT COUNT(*) as booking_count FROM bookings;
+SELECT COUNT(*) as client_count FROM clients;
+SELECT COUNT(*) as treatment_count FROM treatments;
+
+-- Check settings table for old business name
+SELECT * FROM portal_settings LIMIT 5;
+
+-- Check if any client emails/names reference 
+-- old test data
+SELECT id, name, email FROM clients LIMIT 10;
+
+-- Check treatments are Niamh's treatments
+SELECT id, name, price, category FROM treatments;
+
+If bookings or clients exist from Dermadoll 
+testing DELETE them:
+DELETE FROM bookings 
+WHERE created_at < '2025-01-01';
+
+DELETE FROM clients 
+WHERE email LIKE '%test%' 
+   OR email LIKE '%demo%'
+   OR name LIKE '%test%';
+
+-- Verify treatments match facial aesthetics
+-- If still showing Dermadoll treatments (body sculpt etc)
+-- delete and re-seed with Niamh's treatments
+
+===============================================================
+AUDIT 3 — CLOUDSTORE / PORTAL KV
+===============================================================
+
+Check what keys exist in CloudStore:
+
+const keys = await CloudStore.list()
+console.log('CloudStore keys:', JSON.stringify(keys))
+
+Check the media config key:
+const media = await CloudStore.get('dd_media') 
+  || await CloudStore.get('fbn_media')
+  || await CloudStore.get('portal_media')
+console.log('Media config:', JSON.stringify(media))
+
+Check portal settings:
+const settings = await CloudStore.get('portal_settings')
+  || await CloudStore.get('portal_kv')
+console.log('Portal settings:', JSON.stringify(settings))
+
+If any settings show Dermadoll business name:
+await CloudStore.set('portal_settings', {
+  businessName: 'Face By Niamh',
+  ownerName: 'Niamh',
+  instagram: '@facebyniamh',
+  location: 'Leeds / Wakefield',
+  // ... all Niamh's settings
+})
+
+If any media config has Dermadoll image URLs:
+await CloudStore.delete('dd_media')
+await CloudStore.set('fbn_media', {})
+
+===============================================================
+AUDIT 4 — CANVAS/PREVIEW TITLE
+===============================================================
+
+The Replit canvas shows "Dermadoll Aesth..." 
+as the tab/preview title. Fix this.
+
+In index.html find the <title> tag and 
+update:
+<title>Face By Niamh — Aesthetics Leeds & Wakefield</title>
+
+Also update any og:title, og:site_name 
+meta tags:
+<meta property="og:title" content="Face By Niamh" />
+<meta property="og:site_name" content="Face By Niamh" />
+<meta name="description" content="Advanced facial aesthetics treatments in Leeds and Wakefield. Natural results with Niamh, Advanced Aesthetics Practitioner." />
+
+===============================================================
+AUDIT 5 — SERVER.JS DEFAULTS
+===============================================================
+
+Find every hardcoded default value in 
+server.js and check none reference Dermadoll.
+
+Specifically check:
+1. DEFAULT_SETTINGS object — business name
+2. Email from/reply-to addresses
+3. Any hardcoded Instagram handles
+4. Any hardcoded WhatsApp numbers
+5. Any hardcoded domain references
+6. Admin portal password — is it still the 
+   same Dermadoll password or has it been reset?
+7. JWT secret — should be unique per client
+
+If any defaults still reference Dermadoll 
+update them to Face By Niamh.
+
+JWT_SECRET should be regenerated fresh:
+const newSecret = require('crypto')
+  .randomBytes(64).toString('hex')
+// Add to Replit Secrets as JWT_SECRET
+
+===============================================================
+AUDIT 6 — EMAIL TEMPLATES
+===============================================================
+
+Find every email template function and 
+check the content:
+
+grep -n "Dermadoll\|dermadoll\|The Dermadoll\|Dermadoll Team\|dermadoll-aesthetics" \
+  server.js 2>/dev/null
+
+For each email template check:
+- Subject line uses "Face By Niamh"
+- Body uses "Face By Niamh" not Dermadoll
+- Signature is "The Face By Niamh Team"
+- Instagram is "@facebyniamh"
+- From name is "Face By Niamh"
+- Reply-to is Niamh's email placeholder
+
+===============================================================
+AUDIT 7 — STRIPE/RESEND SECRETS
+===============================================================
+
+Check Replit Secrets — do NOT print 
+the actual values, just check which 
+keys exist:
+
+const secretsCheck = {
+  hasStripeSecret: !!process.env.STRIPE_SECRET_KEY,
+  hasStripePublishable: !!process.env.STRIPE_PUBLISHABLE_KEY,
+  hasWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,
+  hasResend: !!process.env.RESEND_API_KEY,
+  hasJWT: !!process.env.JWT_SECRET,
+}
+console.log('Secrets present:', JSON.stringify(secretsCheck))
+
+If Stripe keys exist — verify they are 
+Niamh's keys not Dermadoll's:
+console.log('Stripe key prefix:', 
+  process.env.STRIPE_SECRET_KEY?.substring(0, 8))
+// Should show sk_live_ or sk_test_ 
+// (just the prefix, not the full key)
+
+If Dermadoll's Stripe keys are still 
+in there they MUST be cleared.
+Niamh needs her own Stripe account.
+
+===============================================================
+AUDIT 8 — OBJECT STORAGE / UPLOADED IMAGES
+===============================================================
+
+Check if any Dermadoll images are still 
+being served from Object Storage:
+
+List all objects in storage:
+const objects = await replit.objectStorage.list()
+console.log('Storage objects:', objects)
+
+If any files have "dermadoll" or "permadoll" 
+in their path/name — flag them.
+Niamh will upload her own images via the portal.
+Old Dermadoll images should be deleted.
+
+===============================================================
+AUDIT 9 — PORTAL ADMIN PASSWORD
+===============================================================
+
+The portal uses a 5-click secret login 
+with a password. 
+
+Confirm: is the password stored as a 
+hardcoded string or in Replit Secrets?
+
+If hardcoded — move it to Replit Secrets:
+PORTAL_PASSWORD=aesthetics2024 (or new value)
+
+Then in the code:
+const PORTAL_PASSWORD = process.env.PORTAL_PASSWORD 
+  || 'aesthetics2024'
+
+Generate a fresh secure password for Niamh 
+and log it ONCE then remove the log:
+const niamhPortalPassword = 'FBN' + 
+  Math.random().toString(36).substring(2, 8).toUpperCase()
+console.log('=== NIAMH PORTAL PASSWORD:', niamhPortalPassword, '===')
+// REMOVE THIS LOG AFTER NOTING THE PASSWORD
+
+===============================================================
+AUDIT 10 — FINAL CLEAN CHECK
+===============================================================
+
+After all fixes run a comprehensive final check:
+
+// Check 1: Zero Dermadoll in code
+const dermadollCount = execSync(
+  'grep -ri "dermadoll\\|permadoll" --include="*.html" --include="*.js" --exclude-dir=node_modules . | wc -l'
+).toString().trim()
+console.log('Dermadoll references remaining:', dermadollCount)
+// Must be 0
+
+// Check 2: Database is clean
+const bookingCount = await db.query('SELECT COUNT(*) FROM bookings')
+const clientCount = await db.query('SELECT COUNT(*) FROM clients')
+console.log('Bookings in DB:', bookingCount.rows[0].count)
+console.log('Clients in DB:', clientCount.rows[0].count)
+
+// Check 3: Business name in settings
+const settings = await CloudStore.get('portal_settings')
+console.log('Business name:', settings?.businessName)
+// Must be "Face By Niamh"
+
+// Check 4: Page title
+console.log('Check page title in index.html for Face By Niamh')
+
+// Check 5: Treatments are facial aesthetics
+const treatments = await db.query('SELECT name FROM treatments')
+console.log('Treatments:', treatments.rows.map(t => t.name))
+// Must show facial aesthetics treatments not body sculpt
+
+===============================================================
+REPORT BACK
+===============================================================
+
+After running all audits report:
+
+CODEBASE: ✅ Zero Dermadoll refs / ❌ X refs remaining
+DATABASE: ✅ Clean / ❌ Old data found
+CLOUDSTORE: ✅ Face By Niamh settings / ❌ Old settings
+PAGE TITLE: ✅ Face By Niamh / ❌ Still Dermadoll
+EMAILS: ✅ All updated / ❌ Still has Dermadoll
+STRIPE KEYS: ✅ Cleared / ❌ Old keys present
+JWT SECRET: ✅ Fresh / ❌ Shared with Dermadoll
+TREATMENTS: ✅ Facial aesthetics / ❌ Old treatments
+PORTAL PASSWORD: ✅ New/separate / ❌ Shared
+OBJECT STORAGE: ✅ Clean / ❌ Old images present
+
+Every item must be ✅ before this project 
+goes live for Niamh.
+
+Republish after all fixes are confirmed.

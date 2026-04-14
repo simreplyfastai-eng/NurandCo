@@ -122,8 +122,31 @@ export default function Hero() {
         <style>{`
           @media (max-width: 768px) {
             .hero-wrap { flex-direction: column !important; }
-            .hero-left { order: 2 !important; width: 100% !important; min-height: unset !important; padding: 48px 28px 64px !important; }
-            .hero-right { order: 1 !important; width: 100% !important; height: 55vw !important; min-height: 240px !important; }
+            .hero-left {
+              order: 2 !important;
+              width: 100% !important;
+              min-height: unset !important;
+              padding: 36px 24px 60px !important;
+              align-items: flex-start !important;
+            }
+            .hero-right {
+              order: 1 !important;
+              width: 100% !important;
+              height: 58vw !important;
+              min-height: 280px !important;
+              max-height: 380px !important;
+            }
+            .hero-eyebrow { gap: 8px !important; }
+            .hero-line { display: none !important; }
+            .hero-btns {
+              flex-direction: column !important;
+              width: 100% !important;
+            }
+            .hero-btn-1, .hero-btn-2 {
+              width: 100% !important;
+              text-align: center !important;
+              justify-content: center !important;
+            }
           }
           @keyframes pulseDot {
             0%, 100% { opacity: 1; transform: scale(1); }
@@ -245,7 +268,7 @@ export default function Hero() {
             </p>
 
             {/* Buttons */}
-            <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+            <div className="hero-btns" style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
               <button
                 className="hero-btn-1"
                 onClick={scrollToServices}
