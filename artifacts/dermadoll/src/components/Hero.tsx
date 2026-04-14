@@ -129,6 +129,31 @@ export default function Hero() {
             0%, 100% { opacity: 1; transform: scale(1); }
             50% { opacity: 0.5; transform: scale(1.4); }
           }
+          @keyframes heroFadeUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
+          }
+          @keyframes heroFadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+          }
+          @keyframes watermarkFloat {
+            0%   { transform: translateY(0px); }
+            50%  { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+          }
+          @keyframes lineGrow {
+            from { width: 0px; opacity: 0; }
+            to   { width: 22px; opacity: 0.5; }
+          }
+          .hero-eyebrow   { animation: heroFadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
+          .hero-h1-line1  { animation: heroFadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.35s both; }
+          .hero-h1-line2  { animation: heroFadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.55s both; }
+          .hero-body      { animation: heroFadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.7s both; }
+          .hero-btn-1     { animation: heroFadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.88s both; }
+          .hero-btn-2     { animation: heroFadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 1.0s both; }
+          .hero-watermark { animation: heroFadeIn 1.8s ease 0.4s both, watermarkFloat 7s ease-in-out 2.2s infinite; }
+          .hero-line      { animation: lineGrow 0.8s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
         `}</style>
 
         {/* LEFT — content */}
@@ -147,7 +172,7 @@ export default function Hero() {
           }}
         >
           {/* Large decorative serif watermark — "FACE BY NIAMH" stacked */}
-          <div aria-hidden="true" style={{
+          <div aria-hidden="true" className="hero-watermark" style={{
             position: "absolute",
             bottom: 0,
             left: -6,
@@ -178,7 +203,7 @@ export default function Hero() {
           }} />
           <div style={{ maxWidth: 520 }}>
             {/* Eyebrow */}
-            <div style={{
+            <div className="hero-eyebrow" style={{
               fontFamily: "'DM Sans', sans-serif",
               fontSize: 10,
               letterSpacing: "3px",
@@ -189,9 +214,9 @@ export default function Hero() {
               alignItems: "center",
               gap: 10,
             }}>
-              <div style={{ height: 1, width: 22, background: "#C8860A", opacity: 0.5 }} />
+              <div className="hero-line" style={{ height: 1, width: 22, background: "#C8860A" }} />
               LEEDS / WAKEFIELD
-              <div style={{ height: 1, width: 22, background: "#C8860A", opacity: 0.5 }} />
+              <div className="hero-line" style={{ height: 1, width: 22, background: "#C8860A" }} />
             </div>
 
             {/* H1 */}
@@ -203,13 +228,12 @@ export default function Hero() {
               lineHeight: 1.1,
               margin: "0 0 28px",
             }}>
-              Natural Aesthetics.
-              <br />
-              <em style={{ color: "#C8860A", fontStyle: "italic" }}>Confident Results.</em>
+              <span className="hero-h1-line1" style={{ display: "block" }}>Natural Aesthetics.</span>
+              <em className="hero-h1-line2" style={{ display: "block", color: "#C8860A", fontStyle: "italic" }}>Confident Results.</em>
             </h1>
 
             {/* Body */}
-            <p style={{
+            <p className="hero-body" style={{
               fontFamily: "'DM Sans', sans-serif",
               fontSize: 15,
               color: "#6B6260",
@@ -223,6 +247,7 @@ export default function Hero() {
             {/* Buttons */}
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
               <button
+                className="hero-btn-1"
                 onClick={scrollToServices}
                 style={{
                   background: "transparent",
@@ -243,6 +268,7 @@ export default function Hero() {
                 View Treatments
               </button>
               <button
+                className="hero-btn-2"
                 onClick={() => setConsultOpen(true)}
                 style={{
                   background: "#1A0F00",
