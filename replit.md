@@ -13,7 +13,7 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API framework**: Express 5
 - **Database**: PostgreSQL (raw pool queries, no ORM)
 - **Build**: esbuild (ESM bundle)
-- **Frontend**: React + Vite (Dermadoll website)
+- **Frontend**: React + Vite (Face By Niamh website)
 
 ## Key Commands
 
@@ -23,8 +23,8 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 
 ## Artifacts
 
-### Dermadoll Aesthetics (`artifacts/dermadoll`)
-Single-page luxury aesthetics clinic website (Birmingham & Solihull).
+### Face By Niamh Aesthetics (`artifacts/dermadoll`)
+Single-page luxury aesthetics clinic website (Leeds & Wakefield).
 - **Public site**: `/` — hero video, treatments accordion, before/after grid, booking modal
 - **Admin portal**: `/portal.html` — hidden admin interface
 
@@ -129,7 +129,7 @@ id, name, email, phone, join_date, notes, source, created_at
 | created_at | bigint | Unix timestamp ms |
 
 ### `portal_kv`
-Key-value store for portal settings: `dd_settings`, `dd_availability`, `dd_media`
+Key-value store for portal settings: `fbn_settings`, `fbn_availability`, `fbn_media`
 
 ## Key Libraries
 
