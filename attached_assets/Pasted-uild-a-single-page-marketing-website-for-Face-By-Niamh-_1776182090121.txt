@@ -1,0 +1,151 @@
+uild a single-page marketing website for Face By Niamh Aesthetics — an advanced aesthetics clinic in Leeds/Wakefield. Use React with Tailwind CSS. The page should have the following exact sections in this order, with the design system below applied throughout.
+
+DESIGN SYSTEM
+
+Fonts (Google Fonts):
+
+Serif: Cormorant Garamond (weights 300, 400, 600, 700 + italic variants) — used for all headings
+Sans: DM Sans (weights 300, 400, 500) — used for body, nav, labels, buttons
+Colours:
+
+cream = #FAF7F2 (main background)
+creamDark = #F0EBE1 (alternate section background)
+brown = #1A0F00 (primary text + filled buttons)
+amber = #C8860A (accent — eyebrows, prices, italic lines, icons)
+muted = #6B6260 (body text)
+border = #E2DDD5
+Buttons — all with border-radius: 0, font-family: DM Sans, font-size: 11px, letter-spacing: 2px, text-transform: uppercase:
+
+Outlined: transparent bg, 1px solid #1A0F00, brown text
+Filled: #1A0F00 bg, cream text
+Section eyebrow labels: DM Sans uppercase, 10px, letter-spacing: 3px, amber colour, with a thin amber line either side (e.g. —— ABOUT ——)
+
+LOGO (used in navbar and footer — stacked typographic lockup, no image):
+
+Face          ← italic Cormorant Garamond, ~18px
+BY            ← DM Sans uppercase, ~9px, amber #C8860A, wide letter-spacing
+Niamh         ← Cormorant Garamond, ~22px
+AESTHETICS    ← DM Sans uppercase, ~8px, muted #6B6260, very wide letter-spacing
+
+NAVBAR
+
+Fixed top, transparent → becomes cream/white with border-bottom on scroll
+Left: stacked logo (above)
+Right (desktop): nav links — HOME · TREATMENTS · ABOUT · PACKAGES · PRICING · CONTACT — DM Sans, 10px, wide letter-spacing, uppercase, brown
+Right (mobile): hamburger icon → full-screen overlay menu with same links
+Far right: a BOOK NOW filled button (brown bg, cream text)
+SECTION 1 — HERO
+
+Split layout — on desktop: left 55% content, right 45% image. On mobile: image stacks on top, content below.
+
+Right/top panel: full-bleed photo of the clinic room (use a warm, neutral clinic interior placeholder if no image). Overlay a subtle animated particle effect (small golden dots floating upward). Desktop: show @facebyniamh label with a pulsing dot in the bottom-left corner of the image.
+
+Left/bottom panel (cream bg):
+
+Eyebrow: LEEDS / WAKEFIELD — amber, uppercase, wide tracking
+H1: Natural Aesthetics. then on next line in italic amber: Confident Results. — Cormorant Garamond, ~60–72px desktop / 38px mobile
+Body text: "Advanced aesthetics treatments in Leeds and Wakefield — delivered with care, precision, and a commitment to natural results." — DM Sans, muted, 15px
+Two buttons side by side (desktop) / stacked full-width (mobile): VIEW TREATMENTS (outlined) + BOOK A CONSULTATION (filled)
+TRUST TICKER STRIP (immediately below hero, full width, 48px tall)
+
+Scrolling marquee. Desktop: left 55% cream background with dark text, right 45% dark brown background with cream text. Mobile: full-width dark brown.
+
+Text scrolling endlessly: DERMAL FILLERS ✦ ANTI-WRINKLE ✦ SKIN BOOSTERS ✦ FACIALS ✦ VITAMIN INJECTIONS ✦ NATURAL RESULTS ✦ 5-STAR RATED ✦ LEEDS / WAKEFIELD ✦ — DM Sans, 11px, letter-spacing 2px, uppercase. The ✦ separators are amber.
+
+SECTION 2 — ABOUT
+
+Background: creamDark. Two columns desktop (photo left, text right). Photo stacks below text on mobile.
+
+Left: Niamh's portrait photo (warm, professional — use a placeholder). Image fills the column, object-fit cover.
+
+Right:
+
+Eyebrow: ABOUT NIAMH
+H2: Meet Your Practitioner
+Italic serif subline in amber: "Student Nurse. Advanced Aesthetics Practitioner."
+Body copy (2 paragraphs): "Hi, I'm Niamh — a Student Nurse and Advanced Aesthetics Practitioner based between Leeds and Wakefield. I specialise in natural-looking results that enhance your features while keeping you looking like you — just a refreshed version." / "I work from my private home clinic in Leeds and am available at Laurenanaisbeauty in Horsforth two days a month. Every treatment starts with a thorough consultation and is tailored specifically to you."
+Two small stat callouts side by side: 100+ Clients / 5★ Average Rating
+An outlined BOOK A CONSULTATION button
+SECTION 3 — SERVICES
+
+Background: cream. Horizontally scrollable card carousel (shows 3 on desktop, 1 on mobile, with prev/next arrow buttons).
+
+Section header: eyebrow TREATMENTS, H2: What I Offer, italic amber subline: "Every treatment is tailored to you."
+
+6 treatment cards — each has: amber ✦ icon, treatment name in serif, short description, a FROM £XX price in italic amber, and a BOOK outlined button. Cards:
+
+Dermal Fillers — Lip, cheek, jaw, chin, tear trough and nose filler using premium hyaluronic acid. — From £100
+Anti-Wrinkle — Smooth expression lines and lift the brow with precision toxin placement. — From £140
+Skin Boosters — Profhilo, Seventy Hyal, Jalupro and Lumi Eyes for deep skin hydration. — From £100
+Polynucleotides — PDRN treatments for skin regeneration and quality improvement. — From £120
+Medical Facials — Dermaplaning and microneedling with Salmon DNA for glowing skin. — From £30
+Vitamin Injections — B12 injections for an energy and wellness boost. — From £25
+SECTION 4 — PACKAGES
+
+Background: creamDark. Heading: eyebrow PACKAGES, H2: Treatment Packages, italic amber subline: "Save more when you combine."
+
+3 package cards in a swipeable carousel (mobile) / 3 columns (desktop). Middle card has an amber border and a Most Popular badge. Each card: badge label (amber, small caps), large serif price, package name, italic amber tagline, bullet list of inclusions with ✦ markers, and a CTA button.
+
+Cards:
+
+Anti-Wrinkle Package — Best for: First-timers — From £140 — features: 1 area £140, 2 areas £200, 3 areas £230, Brow Lift £150, 2-week review £10
+Combination Package (Most Popular) — Best for: Anti-wrinkle + filler together — From £230 — features: Toxin + 1ml filler £230, Toxin + 2ml filler £295, Brow Lift + 1ml Lips £245
+Filler Package — Best for: Multi-area filler — From £220 — features: 2ml £220, 3ml £295, 4ml £395, 5ml £495, Consultation £10 (redeemable)
+Footer note in small italic amber: "A deposit is required to secure all appointments. Courses must be used within 12 months of purchase."
+
+SECTION 5 — PRICING
+
+Background: cream. Centred, max-width 750px. Eyebrow PRICING, H2: Transparent Pricing, italic amber subline: "No hidden fees. Every treatment listed."
+
+Accordion — 5 categories, each expands/collapses on click. Dermal Fillers is open by default. Each row: treatment name (DM Sans, 14px, brown) left, price (italic Cormorant, 20px, amber) + small BOOK outlined button right.
+
+Categories and items:
+
+Dermal Fillers: Consultation £10 · 1ml Lip Filler £130 · 0.7ml Lip Filler £110 · 0.5ml Lip Filler £100 · Lip Filler Dissolving £95 · Lip Filler Dissolve & 1ml Refill £190 · 1ml Cheek Contour £130 · Jaw Filler £130 · Chin Augmentation £110 · Non-Surgical Rhinoplasty £130 · Pixie Tip Lift £80 · Tear Trough Filler £130 · Nasolabial Folds £110 · Facial Slimming Package £315 · Summer Glow Up £320 · 2ml Package £220 · 3ml Package £295 · 4ml Package £395 · 5ml Package £495
+
+Anti-Wrinkle: 1 Area £140 · 2 Areas £200 · 3 Areas £230 · Brow Lift £150 · 2 Week Review / Top-up £10 · Masseter Slimming Tox £150 · Nose Tip Lift Tox £140 · DAO Tox £140 · Dimple Chin Tox £150 · Nose Slimming Tox £140
+
+Skin Boosters: Profhilo £140 · Profhilo x4 £450 · Jalupro HMW £130 · Jalupro HMW x4 £420 · Lumi Eyes £100 · Lumi Eyes x4 £350 · Seventy Hyal £120 · Seventy Hyal x4 £300
+
+Facials: Luxury Dermaplane £30 · Luxury Microneedling with Salmon DNA £45 · Dermaplane & Microneedling combo £65
+
+Vitamin Injections: Vitamin B12 Injection £25 · Weekly Course x4 £90
+
+SECTION 6 — RESULTS
+
+Background: creamDark. Eyebrow RESULTS, H2: Real Results, italic amber subline: "Every result is real. Every client is unique."
+
+2×2 grid of before/after cards. Each card has a BEFORE and AFTER placeholder panel side by side (grey placeholder boxes), a treatment label below in DM Sans, and a small amber ✦ divider. Treatments: Lip Filler · Cheek Contour · Skin Booster · Anti-Wrinkle. Add a small disclaimer below the grid: "Results may vary. Treatments are carried out by a qualified aesthetics practitioner."
+
+SECTION 7 — REVIEWS
+
+Background: cream. Eyebrow REVIEWS, H2: What Clients Say, italic amber subline: "5★ on every platform."
+
+Row of 3 review cards (horizontal scroll on mobile). Each card: amber ★★★★★, quote in italic serif, client first name + treatment in muted DM Sans below.
+
+Reviews:
+
+"Absolutely love my lips — so natural and exactly what I wanted. Niamh made me feel so comfortable throughout." — Chloe · Lip Filler
+"Second time coming back and I wouldn't go anywhere else. My skin looks incredible after the skin booster course." — Megan · Skin Boosters
+"Niamh is so professional and knowledgeable. My anti-wrinkle looked so fresh — not overdone at all." — Lauren · Anti-Wrinkle
+SECTION 8 — FAQ
+
+Background: creamDark. Eyebrow FAQ, H2: Common Questions. Accordion list of 5 questions — click to expand.
+
+Do I need a consultation before booking? — All new clients require a consultation before treatment. A £10 consultation fee applies, which is fully redeemable against your treatment.
+Is a deposit required? — Yes, a deposit is required to secure your appointment. This will be deducted from your final balance on the day.
+Where are you based? — I work from my private home clinic in Leeds and am available at Laurenanaisbeauty in Horsforth two days a month. Exact address details are provided upon booking.
+How long do results last? — This varies by treatment. Lip filler typically lasts 6–9 months, anti-wrinkle 3–4 months, and skin boosters can last up to 12 months with a course.
+What if I have a concern after treatment? — Your aftercare and a 2-week review are included. I'm always available via Instagram DM or email for any questions after your appointment.
+SECTION 9 — CTA BANNER
+
+Full-width dark brown (#1A0F00) background. Centred. Large italic serif heading in cream: "Ready for a consultation?" Subline in muted cream: "Online booking — coming soon. Message @facebyniamh on Instagram to enquire." One amber-outlined button: GET IN TOUCH.
+
+SECTION 10 — CONTACT
+
+Background: cream. Two columns desktop. Left: eyebrow CONTACT, H2: Get In Touch, body copy "Based in Leeds and Wakefield. DM on Instagram or send an email — Niamh will get back to you promptly." Then three icon rows: 📍 Leeds / Wakefield · 📸 @facebyniamh · ✉ [email placeholder]. Right: a simple contact form with Name, Email, Message fields and a filled SEND MESSAGE button.
+
+FOOTER
+
+Dark brown background, cream text. Left: stacked logo lockup (same as navbar). Centre: nav links in small DM Sans. Right: Instagram icon linking to @facebyniamh. Bottom bar: "© 2025 Face By Niamh Aesthetics · Results may vary · Treatments performed by a qualified aesthetics practitioner." in small muted text.
+

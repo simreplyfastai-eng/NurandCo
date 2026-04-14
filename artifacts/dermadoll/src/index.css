@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -79,51 +79,52 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  --background: 0 0% 100%;
-  --foreground: 0 0% 7%;
-  --border: 39 46% 61%;
-  
-  --card: 0 0% 100%;
-  --card-foreground: 0 0% 7%;
-  --card-border: 39 46% 61%;
+  /* Face By Niamh palette */
+  --background: 39 44% 97%;       /* #FAF7F2 cream */
+  --foreground: 35 100% 5%;       /* #1A0F00 dark brown */
+  --border: 38 18% 86%;           /* #E2DDD5 */
 
-  --sidebar: 30 18% 97%;
-  --sidebar-foreground: 0 0% 7%;
-  --sidebar-border: 39 46% 61%;
-  --sidebar-primary: 39 46% 61%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 30 18% 92%;
-  --sidebar-accent-foreground: 0 0% 7%;
-  --sidebar-ring: 39 46% 61%;
+  --card: 39 44% 97%;
+  --card-foreground: 35 100% 5%;
+  --card-border: 38 18% 86%;
 
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 7%;
-  --popover-border: 39 46% 61%;
+  --sidebar: 41 34% 91%;
+  --sidebar-foreground: 35 100% 5%;
+  --sidebar-border: 38 18% 86%;
+  --sidebar-primary: 39 90% 41%;
+  --sidebar-primary-foreground: 39 44% 97%;
+  --sidebar-accent: 41 34% 91%;
+  --sidebar-accent-foreground: 35 100% 5%;
+  --sidebar-ring: 39 90% 41%;
 
-  --primary: 39 46% 61%;
-  --primary-foreground: 0 0% 100%;
+  --popover: 39 44% 97%;
+  --popover-foreground: 35 100% 5%;
+  --popover-border: 38 18% 86%;
 
-  --secondary: 30 18% 97%;
-  --secondary-foreground: 0 0% 7%;
+  --primary: 39 90% 41%;          /* #C8860A amber */
+  --primary-foreground: 39 44% 97%;
 
-  --muted: 30 18% 97%;
-  --muted-foreground: 0 0% 40%;
+  --secondary: 41 34% 91%;        /* #F0EBE1 cream dark */
+  --secondary-foreground: 35 100% 5%;
 
-  --accent: 39 46% 61%;
-  --accent-foreground: 0 0% 100%;
+  --muted: 41 34% 91%;
+  --muted-foreground: 11 6% 40%;  /* #6B6260 muted brown */
+
+  --accent: 39 90% 41%;
+  --accent-foreground: 39 44% 97%;
 
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
 
-  --input: 39 46% 61%;
-  --ring: 39 46% 61%;
-  --chart-1: 39 46% 61%;
-  --chart-2: 30 18% 97%;
-  --chart-3: 0 0% 7%;
-  --chart-4: 0 0% 40%;
-  --chart-5: 39 46% 80%;
+  --input: 38 18% 86%;
+  --ring: 39 90% 41%;
+  --chart-1: 39 90% 41%;
+  --chart-2: 41 34% 91%;
+  --chart-3: 35 100% 5%;
+  --chart-4: 11 6% 40%;
+  --chart-5: 39 90% 60%;
 
-  --app-font-sans: 'Inter', sans-serif;
+  --app-font-sans: 'DM Sans', sans-serif;
   --app-font-serif: 'Cormorant Garamond', serif;
   --app-font-mono: Menlo, monospace;
   --radius: 0.5rem; /* 8px */

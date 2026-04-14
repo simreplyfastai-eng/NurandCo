@@ -26,7 +26,7 @@ export default function FAQ() {
         "Booking is quick and easy:",
         "• Use the Book Now button on any treatment page to secure your appointment online.",
         "• Start with a free consultation if you're unsure which treatment is right for you — no charge, no obligation.",
-        "• You can also reach us on Instagram @dermadollaesthetics or via the WhatsApp link in the footer.",
+        "• You can also reach us on Instagram @facebyniamh or via the WhatsApp link in the footer.",
         "A £50 deposit is required to confirm all paid treatment bookings."
       ]
     },
@@ -45,9 +45,9 @@ export default function FAQ() {
     {
       question: "Where is your clinic located?",
       lines: [
-        "Dermadoll Aesthetics is based at:",
-        "Lumi Salon\n1500 Stratford Road\nHall Green, Birmingham\nB28 9ET",
-        "We are conveniently located in Hall Green with parking available nearby. Exact directions will be sent with your booking confirmation."
+        "Face By Niamh operates from two locations:",
+        "Leeds — Private Home Clinic\nWakefield + Laurenanaisbeauty, Horsforth (2 days/month)",
+        "Exact location details are sent with your booking confirmation once your appointment is secured."
       ]
     }
   ];

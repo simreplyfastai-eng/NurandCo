@@ -1,0 +1,57 @@
+Redesign the frontend of this booking system to match the branding of Face By Niamh Aesthetics — an advanced aesthetics clinic based in Leeds/Wakefield run by Niamh, an Advanced Aesthetics Practitioner and Student Nurse.
+
+Brand & Logo
+
+The logo is a stacked typographic lockup — use it in the navbar and footer:
+
+Face          ← italic Cormorant Garamond serif, ~18px
+BY            ← DM Sans, small caps / uppercase, ~9px, amber colour (#C8860A), letter-spacing wide
+Niamh         ← Cormorant Garamond serif, ~22px, bold
+AESTHETICS    ← DM Sans, tiny caps / uppercase, ~8px, muted brown (#6B6260), letter-spacing very wide
+
+Instagram handle: @facebyniamh — show this in the footer.
+Locations: Leeds (private home clinic) and Wakefield + Laurenanaisbeauty, Horsforth (2 days/month).
+
+Colour Palette
+
+Name	Hex
+Cream (background)	#FAF7F2
+Cream Dark (section bg)	#F0EBE1
+Brown (text / buttons)	#1A0F00
+Amber (accent)	#C8860A
+Muted text	#6B6260
+Border	#E2DDD5
+Typography
+
+Serif headings: Cormorant Garamond (Google Fonts) — weights 300, 400, 600, 700; italic variants used for decorative lines
+Body / UI text: DM Sans (Google Fonts) — weights 300, 400, 500
+All h1–h6 default to the serif font; navigation, labels, buttons, and small caps use DM Sans
+Design Style
+
+Warm, luxury aesthetics clinic feel — minimal, clean, editorial
+Cream/off-white backgrounds with dark brown text
+Amber used sparingly as the sole accent (borders, highlights, icons, hover states)
+Generous whitespace, soft borders, no harsh shadows
+Buttons: two styles — outlined (cream bg, dark border) and filled (dark brown bg, cream text)
+Section labels / eyebrows: DM Sans uppercase, wide letter-spacing, amber colour, small size (~10–11px)
+Decorative dividers: thin amber lines or ✦ diamond symbols
+Key copy to use across the booking UI:
+
+Page/app title: Face By Niamh
+Tagline: Natural Aesthetics. Confident Results.
+Sub-tagline: Advanced aesthetics treatments in Leeds and Wakefield — delivered with care, precision, and a commitment to natural results.
+Booking CTA button: Book a Consultation
+Location line: Leeds / Wakefield
+Footer note: Results may vary. Treatments performed by a qualified aesthetics practitioner.
+Contact email: (use placeholder or Niamh's actual email if known)
+Instagram: @facebyniamh
+Services offered (for dropdown / treatment selectors):
+
+Anti-Wrinkle Injections, Dermal Fillers (lips, cheeks, jawline, chin, tear troughs, nose), Skin Boosters (Profhilo, Seventy Hyal), Polynucleotides (PDRN), Medical-Grade Facials, Vitamin Injections, Chemical Peels, Microneedling
+
+Specific UI requests:
+
+The booking confirmation / success screen should say something like: "Thank you for booking with Face By Niamh. Niamh will be in touch shortly to confirm your appointment."
+Keep the booking flow clean and mobile-first — the primary audience is Instagram/TikTok users on their phones
+Any nav links should use: HOME · TREATMENTS · ABOUT · PACKAGES · CONTACT
+Do not add a "memberships" label — use "PACKAGES" instead
