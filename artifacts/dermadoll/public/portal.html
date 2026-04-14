@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;max-width:100%}
-:root{--gold:#C8860A;--bg:#FAF7F2;--sidebar:#FAF7F2;--text:#1C1C1E;--muted:#6B6260;--border:#E2DDD5;--card-shadow:0 2px 8px rgba(0,0,0,.07)}
+:root{--gold:#C9A96E;--bg:#FAF7F2;--sidebar:#FAF7F2;--text:#1C1C1E;--muted:#6B6260;--border:#E2DDD5;--card-shadow:0 2px 8px rgba(0,0,0,.07)}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;max-width:100vw}
 h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 .login-wordmark{font-size:22px !important;letter-spacing:.12em !important}
@@ -24,7 +24,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 .login-sub{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);text-align:center;margin-top:6px;margin-bottom:36px;letter-spacing:.05em}
 .login-label{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.05em;display:block;margin-bottom:6px;text-transform:uppercase}
 .login-input{width:100%;padding:12px 14px;border:1px solid var(--gold);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:box-shadow .2s;margin-bottom:18px}
-.login-input:focus{box-shadow:0 0 0 3px rgba(200,134,10,.18)}
+.login-input:focus{box-shadow:0 0 0 3px rgba(201,169,110,.18)}
 .login-btn{width:100%;padding:14px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;margin-top:4px}
 .login-btn:hover{opacity:.9}
 .login-error{font-size:12px;color:#e53935;text-align:center;margin-top:12px;min-height:18px}
@@ -55,7 +55,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 .sb-footer{padding:16px 12px;border-top:1px solid var(--border)}
 .logout-btn{width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;transition:all .2s}
 .logout-btn:hover{border-color:#e53935;color:#e53935}
-#mobile-toggle{display:none;position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:#C8860A;border:none;border-radius:14px;cursor:pointer;width:56px;height:56px;align-items:center;justify-content:center;flex-direction:column;gap:5px;box-shadow:0 4px 20px rgba(200,134,10,.4)}
+#mobile-toggle{display:none;position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:#C9A96E;border:none;border-radius:14px;cursor:pointer;width:56px;height:56px;align-items:center;justify-content:center;flex-direction:column;gap:5px;box-shadow:0 4px 20px rgba(201,169,110,.4)}
 .mob-line{display:block;width:22px;height:2px;background:#fff;border-radius:2px;transition:transform .2s,opacity .2s}
 #mobile-toggle.open .mob-line:nth-child(1){transform:translateY(7px) rotate(45deg)}
 #mobile-toggle.open .mob-line:nth-child(2){opacity:0;transform:scaleX(0)}
@@ -81,7 +81,7 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
 .kpi-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:var(--card-shadow);position:relative}
 .kpi-card.kpi-link{cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s}
-.kpi-card.kpi-link:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 6px 20px rgba(200,134,10,.15)}
+.kpi-card.kpi-link:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,169,110,.15)}
 .kpi-card.kpi-link::after{content:'→';position:absolute;bottom:16px;right:16px;color:var(--gold);font-size:13px;opacity:0;transition:opacity .2s}
 .kpi-card.kpi-link:hover::after{opacity:1}
 .back-to-dash{display:none;align-items:center;gap:5px;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);transition:border-color .15s,color .15s;white-space:nowrap}
@@ -103,7 +103,7 @@ tr:last-child td{border-bottom:none}
 tr:hover td{background:#FDFBF8}
 .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.04em}
 .pill-green{background:#e8f5e9;color:#2e7d32}
-.pill-gold{background:rgba(200,134,10,.15);color:#7a5510}
+.pill-gold{background:rgba(201,169,110,.15);color:#7a5510}
 .pill-red{background:#fce8e6;color:#c62828}
 .pill-grey{background:#F0F0F0;color:#666}
 .pill-blue{background:#e3f2fd;color:#1565c0}
@@ -127,7 +127,7 @@ tr:hover td{background:#FDFBF8}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px}
 .bar-label{width:110px;text-align:right;color:var(--muted);font-size:11px;flex-shrink:0}
 .bar-track{flex:1;background:#F5F0E8;border-radius:4px;height:20px;overflow:hidden}
-.bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#C8860A,#D4A855);transition:width .6s ease}
+.bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#C9A96E,#D4A855);transition:width .6s ease}
 .bar-val{width:50px;font-size:11px;font-weight:600;color:var(--text)}
 
 /* ── CALENDAR ────────────────────────────────────── */
@@ -144,10 +144,10 @@ tr:hover td{background:#FDFBF8}
 .cal-cell.selected .cal-date{color:#fff}
 .cal-cell.other-month{opacity:.35}
 .cal-cell.sunday{background:#F9F9F9;pointer-events:none}
-.cal-cell.available{background:rgba(200,134,10,.05)}
+.cal-cell.available{background:rgba(201,169,110,.05)}
 .cal-date{font-size:11px;font-weight:600;margin-bottom:4px}
 .cal-cell.today .cal-date{color:var(--gold)}
-.cal-dot{width:6px;height:6px;border-radius:50%;background:#C8860A;position:absolute;bottom:6px;left:50%;transform:translateX(-50%)}
+.cal-dot{width:6px;height:6px;border-radius:50%;background:#C9A96E;position:absolute;bottom:6px;left:50%;transform:translateX(-50%)}
 .cal-cell.selected .cal-dot{display:none}
 .cal-overflow-pill{background:#E8E8E8;color:#666;font-size:9px;border-radius:4px;padding:1px 5px;margin-bottom:2px;display:block}
 .cal-new-mobile{display:none}
@@ -190,7 +190,7 @@ tr:hover td{background:#FDFBF8}
 .avail-mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .avail-mini-day-hdr{text-align:center;font-size:9px;font-weight:700;color:var(--muted);padding:3px 0}
 .avail-mini-cell{height:30px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;border:2px solid transparent;box-sizing:border-box}
-.avail-mini-cell.working{background:rgba(200,134,10,.12);color:var(--text)}
+.avail-mini-cell.working{background:rgba(201,169,110,.12);color:var(--text)}
 .avail-mini-cell.off{background:#F0F0F0;color:#BBBBBB}
 .avail-mini-cell.overridden{border-color:var(--gold)}
 .avail-mini-cell.selected{border-color:#111;box-shadow:0 0 0 1px #111}
@@ -230,20 +230,20 @@ tr:hover td{background:#FDFBF8}
 /* ── CLIENTS LIST ────────────────────────────────── */
 .client-page-hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px;flex-wrap:wrap;gap:10px}
 .cl-count-pill{background:#F0F0F0;color:#888;font-size:11px;padding:2px 8px;border-radius:20px;margin-left:8px;font-family:'DM Sans',sans-serif;font-weight:500;vertical-align:middle}
-.btn-gold-outline{border:1px solid #C8860A;color:#C8860A;background:none;border-radius:20px;padding:6px 16px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
-.btn-gold-outline:hover{background:#C8860A;color:#fff}
+.btn-gold-outline{border:1px solid #C9A96E;color:#C9A96E;background:none;border-radius:20px;padding:6px 16px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-gold-outline:hover{background:#C9A96E;color:#fff}
 .cl-search{width:100%;padding:10px 16px;border:1px solid #E0E0E0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:#111;outline:none;box-sizing:border-box}
 .cl-search::placeholder{color:#AAAAAA}
 .client-list{background:#fff}
 .client-row{display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:64px;cursor:pointer;background:#fff;transition:background .15s;border-bottom:1px solid #F0F0F0}
 .client-row:hover{background:#FAFAFA}
 .client-row:last-child{border-bottom:none}
-.cl-avatar{width:38px;height:38px;border-radius:50%;background:#C8860A;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cl-avatar{width:38px;height:38px;border-radius:50%;background:#C9A96E;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cl-info{flex:1;min-width:0}
 .cl-name{font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cl-meta{font-size:11px;color:#AAAAAA;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cl-stats{text-align:right;flex-shrink:0}
-.cl-spend{font-size:13px;font-weight:700;color:#C8860A}
+.cl-spend{font-size:13px;font-weight:700;color:#C9A96E}
 .cl-status{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:3px;font-size:10px}
 .cl-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
 .cl-chevron{color:#CCC;font-size:16px;flex-shrink:0;margin-left:4px;font-family:'DM Sans',sans-serif}
@@ -264,29 +264,29 @@ tr:hover td{background:#FDFBF8}
 .panel-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:1}
 .panel-close{width:32px;height:32px;border-radius:50%;background:#F5F5F5;border:none;cursor:pointer;color:#888888;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1;transition:background .15s;flex-shrink:0}
 .panel-close:hover{background:#EEEEEE}
-.cp-avatar{width:52px;height:52px;border-radius:50%;background:#C8860A;color:#fff;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.cp-spend-amount{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:#C8860A;line-height:1.1}
+.cp-avatar{width:52px;height:52px;border-radius:50%;background:#C9A96E;color:#fff;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cp-spend-amount{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:#C9A96E;line-height:1.1}
 .cp-spend-meta{font-family:'DM Sans',sans-serif;font-size:12px;color:#888888;margin-top:3px}
 .cp-meta-row{font-size:12px;color:#888888;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.cp-section-label{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#AAAAAA;letter-spacing:1.5px;text-transform:uppercase;margin-top:20px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #C8860A}
+.cp-section-label{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#AAAAAA;letter-spacing:1.5px;text-transform:uppercase;margin-top:20px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #C9A96E}
 .cp-visit-row{background:#FAFAFA;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start}
 .cp-visit-treatment{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#1C1C1E}
 .cp-visit-date{font-family:'DM Sans',sans-serif;font-size:11px;color:#AAAAAA;margin-top:3px}
-.cp-visit-price{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#C8860A;text-align:right}
+.cp-visit-price{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#C9A96E;text-align:right}
 .cp-visit-pill{display:inline-block;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:4px}
 .cp-visit-pill.complete{background:#D8F3DC;color:#2D6A4F}
-.cp-visit-pill.pending{background:#FFF3E0;color:#C8860A}
+.cp-visit-pill.pending{background:#FFF3E0;color:#C9A96E}
 .cp-visit-pill.confirmed{background:#D8F3DC;color:#2D6A4F}
 .cp-visit-pill.cancelled{background:#EEEEEE;color:#888}
 .panel-body{padding:24px}
 
 /* ── TREATMENT ACCORDION ──────────────────────────── */
 .cat-accordion{background:#fff;border:1px solid #F0F0F0;border-radius:10px;margin-bottom:12px;overflow:hidden}
-.cat-accordion.open{border-left:3px solid #C8860A}
+.cat-accordion.open{border-left:3px solid #C9A96E}
 .cat-accordion-header{display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;user-select:none;transition:background .15s;background:#FAFAFA;border-radius:10px}
 .cat-accordion.open .cat-accordion-header{border-radius:10px 10px 0 0}
 .cat-accordion-header:hover{background:#F5F3EF}
-.cat-chevron{font-size:18px;font-weight:300;color:#C8860A;flex-shrink:0;line-height:1;width:20px;text-align:center}
+.cat-chevron{font-size:18px;font-weight:300;color:#C9A96E;flex-shrink:0;line-height:1;width:20px;text-align:center}
 .cat-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;flex:1}
 .cat-count{background:#F3F0EA;color:var(--gold);font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;flex-shrink:0}
 .cat-add-btn{border:1px solid var(--gold);color:var(--gold);background:#fff;border-radius:20px;padding:5px 14px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
@@ -353,12 +353,12 @@ tr:hover td{background:#FDFBF8}
 .fin-table tbody tr:hover td{background:#FAFAFA}
 .fin-pill{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block}
 .fin-pill.complete,.fin-pill.confirmed{background:#D8F3DC;color:#2D6A4F}
-.fin-pill.pending{background:#FFF3E0;color:#C8860A}
+.fin-pill.pending{background:#FFF3E0;color:#C9A96E}
 .fin-pill.cancelled{background:#EEEEEE;color:#888}
-.fin-mark-btn{border:1px solid #C8860A;color:#C8860A;background:#fff;font-family:'DM Sans',sans-serif;font-size:11px;border-radius:20px;padding:4px 12px;cursor:pointer;white-space:nowrap;transition:all .15s}
-.fin-mark-btn:hover{background:#C8860A;color:#fff}
-.fin-mark-circle{width:28px;height:28px;border-radius:50%;border:1px solid #C8860A;color:#C8860A;background:#fff;font-size:14px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;margin:auto;display:flex}
-.fin-mark-circle:hover{background:#C8860A;color:#fff}
+.fin-mark-btn{border:1px solid #C9A96E;color:#C9A96E;background:#fff;font-family:'DM Sans',sans-serif;font-size:11px;border-radius:20px;padding:4px 12px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.fin-mark-btn:hover{background:#C9A96E;color:#fff}
+.fin-mark-circle{width:28px;height:28px;border-radius:50%;border:1px solid #C9A96E;color:#C9A96E;background:#fff;font-size:14px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;margin:auto;display:flex}
+.fin-mark-circle:hover{background:#C9A96E;color:#fff}
 /* ── BOOKINGS FILTER ROW ─────────────────────────── */
 .bk-filter-btn{font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 14px;border-radius:20px;background:#F5F5F5;color:#888;border:none;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;max-width:none}
 .bk-filter-btn.active{background:#111;color:#fff}
@@ -428,7 +428,7 @@ tr:hover td{background:#FDFBF8}
 
 /* ── MEDIA PAGE ──────────────────────────────────── */
 .media-slot{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;display:flex;gap:14px;align-items:flex-start}
-.media-icon{width:40px;height:40px;border-radius:8px;background:rgba(200,134,10,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.media-icon{width:40px;height:40px;border-radius:8px;background:rgba(201,169,110,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .media-slot-title{font-weight:600;font-size:13px;margin-bottom:3px}
 .media-instruction{font-size:11px;color:var(--muted);line-height:1.6}
 .media-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
@@ -509,20 +509,20 @@ tr:hover td{background:#FDFBF8}
 /* ═══════════════════════════════════════════════════════
    FACE BY NIAMH — PORTAL RESKIN
    Matches the public website exactly:
-   Cream #FAF7F2 · Amber #C8860A · Dark Brown #1A0F00
+   Cream #FAF7F2 · Amber #C9A96E · Dark Brown #1A0F00
    Cormorant Garamond serif · DM Sans body
    ═══════════════════════════════════════════════════════ */
 
 /* ── LOGIN SCREEN — dark inverted brand ──────────────────── */
 #login-page{background:#0D0D0F!important}
-.login-card{background:rgba(255,255,255,.04)!important;border:1px solid rgba(200,134,10,.25)!important;border-radius:16px!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:44px 40px!important;max-width:380px!important;box-shadow:0 24px 80px rgba(0,0,0,.5)!important}
-.login-wordmark{font-family:'Cormorant Garamond',serif!important;font-style:italic!important;color:#C8860A!important;font-size:28px!important;font-weight:600!important;letter-spacing:.08em!important}
-.login-sub{color:rgba(200,134,10,.6)!important;font-size:9px!important;letter-spacing:.38em!important;font-style:normal!important}
+.login-card{background:rgba(255,255,255,.04)!important;border:1px solid rgba(201,169,110,.25)!important;border-radius:16px!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:44px 40px!important;max-width:380px!important;box-shadow:0 24px 80px rgba(0,0,0,.5)!important}
+.login-wordmark{font-family:'Cormorant Garamond',serif!important;font-style:italic!important;color:#C9A96E!important;font-size:28px!important;font-weight:600!important;letter-spacing:.08em!important}
+.login-sub{color:rgba(201,169,110,.6)!important;font-size:9px!important;letter-spacing:.38em!important;font-style:normal!important}
 .login-label{color:rgba(250,247,242,.55)!important;font-size:11px!important;font-weight:500!important;letter-spacing:.05em!important}
-.login-input{background:rgba(250,247,242,.06)!important;border:1px solid rgba(200,134,10,.3)!important;color:#FAF7F2!important;border-radius:8px!important;padding:12px 14px!important;font-size:14px!important}
+.login-input{background:rgba(250,247,242,.06)!important;border:1px solid rgba(201,169,110,.3)!important;color:#FAF7F2!important;border-radius:8px!important;padding:12px 14px!important;font-size:14px!important}
 .login-input::placeholder{color:rgba(250,247,242,.3)}
-.login-input:focus{border-color:#C8860A!important;background:rgba(250,247,242,.09)!important;box-shadow:0 0 0 3px rgba(200,134,10,.18)!important;outline:none!important}
-.login-btn{background:#C8860A!important;color:#FAF7F2!important;font-weight:600!important;font-size:13px!important;letter-spacing:.08em!important;text-transform:uppercase!important;border:1px solid #C8860A!important;border-radius:8px!important}
+.login-input:focus{border-color:#C9A96E!important;background:rgba(250,247,242,.09)!important;box-shadow:0 0 0 3px rgba(201,169,110,.18)!important;outline:none!important}
+.login-btn{background:#C9A96E!important;color:#FAF7F2!important;font-weight:600!important;font-size:13px!important;letter-spacing:.08em!important;text-transform:uppercase!important;border:1px solid #C9A96E!important;border-radius:8px!important}
 .login-btn:hover{background:#1C1C1E!important;border-color:#1C1C1E!important;opacity:1!important}
 .login-close{color:rgba(250,247,242,.3)!important}
 .login-close:hover{background:rgba(255,255,255,.08)!important;color:rgba(250,247,242,.7)!important}
@@ -532,21 +532,21 @@ tr:hover td{background:#FDFBF8}
 #sidebar{background:#FAF7F2!important;border-right:1px solid #E2DDD5!important}
 .sb-brand{background:#FAF7F2!important;border-bottom:1px solid #E2DDD5!important;padding:24px 20px 16px!important}
 .sb-wordmark{font-family:'Cormorant Garamond',serif!important;font-style:italic!important;color:#1C1C1E!important;font-size:18px!important;font-weight:600!important;letter-spacing:.04em!important;text-transform:none!important}
-.sb-sub{color:#C8860A!important;font-size:8px!important;letter-spacing:.38em!important;text-transform:uppercase!important;font-style:normal!important}
-.sb-badge{background:rgba(200,134,10,.1)!important;color:#C8860A!important;border:1px solid rgba(200,134,10,.2)!important}
-.sb-section{color:#C8860A!important;font-size:9px!important;font-weight:600!important;letter-spacing:.18em!important;text-transform:uppercase!important;padding:14px 10px 6px!important}
+.sb-sub{color:#C9A96E!important;font-size:8px!important;letter-spacing:.38em!important;text-transform:uppercase!important;font-style:normal!important}
+.sb-badge{background:rgba(201,169,110,.1)!important;color:#C9A96E!important;border:1px solid rgba(201,169,110,.2)!important}
+.sb-section{color:#C9A96E!important;font-size:9px!important;font-weight:600!important;letter-spacing:.18em!important;text-transform:uppercase!important;padding:14px 10px 6px!important}
 .sb-nav{padding:10px 8px!important;background:#FAF7F2!important}
 .sb-item{color:#6B6260!important;font-size:13px!important;font-weight:500!important;letter-spacing:.02em!important;border-radius:6px!important}
-.sb-item:hover{color:#C8860A!important;background:rgba(200,134,10,.06)!important}
-.sb-item.active{background:rgba(200,134,10,.08)!important;color:#C8860A!important;font-weight:600!important;border-left:3px solid #C8860A!important;border-radius:0 6px 6px 0!important}
-.sb-item.active svg{color:#C8860A!important}
+.sb-item:hover{color:#C9A96E!important;background:rgba(201,169,110,.06)!important}
+.sb-item.active{background:rgba(201,169,110,.08)!important;color:#C9A96E!important;font-weight:600!important;border-left:3px solid #C9A96E!important;border-radius:0 6px 6px 0!important}
+.sb-item.active svg{color:#C9A96E!important}
 .sb-item svg{color:#6B6260!important}
-.sb-item:hover svg{color:#C8860A!important}
-.sb-badge-count{background:#C8860A!important;color:#fff!important}
-.sb-item.active .sb-badge-count{background:#C8860A!important;color:#fff!important}
+.sb-item:hover svg{color:#C9A96E!important}
+.sb-badge-count{background:#C9A96E!important;color:#fff!important}
+.sb-item.active .sb-badge-count{background:#C9A96E!important;color:#fff!important}
 .sb-footer{border-top:1px solid #E2DDD5!important;padding:16px 12px!important;background:#FAF7F2!important}
 .logout-btn{color:#6B6260!important;border:1px solid #E2DDD5!important;background:transparent!important}
-.logout-btn:hover{border-color:#C8860A!important;color:#C8860A!important}
+.logout-btn:hover{border-color:#C9A96E!important;color:#C9A96E!important}
 
 /* ── MAIN CONTENT — cream to match website ─────────────── */
 #main-content{background:#FAF7F2!important}
@@ -554,14 +554,14 @@ tr:hover td{background:#FDFBF8}
 .topbar{background:#fff!important;border-bottom:1px solid #E2DDD5!important}
 .topbar-title{font-family:'Cormorant Garamond',serif!important;font-size:26px!important;font-weight:600!important;color:#1C1C1E!important}
 .topbar-search{background:#FAF7F2!important;border:1px solid #E2DDD5!important}
-.topbar-search:focus{border-color:#C8860A!important;box-shadow:0 0 0 3px rgba(200,134,10,.12)!important}
+.topbar-search:focus{border-color:#C9A96E!important;box-shadow:0 0 0 3px rgba(201,169,110,.12)!important}
 
 /* ── KPI / STAT CARDS ────────────────────────────────────── */
-.kpi-card{background:#fff!important;border:1px solid #E2DDD5!important;border-left:4px solid #C8860A!important;border-radius:12px!important;box-shadow:0 2px 8px rgba(26,15,0,.06)!important;overflow:hidden;position:relative}
+.kpi-card{background:#fff!important;border:1px solid #E2DDD5!important;border-left:4px solid #C9A96E!important;border-radius:12px!important;box-shadow:0 2px 8px rgba(26,15,0,.06)!important;overflow:hidden;position:relative}
 .kpi-grid>:nth-child(2){border-left-color:#7c9e87!important}
 .kpi-grid>:nth-child(3){border-left-color:#9b8ec4!important}
 .kpi-label{font-size:10px!important;font-weight:600!important;letter-spacing:1.2px!important;color:#6B6260!important;text-transform:uppercase!important}
-.kpi-value{font-family:'Cormorant Garamond',serif!important;font-size:36px!important;font-weight:700!important;color:#C8860A!important;line-height:1!important}
+.kpi-value{font-family:'Cormorant Garamond',serif!important;font-size:36px!important;font-weight:700!important;color:#C9A96E!important;line-height:1!important}
 .kpi-change{font-size:11px!important;color:#6B6260!important}
 
 /* ── CONTENT CARDS — match website sections ─────────────── */
@@ -571,7 +571,7 @@ tr:hover td{background:#FDFBF8}
 
 /* ── BUTTONS — match website "BOOK NOW" exactly ─────────── */
 .btn-gold{background:#1C1C1E!important;color:#FAF7F2!important;border:1px solid #1C1C1E!important;font-size:11px!important;font-weight:500!important;letter-spacing:.18em!important;text-transform:uppercase!important}
-.btn-gold:hover{background:#C8860A!important;border-color:#C8860A!important;opacity:1!important}
+.btn-gold:hover{background:#C9A96E!important;border-color:#C9A96E!important;opacity:1!important}
 .btn-outline{background:transparent!important;color:#1C1C1E!important;border:1px solid #E2DDD5!important;font-size:11px!important;font-weight:500!important;letter-spacing:.12em!important;text-transform:uppercase!important}
 .btn-outline:hover{background:#1C1C1E!important;color:#FAF7F2!important;border-color:#1C1C1E!important}
 
@@ -583,7 +583,7 @@ tr:hover td{background:#FDFBF8}
 
 /* ── FORM INPUTS ─────────────────────────────────────────── */
 .form-input{border:1px solid #E2DDD5!important;border-radius:8px!important;color:#1C1C1E!important;font-size:13px!important;background:#fff!important}
-.form-input:focus{border-color:#C8860A!important;box-shadow:0 0 0 3px rgba(200,134,10,.12)!important;outline:none!important}
+.form-input:focus{border-color:#C9A96E!important;box-shadow:0 0 0 3px rgba(201,169,110,.12)!important;outline:none!important}
 
 /* ── MODAL ───────────────────────────────────────────────── */
 .modal-box{background:#fff!important;border-radius:14px!important;border:1px solid #E2DDD5!important;box-shadow:0 20px 60px rgba(26,15,0,.12)!important}
@@ -823,9 +823,9 @@ tr:hover td{background:#FDFBF8}
               <div class="avail-mini-grid" id="avail-mini-grid" style="margin-top:2px"></div>
               <div id="avail-override-editor" style="display:none"></div>
               <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5">
-                <span style="display:inline-block;width:10px;height:10px;background:rgba(200,134,10,.2);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Working &nbsp;
+                <span style="display:inline-block;width:10px;height:10px;background:rgba(201,169,110,.2);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Working &nbsp;
                 <span style="display:inline-block;width:10px;height:10px;background:#F0F0F0;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Off &nbsp;
-                <span style="display:inline-block;width:10px;height:10px;background:rgba(200,134,10,.12);border:2px solid var(--gold);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Overridden
+                <span style="display:inline-block;width:10px;height:10px;background:rgba(201,169,110,.12);border:2px solid var(--gold);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Overridden
               </p>
             </div>
           </div>
@@ -852,9 +852,9 @@ tr:hover td{background:#FDFBF8}
     <div id="page-treatments" class="page">
       <div class="topbar" id="treatments-topbar">
         <span class="topbar-title serif">Treatments</span>
-        <span id="treat-save-status" style="font-size:12px;color:#C8860A;opacity:0;transition:opacity 0.3s;margin-left:8px"></span>
+        <span id="treat-save-status" style="font-size:12px;color:#C9A96E;opacity:0;transition:opacity 0.3s;margin-left:8px"></span>
         <input id="treat-search" style="flex:1;max-width:300px;padding:9px 14px;border:1px solid #E0E0E0;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;box-sizing:border-box" placeholder="Search treatments…" oninput="filterTreatments(this.value)"/>
-        <button id="treat-save-btn" onclick="saveAllTreatmentsToCloud()" style="margin-left:8px;padding:8px 18px;background:#C8860A;color:#fff;border:none;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.5px;cursor:pointer;text-transform:uppercase;transition:background 0.2s">Save Changes</button>
+        <button id="treat-save-btn" onclick="saveAllTreatmentsToCloud()" style="margin-left:8px;padding:8px 18px;background:#C9A96E;color:#fff;border:none;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.5px;cursor:pointer;text-transform:uppercase;transition:background 0.2s">Save Changes</button>
       </div>
       <div id="treats-outer" style="padding:20px;overflow-x:hidden;box-sizing:border-box">
         <div id="treatments-table-wrap"></div>
@@ -938,7 +938,7 @@ tr:hover td{background:#FDFBF8}
         <span class="topbar-title serif">Media</span>
         <div style="display:flex;align-items:center;gap:14px">
           <span id="media-autosave-status" style="font-family:'DM Sans',sans-serif;font-size:12px;color:#4CAF50;opacity:0;transition:opacity .4s"></span>
-          <button id="media-save-btn" onclick="publishMediaToCloud()" style="background:#C8860A;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Save to Live Site</button>
+          <button id="media-save-btn" onclick="publishMediaToCloud()" style="background:#C9A96E;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Save to Live Site</button>
         </div>
       </div>
       <div style="padding:28px;max-width:860px;margin:0 auto" id="media-root"></div>
@@ -976,7 +976,7 @@ tr:hover td{background:#FDFBF8}
               <input type="password" id="s-pw-confirm" placeholder="Confirm new password" autocomplete="new-password" style="width:100%;box-sizing:border-box;border:1px solid #E0E0E0;border-radius:8px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;display:block"/>
               <div id="pw-err-confirm" style="font-size:12px;color:#C62828;margin-top:4px;display:none"></div>
             </div>
-            <button onclick="changePassword()" style="background:#C8860A;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;border:none;border-radius:8px;padding:12px 24px;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#B8934A'" onmouseout="this.style.background='#C8860A'">Update Password</button>
+            <button onclick="changePassword()" style="background:#C9A96E;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;border:none;border-radius:8px;padding:12px 24px;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#B8934A'" onmouseout="this.style.background='#C9A96E'">Update Password</button>
           </div>
         </div>
 
@@ -1010,7 +1010,7 @@ tr:hover td{background:#FDFBF8}
               <div style="flex:1;font-size:12px;color:var(--muted);line-height:1.9;background:#FAFAFA;border:1px solid var(--border);border-radius:8px;padding:14px 16px">
                 <strong style="color:var(--text);display:block;margin-bottom:8px">To activate online payments:</strong>
                 <ol style="padding-left:18px;margin:0;list-style:decimal">
-                  <li>Go to <a href="https://stripe.com" target="_blank" style="color:#C8860A">stripe.com</a> and create an account</li>
+                  <li>Go to <a href="https://stripe.com" target="_blank" style="color:#C9A96E">stripe.com</a> and create an account</li>
                   <li>Copy your <strong>Secret Key</strong> and <strong>Publishable Key</strong> from the Stripe dashboard</li>
                   <li>Add both to Replit Secrets as <code style="background:#eee;padding:1px 5px;border-radius:3px">STRIPE_SECRET_KEY</code> and <code style="background:#eee;padding:1px 5px;border-radius:3px">STRIPE_PUBLISHABLE_KEY</code></li>
                   <li>In Stripe, go to <strong>Developers → Webhooks → Add endpoint</strong></li>
@@ -1028,9 +1028,9 @@ tr:hover td{background:#FDFBF8}
           <div class="settings-section-header">Developer</div>
           <div class="settings-body">
             <div class="settings-row"><label>Built by</label><span style="font-size:13px;font-weight:600;color:#111">Simrandeep Sangha</span></div>
-            <div class="settings-row"><label>Email</label><a href="mailto:simrandeepssangha@icloud.com" style="font-size:13px;color:#C8860A;text-decoration:none">simrandeepssangha@icloud.com</a></div>
-            <div class="settings-row"><label>Phone</label><a href="tel:+447495963388" style="font-size:13px;color:#C8860A;text-decoration:none">+44 7495 963388</a></div>
-            <div class="settings-row"><label>Instagram</label><a href="https://instagram.com/aesthetix_systems" target="_blank" style="font-size:13px;color:#C8860A;text-decoration:none">@aesthetix_systems</a></div>
+            <div class="settings-row"><label>Email</label><a href="mailto:simrandeepssangha@icloud.com" style="font-size:13px;color:#C9A96E;text-decoration:none">simrandeepssangha@icloud.com</a></div>
+            <div class="settings-row"><label>Phone</label><a href="tel:+447495963388" style="font-size:13px;color:#C9A96E;text-decoration:none">+44 7495 963388</a></div>
+            <div class="settings-row"><label>Instagram</label><a href="https://instagram.com/aesthetix_systems" target="_blank" style="font-size:13px;color:#C9A96E;text-decoration:none">@aesthetix_systems</a></div>
             <div class="settings-row"><label>Admin portal</label><span style="font-size:13px;color:#888">facebyniamh.co.uk/portal.html</span></div>
             <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
               <button class="btn-gold" onclick="window.open('mailto:simrandeepssangha@icloud.com','_blank')">Contact Developer</button>
@@ -1126,8 +1126,8 @@ tr:hover td{background:#FDFBF8}
       <label class="form-label">Notes</label>
       <textarea class="form-input" id="bm-notes" rows="2" placeholder="Any notes…"></textarea>
     </div>
-    <div id="bm-consultation-fields" style="display:none;background:#F8F4EF;border-radius:10px;padding:14px 16px;border:1px solid rgba(200,134,10,0.25);margin-top:4px">
-      <p style="font-family:'DM Sans',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#C8860A;margin:0 0 12px;font-weight:700">Consultation Details</p>
+    <div id="bm-consultation-fields" style="display:none;background:#F8F4EF;border-radius:10px;padding:14px 16px;border:1px solid rgba(201,169,110,0.25);margin-top:4px">
+      <p style="font-family:'DM Sans',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#C9A96E;margin:0 0 12px;font-weight:700">Consultation Details</p>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Date of Birth</label>
@@ -1922,7 +1922,7 @@ function renderBookings(){
   if(!list.length){body.innerHTML='';table.style.display='none';empty.style.display='block';return;}
   table.style.display='';empty.style.display='none';
   const STATUS_STYLE={
-    Pending:'background:#FFF3E0;color:#C8860A',
+    Pending:'background:#FFF3E0;color:#C9A96E',
     Confirmed:'background:#E8F4FD;color:#1A6EA8',
     Complete:'background:#D8F3DC;color:#2D6A4F',
     Cancelled:'background:#FFE5E5;color:#C1121F',
@@ -1932,7 +1932,7 @@ function renderBookings(){
     const style=STATUS_STYLE[b.status]||'background:#F5F5F5;color:#888';
     const dep=b.depositPaid
       ?`<span style="color:#2D6A4F;font-size:12px;font-weight:600">✓ Paid</span>`
-      :`<span style="color:#C8860A;font-size:12px;font-weight:600">Pending</span>`;
+      :`<span style="color:#C9A96E;font-size:12px;font-weight:600">Pending</span>`;
     const d=new Date(b.date);
     const dateDay=isNaN(d)?b.date:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     const dateYear=isNaN(d)?'':d.getFullYear();
@@ -1943,7 +1943,7 @@ function renderBookings(){
       </td>
       <td class="bk-col-client" style="font-weight:700;color:#111">${b.clientName||'—'}</td>
       <td class="bk-col-treat" style="color:#888888;font-size:12px">${b.treatment||'—'}</td>
-      <td class="bk-col-price" style="font-weight:700;color:#C8860A">${gbp(b.price)}</td>
+      <td class="bk-col-price" style="font-weight:700;color:#C9A96E">${gbp(b.price)}</td>
       <td class="bk-col-dep">${dep}</td>
       <td class="bk-col-status"><span class="bk-status-pill" style="${style}">${b.status}</span></td>
     </tr>`;
@@ -2363,7 +2363,7 @@ function openBookingModal(prefill){
     } else {
       const depAmt=Number(booking.deposit||0);
       depStatus.innerHTML=`<span style="color:#888;font-size:13px">Pending: ${gbp(depAmt)}</span>
-        <button style="padding:5px 14px;border:none;background:#C8860A;color:#fff;border-radius:6px;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markDepositPaidFromModal()">Confirm Deposit Received</button>
+        <button style="padding:5px 14px;border:none;background:#C9A96E;color:#fff;border-radius:6px;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markDepositPaidFromModal()">Confirm Deposit Received</button>
         <span style="display:block;font-size:10px;color:#aaa;margin-top:4px;line-height:1.4">Only use if Stripe payment confirmed but booking shows as pending</span>`;
     }
     // Show balance paid row in edit mode
@@ -2375,7 +2375,7 @@ function openBookingModal(prefill){
     } else {
       const remaining=Math.max(0,Number(booking.price||0)-Number(booking.deposit||0));
       bal.innerHTML=`<span style="color:#888;font-size:13px">Outstanding: ${gbp(remaining)}</span>
-        <button style="padding:5px 14px;border:none;background:#C8860A;color:#fff;border-radius:6px;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markBalancePaidFromModal()">Mark Paid</button>`;
+        <button style="padding:5px 14px;border:none;background:#C9A96E;color:#fff;border-radius:6px;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markBalancePaidFromModal()">Mark Paid</button>`;
     }
     // Set treatment
     const sel=document.getElementById('bm-treatment');
@@ -2601,7 +2601,7 @@ function openClientPanel(id){
     ${c.phone?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">📞</span> ${c.phone}</div>`:''}
     ${c.dateOfBirth?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">🎂</span> DOB: ${c.dateOfBirth}</div>`:''}
     <div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">👤</span> ${c.source||'Direct'} · Joined ${formatDate(c.joinDate)}</div>
-    ${(()=>{const cb=bookings.find(b=>b.category==='Consultation'||b.treatment==='Consultation');return cb&&cb.clientNotes?`<div class="cp-meta-row" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="color:#C8860A;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700">Skin Concerns (Consultation)</span><span style="color:#555;font-size:13px">${cb.clientNotes}</span></div>`:''})()}
+    ${(()=>{const cb=bookings.find(b=>b.category==='Consultation'||b.treatment==='Consultation');return cb&&cb.clientNotes?`<div class="cp-meta-row" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="color:#C9A96E;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700">Skin Concerns (Consultation)</span><span style="color:#555;font-size:13px">${cb.clientNotes}</span></div>`:''})()}
     <div class="cp-section-label">Visit History</div>
     ${bookings.map(b=>`<div class="cp-visit-row">
       <div>
@@ -2616,8 +2616,8 @@ function openClientPanel(id){
     <div class="cp-section-label">Notes</div>
     <textarea id="cp-notes" rows="3" style="width:100%;padding:12px;border:1px solid #E8E8E8;border-radius:8px;font-family:"DM Sans",sans-serif;font-size:13px;resize:vertical;min-height:80px;box-sizing:border-box;outline:none">${c.notes||''}</textarea>
     <div style="display:flex;gap:8px;margin-top:10px">
-      <button style="flex:1;background:#C8860A;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="saveClientNote('${c.id}')">Save Notes</button>
-      <button style="flex:1;background:#fff;color:#C8860A;border:1px solid #C8860A;border-radius:8px;padding:10px 20px;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="openBookingModal('${c.name}')">Book Again</button>
+      <button style="flex:1;background:#C9A96E;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="saveClientNote('${c.id}')">Save Notes</button>
+      <button style="flex:1;background:#fff;color:#C9A96E;border:1px solid #C9A96E;border-radius:8px;padding:10px 20px;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="openBookingModal('${c.name}')">Book Again</button>
     </div>
     <button style="width:100%;margin-top:8px;background:#fff;color:#c62828;border:1px solid #c62828;border-radius:8px;padding:10px 20px;font-family:"DM Sans",sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="deleteClient('${c.id}','${c.name.replace(/'/g,"\\'")}')">Delete Client</button>
   `;
@@ -2932,8 +2932,8 @@ function drawRevenueChart(){
   const pts=cumulative.map((v,i)=>({x:padL+cW*i/Math.max(days-1,1),y:padT+cH*(1-v/maxV)}));
   // Gradient fill
   const grad=ctx.createLinearGradient(0,padT,0,padT+cH);
-  grad.addColorStop(0,'rgba(200,134,10,0.15)');
-  grad.addColorStop(1,'rgba(200,134,10,0)');
+  grad.addColorStop(0,'rgba(201,169,110,0.15)');
+  grad.addColorStop(1,'rgba(201,169,110,0)');
   ctx.beginPath();
   ctx.moveTo(pts[0].x,pts[0].y);
   for(let i=1;i<pts.length;i++){const cpx=(pts[i-1].x+pts[i].x)/2;ctx.bezierCurveTo(cpx,pts[i-1].y,cpx,pts[i].y,pts[i].x,pts[i].y);}
@@ -2942,7 +2942,7 @@ function drawRevenueChart(){
   // Line
   ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
   for(let i=1;i<pts.length;i++){const cpx=(pts[i-1].x+pts[i].x)/2;ctx.bezierCurveTo(cpx,pts[i-1].y,cpx,pts[i].y,pts[i].x,pts[i].y);}
-  ctx.strokeStyle='#C8860A';ctx.lineWidth=2;ctx.stroke();
+  ctx.strokeStyle='#C9A96E';ctx.lineWidth=2;ctx.stroke();
   // X axis labels
   ctx.fillStyle='#AAAAAA';ctx.font='10px Inter';ctx.textAlign='center';
   [1,15,days].forEach(d=>{const x=padL+cW*(d-1)/Math.max(days-1,1);ctx.fillText(d,x,H-6);});
@@ -2976,7 +2976,7 @@ function initChartTooltip(){
     // Draw hover dot
     const ctx=canvas.getContext('2d');
     drawRevenueChart();
-    ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fillStyle='#C8860A';ctx.fill();
+    ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fillStyle='#C9A96E';ctx.fill();
   }
   canvas.addEventListener('mousemove',e=>showTip(e.clientX,e.clientY));
   canvas.addEventListener('mouseleave',()=>{tip.style.display='none';drawRevenueChart();});
@@ -3017,7 +3017,7 @@ async function renderFinance(){
 
     // KPI cards
     document.getElementById('finance-kpi').innerHTML=`
-      <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C8860A">${gbp(summary.totalRevenue)}</div></div>
+      <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C9A96E">${gbp(summary.totalRevenue)}</div></div>
       <div class="fin-kpi-card"><div class="fin-kpi-label">Deposits Collected</div><div class="fin-kpi-value" style="color:#2D6A4F">${gbp(summary.depositsCollected)}</div></div>
       <div class="fin-kpi-card"><div class="fin-kpi-label">Balance Outstanding</div><div class="fin-kpi-value" style="color:#C1121F">${gbp(summary.balanceOutstanding)}</div></div>
     `;
@@ -3052,7 +3052,7 @@ async function renderFinance(){
         <td><span class="date-full">${formatDate(b.date)}</span><span class="date-mob">${formatDateShort(b.date)}</span></td>
         <td style="font-weight:700">${b.clientName}</td>
         <td class="fin-col-treat">${b.treatment}</td>
-        <td style="font-weight:700;color:#C8860A">${gbp(b.price)}</td>
+        <td style="font-weight:700;color:#C9A96E">${gbp(b.price)}</td>
         <td><span class="fin-pill ${pillCls}">${status}</span></td>
         <td style="text-align:center">${actionBtn}</td>
       </tr>`;
@@ -3072,7 +3072,7 @@ async function renderFinance(){
     const deposits=allMonthBookings.reduce((s,b)=>s+Number(b.deposit||0),0);
     const outstanding=allMonthBookings.filter(b=>b.status!=='Complete').reduce((s,b)=>s+(Number(b.price)-Number(b.deposit||0)),0);
     document.getElementById('finance-kpi').innerHTML=`
-      <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C8860A">${gbp(totalRev)}</div></div>
+      <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C9A96E">${gbp(totalRev)}</div></div>
       <div class="fin-kpi-card"><div class="fin-kpi-label">Deposits Collected</div><div class="fin-kpi-value" style="color:#2D6A4F">${gbp(deposits)}</div></div>
       <div class="fin-kpi-card"><div class="fin-kpi-label">Balance Outstanding</div><div class="fin-kpi-value" style="color:#C1121F">${gbp(outstanding)}</div></div>
     `;
@@ -3139,7 +3139,7 @@ function _showMediaSaveStatus(state){
   clearTimeout(el._hideTimer);
   if(state==='syncing'){
     el.textContent='\u2191 Syncing\u2026';
-    el.style.color='#C8860A';
+    el.style.color='#C9A96E';
     el.style.opacity='1';
   }else if(state==='saved'){
     el.textContent='\u2713 Saved to cloud';
@@ -3184,9 +3184,9 @@ const VID_SLOTS=[
 
 function mBtn(label,onclick,ghost){
   const s=ghost
-    ?'border:1px solid #C8860A;color:#C8860A;background:#fff;border-radius:20px;padding:6px 16px;font-family:"DM Sans",sans-serif;font-size:12px;cursor:pointer'
-    :'border:1px solid #C8860A;color:#C8860A;background:#fff;border-radius:20px;padding:5px 14px;font-family:"DM Sans",sans-serif;font-size:12px;cursor:pointer';
-  return`<button style="${s}" onclick="${onclick}" onmouseover="this.style.background='#C8860A';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#C8860A'">${label}</button>`;
+    ?'border:1px solid #C9A96E;color:#C9A96E;background:#fff;border-radius:20px;padding:6px 16px;font-family:"DM Sans",sans-serif;font-size:12px;cursor:pointer'
+    :'border:1px solid #C9A96E;color:#C9A96E;background:#fff;border-radius:20px;padding:5px 14px;font-family:"DM Sans",sans-serif;font-size:12px;cursor:pointer';
+  return`<button style="${s}" onclick="${onclick}" onmouseover="this.style.background='#C9A96E';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#C9A96E'">${label}</button>`;
 }
 
 function mCard(content){
@@ -3214,7 +3214,7 @@ function mSubheader(left,rightHtml){
 }
 
 function mDropZone(id,accept,onchange){
-  return`<div id="dropzone-${id}" style="border:2px dashed #E8E8E8;border-radius:10px;padding:32px;text-align:center;cursor:pointer" onclick="document.getElementById('file-${id}').click()" ondragover="event.preventDefault();this.style.borderColor='#C8860A'" ondragleave="this.style.borderColor='#E8E8E8'" ondrop="handleDrop(event,'${id}','${accept}')">
+  return`<div id="dropzone-${id}" style="border:2px dashed #E8E8E8;border-radius:10px;padding:32px;text-align:center;cursor:pointer" onclick="document.getElementById('file-${id}').click()" ondragover="event.preventDefault();this.style.borderColor='#C9A96E'" ondragleave="this.style.borderColor='#E8E8E8'" ondrop="handleDrop(event,'${id}','${accept}')">
     <div style="font-family:"DM Sans",sans-serif;font-size:13px;color:#BBBBBB">Drag here or click to upload</div>
     <input type="file" id="file-${id}" accept="${accept}" style="display:none" onchange="${onchange}"/>
   </div>`;
@@ -3222,7 +3222,7 @@ function mDropZone(id,accept,onchange){
 
 function livePill(text,green){
   const bg=green?'rgba(0,0,0,0.6)':'rgba(0,0,0,0.6)';
-  const dot=green?'#4CAF50':'#C8860A';
+  const dot=green?'#4CAF50':'#C9A96E';
   return`<span style="background:${bg};color:#fff;font-family:"DM Sans",sans-serif;font-size:11px;font-weight:700;border-radius:6px;padding:5px 10px;display:inline-flex;align-items:center;gap:5px"><span style="color:${dot};font-size:9px">●</span>${text}</span>`;
 }
 
@@ -3455,10 +3455,10 @@ function renderMedia(){
       ?('<img src="'+src+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>'
         +'<div style="position:absolute;top:8px;right:8px">'+livePill('● LIVE',true)+'</div>')
       :('<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">'
-        +'<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C8860A" stroke-width="1.2">'
+        +'<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="1.2">'
         +'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>'
         +'</svg>'
-        +'<span style="font-family:"DM Sans",sans-serif;font-size:12px;color:#C8860A;text-align:center;padding:0 8px">Coming soon</span>'
+        +'<span style="font-family:"DM Sans",sans-serif;font-size:12px;color:#C9A96E;text-align:center;padding:0 8px">Coming soon</span>'
         +'</div>');
     const nameVal=(g.name||'').replace(/"/g,'&quot;');
     const courseVal=(g.course||'').replace(/"/g,'&quot;');
@@ -3492,12 +3492,12 @@ function renderMedia(){
   </div>`;
 
   /* ── DEVELOPER NOTE ── */
-  const devNote='<div style="border-left:4px solid #C8860A;background:#FFFBF4;border-radius:8px;padding:20px;margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">'
+  const devNote='<div style="border-left:4px solid #C9A96E;background:#FFFBF4;border-radius:8px;padding:20px;margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">'
     +'<div style="display:flex;align-items:flex-start;gap:10px;flex:1;min-width:200px">'
-    +'<span style="font-size:16px;line-height:1.4;color:#C8860A;flex-shrink:0">\u26a0</span>'
+    +'<span style="font-size:16px;line-height:1.4;color:#C9A96E;flex-shrink:0">\u26a0</span>'
     +'<span style="font-family:"DM Sans",sans-serif;font-size:13px;color:#888;font-style:italic;line-height:1.6">All media files are stored in cloud storage. For major structural changes contact your developer.</span>'
     +'</div>'
-    +'<a href="mailto:hello@facebyniamh.co.uk" style="background:#C8860A;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;display:inline-block;line-height:1.4">Contact Developer</a>'
+    +'<a href="mailto:hello@facebyniamh.co.uk" style="background:#C9A96E;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:"DM Sans",sans-serif;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;display:inline-block;line-height:1.4">Contact Developer</a>'
     +'</div>';
 
   document.getElementById('media-root').innerHTML=mobileStyles+practCard+heroCard+galleryCard+vidCard+gradCard+devNote;
