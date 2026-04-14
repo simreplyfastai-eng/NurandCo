@@ -46,6 +46,91 @@ export default function CTABanner() {
       {/* Top rule */}
       <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent, rgba(201,169,110,0.4), transparent)" }} />
 
+      {/* Botanical corner ornaments */}
+      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", top: 0, left: 0, width: 200, height: 200, opacity: 0.14, pointerEvents: "none" }}>
+        <g stroke="#C9A96E" strokeWidth="1" fill="none">
+          <path d="M0,200 Q30,130 90,105 Q55,145 0,200Z" />
+          <path d="M0,200 Q60,155 110,125 Q70,160 0,200Z" />
+          <path d="M0,200 Q45,110 80,75" strokeLinecap="round" />
+          <circle cx="90" cy="105" r="3" fill="#C9A96E" />
+          <circle cx="110" cy="125" r="2" fill="#C9A96E" />
+          <circle cx="55" cy="150" r="1.5" fill="#C9A96E" />
+          <path d="M68,92 Q74,80 85,83 Q76,90 68,92Z" />
+          <path d="M55,115 Q61,103 72,107 Q64,114 55,115Z" />
+          <path d="M38,138 Q44,126 55,130 Q47,137 38,138Z" />
+        </g>
+      </svg>
+      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", top: 0, right: 0, width: 200, height: 200, opacity: 0.14, pointerEvents: "none", transform: "scaleX(-1)" }}>
+        <g stroke="#C9A96E" strokeWidth="1" fill="none">
+          <path d="M0,200 Q30,130 90,105 Q55,145 0,200Z" />
+          <path d="M0,200 Q60,155 110,125 Q70,160 0,200Z" />
+          <path d="M0,200 Q45,110 80,75" strokeLinecap="round" />
+          <circle cx="90" cy="105" r="3" fill="#C9A96E" />
+          <circle cx="110" cy="125" r="2" fill="#C9A96E" />
+          <circle cx="55" cy="150" r="1.5" fill="#C9A96E" />
+          <path d="M68,92 Q74,80 85,83 Q76,90 68,92Z" />
+          <path d="M55,115 Q61,103 72,107 Q64,114 55,115Z" />
+        </g>
+      </svg>
+      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", bottom: 0, left: 0, width: 160, height: 160, opacity: 0.1, pointerEvents: "none", transform: "rotate(90deg)" }}>
+        <g stroke="#C9A96E" strokeWidth="1" fill="none">
+          <path d="M0,200 Q30,130 90,105 Q55,145 0,200Z" />
+          <path d="M0,200 Q60,155 110,125 Q70,160 0,200Z" />
+          <circle cx="90" cy="105" r="2.5" fill="#C9A96E" />
+        </g>
+      </svg>
+      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", bottom: 0, right: 0, width: 160, height: 160, opacity: 0.1, pointerEvents: "none", transform: "rotate(90deg) scaleX(-1)" }}>
+        <g stroke="#C9A96E" strokeWidth="1" fill="none">
+          <path d="M0,200 Q30,130 90,105 Q55,145 0,200Z" />
+          <path d="M0,200 Q60,155 110,125 Q70,160 0,200Z" />
+          <circle cx="90" cy="105" r="2.5" fill="#C9A96E" />
+        </g>
+      </svg>
+
+      {/* Scattered sparkles */}
+      {[
+        { top: "15%", left: "8%", size: 10, opacity: 0.22 },
+        { top: "60%", left: "5%", size: 7, opacity: 0.16 },
+        { top: "80%", left: "18%", size: 9, opacity: 0.18 },
+        { top: "20%", right: "7%", size: 8, opacity: 0.2 },
+        { top: "55%", right: "6%", size: 11, opacity: 0.16 },
+        { top: "75%", right: "20%", size: 6, opacity: 0.14 },
+      ].map((s, i) => (
+        <div key={i} aria-hidden="true" style={{
+          position: "absolute",
+          top: s.top,
+          left: (s as any).left,
+          right: (s as any).right,
+          opacity: s.opacity,
+          pointerEvents: "none",
+          fontFamily: "'Cormorant Garamond', serif",
+          color: "#C9A96E",
+          fontSize: s.size * 1.5,
+          lineHeight: 1,
+          userSelect: "none",
+        }}>✦</div>
+      ))}
+
+      {/* Delicate ring ornaments on sides */}
+      <svg aria-hidden="true" viewBox="0 0 60 60" style={{ position: "absolute", top: "35%", left: "3%", width: 44, height: 44, opacity: 0.13, pointerEvents: "none" }}>
+        <circle cx="30" cy="30" r="26" stroke="#C9A96E" strokeWidth="0.8" fill="none" />
+        <circle cx="30" cy="30" r="18" stroke="#C9A96E" strokeWidth="0.5" fill="none" />
+        <circle cx="30" cy="30" r="2" fill="#C9A96E" />
+        <line x1="30" y1="4" x2="30" y2="12" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="30" y1="48" x2="30" y2="56" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="4" y1="30" x2="12" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="48" y1="30" x2="56" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
+      </svg>
+      <svg aria-hidden="true" viewBox="0 0 60 60" style={{ position: "absolute", top: "35%", right: "3%", width: 44, height: 44, opacity: 0.13, pointerEvents: "none" }}>
+        <circle cx="30" cy="30" r="26" stroke="#C9A96E" strokeWidth="0.8" fill="none" />
+        <circle cx="30" cy="30" r="18" stroke="#C9A96E" strokeWidth="0.5" fill="none" />
+        <circle cx="30" cy="30" r="2" fill="#C9A96E" />
+        <line x1="30" y1="4" x2="30" y2="12" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="30" y1="48" x2="30" y2="56" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="4" y1="30" x2="12" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="48" y1="30" x2="56" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
+      </svg>
+
       <motion.div
         initial={{ opacity: 0, y: 28 }}
         whileInView={{ opacity: 1, y: 0 }}

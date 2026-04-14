@@ -105,6 +105,101 @@ export default function Footer() {
         }}
       />
 
+      {/* Decorative botanical corners */}
+      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", top: 20, left: 20, width: 180, height: 180, opacity: 0.13, pointerEvents: "none" }}>
+        <g stroke="#C9A96E" strokeWidth="1" fill="none">
+          <path d="M10,180 Q30,120 80,100 Q50,140 10,180Z" />
+          <path d="M10,180 Q60,150 100,120 Q70,155 10,180Z" />
+          <path d="M10,180 Q40,110 70,80" strokeLinecap="round" />
+          <circle cx="80" cy="100" r="3" fill="#C9A96E" />
+          <circle cx="100" cy="120" r="2" fill="#C9A96E" />
+          <circle cx="50" cy="145" r="1.5" fill="#C9A96E" />
+          <path d="M60,90 Q65,80 75,82 Q68,88 60,90Z" />
+          <path d="M55,110 Q60,100 70,103 Q63,109 55,110Z" />
+          <path d="M40,130 Q45,120 55,123 Q48,129 40,130Z" />
+        </g>
+      </svg>
+      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", top: 20, right: 20, width: 180, height: 180, opacity: 0.13, pointerEvents: "none", transform: "scaleX(-1)" }}>
+        <g stroke="#C9A96E" strokeWidth="1" fill="none">
+          <path d="M10,180 Q30,120 80,100 Q50,140 10,180Z" />
+          <path d="M10,180 Q60,150 100,120 Q70,155 10,180Z" />
+          <path d="M10,180 Q40,110 70,80" strokeLinecap="round" />
+          <circle cx="80" cy="100" r="3" fill="#C9A96E" />
+          <circle cx="100" cy="120" r="2" fill="#C9A96E" />
+          <circle cx="50" cy="145" r="1.5" fill="#C9A96E" />
+          <path d="M60,90 Q65,80 75,82 Q68,88 60,90Z" />
+          <path d="M55,110 Q60,100 70,103 Q63,109 55,110Z" />
+          <path d="M40,130 Q45,120 55,123 Q48,129 40,130Z" />
+        </g>
+      </svg>
+      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", bottom: 20, left: 20, width: 160, height: 160, opacity: 0.1, pointerEvents: "none", transform: "rotate(180deg) scaleX(-1)" }}>
+        <g stroke="#C9A96E" strokeWidth="1" fill="none">
+          <path d="M10,180 Q30,120 80,100 Q50,140 10,180Z" />
+          <path d="M10,180 Q60,150 100,120 Q70,155 10,180Z" />
+          <path d="M10,180 Q40,110 70,80" strokeLinecap="round" />
+          <circle cx="80" cy="100" r="2.5" fill="#C9A96E" />
+          <circle cx="50" cy="145" r="1.5" fill="#C9A96E" />
+        </g>
+      </svg>
+      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", bottom: 20, right: 20, width: 160, height: 160, opacity: 0.1, pointerEvents: "none", transform: "rotate(180deg)" }}>
+        <g stroke="#C9A96E" strokeWidth="1" fill="none">
+          <path d="M10,180 Q30,120 80,100 Q50,140 10,180Z" />
+          <path d="M10,180 Q60,150 100,120 Q70,155 10,180Z" />
+          <path d="M10,180 Q40,110 70,80" strokeLinecap="round" />
+          <circle cx="80" cy="100" r="2.5" fill="#C9A96E" />
+          <circle cx="50" cy="145" r="1.5" fill="#C9A96E" />
+        </g>
+      </svg>
+
+      {/* Scattered sparkles */}
+      {[
+        { top: "12%", left: "22%", size: 10, opacity: 0.25 },
+        { top: "28%", left: "8%", size: 7, opacity: 0.18 },
+        { top: "55%", left: "15%", size: 12, opacity: 0.2 },
+        { top: "75%", left: "28%", size: 6, opacity: 0.15 },
+        { top: "18%", right: "18%", size: 9, opacity: 0.22 },
+        { top: "42%", right: "10%", size: 13, opacity: 0.18 },
+        { top: "68%", right: "22%", size: 7, opacity: 0.2 },
+        { top: "85%", right: "35%", size: 5, opacity: 0.14 },
+        { top: "38%", left: "46%", size: 8, opacity: 0.12 },
+      ].map((s, i) => (
+        <div key={i} aria-hidden="true" style={{
+          position: "absolute",
+          top: s.top,
+          left: (s as any).left,
+          right: (s as any).right,
+          width: s.size,
+          height: s.size,
+          opacity: s.opacity,
+          pointerEvents: "none",
+          fontFamily: "'Cormorant Garamond', serif",
+          color: "#C9A96E",
+          fontSize: s.size * 1.4,
+          lineHeight: 1,
+          userSelect: "none",
+        }}>✦</div>
+      ))}
+
+      {/* Delicate ring ornaments */}
+      <svg aria-hidden="true" viewBox="0 0 60 60" style={{ position: "absolute", top: "30%", left: "5%", width: 48, height: 48, opacity: 0.12, pointerEvents: "none" }}>
+        <circle cx="30" cy="30" r="26" stroke="#C9A96E" strokeWidth="0.8" fill="none" />
+        <circle cx="30" cy="30" r="20" stroke="#C9A96E" strokeWidth="0.5" fill="none" />
+        <circle cx="30" cy="30" r="2" fill="#C9A96E" />
+        <line x1="30" y1="4" x2="30" y2="10" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="30" y1="50" x2="30" y2="56" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="4" y1="30" x2="10" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="50" y1="30" x2="56" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
+      </svg>
+      <svg aria-hidden="true" viewBox="0 0 60 60" style={{ position: "absolute", bottom: "25%", right: "6%", width: 40, height: 40, opacity: 0.11, pointerEvents: "none" }}>
+        <circle cx="30" cy="30" r="26" stroke="#C9A96E" strokeWidth="0.8" fill="none" />
+        <circle cx="30" cy="30" r="20" stroke="#C9A96E" strokeWidth="0.5" fill="none" />
+        <circle cx="30" cy="30" r="2" fill="#C9A96E" />
+        <line x1="30" y1="4" x2="30" y2="10" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="30" y1="50" x2="30" y2="56" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="4" y1="30" x2="10" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
+        <line x1="50" y1="30" x2="56" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
+      </svg>
+
       {/* Top rule */}
       <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(201,169,110,0.5), transparent)" }} />
 
