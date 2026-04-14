@@ -1,3 +1,23 @@
+/*
+ * ═══════════════════════════════════════════════════════
+ * FACE BY NIAMH — AESTHETICS BOOKING SYSTEM (API SERVER)
+ * ═══════════════════════════════════════════════════════
+ *
+ * CLIENT:  Face By Niamh Aesthetics · Leeds & Wakefield
+ * CONTACT: hello@facebyniamh.co.uk · @facebyniamh
+ *
+ * DATA ISOLATION — this project is 100% separate from
+ * Dermadoll Aesthetics and any other client project:
+ *   Database:       This project's PostgreSQL (heliumdb)
+ *   KV Store:       fbn_* keys only (per-project scope)
+ *   Object Storage: This project's bucket (per-project)
+ *   Secrets:        This project's Secrets only
+ *   Auth tokens:    SESSION_SECRET unique to this project
+ *   LocalStorage:   fbn_* keys in portal.html
+ *
+ * Changes here DO NOT affect any other project.
+ * ═══════════════════════════════════════════════════════
+ */
 import app from "./app";
 import { logger } from "./lib/logger";
 import { ensureTables } from "@workspace/db";
