@@ -105,11 +105,9 @@ export default function Home() {
 
       {/* 1. Hero */}
       <Hero />
-      <SectionDivider />
 
       {/* 2. Trust Ticker */}
       <TrustTicker />
-      <SectionDivider />
 
       {/* 3. About */}
       <About />
