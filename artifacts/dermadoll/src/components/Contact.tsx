@@ -39,8 +39,64 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" style={{ background: "#FAF7F2", padding: "100px 0" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
+    <section id="contact" style={{ background: "#FAF7F2", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+
+      {/* Decorative background layer */}
+      {/* Large faint "@" watermark — right side */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: "50%", right: "-40px", transform: "translateY(-50%)",
+        fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 700,
+        fontSize: "clamp(180px, 26vw, 300px)", color: "rgba(200,134,10,0.05)",
+        lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-0.04em",
+      }}>@</div>
+
+      {/* Radial amber glow — top left */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: -60, left: -60,
+        width: 380, height: 380,
+        background: "radial-gradient(circle, rgba(200,134,10,0.08) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+
+      {/* Radial amber glow — bottom right */}
+      <div aria-hidden="true" style={{
+        position: "absolute", bottom: -60, right: 80,
+        width: 300, height: 300,
+        background: "radial-gradient(circle, rgba(200,134,10,0.06) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+
+      {/* Scattered ✦ ornaments */}
+      {[
+        { top: "8%",  left: "3%",   size: "1rem",   opacity: 0.13 },
+        { top: "40%", left: "1%",   size: "0.7rem",  opacity: 0.09 },
+        { top: "78%", left: "5%",   size: "0.85rem", opacity: 0.10 },
+        { top: "12%", right: "6%",  size: "0.75rem", opacity: 0.09 },
+        { top: "65%", right: "4%",  size: "1.1rem",  opacity: 0.08 },
+      ].map((pos, i) => (
+        <div key={i} aria-hidden="true" style={{
+          position: "absolute", ...(pos as any),
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: pos.size, color: "#C8860A", opacity: pos.opacity,
+          pointerEvents: "none", userSelect: "none",
+        }}>✦</div>
+      ))}
+
+      {/* Thin horizontal rule lines */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: 48, left: "50%", transform: "translateX(-50%)",
+        width: "60%", height: 1,
+        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.16), transparent)",
+        pointerEvents: "none",
+      }} />
+      <div aria-hidden="true" style={{
+        position: "absolute", bottom: 48, left: "50%", transform: "translateX(-50%)",
+        width: "60%", height: 1,
+        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.16), transparent)",
+        pointerEvents: "none",
+      }} />
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }} className="contact-grid">
           <style>{`
