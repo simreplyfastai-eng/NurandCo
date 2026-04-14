@@ -27,7 +27,7 @@ router.get("/availability", async (_req, res) => {
   try {
     const result = await pool.query(
       "SELECT value FROM portal_kv WHERE key = $1",
-      ["dd_availability"],
+      ['fbn_availability'],
     );
     if (result.rows.length === 0) {
       return res.json(AVAIL_DEFAULT);

@@ -5,50 +5,51 @@ import { requireAuth } from "../lib/auth";
 const router = Router();
 
 const BUILT_IN_TREATMENTS = [
-  {cat:'BOTOX',name:'Botox 1 Area',duration:15,price:100},
-  {cat:'BOTOX',name:'Botox 2 Areas',duration:15,price:140},
-  {cat:'BOTOX',name:'Botox 3 Areas',duration:15,price:180},
-  {cat:'BOTOX',name:'Botox 4 Areas',duration:15,price:210},
-  {cat:'BOTOX',name:'Masseter Botox',duration:15,price:200},
-  {cat:'BOTOX',name:'Nefertiti Lift Botox (Neck)',duration:30,price:220},
-  {cat:'BOTOX',name:'Chin Botox (Mentalis Muscle)',duration:30,price:80},
-  {cat:'BOTOX',name:'Nose Slimming Botox',duration:30,price:80},
-  {cat:'BOTOX',name:'Gummy Smile / Lip Flip Botox',duration:30,price:80},
-  {cat:'BOTOX',name:'Hyperhidrosis (Underarm) Botox',duration:30,price:220},
-  {cat:'BOTOX',name:'Botox Topup',duration:15,price:20},
+  // Anti-Wrinkle
+  {cat:'BOTOX',name:'Anti-Wrinkle — 1 Area',duration:30,price:140},
+  {cat:'BOTOX',name:'Anti-Wrinkle — 2 Areas',duration:30,price:200},
+  {cat:'BOTOX',name:'Anti-Wrinkle — 3 Areas',duration:45,price:230},
+  {cat:'BOTOX',name:'Brow Lift',duration:30,price:150},
+  {cat:'BOTOX',name:'Masseter Slimming Tox',duration:30,price:150},
+  {cat:'BOTOX',name:'Nose Tip Lift Tox',duration:30,price:140},
+  {cat:'BOTOX',name:'DAO Tox',duration:30,price:140},
+  {cat:'BOTOX',name:'Dimple Chin Tox',duration:30,price:150},
+  {cat:'BOTOX',name:'Nose Slimming Tox',duration:30,price:140},
+  {cat:'BOTOX',name:'2 Week Review / Top-up',duration:15,price:10},
+  // Dermal Filler
   {cat:'FILLER',name:'0.5ml Lip Filler',duration:30,price:100},
-  {cat:'FILLER',name:'0.7ml Lip Filler',duration:45,price:120},
-  {cat:'FILLER',name:'1.1ml Lip Filler',duration:45,price:150},
-  {cat:'FILLER',name:'1.1ml Nasal Labials',duration:30,price:150},
-  {cat:'FILLER',name:'1.1ml Cheek Filler',duration:30,price:150},
-  {cat:'FILLER',name:'1.5ml Cheek Filler',duration:45,price:200},
-  {cat:'FILLER',name:'2.2ml Cheek Filler',duration:45,price:250},
-  {cat:'FILLER',name:'1.1ml Chin Filler',duration:45,price:150},
-  {cat:'FILLER',name:'2.2ml Jawline Filler',duration:60,price:250},
-  {cat:'FILLER',name:'Liquid Rhinoplasty',duration:45,price:180},
-  {cat:'FILLER',name:'Teartrough Filler',duration:45,price:180},
-  {cat:'FILLER',name:'2.2ml Facial Contouring',duration:45,price:230},
-  {cat:'FILLER',name:'3.3ml Facial Contouring',duration:60,price:330},
-  {cat:'FILLER',name:'4.4ml Facial Contouring',duration:60,price:440},
-  {cat:'FACIALS',name:'Glass Skin Facial',duration:60,price:80},
-  {cat:'FACIALS',name:'Glass Skin Facial + Microneedling',duration:60,price:120},
-  {cat:'SKINBOOST',name:'1x Skin Booster',duration:30,price:150},
-  {cat:'SKINBOOST',name:'3x Lumi Pro Skin Booster',duration:30,price:350},
-  {cat:'SKINBOOST',name:'Plenhyage XL Strong',duration:30,price:200},
-  {cat:'SKINBOOST',name:'Plenhyage XL Strong 2 Treatments',duration:30,price:350},
-  {cat:'SKINBOOST',name:'Vitarin I - Eye Polynucleotide',duration:30,price:170},
-  {cat:'SKINBOOST',name:'Vitarin I - Eye Polynucleotide x2',duration:30,price:300},
-  {cat:'SKINBOOST',name:'B12 Injection',duration:15,price:30},
-  {cat:'FATDISSOLVE',name:'Lemon Bottle Small Area',duration:30,price:70},
-  {cat:'FATDISSOLVE',name:'Lemon Bottle Large Area',duration:30,price:100},
-  {cat:'INJECTABLES',name:'Hyaluronidase - Dissolving',duration:30,price:100},
-  {cat:'INJECTABLES',name:'Hayfever Relief',duration:15,price:80},
-  {cat:'BUNDLES',name:'Botox 3 Areas + 1.1ml Dermal Filler',duration:45,price:320},
-  {cat:'BUNDLES',name:'Botox 3 Areas + 1.1ml Lips + Lumi Pro',duration:60,price:450},
-  {cat:'BUNDLES',name:'Botox 3 Areas + 1x Lumi Pro Skin Booster',duration:45,price:300},
-  {cat:'BUNDLES',name:'Botox 3 Areas + 1x Plenhyage XL',duration:45,price:350},
-  {cat:'BUNDLES',name:'Botox 3 Areas + Vitarin I Eye',duration:45,price:300},
-  {cat:'CONSULT',name:'Consultation',duration:15,price:25},
+  {cat:'FILLER',name:'0.7ml Lip Filler',duration:30,price:110},
+  {cat:'FILLER',name:'1ml Lip Filler',duration:45,price:130},
+  {cat:'FILLER',name:'Lip Filler Dissolving',duration:30,price:95},
+  {cat:'FILLER',name:'Lip Filler Dissolve & 1ml Refill',duration:60,price:190},
+  {cat:'FILLER',name:'1ml Cheek Contour',duration:45,price:130},
+  {cat:'FILLER',name:'Jaw Filler',duration:60,price:130},
+  {cat:'FILLER',name:'Chin Augmentation',duration:45,price:110},
+  {cat:'FILLER',name:'Non-Surgical Rhinoplasty',duration:45,price:130},
+  {cat:'FILLER',name:'Pixie Tip Lift',duration:30,price:80},
+  {cat:'FILLER',name:'Tear Trough Filler',duration:45,price:130},
+  {cat:'FILLER',name:'Nasolabial Folds',duration:45,price:110},
+  // Packages
+  {cat:'BUNDLES',name:'Facial Slimming Package',duration:60,price:315},
+  {cat:'BUNDLES',name:'Summer Glow Up',duration:60,price:320},
+  {cat:'BUNDLES',name:'2ml Package',duration:60,price:220},
+  {cat:'BUNDLES',name:'3ml Package',duration:75,price:295},
+  {cat:'BUNDLES',name:'4ml Package',duration:90,price:395},
+  {cat:'BUNDLES',name:'5ml Package',duration:105,price:495},
+  // Skin Boosters
+  {cat:'SKINBOOST',name:'Profhilo',duration:45,price:140},
+  {cat:'SKINBOOST',name:'Profhilo x4',duration:45,price:450},
+  {cat:'SKINBOOST',name:'Seventy Hyal Skin Booster',duration:45,price:120},
+  {cat:'SKINBOOST',name:'Jalupro Skin Booster',duration:45,price:100},
+  {cat:'SKINBOOST',name:'Lumi Eyes',duration:30,price:120},
+  {cat:'SKINBOOST',name:'Polynucleotides (PDRN)',duration:45,price:120},
+  // Medical Facials
+  {cat:'FACIALS',name:'Dermaplaning',duration:45,price:30},
+  {cat:'FACIALS',name:'Microneedling with Salmon DNA',duration:60,price:80},
+  // Vitamin Injections
+  {cat:'INJECTABLES',name:'B12 Injection',duration:15,price:25},
+  // Consultation
+  {cat:'CONSULT',name:'Consultation',duration:30,price:10},
 ];
 
 const CAT_LABELS: Record<string, string> = {
@@ -61,9 +62,9 @@ const CAT_LABELS: Record<string, string> = {
 const CAT_ORDER = ['BOTOX','FILLER','FACIALS','SKINBOOST','FATDISSOLVE','INJECTABLES','BUNDLES','CONSULT'];
 
 const ALLOWED_KV_KEYS = new Set([
-  'dd_settings','dd_custom_treats','dd_custom_cats','dd_cat_states',
-  'dd_treatment_overrides','dd_video_labels','dd_availability',
-  'dd_initialized','dd_media','admin_password_override',
+  'fbn_settings','fbn_custom_treats','fbn_custom_cats','fbn_cat_states',
+  'fbn_treatment_overrides','fbn_video_labels','fbn_availability',
+  'fbn_initialized','fbn_media','admin_password_override',
 ]);
 
 function formatDuration(mins: number): string {
@@ -73,9 +74,9 @@ function formatDuration(mins: number): string {
 }
 
 function buildTreatmentCategories(kvData: Record<string, any>) {
-  const customTreats: any[] = Array.isArray(kvData['dd_custom_treats']) ? kvData['dd_custom_treats'] : [];
-  const customCats: any[] = Array.isArray(kvData['dd_custom_cats']) ? kvData['dd_custom_cats'] : [];
-  const overrides: Record<string, any> = (kvData['dd_treatment_overrides'] && typeof kvData['dd_treatment_overrides'] === 'object' && !Array.isArray(kvData['dd_treatment_overrides'])) ? kvData['dd_treatment_overrides'] : {};
+  const customTreats: any[] = Array.isArray(kvData['fbn_custom_treats']) ? kvData['fbn_custom_treats'] : [];
+  const customCats: any[] = Array.isArray(kvData['fbn_custom_cats']) ? kvData['fbn_custom_cats'] : [];
+  const overrides: Record<string, any> = (kvData['fbn_treatment_overrides'] && typeof kvData['fbn_treatment_overrides'] === 'object' && !Array.isArray(kvData['fbn_treatment_overrides'])) ? kvData['fbn_treatment_overrides'] : {};
 
   const validCustomTreats = customTreats.filter(t =>
     t && typeof t === 'object' && typeof t.name === 'string' && t.name.trim() &&
@@ -132,7 +133,7 @@ router.get("/treatments", async (_req, res) => {
 
     const result = await pool.query(
       "SELECT key, value FROM portal_kv WHERE key = ANY($1)",
-      [['dd_custom_treats', 'dd_custom_cats', 'dd_treatment_overrides']],
+      [['fbn_custom_treats', 'fbn_custom_cats', 'fbn_treatment_overrides']],
     );
     const kvData: Record<string, any> = {};
     for (const row of result.rows) {
@@ -215,7 +216,7 @@ router.put("/portal/store/:key", async (req, res) => {
        DO UPDATE SET value = $2::jsonb, updated_at = NOW()`,
       [key, JSON.stringify(value)],
     );
-    if (key === 'dd_custom_treats' || key === 'dd_custom_cats' || key === 'dd_treatment_overrides') {
+    if (key === 'fbn_custom_treats' || key === 'fbn_custom_cats' || key === 'fbn_treatment_overrides') {
       treatmentsCache = null;
     }
     return res.json({ ok: true });

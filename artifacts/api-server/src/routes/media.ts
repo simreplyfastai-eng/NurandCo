@@ -27,7 +27,7 @@ function convertMap(map: Record<string, string> | undefined): Record<string, str
 router.get("/media/config", async (req, res) => {
   try {
     const result = await pool.query(
-      "SELECT value FROM portal_kv WHERE key = 'dd_media'"
+      "SELECT value FROM portal_kv WHERE key = 'fbn_media'"
     );
     const data: Record<string, unknown> =
       result.rows.length > 0 ? (result.rows[0].value as Record<string, unknown>) : {};

@@ -1,0 +1,274 @@
+This project was built for Dermadoll 
+Aesthetics. Rebrand and rewire it 
+completely for a new client: Face By Niamh.
+
+NEW CLIENT DETAILS:
+Business name: Face By Niamh
+Owner: Niamh
+Location: Leeds / Wakefield (keep as is)
+Instagram: @facebyniamh
+WhatsApp: [PLACEHOLDER - Niamh to provide]
+Email: [PLACEHOLDER - Niamh to provide]
+Domain: [PLACEHOLDER - Niamh to provide]
+Specialty: Facial aesthetics clinic
+
+DO NOT change:
+- Leeds / Wakefield location
+- The site design or layout
+- Any working functionality
+
+===============================================================
+STEP 1 — FIND AND REPLACE ALL DERMADOLL REFERENCES
+===============================================================
+
+Run full search across ALL files and replace:
+
+"Dermadoll Aesthetics" → "Face By Niamh"
+"DermaDoll Aesthetics" → "Face By Niamh"
+"Dermadoll" → "Face By Niamh"
+"DermaDoll" → "Face By Niamh"
+"dermadoll" → "facebyniamh"
+"Permadoll Aesthetics" → "Face By Niamh"
+"Permadoll" → "Face By Niamh"
+"permadoll" → "facebyniamh"
+"@dermadollaesthetics" → "@facebyniamh"
+"@DermaDollAesthetics" → "@facebyniamh"
+"@permadoll" → "@facebyniamh"
+"dermadoll-aesthetics.co.uk" → "[DOMAIN_TBC]"
+"permadoll-aesthetics.co.uk" → "[DOMAIN_TBC]"
+
+Check every file:
+- index.html
+- portal.html  
+- server.js
+- All .js files
+- All email templates
+- All config/settings defaults
+- package.json
+- Any README
+
+Confirm with:
+grep -r "dermadoll\|DermaDoll\|permadoll\|Permadoll" \
+  --include="*.html" --include="*.js" \
+  --include="*.css" --include="*.json" \
+  --exclude-dir=node_modules . 2>/dev/null
+
+Zero results = done ✓
+
+===============================================================
+STEP 2 — CLEAR ALL DERMADOLL DATA
+===============================================================
+
+Wipe all existing business data so 
+Niamh starts completely fresh.
+Keep the schema — delete the data only.
+
+DELETE FROM bookings;
+DELETE FROM clients;
+DELETE FROM treatments;
+DELETE FROM blocked_slots;
+
+-- Reset ID sequences
+ALTER SEQUENCE IF EXISTS bookings_id_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS clients_id_seq RESTART WITH 1;
+ALTER SEQUENCE IF EXISTS treatments_id_seq RESTART WITH 1;
+
+-- Clear CloudStore / portal_kv:
+-- Delete keys: dd_media, portal_kv, 
+-- any dermadoll_ prefixed keys
+
+-- Rename CloudStore keys going forward:
+-- dd_media → fbn_media
+-- dd_ prefix → fbn_ prefix
+
+===============================================================
+STEP 3 — UPDATE DEFAULT SETTINGS
+===============================================================
+
+Update every settings default in 
+server.js and portal config:
+
+const DEFAULT_SETTINGS = {
+  businessName: 'Face By Niamh',
+  ownerName: 'Niamh',
+  email: 'hello@facebyniamh.co.uk',
+  phone: '',
+  whatsapp: '',
+  instagram: '@facebyniamh',
+  location: 'Leeds / Wakefield',
+  depositPercentage: 50,
+  cancellationHours: 24,
+  bufferTime: 15,
+  timezone: 'Europe/London',
+  workingHours: {
+    monday: { open: '09:00', close: '17:00', active: true },
+    tuesday: { open: '09:00', close: '17:00', active: true },
+    wednesday: { open: '09:00', close: '17:00', active: true },
+    thursday: { open: '09:00', close: '17:00', active: true },
+    friday: { open: '09:00', close: '17:00', active: true },
+    saturday: { open: '09:00', close: '15:00', active: true },
+    sunday: { open: '', close: '', active: false },
+  },
+}
+
+===============================================================
+STEP 4 — SEED FACIAL AESTHETICS TREATMENTS
+===============================================================
+
+Replace Dermadoll treatments with 
+facial aesthetics treatments relevant 
+to Niamh's clinic. She can edit these 
+in the portal later.
+
+INSERT INTO treatments 
+(name, duration, price, deposit, description, category, active) 
+VALUES
+('Consultation', 30, 0, 0, 
+  'Full face assessment and personalised treatment plan.', 
+  'Consultation', true),
+('Anti-Wrinkle — 1 Area', 30, 150, 75, 
+  'Botulinum toxin for one area (forehead, frown lines or crows feet).', 
+  'Injectables', true),
+('Anti-Wrinkle — 2 Areas', 30, 200, 100, 
+  'Botulinum toxin for two areas.', 
+  'Injectables', true),
+('Anti-Wrinkle — 3 Areas', 45, 250, 125, 
+  'Botulinum toxin for three areas.', 
+  'Injectables', true),
+('Lip Filler — 0.5ml', 30, 180, 90, 
+  'Natural lip enhancement using 0.5ml dermal filler.', 
+  'Filler', true),
+('Lip Filler — 1ml', 45, 220, 110, 
+  'Lip enhancement using 1ml dermal filler.', 
+  'Filler', true),
+('Cheek Filler — 1ml', 45, 280, 140, 
+  'Cheek augmentation and lift using 1ml filler.', 
+  'Filler', true),
+('Cheek Filler — 2ml', 60, 400, 200, 
+  'Cheek augmentation using 2ml filler.', 
+  'Filler', true),
+('Jaw Filler', 60, 350, 175, 
+  'Jawline definition and contouring.', 
+  'Filler', true),
+('Chin Filler', 45, 250, 125, 
+  'Chin enhancement and projection.', 
+  'Filler', true),
+('Tear Trough Filler', 45, 300, 150, 
+  'Under eye hollows and dark circle treatment.', 
+  'Filler', true),
+('Nasolabial Folds', 45, 250, 125, 
+  'Softening nose to mouth lines with filler.', 
+  'Filler', true),
+('Profhilo — Course of 2', 60, 400, 200, 
+  'Bio-remodelling injectable. Price covers both sessions.', 
+  'Skin Boosters', true),
+('Polynucleotides (PDRN)', 45, 280, 140, 
+  'Skin regeneration and repair treatment.', 
+  'Skin Boosters', true),
+('Skin Booster — Jalupro', 45, 220, 110, 
+  'Deep hydration and skin quality treatment.', 
+  'Skin Boosters', true);
+
+===============================================================
+STEP 5 — UPDATE PORTAL BRANDING
+===============================================================
+
+Portal login screen:
+- Title: "Face By Niamh — Admin Portal"
+- Wordmark: "FACE BY NIAMH"
+- Subtitle: "AESTHETICS · ADMIN"
+- Keep the 5-click secret login mechanic
+
+Portal sidebar:
+- Logo/name: "FACE BY NIAMH"
+- Label: "AESTHETICS · ADMIN"
+
+Export filenames:
+"dermadoll-bookings.csv" → "facebyniamh-bookings.csv"
+"dermadoll-finance" → "facebyniamh-finance"
+
+===============================================================
+STEP 6 — UPDATE EMAIL TEMPLATES
+===============================================================
+
+Update in every email template:
+
+Business name: "Face By Niamh"
+From name: "Face By Niamh"
+From email: "hello@facebyniamh.co.uk"
+Instagram: "@facebyniamh"
+Signature: "The Face By Niamh Team"
+Website: "[DOMAIN_TBC]"
+
+Subject lines:
+"Booking Confirmed — Face By Niamh"
+"Appointment Reminder — Face By Niamh"
+"Booking Cancelled — Face By Niamh"
+
+===============================================================
+STEP 7 — UPDATE WEBSITE COPY
+===============================================================
+
+index.html hero section:
+
+Headline: "Natural Aesthetics."
+Subheadline: "Confident Results."
+Body copy: "Advanced facial aesthetics 
+treatments in Leeds and Wakefield — 
+delivered with care, precision, and a 
+commitment to natural results."
+
+Location tag: "LEEDS / WAKEFIELD"
+(already correct — keep as is)
+
+Instagram handle in footer/hero: 
+"@facebyniamh"
+
+About section — replace Dermadoll bio 
+with placeholder:
+"[NIAMH — add your personal bio here. 
+Tell your clients about your qualifications, 
+experience and passion for natural aesthetics.]"
+
+===============================================================
+STEP 8 — CLEAR STRIPE KEYS
+===============================================================
+
+Remove any Dermadoll Stripe/Resend keys.
+Niamh needs her own accounts.
+
+Add clear placeholder comments in server.js:
+
+// ═══════════════════════════════════════
+// NIAMH — ADD YOUR KEYS TO REPLIT SECRETS
+// ═══════════════════════════════════════
+// STRIPE_SECRET_KEY=sk_live_...
+// STRIPE_PUBLISHABLE_KEY=pk_live_...
+// STRIPE_WEBHOOK_SECRET=whsec_...
+// RESEND_API_KEY=re_...
+// ═══════════════════════════════════════
+
+===============================================================
+STEP 9 — FINAL VERIFICATION
+===============================================================
+
+Run final grep check:
+
+grep -ri "dermadoll\|permadoll" \
+  --include="*.html" --include="*.js" \
+  --include="*.css" --include="*.json" \
+  --exclude-dir=node_modules . 2>/dev/null
+
+Must return zero results.
+
+Then confirm:
+✓ Zero Dermadoll references remain
+✓ Portal shows "Face By Niamh"
+✓ Location stays Leeds / Wakefield
+✓ Treatments seeded for facial aesthetics
+✓ Database cleared of Dermadoll data
+✓ Email templates updated
+✓ Stripe keys cleared for Niamh to add
+✓ CloudStore keys renamed fbn_
+
+Republish after all changes complete.

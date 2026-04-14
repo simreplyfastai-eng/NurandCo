@@ -1,8 +1,8 @@
 import { Resend } from "resend";
 
 const RESEND_KEY = process.env.RESEND_API_KEY ?? "";
-const FROM = "bookings@dermadoll-aesthetics.co.uk";
-const INSTAGRAM = "@dermadollaesthetics";
+const FROM = "hello@facebyniamh.co.uk";
+const INSTAGRAM = "@facebyniamh";
 const CLINIC_ADDRESS = "1500 Stratford Road, Lumi Salon, Hall Green, Birmingham B28 9ET";
 
 let _resend: Resend | null = null;
@@ -35,7 +35,7 @@ function fmtDateLong(dateStr: string): string {
 function emailShell(body: string): string {
   return `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Dermadoll Aesthetics</title></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Face By Niamh</title></head>
 <body style="margin:0;padding:0;background:#0d0d0d;font-family:Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#0d0d0d;padding:40px 16px;">
     <tr><td align="center">
@@ -43,21 +43,21 @@ function emailShell(body: string): string {
 
         <!-- Header -->
         <tr><td style="text-align:center;padding-bottom:28px;">
-          <p style="margin:0;font-size:11px;letter-spacing:3px;color:#C9A96E;font-family:Arial,sans-serif;text-transform:uppercase;">Premium Face Clinic</p>
-          <h1 style="margin:8px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#ffffff;letter-spacing:1px;">Dermadoll Aesthetics</h1>
-          <div style="width:50px;height:1px;background:#C9A96E;margin:16px auto 0;"></div>
+          <p style="margin:0;font-size:11px;letter-spacing:3px;color:#C8860A;font-family:Arial,sans-serif;text-transform:uppercase;">Premium Face Clinic</p>
+          <h1 style="margin:8px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:28px;font-weight:400;color:#ffffff;letter-spacing:1px;">Face By Niamh</h1>
+          <div style="width:50px;height:1px;background:#C8860A;margin:16px auto 0;"></div>
         </td></tr>
 
         <!-- Card -->
-        <tr><td style="background:#1a1a1a;border:1px solid rgba(201,169,110,0.3);border-radius:16px;padding:36px 32px;">
+        <tr><td style="background:#1a1a1a;border:1px solid rgba(200,134,10,0.3);border-radius:16px;padding:36px 32px;">
           ${body}
         </td></tr>
 
         <!-- Footer -->
         <tr><td style="text-align:center;padding-top:28px;">
           <p style="margin:0 0 6px;font-size:12px;color:#555;font-family:Arial,sans-serif;">${CLINIC_ADDRESS}</p>
-          <p style="margin:0 0 6px;font-size:12px;color:#555;font-family:Arial,sans-serif;">Instagram: <a href="https://instagram.com/dermadollaesthetics" style="color:#C9A96E;text-decoration:none;">${INSTAGRAM}</a></p>
-          <p style="margin:16px 0 0;font-size:11px;color:#333;font-family:Arial,sans-serif;">© 2026 Dermadoll Aesthetics. All rights reserved.</p>
+          <p style="margin:0 0 6px;font-size:12px;color:#555;font-family:Arial,sans-serif;">Instagram: <a href="https://instagram.com/facebyniamh" style="color:#C8860A;text-decoration:none;">${INSTAGRAM}</a></p>
+          <p style="margin:16px 0 0;font-size:11px;color:#333;font-family:Arial,sans-serif;">© 2026 Face By Niamh. All rights reserved.</p>
         </td></tr>
 
       </table>
@@ -68,11 +68,11 @@ function emailShell(body: string): string {
 }
 
 function pill(text: string): string {
-  return `<div style="display:inline-block;background:rgba(201,169,110,0.12);border:1px solid rgba(201,169,110,0.4);color:#C9A96E;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;border-radius:20px;padding:5px 14px;text-transform:uppercase;margin-bottom:20px;">${text}</div>`;
+  return `<div style="display:inline-block;background:rgba(200,134,10,0.12);border:1px solid rgba(200,134,10,0.4);color:#C8860A;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;border-radius:20px;padding:5px 14px;text-transform:uppercase;margin-bottom:20px;">${text}</div>`;
 }
 
 function divider(): string {
-  return `<div style="width:40px;height:1px;background:#C9A96E;margin:20px auto;"></div>`;
+  return `<div style="width:40px;height:1px;background:#C8860A;margin:20px auto;"></div>`;
 }
 
 function heading(text: string): string {
@@ -93,17 +93,17 @@ function detailRow(label: string, value: string): string {
 
 function detailTable(rows: string): string {
   return `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid rgba(201,169,110,0.2);border-radius:10px;overflow:hidden;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid rgba(200,134,10,0.2);border-radius:10px;overflow:hidden;">
       ${rows}
     </table>`;
 }
 
 function goldBox(content: string): string {
-  return `<div style="background:rgba(201,169,110,0.08);border:1px solid rgba(201,169,110,0.25);border-radius:10px;padding:16px 20px;margin:20px 0;text-align:center;">${content}</div>`;
+  return `<div style="background:rgba(200,134,10,0.08);border:1px solid rgba(200,134,10,0.25);border-radius:10px;padding:16px 20px;margin:20px 0;text-align:center;">${content}</div>`;
 }
 
 function ctaButton(href: string, text: string): string {
-  return `<div style="text-align:center;margin-top:24px;"><a href="${href}" style="display:inline-block;background:#C9A96E;color:#000000;font-family:Arial,sans-serif;font-size:14px;font-weight:700;padding:14px 36px;border-radius:30px;text-decoration:none;letter-spacing:0.5px;">${text}</a></div>`;
+  return `<div style="text-align:center;margin-top:24px;"><a href="${href}" style="display:inline-block;background:#C8860A;color:#000000;font-family:Arial,sans-serif;font-size:14px;font-weight:700;padding:14px 36px;border-radius:30px;text-decoration:none;letter-spacing:0.5px;">${text}</a></div>`;
 }
 
 function smallPrint(text: string): string {
@@ -147,12 +147,12 @@ export async function sendClientConfirmationEmail(params: {
     )}
     ${goldBox(
       depositPaid
-        ? `<p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#C9A96E;font-weight:700;">✓ Deposit paid — £${params.deposit}</p>
+        ? `<p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#C8860A;font-weight:700;">✓ Deposit paid — £${params.deposit}</p>
            <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.6);">Balance due on arrival: <strong style="color:#ffffff;">£${params.balance}</strong></p>`
         : `<p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.6);">Balance due on arrival: <strong style="color:#ffffff;">£${params.balance}</strong></p>`
     )}
     <p style="margin:20px 0 6px;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">Please arrive 5 minutes early. To reschedule, contact us at least 24 hours in advance.</p>
-    <p style="margin:6px 0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C9A96E;text-decoration:none;">${wa}</a></p>
+    <p style="margin:6px 0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C8860A;text-decoration:none;">${wa}</a></p>
     ${smallPrint("Free cancellation 48 hours before your appointment.")}
   `;
 
@@ -160,7 +160,7 @@ export async function sendClientConfirmationEmail(params: {
     await resend.emails.send({
       from: FROM,
       to: params.clientEmail,
-      subject: "Your appointment is confirmed — Dermadoll Aesthetics",
+      subject: "Your appointment is confirmed — Face By Niamh",
       html: emailShell(body),
     });
   } catch (err) {
@@ -195,14 +195,14 @@ export async function sendCancellationEmail(params: {
       detailRow("Time", params.time)
     )}
     ${ctaButton(`https://wa.me/${wa.replace(/\s/g,"")}`, "Rebook via WhatsApp")}
-    ${smallPrint("If you have any questions, message us on Instagram @dermadollaesthetics")}
+    ${smallPrint("If you have any questions, message us on Instagram @facebyniamh")}
   `;
 
   try {
     await resend.emails.send({
       from: FROM,
       to: params.clientEmail,
-      subject: "Your Dermadoll appointment has been cancelled",
+      subject: "Your Face By Niamh appointment has been cancelled",
       html: emailShell(body),
     });
   } catch (err) {
@@ -240,15 +240,15 @@ export async function sendReminderEmail(params: {
     )}
     ${goldBox(`<p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.65);">Please arrive <strong style="color:#ffffff;">5 minutes early</strong> and come with a clean face — no makeup on the treatment area.</p>`)}
     <p style="margin:16px 0 4px;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">Need to reschedule? Message us ASAP:</p>
-    <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C9A96E;text-decoration:none;">${wa}</a></p>
-    ${smallPrint(`Dermadoll Aesthetics — ${CLINIC_ADDRESS}`)}
+    <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C8860A;text-decoration:none;">${wa}</a></p>
+    ${smallPrint(`Face By Niamh — ${CLINIC_ADDRESS}`)}
   `;
 
   try {
     await resend.emails.send({
       from: FROM,
       to: params.clientEmail,
-      subject: "See you tomorrow — Dermadoll Aesthetics",
+      subject: "See you tomorrow — Face By Niamh",
       html: emailShell(body),
     });
   } catch (err) {
@@ -274,7 +274,7 @@ export async function sendAdminNotificationEmail(params: {
   if (!resend || !params.adminEmail) return;
   const dateDisp = params.date ? fmtDateUK(params.date) : "TBC";
   const timeDisp = params.time || "TBC";
-  const depositStatus = params.depositPaid ? `<span style="color:#4CAF50;">✓ Paid via Stripe — £${params.deposit}</span>` : `<span style="color:#C9A96E;">Pending — £${params.deposit}</span>`;
+  const depositStatus = params.depositPaid ? `<span style="color:#4CAF50;">✓ Paid via Stripe — £${params.deposit}</span>` : `<span style="color:#C8860A;">Pending — £${params.deposit}</span>`;
 
   const body = `
     <div style="text-align:center;">
@@ -293,7 +293,7 @@ export async function sendAdminNotificationEmail(params: {
       detailRow("Deposit", depositStatus) +
       detailRow("Booked via", params.source)
     )}
-    ${smallPrint("This is an automated notification from Dermadoll Aesthetics booking system.")}
+    ${smallPrint("This is an automated notification from Face By Niamh booking system.")}
   `;
 
   try {
@@ -337,11 +337,11 @@ export async function sendConsultationConfirmationEmail(params: {
       detailRow("Location", CLINIC_ADDRESS)
     )}
     ${goldBox(`
-      <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#C9A96E;font-weight:700;">✓ Free consultation — no charge</p>
+      <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#C8860A;font-weight:700;">✓ Free consultation — no charge</p>
       <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:rgba(255,255,255,0.5);font-style:italic;">We look forward to discussing your treatment goals with you.</p>
     `)}
     <p style="margin:16px 0 4px;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">Questions before your visit?</p>
-    <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C9A96E;text-decoration:none;">${wa}</a></p>
+    <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.5);text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C8860A;text-decoration:none;">${wa}</a></p>
     ${smallPrint("Please arrive 5 minutes early. We look forward to seeing you.")}
   `;
 
@@ -349,7 +349,7 @@ export async function sendConsultationConfirmationEmail(params: {
     await resend.emails.send({
       from: FROM,
       to: params.clientEmail,
-      subject: "Consultation confirmed — Dermadoll Aesthetics",
+      subject: "Consultation confirmed — Face By Niamh",
       html: emailShell(body),
     });
   } catch (err) {
@@ -391,7 +391,7 @@ export async function sendConsultationAdminEmail(params: {
       detailRow("Time", timeDisp) +
       detailRow("Fee", `<span style="color:#4CAF50;">Free ✓</span>`)
     )}
-    ${smallPrint("This is an automated notification from Dermadoll Aesthetics booking system.")}
+    ${smallPrint("This is an automated notification from Face By Niamh booking system.")}
   `;
 
   try {
@@ -434,7 +434,7 @@ export async function sendEnquiryEmails(params: {
         detailRow("Course", params.course) +
         detailRow("Message", params.message || "—")
       )}
-      ${smallPrint("This is an automated notification from Dermadoll Aesthetics.")}
+      ${smallPrint("This is an automated notification from Face By Niamh.")}
     `;
     promises.push(
       resend.emails.send({
@@ -451,18 +451,18 @@ export async function sendEnquiryEmails(params: {
       <div style="text-align:center;">
         ${pill("Enquiry Received")}
         ${heading(`Thank you, ${firstName}`)}
-        ${bodyText(`We've received your enquiry about <strong style="color:#C9A96E;">${params.course}</strong> and will be in touch shortly with available dates and next steps.`)}
+        ${bodyText(`We've received your enquiry about <strong style="color:#C8860A;">${params.course}</strong> and will be in touch shortly with available dates and next steps.`)}
         ${divider()}
       </div>
       ${goldBox(`<p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:rgba(255,255,255,0.65);">In the meantime, feel free to browse our training pathways or message us on Instagram.</p>`)}
-      ${ctaButton("https://instagram.com/dermadollaesthetics", "Follow us on Instagram")}
+      ${ctaButton("https://instagram.com/facebyniamh", "Follow us on Instagram")}
       ${smallPrint("We typically respond within 24 hours.")}
     `;
     promises.push(
       resend.emails.send({
         from: FROM,
         to: params.email,
-        subject: "Thanks for your enquiry — Dermadoll Aesthetics",
+        subject: "Thanks for your enquiry — Face By Niamh",
         html: emailShell(clientBody),
       }).then(() => {}).catch((e) => console.error("sendEnquiryEmails client error", e)),
     );

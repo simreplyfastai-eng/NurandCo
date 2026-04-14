@@ -8,7 +8,7 @@ const router = Router();
 
 /** Send 24h reminders for Confirmed bookings arriving in 23–25h window */
 async function sendReminders(): Promise<number> {
-  const whatsappRes = await pool.query("SELECT value FROM portal_kv WHERE key='dd_settings'").catch(() => null);
+  const whatsappRes = await pool.query("SELECT value FROM portal_kv WHERE key='fbn_settings'").catch(() => null);
   const settings = (whatsappRes?.rows[0]?.value as Record<string, string>) ?? {};
   const whatsapp = settings.whatsapp ?? "";
 

@@ -22,7 +22,7 @@ function getStripe(): Stripe | null {
 
 async function getSettings(): Promise<Record<string, string>> {
   try {
-    const res = await pool.query("SELECT value FROM portal_kv WHERE key='dd_settings'");
+    const res = await pool.query("SELECT value FROM portal_kv WHERE key='fbn_settings'");
     if (res.rows.length) return (res.rows[0].value as Record<string, string>) ?? {};
   } catch { /* ignore */ }
   return {};

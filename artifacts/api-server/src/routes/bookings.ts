@@ -66,7 +66,7 @@ async function checkAvailability(
 
   try {
     const result = await pool.query(
-      "SELECT value FROM portal_kv WHERE key = 'dd_availability'",
+      "SELECT value FROM portal_kv WHERE key = 'fbn_availability'",
     );
     if (result.rows.length) {
       const raw = result.rows[0].value as {
@@ -114,7 +114,7 @@ async function checkAvailability(
 /** Fetch WhatsApp number from settings stored in portal_kv */
 async function getWhatsApp(): Promise<string> {
   try {
-    const res = await pool.query("SELECT value FROM portal_kv WHERE key='dd_settings'");
+    const res = await pool.query("SELECT value FROM portal_kv WHERE key='fbn_settings'");
     if (res.rows.length) {
       const settings = res.rows[0].value as Record<string, string>;
       return settings.whatsapp ?? "";

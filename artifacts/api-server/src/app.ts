@@ -50,8 +50,8 @@ app.use(
   }),
 );
 const allowedOrigins: (string | RegExp)[] = [
-  "https://dermadoll-aesthetics.co.uk",
-  "https://www.dermadoll-aesthetics.co.uk",
+  "https://facebyniamh.co.uk",
+  "https://www.facebyniamh.co.uk",
 ];
 // Allow Replit dev-domain proxy in development so the portal preview works
 if (process.env.REPLIT_DEV_DOMAIN) {
