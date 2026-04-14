@@ -40,7 +40,7 @@ export default function Navbar() {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[#FAF7F2] ${isScrolled ? "py-3 shadow-sm" : "py-4"}`}
-        style={{ borderBottom: `1px solid ${isScrolled ? "#E2DDD5" : "transparent"}` }}
+        style={{ borderBottom: "1px solid #D9D2C7" }}
       >
         <div className="container mx-auto px-6 flex items-center justify-between max-w-6xl">
           {/* Logo lockup */}
