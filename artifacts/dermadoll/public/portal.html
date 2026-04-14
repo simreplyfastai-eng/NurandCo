@@ -10,7 +10,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;max-width:100%}
-:root{--gold:#C8860A;--bg:#FFFFFF;--sidebar:#FAF7F2;--text:#1A0F00;--muted:#6B6260;--border:#E2DDD5;--card-shadow:0 2px 12px rgba(0,0,0,.06)}
+:root{--gold:#D4A5A5;--gold-dark:#B8887E;--gold-glow:rgba(212,165,165,0.15);--bg:#F7F7F8;--sidebar:#1C1C1E;--sidebar-dark:#141416;--sidebar-border:rgba(255,255,255,0.06);--text:#1C1C1E;--muted:#6E6E80;--muted-light:#A8A8B3;--border:#EBEBED;--card-shadow:0 1px 4px rgba(0,0,0,.06)}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;max-width:100vw}
 h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 .login-wordmark{font-size:22px !important;letter-spacing:.12em !important}
@@ -507,78 +507,94 @@ tr:hover td{background:#FDFBF8}
   .fin-kpi-card{padding:12px 6px}
 }
 /* ═══════════════════════════════════════════════════════
-   FACE BY NIAMH — VISUAL RESKIN (layout unchanged)
-   Dark sidebar, warm cream content, Playfair Display
+   FACE BY NIAMH — VISUAL RESKIN v2
+   Charcoal sidebar · Dusty rose accent · Clean SaaS feel
    ═══════════════════════════════════════════════════════ */
 
-/* ── LOGIN SCREEN — DARK MOODY ────────────────────────── */
-#login-page{background:radial-gradient(ellipse at center,#1a0f00 0%,#0a0500 100%)!important}
-.login-card{background:rgba(255,255,255,.04)!important;border:1px solid rgba(200,134,10,.25)!important;border-radius:20px!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,.4)!important;padding:40px!important;max-width:380px!important}
-.login-wordmark{font-family:'Playfair Display',serif!important;color:#c8860a!important;font-size:22px!important;font-weight:700!important;letter-spacing:.14em!important}
-.login-sub{color:#6b5040!important;font-size:10px!important;letter-spacing:4px!important}
-.login-label{color:rgba(245,237,224,.7)!important}
-.login-input{background:rgba(255,255,255,.06)!important;border:1px solid rgba(200,134,10,.3)!important;color:#f5ede0!important;border-radius:10px!important;padding:13px 16px!important;font-size:14px!important}
-.login-input::placeholder{color:rgba(245,237,224,.3)}
-.login-input:focus{box-shadow:0 0 0 3px rgba(200,134,10,.15)!important;border-color:#c8860a!important;outline:none!important}
-.login-btn{background:#c8860a!important;color:#1a0f00!important;font-weight:700!important;border-radius:10px!important;font-size:14px!important;padding:13px!important;letter-spacing:.03em!important}
-.login-btn:hover{background:#e09a0c!important;opacity:1!important}
-.login-close{color:rgba(245,237,224,.35)!important}
-.login-close:hover{background:rgba(255,255,255,.08)!important;color:#f5ede0!important}
+/* ── LOGIN SCREEN ─────────────────────────────────────── */
+#login-page{background:#0d0d0f!important;background:radial-gradient(ellipse at 50% 40%,rgba(212,165,165,.08) 0%,transparent 70%),#0d0d0f!important}
+.login-card{background:rgba(255,255,255,.03)!important;border:1px solid rgba(255,255,255,.08)!important;border-radius:20px!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);padding:44px 40px!important;max-width:380px!important;box-shadow:0 24px 80px rgba(0,0,0,.4)!important}
+.login-wordmark{font-family:'Playfair Display',serif!important;color:#fff!important;font-size:20px!important;font-weight:700!important;letter-spacing:.18em!important}
+.login-sub{color:#D4A5A5!important;font-size:9px!important;letter-spacing:4px!important}
+.login-label{color:rgba(255,255,255,.45)!important;font-size:12px!important;font-weight:500!important}
+.login-input{background:rgba(255,255,255,.05)!important;border:1px solid rgba(255,255,255,.1)!important;color:#fff!important;border-radius:10px!important;padding:13px 16px!important;font-size:14px!important}
+.login-input::placeholder{color:rgba(255,255,255,.25)}
+.login-input:focus{border-color:#D4A5A5!important;background:rgba(255,255,255,.07)!important;box-shadow:0 0 0 3px rgba(212,165,165,.1)!important;outline:none!important}
+.login-btn{background:#D4A5A5!important;color:#fff!important;font-weight:600!important;border-radius:10px!important;font-size:14px!important;padding:13px!important;letter-spacing:.03em!important;border:none!important}
+.login-btn:hover{background:#C49090!important;opacity:1!important;transform:translateY(-1px);box-shadow:0 8px 24px rgba(212,165,165,.3)!important}
+.login-close{color:rgba(255,255,255,.25)!important}
+.login-close:hover{background:rgba(255,255,255,.06)!important;color:rgba(255,255,255,.7)!important}
 .login-error{color:#f87171!important}
 
-/* ── SIDEBAR — DARK (layout position unchanged) ────────── */
-#sidebar{background:#1a0f00!important;border-right:1px solid rgba(200,134,10,.15)!important}
-.sb-brand{background:#0f0800!important;border-bottom:1px solid rgba(200,134,10,.2)!important;padding:20px 16px!important}
-.sb-wordmark{font-family:'Playfair Display',serif!important;color:#c8860a!important;font-size:15px!important;letter-spacing:.16em!important}
-.sb-sub{color:#6b5040!important;font-size:10px!important;letter-spacing:2px!important}
-.sb-badge{background:rgba(200,134,10,.15)!important;color:#c8a060!important;border:1px solid rgba(200,134,10,.2)!important}
-.sb-section{color:#4a3828!important;font-size:9px!important;letter-spacing:2px!important;padding:16px 16px 6px!important}
-.sb-nav{padding:8px!important}
-.sb-item{color:#c8a882!important;border-radius:0 8px 8px 0!important}
-.sb-item:hover{background:rgba(255,255,255,.05)!important;color:#f5ede0!important}
-.sb-item.active{background:rgba(200,134,10,.15)!important;color:#c8860a!important;font-weight:600!important;border-left:3px solid #c8860a!important;border-radius:0 8px 8px 0!important}
-.sb-item.active svg{color:#c8860a!important}
-.sb-item svg{color:#6b5040!important}
-.sb-badge-count{background:#c8860a!important;color:#fff!important}
-.sb-item.active .sb-badge-count{background:#c8860a!important;color:#fff!important}
-.sb-footer{border-top:1px solid rgba(200,134,10,.15)!important;padding:16px!important}
-.logout-btn{color:#6b5040!important;border-color:rgba(200,134,10,.2)!important}
-.logout-btn:hover{color:#c8860a!important;border-color:#c8860a!important}
+/* ── SIDEBAR — CHARCOAL (layout unchanged) ──────────────── */
+#sidebar{background:#1C1C1E!important;border-right:1px solid rgba(255,255,255,.06)!important}
+.sb-brand{background:#141416!important;border-bottom:1px solid rgba(255,255,255,.06)!important;padding:20px 18px!important}
+.sb-wordmark{font-family:'Playfair Display',serif!important;color:#fff!important;font-size:15px!important;font-weight:700!important;letter-spacing:2px!important;text-transform:uppercase!important}
+.sb-sub{color:#D4A5A5!important;font-size:9px!important;letter-spacing:3px!important;text-transform:uppercase!important}
+.sb-badge{background:rgba(212,165,165,.15)!important;color:#D4A5A5!important;border:1px solid rgba(212,165,165,.2)!important}
+.sb-section{color:#3A3A4A!important;font-size:9px!important;font-weight:700!important;letter-spacing:2px!important;padding:18px 18px 6px!important}
+.sb-nav{padding:8px!important;background:#1C1C1E!important}
+.sb-item{color:#A8A8B3!important;font-size:13px!important;font-weight:400!important;border-left:3px solid transparent!important;border-radius:0!important;padding:9px 18px!important}
+.sb-item:hover{background:rgba(255,255,255,.04)!important;color:#fff!important;border-left-color:transparent!important}
+.sb-item.active{background:rgba(212,165,165,.12)!important;color:#fff!important;font-weight:500!important;border-left:3px solid #D4A5A5!important;border-radius:0!important}
+.sb-item.active svg{color:#D4A5A5!important;opacity:1!important}
+.sb-item svg{opacity:.5;color:#A8A8B3!important}
+.sb-item:hover svg{opacity:1}
+.sb-badge-count{background:#D4A5A5!important;color:#fff!important;font-size:10px!important;font-weight:700!important;border-radius:10px!important;padding:2px 7px!important}
+.sb-item.active .sb-badge-count{background:#D4A5A5!important;color:#fff!important}
+.sb-footer{border-top:1px solid rgba(255,255,255,.06)!important;padding:16px 18px!important;background:#1C1C1E!important}
+.logout-btn{color:#3A3A4A!important;border:none!important;background:transparent!important;font-size:12px!important;width:100%!important;text-align:left!important;padding:8px 0!important}
+.logout-btn:hover{color:#A8A8B3!important}
 
-/* ── MAIN CONTENT — WARM CREAM ──────────────────────────── */
-#main-content{background:#faf6f1!important}
-.page{background:#faf6f1}
-.topbar{background:#ffffff!important;border-bottom:1px solid #ede5d8!important}
-.topbar-title{font-family:'Playfair Display',serif!important;font-size:24px!important;color:#1a0f00!important}
-.topbar-search{background:#faf6f1!important;border:1px solid #ede5d8!important}
+/* ── MAIN CONTENT ────────────────────────────────────────── */
+#main-content{background:#F7F7F8!important}
+.page{background:#F7F7F8}
+.topbar{background:#fff!important;border-bottom:1px solid #EBEBED!important;padding:14px 28px!important}
+.topbar-title{font-family:'Playfair Display',serif!important;font-size:24px!important;color:#1C1C1E!important;font-weight:600!important;letter-spacing:-.3px!important}
+.topbar-search{background:#F7F7F8!important;border:1px solid #EBEBED!important;border-radius:8px!important;color:#1C1C1E!important}
+.topbar-search:focus{border-color:#D4A5A5!important;box-shadow:0 0 0 3px rgba(212,165,165,.12)!important}
 
 /* ── KPI / STAT CARDS ────────────────────────────────────── */
-.kpi-card{background:#ffffff!important;border:1px solid #ede5d8!important;border-left:4px solid #c8860a!important;border-radius:12px!important;box-shadow:0 2px 8px rgba(26,15,0,.05)!important;overflow:hidden;position:relative}
-.kpi-card::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:#c8860a;opacity:.04;pointer-events:none}
-.kpi-grid>:nth-child(2){border-left-color:#7c9e87!important}
-.kpi-grid>:nth-child(3){border-left-color:#9b7ea6!important}
-.kpi-label{font-size:10px!important;font-weight:700!important;letter-spacing:1.5px!important;color:#a08060!important}
-.kpi-value{font-family:'Playfair Display',serif!important;font-size:30px!important;color:#1a0f00!important}
+.kpi-card{background:#fff!important;border:1px solid #EBEBED!important;border-radius:12px!important;box-shadow:0 1px 4px rgba(0,0,0,.06)!important;overflow:hidden;position:relative;border-top:3px solid #D4A5A5!important;border-left:1px solid #EBEBED!important}
+.kpi-grid>:nth-child(2){border-top-color:#A8C5DA!important}
+.kpi-grid>:nth-child(3){border-top-color:#B8D4B8!important}
+.kpi-grid>:nth-child(4){border-top-color:#D4A5A5!important}
+.kpi-label{font-size:10px!important;font-weight:600!important;letter-spacing:1.2px!important;color:#A8A8B3!important;text-transform:uppercase!important}
+.kpi-value{font-family:'Playfair Display',serif!important;font-size:32px!important;font-weight:600!important;color:#1C1C1E!important;line-height:1!important}
+.kpi-change{font-size:12px!important;color:#A8A8B3!important}
 
-/* ── SECTION CARDS ────────────────────────────────────────── */
-.card{background:#ffffff!important;border:1px solid #ede5d8!important;border-radius:14px!important;box-shadow:0 2px 12px rgba(26,15,0,.04)!important}
-.card-header{background:#fdfaf7!important;border-bottom:1px solid #f0e8de!important}
-.card-title{font-family:'Playfair Display',serif!important;font-size:15px!important;color:#1a0f00!important}
+/* ── CONTENT CARDS ───────────────────────────────────────── */
+.card{background:#fff!important;border:1px solid #EBEBED!important;border-radius:12px!important;box-shadow:0 1px 4px rgba(0,0,0,.05)!important}
+.card-header{background:#FAFAFA!important;border-bottom:1px solid #F0F0F2!important;padding:14px 20px!important}
+.card-title{font-family:'Playfair Display',serif!important;font-size:14px!important;font-weight:600!important;color:#1C1C1E!important}
 
 /* ── BUTTONS ─────────────────────────────────────────────── */
-.btn-gold{background:#1a0f00!important;color:#f5ede0!important;font-weight:600!important;font-size:13px!important}
-.btn-gold:hover{background:#2d1a00!important;opacity:1!important}
-.btn-outline{border:1px solid #c8860a!important;color:#c8860a!important;background:transparent!important}
-.btn-outline:hover{background:#c8860a!important;color:#fff!important}
+.btn-gold{background:#1C1C1E!important;color:#fff!important;font-weight:500!important;font-size:13px!important;letter-spacing:.02em!important;border:none!important}
+.btn-gold:hover{background:#2C2C2E!important;opacity:1!important}
+.btn-outline{background:transparent!important;color:#6E6E80!important;border:1px solid #EBEBED!important;font-size:13px!important;font-weight:500!important}
+.btn-outline:hover{border-color:#D4A5A5!important;color:#D4A5A5!important;background:transparent!important}
 
 /* ── STATUS PILLS ─────────────────────────────────────────── */
-.bk-status-pill,.fin-pill{border-radius:20px!important;font-size:11px!important;font-weight:600!important;padding:3px 12px!important;letter-spacing:.03em!important}
+.bk-status-pill,.fin-pill{border-radius:20px!important;font-size:11px!important;font-weight:600!important;padding:3px 10px!important;letter-spacing:.03em!important}
 
-/* ── TYPOGRAPHY — HEADINGS ───────────────────────────────── */
-.modal-title{font-family:'Playfair Display',serif!important}
-.fin-title{font-family:'Playfair Display',serif!important}
-.settings-section-header{font-family:'Playfair Display',serif!important}
-.avail-card-title{font-family:'Playfair Display',serif!important}
+/* ── TABLES ──────────────────────────────────────────────── */
+thead th{font-size:10px!important;font-weight:700!important;letter-spacing:1px!important;text-transform:uppercase!important;color:#A8A8B3!important;background:transparent!important;border-bottom:1px solid #EBEBED!important;padding:10px 12px!important}
+tbody td{color:#1C1C1E!important;font-size:13px!important;border-bottom:1px solid #F7F7F8!important}
+tbody tr:hover td{background:#FAFAFA!important}
+
+/* ── TYPOGRAPHY / HEADINGS ───────────────────────────────── */
+.modal-title,.fin-title,.settings-section-header,.avail-card-title{font-family:'Playfair Display',serif!important;color:#1C1C1E!important}
+
+/* ── FORM INPUTS ─────────────────────────────────────────── */
+.form-input,select{border:1px solid #EBEBED!important;border-radius:8px!important;color:#1C1C1E!important;font-size:13px!important;background:#fff!important}
+.form-input:focus,select:focus{border-color:#D4A5A5!important;box-shadow:0 0 0 3px rgba(212,165,165,.1)!important;outline:none!important}
+
+/* ── MODAL ───────────────────────────────────────────────── */
+.modal-box{background:#fff!important;border-radius:16px!important;border:1px solid #EBEBED!important;box-shadow:0 20px 60px rgba(0,0,0,.12)!important}
+.modal-overlay{backdrop-filter:blur(4px)}
+
+/* Accent colour for links / "view all" */
+a[style*="color:var(--gold)"],a[style*="color:#C8860A"]{color:#D4A5A5!important}
 
 /* ── TOAST ── */
 #toast-container{position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none}

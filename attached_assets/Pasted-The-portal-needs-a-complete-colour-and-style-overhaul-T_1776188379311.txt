@@ -1,0 +1,653 @@
+The portal needs a complete colour and 
+style overhaul. The brown looks horrible. 
+Replace everything with a clean, modern, 
+luxury aesthetic that looks like a 
+high-end SaaS product — think Notion 
+meets a luxury beauty brand.
+
+TARGET LOOK:
+Sidebar: deep charcoal/near-black with 
+soft white text and a single blush/rose 
+gold accent colour.
+Main area: very light warm grey background.
+Cards: pure white, clean shadows, 
+minimal borders.
+Accent colour: a sophisticated dusty rose 
+/ soft blush — not pink, not brown.
+Typography: clean, modern, elegant.
+
+COLOUR PALETTE — replace ALL brown:
+
+PRIMARY ACCENT: #D4A5A5 (dusty rose/blush)
+ACCENT DARK: #B8887E (muted terracotta for hover)
+ACCENT GLOW: rgba(212, 165, 165, 0.15)
+
+SIDEBAR BG: #1C1C1E (near-black charcoal)
+SIDEBAR DARKER: #141416 (brand area top)
+SIDEBAR BORDER: rgba(255,255,255,0.06)
+SIDEBAR TEXT: #A8A8B3 (soft grey)
+SIDEBAR TEXT ACTIVE: #FFFFFF
+SIDEBAR ACTIVE BG: rgba(212,165,165,0.12)
+SIDEBAR ACTIVE BORDER: #D4A5A5
+
+MAIN BG: #F7F7F8 (cool light grey)
+CARD BG: #FFFFFF
+CARD BORDER: #EBEBED
+CARD SHADOW: 0 1px 4px rgba(0,0,0,0.06)
+
+TEXT PRIMARY: #1C1C1E
+TEXT SECONDARY: #6E6E80
+TEXT MUTED: #A8A8B3
+
+===============================================================
+FIX 1 — SIDEBAR COMPLETE RESKIN
+===============================================================
+
+/* Sidebar wrapper */
+.sidebar, #sidebar, [class*="sidebar"] {
+  background: #1C1C1E !important;
+  border-right: 1px solid rgba(255,255,255,0.06) !important;
+}
+
+/* Brand area at top of sidebar */
+.sidebar-brand, .brand-area, 
+.sidebar > *:first-child {
+  background: #141416 !important;
+  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
+  padding: 20px 18px !important;
+}
+
+/* Brand name */
+.brand-name, .sidebar-logo-text,
+[class*="brand"] h1, [class*="brand"] h2 {
+  color: #FFFFFF !important;
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-size: 16px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+}
+
+/* Brand subtitle */
+.brand-subtitle, .sidebar-subtitle {
+  color: #D4A5A5 !important;
+  font-size: 9px !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+  margin-top: 3px !important;
+}
+
+/* Section labels */
+.nav-section-label, .sidebar-section,
+[class*="nav-section"], [class*="section-label"] {
+  color: #3A3A4A !important;
+  font-size: 9px !important;
+  font-weight: 700 !important;
+  letter-spacing: 2px !important;
+  text-transform: uppercase !important;
+  padding: 18px 18px 6px !important;
+}
+
+/* Nav items */
+.nav-item, .sidebar-nav a, 
+.sidebar a, [class*="nav-item"] {
+  color: #A8A8B3 !important;
+  font-size: 13px !important;
+  font-weight: 400 !important;
+  padding: 9px 18px !important;
+  border-radius: 0 !important;
+  border-left: 3px solid transparent !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  transition: all 0.15s ease !important;
+  text-decoration: none !important;
+}
+
+/* Nav item hover */
+.nav-item:hover, .sidebar-nav a:hover {
+  color: #FFFFFF !important;
+  background: rgba(255,255,255,0.04) !important;
+}
+
+/* Nav item active */
+.nav-item.active, .sidebar-nav a.active,
+.nav-item[data-active="true"] {
+  color: #FFFFFF !important;
+  background: rgba(212,165,165,0.12) !important;
+  border-left-color: #D4A5A5 !important;
+}
+
+/* Nav icons */
+.nav-item svg, .nav-item i,
+.sidebar a svg, .sidebar a i {
+  opacity: 0.5 !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.nav-item.active svg, .nav-item.active i,
+.nav-item:hover svg, .nav-item:hover i {
+  opacity: 1 !important;
+}
+
+/* Badges (new booking count) */
+.nav-badge, .badge, [class*="badge"] {
+  background: #D4A5A5 !important;
+  color: #1C1C1E !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  border-radius: 10px !important;
+  padding: 2px 7px !important;
+}
+
+/* Logout */
+.logout-btn, [class*="logout"],
+.sidebar-footer a {
+  color: #3A3A4A !important;
+  font-size: 12px !important;
+  border-top: 1px solid rgba(255,255,255,0.06) !important;
+  padding: 16px 18px !important;
+}
+
+.logout-btn:hover {
+  color: #A8A8B3 !important;
+}
+
+===============================================================
+FIX 2 — MAIN CONTENT AREA
+===============================================================
+
+/* Main background */
+.main-content, #main-content,
+[class*="main-content"], .page-content {
+  background: #F7F7F8 !important;
+}
+
+/* Top action bar */
+.topbar, .page-header, .action-bar,
+[class*="topbar"], [class*="page-header"] {
+  background: #FFFFFF !important;
+  border-bottom: 1px solid #EBEBED !important;
+  padding: 14px 28px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+}
+
+/* Page title */
+h1, .page-title, [class*="page-title"] {
+  font-family: 'Playfair Display', Georgia, serif !important;
+  font-size: 24px !important;
+  font-weight: 600 !important;
+  color: #1C1C1E !important;
+  letter-spacing: -0.3px !important;
+}
+
+/* Search bar */
+input[type="search"], input[type="text"],
+.search-input, [class*="search"] input {
+  background: #F7F7F8 !important;
+  border: 1px solid #EBEBED !important;
+  border-radius: 8px !important;
+  color: #1C1C1E !important;
+  font-size: 13px !important;
+  padding: 9px 14px !important;
+}
+
+input[type="search"]:focus,
+input[type="text"]:focus {
+  border-color: #D4A5A5 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(212,165,165,0.12) !important;
+}
+
+===============================================================
+FIX 3 — BUTTONS
+===============================================================
+
+/* Primary button */
+.btn-primary, .btn-new-booking,
+button[class*="primary"], 
+a[class*="primary"],
+button.btn:not([class*="secondary"]):not([class*="outline"]) {
+  background: #1C1C1E !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 8px !important;
+  padding: 10px 18px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.2px !important;
+  cursor: pointer !important;
+  transition: all 0.15s !important;
+}
+
+.btn-primary:hover {
+  background: #2C2C2E !important;
+}
+
+/* Secondary/outline button */
+.btn-secondary, .btn-outline, .btn-export,
+button[class*="secondary"],
+button[class*="outline"] {
+  background: transparent !important;
+  color: #6E6E80 !important;
+  border: 1px solid #EBEBED !important;
+  border-radius: 8px !important;
+  padding: 9px 16px !important;
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  cursor: pointer !important;
+}
+
+.btn-secondary:hover {
+  border-color: #D4A5A5 !important;
+  color: #D4A5A5 !important;
+}
+
+/* Accent button (where gold was used) */
+.btn-accent, .btn-rose {
+  background: #D4A5A5 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 8px !important;
+}
+
+===============================================================
+FIX 4 — STAT CARDS (KPIs)
+===============================================================
+
+/* Stat card wrapper */
+.kpi-card, .stat-card, .metric-card,
+[class*="kpi"], [class*="stat-card"],
+[class*="metric"] {
+  background: #FFFFFF !important;
+  border: 1px solid #EBEBED !important;
+  border-radius: 12px !important;
+  border-top: none !important;
+  border-left: none !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+  padding: 20px 22px !important;
+  position: relative !important;
+  overflow: hidden !important;
+}
+
+/* Decorative top bar per card */
+.kpi-card:nth-child(1)::before,
+.stat-card:nth-child(1)::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important; left: 0 !important; right: 0 !important;
+  height: 3px !important;
+  background: #D4A5A5 !important;
+}
+
+.kpi-card:nth-child(2)::before,
+.stat-card:nth-child(2)::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important; left: 0 !important; right: 0 !important;
+  height: 3px !important;
+  background: #A8C5DA !important; /* soft blue */
+}
+
+.kpi-card:nth-child(3)::before,
+.stat-card:nth-child(3)::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important; left: 0 !important; right: 0 !important;
+  height: 3px !important;
+  background: #B8D4B8 !important; /* soft sage */
+}
+
+.kpi-card:nth-child(4)::before,
+.stat-card:nth-child(4)::before {
+  content: '' !important;
+  position: absolute !important;
+  top: 0 !important; left: 0 !important; right: 0 !important;
+  height: 3px !important;
+  background: #D4A5A5 !important;
+}
+
+/* Stat label */
+.kpi-label, .stat-label, [class*="kpi-label"],
+[class*="stat-label"] {
+  font-size: 10px !important;
+  font-weight: 600 !important;
+  letter-spacing: 1.2px !important;
+  text-transform: uppercase !important;
+  color: #A8A8B3 !important;
+  margin-bottom: 8px !important;
+}
+
+/* Stat value */
+.kpi-value, .stat-value, [class*="kpi-value"],
+[class*="stat-value"] {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 32px !important;
+  font-weight: 600 !important;
+  color: #1C1C1E !important;
+  line-height: 1 !important;
+  margin-bottom: 6px !important;
+}
+
+/* Change indicator */
+.kpi-change, .stat-change {
+  font-size: 12px !important;
+  color: #A8A8B3 !important;
+}
+
+===============================================================
+FIX 5 — CONTENT CARDS
+===============================================================
+
+/* All content cards */
+.card, [class*="card"]:not([class*="kpi"]):not([class*="stat"]) {
+  background: #FFFFFF !important;
+  border: 1px solid #EBEBED !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.05) !important;
+  overflow: hidden !important;
+}
+
+/* Card headers */
+.card-header, [class*="card-header"] {
+  background: #FAFAFA !important;
+  border-bottom: 1px solid #F0F0F2 !important;
+  padding: 14px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+}
+
+.card-header h2, .card-header h3,
+.card-title, [class*="card-title"] {
+  font-family: 'Playfair Display', serif !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  color: #1C1C1E !important;
+}
+
+/* Card body */
+.card-body, [class*="card-body"] {
+  padding: 20px !important;
+}
+
+/* View all link */
+a[class*="view-all"], .view-all {
+  font-size: 12px !important;
+  color: #D4A5A5 !important;
+  font-weight: 500 !important;
+  text-decoration: none !important;
+}
+
+===============================================================
+FIX 6 — TABLE STYLES
+===============================================================
+
+/* Table headers */
+th, thead td {
+  font-size: 10px !important;
+  font-weight: 700 !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  color: #A8A8B3 !important;
+  border-bottom: 1px solid #EBEBED !important;
+  padding: 10px 12px !important;
+  background: transparent !important;
+}
+
+/* Table rows */
+td {
+  font-size: 13px !important;
+  color: #1C1C1E !important;
+  padding: 12px !important;
+  border-bottom: 1px solid #F7F7F8 !important;
+}
+
+tr:hover td {
+  background: #FAFAFA !important;
+}
+
+/* Row action buttons */
+.row-action, td button {
+  font-size: 12px !important;
+  color: #A8A8B3 !important;
+  background: transparent !important;
+  border: none !important;
+  cursor: pointer !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+}
+
+.row-action:hover, td button:hover {
+  color: #1C1C1E !important;
+  background: #F7F7F8 !important;
+}
+
+===============================================================
+FIX 7 — STATUS PILLS
+===============================================================
+
+[class*="status-confirmed"],
+[class*="status"][value="confirmed"],
+.badge-confirmed {
+  background: #E8F5EC !important;
+  color: #1E6B35 !important;
+  border: 1px solid #C3E0CC !important;
+  border-radius: 20px !important;
+  padding: 3px 10px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+[class*="status-pending"],
+.badge-pending {
+  background: #FDF0F0 !important;
+  color: #B8887E !important;
+  border: 1px solid #EDD5D5 !important;
+  border-radius: 20px !important;
+  padding: 3px 10px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+[class*="status-cancelled"],
+.badge-cancelled {
+  background: #F5F5F7 !important;
+  color: #6E6E80 !important;
+  border: 1px solid #E5E5EA !important;
+  border-radius: 20px !important;
+  padding: 3px 10px !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+}
+
+===============================================================
+FIX 8 — LOGIN SCREEN
+===============================================================
+
+/* Full login page */
+.login-page, body.login, 
+#login-screen, [class*="login-page"] {
+  background: #0D0D0F !important;
+  min-height: 100vh !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* Subtle gradient */
+body.login::before {
+  content: '' !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background: radial-gradient(
+    ellipse at 50% 40%,
+    rgba(212,165,165,0.08) 0%,
+    transparent 70%
+  ) !important;
+  pointer-events: none !important;
+}
+
+/* Login card */
+.login-card, .login-box, .login-form,
+[class*="login-card"] {
+  background: rgba(255,255,255,0.03) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  border-radius: 20px !important;
+  padding: 44px 40px !important;
+  width: 100% !important;
+  max-width: 380px !important;
+  backdrop-filter: blur(20px) !important;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.4) !important;
+}
+
+/* Brand on login */
+.login-brand, .login-logo {
+  text-align: center !important;
+  margin-bottom: 32px !important;
+}
+
+.login-brand h1, .login-brand-name {
+  font-family: 'Playfair Display', serif !important;
+  color: #FFFFFF !important;
+  font-size: 20px !important;
+  font-weight: 700 !important;
+  letter-spacing: 3px !important;
+  text-transform: uppercase !important;
+}
+
+.login-brand-sub {
+  color: #D4A5A5 !important;
+  font-size: 9px !important;
+  letter-spacing: 4px !important;
+  text-transform: uppercase !important;
+  margin-top: 4px !important;
+}
+
+/* Login input */
+.login-input, .login-form input {
+  background: rgba(255,255,255,0.05) !important;
+  border: 1px solid rgba(255,255,255,0.1) !important;
+  border-radius: 10px !important;
+  color: #FFFFFF !important;
+  padding: 13px 16px !important;
+  font-size: 14px !important;
+  width: 100% !important;
+  margin-bottom: 12px !important;
+}
+
+.login-input:focus, .login-form input:focus {
+  border-color: #D4A5A5 !important;
+  outline: none !important;
+  background: rgba(255,255,255,0.07) !important;
+}
+
+.login-form input::placeholder {
+  color: rgba(255,255,255,0.25) !important;
+}
+
+/* Login button */
+.login-btn, .login-form button,
+.login-submit {
+  background: #D4A5A5 !important;
+  color: #FFFFFF !important;
+  border: none !important;
+  border-radius: 10px !important;
+  padding: 13px !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  width: 100% !important;
+  cursor: pointer !important;
+  letter-spacing: 0.3px !important;
+  transition: all 0.15s !important;
+}
+
+.login-btn:hover {
+  background: #C49090 !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 8px 24px rgba(212,165,165,0.3) !important;
+}
+
+/* Click hint text */
+.login-hint, .click-hint {
+  color: rgba(255,255,255,0.2) !important;
+  font-size: 11px !important;
+  text-align: center !important;
+  margin-top: 16px !important;
+}
+
+===============================================================
+FIX 9 — FORM INPUTS THROUGHOUT PORTAL
+===============================================================
+
+input, select, textarea {
+  border: 1px solid #EBEBED !important;
+  border-radius: 8px !important;
+  color: #1C1C1E !important;
+  font-size: 13px !important;
+  padding: 10px 13px !important;
+  background: #FFFFFF !important;
+}
+
+input:focus, select:focus, textarea:focus {
+  border-color: #D4A5A5 !important;
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(212,165,165,0.1) !important;
+}
+
+label {
+  font-size: 12px !important;
+  font-weight: 500 !important;
+  color: #6E6E80 !important;
+  margin-bottom: 4px !important;
+}
+
+===============================================================
+FIX 10 — MODAL / DRAWER STYLES
+===============================================================
+
+.modal, .drawer, [class*="modal"],
+[class*="drawer"] {
+  background: #FFFFFF !important;
+  border-radius: 16px !important;
+  border: 1px solid #EBEBED !important;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.12) !important;
+}
+
+.modal-header, [class*="modal-header"] {
+  border-bottom: 1px solid #EBEBED !important;
+  padding: 18px 24px !important;
+  font-family: 'Playfair Display', serif !important;
+  font-size: 16px !important;
+  color: #1C1C1E !important;
+}
+
+.modal-overlay, .drawer-overlay {
+  background: rgba(0,0,0,0.4) !important;
+  backdrop-filter: blur(4px) !important;
+}
+
+===============================================================
+FINAL RULES
+===============================================================
+
+- Zero brown anywhere — it's gone
+- Sidebar: charcoal #1C1C1E with blush accents
+- Main: light grey #F7F7F8 background
+- Cards: white, minimal shadow, clean
+- Accent: dusty rose #D4A5A5 ONLY for:
+  active nav, active borders, accents,
+  login button, view all links, badges
+- All other buttons: charcoal #1C1C1E
+- Typography: Playfair Display for all 
+  headings, DM Sans for everything else
+- Login screen: near-black with rose glow
+- No functionality changes whatsoever
+- Test all pages after applying
+
+Republish after changes then reload 
+portal.html to verify.
