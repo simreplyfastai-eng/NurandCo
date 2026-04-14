@@ -34,8 +34,64 @@ export default function Reviews() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <section id="reviews" style={{ background: "#FAF7F2", padding: "100px 0" }}>
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
+    <section id="reviews" style={{ background: "#FAF7F2", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+
+      {/* Decorative background layer */}
+      {/* Large faint quotation mark — top right */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: "-40px", right: "-20px",
+        fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 700,
+        fontSize: "clamp(180px, 26vw, 320px)", color: "rgba(200,134,10,0.05)",
+        lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-0.04em",
+      }}>"</div>
+
+      {/* Radial amber glow — bottom right */}
+      <div aria-hidden="true" style={{
+        position: "absolute", bottom: -60, right: -60,
+        width: 360, height: 360,
+        background: "radial-gradient(circle, rgba(200,134,10,0.08) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+
+      {/* Radial amber glow — top left */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: -40, left: -40,
+        width: 280, height: 280,
+        background: "radial-gradient(circle, rgba(200,134,10,0.06) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+
+      {/* Scattered ✦ ornaments */}
+      {[
+        { top: "10%", left: "4%",   size: "0.9rem",  opacity: 0.12 },
+        { top: "50%", left: "2%",   size: "0.65rem", opacity: 0.09 },
+        { top: "80%", left: "6%",   size: "1.1rem",  opacity: 0.08 },
+        { top: "15%", right: "5%",  size: "0.75rem", opacity: 0.10 },
+        { top: "70%", right: "3%",  size: "0.85rem", opacity: 0.09 },
+      ].map((pos, i) => (
+        <div key={i} aria-hidden="true" style={{
+          position: "absolute", ...(pos as any),
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: pos.size, color: "#C8860A", opacity: pos.opacity,
+          pointerEvents: "none", userSelect: "none",
+        }}>✦</div>
+      ))}
+
+      {/* Thin horizontal rule lines */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: 48, left: "50%", transform: "translateX(-50%)",
+        width: "60%", height: 1,
+        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.16), transparent)",
+        pointerEvents: "none",
+      }} />
+      <div aria-hidden="true" style={{
+        position: "absolute", bottom: 48, left: "50%", transform: "translateX(-50%)",
+        width: "60%", height: 1,
+        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.16), transparent)",
+        pointerEvents: "none",
+      }} />
+
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
