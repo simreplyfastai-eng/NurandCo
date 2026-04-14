@@ -42,7 +42,7 @@ export default function Navbar() {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[#FAF7F2] ${isScrolled ? "py-3 shadow-sm" : "py-4"}`}
         style={{ borderBottom: "1px solid #D9D2C7" }}
       >
-        <div className="w-full px-8 flex items-center justify-between">
+        <div className="w-full pl-16 pr-8 flex items-center justify-between">
           {/* Logo lockup */}
           <a href="#" className="flex flex-col items-start relative z-50 leading-none gap-[1px]" onClick={(e) => scrollTo(e, "#")}>
             <span className="font-serif italic text-[18px] font-normal leading-none" style={{ color: "#1C1C1E" }}>
