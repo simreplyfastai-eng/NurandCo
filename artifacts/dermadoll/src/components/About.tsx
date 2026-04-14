@@ -103,7 +103,8 @@ export default function About() {
             <div style={{ display: "flex", gap: 32, marginBottom: 36 }}>
               {[
                 { value: "100+", label: "Clients" },
-                { value: "5★", label: "Average Rating" },
+                { value: "5★", label: "Rated" },
+                { value: "Advanced", label: "Aesthetics Practitioner" },
               ].map((stat) => (
                 <div key={stat.label}>
                   <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.2rem", fontWeight: 600, color: "#1A0F00", lineHeight: 1 }}>
