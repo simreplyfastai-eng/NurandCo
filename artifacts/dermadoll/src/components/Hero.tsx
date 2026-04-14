@@ -137,13 +137,43 @@ export default function Hero() {
           style={{
             width: "55%",
             minHeight: "100dvh",
-            background: "#FAF7F2",
+            background: "linear-gradient(145deg, #fdf9f3 0%, #FAF7F2 45%, #f3ede2 100%)",
             display: "flex",
             alignItems: "center",
             padding: "100px 64px 80px",
             boxSizing: "border-box",
+            position: "relative",
+            overflow: "hidden",
           }}
         >
+          {/* Large decorative serif watermark */}
+          <div aria-hidden="true" style={{
+            position: "absolute",
+            bottom: -20,
+            right: -10,
+            fontFamily: "'Cormorant Garamond', serif",
+            fontStyle: "italic",
+            fontWeight: 700,
+            fontSize: "clamp(160px, 22vw, 260px)",
+            color: "rgba(200,134,10,0.055)",
+            lineHeight: 1,
+            pointerEvents: "none",
+            userSelect: "none",
+            letterSpacing: "-0.04em",
+          }}>
+            N
+          </div>
+          {/* Subtle amber glow top right */}
+          <div aria-hidden="true" style={{
+            position: "absolute",
+            top: -40,
+            right: 0,
+            width: 280,
+            height: 280,
+            borderRadius: "50%",
+            background: "radial-gradient(circle, rgba(200,134,10,0.07) 0%, transparent 70%)",
+            pointerEvents: "none",
+          }} />
           <div style={{ maxWidth: 520 }}>
             {/* Eyebrow */}
             <div style={{
@@ -233,6 +263,15 @@ export default function Hero() {
             </div>
           </div>
         </div>
+
+        {/* Thin amber divider between panels */}
+        <div aria-hidden="true" style={{
+          width: 1,
+          minHeight: "100dvh",
+          background: "linear-gradient(180deg, transparent 0%, rgba(200,134,10,0.35) 20%, rgba(200,134,10,0.5) 50%, rgba(200,134,10,0.35) 80%, transparent 100%)",
+          flexShrink: 0,
+          zIndex: 5,
+        }} />
 
         {/* RIGHT — image */}
         <div

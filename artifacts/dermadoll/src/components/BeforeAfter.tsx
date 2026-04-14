@@ -54,8 +54,9 @@ export default function BeforeAfter() {
   return (
     <>
       <section
-        className="py-[100px] bg-secondary"
         style={{
+          padding: "100px 0",
+          background: "#F0EBE1",
           position: "relative",
           overflow: "hidden",
         }}
@@ -102,38 +103,37 @@ export default function BeforeAfter() {
 
           {/* Heading block */}
           <div className="text-center mb-20">
+            {/* Eyebrow */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5 }}
+              style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}
+            >
+              <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>RESULTS</span>
+              <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+            </motion.div>
+
             <motion.h2
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              className="font-serif text-[2rem] md:text-[56px] mb-5"
+              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1A0F00", margin: "0 0 12px" }}
             >
-              The Doll Gallery
+              Real Results
             </motion.h2>
 
-            {/* Animated gold divider */}
-            <motion.div
-              initial={{ width: 0 }}
-              whileInView={{ width: 60 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
-              style={{
-                height: 1,
-                background: "#C9A96E",
-                margin: "0 auto 20px",
-              }}
-            />
-
             <motion.p
-              initial={{ opacity: 0, y: 30 }}
+              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
-              className="font-light text-lg"
-              style={{ color: "#C9A96E" }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+              style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C8860A", margin: "0 0 8px" }}
             >
-              Every result is natural, tailored and uniquely yours
+              Every result is real. Every client is unique.
             </motion.p>
           </div>
 
