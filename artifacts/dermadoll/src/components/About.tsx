@@ -117,26 +117,28 @@ export default function About() {
               </div>
             </div>
 
-            <button
-              onClick={() => setConsultOpen(true)}
-              style={{
-                background: "transparent",
-                border: "1px solid #1A0F00",
-                color: "#1A0F00",
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 11,
-                letterSpacing: "2px",
-                textTransform: "uppercase",
-                padding: "14px 28px",
-                borderRadius: 0,
-                cursor: "pointer",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0F00"; e.currentTarget.style.color = "#FAF7F2"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1A0F00"; }}
-            >
-              Book a Consultation
-            </button>
+            <div style={{ textAlign: "center" }}>
+              <button
+                onClick={() => setConsultOpen(true)}
+                style={{
+                  background: "transparent",
+                  border: "1px solid #1A0F00",
+                  color: "#1A0F00",
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 11,
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                  padding: "14px 28px",
+                  borderRadius: 0,
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0F00"; e.currentTarget.style.color = "#FAF7F2"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1A0F00"; }}
+              >
+                Book a Consultation
+              </button>
+            </div>
           </motion.div>
         </div>
       </div>
