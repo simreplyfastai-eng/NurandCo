@@ -146,22 +146,24 @@ export default function Hero() {
             overflow: "hidden",
           }}
         >
-          {/* Large decorative serif watermark */}
+          {/* Large decorative serif watermark — "FACE BY NIAMH" stacked */}
           <div aria-hidden="true" style={{
             position: "absolute",
-            bottom: -20,
-            right: -10,
+            bottom: -10,
+            left: -8,
+            right: 0,
             fontFamily: "'Cormorant Garamond', serif",
             fontStyle: "italic",
             fontWeight: 700,
-            fontSize: "clamp(160px, 22vw, 260px)",
+            fontSize: "clamp(72px, 11vw, 140px)",
             color: "rgba(200,134,10,0.055)",
-            lineHeight: 1,
+            lineHeight: 0.92,
             pointerEvents: "none",
             userSelect: "none",
-            letterSpacing: "-0.04em",
+            letterSpacing: "-0.03em",
+            whiteSpace: "nowrap",
           }}>
-            N
+            FACE<br />BY<br />NIAMH
           </div>
           {/* Subtle amber glow top right */}
           <div aria-hidden="true" style={{
