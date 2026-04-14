@@ -20,7 +20,7 @@ function Eyebrow({ label }: { label: string }) {
 }
 
 export default function About() {
-  const [practImage, setPractImage] = useState<string | null>(null);
+  const [practImage, setPractImage] = useState<string | null>(`${import.meta.env.BASE_URL}niamh-practitioner.jpg`);
   const [consultOpen, setConsultOpen] = useState(false);
 
   useEffect(() => {
@@ -52,7 +52,7 @@ export default function About() {
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7 }}
-            style={{ aspectRatio: "3/4", overflow: "hidden", background: "#d8cfc6" }}
+            style={{ aspectRatio: "3/4", overflow: "hidden", background: "#d8cfc6", borderRadius: 4, boxShadow: "0 8px 40px rgba(26,15,0,0.12)" }}
           >
             {practImage ? (
               <img
