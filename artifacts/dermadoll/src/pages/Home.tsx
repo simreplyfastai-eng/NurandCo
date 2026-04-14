@@ -14,7 +14,6 @@ import FAQ from "@/components/FAQ";
 import CTABanner from "@/components/CTABanner";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
-import SectionDivider from "@/components/SectionDivider";
 
 export default function Home() {
   const [showBookingSuccess, setShowBookingSuccess] = useState(false);
@@ -111,35 +110,27 @@ export default function Home() {
 
       {/* 3. About */}
       <About />
-      <SectionDivider />
 
       {/* 4. Services */}
       <Services />
-      <SectionDivider />
 
       {/* 5. Packages */}
       <Packages />
-      <SectionDivider />
 
       {/* 6. Pricing */}
       <Pricing />
-      <SectionDivider />
 
       {/* 7. Gallery */}
       <FacesGallery />
-      <SectionDivider />
 
       {/* 8. Reviews */}
       <Reviews />
-      <SectionDivider />
 
       {/* 9. FAQ */}
       <FAQ />
-      <SectionDivider />
 
       {/* 10. CTA Banner */}
       <CTABanner />
-      <SectionDivider />
 
       {/* 11. Contact */}
       <Contact />

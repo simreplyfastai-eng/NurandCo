@@ -86,7 +86,7 @@ export default function FAQ() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "20px 24px",
-                  background: open === i ? "#1C1C1E" : "#FAF7F2",
+                  background: open === i ? "#C9A96E" : "#FAF7F2",
                   border: "none",
                   cursor: "pointer",
                   gap: 16,
@@ -98,7 +98,7 @@ export default function FAQ() {
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 14,
                   fontWeight: 500,
-                  color: open === i ? "#FAF7F2" : "#1C1C1E",
+                  color: "#1C1C1E",
                 }}>
                   {faq.question}
                 </span>

@@ -191,7 +191,7 @@ export default function Pricing() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "18px 24px",
-                  background: open === i ? "#1C1C1E" : "#FAF7F2",
+                  background: open === i ? "#C9A96E" : "#FFFFFF",
                   border: "none",
                   cursor: "pointer",
                   transition: "background 0.2s",
@@ -201,7 +201,7 @@ export default function Pricing() {
                   fontFamily: "'Cormorant Garamond', serif",
                   fontSize: "1.15rem",
                   fontWeight: 600,
-                  color: open === i ? "#FAF7F2" : "#1C1C1E",
+                  color: "#1C1C1E",
                 }}>
                   {cat.title}
                 </span>
@@ -220,7 +220,7 @@ export default function Pricing() {
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    style={{ overflow: "hidden", background: "#FAF7F2" }}
+                    style={{ overflow: "hidden", background: "#FFFFFF" }}
                   >
                     <div style={{ padding: "4px 24px 8px" }}>
                       {cat.items.map((item, j) => (
