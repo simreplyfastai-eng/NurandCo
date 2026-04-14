@@ -3,28 +3,29 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Dermadoll Admin Portal</title>
+<title>Face By Niamh — Admin Portal</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;max-width:100%}
-:root{--gold:#C9A96E;--bg:#FFFFFF;--sidebar:#FAF9F7;--text:#111111;--muted:#888;--border:#E8E4DE;--card-shadow:0 2px 12px rgba(0,0,0,.06)}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;max-width:100vw}
+:root{--gold:#C8860A;--bg:#FFFFFF;--sidebar:#FAF7F2;--text:#1A0F00;--muted:#6B6260;--border:#E2DDD5;--card-shadow:0 2px 12px rgba(0,0,0,.06)}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;max-width:100vw}
 h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
+.login-wordmark{font-size:22px !important;letter-spacing:.12em !important}
 
 /* ── LOGIN ─────────────────────────────────────── */
-#login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#FAF9F7}
+#login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;background:#FAF7F2}
 .login-card{position:relative;background:#fff;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.1);padding:48px 40px;width:100%;max-width:400px}
 .login-close{position:absolute;top:16px;right:16px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;border-radius:50%;color:#bbb;font-size:18px;line-height:1;transition:background .15s,color .15s}
 .login-close:hover{background:#f5f5f5;color:#555}
 .login-wordmark{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;letter-spacing:.18em;color:var(--gold);text-align:center}
-.login-sub{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);text-align:center;margin-top:6px;margin-bottom:36px;letter-spacing:.05em}
+.login-sub{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--muted);text-align:center;margin-top:6px;margin-bottom:36px;letter-spacing:.05em}
 .login-label{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:.05em;display:block;margin-bottom:6px;text-transform:uppercase}
-.login-input{width:100%;padding:12px 14px;border:1px solid var(--gold);border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;color:var(--text);outline:none;transition:box-shadow .2s;margin-bottom:18px}
-.login-input:focus{box-shadow:0 0 0 3px rgba(201,169,110,.18)}
-.login-btn{width:100%;padding:14px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;margin-top:4px}
+.login-input{width:100%;padding:12px 14px;border:1px solid var(--gold);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);outline:none;transition:box-shadow .2s;margin-bottom:18px}
+.login-input:focus{box-shadow:0 0 0 3px rgba(200,134,10,.18)}
+.login-btn{width:100%;padding:14px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:opacity .2s;margin-top:4px}
 .login-btn:hover{opacity:.9}
 .login-error{font-size:12px;color:#e53935;text-align:center;margin-top:12px;min-height:18px}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
@@ -52,9 +53,9 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 .sb-badge-count{margin-left:auto;background:var(--gold);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px}
 .sb-item.active .sb-badge-count{background:#fff;color:var(--gold)}
 .sb-footer{padding:16px 12px;border-top:1px solid var(--border)}
-.logout-btn{width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:transparent;font-family:'Inter',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;transition:all .2s}
+.logout-btn{width:100%;padding:9px;border:1px solid var(--border);border-radius:8px;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--muted);cursor:pointer;transition:all .2s}
 .logout-btn:hover{border-color:#e53935;color:#e53935}
-#mobile-toggle{display:none;position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:#C9A96E;border:none;border-radius:14px;cursor:pointer;width:56px;height:56px;align-items:center;justify-content:center;flex-direction:column;gap:5px;box-shadow:0 4px 20px rgba(201,169,110,.4)}
+#mobile-toggle{display:none;position:fixed;bottom:calc(24px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);z-index:1000;background:#C8860A;border:none;border-radius:14px;cursor:pointer;width:56px;height:56px;align-items:center;justify-content:center;flex-direction:column;gap:5px;box-shadow:0 4px 20px rgba(200,134,10,.4)}
 .mob-line{display:block;width:22px;height:2px;background:#fff;border-radius:2px;transition:transform .2s,opacity .2s}
 #mobile-toggle.open .mob-line:nth-child(1){transform:translateY(7px) rotate(45deg)}
 #mobile-toggle.open .mob-line:nth-child(2){opacity:0;transform:scaleX(0)}
@@ -64,11 +65,11 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 /* ── TOP BAR ─────────────────────────────────────── */
 .topbar{display:flex;align-items:center;gap:12px;padding:20px 28px;border-bottom:1px solid var(--border);background:#fff;position:sticky;top:0;z-index:50}
 .topbar-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;margin-right:auto}
-.topbar-search{flex:1;max-width:300px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none}
+.topbar-search{flex:1;max-width:300px;padding:9px 14px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none}
 .topbar-search:focus{border-color:var(--gold)}
-.btn-outline{padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:transparent;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;cursor:pointer;color:var(--text);transition:all .2s}
+.btn-outline{padding:8px 16px;border:1px solid var(--border);border-radius:8px;background:transparent;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;cursor:pointer;color:var(--text);transition:all .2s}
 .btn-outline:hover{border-color:var(--gold);color:var(--gold)}
-.btn-gold{padding:8px 18px;border:none;background:var(--gold);border-radius:8px;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .2s;white-space:nowrap}
+.btn-gold{padding:8px 18px;border:none;background:var(--gold);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;color:#fff;cursor:pointer;transition:opacity .2s;white-space:nowrap}
 .btn-gold:hover{opacity:.88}
 
 /* ── PAGE COMMON ─────────────────────────────────── */
@@ -80,10 +81,10 @@ h1,h2,h3,h4,.serif{font-family:'Cormorant Garamond',serif}
 .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:24px}
 .kpi-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:var(--card-shadow);position:relative}
 .kpi-card.kpi-link{cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .2s}
-.kpi-card.kpi-link:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 6px 20px rgba(201,169,110,.15)}
+.kpi-card.kpi-link:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:0 6px 20px rgba(200,134,10,.15)}
 .kpi-card.kpi-link::after{content:'→';position:absolute;bottom:16px;right:16px;color:var(--gold);font-size:13px;opacity:0;transition:opacity .2s}
 .kpi-card.kpi-link:hover::after{opacity:1}
-.back-to-dash{display:none;align-items:center;gap:5px;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;color:var(--text);transition:border-color .15s,color .15s;white-space:nowrap}
+.back-to-dash{display:none;align-items:center;gap:5px;background:none;border:1px solid var(--border);border-radius:8px;padding:6px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;color:var(--text);transition:border-color .15s,color .15s;white-space:nowrap}
 .back-to-dash:hover{border-color:var(--gold);color:var(--gold)}
 .back-to-dash.visible{display:inline-flex}
 .kpi-label{font-size:11px;font-weight:500;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-bottom:8px}
@@ -102,7 +103,7 @@ tr:last-child td{border-bottom:none}
 tr:hover td{background:#FDFBF8}
 .pill{display:inline-flex;align-items:center;padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;letter-spacing:.04em}
 .pill-green{background:#e8f5e9;color:#2e7d32}
-.pill-gold{background:rgba(201,169,110,.15);color:#8a6a3a}
+.pill-gold{background:rgba(200,134,10,.15);color:#7a5510}
 .pill-red{background:#fce8e6;color:#c62828}
 .pill-grey{background:#F0F0F0;color:#666}
 .pill-blue{background:#e3f2fd;color:#1565c0}
@@ -126,7 +127,7 @@ tr:hover td{background:#FDFBF8}
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px}
 .bar-label{width:110px;text-align:right;color:var(--muted);font-size:11px;flex-shrink:0}
 .bar-track{flex:1;background:#F5F0E8;border-radius:4px;height:20px;overflow:hidden}
-.bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#C9A96E,#E5C99A);transition:width .6s ease}
+.bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,#C8860A,#D4A855);transition:width .6s ease}
 .bar-val{width:50px;font-size:11px;font-weight:600;color:var(--text)}
 
 /* ── CALENDAR ────────────────────────────────────── */
@@ -143,10 +144,10 @@ tr:hover td{background:#FDFBF8}
 .cal-cell.selected .cal-date{color:#fff}
 .cal-cell.other-month{opacity:.35}
 .cal-cell.sunday{background:#F9F9F9;pointer-events:none}
-.cal-cell.available{background:rgba(201,169,110,.05)}
+.cal-cell.available{background:rgba(200,134,10,.05)}
 .cal-date{font-size:11px;font-weight:600;margin-bottom:4px}
 .cal-cell.today .cal-date{color:var(--gold)}
-.cal-dot{width:6px;height:6px;border-radius:50%;background:#C9A96E;position:absolute;bottom:6px;left:50%;transform:translateX(-50%)}
+.cal-dot{width:6px;height:6px;border-radius:50%;background:#C8860A;position:absolute;bottom:6px;left:50%;transform:translateX(-50%)}
 .cal-cell.selected .cal-dot{display:none}
 .cal-overflow-pill{background:#E8E8E8;color:#666;font-size:9px;border-radius:4px;padding:1px 5px;margin-bottom:2px;display:block}
 .cal-new-mobile{display:none}
@@ -171,7 +172,7 @@ tr:hover td{background:#FDFBF8}
 .avail-hours{display:flex;align-items:center;gap:6px;flex:1}
 .avail-hours.hidden{display:none}
 .avail-off-label{font-size:11px;color:#AAAAAA;font-style:italic;flex:1}
-.avail-time-input{border:1px solid #E0E0E0;border-radius:6px;padding:5px 7px;font-size:12px;font-family:'Inter',sans-serif;color:var(--text);background:#FAFAFA;width:88px;box-sizing:border-box;cursor:pointer}
+.avail-time-input{border:1px solid #E0E0E0;border-radius:6px;padding:5px 7px;font-size:12px;font-family:'DM Sans',sans-serif;color:var(--text);background:#FAFAFA;width:88px;box-sizing:border-box;cursor:pointer}
 .avail-time-input:focus{outline:none;border-color:var(--gold)}
 
 /* Toggle switch */
@@ -189,7 +190,7 @@ tr:hover td{background:#FDFBF8}
 .avail-mini-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
 .avail-mini-day-hdr{text-align:center;font-size:9px;font-weight:700;color:var(--muted);padding:3px 0}
 .avail-mini-cell{height:30px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;cursor:pointer;transition:all .15s;border:2px solid transparent;box-sizing:border-box}
-.avail-mini-cell.working{background:rgba(201,169,110,.12);color:var(--text)}
+.avail-mini-cell.working{background:rgba(200,134,10,.12);color:var(--text)}
 .avail-mini-cell.off{background:#F0F0F0;color:#BBBBBB}
 .avail-mini-cell.overridden{border-color:var(--gold)}
 .avail-mini-cell.selected{border-color:#111;box-shadow:0 0 0 1px #111}
@@ -222,39 +223,39 @@ tr:hover td{background:#FDFBF8}
   .timeline-status{width:100%;display:flex;justify-content:flex-end}
   .timeline-status .pill{min-height:36px;display:inline-flex;align-items:center;padding:0 14px}
   #page-schedule .topbar .cal-desktop-new{display:none}
-  .cal-new-mobile{display:block;width:100%;padding:10px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:12px;min-height:44px}
+  .cal-new-mobile{display:block;width:100%;padding:10px;background:var(--gold);color:#fff;border:none;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;margin-bottom:12px;min-height:44px}
   .cal-new-mobile:active{background:#b8903a}
 }
 
 /* ── CLIENTS LIST ────────────────────────────────── */
 .client-page-hdr{display:flex;align-items:center;justify-content:space-between;padding:20px 20px 12px;flex-wrap:wrap;gap:10px}
-.cl-count-pill{background:#F0F0F0;color:#888;font-size:11px;padding:2px 8px;border-radius:20px;margin-left:8px;font-family:'Inter',sans-serif;font-weight:500;vertical-align:middle}
-.btn-gold-outline{border:1px solid #C9A96E;color:#C9A96E;background:none;border-radius:20px;padding:6px 16px;font-family:'Inter',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
-.btn-gold-outline:hover{background:#C9A96E;color:#fff}
-.cl-search{width:100%;padding:10px 16px;border:1px solid #E0E0E0;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;color:#111;outline:none;box-sizing:border-box}
+.cl-count-pill{background:#F0F0F0;color:#888;font-size:11px;padding:2px 8px;border-radius:20px;margin-left:8px;font-family:'DM Sans',sans-serif;font-weight:500;vertical-align:middle}
+.btn-gold-outline{border:1px solid #C8860A;color:#C8860A;background:none;border-radius:20px;padding:6px 16px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-gold-outline:hover{background:#C8860A;color:#fff}
+.cl-search{width:100%;padding:10px 16px;border:1px solid #E0E0E0;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:#111;outline:none;box-sizing:border-box}
 .cl-search::placeholder{color:#AAAAAA}
 .client-list{background:#fff}
 .client-row{display:flex;align-items:center;gap:12px;padding:12px 16px;min-height:64px;cursor:pointer;background:#fff;transition:background .15s;border-bottom:1px solid #F0F0F0}
 .client-row:hover{background:#FAFAFA}
 .client-row:last-child{border-bottom:none}
-.cl-avatar{width:38px;height:38px;border-radius:50%;background:#C9A96E;color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cl-avatar{width:38px;height:38px;border-radius:50%;background:#C8860A;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .cl-info{flex:1;min-width:0}
 .cl-name{font-size:13px;font-weight:700;color:#111;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cl-meta{font-size:11px;color:#AAAAAA;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cl-stats{text-align:right;flex-shrink:0}
-.cl-spend{font-size:13px;font-weight:700;color:#C9A96E}
+.cl-spend{font-size:13px;font-weight:700;color:#C8860A}
 .cl-status{display:flex;align-items:center;justify-content:flex-end;gap:4px;margin-top:3px;font-size:10px}
 .cl-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-.cl-chevron{color:#CCC;font-size:16px;flex-shrink:0;margin-left:4px;font-family:'Inter',sans-serif}
+.cl-chevron{color:#CCC;font-size:16px;flex-shrink:0;margin-left:4px;font-family:'DM Sans',sans-serif}
 .cl-empty{text-align:center;padding:60px 20px}
 .cl-empty-title{font-family:'Cormorant Garamond',serif;font-size:20px;color:#111;margin-bottom:8px}
 .cl-empty-sub{font-size:13px;color:#AAAAAA}
 @media(max-width:380px){.cl-spend{display:none}}
 
 /* ── UNDO TOAST ─────────────────────────────────── */
-#undo-toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(12px);background:#111;color:#fff;padding:10px 16px;border-radius:10px;display:flex;align-items:center;gap:14px;font-size:13px;font-family:'Inter',sans-serif;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:600;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.25)}
+#undo-toast{position:fixed;bottom:calc(96px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(12px);background:#111;color:#fff;padding:10px 16px;border-radius:10px;display:flex;align-items:center;gap:14px;font-size:13px;font-family:'DM Sans',sans-serif;opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:600;white-space:nowrap;box-shadow:0 4px 20px rgba(0,0,0,.25)}
 #undo-toast.visible{opacity:1;transform:translateX(-50%) translateY(0);pointer-events:auto}
-.undo-btn{background:var(--gold);color:#fff;border:none;border-radius:6px;padding:4px 14px;cursor:pointer;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;transition:opacity .15s}
+.undo-btn{background:var(--gold);color:#fff;border:none;border-radius:6px;padding:4px 14px;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;transition:opacity .15s}
 .undo-btn:hover{opacity:.85}
 
 /* ── SIDE PANEL ─────────────────────────────────── */
@@ -263,32 +264,32 @@ tr:hover td{background:#FDFBF8}
 .panel-header{display:flex;align-items:center;justify-content:space-between;padding:20px 24px;border-bottom:1px solid var(--border);position:sticky;top:0;background:#fff;z-index:1}
 .panel-close{width:32px;height:32px;border-radius:50%;background:#F5F5F5;border:none;cursor:pointer;color:#888888;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1;transition:background .15s;flex-shrink:0}
 .panel-close:hover{background:#EEEEEE}
-.cp-avatar{width:52px;height:52px;border-radius:50%;background:#C9A96E;color:#fff;font-family:'Inter',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.cp-spend-amount{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:#C9A96E;line-height:1.1}
-.cp-spend-meta{font-family:'Inter',sans-serif;font-size:12px;color:#888888;margin-top:3px}
+.cp-avatar{width:52px;height:52px;border-radius:50%;background:#C8860A;color:#fff;font-family:'DM Sans',sans-serif;font-size:16px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.cp-spend-amount{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:#C8860A;line-height:1.1}
+.cp-spend-meta{font-family:'DM Sans',sans-serif;font-size:12px;color:#888888;margin-top:3px}
 .cp-meta-row{font-size:12px;color:#888888;margin-bottom:6px;display:flex;align-items:center;gap:6px}
-.cp-section-label{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;color:#AAAAAA;letter-spacing:1.5px;text-transform:uppercase;margin-top:20px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #C9A96E}
+.cp-section-label{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#AAAAAA;letter-spacing:1.5px;text-transform:uppercase;margin-top:20px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #C8860A}
 .cp-visit-row{background:#FAFAFA;border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;justify-content:space-between;align-items:flex-start}
-.cp-visit-treatment{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:#111111}
-.cp-visit-date{font-family:'Inter',sans-serif;font-size:11px;color:#AAAAAA;margin-top:3px}
-.cp-visit-price{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:#C9A96E;text-align:right}
-.cp-visit-pill{display:inline-block;font-family:'Inter',sans-serif;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:4px}
+.cp-visit-treatment{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#1A0F00}
+.cp-visit-date{font-family:'DM Sans',sans-serif;font-size:11px;color:#AAAAAA;margin-top:3px}
+.cp-visit-price{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#C8860A;text-align:right}
+.cp-visit-pill{display:inline-block;font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:4px}
 .cp-visit-pill.complete{background:#D8F3DC;color:#2D6A4F}
-.cp-visit-pill.pending{background:#FFF3E0;color:#C9A96E}
+.cp-visit-pill.pending{background:#FFF3E0;color:#C8860A}
 .cp-visit-pill.confirmed{background:#D8F3DC;color:#2D6A4F}
 .cp-visit-pill.cancelled{background:#EEEEEE;color:#888}
 .panel-body{padding:24px}
 
 /* ── TREATMENT ACCORDION ──────────────────────────── */
 .cat-accordion{background:#fff;border:1px solid #F0F0F0;border-radius:10px;margin-bottom:12px;overflow:hidden}
-.cat-accordion.open{border-left:3px solid #C9A96E}
+.cat-accordion.open{border-left:3px solid #C8860A}
 .cat-accordion-header{display:flex;align-items:center;gap:10px;padding:14px 18px;cursor:pointer;user-select:none;transition:background .15s;background:#FAFAFA;border-radius:10px}
 .cat-accordion.open .cat-accordion-header{border-radius:10px 10px 0 0}
 .cat-accordion-header:hover{background:#F5F3EF}
-.cat-chevron{font-size:18px;font-weight:300;color:#C9A96E;flex-shrink:0;line-height:1;width:20px;text-align:center}
+.cat-chevron{font-size:18px;font-weight:300;color:#C8860A;flex-shrink:0;line-height:1;width:20px;text-align:center}
 .cat-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;flex:1}
 .cat-count{background:#F3F0EA;color:var(--gold);font-size:11px;font-weight:700;padding:2px 10px;border-radius:20px;flex-shrink:0}
-.cat-add-btn{border:1px solid var(--gold);color:var(--gold);background:#fff;border-radius:20px;padding:5px 14px;font-family:'Inter',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.cat-add-btn{border:1px solid var(--gold);color:var(--gold);background:#fff;border-radius:20px;padding:5px 14px;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
 .cat-add-btn:hover{background:var(--gold);color:#fff}
 .cat-delete-btn{border:none;background:none;color:#ddd;font-size:14px;cursor:pointer;padding:4px;border-radius:6px;flex-shrink:0}
 .cat-delete-btn:hover{color:#e53935}
@@ -328,38 +329,38 @@ tr:hover td{background:#FDFBF8}
 #page-finance{overflow-x:hidden;background:#fff}
 #page-finance *{box-sizing:border-box}
 .fin-header{display:flex;align-items:center;gap:12px;padding:20px 24px 0;flex-wrap:wrap}
-.fin-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:#111111;flex:1}
-.fin-month-sel{border:1px solid #E0E0E0;border-radius:8px;padding:6px 28px 6px 14px;font-family:'Inter',sans-serif;font-size:13px;color:#111111;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23C9A96E'/%3E%3C/svg%3E") no-repeat right 10px center;-webkit-appearance:none;appearance:none;cursor:pointer;outline:none}
+.fin-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;color:#1A0F00;flex:1}
+.fin-month-sel{border:1px solid #E0E0E0;border-radius:8px;padding:6px 28px 6px 14px;font-family:'DM Sans',sans-serif;font-size:13px;color:#1A0F00;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23C9A96E'/%3E%3C/svg%3E") no-repeat right 10px center;-webkit-appearance:none;appearance:none;cursor:pointer;outline:none}
 .fin-body{padding:16px 24px 100px}
 .fin-kpi-row{display:flex;border:1px solid #F0F0F0;border-radius:12px;overflow:hidden}
 .fin-kpi-card{flex:1;padding:16px 12px;text-align:center;border-right:1px solid #F0F0F0}
 .fin-kpi-card:last-child{border-right:none}
-.fin-kpi-label{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;color:#AAAAAA;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
+.fin-kpi-label{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;color:#AAAAAA;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px}
 .fin-kpi-value{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;line-height:1.1}
 .fin-card{background:#fff;border:1px solid #F0F0F0;border-radius:12px;padding:20px}
 .fin-card-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
-.fin-card-title{font-family:'Inter',sans-serif;font-size:13px;font-weight:700;color:#111111}
-.fin-total-pill{background:#F5F5F5;color:#888888;font-family:'Inter',sans-serif;font-size:12px;border-radius:20px;padding:4px 12px}
+.fin-card-title{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#1A0F00}
+.fin-total-pill{background:#F5F5F5;color:#888888;font-family:'DM Sans',sans-serif;font-size:12px;border-radius:20px;padding:4px 12px}
 .fin-filter-row{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .fin-filter-row::-webkit-scrollbar{display:none}
-.fin-tab{font-family:'Inter',sans-serif;font-size:12px;padding:6px 14px;border-radius:20px;background:#F5F5F5;color:#888;border:none;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
-.fin-tab.active{background:#111111;color:#fff}
+.fin-tab{font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 14px;border-radius:20px;background:#F5F5F5;color:#888;border:none;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0}
+.fin-tab.active{background:#1A0F00;color:#fff}
 #revenue-canvas{width:100%!important;max-width:100%!important;height:220px;display:block}
 .fin-table{width:100%;table-layout:fixed;border-collapse:collapse}
-.fin-table thead th{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;color:#AAAAAA;letter-spacing:1px;text-transform:uppercase;padding:10px 12px;text-align:left;background:#FAFAFA;border-bottom:1px solid #F0F0F0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fin-table tbody td{padding:0 12px;height:52px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-bottom:1px solid #F5F5F5;font-family:'Inter',sans-serif}
+.fin-table thead th{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;color:#AAAAAA;letter-spacing:1px;text-transform:uppercase;padding:10px 12px;text-align:left;background:#FAFAFA;border-bottom:1px solid #F0F0F0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fin-table tbody td{padding:0 12px;height:52px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-bottom:1px solid #F5F5F5;font-family:'DM Sans',sans-serif}
 .fin-table tbody tr:last-child td{border-bottom:none}
 .fin-table tbody tr:hover td{background:#FAFAFA}
-.fin-pill{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block}
+.fin-pill{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block}
 .fin-pill.complete,.fin-pill.confirmed{background:#D8F3DC;color:#2D6A4F}
-.fin-pill.pending{background:#FFF3E0;color:#C9A96E}
+.fin-pill.pending{background:#FFF3E0;color:#C8860A}
 .fin-pill.cancelled{background:#EEEEEE;color:#888}
-.fin-mark-btn{border:1px solid #C9A96E;color:#C9A96E;background:#fff;font-family:'Inter',sans-serif;font-size:11px;border-radius:20px;padding:4px 12px;cursor:pointer;white-space:nowrap;transition:all .15s}
-.fin-mark-btn:hover{background:#C9A96E;color:#fff}
-.fin-mark-circle{width:28px;height:28px;border-radius:50%;border:1px solid #C9A96E;color:#C9A96E;background:#fff;font-size:14px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;margin:auto;display:flex}
-.fin-mark-circle:hover{background:#C9A96E;color:#fff}
+.fin-mark-btn{border:1px solid #C8860A;color:#C8860A;background:#fff;font-family:'DM Sans',sans-serif;font-size:11px;border-radius:20px;padding:4px 12px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.fin-mark-btn:hover{background:#C8860A;color:#fff}
+.fin-mark-circle{width:28px;height:28px;border-radius:50%;border:1px solid #C8860A;color:#C8860A;background:#fff;font-size:14px;line-height:1;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;margin:auto;display:flex}
+.fin-mark-circle:hover{background:#C8860A;color:#fff}
 /* ── BOOKINGS FILTER ROW ─────────────────────────── */
-.bk-filter-btn{font-family:'Inter',sans-serif;font-size:12px;padding:6px 14px;border-radius:20px;background:#F5F5F5;color:#888;border:none;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;max-width:none}
+.bk-filter-btn{font-family:'DM Sans',sans-serif;font-size:12px;padding:6px 14px;border-radius:20px;background:#F5F5F5;color:#888;border:none;cursor:pointer;white-space:nowrap;transition:all .15s;flex-shrink:0;max-width:none}
 .bk-filter-btn.active{background:#111;color:#fff}
 .bk-filter-btn:hover:not(.active){background:#e8e8e8;color:#444}
 .bk-filter-row{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;flex-wrap:nowrap;white-space:nowrap;margin-bottom:18px;width:100%;max-width:100%}
@@ -367,16 +368,16 @@ tr:hover td{background:#FDFBF8}
 /* ── BOOKINGS TABLE WRAPPER ──────────────────────── */
 #bk-all-wrap{width:100%;max-width:100%;overflow:hidden;box-sizing:border-box;display:block}
 #bk-all-table{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;display:table}
-#bk-all-table thead th{font-family:'Inter',sans-serif;font-size:10px;font-weight:700;color:#AAAAAA;letter-spacing:1px;text-transform:uppercase;padding:10px 12px;text-align:left;background:#FAFAFA;border-bottom:1px solid #F0F0F0;overflow:hidden;white-space:nowrap;max-width:none}
+#bk-all-table thead th{font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;color:#AAAAAA;letter-spacing:1px;text-transform:uppercase;padding:10px 12px;text-align:left;background:#FAFAFA;border-bottom:1px solid #F0F0F0;overflow:hidden;white-space:nowrap;max-width:none}
 #bk-all-table tbody tr{border-bottom:1px solid #F5F5F5;height:56px}
 #bk-all-table tbody tr:last-child{border-bottom:none}
 #bk-all-table tbody tr:hover td{background:#FAFAFA}
-#bk-all-table tbody td{padding:0 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Inter',sans-serif;font-size:13px;color:#333;box-sizing:border-box;max-width:none}
+#bk-all-table tbody td{padding:0 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'DM Sans',sans-serif;font-size:13px;color:#333;box-sizing:border-box;max-width:none}
 .bk-date-cell{white-space:normal!important;line-height:1.4}
 .bk-date-day{font-size:12px;font-weight:700;color:#111}
 .bk-date-time{font-size:11px;color:#AAAAAA}
 /* Status pill — no dot, overflow-safe */
-.bk-status-pill{font-family:'Inter',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.bk-status-pill{font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 /* Desktop column widths — no Actions column */
 #bk-all-table .bk-col-date{width:18%}
 #bk-all-table .bk-col-client{width:20%}
@@ -393,7 +394,7 @@ tr:hover td{background:#FDFBF8}
   #bk-all-table .bk-col-status{width:14%}
   .bk-status-pill{max-width:70px;font-size:9px;padding:3px 6px}
 }
-.fin-export-btn{width:100%;border:1px solid #E0E0E0;color:#888888;background:#fff;border-radius:8px;padding:12px;font-family:'Inter',sans-serif;font-size:13px;cursor:pointer;margin-top:16px;transition:border-color .15s,color .15s;display:block}
+.fin-export-btn{width:100%;border:1px solid #E0E0E0;color:#888888;background:#fff;border-radius:8px;padding:12px;font-family:'DM Sans',sans-serif;font-size:13px;cursor:pointer;margin-top:16px;transition:border-color .15s,color .15s;display:block}
 .fin-export-btn:hover{border-color:#AAAAAA;color:#555}
 
 /* ── MODAL ───────────────────────────────────────── */
@@ -403,7 +404,7 @@ tr:hover td{background:#FDFBF8}
 .modal-title{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;margin-bottom:20px}
 .form-group{margin-bottom:16px}
 .form-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:6px}
-.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .2s}
+.form-input{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;transition:border-color .2s}
 .form-input:focus{border-color:var(--gold)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 
@@ -414,7 +415,7 @@ tr:hover td{background:#FDFBF8}
 .settings-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
 .settings-row:last-child{margin-bottom:0}
 .settings-row label{font-size:12px;font-weight:500;color:var(--muted);width:140px;flex-shrink:0}
-.settings-row input,.settings-row textarea{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;outline:none}
+.settings-row input,.settings-row textarea{flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none}
 .settings-row input:focus,.settings-row textarea:focus{border-color:var(--gold)}
 .checklist-item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:8px;background:#FAFAFA;border:1px solid var(--border)}
 .checklist-item.done{background:#F0FBF4;border-color:#B7E4C7}
@@ -422,12 +423,12 @@ tr:hover td{background:#FDFBF8}
 .chk-label{font-size:13px;font-weight:500;color:var(--text)}
 .chk-hint{font-size:11px;color:var(--muted);margin-top:1px;line-height:1.5}
 .chk-hint code{background:#eee;padding:1px 4px;border-radius:3px;font-size:10px}
-.danger-btn{padding:9px 20px;border:1px solid #e53935;border-radius:8px;background:transparent;color:#e53935;font-family:'Inter',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;margin-right:10px}
+.danger-btn{padding:9px 20px;border:1px solid #e53935;border-radius:8px;background:transparent;color:#e53935;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s;margin-right:10px}
 .danger-btn:hover{background:#fce8e6}
 
 /* ── MEDIA PAGE ──────────────────────────────────── */
 .media-slot{background:#fff;border:1px solid var(--border);border-radius:10px;padding:18px;display:flex;gap:14px;align-items:flex-start}
-.media-icon{width:40px;height:40px;border-radius:8px;background:rgba(201,169,110,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.media-icon{width:40px;height:40px;border-radius:8px;background:rgba(200,134,10,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .media-slot-title{font-weight:600;font-size:13px;margin-bottom:3px}
 .media-instruction{font-size:11px;color:var(--muted);line-height:1.6}
 .media-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:12px}
@@ -507,13 +508,13 @@ tr:hover td{background:#FDFBF8}
 }
 /* ── TOAST ── */
 #toast-container{position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
-.toast{background:#111;color:#fff;font-family:'Inter',sans-serif;font-size:13px;padding:12px 18px;border-radius:8px;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;max-width:320px;line-height:1.5}
+.toast{background:#111;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;padding:12px 18px;border-radius:8px;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;max-width:320px;line-height:1.5}
 .toast.show{opacity:1;transform:translateY(0)}
 /* ── ENQUIRIES TABLE ── */
 #enq-body tr:nth-child(even){background:#FAFAFA}
 #enq-body td{padding:12px 16px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:top}
 #enq-body tr:last-child td{border-bottom:none}
-.enq-status-select{font-family:'Inter',sans-serif;font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;background:#fff;cursor:pointer}
+.enq-status-select{font-family:'DM Sans',sans-serif;font-size:12px;padding:4px 8px;border:1px solid var(--border);border-radius:4px;background:#fff;cursor:pointer}
 </style>
 </head>
 <body>
@@ -523,10 +524,10 @@ tr:hover td{background:#FDFBF8}
 <div id="login-page">
   <div class="login-card" id="login-card">
     <button class="login-close" onclick="window.location.href='/'" aria-label="Back to site">✕</button>
-    <div class="login-wordmark">DERMADOLL</div>
-    <div class="login-sub">Admin Portal</div>
+    <div class="login-wordmark">FACE BY NIAMH</div>
+    <div class="login-sub">Aesthetics · Admin Portal</div>
     <label class="login-label">Email</label>
-    <input class="login-input" type="email" id="login-email" placeholder="admin@dermadoll.com" autocomplete="email"/>
+    <input class="login-input" type="email" id="login-email" placeholder="admin@facebyniamh.com" autocomplete="email"/>
     <label class="login-label">Password</label>
     <input class="login-input" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
     <button class="login-btn" onclick="doLogin()">Login</button>
@@ -547,8 +548,8 @@ tr:hover td{background:#FDFBF8}
   <!-- SIDEBAR -->
   <aside id="sidebar">
     <div class="sb-brand">
-      <div class="sb-wordmark">DERMADOLL</div>
-      <div class="sb-sub">AESTHETICS</div>
+      <div class="sb-wordmark" style="font-size:14px;letter-spacing:.12em">FACE BY NIAMH</div>
+      <div class="sb-sub">AESTHETICS · ADMIN</div>
       <div class="sb-badge">Portal</div>
     </div>
     <nav class="sb-nav">
@@ -740,9 +741,9 @@ tr:hover td{background:#FDFBF8}
               <div class="avail-mini-grid" id="avail-mini-grid" style="margin-top:2px"></div>
               <div id="avail-override-editor" style="display:none"></div>
               <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5">
-                <span style="display:inline-block;width:10px;height:10px;background:rgba(201,169,110,.2);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Working &nbsp;
+                <span style="display:inline-block;width:10px;height:10px;background:rgba(200,134,10,.2);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Working &nbsp;
                 <span style="display:inline-block;width:10px;height:10px;background:#F0F0F0;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Off &nbsp;
-                <span style="display:inline-block;width:10px;height:10px;background:rgba(201,169,110,.12);border:2px solid var(--gold);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Overridden
+                <span style="display:inline-block;width:10px;height:10px;background:rgba(200,134,10,.12);border:2px solid var(--gold);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Overridden
               </p>
             </div>
           </div>
@@ -769,9 +770,9 @@ tr:hover td{background:#FDFBF8}
     <div id="page-treatments" class="page">
       <div class="topbar" id="treatments-topbar">
         <span class="topbar-title serif">Treatments</span>
-        <span id="treat-save-status" style="font-size:12px;color:#C9A96E;opacity:0;transition:opacity 0.3s;margin-left:8px"></span>
-        <input id="treat-search" style="flex:1;max-width:300px;padding:9px 14px;border:1px solid #E0E0E0;border-radius:20px;font-family:'Inter',sans-serif;font-size:13px;color:var(--text);outline:none;box-sizing:border-box" placeholder="Search treatments…" oninput="filterTreatments(this.value)"/>
-        <button id="treat-save-btn" onclick="saveAllTreatmentsToCloud()" style="margin-left:8px;padding:8px 18px;background:#C9A96E;color:#fff;border:none;border-radius:20px;font-family:'Inter',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.5px;cursor:pointer;text-transform:uppercase;transition:background 0.2s">Save Changes</button>
+        <span id="treat-save-status" style="font-size:12px;color:#C8860A;opacity:0;transition:opacity 0.3s;margin-left:8px"></span>
+        <input id="treat-search" style="flex:1;max-width:300px;padding:9px 14px;border:1px solid #E0E0E0;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);outline:none;box-sizing:border-box" placeholder="Search treatments…" oninput="filterTreatments(this.value)"/>
+        <button id="treat-save-btn" onclick="saveAllTreatmentsToCloud()" style="margin-left:8px;padding:8px 18px;background:#C8860A;color:#fff;border:none;border-radius:20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:500;letter-spacing:0.5px;cursor:pointer;text-transform:uppercase;transition:background 0.2s">Save Changes</button>
       </div>
       <div id="treats-outer" style="padding:20px;overflow-x:hidden;box-sizing:border-box">
         <div id="treatments-table-wrap"></div>
@@ -796,7 +797,7 @@ tr:hover td{background:#FDFBF8}
           </div>
           <div id="fin-chart-wrap" style="position:relative">
             <canvas id="revenue-canvas"></canvas>
-            <div id="fin-tooltip" style="position:absolute;display:none;background:#fff;border-radius:8px;padding:5px 10px;font-family:'Inter',sans-serif;font-size:12px;color:#111;box-shadow:0 2px 8px rgba(0,0,0,.1);pointer-events:none;white-space:nowrap"></div>
+            <div id="fin-tooltip" style="position:absolute;display:none;background:#fff;border-radius:8px;padding:5px 10px;font-family:'DM Sans',sans-serif;font-size:12px;color:#111;box-shadow:0 2px 8px rgba(0,0,0,.1);pointer-events:none;white-space:nowrap"></div>
           </div>
         </div>
         <!-- Transactions -->
@@ -854,8 +855,8 @@ tr:hover td{background:#FDFBF8}
       <div class="topbar" style="display:flex;align-items:center;justify-content:space-between">
         <span class="topbar-title serif">Media</span>
         <div style="display:flex;align-items:center;gap:14px">
-          <span id="media-autosave-status" style="font-family:Inter,sans-serif;font-size:12px;color:#4CAF50;opacity:0;transition:opacity .4s"></span>
-          <button id="media-save-btn" onclick="publishMediaToCloud()" style="background:#C9A96E;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Save to Live Site</button>
+          <span id="media-autosave-status" style="font-family:'DM Sans',sans-serif;font-size:12px;color:#4CAF50;opacity:0;transition:opacity .4s"></span>
+          <button id="media-save-btn" onclick="publishMediaToCloud()" style="background:#C8860A;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Save to Live Site</button>
         </div>
       </div>
       <div style="padding:28px;max-width:860px;margin:0 auto" id="media-root"></div>
@@ -869,9 +870,9 @@ tr:hover td{background:#FDFBF8}
         <div class="settings-section">
           <div class="settings-section-header">Business Info</div>
           <div class="settings-body">
-            <div class="settings-row"><label>Clinic name</label><input type="text" id="s-clinic" value="Dermadoll Aesthetics"/></div>
+            <div class="settings-row"><label>Clinic name</label><input type="text" id="s-clinic" value="Face By Niamh Aesthetics"/></div>
             <div class="settings-row"><label>Practitioner</label><input type="text" id="s-practitioner" value="Niamh"/></div>
-            <div class="settings-row"><label>Instagram</label><input type="text" id="s-instagram" value="@dermadollaesthetics"/></div>
+            <div class="settings-row"><label>Instagram</label><input type="text" id="s-instagram" value="@facebyniamh"/></div>
             <div class="settings-row"><label>WhatsApp</label><input type="text" id="s-whatsapp" placeholder="+44 7…"/></div>
             <div class="settings-row" style="align-items:flex-start"><label>Working hours</label><div style="font-size:12px;color:var(--muted);line-height:1.8">Mon: OFF<br/>Tue–Thu: 10:00–19:00<br/>Fri: 09:00–16:00<br/>Sat: 09:00–14:00<br/>Sun: OFF<br/><em style="font-size:11px">Edit in Availability page</em></div></div>
             <button class="btn-gold" onclick="saveSettings()">Save Changes</button>
@@ -879,21 +880,21 @@ tr:hover td{background:#FDFBF8}
         </div>
 
         <div class="settings-section">
-          <div class="settings-section-header" style="font-size:14px;font-weight:700;color:#111111;font-family:'Inter',sans-serif">Change Password</div>
+          <div class="settings-section-header" style="font-size:14px;font-weight:700;color:#1A0F00;font-family:'DM Sans',sans-serif">Change Password</div>
           <div class="settings-body">
             <div style="margin-bottom:12px">
-              <input type="password" id="s-pw-current" placeholder="Current password" autocomplete="current-password" style="width:100%;box-sizing:border-box;border:1px solid #E0E0E0;border-radius:8px;padding:12px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;display:block"/>
+              <input type="password" id="s-pw-current" placeholder="Current password" autocomplete="current-password" style="width:100%;box-sizing:border-box;border:1px solid #E0E0E0;border-radius:8px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;display:block"/>
               <div id="pw-err-current" style="font-size:12px;color:#C62828;margin-top:4px;display:none"></div>
             </div>
             <div style="margin-bottom:12px">
-              <input type="password" id="s-pw-new" placeholder="New password (min. 8 characters)" autocomplete="new-password" style="width:100%;box-sizing:border-box;border:1px solid #E0E0E0;border-radius:8px;padding:12px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;display:block"/>
+              <input type="password" id="s-pw-new" placeholder="New password (min. 8 characters)" autocomplete="new-password" style="width:100%;box-sizing:border-box;border:1px solid #E0E0E0;border-radius:8px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;display:block"/>
               <div id="pw-err-new" style="font-size:12px;color:#C62828;margin-top:4px;display:none"></div>
             </div>
             <div style="margin-bottom:12px">
-              <input type="password" id="s-pw-confirm" placeholder="Confirm new password" autocomplete="new-password" style="width:100%;box-sizing:border-box;border:1px solid #E0E0E0;border-radius:8px;padding:12px 16px;font-family:'Inter',sans-serif;font-size:13px;outline:none;display:block"/>
+              <input type="password" id="s-pw-confirm" placeholder="Confirm new password" autocomplete="new-password" style="width:100%;box-sizing:border-box;border:1px solid #E0E0E0;border-radius:8px;padding:12px 16px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;display:block"/>
               <div id="pw-err-confirm" style="font-size:12px;color:#C62828;margin-top:4px;display:none"></div>
             </div>
-            <button onclick="changePassword()" style="background:#C9A96E;color:#fff;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;border:none;border-radius:8px;padding:12px 24px;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#B8934A'" onmouseout="this.style.background='#C9A96E'">Update Password</button>
+            <button onclick="changePassword()" style="background:#C8860A;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;border:none;border-radius:8px;padding:12px 24px;cursor:pointer;transition:background .2s" onmouseover="this.style.background='#B8934A'" onmouseout="this.style.background='#C8860A'">Update Password</button>
           </div>
         </div>
 
@@ -901,8 +902,8 @@ tr:hover td{background:#FDFBF8}
           <div class="settings-section-header">Booking Settings</div>
           <div class="settings-body">
             <div class="settings-row"><label>Deposit (£)</label><input type="number" id="s-deposit" value="50" min="0" max="9999" style="width:80px;flex:unset"/><span style="font-size:12px;color:var(--muted)">Flat deposit amount charged via Stripe on booking (currently £50)</span></div>
-            <div class="settings-row" style="align-items:flex-start"><label>Confirmation msg</label><textarea id="s-confirm-msg" rows="3" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-family:'Inter',sans-serif;font-size:13px;resize:vertical">Thank you for booking with Dermadoll Aesthetics! We'll be in touch to confirm your appointment shortly.</textarea></div>
-            <div class="settings-row"><label>Notify email</label><input type="email" id="s-notify-email" placeholder="niamh@dermadoll.com"/></div>
+            <div class="settings-row" style="align-items:flex-start"><label>Confirmation msg</label><textarea id="s-confirm-msg" rows="3" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:6px;font-family:'DM Sans',sans-serif;font-size:13px;resize:vertical">Thank you for booking with Face By Niamh Aesthetics! We'll be in touch to confirm your appointment shortly.</textarea></div>
+            <div class="settings-row"><label>Notify email</label><input type="email" id="s-notify-email" placeholder="niamh@facebyniamh.com"/></div>
           </div>
         </div>
 
@@ -912,7 +913,7 @@ tr:hover td{background:#FDFBF8}
             <div class="settings-row">
               <label>Stripe Status</label>
               <span id="stripe-status-badge" style="display:inline-flex;align-items:center;gap:8px">
-                <span style="display:inline-block;background:#FFEBEE;color:#C62828;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'Inter',sans-serif;letter-spacing:.3px">CHECKING…</span>
+                <span style="display:inline-block;background:#FFEBEE;color:#C62828;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'DM Sans',sans-serif;letter-spacing:.3px">CHECKING…</span>
               </span>
             </div>
             <div class="settings-row" style="align-items:flex-start">
@@ -927,7 +928,7 @@ tr:hover td{background:#FDFBF8}
               <div style="flex:1;font-size:12px;color:var(--muted);line-height:1.9;background:#FAFAFA;border:1px solid var(--border);border-radius:8px;padding:14px 16px">
                 <strong style="color:var(--text);display:block;margin-bottom:8px">To activate online payments:</strong>
                 <ol style="padding-left:18px;margin:0;list-style:decimal">
-                  <li>Go to <a href="https://stripe.com" target="_blank" style="color:#C9A96E">stripe.com</a> and create an account</li>
+                  <li>Go to <a href="https://stripe.com" target="_blank" style="color:#C8860A">stripe.com</a> and create an account</li>
                   <li>Copy your <strong>Secret Key</strong> and <strong>Publishable Key</strong> from the Stripe dashboard</li>
                   <li>Add both to Replit Secrets as <code style="background:#eee;padding:1px 5px;border-radius:3px">STRIPE_SECRET_KEY</code> and <code style="background:#eee;padding:1px 5px;border-radius:3px">STRIPE_PUBLISHABLE_KEY</code></li>
                   <li>In Stripe, go to <strong>Developers → Webhooks → Add endpoint</strong></li>
@@ -945,10 +946,10 @@ tr:hover td{background:#FDFBF8}
           <div class="settings-section-header">Developer</div>
           <div class="settings-body">
             <div class="settings-row"><label>Built by</label><span style="font-size:13px;font-weight:600;color:#111">Simrandeep Sangha</span></div>
-            <div class="settings-row"><label>Email</label><a href="mailto:simrandeepssangha@icloud.com" style="font-size:13px;color:#C9A96E;text-decoration:none">simrandeepssangha@icloud.com</a></div>
-            <div class="settings-row"><label>Phone</label><a href="tel:+447495963388" style="font-size:13px;color:#C9A96E;text-decoration:none">+44 7495 963388</a></div>
-            <div class="settings-row"><label>Instagram</label><a href="https://instagram.com/aesthetix_systems" target="_blank" style="font-size:13px;color:#C9A96E;text-decoration:none">@aesthetix_systems</a></div>
-            <div class="settings-row"><label>Admin portal</label><span style="font-size:13px;color:#888">dermadoll-aesthetics.co.uk/portal.html</span></div>
+            <div class="settings-row"><label>Email</label><a href="mailto:simrandeepssangha@icloud.com" style="font-size:13px;color:#C8860A;text-decoration:none">simrandeepssangha@icloud.com</a></div>
+            <div class="settings-row"><label>Phone</label><a href="tel:+447495963388" style="font-size:13px;color:#C8860A;text-decoration:none">+44 7495 963388</a></div>
+            <div class="settings-row"><label>Instagram</label><a href="https://instagram.com/aesthetix_systems" target="_blank" style="font-size:13px;color:#C8860A;text-decoration:none">@aesthetix_systems</a></div>
+            <div class="settings-row"><label>Admin portal</label><span style="font-size:13px;color:#888">facebyniamh.co.uk/portal.html</span></div>
             <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
               <button class="btn-gold" onclick="window.open('mailto:simrandeepssangha@icloud.com','_blank')">Contact Developer</button>
               <button class="btn-outline" onclick="window.open('/','_blank')">View Site</button>
@@ -1043,8 +1044,8 @@ tr:hover td{background:#FDFBF8}
       <label class="form-label">Notes</label>
       <textarea class="form-input" id="bm-notes" rows="2" placeholder="Any notes…"></textarea>
     </div>
-    <div id="bm-consultation-fields" style="display:none;background:#F8F4EF;border-radius:10px;padding:14px 16px;border:1px solid rgba(201,169,110,0.25);margin-top:4px">
-      <p style="font-family:'Inter',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#C9A96E;margin:0 0 12px;font-weight:700">Consultation Details</p>
+    <div id="bm-consultation-fields" style="display:none;background:#F8F4EF;border-radius:10px;padding:14px 16px;border:1px solid rgba(200,134,10,0.25);margin-top:4px">
+      <p style="font-family:'DM Sans',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#C8860A;margin:0 0 12px;font-weight:700">Consultation Details</p>
       <div class="form-row">
         <div class="form-group">
           <label class="form-label">Date of Birth</label>
@@ -1057,7 +1058,7 @@ tr:hover td{background:#FDFBF8}
       </div>
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px;flex-wrap:wrap">
-      <button id="bm-cancel-booking-btn" onclick="cancelBookingFromModal()" style="display:none;padding:10px 18px;border:1px solid #c62828;background:#fff;color:#c62828;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px">Cancel Booking</button>
+      <button id="bm-cancel-booking-btn" onclick="cancelBookingFromModal()" style="display:none;padding:10px 18px;border:1px solid #c62828;background:#fff;color:#c62828;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px">Cancel Booking</button>
       <div style="display:flex;gap:10px;margin-left:auto">
         <button class="btn-outline" onclick="closeBookingModal()">Close</button>
         <button class="btn-gold" onclick="saveBooking()">Save Booking</button>
@@ -1834,7 +1835,7 @@ function renderBookings(){
   if(!list.length){body.innerHTML='';table.style.display='none';empty.style.display='block';return;}
   table.style.display='';empty.style.display='none';
   const STATUS_STYLE={
-    Pending:'background:#FFF3E0;color:#C9A96E',
+    Pending:'background:#FFF3E0;color:#C8860A',
     Confirmed:'background:#E8F4FD;color:#1A6EA8',
     Complete:'background:#D8F3DC;color:#2D6A4F',
     Cancelled:'background:#FFE5E5;color:#C1121F',
@@ -1844,7 +1845,7 @@ function renderBookings(){
     const style=STATUS_STYLE[b.status]||'background:#F5F5F5;color:#888';
     const dep=b.depositPaid
       ?`<span style="color:#2D6A4F;font-size:12px;font-weight:600">✓ Paid</span>`
-      :`<span style="color:#C9A96E;font-size:12px;font-weight:600">Pending</span>`;
+      :`<span style="color:#C8860A;font-size:12px;font-weight:600">Pending</span>`;
     const d=new Date(b.date);
     const dateDay=isNaN(d)?b.date:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     const dateYear=isNaN(d)?'':d.getFullYear();
@@ -1855,7 +1856,7 @@ function renderBookings(){
       </td>
       <td class="bk-col-client" style="font-weight:700;color:#111">${b.clientName||'—'}</td>
       <td class="bk-col-treat" style="color:#888888;font-size:12px">${b.treatment||'—'}</td>
-      <td class="bk-col-price" style="font-weight:700;color:#C9A96E">${gbp(b.price)}</td>
+      <td class="bk-col-price" style="font-weight:700;color:#C8860A">${gbp(b.price)}</td>
       <td class="bk-col-dep">${dep}</td>
       <td class="bk-col-status"><span class="bk-status-pill" style="${style}">${b.status}</span></td>
     </tr>`;
@@ -2275,7 +2276,7 @@ function openBookingModal(prefill){
     } else {
       const depAmt=Number(booking.deposit||0);
       depStatus.innerHTML=`<span style="color:#888;font-size:13px">Pending: ${gbp(depAmt)}</span>
-        <button style="padding:5px 14px;border:none;background:#C9A96E;color:#fff;border-radius:6px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markDepositPaidFromModal()">Confirm Deposit Received</button>
+        <button style="padding:5px 14px;border:none;background:#C8860A;color:#fff;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markDepositPaidFromModal()">Confirm Deposit Received</button>
         <span style="display:block;font-size:10px;color:#aaa;margin-top:4px;line-height:1.4">Only use if Stripe payment confirmed but booking shows as pending</span>`;
     }
     // Show balance paid row in edit mode
@@ -2287,7 +2288,7 @@ function openBookingModal(prefill){
     } else {
       const remaining=Math.max(0,Number(booking.price||0)-Number(booking.deposit||0));
       bal.innerHTML=`<span style="color:#888;font-size:13px">Outstanding: ${gbp(remaining)}</span>
-        <button style="padding:5px 14px;border:none;background:#C9A96E;color:#fff;border-radius:6px;font-family:Inter,sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markBalancePaidFromModal()">Mark Paid</button>`;
+        <button style="padding:5px 14px;border:none;background:#C8860A;color:#fff;border-radius:6px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;cursor:pointer" onclick="markBalancePaidFromModal()">Mark Paid</button>`;
     }
     // Set treatment
     const sel=document.getElementById('bm-treatment');
@@ -2513,7 +2514,7 @@ function openClientPanel(id){
     ${c.phone?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">📞</span> ${c.phone}</div>`:''}
     ${c.dateOfBirth?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">🎂</span> DOB: ${c.dateOfBirth}</div>`:''}
     <div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">👤</span> ${c.source||'Direct'} · Joined ${formatDate(c.joinDate)}</div>
-    ${(()=>{const cb=bookings.find(b=>b.category==='Consultation'||b.treatment==='Consultation');return cb&&cb.clientNotes?`<div class="cp-meta-row" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="color:#C9A96E;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700">Skin Concerns (Consultation)</span><span style="color:#555;font-size:13px">${cb.clientNotes}</span></div>`:''})()}
+    ${(()=>{const cb=bookings.find(b=>b.category==='Consultation'||b.treatment==='Consultation');return cb&&cb.clientNotes?`<div class="cp-meta-row" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="color:#C8860A;font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700">Skin Concerns (Consultation)</span><span style="color:#555;font-size:13px">${cb.clientNotes}</span></div>`:''})()}
     <div class="cp-section-label">Visit History</div>
     ${bookings.map(b=>`<div class="cp-visit-row">
       <div>
@@ -2526,12 +2527,12 @@ function openClientPanel(id){
       </div>
     </div>`).join('')||'<p style="color:var(--muted);font-size:13px">No visits yet</p>'}
     <div class="cp-section-label">Notes</div>
-    <textarea id="cp-notes" rows="3" style="width:100%;padding:12px;border:1px solid #E8E8E8;border-radius:8px;font-family:'Inter',sans-serif;font-size:13px;resize:vertical;min-height:80px;box-sizing:border-box;outline:none">${c.notes||''}</textarea>
+    <textarea id="cp-notes" rows="3" style="width:100%;padding:12px;border:1px solid #E8E8E8;border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;resize:vertical;min-height:80px;box-sizing:border-box;outline:none">${c.notes||''}</textarea>
     <div style="display:flex;gap:8px;margin-top:10px">
-      <button style="flex:1;background:#C9A96E;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="saveClientNote('${c.id}')">Save Notes</button>
-      <button style="flex:1;background:#fff;color:#C9A96E;border:1px solid #C9A96E;border-radius:8px;padding:10px 20px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="openBookingModal('${c.name}')">Book Again</button>
+      <button style="flex:1;background:#C8860A;color:#fff;border:none;border-radius:8px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="saveClientNote('${c.id}')">Save Notes</button>
+      <button style="flex:1;background:#fff;color:#C8860A;border:1px solid #C8860A;border-radius:8px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="openBookingModal('${c.name}')">Book Again</button>
     </div>
-    <button style="width:100%;margin-top:8px;background:#fff;color:#c62828;border:1px solid #c62828;border-radius:8px;padding:10px 20px;font-family:'Inter',sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="deleteClient('${c.id}','${c.name.replace(/'/g,"\\'")}')">Delete Client</button>
+    <button style="width:100%;margin-top:8px;background:#fff;color:#c62828;border:1px solid #c62828;border-radius:8px;padding:10px 20px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;cursor:pointer" onclick="deleteClient('${c.id}','${c.name.replace(/'/g,"\\'")}')">Delete Client</button>
   `;
   document.getElementById('client-panel').classList.add('open');
 }
@@ -2844,8 +2845,8 @@ function drawRevenueChart(){
   const pts=cumulative.map((v,i)=>({x:padL+cW*i/Math.max(days-1,1),y:padT+cH*(1-v/maxV)}));
   // Gradient fill
   const grad=ctx.createLinearGradient(0,padT,0,padT+cH);
-  grad.addColorStop(0,'rgba(201,169,110,0.15)');
-  grad.addColorStop(1,'rgba(201,169,110,0)');
+  grad.addColorStop(0,'rgba(200,134,10,0.15)');
+  grad.addColorStop(1,'rgba(200,134,10,0)');
   ctx.beginPath();
   ctx.moveTo(pts[0].x,pts[0].y);
   for(let i=1;i<pts.length;i++){const cpx=(pts[i-1].x+pts[i].x)/2;ctx.bezierCurveTo(cpx,pts[i-1].y,cpx,pts[i].y,pts[i].x,pts[i].y);}
@@ -2854,7 +2855,7 @@ function drawRevenueChart(){
   // Line
   ctx.beginPath();ctx.moveTo(pts[0].x,pts[0].y);
   for(let i=1;i<pts.length;i++){const cpx=(pts[i-1].x+pts[i].x)/2;ctx.bezierCurveTo(cpx,pts[i-1].y,cpx,pts[i].y,pts[i].x,pts[i].y);}
-  ctx.strokeStyle='#C9A96E';ctx.lineWidth=2;ctx.stroke();
+  ctx.strokeStyle='#C8860A';ctx.lineWidth=2;ctx.stroke();
   // X axis labels
   ctx.fillStyle='#AAAAAA';ctx.font='10px Inter';ctx.textAlign='center';
   [1,15,days].forEach(d=>{const x=padL+cW*(d-1)/Math.max(days-1,1);ctx.fillText(d,x,H-6);});
@@ -2888,7 +2889,7 @@ function initChartTooltip(){
     // Draw hover dot
     const ctx=canvas.getContext('2d');
     drawRevenueChart();
-    ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fillStyle='#C9A96E';ctx.fill();
+    ctx.beginPath();ctx.arc(p.x,p.y,4,0,Math.PI*2);ctx.fillStyle='#C8860A';ctx.fill();
   }
   canvas.addEventListener('mousemove',e=>showTip(e.clientX,e.clientY));
   canvas.addEventListener('mouseleave',()=>{tip.style.display='none';drawRevenueChart();});
@@ -2929,7 +2930,7 @@ async function renderFinance(){
 
     // KPI cards
     document.getElementById('finance-kpi').innerHTML=`
-      <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C9A96E">${gbp(summary.totalRevenue)}</div></div>
+      <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C8860A">${gbp(summary.totalRevenue)}</div></div>
       <div class="fin-kpi-card"><div class="fin-kpi-label">Deposits Collected</div><div class="fin-kpi-value" style="color:#2D6A4F">${gbp(summary.depositsCollected)}</div></div>
       <div class="fin-kpi-card"><div class="fin-kpi-label">Balance Outstanding</div><div class="fin-kpi-value" style="color:#C1121F">${gbp(summary.balanceOutstanding)}</div></div>
     `;
@@ -2964,13 +2965,13 @@ async function renderFinance(){
         <td><span class="date-full">${formatDate(b.date)}</span><span class="date-mob">${formatDateShort(b.date)}</span></td>
         <td style="font-weight:700">${b.clientName}</td>
         <td class="fin-col-treat">${b.treatment}</td>
-        <td style="font-weight:700;color:#C9A96E">${gbp(b.price)}</td>
+        <td style="font-weight:700;color:#C8860A">${gbp(b.price)}</td>
         <td><span class="fin-pill ${pillCls}">${status}</span></td>
         <td style="text-align:center">${actionBtn}</td>
       </tr>`;
     }).join('')||`<tr><td colspan="6" style="text-align:center;padding:40px 0">
       <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:#111;margin-bottom:8px">No transactions yet</div>
-      <div style="font-family:'Inter',sans-serif;font-size:13px;color:#AAAAAA">Bookings will appear here automatically</div>
+      <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#AAAAAA">Bookings will appear here automatically</div>
     </td></tr>`;
 
   } catch(err) {
@@ -2984,7 +2985,7 @@ async function renderFinance(){
     const deposits=allMonthBookings.reduce((s,b)=>s+Number(b.deposit||0),0);
     const outstanding=allMonthBookings.filter(b=>b.status!=='Complete').reduce((s,b)=>s+(Number(b.price)-Number(b.deposit||0)),0);
     document.getElementById('finance-kpi').innerHTML=`
-      <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C9A96E">${gbp(totalRev)}</div></div>
+      <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:#C8860A">${gbp(totalRev)}</div></div>
       <div class="fin-kpi-card"><div class="fin-kpi-label">Deposits Collected</div><div class="fin-kpi-value" style="color:#2D6A4F">${gbp(deposits)}</div></div>
       <div class="fin-kpi-card"><div class="fin-kpi-label">Balance Outstanding</div><div class="fin-kpi-value" style="color:#C1121F">${gbp(outstanding)}</div></div>
     `;
@@ -3030,11 +3031,11 @@ function exportFinance(){
   const [y,m]=sel?sel.value.split('-').map(Number):[new Date().getFullYear(),new Date().getMonth()+1];
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const b=getBookings().filter(x=>{const d=new Date(x.date);return d.getFullYear()===y&&d.getMonth()+1===m;});
-  let txt=`DERMADOLL AESTHETICS — Finance Export\n${months[m-1]} ${y}\n${'─'.repeat(40)}\n\n`;
+  let txt=`FACE BY NIAMH AESTHETICS — Finance Export\n${months[m-1]} ${y}\n${'─'.repeat(40)}\n\n`;
   b.forEach(x=>{txt+=`${x.date} | ${x.clientName} | ${x.treatment} | ${gbp(x.price)} | ${x.status}\n`;});
   const total=b.filter(x=>x.status!=='Cancelled').reduce((s,x)=>s+Number(x.price),0);
   txt+=`\n${'─'.repeat(40)}\nTotal: ${gbp(total)}`;
-  const a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(txt);a.download=`dermadoll-finance-${months[m-1].toLowerCase()}-${y}.txt`;a.click();
+  const a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(txt);a.download=`facebyniamh-finance-${months[m-1].toLowerCase()}-${y}.txt`;a.click();
 }
 
 // ═══════════════════════════════════════════════════
@@ -3051,7 +3052,7 @@ function _showMediaSaveStatus(state){
   clearTimeout(el._hideTimer);
   if(state==='syncing'){
     el.textContent='\u2191 Syncing\u2026';
-    el.style.color='#C9A96E';
+    el.style.color='#C8860A';
     el.style.opacity='1';
   }else if(state==='saved'){
     el.textContent='\u2713 Saved to cloud';
@@ -3096,9 +3097,9 @@ const VID_SLOTS=[
 
 function mBtn(label,onclick,ghost){
   const s=ghost
-    ?'border:1px solid #C9A96E;color:#C9A96E;background:#fff;border-radius:20px;padding:6px 16px;font-family:Inter,sans-serif;font-size:12px;cursor:pointer'
-    :'border:1px solid #C9A96E;color:#C9A96E;background:#fff;border-radius:20px;padding:5px 14px;font-family:Inter,sans-serif;font-size:12px;cursor:pointer';
-  return`<button style="${s}" onclick="${onclick}" onmouseover="this.style.background='#C9A96E';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#C9A96E'">${label}</button>`;
+    ?'border:1px solid #C8860A;color:#C8860A;background:#fff;border-radius:20px;padding:6px 16px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer'
+    :'border:1px solid #C8860A;color:#C8860A;background:#fff;border-radius:20px;padding:5px 14px;font-family:'DM Sans',sans-serif;font-size:12px;cursor:pointer';
+  return`<button style="${s}" onclick="${onclick}" onmouseover="this.style.background='#C8860A';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#C8860A'">${label}</button>`;
 }
 
 function mCard(content){
@@ -3107,35 +3108,35 @@ function mCard(content){
 
 function mCardHeader(title,pill,subtitle,green){
   const pillHtml=green
-    ?'<span style="color:#4CAF50;font-family:Inter,sans-serif;font-size:11px;font-weight:600">'+pill+'</span>'
-    :'<span style="background:#F3F3F3;border-radius:20px;padding:4px 12px;font-family:Inter,sans-serif;font-size:11px;color:#666">'+pill+'</span>';
+    ?'<span style="color:#4CAF50;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600">'+pill+'</span>'
+    :'<span style="background:#F3F3F3;border-radius:20px;padding:4px 12px;font-family:'DM Sans',sans-serif;font-size:11px;color:#666">'+pill+'</span>';
   return'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">'
     +'<div style="font-family:\'Cormorant Garamond\',serif;font-size:20px;font-weight:700;color:#111">'+title+'</div>'
     +pillHtml
     +'</div>'
-    +'<div style="font-family:Inter,sans-serif;font-size:13px;color:#888;font-style:italic;margin-bottom:18px">'+subtitle+'</div>';
+    +'<div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#888;font-style:italic;margin-bottom:18px">'+subtitle+'</div>';
 }
 
 function mDivider(){return`<div style="height:1px;background:#F0F0F0;margin:18px 0"></div>`}
 
 function mSubheader(left,rightHtml){
   return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
-    <span style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;color:#AAAAAA;letter-spacing:1.5px;text-transform:uppercase">${left}</span>
+    <span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#AAAAAA;letter-spacing:1.5px;text-transform:uppercase">${left}</span>
     ${rightHtml}
   </div>`;
 }
 
 function mDropZone(id,accept,onchange){
-  return`<div id="dropzone-${id}" style="border:2px dashed #E8E8E8;border-radius:10px;padding:32px;text-align:center;cursor:pointer" onclick="document.getElementById('file-${id}').click()" ondragover="event.preventDefault();this.style.borderColor='#C9A96E'" ondragleave="this.style.borderColor='#E8E8E8'" ondrop="handleDrop(event,'${id}','${accept}')">
-    <div style="font-family:Inter,sans-serif;font-size:13px;color:#BBBBBB">Drag here or click to upload</div>
+  return`<div id="dropzone-${id}" style="border:2px dashed #E8E8E8;border-radius:10px;padding:32px;text-align:center;cursor:pointer" onclick="document.getElementById('file-${id}').click()" ondragover="event.preventDefault();this.style.borderColor='#C8860A'" ondragleave="this.style.borderColor='#E8E8E8'" ondrop="handleDrop(event,'${id}','${accept}')">
+    <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#BBBBBB">Drag here or click to upload</div>
     <input type="file" id="file-${id}" accept="${accept}" style="display:none" onchange="${onchange}"/>
   </div>`;
 }
 
 function livePill(text,green){
   const bg=green?'rgba(0,0,0,0.6)':'rgba(0,0,0,0.6)';
-  const dot=green?'#4CAF50':'#C9A96E';
-  return`<span style="background:${bg};color:#fff;font-family:Inter,sans-serif;font-size:11px;font-weight:700;border-radius:6px;padding:5px 10px;display:inline-flex;align-items:center;gap:5px"><span style="color:${dot};font-size:9px">●</span>${text}</span>`;
+  const dot=green?'#4CAF50':'#C8860A';
+  return`<span style="background:${bg};color:#fff;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;border-radius:6px;padding:5px 10px;display:inline-flex;align-items:center;gap:5px"><span style="color:${dot};font-size:9px">●</span>${text}</span>`;
 }
 
 async function publishMediaToCloud(){
@@ -3178,11 +3179,11 @@ function renderMedia(){
         <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#CCCCCC" stroke-width="1.2">
           <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
         </svg>
-        <span style="font-family:Inter,sans-serif;font-size:13px;color:#AAAAAA">No photo uploaded</span>
+        <span style="font-family:'DM Sans',sans-serif;font-size:13px;color:#AAAAAA">No photo uploaded</span>
       </div>`;
   const practCard=`<div class="mcard" style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:24px;margin-bottom:24px">
     <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111;margin-bottom:4px">Practitioner Photo</div>
-    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;margin-bottom:18px">Your photo shown in the About section on the website</div>
+    <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#888;margin-bottom:18px">Your photo shown in the About section on the website</div>
     <div style="display:flex;flex-direction:column;align-items:center;gap:16px">
       <div style="position:relative;width:100%;max-width:260px;aspect-ratio:1/1;border-radius:12px;overflow:hidden;background:#F5F5F5;border:1px solid #E8E8E8">
         ${practPreview}
@@ -3204,8 +3205,8 @@ function renderMedia(){
     +(heroHasCloud?`<button onclick="clearHeroVideo()" style="position:absolute;top:10px;right:10px;border:none;background:rgba(0,0,0,0.55);color:#fff;font-size:14px;width:34px;height:34px;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center" onmouseover="this.style.background='rgba(229,57,53,0.85)'" onmouseout="this.style.background='rgba(0,0,0,0.55)'">🗑</button>`:'');
   const heroCard=`<div class="mcard" style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:24px;margin-bottom:24px">
     <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111;margin-bottom:4px">Hero Section Video</div>
-    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;margin-bottom:18px">This video plays full screen on your homepage</div>
-    <div style="position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#111111;margin-bottom:20px">
+    <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#888;margin-bottom:18px">This video plays full screen on your homepage</div>
+    <div style="position:relative;width:100%;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#1A0F00;margin-bottom:20px">
       ${heroPreviewContent}
     </div>
     ${mSubheader('VIDEO LIBRARY',mBtn('+ Upload Video','document.getElementById("file-hero-upload").click()',true))}
@@ -3222,19 +3223,19 @@ function renderMedia(){
     const hasCloud=!!cloudUrl;
     const imgContent=hasCloud
       ?`<img src="${cloudUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>
-         <div style="position:absolute;top:8px;right:8px"><span style="background:#4CAF50;color:#fff;font-family:Inter,sans-serif;font-size:9px;font-weight:700;border-radius:4px;padding:3px 7px">● LIVE</span></div>`
+         <div style="position:absolute;top:8px;right:8px"><span style="background:#4CAF50;color:#fff;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;border-radius:4px;padding:3px 7px">● LIVE</span></div>`
       :`<div style="position:absolute;inset:0;background:#F5F5F5;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#CCC" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          <span style="font-size:12px;color:#BBB;font-family:Inter,sans-serif">No image</span>
+          <span style="font-size:12px;color:#BBB;font-family:'DM Sans',sans-serif">No image</span>
         </div>`;
     const label=baLabels[s.key]||s.label;
     return`<div>
       <div style="position:relative;width:100%;padding-top:100%;border-radius:10px;overflow:hidden">
         ${imgContent}
-        <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.55);color:#fff;font-family:Inter,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;border-radius:4px;padding:3px 7px">${s.pos}</div>
+        <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.55);color:#fff;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;border-radius:4px;padding:3px 7px">${s.pos}</div>
       </div>
       <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:6px">
-        <span contenteditable="true" id="ba-label-${s.key}" style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:#111;min-width:40px;outline:none;cursor:text;flex:1;overflow:hidden" onblur="saveBALabel('${s.key}',this.innerText)">${label}</span>
+        <span contenteditable="true" id="ba-label-${s.key}" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#111;min-width:40px;outline:none;cursor:text;flex:1;overflow:hidden" onblur="saveBALabel('${s.key}',this.innerText)">${label}</span>
         <div style="display:flex;gap:4px;align-items:center;flex-shrink:0">
           ${mBtn('⟳ Replace',`replaceBAImage('${s.key}')`,false)}
           <button onclick="clearBASlot('${s.key}')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:16px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:6px" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑</button>
@@ -3266,7 +3267,7 @@ function renderMedia(){
       +'<img src="'+cloudSrc(src)+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>'
       +'</div>'
       +'<div style="padding:6px 8px;background:#fff;display:flex;align-items:center;gap:4px;height:40px;box-sizing:border-box">'
-      +'<span style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;color:#111;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nameVal+'</span>'
+      +'<span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#111;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+nameVal+'</span>'
       +'<select onchange="assignImageToSlot(\''+k+'\',this.value);this.value=\'\'" style="display:none"></select>'
       +'<button onclick="deleteBAImage(\''+k+'\')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;min-width:30px;height:30px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">\ud83d\uddd1</button>'
       +'</div>'
@@ -3275,12 +3276,12 @@ function renderMedia(){
 
   const galleryCard=`<div class="mcard" style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:24px;margin-bottom:24px">
     <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111;margin-bottom:4px">The Doll Gallery</div>
-    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;margin-bottom:18px">The 2×2 grid matches exactly what visitors see on your site. Tap Replace on any photo to swap it instantly.</div>
+    <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#888;margin-bottom:18px">The 2×2 grid matches exactly what visitors see on your site. Tap Replace on any photo to swap it instantly.</div>
     <div class="mgrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">${baGrid}</div>
     ${mDivider()}
     ${mSubheader('SAVED LIBRARY',mBtn('+ Add Photo','document.getElementById("file-ba-lib").click()',true))}
     <input type="file" id="file-ba-lib" accept="image/*" style="display:none" onchange="handleBALibUpload(this)"/>
-    <div class="mlib" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px" id="ba-lib-row">${baLibItems||'<span style="font-family:Inter,sans-serif;font-size:12px;color:#BBB">No saved photos yet</span>'}</div>
+    <div class="mlib" style="display:flex;flex-wrap:wrap;gap:12px;margin-bottom:14px" id="ba-lib-row">${baLibItems||'<span style="font-family:'DM Sans',sans-serif;font-size:12px;color:#BBB">No saved photos yet</span>'}</div>
     ${mDropZone('ba-lib','image/*','handleBALibUpload(this)')}
   </div>`;
 
@@ -3294,21 +3295,21 @@ function renderMedia(){
     const previewUrl=cloudUrl||staticUrl;
     const vidContent=previewUrl
       ?`<video src="${previewUrl}" muted autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>
-         <div style="position:absolute;top:8px;right:8px"><span style="background:${hasCloud?'#4CAF50':'rgba(150,110,50,0.85)'};color:#fff;font-family:Inter,sans-serif;font-size:9px;font-weight:700;border-radius:4px;padding:3px 7px">${hasCloud?'● LIVE':'● DEFAULT'}</span></div>`
+         <div style="position:absolute;top:8px;right:8px"><span style="background:${hasCloud?'#4CAF50':'rgba(150,110,50,0.85)'};color:#fff;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;border-radius:4px;padding:3px 7px">${hasCloud?'● LIVE':'● DEFAULT'}</span></div>`
       :`<div style="position:absolute;inset:0;border:2px dashed #333;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">
           <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.2">
             <rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-4v12l-6-4"/>
           </svg>
-          <span style="font-family:Inter,sans-serif;font-size:12px;color:#666">No video</span>
+          <span style="font-family:'DM Sans',sans-serif;font-size:12px;color:#666">No video</span>
         </div>`;
     const label=vidLabels[s.key]||s.label;
     return`<div>
       <div style="position:relative;width:100%;padding-top:100%;border-radius:10px;overflow:hidden;background:#111">
         ${vidContent}
-        <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.55);color:#fff;font-family:Inter,sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;border-radius:4px;padding:3px 7px">${s.pos}</div>
+        <div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.55);color:#fff;font-family:'DM Sans',sans-serif;font-size:9px;font-weight:700;text-transform:uppercase;border-radius:4px;padding:3px 7px">${s.pos}</div>
       </div>
       <div style="margin-top:8px;display:flex;align-items:center;justify-content:space-between;gap:6px">
-        <span contenteditable="true" id="vid-label-${s.key}" style="font-family:Inter,sans-serif;font-size:13px;font-weight:700;color:#111;min-width:40px;outline:none;cursor:text;flex:1;overflow:hidden" onblur="saveVidLabel('${s.key}',this.innerText)">${label}</span>
+        <span contenteditable="true" id="vid-label-${s.key}" style="font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;color:#111;min-width:40px;outline:none;cursor:text;flex:1;overflow:hidden" onblur="saveVidLabel('${s.key}',this.innerText)">${label}</span>
         <div style="display:flex;gap:4px;align-items:center;flex-shrink:0">
           ${mBtn('⟳ Replace',`replaceVid('${s.key}')`,false)}
           <button onclick="clearVidSlot('${s.key}')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:16px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center;border-radius:6px" onmouseover="this.style.color='#e53935'" onmouseout="this.style.color='#CCC'">🗑</button>
@@ -3328,7 +3329,7 @@ function renderMedia(){
 
   const vidLibData=data.vidLib||[];
   const vidLibHtml=vidLibData.length===0
-    ?'<span style="font-family:Inter,sans-serif;font-size:12px;color:#BBB">No saved videos yet \u2014 uploaded videos will appear here</span>'
+    ?'<span style="font-family:'DM Sans',sans-serif;font-size:12px;color:#BBB">No saved videos yet \u2014 uploaded videos will appear here</span>'
     :vidLibData.map(function(v){
       const vsrc=cloudSrc(v.url)||'';
       const vNameVal=(v.label||'').replace(/"/g,'&quot;');
@@ -3337,7 +3338,7 @@ function renderMedia(){
         +(vsrc?'<video src="'+vsrc+'" muted autoplay loop playsinline style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"></video>':'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#555" stroke-width="1.2"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-4v12l-6-4"/></svg></div>')
         +'</div>'
         +'<div style="padding:6px 8px;background:#fff;display:flex;align-items:center;gap:4px;height:40px;box-sizing:border-box">'
-        +'<span style="font-family:Inter,sans-serif;font-size:11px;font-weight:700;color:#111;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vNameVal+'</span>'
+        +'<span style="font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;color:#111;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+vNameVal+'</span>'
         +'<button onclick="deleteVidLibItem(\''+v.id+'\')" style="border:none;background:none;cursor:pointer;color:#CCC;font-size:15px;min-width:30px;height:30px;display:flex;align-items:center;justify-content:center;padding:0;flex-shrink:0" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">\ud83d\uddd1</button>'
         +'</div>'
         +'</div>';
@@ -3345,7 +3346,7 @@ function renderMedia(){
 
   const vidCard=`<div class="mcard" style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:24px;margin-bottom:24px">
     <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111;margin-bottom:4px">Results Videos</div>
-    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;margin-bottom:18px">These 4 slots match the See the Results section on your site. Tap Replace to swap any video instantly.</div>
+    <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#888;margin-bottom:18px">These 4 slots match the See the Results section on your site. Tap Replace to swap any video instantly.</div>
     <div class="mgrid" style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">${vidGrid}</div>
     ${mDivider()}
     ${mSubheader('SAVED LIBRARY',mBtn('+ Upload Video','document.getElementById("file-vid-lib").click()',true))}
@@ -3367,10 +3368,10 @@ function renderMedia(){
       ?('<img src="'+src+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover"/>'
         +'<div style="position:absolute;top:8px;right:8px">'+livePill('● LIVE',true)+'</div>')
       :('<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px">'
-        +'<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="1.2">'
+        +'<svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#C8860A" stroke-width="1.2">'
         +'<circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>'
         +'</svg>'
-        +'<span style="font-family:Inter,sans-serif;font-size:12px;color:#C9A96E;text-align:center;padding:0 8px">Coming soon</span>'
+        +'<span style="font-family:'DM Sans',sans-serif;font-size:12px;color:#C8860A;text-align:center;padding:0 8px">Coming soon</span>'
         +'</div>');
     const nameVal=(g.name||'').replace(/"/g,'&quot;');
     const courseVal=(g.course||'').replace(/"/g,'&quot;');
@@ -3380,15 +3381,15 @@ function renderMedia(){
       +imgHtml+'</div>'
       +'<input type="file" id="grad-file-'+idx+'" accept="image/*" style="display:none" onchange="handleGradUpload('+idx+',this)"/>'
       +'<div style="margin-bottom:6px">'
-      +'<div style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#AAA;margin-bottom:4px">Name</div>'
+      +'<div style="font-family:'DM Sans',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#AAA;margin-bottom:4px">Name</div>'
       +'<input type="text" value="'+nameVal+'" placeholder="Graduate name"'
-      +' style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:6px 10px;font-family:Inter,sans-serif;font-size:13px;box-sizing:border-box;outline:none"'
+      +' style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:13px;box-sizing:border-box;outline:none"'
       +' onchange="saveGradField('+idx+',\'name\',this.value)"/>'
       +'</div>'
       +'<div style="margin-bottom:10px">'
-      +'<div style="font-family:Inter,sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#AAA;margin-bottom:4px">Course</div>'
+      +'<div style="font-family:'DM Sans',sans-serif;font-size:10px;text-transform:uppercase;letter-spacing:1px;color:#AAA;margin-bottom:4px">Course</div>'
       +'<input type="text" value="'+courseVal+'" placeholder="Course completed"'
-      +' style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:6px 10px;font-family:Inter,sans-serif;font-size:13px;box-sizing:border-box;outline:none"'
+      +' style="width:100%;border:1px solid #E8E8E8;border-radius:6px;padding:6px 10px;font-family:'DM Sans',sans-serif;font-size:13px;box-sizing:border-box;outline:none"'
       +' onchange="saveGradField('+idx+',\'course\',this.value)"/>'
       +'</div>'
       +'<div style="display:flex;gap:6px;align-items:center;justify-content:center">'
@@ -3399,17 +3400,17 @@ function renderMedia(){
   }).join('');
   const gradCard=`<div class="mcard" style="background:#fff;border-radius:12px;box-shadow:0 2px 16px rgba(0,0,0,.06);padding:24px;margin-bottom:24px">
     <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:#111;margin-bottom:4px">Graduate Photos</div>
-    <div style="font-family:Inter,sans-serif;font-size:13px;color:#888;margin-bottom:18px">Shown in the Training section on your website \u00b7 ${gradLiveCount} of 3 set</div>
+    <div style="font-family:'DM Sans',sans-serif;font-size:13px;color:#888;margin-bottom:18px">Shown in the Training section on your website \u00b7 ${gradLiveCount} of 3 set</div>
     <div style="display:flex;gap:16px">${gradSlots}</div>
   </div>`;
 
   /* ── DEVELOPER NOTE ── */
-  const devNote='<div style="border-left:4px solid #C9A96E;background:#FFFBF4;border-radius:8px;padding:20px;margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">'
+  const devNote='<div style="border-left:4px solid #C8860A;background:#FFFBF4;border-radius:8px;padding:20px;margin-bottom:24px;display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-wrap:wrap">'
     +'<div style="display:flex;align-items:flex-start;gap:10px;flex:1;min-width:200px">'
-    +'<span style="font-size:16px;line-height:1.4;color:#C9A96E;flex-shrink:0">\u26a0</span>'
-    +'<span style="font-family:Inter,sans-serif;font-size:13px;color:#888;font-style:italic;line-height:1.6">All media files are stored in cloud storage. For major structural changes contact your developer.</span>'
+    +'<span style="font-size:16px;line-height:1.4;color:#C8860A;flex-shrink:0">\u26a0</span>'
+    +'<span style="font-family:'DM Sans',sans-serif;font-size:13px;color:#888;font-style:italic;line-height:1.6">All media files are stored in cloud storage. For major structural changes contact your developer.</span>'
     +'</div>'
-    +'<a href="mailto:hello@dermadollaesthetics.co.uk" style="background:#C9A96E;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:Inter,sans-serif;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;display:inline-block;line-height:1.4">Contact Developer</a>'
+    +'<a href="mailto:hello@facebyniamh.co.uk" style="background:#C8860A;color:#fff;border:none;border-radius:20px;padding:8px 20px;font-family:'DM Sans',sans-serif;font-size:12px;font-weight:700;text-decoration:none;white-space:nowrap;flex-shrink:0;display:inline-block;line-height:1.4">Contact Developer</a>'
     +'</div>';
 
   document.getElementById('media-root').innerHTML=mobileStyles+practCard+heroCard+galleryCard+vidCard+gradCard+devNote;
@@ -3811,9 +3812,9 @@ function globalSearch(v){
 // ═══════════════════════════════════════════════════
 function exportData(){
   const b=getBookings();
-  let txt='DERMADOLL AESTHETICS — Bookings Export\n\nDate,Client,Treatment,Price,Deposit,Status\n';
+  let txt='FACE BY NIAMH AESTHETICS — Bookings Export\n\nDate,Client,Treatment,Price,Deposit,Status\n';
   b.forEach(x=>{txt+=`${x.date},${x.clientName},${x.treatment},£${x.price},£${x.deposit},${x.status}\n`});
-  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(txt);a.download='dermadoll-bookings.csv';a.click();
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(txt);a.download='facebyniamh-bookings.csv';a.click();
 }
 
 // ═══════════════════════════════════════════════════
@@ -4008,9 +4009,9 @@ async function loadLaunchChecklist(){
     const badge=document.getElementById('stripe-status-badge');
     if(!badge)return;
     if(connected){
-      badge.innerHTML=`<span style="display:inline-block;background:#E8F5E9;color:#2D6A4F;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'Inter',sans-serif;letter-spacing:.3px">CONNECTED</span>`;
+      badge.innerHTML=`<span style="display:inline-block;background:#E8F5E9;color:#2D6A4F;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'DM Sans',sans-serif;letter-spacing:.3px">CONNECTED</span>`;
     } else {
-      badge.innerHTML=`<span style="display:inline-block;background:#FFEBEE;color:#C62828;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'Inter',sans-serif;letter-spacing:.3px">NOT CONNECTED</span><span style="font-size:12px;color:var(--muted);margin-left:6px">See setup instructions below</span>`;
+      badge.innerHTML=`<span style="display:inline-block;background:#FFEBEE;color:#C62828;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;font-family:'DM Sans',sans-serif;letter-spacing:.3px">NOT CONNECTED</span><span style="font-size:12px;color:var(--muted);margin-left:6px">See setup instructions below</span>`;
     }
   }
 
