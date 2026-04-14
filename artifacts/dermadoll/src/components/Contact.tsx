@@ -39,7 +39,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" style={{ background: "#FAF7F2", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+    <section id="contact" style={{ background: "#F0EBE1", padding: "100px 0", position: "relative", overflow: "hidden" }}>
 
       {/* Decorative background layer */}
       {/* Large faint "@" watermark — right side */}

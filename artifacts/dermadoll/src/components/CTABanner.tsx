@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 export default function CTABanner() {
   return (
     <section style={{
-      background: "linear-gradient(160deg, #EDE7DC 0%, #FAF7F2 55%, #EDE7DC 100%)",
+      background: "#FAF7F2",
       padding: "120px 24px",
       textAlign: "center",
       position: "relative",
