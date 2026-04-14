@@ -1296,35 +1296,10 @@ function saveSettingsData(s){localStorage.setItem('fbn_settings',JSON.stringify(
 function getVideoLabels(){return JSON.parse(localStorage.getItem('fbn_video_labels')||'{"video1":"Medical Needling","video2":"Lip Filler","video3":"Masseter Botox","video4":"Skin Booster Results"}')}
 
 function initSampleData(){
-  if(localStorage.getItem('fbn_initialized'))return;
-  if(getBookings().length>0){localStorage.setItem('fbn_initialized','1');CloudStore.set('fbn_initialized','1');return;}
-  const now=new Date();
-  const y=now.getFullYear(),m=now.getMonth();
-  const sample=[
-    {id:uid(),clientName:'Emma R.',treatment:'1ml Lip Filler',category:'FILLER',date:fmt(new Date(y,m,3)),time:'11:00',price:130,deposit:50,status:'Complete',notes:'',createdAt:Date.now()-20*86400000},
-    {id:uid(),clientName:'Jessica T.',treatment:'2 Areas of Anti-Wrinkle',category:'BOTOX',date:fmt(new Date(y,m,5)),time:'13:00',price:200,deposit:50,status:'Complete',notes:'',createdAt:Date.now()-18*86400000},
-    {id:uid(),clientName:'Lauren M.',treatment:'Luxury Dermaplane',category:'FACIALS',date:fmt(new Date(y,m,8)),time:'10:00',price:30,deposit:20,status:'Complete',notes:'',createdAt:Date.now()-15*86400000},
-    {id:uid(),clientName:'Chloe B.',treatment:'Non-Surgical Rhinoplasty',category:'FILLER',date:fmt(new Date(y,m,10)),time:'14:00',price:130,deposit:50,status:'Complete',notes:'',createdAt:Date.now()-12*86400000},
-    {id:uid(),clientName:'Emma R.',treatment:'Profhilo',category:'SKINBOOST',date:fmt(new Date(y,m,14)),time:'11:30',price:140,deposit:50,status:'Complete',notes:'',createdAt:Date.now()-8*86400000},
-    {id:uid(),clientName:'Amara J.',treatment:'Masseter Face Slimming Tox',category:'BOTOX',date:fmt(new Date(y,m,15)),time:'15:00',price:150,deposit:50,status:'Confirmed',notes:'',createdAt:Date.now()-7*86400000},
-    {id:uid(),clientName:'Priya K.',treatment:'Vitamin B12 Injection',category:'VITAMIN',date:fmt(new Date(y,m,17)),time:'09:30',price:25,deposit:20,status:'Confirmed',notes:'',createdAt:Date.now()-5*86400000},
-    {id:uid(),clientName:'Jessica T.',treatment:'0.7ml Lip Filler',category:'FILLER',date:fmt(new Date(y,m,20)),time:'12:00',price:110,deposit:50,status:'Pending',notes:'',createdAt:Date.now()-2*86400000},
-    {id:uid(),clientName:'Lauren M.',treatment:'Luxury Microneedling with Salmon DNA',category:'FACIALS',date:fmt(new Date(y,m,22)),time:'10:30',price:45,deposit:20,status:'Pending',notes:'',createdAt:Date.now()-1*86400000},
-    {id:uid(),clientName:'Zara H.',treatment:'3 Areas of Anti-Wrinkle',category:'BOTOX',date:fmt(new Date(y,m,25)),time:'13:30',price:230,deposit:50,status:'Pending',notes:'',createdAt:Date.now()},
-  ];
-  saveBookings(sample);
-  const clients=[
-    {id:uid(),name:'Ellisha W.',email:'ellisha@email.com',phone:'',joinDate:fmt(new Date(y,m-1,15)),notes:'Regular client — loves natural results',source:'Instagram'},
-    {id:uid(),name:'Donna S.',email:'',phone:'',joinDate:fmt(new Date(y,m-2,10)),notes:'',source:'Referral'},
-    {id:uid(),name:'Sophie M.',email:'',phone:'',joinDate:fmt(new Date(y,m,8)),notes:'',source:'Instagram'},
-    {id:uid(),name:'Chloe R.',email:'',phone:'',joinDate:fmt(new Date(y,m,10)),notes:'First time — rhinoplasty',source:'Google'},
-    {id:uid(),name:'Amara J.',email:'',phone:'',joinDate:fmt(new Date(y,m,15)),notes:'',source:'Instagram'},
-    {id:uid(),name:'Priya K.',email:'',phone:'',joinDate:fmt(new Date(y,m,17)),notes:'',source:'Website'},
-    {id:uid(),name:'Zara T.',email:'',phone:'',joinDate:fmt(new Date(y,m,25)),notes:'',source:'Instagram'},
-  ];
-  saveClients(clients);
-  localStorage.setItem('fbn_initialized','1');
-  CloudStore.set('fbn_initialized','1');
+  /* Data lives in the database — skip localStorage seeding */
+  if(!localStorage.getItem('fbn_initialized')){
+    localStorage.setItem('fbn_initialized','1');
+  }
 }
 
 function fmt(d){const y=d.getFullYear();const mo=String(d.getMonth()+1).padStart(2,'0');const dy=String(d.getDate()).padStart(2,'0');return y+'-'+mo+'-'+dy;}
