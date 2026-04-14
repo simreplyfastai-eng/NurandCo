@@ -90,6 +90,8 @@ export default function Navbar() {
             </a>
             <a
               href="/portal.html"
+              target="_blank"
+              rel="noopener noreferrer"
               style={{ marginLeft: '4px', color: '#C8C0B4', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}
               onMouseEnter={(e) => (e.currentTarget.style.color = '#C8860A')}
               onMouseLeave={(e) => (e.currentTarget.style.color = '#C8C0B4')}
