@@ -1,436 +1,202 @@
-import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect } from "react";
-import BookingModal from "./BookingModal";
+import { useState, useRef } from "react";
+import { motion } from "framer-motion";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import ConsultationModal from "./ConsultationModal";
 
-type Treatment = {
+interface ServiceCard {
   name: string;
-  price: string;
-  duration: string;
-  durationMins?: number;
-};
+  description: string;
+  from: string;
+}
 
-type Category = {
-  title: string;
-  items: Treatment[];
-};
-
-const FALLBACK_SERVICES: Category[] = [
+const services: ServiceCard[] = [
   {
-    title: "Botox",
-    items: [
-      { name: "Botox 1 Area", price: "£100", duration: "15 mins", durationMins: 15 },
-      { name: "Botox 2 Areas", price: "£140", duration: "15 mins", durationMins: 15 },
-      { name: "Botox 3 Areas", price: "£180", duration: "15 mins", durationMins: 15 },
-      { name: "Botox 4 Areas", price: "£210", duration: "15 mins", durationMins: 15 },
-      { name: "Masseter Botox", price: "£200", duration: "15 mins", durationMins: 15 },
-      { name: "Nefertiti Lift Botox (Neck)", price: "£220", duration: "30 mins", durationMins: 30 },
-      { name: "Chin Botox (Mentalis Muscle)", price: "£80", duration: "30 mins", durationMins: 30 },
-      { name: "Nose Slimming Botox", price: "£80", duration: "30 mins", durationMins: 30 },
-      { name: "Gummy Smile / Lip Flip Botox", price: "£80", duration: "30 mins", durationMins: 30 },
-      { name: "Hyperhidrosis (Underarm) Botox", price: "£220", duration: "30 mins", durationMins: 30 },
-      { name: "Botox Topup", price: "£20", duration: "15 mins", durationMins: 15 },
-    ],
+    name: "Dermal Fillers",
+    description: "Lip, cheek, jaw, chin, tear trough and nose filler using premium hyaluronic acid.",
+    from: "From £100",
   },
   {
-    title: "Dermal Filler",
-    items: [
-      { name: "0.5ml Lip Filler", price: "£100", duration: "30 mins", durationMins: 30 },
-      { name: "0.7ml Lip Filler", price: "£120", duration: "45 mins", durationMins: 45 },
-      { name: "1.1ml Lip Filler", price: "£150", duration: "45 mins", durationMins: 45 },
-      { name: "1.1ml Nasal Labials", price: "£150", duration: "30 mins", durationMins: 30 },
-      { name: "1.1ml Cheek Filler", price: "£150", duration: "30 mins", durationMins: 30 },
-      { name: "1.5ml Cheek Filler", price: "£200", duration: "45 mins", durationMins: 45 },
-      { name: "2.2ml Cheek Filler", price: "£250", duration: "45 mins", durationMins: 45 },
-      { name: "1.1ml Chin Filler", price: "£150", duration: "45 mins", durationMins: 45 },
-      { name: "2.2ml Jawline Filler", price: "£250", duration: "1 hr", durationMins: 60 },
-      { name: "Liquid Rhinoplasty", price: "£180", duration: "45 mins", durationMins: 45 },
-      { name: "Teartrough Filler", price: "£180", duration: "45 mins", durationMins: 45 },
-      { name: "2.2ml Facial Contouring", price: "£230", duration: "45 mins", durationMins: 45 },
-      { name: "3.3ml Facial Contouring", price: "£330", duration: "1 hr", durationMins: 60 },
-      { name: "4.4ml Facial Contouring", price: "£440", duration: "1 hr", durationMins: 60 },
-    ],
+    name: "Anti-Wrinkle",
+    description: "Smooth expression lines and lift the brow with precision toxin placement.",
+    from: "From £140",
   },
   {
-    title: "Facials",
-    items: [
-      { name: "Glass Skin Facial", price: "£80", duration: "1 hr", durationMins: 60 },
-      { name: "Glass Skin Facial + Microneedling", price: "£120", duration: "1 hr", durationMins: 60 },
-    ],
+    name: "Skin Boosters",
+    description: "Profhilo, Seventy Hyal, Jalupro and Lumi Eyes for deep skin hydration.",
+    from: "From £100",
   },
   {
-    title: "Skin Boosters",
-    items: [
-      { name: "1x Skin Booster", price: "£150", duration: "30 mins", durationMins: 30 },
-      { name: "3x Lumi Pro Skin Booster", price: "£350", duration: "30 mins", durationMins: 30 },
-      { name: "Plenhyage XL Strong", price: "£200", duration: "30 mins", durationMins: 30 },
-      { name: "Plenhyage XL Strong 2 Treatments", price: "£350", duration: "30 mins", durationMins: 30 },
-      { name: "Vitarin I - Eye Polynucleotide", price: "£170", duration: "30 mins", durationMins: 30 },
-      { name: "Vitarin I - Eye Polynucleotide x2", price: "£300", duration: "30 mins", durationMins: 30 },
-      { name: "B12 Injection", price: "£30", duration: "15 mins", durationMins: 15 },
-    ],
+    name: "Polynucleotides",
+    description: "PDRN treatments for skin regeneration and quality improvement.",
+    from: "From £120",
   },
   {
-    title: "Fat Dissolving",
-    items: [
-      { name: "Lemon Bottle Small Area", price: "£70", duration: "30 mins", durationMins: 30 },
-      { name: "Lemon Bottle Large Area", price: "£100", duration: "30 mins", durationMins: 30 },
-    ],
+    name: "Medical Facials",
+    description: "Dermaplaning and microneedling with Salmon DNA for glowing skin.",
+    from: "From £30",
   },
   {
-    title: "Injectables",
-    items: [
-      { name: "Hyaluronidase - Dissolving", price: "£100", duration: "30 mins", durationMins: 30 },
-      { name: "Hayfever Relief", price: "£80", duration: "15 mins", durationMins: 15 },
-    ],
-  },
-  {
-    title: "Treatment Bundles",
-    items: [
-      { name: "Botox 3 Areas + 1.1ml Dermal Filler", price: "£320", duration: "45 mins", durationMins: 45 },
-      { name: "Botox 3 Areas + 1.1ml Lips + Lumi Pro", price: "£450", duration: "1 hr", durationMins: 60 },
-      { name: "Botox 3 Areas + 1x Lumi Pro Skin Booster", price: "£300", duration: "45 mins", durationMins: 45 },
-      { name: "Botox 3 Areas + 1x Plenhyage XL", price: "£350", duration: "45 mins", durationMins: 45 },
-      { name: "Botox 3 Areas + Vitarin I Eye", price: "£300", duration: "45 mins", durationMins: 45 },
-    ],
+    name: "Vitamin Injections",
+    description: "B12 injections for an energy and wellness boost.",
+    from: "From £25",
   },
 ];
 
-function BookNowPill({ onClick }: { onClick: () => void }) {
+function Eyebrow({ label }: { label: string }) {
   return (
-    <button
-      onClick={(e) => { e.stopPropagation(); onClick(); }}
-      className="flex-shrink-0 transition-all duration-150"
-      style={{
-        border: "1px solid #C9A96E",
-        color: "#C9A96E",
-        background: "transparent",
-        borderRadius: "20px",
-        padding: "4px 14px",
-        fontSize: "12px",
-        fontFamily: "Inter, sans-serif",
-        cursor: "pointer",
-        whiteSpace: "nowrap",
-      }}
-      onMouseEnter={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.backgroundColor = "#C9A96E";
-        (e.currentTarget as HTMLButtonElement).style.color = "#fff";
-      }}
-      onMouseLeave={(e) => {
-        (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent";
-        (e.currentTarget as HTMLButtonElement).style.color = "#C9A96E";
-      }}
-    >
-      Book Now
-    </button>
-  );
-}
-
-function CategoryDropdown({
-  category,
-  index,
-  onBook,
-}: {
-  category: Category;
-  index: number;
-  onBook: (t: Treatment) => void;
-}) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ delay: index * 0.06 }}
-      style={{ borderBottom: "1px solid #C9A96E" }}
-    >
-      <button
-        onClick={() => setOpen(!open)}
-        className="w-full flex items-center justify-between text-left py-5 md:py-[30px]"
-      >
-        <span
-          className="font-serif italic text-foreground hover:text-primary transition-colors duration-200"
-          style={{ fontSize: "22px" }}
-        >
-          {category.title}
-        </span>
-        <div className="flex items-center gap-4 flex-shrink-0 ml-4">
-          <span className="text-xs tracking-widest uppercase text-foreground/40 font-light hidden sm:block">
-            {category.items.length} treatments
-          </span>
-          <motion.span
-            animate={{ rotate: open ? 45 : 0 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="text-primary text-2xl leading-none font-light"
-          >
-            +
-          </motion.span>
-        </div>
-      </button>
-
-      <AnimatePresence initial={false}>
-        {open && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.35, ease: "easeInOut" }}
-            className="overflow-hidden"
-          >
-            <div className="pb-4">
-              {category.items.map((item, i) => (
-                <motion.div
-                  key={item.name}
-                  initial={{ opacity: 0, y: 6 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: i * 0.04, duration: 0.25 }}
-                  className="flex items-center justify-between py-4 border-b last:border-b-0 gap-3"
-                  style={{ borderColor: "rgba(201,169,110,0.15)" }}
-                >
-                  {/* Name + duration */}
-                  <div className="flex flex-col min-w-0">
-                    <span className="text-sm md:text-base text-foreground font-light leading-snug">
-                      {item.name}
-                    </span>
-                    <span className="text-xs text-foreground/40 mt-0.5">{item.duration}</span>
-                  </div>
-
-                  {/* Price + Book Now */}
-                  <div className="flex items-center gap-3 flex-shrink-0">
-                    <span
-                      className="font-serif"
-                      style={{ fontSize: "20px", color: "#C9A96E" }}
-                    >
-                      {item.price}
-                    </span>
-                    <BookNowPill
-                      onClick={() => onBook(item)}
-                    />
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </motion.div>
+    <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
+      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+    </div>
   );
 }
 
 export default function Services() {
-  const [bookingTreatment, setBookingTreatment] = useState<Treatment | null>(null);
-  const [showConsultation, setShowConsultation] = useState(false);
-  const [services, setServices] = useState<Category[]>(FALLBACK_SERVICES);
+  const [consultOpen, setConsultOpen] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-    fetch("/api/treatments", { signal: controller.signal })
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (!Array.isArray(data) || data.length === 0) return;
-        const valid = data.filter(
-          (c: any) =>
-            c &&
-            typeof c.title === "string" &&
-            c.title !== "Consultation" &&
-            Array.isArray(c.items) &&
-            c.items.length > 0 &&
-            c.items.every(
-              (i: any) =>
-                i && typeof i.name === "string" && typeof i.price === "string",
-            ),
-        ) as Category[];
-        if (valid.length > 0) setServices(valid);
-      })
-      .catch(() => {})
-      .finally(() => clearTimeout(timeout));
-    return () => { controller.abort(); clearTimeout(timeout); };
-  }, []);
+  const scroll = (dir: "left" | "right") => {
+    if (!scrollRef.current) return;
+    const amount = 340;
+    scrollRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  };
 
   return (
-    <section id="services" className="py-[100px] bg-white">
-      <span id="treatments" style={{ position: "absolute", marginTop: "-80px" }} />
-      <div className="container mx-auto px-6 max-w-3xl">
-        <div className="text-center mb-20">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="font-serif text-[2rem] md:text-[56px] mb-5"
-          >
-            Our Treatments
-          </motion.h2>
-          <div className="w-[60px] h-px bg-primary mx-auto mb-5" />
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="font-light text-lg"
-            style={{ color: "#C9A96E" }}
-          >
-            Explore our full range of aesthetic treatments
-          </motion.p>
-        </div>
+    <section id="services" style={{ background: "#FAF7F2", padding: "100px 0" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px" }}>
 
-        <div style={{ borderTop: "1px solid #C9A96E" }}>
-          {services.map((category, i) => (
-            <CategoryDropdown
-              key={category.title}
-              category={category}
-              index={i}
-              onBook={setBookingTreatment}
-            />
-          ))}
-        </div>
-
-        {/* Consultation Card */}
         <motion.div
-          initial={{ opacity: 0, y: 24 }}
+          initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          style={{
-            marginTop: "48px",
-            background: "hsl(30, 18%, 97%)",
-            borderRadius: "16px",
-            border: "1px solid #C9A96E",
-          }}
+          style={{ textAlign: "center", marginBottom: 56 }}
         >
-          <div
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              gap: "32px",
-              padding: "clamp(24px, 4vw, 40px)",
-            }}
-            className="consultation-card-inner"
-          >
-            {/* Left */}
-            <div style={{ flex: "1 1 60%" }}>
-              <p style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: "10px",
-                color: "#C9A96E",
-                textTransform: "uppercase",
-                letterSpacing: "2px",
-                marginBottom: "12px",
-              }}>Not sure where to start?</p>
-
-              <h3 style={{
-                fontFamily: "Cormorant Garamond, Georgia, serif",
-                fontSize: "32px",
-                color: "#111111",
-                fontWeight: 700,
-                lineHeight: 1.2,
-                margin: 0,
-              }}>Book a Consultation</h3>
-
-              <p style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: "14px",
-                color: "rgba(17,17,17,0.65)",
-                lineHeight: 1.7,
-                marginTop: "12px",
-              }}>
-                Unsure which treatment is right for you? Book a 15-minute consultation with Niamh and get expert advice tailored to your skin and goals.
-              </p>
-
-              <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "10px" }}>
-                {["15 minutes with Niamh", "Personalised treatment advice", "Completely free — no charge"].map((pt) => (
-                  <div key={pt} style={{ display: "flex", alignItems: "flex-start", gap: "10px" }}>
-                    <span style={{ color: "#C9A96E", fontWeight: 700, flexShrink: 0 }}>✓</span>
-                    <span style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", color: "rgba(17,17,17,0.8)", lineHeight: 1.5 }}>{pt}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Right */}
-            <div style={{ flex: "0 0 auto", textAlign: "center", minWidth: "160px" }} className="consultation-right">
-              <div style={{
-                fontFamily: "Cormorant Garamond, Georgia, serif",
-                fontSize: "64px",
-                color: "#2D6A4F",
-                fontWeight: 700,
-                lineHeight: 1,
-              }}>Free</div>
-              <div style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: "12px",
-                color: "rgba(17,17,17,0.45)",
-                textTransform: "uppercase",
-                letterSpacing: "2px",
-                marginTop: "4px",
-              }}>consultation</div>
-              <div style={{
-                fontFamily: "Inter, sans-serif",
-                fontSize: "11px",
-                color: "#2D6A4F",
-                fontStyle: "italic",
-                marginTop: "6px",
-              }}>No charge — book in seconds</div>
-
-              <button
-                onClick={() => setShowConsultation(true)}
-                style={{
-                  marginTop: "20px",
-                  background: "#C9A96E",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "8px",
-                  padding: "16px 40px",
-                  fontFamily: "Inter, sans-serif",
-                  fontSize: "13px",
-                  fontWeight: 700,
-                  letterSpacing: "2px",
-                  textTransform: "uppercase",
-                  cursor: "pointer",
-                  width: "100%",
-                  transition: "background 0.2s",
-                }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "#B8934A")}
-                onMouseLeave={(e) => (e.currentTarget.style.background = "#C9A96E")}
-              >
-                Book Now
-              </button>
-            </div>
-          </div>
+          <Eyebrow label="TREATMENTS" />
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1A0F00", margin: "0 0 12px" }}>
+            What I Offer
+          </h2>
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C8860A", margin: 0 }}>
+            Every treatment is tailored to you.
+          </p>
         </motion.div>
 
-        <style>{`
-          @media (max-width: 600px) {
-            .consultation-card-inner {
-              flex-direction: column !important;
-            }
-            .consultation-right {
-              width: 100% !important;
-              min-width: unset !important;
-            }
-            .consultation-right button {
-              width: 100% !important;
-            }
-          }
-        `}</style>
+        {/* Carousel controls */}
+        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginBottom: 20 }}>
+          {[{ dir: "left" as const, icon: <ChevronLeft size={18} /> }, { dir: "right" as const, icon: <ChevronRight size={18} /> }].map(({ dir, icon }) => (
+            <button
+              key={dir}
+              onClick={() => scroll(dir)}
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: "50%",
+                border: "1px solid #E2DDD5",
+                background: "#FAF7F2",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: "#1A0F00",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0F00"; e.currentTarget.style.color = "#FAF7F2"; (e.currentTarget.querySelector("svg") as SVGElement).style.color = "#FAF7F2"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "#FAF7F2"; e.currentTarget.style.color = "#1A0F00"; }}
+            >
+              {icon}
+            </button>
+          ))}
+        </div>
+
+        {/* Scroll container */}
+        <div
+          ref={scrollRef}
+          style={{
+            display: "flex",
+            gap: 20,
+            overflowX: "auto",
+            scrollSnapType: "x mandatory",
+            paddingBottom: 16,
+            msOverflowStyle: "none",
+            scrollbarWidth: "none",
+          }}
+        >
+          <style>{`.services-scroll::-webkit-scrollbar { display: none; }`}</style>
+          {services.map((svc, i) => (
+            <motion.div
+              key={svc.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.07 }}
+              style={{
+                minWidth: "clamp(260px, 31%, 320px)",
+                flexShrink: 0,
+                scrollSnapAlign: "start",
+                background: "#FAF7F2",
+                border: "1px solid #E2DDD5",
+                padding: "36px 28px",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <div style={{ fontSize: 20, color: "#C8860A", marginBottom: 16 }}>✦</div>
+              <h3 style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontSize: "1.4rem",
+                fontWeight: 600,
+                color: "#1A0F00",
+                margin: "0 0 12px",
+              }}>
+                {svc.name}
+              </h3>
+              <p style={{
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 13,
+                color: "#6B6260",
+                lineHeight: 1.7,
+                margin: "0 0 24px",
+                flexGrow: 1,
+              }}>
+                {svc.description}
+              </p>
+              <div style={{
+                fontFamily: "'Cormorant Garamond', serif",
+                fontStyle: "italic",
+                fontSize: "1.2rem",
+                color: "#C8860A",
+                marginBottom: 20,
+              }}>
+                {svc.from}
+              </div>
+              <button
+                onClick={() => setConsultOpen(true)}
+                style={{
+                  background: "transparent",
+                  border: "1px solid #1A0F00",
+                  color: "#1A0F00",
+                  fontFamily: "'DM Sans', sans-serif",
+                  fontSize: 10,
+                  letterSpacing: "2px",
+                  textTransform: "uppercase",
+                  padding: "12px 20px",
+                  borderRadius: 0,
+                  cursor: "pointer",
+                  transition: "all 0.2s",
+                  alignSelf: "flex-start",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0F00"; e.currentTarget.style.color = "#FAF7F2"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1A0F00"; }}
+              >
+                Book
+              </button>
+            </motion.div>
+          ))}
+        </div>
       </div>
 
-      <AnimatePresence>
-        {bookingTreatment && (
-          <BookingModal
-            treatment={bookingTreatment}
-            onClose={() => setBookingTreatment(null)}
-          />
-        )}
-      </AnimatePresence>
-
-      <AnimatePresence>
-        {showConsultation && (
-          <ConsultationModal onClose={() => setShowConsultation(false)} />
-        )}
-      </AnimatePresence>
+      {consultOpen && <ConsultationModal onClose={() => setConsultOpen(false)} />}
     </section>
   );
 }

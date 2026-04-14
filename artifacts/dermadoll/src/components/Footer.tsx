@@ -29,8 +29,9 @@ export default function Footer() {
     { name: "HOME", href: "#" },
     { name: "TREATMENTS", href: "#services" },
     { name: "ABOUT", href: "#about" },
-    { name: "PACKAGES", href: "#training" },
-    { name: "CONTACT", href: "#faq" },
+    { name: "PACKAGES", href: "#packages" },
+    { name: "PRICING", href: "#pricing" },
+    { name: "CONTACT", href: "#contact" },
   ];
 
   const scrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {

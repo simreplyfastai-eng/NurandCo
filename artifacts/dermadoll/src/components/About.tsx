@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
+import ConsultationModal from "./ConsultationModal";
 
 function mediaUrl(path: string | null): string | null {
   if (!path) return null;
@@ -8,128 +9,138 @@ function mediaUrl(path: string | null): string | null {
   return path;
 }
 
+function Eyebrow({ label }: { label: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+    </div>
+  );
+}
+
 export default function About() {
   const [practImage, setPractImage] = useState<string | null>(null);
+  const [consultOpen, setConsultOpen] = useState(false);
 
   useEffect(() => {
     fetch("/api/media/config")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
-        if (data?.practitionerImage) {
-          setPractImage(mediaUrl(data.practitionerImage));
-        }
+        if (data?.practitionerImage) setPractImage(mediaUrl(data.practitionerImage));
       })
       .catch(() => {});
   }, []);
 
   return (
-    <section id="about" className="py-[100px]" style={{ background: "#F0EBE1" }}>
-      <div className="container mx-auto px-4 max-w-4xl">
+    <section id="about" style={{ background: "#F0EBE1", padding: "100px 0" }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
 
-        {/* Eyebrow + heading */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-14"
-        >
-          <p className="font-sans uppercase tracking-[0.35em] text-[10px] mb-4" style={{ color: "#C8860A" }}>
-            About
-          </p>
-          <h2 className="font-serif font-bold text-[#1A0F00]" style={{ fontSize: "clamp(2rem, 5vw, 3.2rem)" }}>
-            Meet Face By Niamh
-          </h2>
-          <div className="flex items-center justify-center gap-3 mt-5">
-            <div className="h-px w-8" style={{ background: "#C8860A", opacity: 0.5 }} />
-            <span style={{ color: "#C8860A", fontSize: "10px", opacity: 0.6 }}>✦</span>
-            <div className="h-px w-8" style={{ background: "#C8860A", opacity: 0.5 }} />
-          </div>
-        </motion.div>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 72, alignItems: "center" }} className="about-grid">
+          <style>{`
+            @media (max-width: 768px) {
+              .about-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
+              .about-img-col { order: 2 !important; }
+              .about-text-col { order: 1 !important; }
+            }
+          `}</style>
 
-        {/* Two-column: photo + text */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-          className="flex flex-col md:flex-row md:items-center gap-10 md:gap-14 mb-20"
-        >
-          {/* Photo */}
-          <div className="w-full md:w-2/5 flex-shrink-0">
+          {/* Photo — left on desktop */}
+          <motion.div
+            className="about-img-col"
+            initial={{ opacity: 0, x: -24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            style={{ aspectRatio: "3/4", overflow: "hidden", background: "#d8cfc6" }}
+          >
             {practImage ? (
               <img
                 src={practImage}
                 alt="Niamh — Face By Niamh Aesthetics"
-                className="w-full object-cover"
-                style={{
-                  border: "1px solid #E2DDD5",
-                  aspectRatio: "1 / 1",
-                }}
+                style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
               />
             ) : (
-              <div
-                className="w-full flex flex-col items-center justify-center gap-3"
-                style={{
-                  background: "#FAF7F2",
-                  border: "1px solid #E2DDD5",
-                  aspectRatio: "1 / 1",
-                }}
-              >
-                <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="#C8C0B4" strokeWidth="1">
-                  <circle cx="12" cy="8" r="4" />
-                  <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-                </svg>
-                <span className="font-sans text-[12px]" style={{ color: "#C8C0B4" }}>Photo coming soon</span>
+              <div style={{
+                width: "100%",
+                height: "100%",
+                minHeight: 420,
+                background: "linear-gradient(160deg, #cfc5b8 0%, #bfb4a5 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}>
+                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 18, color: "rgba(26,15,0,0.3)" }}>
+                  Niamh
+                </span>
               </div>
             )}
-          </div>
+          </motion.div>
 
-          {/* Text */}
-          <div className="w-full md:w-3/5">
-            <p className="hidden md:block font-serif text-[#1A0F00]/80 leading-relaxed text-xl font-light">
-              Face By Niamh is an advanced aesthetics clinic based in Leeds and Wakefield, run by Niamh — an Advanced Aesthetics Practitioner and Student Nurse. Every treatment is tailored to you, combining the latest techniques with a warm, professional approach and a commitment to natural-looking results.
+          {/* Text — right on desktop */}
+          <motion.div
+            className="about-text-col"
+            initial={{ opacity: 0, x: 24 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.1 }}
+          >
+            <Eyebrow label="ABOUT NIAMH" />
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 600, color: "#1A0F00", margin: "0 0 10px" }}>
+              Meet Your Practitioner
+            </h2>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C8860A", margin: "0 0 28px" }}>
+              Student Nurse. Advanced Aesthetics Practitioner.
             </p>
-            <div className="md:hidden text-center">
-              <p className="font-sans mb-4" style={{ fontSize: "15px", lineHeight: "1.75", color: "#6B6260" }}>
-                An advanced aesthetics clinic based in Leeds and Wakefield.
-              </p>
-              <p className="font-sans mb-4" style={{ fontSize: "15px", lineHeight: "1.75", color: "#6B6260" }}>
-                Led by <span style={{ color: "#C8860A" }}>Niamh</span> — every treatment is tailored to you, combining the latest techniques with a warm, professional approach.
-              </p>
-              <p className="font-sans" style={{ fontSize: "15px", lineHeight: "1.75", color: "#C8860A" }}>
-                Natural results. Your comfort, always our priority.
-              </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B6260", lineHeight: 1.8, margin: "0 0 18px" }}>
+              Hi, I'm Niamh — a Student Nurse and Advanced Aesthetics Practitioner based between Leeds and Wakefield. I specialise in natural-looking results that enhance your features while keeping you looking like you — just a refreshed version.
+            </p>
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B6260", lineHeight: 1.8, margin: "0 0 36px" }}>
+              I work from my private home clinic in Leeds and am available at Laurenanaisbeauty in Horsforth two days a month. Every treatment starts with a thorough consultation and is tailored specifically to you.
+            </p>
+
+            {/* Stats */}
+            <div style={{ display: "flex", gap: 32, marginBottom: 36 }}>
+              {[
+                { value: "100+", label: "Clients" },
+                { value: "5★", label: "Average Rating" },
+              ].map((stat) => (
+                <div key={stat.label}>
+                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.2rem", fontWeight: 600, color: "#1A0F00", lineHeight: 1 }}>
+                    {stat.value}
+                  </div>
+                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: "#6B6260", marginTop: 6 }}>
+                    {stat.label}
+                  </div>
+                </div>
+              ))}
             </div>
-          </div>
-        </motion.div>
 
-        {/* Divider */}
-        <div className="h-px w-20 mx-auto mb-14" style={{ background: "#C8860A", opacity: 0.3 }} />
-
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 text-center">
-          {[
-            { value: "100+", label: "Treatments Performed" },
-            { value: "★ 5.0", label: "Average Rating" },
-            { value: "Leeds & Wakefield", label: "Clinic Locations" },
-          ].map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: i * 0.1 }}
+            <button
+              onClick={() => setConsultOpen(true)}
+              style={{
+                background: "transparent",
+                border: "1px solid #1A0F00",
+                color: "#1A0F00",
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: 11,
+                letterSpacing: "2px",
+                textTransform: "uppercase",
+                padding: "14px 28px",
+                borderRadius: 0,
+                cursor: "pointer",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0F00"; e.currentTarget.style.color = "#FAF7F2"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1A0F00"; }}
             >
-              <div className="font-serif text-4xl mb-2" style={{ color: "#C8860A" }}>{stat.value}</div>
-              <div className="font-sans text-[11px] uppercase tracking-widest" style={{ color: "#6B6260" }}>
-                {stat.label}
-              </div>
-            </motion.div>
-          ))}
+              Book a Consultation
+            </button>
+          </motion.div>
         </div>
-
       </div>
+
+      {consultOpen && <ConsultationModal onClose={() => setConsultOpen(false)} />}
     </section>
   );
 }

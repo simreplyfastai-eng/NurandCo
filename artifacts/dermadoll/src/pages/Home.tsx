@@ -3,37 +3,17 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import TrustTicker from "@/components/TrustTicker";
 import About from "@/components/About";
 import Services from "@/components/Services";
+import Packages from "@/components/Packages";
+import Pricing from "@/components/Pricing";
 import BeforeAfter from "@/components/BeforeAfter";
-import ResultsVideos from "@/components/ResultsVideos";
-import Training from "@/components/Training";
 import Reviews from "@/components/Reviews";
 import FAQ from "@/components/FAQ";
-import BookNow from "@/components/BookNow";
+import CTABanner from "@/components/CTABanner";
+import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
-import PopupBanner from "@/components/PopupBanner";
-
-function GoldDivider() {
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        width: "100%",
-        padding: "0 48px",
-        boxSizing: "border-box",
-      }}
-    >
-      <div
-        style={{
-          height: 1,
-          background: "linear-gradient(90deg, transparent 0%, #C9A96E 30%, #C9A96E 70%, transparent 100%)",
-          opacity: 0.35,
-        }}
-      />
-    </div>
-  );
-}
 
 export default function Home() {
   const [showBookingSuccess, setShowBookingSuccess] = useState(false);
@@ -51,9 +31,8 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-[100dvh] bg-white text-foreground">
+    <div className="min-h-[100dvh]" style={{ background: "#FAF7F2", color: "#1A0F00" }}>
 
-      {/* 3DS redirect success banner */}
       <AnimatePresence>
         {showBookingSuccess && (
           <motion.div
@@ -63,17 +42,17 @@ export default function Home() {
             transition={{ duration: 0.4 }}
             style={{
               position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
-              background: "#1a1a1a",
-              borderBottom: "2px solid #C9A96E",
+              background: "#1A0F00",
+              borderBottom: "2px solid #C8860A",
               padding: "14px 24px",
               display: "flex", alignItems: "center", justifyContent: "center", gap: "12px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: "50%", background: "rgba(201,169,110,0.2)", flexShrink: 0 }}>
-              <Check size={14} color="#C9A96E" />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: "50%", background: "rgba(200,134,10,0.2)", flexShrink: 0 }}>
+              <Check size={14} color="#C8860A" />
             </div>
-            <p style={{ fontFamily: "Inter, sans-serif", fontSize: "14px", color: "#FAF9F7", margin: 0 }}>
-              <span style={{ color: "#C9A96E", fontWeight: 600 }}>Booking confirmed.</span>{" "}
+            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", color: "#FAF7F2", margin: 0 }}>
+              <span style={{ color: "#C8860A", fontWeight: 600 }}>Booking confirmed.</span>{" "}
               You'll receive a confirmation email shortly.
             </p>
             <button
@@ -86,8 +65,6 @@ export default function Home() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <PopupBanner />
 
       {/* Floating WhatsApp button */}
       <a
@@ -112,11 +89,9 @@ export default function Home() {
         }}
         onMouseEnter={(e) => {
           (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.08)";
-          (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 6px 24px rgba(37,211,102,0.55)";
         }}
         onMouseLeave={(e) => {
           (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
-          (e.currentTarget as HTMLAnchorElement).style.boxShadow = "0 4px 16px rgba(37,211,102,0.45)";
         }}
       >
         <svg viewBox="0 0 24 24" fill="white" width="26" height="26" aria-hidden="true">
@@ -126,24 +101,41 @@ export default function Home() {
       </a>
 
       <Navbar />
+
+      {/* 1. Hero */}
       <Hero />
-      <GoldDivider />
+
+      {/* 2. Trust Ticker */}
+      <TrustTicker />
+
+      {/* 3. About */}
       <About />
-      <GoldDivider />
+
+      {/* 4. Services */}
       <Services />
-      <GoldDivider />
+
+      {/* 5. Packages */}
+      <Packages />
+
+      {/* 6. Pricing */}
+      <Pricing />
+
+      {/* 7. Results */}
       <BeforeAfter />
-      <GoldDivider />
-      <ResultsVideos />
-      <GoldDivider />
-      <Training />
-      <GoldDivider />
+
+      {/* 8. Reviews */}
       <Reviews />
-      <GoldDivider />
+
+      {/* 9. FAQ */}
       <FAQ />
-      <GoldDivider />
-      <BookNow />
-      <GoldDivider />
+
+      {/* 10. CTA Banner */}
+      <CTABanner />
+
+      {/* 11. Contact */}
+      <Contact />
+
+      {/* Footer */}
       <Footer />
     </div>
   );
