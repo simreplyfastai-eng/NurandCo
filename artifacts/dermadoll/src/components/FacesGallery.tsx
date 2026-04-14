@@ -2,14 +2,13 @@ import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_IMAGES = [
-  { key: "g0", src: "result-1.jpg", label: "Lip Filler" },
-  { key: "g1", src: "result-2.jpg", label: "Lip Filler" },
-  { key: "g2", src: "result-3.jpg", label: "Glass Skin Facial" },
-  { key: "g3", src: "result-4.jpg", label: "Skin Treatment" },
-  { key: "g4", src: "result-1.jpg", label: "Liquid Rhinoplasty" },
-  { key: "g5", src: "result-2.jpg", label: "Anti-Wrinkle" },
-  { key: "g6", src: "result-3.jpg", label: "Microneedling" },
-  { key: "g7", src: "result-4.jpg", label: "Dermal Filler" },
+  { key: "g0", src: "gallery-1.jpg", label: "Lip Filler" },
+  { key: "g1", src: "gallery-2.jpg", label: "Lip Filler" },
+  { key: "g2", src: "gallery-3.jpg", label: "Liquid Rhinoplasty" },
+  { key: "g3", src: "gallery-4.jpg", label: "Lip Filler" },
+  { key: "g4", src: "gallery-5.jpg", label: "Dermal Filler" },
+  { key: "g5", src: "gallery-6.jpg", label: "Lip Filler" },
+  { key: "g6", src: "gallery-7.jpg", label: "Anti-Wrinkle" },
 ];
 
 interface GalleryItem { key: string; src: string; label: string; }
