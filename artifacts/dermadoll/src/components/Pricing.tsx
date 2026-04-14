@@ -98,8 +98,64 @@ export default function Pricing() {
   const [consultOpen, setConsultOpen] = useState(false);
 
   return (
-    <section id="pricing" style={{ background: "#FAF7F2", padding: "100px 0" }}>
-      <div style={{ maxWidth: 750, margin: "0 auto", padding: "0 24px" }}>
+    <section id="pricing" style={{ background: "#F0EBE1", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+
+      {/* Decorative background layer */}
+      {/* Large faint "£" watermark — left side */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: "50%", left: "-30px", transform: "translateY(-50%)",
+        fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 700,
+        fontSize: "clamp(200px, 28vw, 340px)", color: "rgba(200,134,10,0.05)",
+        lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-0.04em",
+      }}>£</div>
+
+      {/* Radial amber glow — top right */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: -60, right: -60,
+        width: 380, height: 380,
+        background: "radial-gradient(circle, rgba(200,134,10,0.09) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+
+      {/* Radial amber glow — bottom left */}
+      <div aria-hidden="true" style={{
+        position: "absolute", bottom: -60, left: 100,
+        width: 300, height: 300,
+        background: "radial-gradient(circle, rgba(200,134,10,0.07) 0%, transparent 70%)",
+        pointerEvents: "none",
+      }} />
+
+      {/* Scattered ✦ ornaments */}
+      {[
+        { top: "8%",  right: "6%",  size: "1rem",   opacity: 0.14 },
+        { top: "25%", left: "2%",   size: "0.7rem",  opacity: 0.10 },
+        { top: "60%", right: "4%",  size: "0.85rem", opacity: 0.11 },
+        { top: "85%", right: "10%", size: "0.65rem", opacity: 0.08 },
+        { top: "75%", left: "5%",   size: "1.1rem",  opacity: 0.07 },
+      ].map((pos, i) => (
+        <div key={i} aria-hidden="true" style={{
+          position: "absolute", ...(pos as any),
+          fontFamily: "'Cormorant Garamond', serif",
+          fontSize: pos.size, color: "#C8860A", opacity: pos.opacity,
+          pointerEvents: "none", userSelect: "none",
+        }}>✦</div>
+      ))}
+
+      {/* Thin horizontal rule lines */}
+      <div aria-hidden="true" style={{
+        position: "absolute", top: 48, left: "50%", transform: "translateX(-50%)",
+        width: "55%", height: 1,
+        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.18), transparent)",
+        pointerEvents: "none",
+      }} />
+      <div aria-hidden="true" style={{
+        position: "absolute", bottom: 48, left: "50%", transform: "translateX(-50%)",
+        width: "55%", height: 1,
+        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.18), transparent)",
+        pointerEvents: "none",
+      }} />
+
+      <div style={{ maxWidth: 750, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -135,7 +191,7 @@ export default function Pricing() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "18px 24px",
-                  background: open === i ? "#1A0F00" : "#FAF7F2",
+                  background: open === i ? "#1A0F00" : "#F0EBE1",
                   border: "none",
                   cursor: "pointer",
                   transition: "background 0.2s",
@@ -164,7 +220,7 @@ export default function Pricing() {
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    style={{ overflow: "hidden", background: "#FAF7F2" }}
+                    style={{ overflow: "hidden", background: "#F0EBE1" }}
                   >
                     <div style={{ padding: "4px 24px 8px" }}>
                       {cat.items.map((item, j) => (
