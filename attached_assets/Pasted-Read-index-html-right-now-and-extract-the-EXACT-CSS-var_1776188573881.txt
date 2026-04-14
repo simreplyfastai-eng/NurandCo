@@ -1,0 +1,111 @@
+Read index.html right now and extract 
+the EXACT CSS variables, colours, fonts 
+and styles used on the website frontend.
+
+Then restyle portal.html to match the 
+website exactly — same colour palette, 
+same fonts, same feel. The portal should 
+look like the admin back-end of the 
+same website, not a different product.
+
+STEP 1 — READ AND EXTRACT FROM index.html:
+
+Read index.html and find:
+1. Every CSS variable defined in :root {}
+2. The body font-family
+3. The heading font-family  
+4. The background colours used
+5. The nav/header background and text colour
+6. The primary button background colour
+7. The gold/accent colour
+8. The dark text colour
+9. Any border colours used
+10. The cream/off-white background colour
+
+Then use THOSE EXACT values in the portal.
+
+STEP 2 — APPLY TO PORTAL
+
+Once you have the exact values from 
+index.html apply them to portal.html 
+so the portal matches the website.
+
+The mapping should be:
+
+Website nav background → Portal sidebar background
+Website body background → Portal main content background  
+Website gold/accent colour → Portal active nav items, 
+  badges, active borders, accent links
+Website dark text colour → Portal primary buttons, 
+  headings, strong text
+Website heading font → Portal page titles, card headers,
+  stat values, brand name in sidebar
+Website body font → Portal all body text, nav items,
+  labels, table content
+Website button style → Portal primary button style
+Website card/section style → Portal content cards
+Website cream background → Portal sidebar or 
+  card header backgrounds
+Website border colour → Portal card borders, dividers
+
+STEP 3 — SPECIFIC ELEMENTS TO MATCH
+
+SIDEBAR:
+Use the website's nav/header background colour.
+If the website nav is light — make sidebar light.
+If the website nav is dark — make sidebar dark.
+Use the website's exact gold/accent for active items.
+
+BRAND AREA (top of sidebar):
+Use the website's exact heading font for 
+"FACE BY NIAMH" wordmark.
+Match the website's logo/brand typography exactly.
+
+MAIN CONTENT BACKGROUND:
+Use the website's body/page background colour.
+
+STAT CARDS:
+White cards with a thin top accent bar 
+in the website's gold/accent colour.
+Heading font for the stat numbers.
+
+BUTTONS:
+Primary button matches the website's 
+"BOOK NOW" button style exactly.
+
+LOGIN SCREEN:
+Make it feel like an exclusive admin 
+entry point to the same brand.
+Use the website's colours but dark/inverted
+version for drama.
+Website heading font for the brand name.
+Website accent colour for the login button.
+
+STEP 4 — FONTS
+
+Make sure the EXACT same Google Fonts 
+imported in index.html are also imported 
+in portal.html. Use the same font names 
+and weights.
+
+STEP 5 — FINAL CHECK
+
+After applying all styles:
+1. The portal sidebar should feel like 
+   the website's navigation — same brand
+2. The portal cards should feel like 
+   the website's content sections
+3. The portal accent colour is exactly 
+   the same gold/amber as on the website
+4. The typography matches — same fonts, 
+   same weights, same letter-spacing style
+5. Someone looking at both should 
+   immediately see they are the same brand
+
+DO NOT change any functionality.
+DO NOT change any JavaScript.
+DO NOT change any data or API calls.
+CSS and visual styling ONLY.
+
+Republish after applying then reload 
+portal.html to verify it matches.
