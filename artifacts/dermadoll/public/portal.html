@@ -507,117 +507,79 @@ tr:hover td{background:#FDFBF8}
   .fin-kpi-card{padding:12px 6px}
 }
 /* ═══════════════════════════════════════════════════════
-   FACE BY NIAMH — VISUAL REDESIGN
-   Top navigation, dark login, Playfair Display, warm cream
+   FACE BY NIAMH — VISUAL RESKIN (layout unchanged)
+   Dark sidebar, warm cream content, Playfair Display
    ═══════════════════════════════════════════════════════ */
 
-/* Nav height tokens */
-:root{--nav-h:100px;--brand-h:50px}
-
 /* ── LOGIN SCREEN — DARK MOODY ────────────────────────── */
-#login-page{background:#1a0f00!important}
-.login-card{background:rgba(255,255,255,.06)!important;border:1px solid rgba(200,134,10,.3)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 20px 60px rgba(0,0,0,.5)!important}
-.login-wordmark{font-family:'Playfair Display',serif!important;color:#c8860a!important;font-size:26px!important;letter-spacing:.14em!important}
-.login-sub{color:rgba(245,237,224,.6)!important}
+#login-page{background:radial-gradient(ellipse at center,#1a0f00 0%,#0a0500 100%)!important}
+.login-card{background:rgba(255,255,255,.04)!important;border:1px solid rgba(200,134,10,.25)!important;border-radius:20px!important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);box-shadow:0 20px 60px rgba(0,0,0,.4)!important;padding:40px!important;max-width:380px!important}
+.login-wordmark{font-family:'Playfair Display',serif!important;color:#c8860a!important;font-size:22px!important;font-weight:700!important;letter-spacing:.14em!important}
+.login-sub{color:#6b5040!important;font-size:10px!important;letter-spacing:4px!important}
 .login-label{color:rgba(245,237,224,.7)!important}
-.login-input{background:rgba(255,255,255,.08)!important;border:1px solid rgba(200,134,10,.3)!important;color:#f5ede0!important;border-radius:10px!important}
-.login-input::placeholder{color:rgba(245,237,224,.35)}
-.login-input:focus{box-shadow:0 0 0 3px rgba(200,134,10,.25)!important;border-color:rgba(200,134,10,.6)!important}
-.login-btn{background:#c8860a!important;color:#1a0f00!important;font-weight:700!important;border-radius:10px!important}
-.login-close{color:rgba(245,237,224,.4)!important}
-.login-close:hover{background:rgba(255,255,255,.1)!important;color:#f5ede0!important}
+.login-input{background:rgba(255,255,255,.06)!important;border:1px solid rgba(200,134,10,.3)!important;color:#f5ede0!important;border-radius:10px!important;padding:13px 16px!important;font-size:14px!important}
+.login-input::placeholder{color:rgba(245,237,224,.3)}
+.login-input:focus{box-shadow:0 0 0 3px rgba(200,134,10,.15)!important;border-color:#c8860a!important;outline:none!important}
+.login-btn{background:#c8860a!important;color:#1a0f00!important;font-weight:700!important;border-radius:10px!important;font-size:14px!important;padding:13px!important;letter-spacing:.03em!important}
+.login-btn:hover{background:#e09a0c!important;opacity:1!important}
+.login-close{color:rgba(245,237,224,.35)!important}
+.login-close:hover{background:rgba(255,255,255,.08)!important;color:#f5ede0!important}
 .login-error{color:#f87171!important}
 
-/* ── PORTAL LAYOUT — TOP NAV ──────────────────────────── */
-#portal.visible{display:block}
-
-/* Sidebar becomes a full-width fixed top nav */
-#sidebar{width:100%;min-height:auto;height:auto;bottom:auto;flex-direction:column;background:transparent;border-right:none;transform:none!important}
-
-/* Brand bar — dark, top strip */
-.sb-brand{background:#1a0f00;padding:0 28px;height:var(--brand-h);display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;border-bottom:none;position:relative}
-.sb-wordmark{font-family:'Playfair Display',serif!important;font-size:15px!important;font-weight:700!important;letter-spacing:.18em!important;color:#c8860a!important;text-transform:uppercase}
-.sb-sub{font-size:9px!important;letter-spacing:.32em!important;color:#a08060!important;margin-top:0!important;display:inline}
-.sb-badge{display:none!important}
-
-/* Logout button floated to right inside brand bar */
-.sb-footer{position:absolute;top:0;right:28px;height:var(--brand-h);display:flex;align-items:center;padding:0;border-top:none}
-.logout-btn{width:auto!important;background:transparent!important;border:1px solid rgba(200,134,10,.35)!important;color:#a08060!important;font-size:11px!important;padding:5px 14px!important;border-radius:6px!important;white-space:nowrap}
-.logout-btn:hover{border-color:#c8860a!important;color:#c8860a!important}
-
-/* Nav strip — white, below brand bar */
-.sb-nav{flex-direction:row!important;background:#ffffff;border-bottom:2px solid #f0e8de;padding:0 20px!important;overflow-x:auto!important;overflow-y:hidden!important;flex:none!important;scrollbar-width:none;-ms-overflow-style:none}
-.sb-nav::-webkit-scrollbar{display:none}
-
-/* Section labels → thin vertical dividers */
-.sb-section{width:1px;flex-shrink:0;background:#e8e0d6;margin:12px 6px;padding:0!important;font-size:0!important;letter-spacing:0;text-transform:none}
-
-/* Nav items — horizontal */
-.sb-item{flex-direction:row!important;padding:14px 15px!important;border-radius:0!important;margin-bottom:0!important;border-bottom:3px solid transparent;border-top:3px solid transparent;white-space:nowrap;flex-shrink:0;color:#6b5a47!important;font-size:13px;transition:all .15s}
-.sb-item:hover{background:#faf5ef!important;color:#1a0f00!important;border-bottom-color:transparent}
-.sb-item.active{background:transparent!important;color:#c8860a!important;font-weight:600!important;border-bottom-color:#c8860a}
-.sb-item svg{width:14px!important;height:14px!important;flex-shrink:0}
-.sb-badge-count{font-size:9px!important;padding:1px 5px!important;margin-left:4px}
+/* ── SIDEBAR — DARK (layout position unchanged) ────────── */
+#sidebar{background:#1a0f00!important;border-right:1px solid rgba(200,134,10,.15)!important}
+.sb-brand{background:#0f0800!important;border-bottom:1px solid rgba(200,134,10,.2)!important;padding:20px 16px!important}
+.sb-wordmark{font-family:'Playfair Display',serif!important;color:#c8860a!important;font-size:15px!important;letter-spacing:.16em!important}
+.sb-sub{color:#6b5040!important;font-size:10px!important;letter-spacing:2px!important}
+.sb-badge{background:rgba(200,134,10,.15)!important;color:#c8a060!important;border:1px solid rgba(200,134,10,.2)!important}
+.sb-section{color:#4a3828!important;font-size:9px!important;letter-spacing:2px!important;padding:16px 16px 6px!important}
+.sb-nav{padding:8px!important}
+.sb-item{color:#c8a882!important;border-radius:0 8px 8px 0!important}
+.sb-item:hover{background:rgba(255,255,255,.05)!important;color:#f5ede0!important}
+.sb-item.active{background:rgba(200,134,10,.15)!important;color:#c8860a!important;font-weight:600!important;border-left:3px solid #c8860a!important;border-radius:0 8px 8px 0!important}
+.sb-item.active svg{color:#c8860a!important}
+.sb-item svg{color:#6b5040!important}
+.sb-badge-count{background:#c8860a!important;color:#fff!important}
 .sb-item.active .sb-badge-count{background:#c8860a!important;color:#fff!important}
+.sb-footer{border-top:1px solid rgba(200,134,10,.15)!important;padding:16px!important}
+.logout-btn{color:#6b5040!important;border-color:rgba(200,134,10,.2)!important}
+.logout-btn:hover{color:#c8860a!important;border-color:#c8860a!important}
 
-/* Mobile hamburger — not needed with top nav */
-#mobile-toggle{display:none!important}
-#sidebar-overlay{display:none!important}
-
-/* Main content — full width, push below top nav */
-#main-content{margin-left:0!important;margin-top:var(--nav-h)!important;width:100%!important;max-width:100%!important;background:#faf6f1!important}
-
-/* Sticky page topbar — offset by nav height */
-.topbar{top:var(--nav-h)!important;background:#fdfaf7!important;border-bottom:1px solid #ede5d8!important}
-.topbar-title{font-family:'Playfair Display',serif!important;font-size:24px!important}
-
-/* Page warm cream background */
+/* ── MAIN CONTENT — WARM CREAM ──────────────────────────── */
+#main-content{background:#faf6f1!important}
 .page{background:#faf6f1}
+.topbar{background:#ffffff!important;border-bottom:1px solid #ede5d8!important}
+.topbar-title{font-family:'Playfair Display',serif!important;font-size:24px!important;color:#1a0f00!important}
+.topbar-search{background:#faf6f1!important;border:1px solid #ede5d8!important}
 
-/* ── KPI / STAT CARDS ─────────────────────────────────── */
-.kpi-card{border-left:4px solid #c8860a!important;border-radius:12px!important;box-shadow:0 2px 8px rgba(26,15,0,.06)!important;overflow:hidden;position:relative}
+/* ── KPI / STAT CARDS ────────────────────────────────────── */
+.kpi-card{background:#ffffff!important;border:1px solid #ede5d8!important;border-left:4px solid #c8860a!important;border-radius:12px!important;box-shadow:0 2px 8px rgba(26,15,0,.05)!important;overflow:hidden;position:relative}
 .kpi-card::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:#c8860a;opacity:.04;pointer-events:none}
 .kpi-grid>:nth-child(2){border-left-color:#7c9e87!important}
 .kpi-grid>:nth-child(3){border-left-color:#9b7ea6!important}
 .kpi-label{font-size:10px!important;font-weight:700!important;letter-spacing:1.5px!important;color:#a08060!important}
-.kpi-value{font-family:'Playfair Display',serif!important;font-size:34px!important;color:#1a0f00!important}
+.kpi-value{font-family:'Playfair Display',serif!important;font-size:30px!important;color:#1a0f00!important}
 
-/* ── SECTION CARDS ────────────────────────────────────── */
-.card{border-radius:14px!important;border:1px solid #ede5d8!important;box-shadow:0 2px 12px rgba(26,15,0,.05)!important}
+/* ── SECTION CARDS ────────────────────────────────────────── */
+.card{background:#ffffff!important;border:1px solid #ede5d8!important;border-radius:14px!important;box-shadow:0 2px 12px rgba(26,15,0,.04)!important}
 .card-header{background:#fdfaf7!important;border-bottom:1px solid #f0e8de!important}
 .card-title{font-family:'Playfair Display',serif!important;font-size:15px!important;color:#1a0f00!important}
 
-/* ── BUTTONS ──────────────────────────────────────────── */
-.btn-gold{background:#1a0f00!important;color:#f5ede0!important;font-weight:600!important}
+/* ── BUTTONS ─────────────────────────────────────────────── */
+.btn-gold{background:#1a0f00!important;color:#f5ede0!important;font-weight:600!important;font-size:13px!important}
 .btn-gold:hover{background:#2d1a00!important;opacity:1!important}
-.btn-outline{border:1px solid #c8860a!important;color:#c8860a!important}
+.btn-outline{border:1px solid #c8860a!important;color:#c8860a!important;background:transparent!important}
 .btn-outline:hover{background:#c8860a!important;color:#fff!important}
 
-/* ── STATUS PILLS ─────────────────────────────────────── */
-.bk-status-pill,.fin-pill{border-radius:20px!important;font-size:11px!important;font-weight:600!important;padding:3px 10px!important}
+/* ── STATUS PILLS ─────────────────────────────────────────── */
+.bk-status-pill,.fin-pill{border-radius:20px!important;font-size:11px!important;font-weight:600!important;padding:3px 12px!important;letter-spacing:.03em!important}
 
-/* ── MODAL TITLES ─────────────────────────────────────── */
+/* ── TYPOGRAPHY — HEADINGS ───────────────────────────────── */
 .modal-title{font-family:'Playfair Display',serif!important}
-
-/* Finance page heading */
 .fin-title{font-family:'Playfair Display',serif!important}
+.settings-section-header{font-family:'Playfair Display',serif!important}
+.avail-card-title{font-family:'Playfair Display',serif!important}
 
-/* ── MOBILE — top nav scrolls horizontally ────────────── */
-@media(max-width:900px){
-  :root{--nav-h:92px;--brand-h:44px}
-  .sb-brand{padding:0 16px}
-  .sb-nav{padding:0 8px!important}
-  .sb-item{padding:12px 10px!important;font-size:12px}
-  .sb-item svg{display:none!important}
-  .sb-section{margin:10px 4px}
-  .sb-footer{right:12px}
-  .sb-wordmark{font-size:13px!important;letter-spacing:.1em!important}
-}
-@media(max-width:480px){
-  :root{--nav-h:86px;--brand-h:40px}
-  .sb-sub{display:none!important}
-  .sb-item{padding:10px 8px!important}
-}
 /* ── TOAST ── */
 #toast-container{position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
 .toast{background:#111;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;padding:12px 18px;border-radius:8px;opacity:0;transform:translateY(10px);transition:opacity .3s,transform .3s;pointer-events:none;max-width:320px;line-height:1.5}
