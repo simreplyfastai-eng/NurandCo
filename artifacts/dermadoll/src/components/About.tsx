@@ -100,21 +100,21 @@ export default function About() {
             </p>
 
             {/* Stats */}
-            <div style={{ display: "flex", gap: 32, marginBottom: 36 }}>
-              {[
-                { value: "100+", label: "Clients" },
-                { value: "5★", label: "Rated" },
-                { value: "Advanced", label: "Aesthetics Practitioner" },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.2rem", fontWeight: 600, color: "#1A0F00", lineHeight: 1 }}>
-                    {stat.value}
-                  </div>
-                  <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase", color: "#6B6260", marginTop: 6 }}>
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
+            <div style={{ display: "flex", alignItems: "center", marginBottom: 36 }}>
+              <div style={{ textAlign: "center", flex: 1 }}>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.4rem", fontWeight: 300, color: "#C8860A", lineHeight: 1 }}>100+</div>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#6B6260", marginTop: 8 }}>Clients</div>
+              </div>
+              <div style={{ width: 1, height: 48, background: "#C8860A", opacity: 0.3, flexShrink: 0 }} />
+              <div style={{ textAlign: "center", flex: 1 }}>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.4rem", fontWeight: 300, color: "#C8860A", lineHeight: 1 }}>5 ★</div>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#6B6260", marginTop: 8 }}>Rated</div>
+              </div>
+              <div style={{ width: 1, height: 48, background: "#C8860A", opacity: 0.3, flexShrink: 0 }} />
+              <div style={{ textAlign: "center", flex: 1 }}>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2rem", fontWeight: 300, color: "#C8860A", lineHeight: 1 }}>Advanced</div>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#6B6260", marginTop: 8 }}>Aesthetics Practitioner</div>
+              </div>
             </div>
 
             <button
