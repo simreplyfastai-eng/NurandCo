@@ -13,20 +13,28 @@ const faqs: FAQItem[] = [
     answer: "All new clients require a consultation before treatment. A £10 consultation fee applies, which is fully redeemable against your treatment.",
   },
   {
-    question: "Is a deposit required?",
-    answer: "Yes, a deposit is required to secure your appointment. This will be deducted from your final balance on the day.",
+    question: "Is a deposit required to book?",
+    answer: "Yes — a deposit is required to secure all appointments. The deposit amount varies depending on the treatment booked. Deposits are non-refundable.",
+  },
+  {
+    question: "What is your rescheduling policy?",
+    answer: "Please give at least 48 hours' notice if you need to reschedule. Rescheduling within this timeframe allows your deposit to be transferred to your new appointment.",
+  },
+  {
+    question: "What happens if I cancel or don't show up?",
+    answer: "Cancellations with less than 48 hours' notice will result in your deposit being forfeited. No-shows will lose their deposit and will be charged the remainder of the appointment cost. A new deposit will be required to rebook.",
   },
   {
     question: "Where are you based?",
-    answer: "Niamh works from a private home clinic in Leeds and is available at Laurenanaisbeauty in Horsforth two days a month. Exact address details are provided upon booking.",
+    answer: "Niamh works from a private home clinic in Leeds and is available at Laurenanaisbeauty in Horsforth two days a month. Exact address details are provided upon booking confirmation.",
   },
   {
     question: "How long do results last?",
     answer: "This varies by treatment. Lip filler typically lasts 6–9 months, anti-wrinkle 3–4 months, and skin boosters can last up to 12 months with a course.",
   },
   {
-    question: "What if I have a concern after treatment?",
-    answer: "Your aftercare and a 2-week review are included. Niamh is always available via Instagram DM or email for any questions after your appointment.",
+    question: "What aftercare is provided?",
+    answer: "Full aftercare guidance is provided after every treatment. A complimentary 2-week review is included for anti-wrinkle treatments. Niamh is always available via Instagram DM or WhatsApp for any questions after your appointment.",
   },
 ];
 

@@ -6,22 +6,25 @@ const router = Router();
 
 const BUILT_IN_TREATMENTS = [
   // Anti-Wrinkle
-  {cat:'BOTOX',name:'Anti-Wrinkle — 1 Area',duration:30,price:140},
-  {cat:'BOTOX',name:'Anti-Wrinkle — 2 Areas',duration:30,price:200},
-  {cat:'BOTOX',name:'Anti-Wrinkle — 3 Areas',duration:45,price:230},
+  {cat:'BOTOX',name:'1 Area of Anti-Wrinkle',duration:30,price:140},
+  {cat:'BOTOX',name:'2 Areas of Anti-Wrinkle',duration:30,price:200},
+  {cat:'BOTOX',name:'3 Areas of Anti-Wrinkle',duration:45,price:230},
   {cat:'BOTOX',name:'Brow Lift',duration:30,price:150},
-  {cat:'BOTOX',name:'Masseter Slimming Tox',duration:30,price:150},
+  {cat:'BOTOX',name:'2 Week Review / Top-up',duration:15,price:10},
+  {cat:'BOTOX',name:'Masseter Face Slimming Tox',duration:30,price:150},
   {cat:'BOTOX',name:'Nose Tip Lift Tox',duration:30,price:140},
-  {cat:'BOTOX',name:'DAO Tox',duration:30,price:140},
+  {cat:'BOTOX',name:'DAO Tox (Downturned Smile)',duration:30,price:140},
   {cat:'BOTOX',name:'Dimple Chin Tox',duration:30,price:150},
   {cat:'BOTOX',name:'Nose Slimming Tox',duration:30,price:140},
-  {cat:'BOTOX',name:'2 Week Review / Top-up',duration:15,price:10},
   // Dermal Filler
-  {cat:'FILLER',name:'0.5ml Lip Filler',duration:30,price:100},
-  {cat:'FILLER',name:'0.7ml Lip Filler',duration:30,price:110},
+  {cat:'FILLER',name:'Consultation',duration:30,price:10},
+  {cat:'FILLER',name:'Facial Slimming Package',duration:60,price:315},
+  {cat:'FILLER',name:'Summer Glow Up',duration:60,price:320},
   {cat:'FILLER',name:'1ml Lip Filler',duration:45,price:130},
+  {cat:'FILLER',name:'0.7ml Lip Filler',duration:30,price:110},
+  {cat:'FILLER',name:'0.5ml Lip Filler',duration:30,price:100},
   {cat:'FILLER',name:'Lip Filler Dissolving',duration:30,price:95},
-  {cat:'FILLER',name:'Lip Filler Dissolve & 1ml Refill',duration:60,price:190},
+  {cat:'FILLER',name:'Lip Filler Dissolve & 1ml Lip Refill',duration:60,price:190},
   {cat:'FILLER',name:'1ml Cheek Contour',duration:45,price:130},
   {cat:'FILLER',name:'Jaw Filler',duration:60,price:130},
   {cat:'FILLER',name:'Chin Augmentation',duration:45,price:110},
@@ -29,37 +32,35 @@ const BUILT_IN_TREATMENTS = [
   {cat:'FILLER',name:'Pixie Tip Lift',duration:30,price:80},
   {cat:'FILLER',name:'Tear Trough Filler',duration:45,price:130},
   {cat:'FILLER',name:'Nasolabial Folds',duration:45,price:110},
-  // Packages
-  {cat:'BUNDLES',name:'Facial Slimming Package',duration:60,price:315},
-  {cat:'BUNDLES',name:'Summer Glow Up',duration:60,price:320},
-  {cat:'BUNDLES',name:'2ml Package',duration:60,price:220},
-  {cat:'BUNDLES',name:'3ml Package',duration:75,price:295},
-  {cat:'BUNDLES',name:'4ml Package',duration:90,price:395},
-  {cat:'BUNDLES',name:'5ml Package',duration:105,price:495},
+  {cat:'FILLER',name:'2ml Package',duration:60,price:220},
+  {cat:'FILLER',name:'3ml Package',duration:75,price:295},
+  {cat:'FILLER',name:'4ml Package',duration:90,price:395},
+  {cat:'FILLER',name:'5ml Package',duration:105,price:495},
   // Skin Boosters
   {cat:'SKINBOOST',name:'Profhilo',duration:45,price:140},
-  {cat:'SKINBOOST',name:'Profhilo x4',duration:45,price:450},
-  {cat:'SKINBOOST',name:'Seventy Hyal Skin Booster',duration:45,price:120},
-  {cat:'SKINBOOST',name:'Jalupro Skin Booster',duration:45,price:100},
-  {cat:'SKINBOOST',name:'Lumi Eyes',duration:30,price:120},
-  {cat:'SKINBOOST',name:'Polynucleotides (PDRN)',duration:45,price:120},
-  // Medical Facials
-  {cat:'FACIALS',name:'Dermaplaning',duration:45,price:30},
-  {cat:'FACIALS',name:'Microneedling with Salmon DNA',duration:60,price:80},
+  {cat:'SKINBOOST',name:'Profhilo X4 Sessions',duration:45,price:450},
+  {cat:'SKINBOOST',name:'Jalupro HMW',duration:45,price:130},
+  {cat:'SKINBOOST',name:'Jalupro HMW X4 Sessions',duration:45,price:420},
+  {cat:'SKINBOOST',name:'Lumi Eyes',duration:30,price:100},
+  {cat:'SKINBOOST',name:'Lumi Eyes X4 Sessions',duration:30,price:350},
+  {cat:'SKINBOOST',name:'Seventy Hyal',duration:45,price:120},
+  {cat:'SKINBOOST',name:'Seventy Hyal X4 Sessions',duration:45,price:300},
+  // Facials
+  {cat:'FACIALS',name:'Luxury Dermaplane',duration:45,price:30},
+  {cat:'FACIALS',name:'Luxury Microneedling with Salmon DNA',duration:60,price:45},
+  {cat:'FACIALS',name:'Luxury Dermaplane & Microneedling with Salmon DNA',duration:75,price:65},
   // Vitamin Injections
-  {cat:'INJECTABLES',name:'B12 Injection',duration:15,price:25},
-  // Consultation
-  {cat:'CONSULT',name:'Consultation',duration:30,price:10},
+  {cat:'VITAMIN',name:'Vitamin B12 Injection',duration:15,price:25},
+  {cat:'VITAMIN',name:'Weekly Course of B12 Injections x4',duration:15,price:90},
 ];
 
 const CAT_LABELS: Record<string, string> = {
-  BOTOX:'Botox',FILLER:'Dermal Filler',FACIALS:'Facials',
-  SKINBOOST:'Skin Boosters',FATDISSOLVE:'Fat Dissolving',
-  INJECTABLES:'Injectables',
+  BOTOX:'Anti-Wrinkle',FILLER:'Dermal Fillers',FACIALS:'Facials',
+  SKINBOOST:'Skin Boosters',VITAMIN:'Vitamin Injections',
   BUNDLES:'Treatment Bundles',CONSULT:'Consultation',
 };
 
-const CAT_ORDER = ['BOTOX','FILLER','FACIALS','SKINBOOST','FATDISSOLVE','INJECTABLES','BUNDLES','CONSULT'];
+const CAT_ORDER = ['BOTOX','FILLER','SKINBOOST','FACIALS','VITAMIN','BUNDLES','CONSULT'];
 
 const ALLOWED_KV_KEYS = new Set([
   'fbn_settings','fbn_custom_treats','fbn_custom_cats','fbn_cat_states',
