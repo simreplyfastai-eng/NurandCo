@@ -8,7 +8,7 @@ import About from "@/components/About";
 import Services from "@/components/Services";
 import Packages from "@/components/Packages";
 import Pricing from "@/components/Pricing";
-import BeforeAfter from "@/components/BeforeAfter";
+import FacesGallery from "@/components/FacesGallery";
 import Reviews from "@/components/Reviews";
 import FAQ from "@/components/FAQ";
 import CTABanner from "@/components/CTABanner";
@@ -121,7 +121,7 @@ export default function Home() {
       <Pricing />
 
       {/* 7. Results */}
-      <BeforeAfter />
+      <FacesGallery />
 
       {/* 8. Reviews */}
       <Reviews />
