@@ -82,33 +82,6 @@ export default function Services() {
           </p>
         </motion.div>
 
-        {/* Carousel controls */}
-        <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginBottom: 20 }}>
-          {[{ dir: "left" as const, icon: <ChevronLeft size={18} /> }, { dir: "right" as const, icon: <ChevronRight size={18} /> }].map(({ dir, icon }) => (
-            <button
-              key={dir}
-              onClick={() => scroll(dir)}
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                border: "1px solid #E2DDD5",
-                background: "#FAF7F2",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                color: "#1A0F00",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0F00"; e.currentTarget.style.color = "#FAF7F2"; (e.currentTarget.querySelector("svg") as SVGElement).style.color = "#FAF7F2"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "#FAF7F2"; e.currentTarget.style.color = "#1A0F00"; }}
-            >
-              {icon}
-            </button>
-          ))}
-        </div>
-
         {/* Scroll container */}
         <div
           ref={scrollRef}
@@ -194,6 +167,34 @@ export default function Services() {
             </motion.div>
           ))}
         </div>
+
+        {/* Carousel controls — centred below cards */}
+        <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 32 }}>
+          {[{ dir: "left" as const, icon: <ChevronLeft size={20} /> }, { dir: "right" as const, icon: <ChevronRight size={20} /> }].map(({ dir, icon }) => (
+            <button
+              key={dir}
+              onClick={() => scroll(dir)}
+              style={{
+                width: 48,
+                height: 48,
+                borderRadius: "50%",
+                border: "1.5px solid #1A0F00",
+                background: "transparent",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                color: "#1A0F00",
+                transition: "all 0.2s",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0F00"; e.currentTarget.style.color = "#FAF7F2"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1A0F00"; }}
+            >
+              {icon}
+            </button>
+          ))}
+        </div>
+
       </div>
 
       {consultOpen && <ConsultationModal onClose={() => setConsultOpen(false)} />}
