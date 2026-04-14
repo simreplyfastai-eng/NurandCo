@@ -276,7 +276,7 @@ export default function Footer() {
         </div>
 
         {/* Divider */}
-        <div style={{ height: 1, background: "rgba(255,255,255,0.06)", marginBottom: 24 }} />
+        <div style={{ height: 1, background: "rgba(255,255,255,0.14)", marginBottom: 24 }} />
 
         {/* Legal */}
         <div style={{
@@ -287,7 +287,7 @@ export default function Footer() {
           gap: 12,
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 11,
-          color: "rgba(250,247,242,0.25)",
+          color: "rgba(250,247,242,0.6)",
           fontWeight: 300,
           letterSpacing: "0.04em",
         }}>
@@ -302,7 +302,7 @@ export default function Footer() {
           paddingTop: 20,
           fontFamily: "'DM Sans', sans-serif",
           fontSize: 9,
-          color: "rgba(250,247,242,0.12)",
+          color: "rgba(250,247,242,0.45)",
           letterSpacing: "0.2em",
           textTransform: "uppercase",
         }}>
@@ -311,9 +311,9 @@ export default function Footer() {
             href="https://aesthetix-systems.co.uk"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "inherit", textDecoration: "none", transition: "color 0.2s" }}
-            onMouseEnter={(e) => e.currentTarget.style.color = "rgba(250,247,242,0.3)"}
-            onMouseLeave={(e) => e.currentTarget.style.color = "rgba(250,247,242,0.12)"}
+            style={{ color: "#C8860A", textDecoration: "none", transition: "color 0.2s" }}
+            onMouseEnter={(e) => e.currentTarget.style.color = "#e09b20"}
+            onMouseLeave={(e) => e.currentTarget.style.color = "#C8860A"}
           >
             AESTHETIX
           </a>
