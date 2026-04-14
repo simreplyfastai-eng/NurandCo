@@ -1,0 +1,299 @@
+Verify and enforce that this project 
+(Face By Niamh) is 100% isolated from 
+the Dermadoll Aesthetics project. Any 
+change made in this portal must NEVER 
+affect Dermadoll's live site and vice versa.
+
+The two projects are:
+- THIS PROJECT: Face By Niamh 
+  (aesthetics-webbooking-system-template)
+- OTHER PROJECT: Dermadoll Aesthetics
+  (separate Replit project)
+
+===============================================================
+AUDIT 1 — DATABASE ISOLATION
+===============================================================
+
+The most critical separation point is 
+the PostgreSQL database. Each Replit 
+project gets its own database — but 
+only if they are completely separate 
+Replit projects.
+
+Confirm which database this project uses:
+
+Run this query and show me the result:
+SELECT current_database(), inet_server_addr();
+
+Then check the DATABASE_URL secret:
+console.log('DB prefix:', 
+  process.env.DATABASE_URL?.substring(0, 40))
+// Shows first 40 chars only — enough to 
+// see if it's a different DB than Dermadoll
+
+Each Replit project has its own isolated 
+PostgreSQL instance — if this is a 
+separate Replit project (forked or created 
+fresh) then the database is already 
+completely separate.
+
+Confirm by checking the tables:
+SELECT table_name FROM information_schema.tables 
+WHERE table_schema = 'public'
+ORDER BY table_name;
+
+Show me all table names so I can verify 
+this is a clean separate database.
+
+===============================================================
+AUDIT 2 — CLOUDSTORE / KV ISOLATION  
+===============================================================
+
+CloudStore (Replit Key-Value store) is 
+scoped per Replit project — each project 
+has its own isolated KV namespace. 
+A key named "fbn_settings" in THIS project 
+is completely separate from any key in 
+the Dermadoll project.
+
+Verify by listing all keys in this project:
+
+import Database from '@replit/database'
+const db = new Database()
+const keys = await db.list()
+console.log('All KV keys in this project:', [...keys])
+
+Expected output should show ONLY fbn_ 
+prefixed keys — no dd_ or dermadoll_ keys.
+
+If any dd_ or dermadoll_ keys exist:
+for (const key of [...keys]) {
+  if (key.startsWith('dd_') || 
+      key.toLowerCase().includes('dermadoll')) {
+    await db.delete(key)
+    console.log('Deleted stale key:', key)
+  }
+}
+
+===============================================================
+AUDIT 3 — OBJECT STORAGE ISOLATION
+===============================================================
+
+Replit Object Storage is also scoped 
+per project. Files uploaded in this 
+project cannot be seen or accessed from 
+the Dermadoll project.
+
+List all objects in this project's storage:
+
+import { Client } from '@replit/object-storage'
+const client = new Client()
+const { ok, value: objects } = await client.list()
+if (ok) {
+  console.log('Objects in this project storage:')
+  objects.forEach(obj => console.log(' -', obj.name))
+} else {
+  console.log('No objects or error listing')
+}
+
+Every file listed should be Niamh's files 
+(niamh-practitioner.jpg, hero-room.jpg etc).
+No dermadoll files should appear.
+
+===============================================================
+AUDIT 4 — ENVIRONMENT VARIABLES / SECRETS
+===============================================================
+
+Replit Secrets are 100% per-project —
+a secret in this project is completely 
+invisible to the Dermadoll project.
+
+Verify secrets are set correctly for 
+THIS project only:
+
+const secretsAudit = {
+  hasDbUrl: !!process.env.DATABASE_URL,
+  hasJwtSecret: !!process.env.JWT_SECRET,
+  hasAdminPassword: !!process.env.ADMIN_PASSWORD,
+  hasStripeKey: !!process.env.STRIPE_SECRET_KEY,
+  hasResend: !!process.env.RESEND_API_KEY,
+}
+console.log('Secrets in this project:', secretsAudit)
+
+// Check JWT secret is unique (not shared)
+// Just show a hash/fingerprint, not the value
+const crypto = require('crypto')
+const jwtHash = crypto
+  .createHash('sha256')
+  .update(process.env.JWT_SECRET || '')
+  .digest('hex')
+  .substring(0, 8)
+console.log('JWT fingerprint:', jwtHash)
+// If this matches Dermadoll's fingerprint 
+// the secrets are shared — generate a new one
+
+// Generate fresh JWT secret if needed:
+const newJwtSecret = crypto.randomBytes(64).toString('hex')
+console.log('NEW JWT SECRET (save to Secrets):', newJwtSecret)
+// Copy this value → Replit Secrets → JWT_SECRET
+
+===============================================================
+AUDIT 5 — SESSION ISOLATION
+===============================================================
+
+User sessions (cookies/JWT tokens) must 
+be completely separate between projects. 
+A user logged into Dermadoll's portal 
+cannot accidentally access Niamh's portal.
+
+Check the session configuration:
+
+// In server.js find where sessions/JWT are configured
+// The JWT_SECRET must be unique per project
+// The cookie name should be unique per project
+
+// Check session cookie name:
+grep -n "session\|cookie\|jwt" server.js | head -20
+
+Ensure the cookie name is unique:
+// BAD — generic name shared across projects:
+app.use(session({ name: 'sessionId', ... }))
+
+// GOOD — unique per client:
+app.use(session({ name: 'fbn_session', ... }))
+
+Update the session cookie name to 'fbn_session'
+so it cannot conflict with Dermadoll's cookies
+even if both are open in the same browser.
+
+===============================================================
+AUDIT 6 — API ENDPOINTS ARE SEPARATE
+===============================================================
+
+Each project runs on its own URL:
+- Face By Niamh: aesthetics-webbooking-system-template.replit.app
+- Dermadoll: [their own replit URL]
+
+There is zero shared API surface between 
+the two projects. Confirm by checking 
+the deployed URL:
+
+console.log('This project URL:', 
+  process.env.REPLIT_DEPLOYMENT_URL || 
+  process.env.REPL_SLUG)
+
+This must be different from Dermadoll's URL.
+
+===============================================================
+AUDIT 7 — PORTAL DATA SCOPING
+===============================================================
+
+All portal data (bookings, clients, 
+treatments, settings) is stored in THIS 
+project's database ONLY.
+
+Add a sanity check to server.js that 
+runs on startup to confirm database 
+isolation:
+
+// On startup log the business name from DB
+// to confirm we're connected to the right DB
+const settingsCheck = await db.get('fbn_settings')
+console.log('=== STARTUP CHECK ===')
+console.log('Business:', settingsCheck?.businessName)
+console.log('DB tables:', 
+  (await pool.query(
+    "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='public'"
+  )).rows[0].count, 'tables')
+console.log('Bookings:', 
+  (await pool.query('SELECT COUNT(*) FROM bookings')).rows[0].count)
+console.log('=== END CHECK ===')
+
+This runs every time the server starts 
+and confirms which client's data is loaded.
+
+===============================================================
+AUDIT 8 — MEDIA/IMAGE ISOLATION
+===============================================================
+
+The media manager in the portal uploads 
+images to THIS project's Object Storage 
+only. Updates to Face By Niamh's gallery, 
+videos or practitioner photo cannot affect 
+Dermadoll's site.
+
+Verify the media upload endpoint uses 
+this project's storage client:
+
+In server.js find the upload endpoint:
+grep -n "upload\|objectStorage\|storage" server.js | head -20
+
+Confirm the storage client is initialised 
+without any cross-project credentials:
+
+// CORRECT — uses this project's storage:
+import { Client } from '@replit/object-storage'
+const storageClient = new Client()
+// No credentials needed — scoped to this project automatically
+
+// WRONG — would be if credentials from 
+// another project were passed in:
+// const storageClient = new Client({ token: '...' })
+
+===============================================================
+AUDIT 9 — ADD ISOLATION COMMENT HEADER
+===============================================================
+
+Add a clear comment block at the top of 
+server.js as a permanent record:
+
+/*
+ * ═══════════════════════════════════════════
+ * FACE BY NIAMH — AESTHETICS BOOKING SYSTEM
+ * ═══════════════════════════════════════════
+ * 
+ * CLIENT: Face By Niamh
+ * REPLIT PROJECT: aesthetics-webbooking-system-template
+ * DEPLOYED URL: aesthetics-webbooking-system-template.replit.app
+ * 
+ * DATA ISOLATION:
+ * - Database: This project's PostgreSQL (isolated)
+ * - KV Store: fbn_* keys only (isolated per project)
+ * - Object Storage: This project's bucket (isolated)
+ * - Secrets: This project's Secrets only (isolated)
+ * - Sessions: fbn_session cookie (unique name)
+ * 
+ * This project is COMPLETELY SEPARATE from:
+ * - Dermadoll Aesthetics (different Replit project)
+ * - Any other client project
+ * 
+ * Changes here DO NOT affect any other client.
+ * ═══════════════════════════════════════════
+ */
+
+===============================================================
+AUDIT 10 — FINAL ISOLATION REPORT
+===============================================================
+
+Run all checks and produce a final report:
+
+console.log(`
+╔═══════════════════════════════════════╗
+║  FACE BY NIAMH — ISOLATION REPORT    ║
+╠═══════════════════════════════════════╣
+║  Database:      ${!!process.env.DATABASE_URL ? '✅ Separate' : '❌ Missing'}          ║
+║  KV Store:      fbn_ keys only ✅     ║
+║  Obj Storage:   This project ✅        ║
+║  JWT Secret:    ${!!process.env.JWT_SECRET ? '✅ Present' : '❌ Missing'}             ║
+║  Session Name:  fbn_session ✅        ║
+║  Admin Pass:    ${!!process.env.ADMIN_PASSWORD ? '✅ Set' : '❌ Missing'}                ║
+║  Stripe Keys:   ${!!process.env.STRIPE_SECRET_KEY ? '✅ Present' : '⚠️  Not set yet'}      ║
+╠═══════════════════════════════════════╣
+║  STATUS: FULLY ISOLATED ✅            ║
+╚═══════════════════════════════════════╝
+`)
+
+Every row must show ✅ before this 
+project goes live.
+
+Republish after all checks complete.

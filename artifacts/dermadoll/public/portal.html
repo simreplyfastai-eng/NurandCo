@@ -1148,48 +1148,53 @@ tr:hover td{background:#FDFBF8}
 // DATA
 // ═══════════════════════════════════════════════════
 const TREATMENTS = [
-  {cat:'BOTOX',name:'Botox 1 Area',duration:15,price:100},
-  {cat:'BOTOX',name:'Botox 2 Areas',duration:15,price:140},
-  {cat:'BOTOX',name:'Botox 3 Areas',duration:15,price:180},
-  {cat:'BOTOX',name:'Botox 4 Areas',duration:15,price:210},
-  {cat:'BOTOX',name:'Masseter Botox',duration:15,price:200},
-  {cat:'BOTOX',name:'Nefertiti Lift Botox (Neck)',duration:30,price:220},
-  {cat:'BOTOX',name:'Chin Botox (Mentalis Muscle)',duration:30,price:80},
-  {cat:'BOTOX',name:'Nose Slimming Botox',duration:30,price:80},
-  {cat:'BOTOX',name:'Gummy Smile / Lip Flip Botox',duration:30,price:80},
-  {cat:'BOTOX',name:'Hyperhidrosis (Underarm) Botox',duration:30,price:220},
-  {cat:'BOTOX',name:'Botox Topup',duration:15,price:20},
+  // Anti-Wrinkle
+  {cat:'BOTOX',name:'1 Area of Anti-Wrinkle',duration:30,price:140},
+  {cat:'BOTOX',name:'2 Areas of Anti-Wrinkle',duration:30,price:200},
+  {cat:'BOTOX',name:'3 Areas of Anti-Wrinkle',duration:45,price:230},
+  {cat:'BOTOX',name:'Brow Lift',duration:30,price:150},
+  {cat:'BOTOX',name:'2 Week Review / Top-up',duration:15,price:10},
+  {cat:'BOTOX',name:'Masseter Face Slimming Tox',duration:30,price:150},
+  {cat:'BOTOX',name:'Nose Tip Lift Tox',duration:30,price:140},
+  {cat:'BOTOX',name:'DAO Tox (Downturned Smile)',duration:30,price:140},
+  {cat:'BOTOX',name:'Dimple Chin Tox',duration:30,price:150},
+  {cat:'BOTOX',name:'Nose Slimming Tox',duration:30,price:140},
+  // Dermal Fillers
+  {cat:'FILLER',name:'Consultation',duration:30,price:10},
+  {cat:'FILLER',name:'Facial Slimming Package',duration:60,price:315},
+  {cat:'FILLER',name:'Summer Glow Up',duration:60,price:320},
+  {cat:'FILLER',name:'1ml Lip Filler',duration:45,price:130},
+  {cat:'FILLER',name:'0.7ml Lip Filler',duration:30,price:110},
   {cat:'FILLER',name:'0.5ml Lip Filler',duration:30,price:100},
-  {cat:'FILLER',name:'0.7ml Lip Filler',duration:45,price:120},
-  {cat:'FILLER',name:'1.1ml Lip Filler',duration:45,price:150},
-  {cat:'FILLER',name:'1.1ml Nasal Labials',duration:30,price:150},
-  {cat:'FILLER',name:'1.1ml Cheek Filler',duration:30,price:150},
-  {cat:'FILLER',name:'1.5ml Cheek Filler',duration:45,price:200},
-  {cat:'FILLER',name:'2.2ml Cheek Filler',duration:45,price:250},
-  {cat:'FILLER',name:'1.1ml Chin Filler',duration:45,price:150},
-  {cat:'FILLER',name:'2.2ml Jawline Filler',duration:60,price:250},
-  {cat:'FILLER',name:'Liquid Rhinoplasty',duration:45,price:180},
-  {cat:'FILLER',name:'Teartrough Filler',duration:45,price:180},
-  {cat:'FILLER',name:'2.2ml Facial Contouring',duration:45,price:230},
-  {cat:'FILLER',name:'3.3ml Facial Contouring',duration:60,price:330},
-  {cat:'FILLER',name:'4.4ml Facial Contouring',duration:60,price:440},
-  {cat:'FACIALS',name:'Glass Skin Facial',duration:60,price:80},
-  {cat:'FACIALS',name:'Glass Skin Facial + Microneedling',duration:60,price:120},
-  {cat:'SKINBOOST',name:'1x Skin Booster',duration:30,price:150},
-  {cat:'SKINBOOST',name:'3x Lumi Pro Skin Booster',duration:30,price:350},
-  {cat:'SKINBOOST',name:'Plenhyage XL Strong',duration:30,price:200},
-  {cat:'SKINBOOST',name:'Plenhyage XL Strong 2 Treatments',duration:30,price:350},
-  {cat:'SKINBOOST',name:'Vitarin I - Eye Polynucleotide',duration:30,price:170},
-  {cat:'SKINBOOST',name:'Vitarin I - Eye Polynucleotide x2',duration:30,price:300},
-  {cat:'SKINBOOST',name:'B12 Injection',duration:15,price:30},
-  {cat:'FATDISSOLVE',name:'Lemon Bottle Small Area',duration:30,price:70},
-  {cat:'FATDISSOLVE',name:'Lemon Bottle Large Area',duration:30,price:100},
-  {cat:'BUNDLES',name:'Botox 3 Areas + 1.1ml Dermal Filler',duration:45,price:320},
-  {cat:'BUNDLES',name:'Botox 3 Areas + 1.1ml Lips + Lumi Pro',duration:60,price:450},
-  {cat:'BUNDLES',name:'Botox 3 Areas + 1x Lumi Pro Skin Booster',duration:45,price:300},
-  {cat:'BUNDLES',name:'Botox 3 Areas + 1x Plenhyage XL',duration:45,price:350},
-  {cat:'BUNDLES',name:'Botox 3 Areas + Vitarin I Eye',duration:45,price:300},
-  {cat:'CONSULT',name:'Consultation',duration:15,price:25},
+  {cat:'FILLER',name:'Lip Filler Dissolving',duration:30,price:95},
+  {cat:'FILLER',name:'Lip Filler Dissolve & 1ml Lip Refill',duration:60,price:190},
+  {cat:'FILLER',name:'1ml Cheek Contour',duration:45,price:130},
+  {cat:'FILLER',name:'Jaw Filler',duration:60,price:130},
+  {cat:'FILLER',name:'Chin Augmentation',duration:45,price:110},
+  {cat:'FILLER',name:'Non-Surgical Rhinoplasty',duration:45,price:130},
+  {cat:'FILLER',name:'Pixie Tip Lift',duration:30,price:80},
+  {cat:'FILLER',name:'Tear Trough Filler',duration:45,price:130},
+  {cat:'FILLER',name:'Nasolabial Folds',duration:45,price:110},
+  {cat:'FILLER',name:'2ml Package',duration:60,price:220},
+  {cat:'FILLER',name:'3ml Package',duration:75,price:295},
+  {cat:'FILLER',name:'4ml Package',duration:90,price:395},
+  {cat:'FILLER',name:'5ml Package',duration:105,price:495},
+  // Skin Boosters
+  {cat:'SKINBOOST',name:'Profhilo',duration:45,price:140},
+  {cat:'SKINBOOST',name:'Profhilo X4 Sessions',duration:45,price:450},
+  {cat:'SKINBOOST',name:'Jalupro HMW',duration:45,price:130},
+  {cat:'SKINBOOST',name:'Jalupro HMW X4 Sessions',duration:45,price:420},
+  {cat:'SKINBOOST',name:'Lumi Eyes',duration:30,price:100},
+  {cat:'SKINBOOST',name:'Lumi Eyes X4 Sessions',duration:30,price:350},
+  {cat:'SKINBOOST',name:'Seventy Hyal',duration:45,price:120},
+  {cat:'SKINBOOST',name:'Seventy Hyal X4 Sessions',duration:45,price:300},
+  // Facials
+  {cat:'FACIALS',name:'Luxury Dermaplane',duration:45,price:30},
+  {cat:'FACIALS',name:'Luxury Microneedling with Salmon DNA',duration:60,price:45},
+  {cat:'FACIALS',name:'Luxury Dermaplane & Microneedling with Salmon DNA',duration:75,price:65},
+  // Vitamin Injections
+  {cat:'VITAMIN',name:'Vitamin B12 Injection',duration:15,price:25},
+  {cat:'VITAMIN',name:'Weekly Course of B12 Injections x4',duration:15,price:90},
 ];
 
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
@@ -1214,16 +1219,16 @@ function initSampleData(){
   const now=new Date();
   const y=now.getFullYear(),m=now.getMonth();
   const sample=[
-    {id:uid(),clientName:'Ellisha W.',treatment:'1.1ml Lip Filler',category:'FILLER',date:fmt(new Date(y,m,3)),time:'11:00',price:150,deposit:75,status:'Complete',notes:'',createdAt:Date.now()-20*86400000},
-    {id:uid(),clientName:'Donna S.',treatment:'Botox 3 Areas',category:'BOTOX',date:fmt(new Date(y,m,5)),time:'13:00',price:180,deposit:90,status:'Complete',notes:'',createdAt:Date.now()-18*86400000},
-    {id:uid(),clientName:'Sophie M.',treatment:'Glass Skin Facial',category:'FACIALS',date:fmt(new Date(y,m,8)),time:'10:00',price:80,deposit:40,status:'Complete',notes:'',createdAt:Date.now()-15*86400000},
-    {id:uid(),clientName:'Chloe R.',treatment:'Liquid Rhinoplasty',category:'FILLER',date:fmt(new Date(y,m,10)),time:'14:00',price:180,deposit:90,status:'Complete',notes:'',createdAt:Date.now()-12*86400000},
-    {id:uid(),clientName:'Ellisha W.',treatment:'1x Skin Booster',category:'SKINBOOST',date:fmt(new Date(y,m,14)),time:'11:30',price:150,deposit:75,status:'Complete',notes:'',createdAt:Date.now()-8*86400000},
-    {id:uid(),clientName:'Amara J.',treatment:'Masseter Botox',category:'BOTOX',date:fmt(new Date(y,m,15)),time:'15:00',price:200,deposit:100,status:'Confirmed',notes:'',createdAt:Date.now()-7*86400000},
-    {id:uid(),clientName:'Priya K.',treatment:'Lemon Bottle Small Area',category:'FATDISSOLVE',date:fmt(new Date(y,m,17)),time:'09:30',price:70,deposit:35,status:'Confirmed',notes:'',createdAt:Date.now()-5*86400000},
-    {id:uid(),clientName:'Donna S.',treatment:'0.7ml Lip Filler',category:'FILLER',date:fmt(new Date(y,m,20)),time:'12:00',price:120,deposit:60,status:'Pending',notes:'',createdAt:Date.now()-2*86400000},
-    {id:uid(),clientName:'Sophie M.',treatment:'Glass Skin Facial + Microneedling',category:'FACIALS',date:fmt(new Date(y,m,22)),time:'10:30',price:120,deposit:60,status:'Pending',notes:'',createdAt:Date.now()-1*86400000},
-    {id:uid(),clientName:'Zara T.',treatment:'Botox 3 Areas + 1.1ml Dermal Filler',category:'BUNDLES',date:fmt(new Date(y,m,25)),time:'13:30',price:320,deposit:160,status:'Pending',notes:'',createdAt:Date.now()},
+    {id:uid(),clientName:'Emma R.',treatment:'1ml Lip Filler',category:'FILLER',date:fmt(new Date(y,m,3)),time:'11:00',price:130,deposit:50,status:'Complete',notes:'',createdAt:Date.now()-20*86400000},
+    {id:uid(),clientName:'Jessica T.',treatment:'2 Areas of Anti-Wrinkle',category:'BOTOX',date:fmt(new Date(y,m,5)),time:'13:00',price:200,deposit:50,status:'Complete',notes:'',createdAt:Date.now()-18*86400000},
+    {id:uid(),clientName:'Lauren M.',treatment:'Luxury Dermaplane',category:'FACIALS',date:fmt(new Date(y,m,8)),time:'10:00',price:30,deposit:20,status:'Complete',notes:'',createdAt:Date.now()-15*86400000},
+    {id:uid(),clientName:'Chloe B.',treatment:'Non-Surgical Rhinoplasty',category:'FILLER',date:fmt(new Date(y,m,10)),time:'14:00',price:130,deposit:50,status:'Complete',notes:'',createdAt:Date.now()-12*86400000},
+    {id:uid(),clientName:'Emma R.',treatment:'Profhilo',category:'SKINBOOST',date:fmt(new Date(y,m,14)),time:'11:30',price:140,deposit:50,status:'Complete',notes:'',createdAt:Date.now()-8*86400000},
+    {id:uid(),clientName:'Amara J.',treatment:'Masseter Face Slimming Tox',category:'BOTOX',date:fmt(new Date(y,m,15)),time:'15:00',price:150,deposit:50,status:'Confirmed',notes:'',createdAt:Date.now()-7*86400000},
+    {id:uid(),clientName:'Priya K.',treatment:'Vitamin B12 Injection',category:'VITAMIN',date:fmt(new Date(y,m,17)),time:'09:30',price:25,deposit:20,status:'Confirmed',notes:'',createdAt:Date.now()-5*86400000},
+    {id:uid(),clientName:'Jessica T.',treatment:'0.7ml Lip Filler',category:'FILLER',date:fmt(new Date(y,m,20)),time:'12:00',price:110,deposit:50,status:'Pending',notes:'',createdAt:Date.now()-2*86400000},
+    {id:uid(),clientName:'Lauren M.',treatment:'Luxury Microneedling with Salmon DNA',category:'FACIALS',date:fmt(new Date(y,m,22)),time:'10:30',price:45,deposit:20,status:'Pending',notes:'',createdAt:Date.now()-1*86400000},
+    {id:uid(),clientName:'Zara H.',treatment:'3 Areas of Anti-Wrinkle',category:'BOTOX',date:fmt(new Date(y,m,25)),time:'13:30',price:230,deposit:50,status:'Pending',notes:'',createdAt:Date.now()},
   ];
   saveBookings(sample);
   const clients=[
@@ -2592,7 +2597,7 @@ function getCatStates(){return JSON.parse(localStorage.getItem('dd_cat_states')|
 function saveCatStates(s){localStorage.setItem('dd_cat_states',JSON.stringify(s));CloudStore.set('dd_cat_states',s);}
 function getTreatOverrides(){return JSON.parse(localStorage.getItem('dd_treatment_overrides')||'{}')}
 
-const CAT_LABELS={BOTOX:'Botox',FILLER:'Dermal Filler',FACIALS:'Facials',SKINBOOST:'Skin Boosters',FATDISSOLVE:'Fat Dissolving',BUNDLES:'Treatment Bundles',CONSULT:'Consultation'};
+const CAT_LABELS={BOTOX:'Anti-Wrinkle',FILLER:'Dermal Fillers',FACIALS:'Facials',SKINBOOST:'Skin Boosters',VITAMIN:'Vitamin Injections'};
 
 function allTreatments(){
   const custom=getCustomTreatments();
