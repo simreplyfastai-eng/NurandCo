@@ -44,7 +44,7 @@ export default function Footer() {
   return (
     <footer
       style={{
-        background: "linear-gradient(160deg, #EDE7DC 0%, #FAF7F2 55%, #EDE7DC 100%)",
+        background: "#FAF7F2",
         color: "#1C1C1E",
         position: "relative",
         overflow: "hidden",
