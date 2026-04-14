@@ -1,0 +1,417 @@
+Redesign the Face By Niamh admin portal 
+so it looks completely different to 
+Dermadoll's portal. Keep all functionality 
+identical — only change the visual design.
+
+Current layout to change:
+- Left sidebar: cream background, gold text
+- Main area: white background, white cards
+- Top bar: plain white
+- Sidebar on LEFT side
+
+NEW DESIGN — move sidebar to TOP:
+
+===============================================================
+CHANGE 1 — SWITCH FROM LEFT SIDEBAR TO TOP NAV
+===============================================================
+
+Remove the left sidebar entirely.
+Replace with a top navigation bar that 
+sits below the brand header.
+
+New layout structure:
+
+┌─────────────────────────────────────────┐
+│  FACE BY NIAMH    AESTHETICS · ADMIN    │  ← Brand bar (dark)
+├─────────────────────────────────────────┤
+│  Dashboard │ Schedule │ Bookings │ ...  │  ← Top nav tabs
+├─────────────────────────────────────────┤
+│                                         │
+│         Main content area               │
+│                                         │
+└─────────────────────────────────────────┘
+
+Brand bar CSS:
+.portal-brand-bar {
+  background: #1a0f00;  /* dark brown */
+  color: #f5ede0;       /* cream */
+  padding: 14px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.portal-brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  color: #c8860a;  /* amber gold */
+  text-transform: uppercase;
+}
+
+.portal-brand-sub {
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: #a08060;
+  text-transform: uppercase;
+}
+
+Top navigation bar:
+.portal-top-nav {
+  background: #ffffff;
+  border-bottom: 2px solid #f0e8de;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow-x: auto;
+}
+
+.portal-nav-item {
+  padding: 14px 18px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #6b5a47;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: all 0.15s;
+  text-decoration: none;
+}
+
+.portal-nav-item:hover {
+  color: #1a0f00;
+  background: #faf5ef;
+}
+
+.portal-nav-item.active {
+  color: #c8860a;
+  border-bottom-color: #c8860a;
+  font-weight: 600;
+}
+
+.portal-nav-badge {
+  background: #c8860a;
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 1px 6px;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+Nav items in order:
+Dashboard | Schedule | New Bookings (badge) | 
+Availability | Clients | Treatments | Finance | 
+Enquiries | Media | Settings
+
+The section headers (OVERVIEW, BUSINESS, SYSTEM) 
+become visual separators in the nav — just a 
+small divider line between groups.
+
+===============================================================
+CHANGE 2 — DARK MAIN BACKGROUND
+===============================================================
+
+Change the main content area background 
+from plain white to a very subtle warm 
+off-white/cream:
+
+.portal-main {
+  background: #faf6f1;  /* warm cream */
+  min-height: calc(100vh - 110px);
+  padding: 28px;
+}
+
+This makes it feel different instantly 
+from Dermadoll's stark white.
+
+===============================================================
+CHANGE 3 — REDESIGN STAT CARDS
+===============================================================
+
+Change the stat cards from plain white 
+boxes to styled cards with a left 
+coloured accent border:
+
+.stat-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 20px 22px;
+  border: 1px solid #ede5d8;
+  border-left: 4px solid #c8860a;
+  box-shadow: 0 2px 8px rgba(26, 15, 0, 0.06);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Subtle pattern in corner */
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #c8860a;
+  opacity: 0.04;
+}
+
+.stat-card-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #a08060;
+  margin-bottom: 8px;
+}
+
+.stat-card-value {
+  font-size: 32px;
+  font-weight: 800;
+  color: #1a0f00;
+  font-family: 'Playfair Display', serif;
+  line-height: 1;
+  margin-bottom: 6px;
+}
+
+.stat-card-change {
+  font-size: 12px;
+  color: #a08060;
+}
+
+Each stat card gets a different accent 
+colour on the left border:
+- Revenue: #c8860a (amber gold)
+- Appointments: #7c9e87 (soft sage green)  
+- Active Clients: #9b7ea6 (soft mauve)
+- Avg Spend: #c8860a (amber gold)
+
+===============================================================
+CHANGE 4 — SECTION CARDS REDESIGN
+===============================================================
+
+Recent Bookings, Today's Schedule, 
+Revenue by Treatment, Recent Activity 
+cards:
+
+.portal-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #ede5d8;
+  box-shadow: 0 2px 12px rgba(26, 15, 0, 0.05);
+  overflow: hidden;
+  margin-bottom: 20px;
+}
+
+.portal-card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid #f0e8de;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fdfaf7;
+}
+
+.portal-card-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a0f00;
+}
+
+.portal-card-body {
+  padding: 20px;
+}
+
+===============================================================
+CHANGE 5 — TOP ACTION BAR REDESIGN
+===============================================================
+
+The top bar with search + Export + New Booking:
+
+.portal-action-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  gap: 12px;
+}
+
+.portal-page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 700;
+  color: #1a0f00;
+  letter-spacing: -0.5px;
+}
+
+.portal-search {
+  background: #ffffff;
+  border: 1px solid #ede5d8;
+  border-radius: 8px;
+  padding: 9px 14px 9px 36px;
+  font-size: 13px;
+  color: #1a0f00;
+  width: 240px;
+  position: relative;
+}
+
+.portal-btn-primary {
+  background: #1a0f00;
+  color: #f5ede0;
+  border: none;
+  border-radius: 8px;
+  padding: 10px 18px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: 0.3px;
+  transition: background 0.15s;
+}
+
+.portal-btn-primary:hover {
+  background: #2d1a00;
+}
+
+.portal-btn-secondary {
+  background: transparent;
+  border: 1px solid #c8860a;
+  color: #c8860a;
+  border-radius: 8px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.portal-btn-secondary:hover {
+  background: #c8860a;
+  color: #fff;
+}
+
+Change the "+ New Booking" button to 
+dark brown (#1a0f00) instead of amber 
+so it's immediately visually different.
+
+===============================================================
+CHANGE 6 — LOGIN SCREEN
+===============================================================
+
+The 5-click login screen needs to look 
+different too.
+
+Change login screen background from 
+cream/white to a dark moody design:
+
+Login screen:
+background: #1a0f00 (dark brown)
+
+Logo/wordmark:
+colour: #c8860a (amber gold)
+font: Playfair Display serif
+
+Login card:
+background: rgba(255,255,255,0.06)
+border: 1px solid rgba(200,134,10,0.3)
+border-radius: 20px
+backdrop-filter: blur(10px)
+
+Password input:
+background: rgba(255,255,255,0.08)
+border: 1px solid rgba(200,134,10,0.3)
+color: #f5ede0
+border-radius: 10px
+
+Login button:
+background: #c8860a
+color: #1a0f00
+font-weight: 700
+
+The dark login screen is the most 
+immediately visible difference — 
+Dermadoll's is light, Niamh's is dark.
+
+===============================================================
+CHANGE 7 — TYPOGRAPHY
+===============================================================
+
+Add Playfair Display for headings 
+throughout the portal:
+
+In the <head> of portal.html add:
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+Apply:
+- All page titles: Playfair Display
+- All card headers: Playfair Display  
+- Stat card values: Playfair Display
+- Nav items: DM Sans
+- Body text: DM Sans
+
+This gives a luxury editorial feel 
+that's distinct from Dermadoll.
+
+===============================================================
+CHANGE 8 — STATUS PILLS
+===============================================================
+
+Update booking status pill styles:
+
+.status-confirmed {
+  background: #e8f5ec;
+  color: #2d6a3f;
+  border: 1px solid #b8dfc4;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-pending {
+  background: #fef3e2;
+  color: #92570a;
+  border: 1px solid #f5d49a;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.status-cancelled {
+  background: #fde8e8;
+  color: #9b2c2c;
+  border: 1px solid #f5b8b8;
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+===============================================================
+IMPORTANT RULES
+===============================================================
+
+- ALL functionality stays exactly the same
+- Only CSS and layout structure changes
+- Every page/section must use the new styles
+- The top nav must work exactly like 
+  the sidebar did — same page switching logic
+- Mobile responsive — nav scrolls horizontally
+  on small screens
+- Dark login screen is the priority change
+- Top nav instead of left sidebar is second
+- Warm cream main background is third
+- Do NOT change any JavaScript logic
+- Do NOT change any API calls
+- Do NOT change any data handling
+
+Republish after all changes then 
+reload portal.html to verify.

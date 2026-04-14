@@ -7,7 +7,7 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet"/>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;max-width:100%}
 :root{--gold:#C8860A;--bg:#FFFFFF;--sidebar:#FAF7F2;--text:#1A0F00;--muted:#6B6260;--border:#E2DDD5;--card-shadow:0 2px 12px rgba(0,0,0,.06)}
@@ -505,6 +505,118 @@ tr:hover td{background:#FDFBF8}
   .fin-kpi-value{font-size:18px}
   .fin-kpi-label{font-size:9px}
   .fin-kpi-card{padding:12px 6px}
+}
+/* ═══════════════════════════════════════════════════════
+   FACE BY NIAMH — VISUAL REDESIGN
+   Top navigation, dark login, Playfair Display, warm cream
+   ═══════════════════════════════════════════════════════ */
+
+/* Nav height tokens */
+:root{--nav-h:100px;--brand-h:50px}
+
+/* ── LOGIN SCREEN — DARK MOODY ────────────────────────── */
+#login-page{background:#1a0f00!important}
+.login-card{background:rgba(255,255,255,.06)!important;border:1px solid rgba(200,134,10,.3)!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);box-shadow:0 20px 60px rgba(0,0,0,.5)!important}
+.login-wordmark{font-family:'Playfair Display',serif!important;color:#c8860a!important;font-size:26px!important;letter-spacing:.14em!important}
+.login-sub{color:rgba(245,237,224,.6)!important}
+.login-label{color:rgba(245,237,224,.7)!important}
+.login-input{background:rgba(255,255,255,.08)!important;border:1px solid rgba(200,134,10,.3)!important;color:#f5ede0!important;border-radius:10px!important}
+.login-input::placeholder{color:rgba(245,237,224,.35)}
+.login-input:focus{box-shadow:0 0 0 3px rgba(200,134,10,.25)!important;border-color:rgba(200,134,10,.6)!important}
+.login-btn{background:#c8860a!important;color:#1a0f00!important;font-weight:700!important;border-radius:10px!important}
+.login-close{color:rgba(245,237,224,.4)!important}
+.login-close:hover{background:rgba(255,255,255,.1)!important;color:#f5ede0!important}
+.login-error{color:#f87171!important}
+
+/* ── PORTAL LAYOUT — TOP NAV ──────────────────────────── */
+#portal.visible{display:block}
+
+/* Sidebar becomes a full-width fixed top nav */
+#sidebar{width:100%;min-height:auto;height:auto;bottom:auto;flex-direction:column;background:transparent;border-right:none;transform:none!important}
+
+/* Brand bar — dark, top strip */
+.sb-brand{background:#1a0f00;padding:0 28px;height:var(--brand-h);display:flex;flex-direction:row;align-items:center;justify-content:flex-start;gap:12px;border-bottom:none;position:relative}
+.sb-wordmark{font-family:'Playfair Display',serif!important;font-size:15px!important;font-weight:700!important;letter-spacing:.18em!important;color:#c8860a!important;text-transform:uppercase}
+.sb-sub{font-size:9px!important;letter-spacing:.32em!important;color:#a08060!important;margin-top:0!important;display:inline}
+.sb-badge{display:none!important}
+
+/* Logout button floated to right inside brand bar */
+.sb-footer{position:absolute;top:0;right:28px;height:var(--brand-h);display:flex;align-items:center;padding:0;border-top:none}
+.logout-btn{width:auto!important;background:transparent!important;border:1px solid rgba(200,134,10,.35)!important;color:#a08060!important;font-size:11px!important;padding:5px 14px!important;border-radius:6px!important;white-space:nowrap}
+.logout-btn:hover{border-color:#c8860a!important;color:#c8860a!important}
+
+/* Nav strip — white, below brand bar */
+.sb-nav{flex-direction:row!important;background:#ffffff;border-bottom:2px solid #f0e8de;padding:0 20px!important;overflow-x:auto!important;overflow-y:hidden!important;flex:none!important;scrollbar-width:none;-ms-overflow-style:none}
+.sb-nav::-webkit-scrollbar{display:none}
+
+/* Section labels → thin vertical dividers */
+.sb-section{width:1px;flex-shrink:0;background:#e8e0d6;margin:12px 6px;padding:0!important;font-size:0!important;letter-spacing:0;text-transform:none}
+
+/* Nav items — horizontal */
+.sb-item{flex-direction:row!important;padding:14px 15px!important;border-radius:0!important;margin-bottom:0!important;border-bottom:3px solid transparent;border-top:3px solid transparent;white-space:nowrap;flex-shrink:0;color:#6b5a47!important;font-size:13px;transition:all .15s}
+.sb-item:hover{background:#faf5ef!important;color:#1a0f00!important;border-bottom-color:transparent}
+.sb-item.active{background:transparent!important;color:#c8860a!important;font-weight:600!important;border-bottom-color:#c8860a}
+.sb-item svg{width:14px!important;height:14px!important;flex-shrink:0}
+.sb-badge-count{font-size:9px!important;padding:1px 5px!important;margin-left:4px}
+.sb-item.active .sb-badge-count{background:#c8860a!important;color:#fff!important}
+
+/* Mobile hamburger — not needed with top nav */
+#mobile-toggle{display:none!important}
+#sidebar-overlay{display:none!important}
+
+/* Main content — full width, push below top nav */
+#main-content{margin-left:0!important;margin-top:var(--nav-h)!important;width:100%!important;max-width:100%!important;background:#faf6f1!important}
+
+/* Sticky page topbar — offset by nav height */
+.topbar{top:var(--nav-h)!important;background:#fdfaf7!important;border-bottom:1px solid #ede5d8!important}
+.topbar-title{font-family:'Playfair Display',serif!important;font-size:24px!important}
+
+/* Page warm cream background */
+.page{background:#faf6f1}
+
+/* ── KPI / STAT CARDS ─────────────────────────────────── */
+.kpi-card{border-left:4px solid #c8860a!important;border-radius:12px!important;box-shadow:0 2px 8px rgba(26,15,0,.06)!important;overflow:hidden;position:relative}
+.kpi-card::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;background:#c8860a;opacity:.04;pointer-events:none}
+.kpi-grid>:nth-child(2){border-left-color:#7c9e87!important}
+.kpi-grid>:nth-child(3){border-left-color:#9b7ea6!important}
+.kpi-label{font-size:10px!important;font-weight:700!important;letter-spacing:1.5px!important;color:#a08060!important}
+.kpi-value{font-family:'Playfair Display',serif!important;font-size:34px!important;color:#1a0f00!important}
+
+/* ── SECTION CARDS ────────────────────────────────────── */
+.card{border-radius:14px!important;border:1px solid #ede5d8!important;box-shadow:0 2px 12px rgba(26,15,0,.05)!important}
+.card-header{background:#fdfaf7!important;border-bottom:1px solid #f0e8de!important}
+.card-title{font-family:'Playfair Display',serif!important;font-size:15px!important;color:#1a0f00!important}
+
+/* ── BUTTONS ──────────────────────────────────────────── */
+.btn-gold{background:#1a0f00!important;color:#f5ede0!important;font-weight:600!important}
+.btn-gold:hover{background:#2d1a00!important;opacity:1!important}
+.btn-outline{border:1px solid #c8860a!important;color:#c8860a!important}
+.btn-outline:hover{background:#c8860a!important;color:#fff!important}
+
+/* ── STATUS PILLS ─────────────────────────────────────── */
+.bk-status-pill,.fin-pill{border-radius:20px!important;font-size:11px!important;font-weight:600!important;padding:3px 10px!important}
+
+/* ── MODAL TITLES ─────────────────────────────────────── */
+.modal-title{font-family:'Playfair Display',serif!important}
+
+/* Finance page heading */
+.fin-title{font-family:'Playfair Display',serif!important}
+
+/* ── MOBILE — top nav scrolls horizontally ────────────── */
+@media(max-width:900px){
+  :root{--nav-h:92px;--brand-h:44px}
+  .sb-brand{padding:0 16px}
+  .sb-nav{padding:0 8px!important}
+  .sb-item{padding:12px 10px!important;font-size:12px}
+  .sb-item svg{display:none!important}
+  .sb-section{margin:10px 4px}
+  .sb-footer{right:12px}
+  .sb-wordmark{font-size:13px!important;letter-spacing:.1em!important}
+}
+@media(max-width:480px){
+  :root{--nav-h:86px;--brand-h:40px}
+  .sb-sub{display:none!important}
+  .sb-item{padding:10px 8px!important}
 }
 /* ── TOAST ── */
 #toast-container{position:fixed;bottom:24px;right:24px;z-index:99999;display:flex;flex-direction:column;gap:10px;pointer-events:none}
