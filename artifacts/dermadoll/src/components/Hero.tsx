@@ -149,18 +149,18 @@ export default function Hero() {
           {/* Large decorative serif watermark — "FACE BY NIAMH" stacked */}
           <div aria-hidden="true" style={{
             position: "absolute",
-            bottom: -10,
-            left: -8,
+            bottom: 0,
+            left: -6,
             right: 0,
             fontFamily: "'Cormorant Garamond', serif",
             fontStyle: "italic",
             fontWeight: 700,
-            fontSize: "clamp(32px, 4.5vw, 56px)",
+            fontSize: "clamp(96px, 15vw, 220px)",
             color: "rgba(200,134,10,0.07)",
-            lineHeight: 1,
+            lineHeight: 0.9,
             pointerEvents: "none",
             userSelect: "none",
-            letterSpacing: "-0.02em",
+            letterSpacing: "-0.03em",
             whiteSpace: "nowrap",
           }}>
             FACE<br />BY<br />NIAMH
