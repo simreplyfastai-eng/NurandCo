@@ -659,7 +659,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
               onClick={onClose}
               className="w-full mt-2"
               style={{
-                background: "#111", color: "#fff", border: "none",
+                background: "#FAF7F2", color: "#fff", border: "none",
                 borderRadius: "8px", padding: "16px", fontSize: "13px",
                 fontFamily: "Inter, sans-serif", fontWeight: 700,
                 letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer",

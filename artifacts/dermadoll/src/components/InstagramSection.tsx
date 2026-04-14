@@ -20,7 +20,7 @@ const floatVariants = [
 
 export default function InstagramSection() {
   return (
-    <section className="py-[100px] overflow-hidden" style={{ backgroundColor: "#111" }}>
+    <section className="py-[100px] overflow-hidden" style={{ backgroundColor: "#FAF7F2" }}>
       <div className="container mx-auto px-6 max-w-5xl">
         {/* Heading */}
         <div className="text-center mb-16">

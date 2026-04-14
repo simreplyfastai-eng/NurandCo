@@ -26,7 +26,7 @@ export default function SectionDivider() {
       <div style={{
         width: 18,
         height: 1,
-        background: "#1C1C1E",
+        background: "#C9A96E",
         opacity: 0.22,
       }} />
 
@@ -47,7 +47,7 @@ export default function SectionDivider() {
       <div style={{
         width: 18,
         height: 1,
-        background: "#1C1C1E",
+        background: "#C9A96E",
         opacity: 0.22,
       }} />
 

@@ -218,9 +218,9 @@ export default function Contact() {
                   type="submit"
                   disabled={sending}
                   style={{
-                    background: "#1C1C1E",
-                    border: "1px solid #1C1C1E",
-                    color: "#FAF7F2",
+                    background: "#C9A96E",
+                    border: "1px solid #C9A96E",
+                    color: "#1C1C1E",
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: 11,
                     letterSpacing: "2px",

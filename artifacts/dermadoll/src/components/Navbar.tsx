@@ -76,14 +76,14 @@ export default function Navbar() {
               href="#services"
               onClick={(e) => { e.preventDefault(); document.getElementById("services")?.scrollIntoView({ behavior: "smooth" }); }}
               className="ml-2 font-sans text-[11px] tracking-[0.18em] font-medium uppercase transition-all duration-300 px-5 py-2.5 border"
-              style={{ background: "#1C1C1E", color: "#FAF7F2", borderColor: "#1C1C1E" }}
+              style={{ background: "#C9A96E", color: "#1C1C1E", borderColor: "#C9A96E" }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "#C9A96E";
                 e.currentTarget.style.borderColor = "#C9A96E";
               }}
               onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#1C1C1E";
-                e.currentTarget.style.borderColor = "#1C1C1E";
+                e.currentTarget.style.background = "#C9A96E";
+                e.currentTarget.style.borderColor = "#C9A96E";
               }}
             >
               Book Now
@@ -149,7 +149,7 @@ export default function Navbar() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45 }}
-                className="font-sans text-[11px] tracking-[0.2em] uppercase font-medium px-8 py-3 border border-[#1C1C1E] text-[#FAF7F2] bg-[#1C1C1E] hover:bg-[#C9A96E] hover:border-[#C9A96E] transition-all"
+                className="font-sans text-[11px] tracking-[0.2em] uppercase font-medium px-8 py-3 border border-[#C9A96E] text-[#1C1C1E] bg-[#C9A96E] hover:bg-[#B8946A] hover:border-[#B8946A] transition-all"
               >
                 Book a Consultation
               </motion.a>

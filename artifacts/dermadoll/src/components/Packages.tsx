@@ -116,7 +116,7 @@ export default function Packages() {
                   left: "50%",
                   transform: "translateX(-50%)",
                   background: "#C9A96E",
-                  color: "#FAF7F2",
+                  color: "#1C1C1E",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 9,
                   letterSpacing: "2px",
@@ -192,7 +192,7 @@ export default function Packages() {
                 onClick={() => setConsultOpen(true)}
                 style={{
                   background: pkg.popular ? "#1C1C1E" : "transparent",
-                  border: "1px solid #1C1C1E",
+                  border: "1px solid #C9A96E",
                   color: pkg.popular ? "#FAF7F2" : "#1C1C1E",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 11,
@@ -204,8 +204,8 @@ export default function Packages() {
                   transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#1C1C1E";
-                  e.currentTarget.style.color = "#FAF7F2";
+                  e.currentTarget.style.background = "#C9A96E";
+                  e.currentTarget.style.color = "#1C1C1E";
                 }}
                 onMouseLeave={(e) => {
                   e.currentTarget.style.background = pkg.popular ? "#1C1C1E" : "transparent";

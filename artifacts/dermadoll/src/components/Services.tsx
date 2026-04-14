@@ -193,7 +193,7 @@ export default function Services() {
                 onClick={() => setConsultOpen(true)}
                 style={{
                   background: "transparent",
-                  border: "1px solid #1C1C1E",
+                  border: "1px solid #C9A96E",
                   color: "#1C1C1E",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 10,
@@ -205,7 +205,7 @@ export default function Services() {
                   transition: "all 0.2s",
                   alignSelf: "flex-start",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#1C1C1E"; e.currentTarget.style.color = "#FAF7F2"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#1C1C1E"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1C1C1E"; }}
               >
                 Book
@@ -224,7 +224,7 @@ export default function Services() {
                 width: 48,
                 height: 48,
                 borderRadius: "50%",
-                border: "1.5px solid #1C1C1E",
+                border: "1.5px solid #C9A96E",
                 background: "transparent",
                 display: "flex",
                 alignItems: "center",
@@ -233,7 +233,7 @@ export default function Services() {
                 color: "#1C1C1E",
                 transition: "all 0.2s",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#1C1C1E"; e.currentTarget.style.color = "#FAF7F2"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#1C1C1E"; }}
               onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1C1C1E"; }}
             >
               {icon}

@@ -278,7 +278,7 @@ export default function Hero() {
                 onClick={scrollToServices}
                 style={{
                   background: "transparent",
-                  border: "1px solid #1C1C1E",
+                  border: "1px solid #C9A96E",
                   color: "#1C1C1E",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 11,
@@ -289,7 +289,7 @@ export default function Hero() {
                   cursor: "pointer",
                   transition: "all 0.2s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#1C1C1E"; e.currentTarget.style.color = "#FAF7F2"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#1C1C1E"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1C1C1E"; }}
               >
                 View Treatments
@@ -298,9 +298,9 @@ export default function Hero() {
                 className="hero-btn-2"
                 onClick={() => setConsultOpen(true)}
                 style={{
-                  background: "#1C1C1E",
-                  border: "1px solid #1C1C1E",
-                  color: "#FAF7F2",
+                  background: "#C9A96E",
+                  border: "1px solid #C9A96E",
+                  color: "#1C1C1E",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 11,
                   letterSpacing: "2px",
@@ -332,7 +332,7 @@ export default function Hero() {
           className="hero-right"
           style={{
             width: "50%",
-            background: "#1C1C1E",
+            background: "#C9A96E",
             position: "relative",
             overflow: "hidden",
           }}

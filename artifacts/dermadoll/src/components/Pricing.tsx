@@ -256,7 +256,7 @@ export default function Pricing() {
                               onClick={() => setConsultOpen(true)}
                               style={{
                                 background: "transparent",
-                                border: "1px solid #1C1C1E",
+                                border: "1px solid #C9A96E",
                                 color: "#1C1C1E",
                                 fontFamily: "'DM Sans', sans-serif",
                                 fontSize: 9,
@@ -269,8 +269,8 @@ export default function Pricing() {
                                 transition: "all 0.2s",
                               }}
                               onMouseEnter={(e) => {
-                                e.currentTarget.style.background = "#1C1C1E";
-                                e.currentTarget.style.color = "#FAF7F2";
+                                e.currentTarget.style.background = "#C9A96E";
+                                e.currentTarget.style.color = "#1C1C1E";
                               }}
                               onMouseLeave={(e) => {
                                 e.currentTarget.style.background = "transparent";
