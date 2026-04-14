@@ -120,22 +120,27 @@ export default function Hero() {
     <>
       <section id="home" style={{ minHeight: "100dvh", display: "flex", flexDirection: "row" }} className="hero-wrap">
         <style>{`
+          /* Desktop: content left, image right */
+          .hero-left  { order: 1; min-height: 100dvh; }
+          .hero-right { order: 2; min-height: 100dvh; }
+          .hero-divider { order: 3; min-height: 100dvh; }
           @media (max-width: 768px) {
             .hero-wrap { flex-direction: column !important; }
             .hero-left {
-              order: 2 !important;
+              order: 2;
               width: 100% !important;
-              min-height: unset !important;
+              min-height: auto !important;
               padding: 36px 24px 60px !important;
               align-items: flex-start !important;
             }
             .hero-right {
-              order: 1 !important;
+              order: 1;
               width: 100% !important;
               height: 58vw !important;
               min-height: 280px !important;
               max-height: 380px !important;
             }
+            .hero-divider { display: none !important; }
             .hero-eyebrow { gap: 8px !important; }
             .hero-line { display: none !important; }
             .hero-btns {
@@ -179,12 +184,11 @@ export default function Hero() {
           .hero-line      { animation: lineGrow 0.8s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
         `}</style>
 
-        {/* LEFT — content */}
+        {/* LEFT — content (order:1 via CSS on desktop, order:2 on mobile) */}
         <div
           className="hero-left"
           style={{
             width: "50%",
-            minHeight: "100dvh",
             background: "linear-gradient(145deg, #fdf9f3 0%, #FAF7F2 45%, #f3ede2 100%)",
             display: "flex",
             alignItems: "center",
@@ -316,20 +320,18 @@ export default function Hero() {
         </div>
 
         {/* Thin amber divider between panels */}
-        <div aria-hidden="true" style={{
+        <div aria-hidden="true" className="hero-divider" style={{
           width: 1,
-          minHeight: "100dvh",
           background: "linear-gradient(180deg, transparent 0%, rgba(200,134,10,0.35) 20%, rgba(200,134,10,0.5) 50%, rgba(200,134,10,0.35) 80%, transparent 100%)",
           flexShrink: 0,
           zIndex: 5,
         }} />
 
-        {/* RIGHT — image */}
+        {/* RIGHT — image (order:2 via CSS on desktop, order:1 on mobile) */}
         <div
           className="hero-right"
           style={{
             width: "50%",
-            minHeight: "100dvh",
             background: "#1A0F00",
             position: "relative",
             overflow: "hidden",
