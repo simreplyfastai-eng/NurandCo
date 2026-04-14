@@ -165,7 +165,7 @@ export default function Hero() {
             background: "linear-gradient(145deg, #fdf9f3 0%, #FAF7F2 45%, #f3ede2 100%)",
             display: "flex",
             alignItems: "center",
-            padding: "100px 64px 80px",
+            padding: "48px 64px 80px",
             boxSizing: "border-box",
             position: "relative",
             overflow: "hidden",
