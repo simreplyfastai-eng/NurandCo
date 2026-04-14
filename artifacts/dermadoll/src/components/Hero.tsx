@@ -35,7 +35,7 @@ function ParticleCanvas() {
       for (const p of particles) {
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(200,134,10,${p.opacity})`;
+        ctx.fillStyle = `rgba(201,169,110,${p.opacity})`;
         ctx.fill();
         p.y += p.vy;
         p.opacity -= 0.001;
@@ -208,7 +208,7 @@ export default function Hero() {
             fontStyle: "italic",
             fontWeight: 700,
             fontSize: "clamp(96px, 15vw, 220px)",
-            color: "rgba(200,134,10,0.07)",
+            color: "rgba(201,169,110,0.07)",
             lineHeight: 0.9,
             pointerEvents: "none",
             userSelect: "none",
@@ -225,7 +225,7 @@ export default function Hero() {
             width: 280,
             height: 280,
             borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(200,134,10,0.07) 0%, transparent 70%)",
+            background: "radial-gradient(circle, rgba(201,169,110,0.07) 0%, transparent 70%)",
             pointerEvents: "none",
           }} />
           <div style={{ maxWidth: 520 }}>
@@ -235,15 +235,15 @@ export default function Hero() {
               fontSize: 10,
               letterSpacing: "3px",
               textTransform: "uppercase",
-              color: "#C8860A",
+              color: "#C9A96E",
               marginBottom: 24,
               display: "flex",
               alignItems: "center",
               gap: 10,
             }}>
-              <div className="hero-line" style={{ height: 1, width: 22, background: "#C8860A" }} />
+              <div className="hero-line" style={{ height: 1, width: 22, background: "#C9A96E" }} />
               LEEDS / WAKEFIELD
-              <div className="hero-line" style={{ height: 1, width: 22, background: "#C8860A" }} />
+              <div className="hero-line" style={{ height: 1, width: 22, background: "#C9A96E" }} />
             </div>
 
             {/* H1 */}
@@ -251,12 +251,12 @@ export default function Hero() {
               fontFamily: "'Cormorant Garamond', serif",
               fontSize: "clamp(2.4rem, 5.5vw, 4.5rem)",
               fontWeight: 600,
-              color: "#1A0F00",
+              color: "#1C1C1E",
               lineHeight: 1.1,
               margin: "0 0 28px",
             }}>
               <span className="hero-h1-line1" style={{ display: "block" }}>Natural Aesthetics.</span>
-              <em className="hero-h1-line2" style={{ display: "block", color: "#C8860A", fontStyle: "italic" }}>Confident Results.</em>
+              <em className="hero-h1-line2" style={{ display: "block", color: "#C9A96E", fontStyle: "italic" }}>Confident Results.</em>
             </h1>
 
             {/* Body */}
@@ -278,8 +278,8 @@ export default function Hero() {
                 onClick={scrollToServices}
                 style={{
                   background: "transparent",
-                  border: "1px solid #1A0F00",
-                  color: "#1A0F00",
+                  border: "1px solid #1C1C1E",
+                  color: "#1C1C1E",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 11,
                   letterSpacing: "2px",
@@ -289,8 +289,8 @@ export default function Hero() {
                   cursor: "pointer",
                   transition: "all 0.2s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0F00"; e.currentTarget.style.color = "#FAF7F2"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1A0F00"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#1C1C1E"; e.currentTarget.style.color = "#FAF7F2"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1C1C1E"; }}
               >
                 View Treatments
               </button>
@@ -298,8 +298,8 @@ export default function Hero() {
                 className="hero-btn-2"
                 onClick={() => setConsultOpen(true)}
                 style={{
-                  background: "#1A0F00",
-                  border: "1px solid #1A0F00",
+                  background: "#1C1C1E",
+                  border: "1px solid #1C1C1E",
                   color: "#FAF7F2",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 11,
@@ -322,7 +322,7 @@ export default function Hero() {
         {/* Thin amber divider between panels */}
         <div aria-hidden="true" className="hero-divider" style={{
           width: 1,
-          background: "linear-gradient(180deg, transparent 0%, rgba(200,134,10,0.35) 20%, rgba(200,134,10,0.5) 50%, rgba(200,134,10,0.35) 80%, transparent 100%)",
+          background: "linear-gradient(180deg, transparent 0%, rgba(201,169,110,0.35) 20%, rgba(201,169,110,0.5) 50%, rgba(201,169,110,0.35) 80%, transparent 100%)",
           flexShrink: 0,
           zIndex: 5,
         }} />
@@ -332,7 +332,7 @@ export default function Hero() {
           className="hero-right"
           style={{
             width: "50%",
-            background: "#1A0F00",
+            background: "#1C1C1E",
             position: "relative",
             overflow: "hidden",
           }}
@@ -366,15 +366,15 @@ export default function Hero() {
             <div style={{
               position: "absolute",
               inset: 0,
-              background: "linear-gradient(160deg, #2a1800 0%, #1A0F00 50%, #3d2200 100%)",
+              background: "linear-gradient(160deg, #2a1800 0%, #1C1C1E 50%, #3d2200 100%)",
               zIndex: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}>
               <div style={{ textAlign: "center", opacity: 0.3 }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 32, color: "#C8860A", marginBottom: 8 }}>Face By Niamh</div>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "4px", textTransform: "uppercase", color: "#C8860A" }}>Aesthetics</div>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 32, color: "#C9A96E", marginBottom: 8 }}>Face By Niamh</div>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "4px", textTransform: "uppercase", color: "#C9A96E" }}>Aesthetics</div>
               </div>
             </div>
           )}
@@ -396,7 +396,7 @@ export default function Hero() {
               width: 8,
               height: 8,
               borderRadius: "50%",
-              background: "#C8860A",
+              background: "#C9A96E",
               animation: "pulseDot 2s ease-in-out infinite",
             }} />
             <span style={{

@@ -41,9 +41,9 @@ const faqs: FAQItem[] = [
 function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>{label}</span>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
     </div>
   );
 }
@@ -63,7 +63,7 @@ export default function FAQ() {
           style={{ textAlign: "center", marginBottom: 56 }}
         >
           <Eyebrow label="FAQ" />
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1A0F00", margin: 0 }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1C1C1E", margin: 0 }}>
             Common Questions
           </h2>
         </motion.div>
@@ -86,7 +86,7 @@ export default function FAQ() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "20px 24px",
-                  background: open === i ? "#1A0F00" : "#FAF7F2",
+                  background: open === i ? "#1C1C1E" : "#FAF7F2",
                   border: "none",
                   cursor: "pointer",
                   gap: 16,
@@ -98,13 +98,13 @@ export default function FAQ() {
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 14,
                   fontWeight: 500,
-                  color: open === i ? "#FAF7F2" : "#1A0F00",
+                  color: open === i ? "#FAF7F2" : "#1C1C1E",
                 }}>
                   {faq.question}
                 </span>
                 <ChevronDown
                   size={16}
-                  color={open === i ? "#C8860A" : "#6B6260"}
+                  color={open === i ? "#C9A96E" : "#6B6260"}
                   style={{ flexShrink: 0, transform: open === i ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s" }}
                 />
               </button>

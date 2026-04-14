@@ -86,9 +86,9 @@ const categories: PricingCategory[] = [
 function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>{label}</span>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
     </div>
   );
 }
@@ -105,7 +105,7 @@ export default function Pricing() {
       <div aria-hidden="true" style={{
         position: "absolute", top: "50%", left: "-30px", transform: "translateY(-50%)",
         fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 700,
-        fontSize: "clamp(200px, 28vw, 340px)", color: "rgba(200,134,10,0.05)",
+        fontSize: "clamp(200px, 28vw, 340px)", color: "rgba(201,169,110,0.05)",
         lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-0.04em",
       }}>£</div>
 
@@ -113,7 +113,7 @@ export default function Pricing() {
       <div aria-hidden="true" style={{
         position: "absolute", top: -60, right: -60,
         width: 380, height: 380,
-        background: "radial-gradient(circle, rgba(200,134,10,0.09) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(201,169,110,0.09) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
 
@@ -121,7 +121,7 @@ export default function Pricing() {
       <div aria-hidden="true" style={{
         position: "absolute", bottom: -60, left: 100,
         width: 300, height: 300,
-        background: "radial-gradient(circle, rgba(200,134,10,0.07) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(201,169,110,0.07) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
 
@@ -136,7 +136,7 @@ export default function Pricing() {
         <div key={i} aria-hidden="true" style={{
           position: "absolute", ...(pos as any),
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: pos.size, color: "#C8860A", opacity: pos.opacity,
+          fontSize: pos.size, color: "#C9A96E", opacity: pos.opacity,
           pointerEvents: "none", userSelect: "none",
         }}>✦</div>
       ))}
@@ -145,13 +145,13 @@ export default function Pricing() {
       <div aria-hidden="true" style={{
         position: "absolute", top: 48, left: "50%", transform: "translateX(-50%)",
         width: "55%", height: 1,
-        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.18), transparent)",
+        background: "linear-gradient(to right, transparent, rgba(201,169,110,0.18), transparent)",
         pointerEvents: "none",
       }} />
       <div aria-hidden="true" style={{
         position: "absolute", bottom: 48, left: "50%", transform: "translateX(-50%)",
         width: "55%", height: 1,
-        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.18), transparent)",
+        background: "linear-gradient(to right, transparent, rgba(201,169,110,0.18), transparent)",
         pointerEvents: "none",
       }} />
 
@@ -165,10 +165,10 @@ export default function Pricing() {
           style={{ textAlign: "center", marginBottom: 56 }}
         >
           <Eyebrow label="PRICING" />
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1A0F00", margin: "0 0 12px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1C1C1E", margin: "0 0 12px" }}>
             Transparent Pricing
           </h2>
-          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C8860A", margin: 0 }}>
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C9A96E", margin: 0 }}>
             No hidden fees. Every treatment listed.
           </p>
         </motion.div>
@@ -191,7 +191,7 @@ export default function Pricing() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "18px 24px",
-                  background: open === i ? "#1A0F00" : "#FAF7F2",
+                  background: open === i ? "#1C1C1E" : "#FAF7F2",
                   border: "none",
                   cursor: "pointer",
                   transition: "background 0.2s",
@@ -201,13 +201,13 @@ export default function Pricing() {
                   fontFamily: "'Cormorant Garamond', serif",
                   fontSize: "1.15rem",
                   fontWeight: 600,
-                  color: open === i ? "#FAF7F2" : "#1A0F00",
+                  color: open === i ? "#FAF7F2" : "#1C1C1E",
                 }}>
                   {cat.title}
                 </span>
                 <ChevronDown
                   size={16}
-                  color={open === i ? "#C8860A" : "#6B6260"}
+                  color={open === i ? "#C9A96E" : "#6B6260"}
                   style={{ transform: open === i ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s" }}
                 />
               </button>
@@ -238,7 +238,7 @@ export default function Pricing() {
                           <span style={{
                             fontFamily: "'DM Sans', sans-serif",
                             fontSize: 14,
-                            color: "#1A0F00",
+                            color: "#1C1C1E",
                             flexShrink: 0,
                           }}>
                             {item.name}
@@ -248,7 +248,7 @@ export default function Pricing() {
                               fontFamily: "'Cormorant Garamond', serif",
                               fontStyle: "italic",
                               fontSize: 20,
-                              color: "#C8860A",
+                              color: "#C9A96E",
                             }}>
                               {item.price}
                             </span>
@@ -256,8 +256,8 @@ export default function Pricing() {
                               onClick={() => setConsultOpen(true)}
                               style={{
                                 background: "transparent",
-                                border: "1px solid #1A0F00",
-                                color: "#1A0F00",
+                                border: "1px solid #1C1C1E",
+                                color: "#1C1C1E",
                                 fontFamily: "'DM Sans', sans-serif",
                                 fontSize: 9,
                                 letterSpacing: "2px",
@@ -269,12 +269,12 @@ export default function Pricing() {
                                 transition: "all 0.2s",
                               }}
                               onMouseEnter={(e) => {
-                                e.currentTarget.style.background = "#1A0F00";
+                                e.currentTarget.style.background = "#1C1C1E";
                                 e.currentTarget.style.color = "#FAF7F2";
                               }}
                               onMouseLeave={(e) => {
                                 e.currentTarget.style.background = "transparent";
-                                e.currentTarget.style.color = "#1A0F00";
+                                e.currentTarget.style.color = "#1C1C1E";
                               }}
                             >
                               BOOK

@@ -45,9 +45,9 @@ const services: ServiceCard[] = [
 function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>{label}</span>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
     </div>
   );
 }
@@ -70,7 +70,7 @@ export default function Services() {
       <div style={{
         position: "absolute", top: "-60px", right: "-40px",
         fontFamily: "'Cormorant Garamond', serif", fontSize: "28rem", fontWeight: 700,
-        color: "#C8860A", opacity: 0.04, lineHeight: 1, userSelect: "none", pointerEvents: "none",
+        color: "#C9A96E", opacity: 0.04, lineHeight: 1, userSelect: "none", pointerEvents: "none",
         letterSpacing: "-0.05em",
       }}>N</div>
 
@@ -78,7 +78,7 @@ export default function Services() {
       <div style={{
         position: "absolute", bottom: "-80px", left: "-80px",
         width: 400, height: 400,
-        background: "radial-gradient(circle, rgba(200,134,10,0.08) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(201,169,110,0.08) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
 
@@ -93,7 +93,7 @@ export default function Services() {
         <div key={i} style={{
           position: "absolute", ...pos as any,
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: pos.size, color: "#C8860A", opacity: pos.opacity,
+          fontSize: pos.size, color: "#C9A96E", opacity: pos.opacity,
           pointerEvents: "none", userSelect: "none",
         }}>✦</div>
       ))}
@@ -101,12 +101,12 @@ export default function Services() {
       {/* Thin horizontal rule lines — decorative */}
       <div style={{
         position: "absolute", top: 48, left: "50%", transform: "translateX(-50%)",
-        width: "60%", height: 1, background: "linear-gradient(to right, transparent, rgba(200,134,10,0.15), transparent)",
+        width: "60%", height: 1, background: "linear-gradient(to right, transparent, rgba(201,169,110,0.15), transparent)",
         pointerEvents: "none",
       }} />
       <div style={{
         position: "absolute", bottom: 48, left: "50%", transform: "translateX(-50%)",
-        width: "60%", height: 1, background: "linear-gradient(to right, transparent, rgba(200,134,10,0.15), transparent)",
+        width: "60%", height: 1, background: "linear-gradient(to right, transparent, rgba(201,169,110,0.15), transparent)",
         pointerEvents: "none",
       }} />
 
@@ -120,10 +120,10 @@ export default function Services() {
           style={{ textAlign: "center", marginBottom: 56 }}
         >
           <Eyebrow label="TREATMENTS" />
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1A0F00", margin: "0 0 12px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1C1C1E", margin: "0 0 12px" }}>
             What I Offer
           </h2>
-          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C8860A", margin: 0 }}>
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C9A96E", margin: 0 }}>
             Every treatment is tailored to you.
           </p>
         </motion.div>
@@ -160,12 +160,12 @@ export default function Services() {
                 flexDirection: "column",
               }}
             >
-              <div style={{ fontSize: 20, color: "#C8860A", marginBottom: 16 }}>✦</div>
+              <div style={{ fontSize: 20, color: "#C9A96E", marginBottom: 16 }}>✦</div>
               <h3 style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: "1.4rem",
                 fontWeight: 600,
-                color: "#1A0F00",
+                color: "#1C1C1E",
                 margin: "0 0 12px",
               }}>
                 {svc.name}
@@ -184,7 +184,7 @@ export default function Services() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontStyle: "italic",
                 fontSize: "1.2rem",
-                color: "#C8860A",
+                color: "#C9A96E",
                 marginBottom: 20,
               }}>
                 {svc.from}
@@ -193,8 +193,8 @@ export default function Services() {
                 onClick={() => setConsultOpen(true)}
                 style={{
                   background: "transparent",
-                  border: "1px solid #1A0F00",
-                  color: "#1A0F00",
+                  border: "1px solid #1C1C1E",
+                  color: "#1C1C1E",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 10,
                   letterSpacing: "2px",
@@ -205,8 +205,8 @@ export default function Services() {
                   transition: "all 0.2s",
                   alignSelf: "flex-start",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0F00"; e.currentTarget.style.color = "#FAF7F2"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1A0F00"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#1C1C1E"; e.currentTarget.style.color = "#FAF7F2"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1C1C1E"; }}
               >
                 Book
               </button>
@@ -224,17 +224,17 @@ export default function Services() {
                 width: 48,
                 height: 48,
                 borderRadius: "50%",
-                border: "1.5px solid #1A0F00",
+                border: "1.5px solid #1C1C1E",
                 background: "transparent",
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
-                color: "#1A0F00",
+                color: "#1C1C1E",
                 transition: "all 0.2s",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0F00"; e.currentTarget.style.color = "#FAF7F2"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1A0F00"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#1C1C1E"; e.currentTarget.style.color = "#FAF7F2"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1C1C1E"; }}
             >
               {icon}
             </button>

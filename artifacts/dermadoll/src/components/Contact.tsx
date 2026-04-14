@@ -4,9 +4,9 @@ import { useState } from "react";
 function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>{label}</span>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
     </div>
   );
 }
@@ -19,7 +19,7 @@ const inputStyle: React.CSSProperties = {
   background: "#FAF7F2",
   fontFamily: "'DM Sans', sans-serif",
   fontSize: 14,
-  color: "#1A0F00",
+  color: "#1C1C1E",
   outline: "none",
   boxSizing: "border-box",
   transition: "border-color 0.2s",
@@ -46,7 +46,7 @@ export default function Contact() {
       <div aria-hidden="true" style={{
         position: "absolute", top: "50%", right: "-40px", transform: "translateY(-50%)",
         fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 700,
-        fontSize: "clamp(180px, 26vw, 300px)", color: "rgba(200,134,10,0.05)",
+        fontSize: "clamp(180px, 26vw, 300px)", color: "rgba(201,169,110,0.05)",
         lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-0.04em",
       }}>@</div>
 
@@ -54,7 +54,7 @@ export default function Contact() {
       <div aria-hidden="true" style={{
         position: "absolute", top: -60, left: -60,
         width: 380, height: 380,
-        background: "radial-gradient(circle, rgba(200,134,10,0.08) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(201,169,110,0.08) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
 
@@ -62,7 +62,7 @@ export default function Contact() {
       <div aria-hidden="true" style={{
         position: "absolute", bottom: -60, right: 80,
         width: 300, height: 300,
-        background: "radial-gradient(circle, rgba(200,134,10,0.06) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(201,169,110,0.06) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
 
@@ -77,7 +77,7 @@ export default function Contact() {
         <div key={i} aria-hidden="true" style={{
           position: "absolute", ...(pos as any),
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: pos.size, color: "#C8860A", opacity: pos.opacity,
+          fontSize: pos.size, color: "#C9A96E", opacity: pos.opacity,
           pointerEvents: "none", userSelect: "none",
         }}>✦</div>
       ))}
@@ -86,13 +86,13 @@ export default function Contact() {
       <div aria-hidden="true" style={{
         position: "absolute", top: 48, left: "50%", transform: "translateX(-50%)",
         width: "60%", height: 1,
-        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.16), transparent)",
+        background: "linear-gradient(to right, transparent, rgba(201,169,110,0.16), transparent)",
         pointerEvents: "none",
       }} />
       <div aria-hidden="true" style={{
         position: "absolute", bottom: 48, left: "50%", transform: "translateX(-50%)",
         width: "60%", height: 1,
-        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.16), transparent)",
+        background: "linear-gradient(to right, transparent, rgba(201,169,110,0.16), transparent)",
         pointerEvents: "none",
       }} />
 
@@ -113,7 +113,7 @@ export default function Contact() {
             transition={{ duration: 0.6 }}
           >
             <Eyebrow label="CONTACT" />
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 600, color: "#1A0F00", margin: "0 0 20px" }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 600, color: "#1C1C1E", margin: "0 0 20px" }}>
               Get In Touch
             </h2>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B6260", lineHeight: 1.8, margin: "0 0 40px" }}>
@@ -133,7 +133,7 @@ export default function Contact() {
                       href={item.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#C8860A", textDecoration: "none" }}
+                      style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#C9A96E", textDecoration: "none" }}
                     >
                       {item.text}
                     </a>
@@ -160,7 +160,7 @@ export default function Contact() {
                 textAlign: "center",
               }}>
                 <div style={{ fontSize: 32, marginBottom: 16 }}>✦</div>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.8rem", color: "#1A0F00", margin: "0 0 10px" }}>
+                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.8rem", color: "#1C1C1E", margin: "0 0 10px" }}>
                   Message Received
                 </h3>
                 <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#6B6260", margin: 0 }}>
@@ -179,7 +179,7 @@ export default function Contact() {
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     style={inputStyle}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#C8860A"}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#C9A96E"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "#E2DDD5"}
                     placeholder="Your name"
                   />
@@ -194,7 +194,7 @@ export default function Contact() {
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     style={inputStyle}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#C8860A"}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#C9A96E"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "#E2DDD5"}
                     placeholder="your@email.com"
                   />
@@ -209,7 +209,7 @@ export default function Contact() {
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                     style={{ ...inputStyle, resize: "none" }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#C8860A"}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "#C9A96E"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "#E2DDD5"}
                     placeholder="How can Niamh help you?"
                   />
@@ -218,8 +218,8 @@ export default function Contact() {
                   type="submit"
                   disabled={sending}
                   style={{
-                    background: "#1A0F00",
-                    border: "1px solid #1A0F00",
+                    background: "#1C1C1E",
+                    border: "1px solid #1C1C1E",
                     color: "#FAF7F2",
                     fontFamily: "'DM Sans', sans-serif",
                     fontSize: 11,

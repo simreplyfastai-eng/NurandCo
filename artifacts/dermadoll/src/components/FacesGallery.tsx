@@ -51,7 +51,7 @@ export default function FacesGallery() {
       }}
     >
       {/* Decorative amber rule top */}
-      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent, rgba(200,134,10,0.25), transparent)" }} />
+      <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent, rgba(201,169,110,0.25), transparent)" }} />
 
       {/* Section heading */}
       <div className="container mx-auto px-6 max-w-5xl" style={{ marginBottom: 56 }}>
@@ -64,16 +64,16 @@ export default function FacesGallery() {
         >
           {/* Eyebrow */}
           <div style={{ display: "flex", alignItems: "center", gap: 14, justifyContent: "center", marginBottom: 16 }}>
-            <div style={{ height: 1, width: 32, background: "#C8860A", opacity: 0.5 }} />
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>Gallery</span>
-            <div style={{ height: 1, width: 32, background: "#C8860A", opacity: 0.5 }} />
+            <div style={{ height: 1, width: 32, background: "#C9A96E", opacity: 0.5 }} />
+            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Gallery</span>
+            <div style={{ height: 1, width: 32, background: "#C9A96E", opacity: 0.5 }} />
           </div>
 
           <h2 style={{
             fontFamily: "'Cormorant Garamond', serif",
             fontSize: "clamp(2rem, 5vw, 3.2rem)",
             fontWeight: 600,
-            color: "#1A0F00",
+            color: "#1C1C1E",
             margin: "0 0 10px",
             lineHeight: 1.15,
           }}>
@@ -84,7 +84,7 @@ export default function FacesGallery() {
             fontFamily: "'Cormorant Garamond', serif",
             fontStyle: "italic",
             fontSize: "clamp(1rem, 2vw, 1.2rem)",
-            color: "#C8860A",
+            color: "#C9A96E",
             margin: 0,
           }}>
             Real people. Real results. Every client is unique.
@@ -179,7 +179,7 @@ export default function FacesGallery() {
       </div>
 
       {/* Decorative amber rule bottom */}
-      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent, rgba(200,134,10,0.25), transparent)" }} />
+      <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 1, background: "linear-gradient(90deg, transparent, rgba(201,169,110,0.25), transparent)" }} />
     </section>
   );
 }

@@ -12,9 +12,9 @@ function mediaUrl(path: string | null): string | null {
 function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>{label}</span>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
     </div>
   );
 }
@@ -86,10 +86,10 @@ export default function About() {
             transition={{ duration: 0.7, delay: 0.1 }}
           >
             <Eyebrow label="ABOUT NIAMH" />
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 600, color: "#1A0F00", margin: "0 0 10px" }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 600, color: "#1C1C1E", margin: "0 0 10px" }}>
               Meet Your Practitioner
             </h2>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C8860A", margin: "0 0 28px" }}>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C9A96E", margin: "0 0 28px" }}>
               Student Nurse. Advanced Aesthetics Practitioner.
             </p>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B6260", lineHeight: 1.8, margin: "0 0 18px" }}>
@@ -102,17 +102,17 @@ export default function About() {
             {/* Stats */}
             <div style={{ display: "flex", alignItems: "center", marginBottom: 36 }}>
               <div style={{ textAlign: "center", flex: 1 }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.4rem", fontWeight: 300, color: "#C8860A", lineHeight: 1 }}>100+</div>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.4rem", fontWeight: 300, color: "#C9A96E", lineHeight: 1 }}>100+</div>
                 <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#6B6260", marginTop: 8 }}>Clients</div>
               </div>
-              <div style={{ width: 1, height: 48, background: "#C8860A", opacity: 0.3, flexShrink: 0 }} />
+              <div style={{ width: 1, height: 48, background: "#C9A96E", opacity: 0.3, flexShrink: 0 }} />
               <div style={{ textAlign: "center", flex: 1 }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.4rem", fontWeight: 300, color: "#C8860A", lineHeight: 1 }}>5 ★</div>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2.4rem", fontWeight: 300, color: "#C9A96E", lineHeight: 1 }}>5 ★</div>
                 <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#6B6260", marginTop: 8 }}>Rated</div>
               </div>
-              <div style={{ width: 1, height: 48, background: "#C8860A", opacity: 0.3, flexShrink: 0 }} />
+              <div style={{ width: 1, height: 48, background: "#C9A96E", opacity: 0.3, flexShrink: 0 }} />
               <div style={{ textAlign: "center", flex: 1 }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2rem", fontWeight: 300, color: "#C8860A", lineHeight: 1 }}>Advanced</div>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "2rem", fontWeight: 300, color: "#C9A96E", lineHeight: 1 }}>Advanced</div>
                 <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#6B6260", marginTop: 8 }}>Aesthetics Practitioner</div>
               </div>
             </div>
@@ -122,8 +122,8 @@ export default function About() {
                 onClick={() => setConsultOpen(true)}
                 style={{
                   background: "transparent",
-                  border: "1px solid #1A0F00",
-                  color: "#1A0F00",
+                  border: "1px solid #1C1C1E",
+                  color: "#1C1C1E",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 11,
                   letterSpacing: "2px",
@@ -133,8 +133,8 @@ export default function About() {
                   cursor: "pointer",
                   transition: "all 0.2s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#1A0F00"; e.currentTarget.style.color = "#FAF7F2"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1A0F00"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#1C1C1E"; e.currentTarget.style.color = "#FAF7F2"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1C1C1E"; }}
               >
                 Book a Consultation
               </button>

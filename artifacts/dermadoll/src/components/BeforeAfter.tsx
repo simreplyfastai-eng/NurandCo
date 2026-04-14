@@ -111,9 +111,9 @@ export default function BeforeAfter() {
               transition={{ duration: 0.5 }}
               style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}
             >
-              <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>RESULTS</span>
-              <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+              <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
+              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>RESULTS</span>
+              <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
             </motion.div>
 
             <motion.h2
@@ -121,7 +121,7 @@ export default function BeforeAfter() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1A0F00", margin: "0 0 12px" }}
+              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1C1C1E", margin: "0 0 12px" }}
             >
               Real Results
             </motion.h2>
@@ -131,7 +131,7 @@ export default function BeforeAfter() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-              style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C8860A", margin: "0 0 8px" }}
+              style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C9A96E", margin: "0 0 8px" }}
             >
               Every result is real. Every client is unique.
             </motion.p>

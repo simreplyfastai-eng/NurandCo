@@ -81,7 +81,7 @@
 
   /* Face By Niamh palette */
   --background: 39 44% 97%;       /* #FAF7F2 cream */
-  --foreground: 35 100% 5%;       /* #1A0F00 dark brown */
+  --foreground: 35 100% 5%;       /* #1C1C1E dark brown */
   --border: 38 18% 86%;           /* #E2DDD5 */
 
   --card: 39 44% 97%;
@@ -101,7 +101,7 @@
   --popover-foreground: 35 100% 5%;
   --popover-border: 38 18% 86%;
 
-  --primary: 39 90% 41%;          /* #C8860A amber */
+  --primary: 39 90% 41%;          /* #C9A96E amber */
   --primary-foreground: 39 44% 97%;
 
   --secondary: 41 34% 91%;        /* #F0EBE1 cream dark */

@@ -59,9 +59,9 @@ const packages: Package[] = [
 function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>{label}</span>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
     </div>
   );
 }
@@ -82,10 +82,10 @@ export default function Packages() {
           style={{ textAlign: "center", marginBottom: 64 }}
         >
           <Eyebrow label="PACKAGES" />
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1A0F00", margin: "0 0 12px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1C1C1E", margin: "0 0 12px" }}>
             Treatment Packages
           </h2>
-          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C8860A", margin: 0 }}>
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C9A96E", margin: 0 }}>
             Save more when you combine.
           </p>
         </motion.div>
@@ -101,7 +101,7 @@ export default function Packages() {
               transition={{ duration: 0.5, delay: i * 0.12 }}
               style={{
                 background: "#FAF7F2",
-                border: pkg.popular ? "2px solid #C8860A" : "1px solid #E2DDD5",
+                border: pkg.popular ? "2px solid #C9A96E" : "1px solid #E2DDD5",
                 borderRadius: 2,
                 padding: "36px 28px",
                 display: "flex",
@@ -115,7 +115,7 @@ export default function Packages() {
                   top: -14,
                   left: "50%",
                   transform: "translateX(-50%)",
-                  background: "#C8860A",
+                  background: "#C9A96E",
                   color: "#FAF7F2",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 9,
@@ -133,7 +133,7 @@ export default function Packages() {
                 fontSize: 9,
                 letterSpacing: "2.5px",
                 textTransform: "uppercase",
-                color: "#C8860A",
+                color: "#C9A96E",
                 marginBottom: 20,
               }}>{pkg.badge}</div>
 
@@ -141,7 +141,7 @@ export default function Packages() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: "clamp(2rem,4vw,2.6rem)",
                 fontWeight: 600,
-                color: "#1A0F00",
+                color: "#1C1C1E",
                 lineHeight: 1,
                 marginBottom: 4,
               }}>{pkg.price}</div>
@@ -150,7 +150,7 @@ export default function Packages() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: "1.2rem",
                 fontWeight: 600,
-                color: "#1A0F00",
+                color: "#1C1C1E",
                 marginBottom: 6,
               }}>{pkg.name}</div>
 
@@ -158,7 +158,7 @@ export default function Packages() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontStyle: "italic",
                 fontSize: "1rem",
-                color: "#C8860A",
+                color: "#C9A96E",
                 marginBottom: 24,
               }}>{pkg.tagline}</div>
 
@@ -173,7 +173,7 @@ export default function Packages() {
                     color: "#6B6260",
                     marginBottom: 8,
                   }}>
-                    <span style={{ color: "#C8860A", fontSize: 10 }}>✦</span>
+                    <span style={{ color: "#C9A96E", fontSize: 10 }}>✦</span>
                     {item}
                   </li>
                 ))}
@@ -191,9 +191,9 @@ export default function Packages() {
               <button
                 onClick={() => setConsultOpen(true)}
                 style={{
-                  background: pkg.popular ? "#1A0F00" : "transparent",
-                  border: "1px solid #1A0F00",
-                  color: pkg.popular ? "#FAF7F2" : "#1A0F00",
+                  background: pkg.popular ? "#1C1C1E" : "transparent",
+                  border: "1px solid #1C1C1E",
+                  color: pkg.popular ? "#FAF7F2" : "#1C1C1E",
                   fontFamily: "'DM Sans', sans-serif",
                   fontSize: 11,
                   letterSpacing: "2px",
@@ -204,12 +204,12 @@ export default function Packages() {
                   transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#1A0F00";
+                  e.currentTarget.style.background = "#1C1C1E";
                   e.currentTarget.style.color = "#FAF7F2";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = pkg.popular ? "#1A0F00" : "transparent";
-                  e.currentTarget.style.color = pkg.popular ? "#FAF7F2" : "#1A0F00";
+                  e.currentTarget.style.background = pkg.popular ? "#1C1C1E" : "transparent";
+                  e.currentTarget.style.color = pkg.popular ? "#FAF7F2" : "#1C1C1E";
                 }}
               >
                 Book Now
@@ -223,7 +223,7 @@ export default function Packages() {
           fontFamily: "'Cormorant Garamond', serif",
           fontStyle: "italic",
           fontSize: 14,
-          color: "#C8860A",
+          color: "#C9A96E",
           marginTop: 36,
           marginBottom: 0,
         }}>

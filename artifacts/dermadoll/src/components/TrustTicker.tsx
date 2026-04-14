@@ -11,7 +11,7 @@ export default function TrustTicker() {
   ];
 
   const separator = (
-    <span style={{ color: "#C8860A", margin: "0 20px", fontSize: 10 }}>✦</span>
+    <span style={{ color: "#C9A96E", margin: "0 20px", fontSize: 10 }}>✦</span>
   );
 
   const track = (
@@ -24,7 +24,7 @@ export default function TrustTicker() {
             fontWeight: 500,
             letterSpacing: "3px",
             textTransform: "uppercase",
-            color: "#FAF7F2",
+            color: "#1C1C1E",
           }}>
             {item}
           </span>
@@ -52,7 +52,7 @@ export default function TrustTicker() {
       `}</style>
 
       <div style={{
-        background: "#1A0F00",
+        background: "#EDE7DC",
         height: 52,
         overflow: "hidden",
         display: "flex",
@@ -64,7 +64,7 @@ export default function TrustTicker() {
           position: "absolute",
           left: 0, top: 0, bottom: 0,
           width: 80,
-          background: "linear-gradient(90deg, #1A0F00, transparent)",
+          background: "linear-gradient(90deg, #EDE7DC, transparent)",
           zIndex: 2,
           pointerEvents: "none",
         }} />
@@ -73,7 +73,7 @@ export default function TrustTicker() {
           position: "absolute",
           right: 0, top: 0, bottom: 0,
           width: 80,
-          background: "linear-gradient(270deg, #1A0F00, transparent)",
+          background: "linear-gradient(270deg, #EDE7DC, transparent)",
           zIndex: 2,
           pointerEvents: "none",
         }} />

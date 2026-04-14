@@ -32,7 +32,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-[100dvh]" style={{ background: "#FAF7F2", color: "#1A0F00" }}>
+    <div className="min-h-[100dvh]" style={{ background: "#FAF7F2", color: "#1C1C1E" }}>
 
       <AnimatePresence>
         {showBookingSuccess && (
@@ -43,17 +43,17 @@ export default function Home() {
             transition={{ duration: 0.4 }}
             style={{
               position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
-              background: "#1A0F00",
-              borderBottom: "2px solid #C8860A",
+              background: "#1C1C1E",
+              borderBottom: "2px solid #C9A96E",
               padding: "14px 24px",
               display: "flex", alignItems: "center", justifyContent: "center", gap: "12px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: "50%", background: "rgba(200,134,10,0.2)", flexShrink: 0 }}>
-              <Check size={14} color="#C8860A" />
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: "50%", background: "rgba(201,169,110,0.2)", flexShrink: 0 }}>
+              <Check size={14} color="#C9A96E" />
             </div>
             <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", color: "#FAF7F2", margin: 0 }}>
-              <span style={{ color: "#C8860A", fontWeight: 600 }}>Booking confirmed.</span>{" "}
+              <span style={{ color: "#C9A96E", fontWeight: 600 }}>Booking confirmed.</span>{" "}
               You'll receive a confirmation email shortly.
             </p>
             <button

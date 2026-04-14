@@ -23,9 +23,9 @@ const reviews = [
 function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C8860A" }}>{label}</span>
-      <div style={{ height: 1, width: 28, background: "#C8860A", opacity: 0.5 }} />
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
     </div>
   );
 }
@@ -41,7 +41,7 @@ export default function Reviews() {
       <div aria-hidden="true" style={{
         position: "absolute", top: "-40px", right: "-20px",
         fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 700,
-        fontSize: "clamp(180px, 26vw, 320px)", color: "rgba(200,134,10,0.05)",
+        fontSize: "clamp(180px, 26vw, 320px)", color: "rgba(201,169,110,0.05)",
         lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-0.04em",
       }}>"</div>
 
@@ -49,7 +49,7 @@ export default function Reviews() {
       <div aria-hidden="true" style={{
         position: "absolute", bottom: -60, right: -60,
         width: 360, height: 360,
-        background: "radial-gradient(circle, rgba(200,134,10,0.08) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(201,169,110,0.08) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
 
@@ -57,7 +57,7 @@ export default function Reviews() {
       <div aria-hidden="true" style={{
         position: "absolute", top: -40, left: -40,
         width: 280, height: 280,
-        background: "radial-gradient(circle, rgba(200,134,10,0.06) 0%, transparent 70%)",
+        background: "radial-gradient(circle, rgba(201,169,110,0.06) 0%, transparent 70%)",
         pointerEvents: "none",
       }} />
 
@@ -72,7 +72,7 @@ export default function Reviews() {
         <div key={i} aria-hidden="true" style={{
           position: "absolute", ...(pos as any),
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: pos.size, color: "#C8860A", opacity: pos.opacity,
+          fontSize: pos.size, color: "#C9A96E", opacity: pos.opacity,
           pointerEvents: "none", userSelect: "none",
         }}>✦</div>
       ))}
@@ -81,13 +81,13 @@ export default function Reviews() {
       <div aria-hidden="true" style={{
         position: "absolute", top: 48, left: "50%", transform: "translateX(-50%)",
         width: "60%", height: 1,
-        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.16), transparent)",
+        background: "linear-gradient(to right, transparent, rgba(201,169,110,0.16), transparent)",
         pointerEvents: "none",
       }} />
       <div aria-hidden="true" style={{
         position: "absolute", bottom: 48, left: "50%", transform: "translateX(-50%)",
         width: "60%", height: 1,
-        background: "linear-gradient(to right, transparent, rgba(200,134,10,0.16), transparent)",
+        background: "linear-gradient(to right, transparent, rgba(201,169,110,0.16), transparent)",
         pointerEvents: "none",
       }} />
 
@@ -101,10 +101,10 @@ export default function Reviews() {
           style={{ textAlign: "center", marginBottom: 56 }}
         >
           <Eyebrow label="REVIEWS" />
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1A0F00", margin: "0 0 12px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1C1C1E", margin: "0 0 12px" }}>
             What Clients Say
           </h2>
-          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C8860A", margin: 0 }}>
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C9A96E", margin: 0 }}>
             5★ on every platform.
           </p>
         </motion.div>
@@ -141,14 +141,14 @@ export default function Reviews() {
             >
               <div style={{ display: "flex", gap: 4, marginBottom: 20 }}>
                 {[1, 2, 3, 4, 5].map((s) => (
-                  <Star key={s} size={14} fill="#C8860A" color="#C8860A" />
+                  <Star key={s} size={14} fill="#C9A96E" color="#C9A96E" />
                 ))}
               </div>
               <p style={{
                 fontFamily: "'Cormorant Garamond', serif",
                 fontStyle: "italic",
                 fontSize: "1.1rem",
-                color: "#1A0F00",
+                color: "#1C1C1E",
                 lineHeight: 1.7,
                 margin: "0 0 24px",
                 flexGrow: 1,
@@ -156,7 +156,7 @@ export default function Reviews() {
                 "{r.quote}"
               </p>
               <div style={{ borderTop: "1px solid #E2DDD5", paddingTop: 16 }}>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: "#1A0F00" }}>
+                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: "#1C1C1E" }}>
                   {r.name}
                 </div>
                 <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#6B6260", marginTop: 3 }}>
