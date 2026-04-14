@@ -155,12 +155,12 @@ export default function Hero() {
             fontFamily: "'Cormorant Garamond', serif",
             fontStyle: "italic",
             fontWeight: 700,
-            fontSize: "clamp(72px, 11vw, 140px)",
-            color: "rgba(200,134,10,0.055)",
-            lineHeight: 0.92,
+            fontSize: "clamp(32px, 4.5vw, 56px)",
+            color: "rgba(200,134,10,0.07)",
+            lineHeight: 1,
             pointerEvents: "none",
             userSelect: "none",
-            letterSpacing: "-0.03em",
+            letterSpacing: "-0.02em",
             whiteSpace: "nowrap",
           }}>
             FACE<br />BY<br />NIAMH
