@@ -98,7 +98,7 @@ export default function Pricing() {
   const [consultOpen, setConsultOpen] = useState(false);
 
   return (
-    <section id="pricing" style={{ background: "#F0EBE1", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+    <section id="pricing" style={{ background: "#FAF7F2", padding: "100px 0", position: "relative", overflow: "hidden" }}>
 
       {/* Decorative background layer */}
       {/* Large faint "£" watermark — left side */}
@@ -191,7 +191,7 @@ export default function Pricing() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "18px 24px",
-                  background: open === i ? "#1A0F00" : "#F0EBE1",
+                  background: open === i ? "#1A0F00" : "#FAF7F2",
                   border: "none",
                   cursor: "pointer",
                   transition: "background 0.2s",
@@ -220,7 +220,7 @@ export default function Pricing() {
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    style={{ overflow: "hidden", background: "#F0EBE1" }}
+                    style={{ overflow: "hidden", background: "#FAF7F2" }}
                   >
                     <div style={{ padding: "4px 24px 8px" }}>
                       {cat.items.map((item, j) => (
