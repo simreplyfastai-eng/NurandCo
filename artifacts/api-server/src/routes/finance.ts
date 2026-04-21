@@ -1,11 +1,18 @@
 import { Router } from "express";
-import { pool } from "@workspace/db";
+import { supabaseAdmin } from "../lib/supabase";
 import { requireAuth } from "../lib/auth";
 
 const router = Router();
 
+function getLocationId(req: import("express").Request): string | null {
+  return (
+    (req.headers["x-location-id"] as string | undefined) ??
+    (req.query.locationId as string | undefined) ??
+    null
+  );
+}
+
 // GET /api/finance/summary?month=YYYY-MM — requires admin JWT
-// Finance data always queries PostgreSQL directly — never uses localStorage cache.
 router.get("/finance/summary", async (req, res) => {
   if (!requireAuth(req, res)) return;
   const { month } = req.query as Record<string, string>;
@@ -13,22 +20,46 @@ router.get("/finance/summary", async (req, res) => {
     return res.status(400).json({ error: "month=YYYY-MM required" });
   }
   try {
-    const pattern = `${month}-%`;
-    const result = await pool.query(
-      `SELECT
-         COALESCE(SUM(CASE WHEN status != 'Cancelled' THEN price ELSE 0 END),0) AS total_revenue,
-         COALESCE(SUM(CASE WHEN deposit_paid = true THEN deposit ELSE 0 END),0) AS deposits_collected,
-         COALESCE(SUM(CASE WHEN balance_paid = false AND status != 'Cancelled' THEN GREATEST(price - deposit, 0) ELSE 0 END),0) AS balance_outstanding,
-         COUNT(CASE WHEN status != 'Cancelled' THEN 1 END) AS booking_count
-       FROM bookings WHERE date LIKE $1`,
-      [pattern],
-    );
-    const row = result.rows[0];
+    const [y, m] = month.split("-").map(Number);
+    const daysInMonth = new Date(y, m, 0).getDate();
+    const startDate = `${month}-01`;
+    const endDate = `${month}-${String(daysInMonth).padStart(2, "0")}`;
+
+    let query = supabaseAdmin
+      .from("bookings")
+      .select("booking_date, total_amount, deposit_amount, balance_due, status, deposit_paid")
+      .gte("booking_date", startDate)
+      .lte("booking_date", endDate);
+
+    const locationId = getLocationId(req);
+    if (locationId) query = query.eq("location_id", locationId);
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    let totalRevenue = 0;
+    let depositsCollected = 0;
+    let balanceOutstanding = 0;
+    let bookingCount = 0;
+
+    for (const b of (data ?? [])) {
+      const total = Number(b.total_amount ?? 0);
+      const dep = Number(b.deposit_amount ?? 0);
+      if (b.status !== "Cancelled") {
+        totalRevenue += total;
+        bookingCount++;
+        const bal = b.balance_due != null ? Number(b.balance_due) : Math.max(0, total - dep);
+        // balance is outstanding if balance_due > 0
+        if (bal > 0) balanceOutstanding += bal;
+      }
+      if (b.deposit_paid) depositsCollected += dep;
+    }
+
     return res.json({
-      totalRevenue: Number(row.total_revenue),
-      depositsCollected: Number(row.deposits_collected),
-      balanceOutstanding: Number(row.balance_outstanding),
-      bookingCount: Number(row.booking_count),
+      totalRevenue,
+      depositsCollected,
+      balanceOutstanding,
+      bookingCount,
     });
   } catch (err) {
     console.error("GET /api/finance/summary", err);
@@ -37,7 +68,6 @@ router.get("/finance/summary", async (req, res) => {
 });
 
 // GET /api/finance/monthly?month=YYYY-MM — requires admin JWT
-// Finance data always queries PostgreSQL directly — never uses localStorage cache.
 // Returns { day: number, revenue: number, cumulative: number }[]
 router.get("/finance/monthly", async (req, res) => {
   if (!requireAuth(req, res)) return;
@@ -48,18 +78,29 @@ router.get("/finance/monthly", async (req, res) => {
   try {
     const [y, m] = month.split("-").map(Number);
     const daysInMonth = new Date(y, m, 0).getDate();
-    const pattern = `${month}-%`;
-    const result = await pool.query(
-      `SELECT CAST(SPLIT_PART(date,'-',3) AS INT) AS day,
-              SUM(CASE WHEN status != 'Cancelled' THEN price ELSE 0 END) AS revenue
-       FROM bookings WHERE date LIKE $1
-       GROUP BY day ORDER BY day`,
-      [pattern],
-    );
+    const startDate = `${month}-01`;
+    const endDate = `${month}-${String(daysInMonth).padStart(2, "0")}`;
+
+    let query = supabaseAdmin
+      .from("bookings")
+      .select("booking_date, total_amount, status")
+      .gte("booking_date", startDate)
+      .lte("booking_date", endDate);
+
+    const locationId = getLocationId(req);
+    if (locationId) query = query.eq("location_id", locationId);
+
+    const { data, error } = await query;
+    if (error) throw error;
+
     const dailyMap: Record<number, number> = {};
-    for (const row of result.rows) {
-      dailyMap[Number(row.day)] = Number(row.revenue);
+    for (const b of (data ?? [])) {
+      if (b.status !== "Cancelled") {
+        const day = new Date(b.booking_date as string).getUTCDate();
+        dailyMap[day] = (dailyMap[day] ?? 0) + Number(b.total_amount ?? 0);
+      }
     }
+
     let cum = 0;
     const days = [];
     for (let d = 1; d <= daysInMonth; d++) {

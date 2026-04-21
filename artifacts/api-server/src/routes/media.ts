@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { pool } from "@workspace/db";
+import { supabaseAdmin } from "../lib/supabase";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 
 const router = Router();
@@ -23,14 +23,43 @@ function convertMap(map: Record<string, string> | undefined): Record<string, str
   return out;
 }
 
+/** Resolve a location UUID from slug or ID string */
+async function resolveLocationId(raw: string | undefined): Promise<string | null> {
+  if (!raw) return null;
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (UUID_RE.test(raw)) return raw;
+  const { data } = await supabaseAdmin.from("locations").select("id").eq("slug", raw).maybeSingle();
+  return data?.id ? String(data.id) : null;
+}
+
 // GET /api/media/config — public config served to the website
+// ?locationId=<uuid|slug>  optional — falls back to first active location
 router.get("/media/config", async (req, res) => {
   try {
-    const result = await pool.query(
-      "SELECT value FROM portal_kv WHERE key = 'fbn_media'"
-    );
-    const data: Record<string, unknown> =
-      result.rows.length > 0 ? (result.rows[0].value as Record<string, unknown>) : {};
+    const rawLoc = (req.query.locationId as string | undefined) ??
+                   (req.headers["x-location-id"] as string | undefined);
+    let locationId = await resolveLocationId(rawLoc);
+
+    if (!locationId) {
+      const { data: first } = await supabaseAdmin
+        .from("locations")
+        .select("id")
+        .order("name")
+        .limit(1)
+        .maybeSingle();
+      locationId = first?.id ? String(first.id) : null;
+    }
+
+    let data: Record<string, unknown> = {};
+    if (locationId) {
+      const { data: row } = await supabaseAdmin
+        .from("portal_kv")
+        .select("value")
+        .eq("location_id", locationId)
+        .eq("key", "dd_media")
+        .maybeSingle();
+      if (row?.value) data = row.value as Record<string, unknown>;
+    }
 
     const defaultGraduates = [
       { slot: 1, name: "Sarah M.", course: "Foundation Anti-Wrinkle", src: "" },
@@ -65,8 +94,6 @@ router.get("/media/config", async (req, res) => {
 });
 
 // POST /api/media/upload-url
-// Returns { uploadURL: string, objectPath: string }
-// The client PUTs the binary directly to uploadURL (presigned), then stores the objectPath reference
 router.post("/media/upload-url", async (req, res) => {
   const { contentType } = req.body as { contentType?: string };
   if (!contentType) {
@@ -74,7 +101,6 @@ router.post("/media/upload-url", async (req, res) => {
   }
   try {
     const uploadURL = await storage.getObjectEntityUploadURL();
-    // Strip query string to get the raw GCS URL for normalisation
     const rawGcsUrl = uploadURL.split("?")[0];
     const objectPath = storage.normalizeObjectEntityPath(rawGcsUrl);
     return res.json({ uploadURL, objectPath });
@@ -84,8 +110,7 @@ router.post("/media/upload-url", async (req, res) => {
   }
 });
 
-// GET /api/media/serve  — proxy a stored object back to the browser
-// ?path=<url-encoded objectPath>  e.g. /objects/uploads/<uuid>
+// GET /api/media/serve
 router.get("/media/serve", async (req, res) => {
   const objectPath = req.query.path as string | undefined;
   if (!objectPath) {

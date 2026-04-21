@@ -18,13 +18,20 @@ function getStripe(): Stripe | null {
   return new Stripe(key, { apiVersion: "2025-02-24.acacia" });
 }
 
-async function getSettings(): Promise<Record<string, string>> {
+/** Read dd_settings for a location from portal_kv */
+async function getLocationSettings(locationId?: string | null): Promise<Record<string, unknown>> {
+  if (!locationId) return {};
   try {
-    const { pool } = await import("@workspace/db");
-    const res = await pool.query("SELECT value FROM portal_kv WHERE key='fbn_settings'");
-    if (res.rows.length) return (res.rows[0].value as Record<string, string>) ?? {};
-  } catch { /* ignore */ }
-  return {};
+    const { data } = await supabaseAdmin
+      .from("portal_kv")
+      .select("value")
+      .eq("location_id", locationId)
+      .eq("key", "dd_settings")
+      .maybeSingle();
+    return (data?.value as Record<string, unknown>) ?? {};
+  } catch {
+    return {};
+  }
 }
 
 async function getWhatsApp(locationId?: string | null): Promise<string> {
@@ -37,9 +44,10 @@ async function getWhatsApp(locationId?: string | null): Promise<string> {
         .single();
       if (data?.whatsapp) return String(data.whatsapp);
     } catch { /* fall through */ }
+    const settings = await getLocationSettings(locationId);
+    if (settings.whatsapp) return String(settings.whatsapp);
   }
-  const settings = await getSettings();
-  return settings.whatsapp ?? "";
+  return "";
 }
 
 async function getLocationInfo(locationId: string): Promise<{ name: string; address: string } | null> {
@@ -74,16 +82,24 @@ async function getTreatmentInfo(
 
 // ── helpers ─────────────────────────────────────────────────────────────────
 
+/**
+ * Deposit settings come from dd_settings.depositPercent in portal_kv.
+ * Falls back to 30% if not set. A value of 100 means full payment required.
+ */
 async function getDepositSettings(locationId: string): Promise<{ deposit_type: "percent" | "fixed"; deposit_value: number }> {
   try {
+    const settings = await getLocationSettings(locationId);
+    const pct = Number(settings.depositPercent ?? settings.deposit ?? 0);
+    if (pct > 0) return { deposit_type: "percent", deposit_value: pct };
+    // Also check deposit_settings table as fallback
     const { data } = await supabaseAdmin
       .from("deposit_settings")
       .select("deposit_type, deposit_value")
       .eq("location_id", locationId)
       .maybeSingle();
-    if (data) return { deposit_type: data.deposit_type as "percent" | "fixed", deposit_value: Number(data.deposit_value ?? 50) };
+    if (data) return { deposit_type: data.deposit_type as "percent" | "fixed", deposit_value: Number(data.deposit_value ?? 30) };
   } catch { /* fall through */ }
-  return { deposit_type: "fixed", deposit_value: 50 };
+  return { deposit_type: "percent", deposit_value: 30 };
 }
 
 async function upsertSupabaseClient(params: {
@@ -151,10 +167,13 @@ async function upsertSupabaseClient(params: {
 }
 
 // GET /api/config — public config + checklist
-router.get("/config", async (_req, res) => {
-  const settings = await getSettings();
-  const whatsapp = settings.whatsapp ?? "";
-  const depositPercent = Number(settings.deposit ?? 50);
+// ?locationId=<uuid>  optional — returns location-specific whatsapp/depositPercent
+router.get("/config", async (req, res) => {
+  const locationId = (req.query.locationId as string | undefined) ??
+                     (req.headers["x-location-id"] as string | undefined) ?? null;
+  const settings = await getLocationSettings(locationId);
+  const whatsapp = await getWhatsApp(locationId);
+  const depositPercent = Number(settings.depositPercent ?? settings.deposit ?? 30);
   return res.json({
     stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY ?? "",
     whatsapp,

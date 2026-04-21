@@ -11,8 +11,8 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
 - **API framework**: Express 5
-- **Primary Database**: Supabase (PostgreSQL, via @supabase/supabase-js v2)
-- **Legacy Database**: PostgreSQL pool (clients, portal_kv, enquiries, finance — still in use)
+- **Primary Database**: Supabase (PostgreSQL, via @supabase/supabase-js v2) — ALL routes fully migrated
+- **Legacy Database**: PostgreSQL pool — FULLY REMOVED from all routes (no more pool.query anywhere)
 - **Build**: esbuild (ESM bundle)
 - **Frontend**: React + Vite (Starr Aesthetics website)
 
@@ -29,7 +29,7 @@ Single-page luxury aesthetics clinic website with admin portal. Founder: **Eva**
 - **Design tokens**: Burgundy #5C1A1A · Gold #C9A96E · Cream #F5F0EB. Fonts: Cormorant Garamond (italic headings) + Inter (body). 0 border-radius, outlined buttons only.
 - **Brand**: Instagram @starraestheticss · Website www.starrbeautyy.co.uk · Email starrbeautyyltd@gmail.com
 - **Page sections** (in order): Navbar (SERVICES | LOCATIONS | TRAINING + BOOK NOW) → Hero (split cream/photo) → About (Eva founder, 6+ yrs, NL™ stats) → TreatmentMarquee (THE EDIT, dual scrolling rows) → Locations (Hornchurch/Marylebone cards) → Services (accordion with location toggle, per-location pricing) → BeforeAfter (Real Transformations grid) → ResultsVideos (Watch Real Treatments) → Training (Starr Academy, Essex/London masterclasses) → Reviews (6-card grid, CLIENT LOVE) → FAQ (NaturalèLips™ questions) → CTABanner (BOOK HORNCHURCH / BOOK MARYLEBONE) → Footer (Beauty Redefined, clean)
-- **Admin portal**: `/portal.html` — Starr Aesthetics rebrand; location selector for Hornchurch / Marylebone; localStorage uses fbn_ prefix (backward compat)
+- **Admin portal**: `/portal.html` — Starr Aesthetics rebrand; location selector for Hornchurch / Marylebone; API calls use `fbn_*` keys (mapped to `dd_*` in Supabase portal_kv backend); `X-Location-Id` header passed on all KV/bookings/clients calls
 
 ### API Server (`artifacts/api-server`)
 Express 5 REST API on port 8080. All routes prefixed `/api/`.
@@ -61,7 +61,7 @@ Express 5 REST API on port 8080. All routes prefixed `/api/`.
 - `POST /api/enquiries` — Submit training enquiry (rate-limited) [public]
 - `PUT /api/enquiries/:id` — Update enquiry status [JWT]
 
-**Finance routes (all JWT-protected, always query PostgreSQL directly):**
+**Finance routes (all JWT-protected, query Supabase bookings with location_id filter):**
 - `GET /api/finance/summary?month=YYYY-MM` — Revenue/deposits/balance summary [JWT]
 - `GET /api/finance/monthly?month=YYYY-MM` — Daily revenue chart data [JWT]
 

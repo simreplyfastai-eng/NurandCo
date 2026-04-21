@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { pool } from "@workspace/db";
+import { supabaseAdmin } from "../lib/supabase";
 import { sendEnquiryEmails } from "../lib/email";
 import { requireAuth } from "../lib/auth";
 
@@ -22,10 +22,12 @@ function rowToEnquiry(row: Record<string, unknown>) {
 router.get("/enquiries", async (req, res) => {
   if (!requireAuth(req, res)) return;
   try {
-    const result = await pool.query(
-      "SELECT * FROM enquiries ORDER BY created_at DESC",
-    );
-    return res.json({ enquiries: result.rows.map(rowToEnquiry) });
+    const { data, error } = await supabaseAdmin
+      .from("enquiries")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (error) throw error;
+    return res.json({ enquiries: (data ?? []).map(rowToEnquiry) });
   } catch (err) {
     console.error("GET /api/enquiries", err);
     return res.status(500).json({ error: "db error" });
@@ -45,19 +47,28 @@ router.post("/enquiries", async (req, res) => {
   }
   const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
   try {
-    await pool.query(
-      `INSERT INTO enquiries (id, name, email, phone, course, message, status, created_at)
-       VALUES ($1,$2,$3,$4,$5,$6,'New',$7)`,
-      [id, name.trim(), email.trim().toLowerCase(), phone.trim(), course.trim(), (message ?? "").trim(), Date.now()],
-    );
-    const result = await pool.query("SELECT * FROM enquiries WHERE id=$1", [id]);
-    const enquiry = rowToEnquiry(result.rows[0]);
+    const { error } = await supabaseAdmin.from("enquiries").insert({
+      id,
+      name: name.trim(),
+      email: email.trim().toLowerCase(),
+      phone: phone.trim(),
+      course: course.trim(),
+      message: (message ?? "").trim(),
+      status: "New",
+      created_at: Date.now(),
+    });
+    if (error) throw error;
 
-    // Send emails (non-blocking)
+    const { data: row } = await supabaseAdmin
+      .from("enquiries")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+
     const adminEmail = process.env.ADMIN_EMAIL ?? "";
     sendEnquiryEmails({ adminEmail, name, email, phone, course, message: message ?? "" }).catch(() => {});
 
-    return res.status(201).json(enquiry);
+    return res.status(201).json(rowToEnquiry((row ?? {}) as Record<string, unknown>));
   } catch (err) {
     console.error("POST /api/enquiries", err);
     return res.status(500).json({ error: "db error" });
@@ -71,10 +82,19 @@ router.put("/enquiries/:id", async (req, res) => {
   const { status } = req.body as { status: string };
   if (!status) return res.status(400).json({ error: "status required" });
   try {
-    await pool.query("UPDATE enquiries SET status=$2 WHERE id=$1", [id, status]);
-    const result = await pool.query("SELECT * FROM enquiries WHERE id=$1", [id]);
-    if (!result.rows.length) return res.status(404).json({ error: "not found" });
-    return res.json(rowToEnquiry(result.rows[0]));
+    const { error } = await supabaseAdmin
+      .from("enquiries")
+      .update({ status })
+      .eq("id", id);
+    if (error) throw error;
+
+    const { data: row } = await supabaseAdmin
+      .from("enquiries")
+      .select("*")
+      .eq("id", id)
+      .maybeSingle();
+    if (!row) return res.status(404).json({ error: "not found" });
+    return res.json(rowToEnquiry(row as Record<string, unknown>));
   } catch (err) {
     console.error("PUT /api/enquiries/:id", err);
     return res.status(500).json({ error: "db error" });

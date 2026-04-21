@@ -134,3 +134,20 @@ BEGIN
     ON CONFLICT (location_id, day_of_week) DO NOTHING;
   END LOOP;
 END $$;
+
+-- ── 6. Enquiries table ──────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS enquiries (
+  id          TEXT PRIMARY KEY,
+  name        TEXT NOT NULL,
+  email       TEXT NOT NULL DEFAULT '',
+  phone       TEXT NOT NULL DEFAULT '',
+  course      TEXT NOT NULL DEFAULT '',
+  message     TEXT DEFAULT '',
+  status      TEXT DEFAULT 'New',
+  created_at  BIGINT DEFAULT 0
+);
+
+ALTER TABLE enquiries ENABLE ROW LEVEL SECURITY;
+-- anon can INSERT (website enquiry form); service_role bypasses for admin reads
+CREATE POLICY IF NOT EXISTS "enquiries_anon_insert"
+  ON enquiries FOR INSERT TO anon WITH CHECK (true);

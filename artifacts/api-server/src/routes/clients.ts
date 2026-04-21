@@ -1,8 +1,16 @@
 import { Router } from "express";
-import { pool } from "@workspace/db";
+import { supabaseAdmin } from "../lib/supabase";
 import { requireAuth } from "../lib/auth";
 
 const router = Router();
+
+function getLocationId(req: import("express").Request): string | null {
+  return (
+    (req.headers["x-location-id"] as string | undefined) ??
+    (req.query.locationId as string | undefined) ??
+    null
+  );
+}
 
 function rowToClient(row: Record<string, unknown>) {
   return {
@@ -10,11 +18,14 @@ function rowToClient(row: Record<string, unknown>) {
     name: row.name,
     email: row.email ?? "",
     phone: row.phone ?? "",
-    joinDate: row.join_date ?? "",
+    joinDate: row.join_date ?? (row.created_at ? new Date(String(row.created_at)).toISOString().slice(0, 10) : ""),
     notes: row.notes ?? "",
     source: row.source ?? "Website",
-    createdAt: Number(row.created_at ?? 0),
+    createdAt: row.created_at ? (typeof row.created_at === "number" ? row.created_at : new Date(String(row.created_at)).getTime()) : 0,
     dateOfBirth: row.date_of_birth ?? "",
+    visitCount: Number(row.visit_count ?? 0),
+    totalSpent: Number(row.total_spent ?? 0),
+    lastVisit: row.last_visit ?? null,
   };
 }
 
@@ -22,129 +33,134 @@ function rowToClient(row: Record<string, unknown>) {
 router.get("/clients", async (req, res) => {
   if (!requireAuth(req, res)) return;
   try {
-    const result = await pool.query(
-      "SELECT * FROM clients ORDER BY created_at DESC",
-    );
-    return res.json(result.rows.map(rowToClient));
+    const locationId = getLocationId(req);
+    let query = supabaseAdmin
+      .from("clients")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (locationId) query = query.eq("location_id", locationId);
+
+    const { data, error } = await query;
+    if (error) throw error;
+    return res.json((data ?? []).map(rowToClient));
   } catch (err) {
     console.error("GET /api/clients", err);
     return res.status(500).json({ error: "db error" });
   }
 });
 
-// POST /api/clients  — upsert by email (if non-empty) or phone (if non-empty), else create new — requires admin JWT
+// POST /api/clients  — upsert by email/phone — requires admin JWT
 router.post("/clients", async (req, res) => {
   if (!requireAuth(req, res)) return;
   const c = req.body;
   if (!c.name) return res.status(400).json({ error: "name required" });
 
+  const locationId = getLocationId(req);
   const email = (c.email ?? "").trim().toLowerCase();
   const phone = (c.phone ?? "").trim().replace(/\s/g, "");
-  const id = c.id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
-  const now = c.createdAt ?? Date.now();
+  const now = new Date().toISOString();
 
   try {
-    // Attempt to find an existing client to deduplicate
     let existing: Record<string, unknown> | null = null;
 
     if (email) {
-      const r = await pool.query(
-        "SELECT * FROM clients WHERE LOWER(TRIM(email)) = $1 LIMIT 1",
-        [email],
-      );
-      if (r.rows.length) existing = r.rows[0];
+      let q = supabaseAdmin.from("clients").select("*").eq("email", email).limit(1);
+      if (locationId) q = q.eq("location_id", locationId);
+      const { data } = await q;
+      if (data?.length) existing = data[0] as Record<string, unknown>;
     }
     if (!existing && phone) {
-      const r = await pool.query(
-        "SELECT * FROM clients WHERE REPLACE(REPLACE(phone,' ',''),'-','') = $1 LIMIT 1",
-        [phone],
-      );
-      if (r.rows.length) existing = r.rows[0];
+      let q = supabaseAdmin.from("clients").select("*").eq("phone", phone).limit(1);
+      if (locationId) q = q.eq("location_id", locationId);
+      const { data } = await q;
+      if (data?.length) existing = data[0] as Record<string, unknown>;
     }
 
     if (existing) {
-      // Merge new data into existing record (never overwrite with blank)
-      await pool.query(
-        `UPDATE clients SET
-          name = CASE WHEN $2 != '' THEN $2 ELSE name END,
-          email = CASE WHEN $3 != '' THEN $3 ELSE email END,
-          phone = CASE WHEN $4 != '' THEN $4 ELSE phone END,
-          notes = CASE WHEN $5 != '' THEN $5 ELSE notes END,
-          source = CASE WHEN $6 != '' THEN $6 ELSE source END
-         WHERE id = $1`,
-        [existing.id, c.name, email, phone, c.notes ?? "", c.source ?? ""],
-      );
-      const updated = await pool.query("SELECT * FROM clients WHERE id=$1", [existing.id]);
-      return res.status(200).json(rowToClient(updated.rows[0]));
+      const updates: Record<string, unknown> = {};
+      if (c.name) updates.name = c.name;
+      if (email) updates.email = email;
+      if (phone) updates.phone = phone;
+      if (c.notes) updates.notes = c.notes;
+      if (c.source) updates.source = c.source;
+      await supabaseAdmin.from("clients").update(updates).eq("id", String(existing.id));
+      const { data: updated } = await supabaseAdmin.from("clients").select("*").eq("id", String(existing.id)).maybeSingle();
+      return res.status(200).json(rowToClient((updated ?? {}) as Record<string, unknown>));
     }
 
-    // No match — create new client
-    await pool.query(
-      `INSERT INTO clients (id, name, email, phone, join_date, notes, source, created_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-       ON CONFLICT (id) DO NOTHING`,
-      [id, c.name, email, phone, c.joinDate ?? "", c.notes ?? "", c.source ?? "Website", now],
-    );
-    const inserted = await pool.query("SELECT * FROM clients WHERE id=$1", [id]);
-    return res.status(201).json(rowToClient(inserted.rows[0]));
+    const payload: Record<string, unknown> = {
+      name: c.name,
+      email: email || null,
+      phone: phone || null,
+      notes: c.notes ?? "",
+      source: c.source ?? "Website",
+      created_at: now,
+    };
+    if (locationId) payload.location_id = locationId;
+
+    const { data: inserted, error } = await supabaseAdmin
+      .from("clients")
+      .insert(payload)
+      .select("*")
+      .single();
+    if (error) throw error;
+    return res.status(201).json(rowToClient(inserted as Record<string, unknown>));
   } catch (err) {
     console.error("POST /api/clients", err);
     return res.status(500).json({ error: "db error" });
   }
 });
 
-// POST /api/clients/bulk  — batch upsert (for portal seeding, runs deduplication) — requires admin JWT
+// POST /api/clients/bulk  — batch upsert — requires admin JWT
 router.post("/clients/bulk", async (req, res) => {
   if (!requireAuth(req, res)) return;
   const clients: unknown[] = req.body;
   if (!Array.isArray(clients)) return res.status(400).json({ error: "array required" });
+
+  const locationId = getLocationId(req);
   let upserted = 0;
-  try {
-    for (const raw of clients as Record<string, unknown>[]) {
-      if (!raw.name) continue;
-      const email = String(raw.email ?? "").trim().toLowerCase();
-      const phone = String(raw.phone ?? "").trim().replace(/\s/g, "");
-      const id = String(raw.id || (Date.now().toString(36) + Math.random().toString(36).slice(2, 6)));
 
-      let existing: Record<string, unknown> | null = null;
-      if (email) {
-        const r = await pool.query(
-          "SELECT * FROM clients WHERE LOWER(TRIM(email)) = $1 LIMIT 1", [email],
-        );
-        if (r.rows.length) existing = r.rows[0];
-      }
-      if (!existing && phone) {
-        const r = await pool.query(
-          "SELECT * FROM clients WHERE REPLACE(REPLACE(phone,' ',''),'-','') = $1 LIMIT 1", [phone],
-        );
-        if (r.rows.length) existing = r.rows[0];
-      }
+  for (const raw of clients as Record<string, unknown>[]) {
+    if (!raw.name) continue;
+    const email = String(raw.email ?? "").trim().toLowerCase();
+    const phone = String(raw.phone ?? "").trim().replace(/\s/g, "");
 
-      if (existing) {
-        await pool.query(
-          `UPDATE clients SET
-            name = CASE WHEN $2 != '' THEN $2 ELSE name END,
-            email = CASE WHEN $3 != '' THEN $3 ELSE email END,
-            phone = CASE WHEN $4 != '' THEN $4 ELSE phone END
-           WHERE id = $1`,
-          [existing.id, String(raw.name), email, phone],
-        );
-      } else {
-        await pool.query(
-          `INSERT INTO clients (id, name, email, phone, join_date, notes, source, created_at)
-           VALUES ($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT (id) DO NOTHING`,
-          [id, String(raw.name), email, phone,
-           String(raw.joinDate ?? ""), String(raw.notes ?? ""),
-           String(raw.source ?? "Website"), Number(raw.createdAt ?? Date.now())],
-        );
-      }
-      upserted++;
+    let existing: Record<string, unknown> | null = null;
+    if (email) {
+      let q = supabaseAdmin.from("clients").select("id").eq("email", email).limit(1);
+      if (locationId) q = q.eq("location_id", locationId);
+      const { data } = await q;
+      if (data?.length) existing = data[0] as Record<string, unknown>;
     }
-    return res.json({ ok: true, upserted });
-  } catch (err) {
-    console.error("POST /api/clients/bulk", err);
-    return res.status(500).json({ error: "db error" });
+    if (!existing && phone) {
+      let q = supabaseAdmin.from("clients").select("id").eq("phone", phone).limit(1);
+      if (locationId) q = q.eq("location_id", locationId);
+      const { data } = await q;
+      if (data?.length) existing = data[0] as Record<string, unknown>;
+    }
+
+    if (existing) {
+      const updates: Record<string, unknown> = {};
+      if (String(raw.name)) updates.name = String(raw.name);
+      if (email) updates.email = email;
+      if (phone) updates.phone = phone;
+      await supabaseAdmin.from("clients").update(updates).eq("id", String(existing.id));
+    } else {
+      const payload: Record<string, unknown> = {
+        name: String(raw.name),
+        email: email || null,
+        phone: phone || null,
+        notes: String(raw.notes ?? ""),
+        source: String(raw.source ?? "Website"),
+        created_at: new Date().toISOString(),
+      };
+      if (locationId) payload.location_id = locationId;
+      await supabaseAdmin.from("clients").insert(payload).catch(() => {});
+    }
+    upserted++;
   }
+
+  return res.json({ ok: true, upserted });
 });
 
 // PUT /api/clients/:id — requires admin JWT
@@ -153,21 +169,17 @@ router.put("/clients/:id", async (req, res) => {
   const { id } = req.params;
   const c = req.body;
   try {
-    await pool.query(
-      `UPDATE clients SET
-        name  = COALESCE($2, name),
-        email = COALESCE($3, email),
-        phone = COALESCE($4, phone),
-        join_date = COALESCE($5, join_date),
-        notes = COALESCE($6, notes),
-        source = COALESCE($7, source)
-       WHERE id = $1`,
-      [id, c.name ?? null, c.email ?? null, c.phone ?? null,
-       c.joinDate ?? null, c.notes ?? null, c.source ?? null],
-    );
-    const updated = await pool.query("SELECT * FROM clients WHERE id=$1", [id]);
-    if (!updated.rows.length) return res.status(404).json({ error: "not found" });
-    return res.json(rowToClient(updated.rows[0]));
+    const updates: Record<string, unknown> = {};
+    if (c.name != null) updates.name = c.name;
+    if (c.email != null) updates.email = c.email;
+    if (c.phone != null) updates.phone = c.phone;
+    if (c.notes != null) updates.notes = c.notes;
+    if (c.source != null) updates.source = c.source;
+
+    await supabaseAdmin.from("clients").update(updates).eq("id", id);
+    const { data: updated } = await supabaseAdmin.from("clients").select("*").eq("id", id).maybeSingle();
+    if (!updated) return res.status(404).json({ error: "not found" });
+    return res.json(rowToClient(updated as Record<string, unknown>));
   } catch (err) {
     console.error("PUT /api/clients/:id", err);
     return res.status(500).json({ error: "db error" });
@@ -178,7 +190,7 @@ router.put("/clients/:id", async (req, res) => {
 router.delete("/clients/:id", async (req, res) => {
   if (!requireAuth(req, res)) return;
   try {
-    await pool.query("DELETE FROM clients WHERE id=$1", [req.params.id]);
+    await supabaseAdmin.from("clients").delete().eq("id", req.params.id);
     return res.json({ ok: true });
   } catch (err) {
     console.error("DELETE /api/clients/:id", err);
@@ -187,16 +199,15 @@ router.delete("/clients/:id", async (req, res) => {
 });
 
 // DELETE /api/clients/sample  — remove seeded test clients only — requires admin JWT
-router.delete("/clients/sample", async (_req, res) => {
-  if (!requireAuth(_req, res)) return;
+router.delete("/clients/sample", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const SAMPLE_NAMES = ["Ellisha W.", "Donna S.", "Sophie M.", "Chloe R.", "Amara J.", "Priya K.", "Zara T."];
-  const placeholders = SAMPLE_NAMES.map((_, i) => `$${i + 1}`).join(",");
   try {
-    const result = await pool.query(
-      `DELETE FROM clients WHERE name IN (${placeholders})`,
-      SAMPLE_NAMES,
-    );
-    return res.json({ ok: true, deleted: result.rowCount });
+    const locationId = getLocationId(req);
+    let q = supabaseAdmin.from("clients").delete().in("name", SAMPLE_NAMES);
+    if (locationId) q = q.eq("location_id", locationId);
+    await q;
+    return res.json({ ok: true });
   } catch (err) {
     console.error("DELETE /api/clients/sample", err);
     return res.status(500).json({ error: "db error" });
@@ -204,10 +215,13 @@ router.delete("/clients/sample", async (_req, res) => {
 });
 
 // DELETE /api/clients  — clear all (used by resetPortal) — requires admin JWT
-router.delete("/clients", async (_req, res) => {
-  if (!requireAuth(_req, res)) return;
+router.delete("/clients", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   try {
-    await pool.query("DELETE FROM clients");
+    const locationId = getLocationId(req);
+    let q = supabaseAdmin.from("clients").delete().neq("id", "00000000-0000-0000-0000-000000000000");
+    if (locationId) q = q.eq("location_id", locationId);
+    await q;
     return res.json({ ok: true });
   } catch (err) {
     console.error("DELETE /api/clients", err);
@@ -215,62 +229,71 @@ router.delete("/clients", async (_req, res) => {
   }
 });
 
-export default router;
-
 // Helper exported for use in bookings route — upsert a client silently
-// Returns the client id so callers can store it as a FK on bookings
 export async function upsertClientFromBooking(data: {
   name: string;
   email: string;
   phone: string;
   date: string;
   source: string;
+  locationId?: string;
   dob?: string;
   notes?: string;
 }): Promise<string | null> {
   if (!data.name) return null;
   const email = data.email.trim().toLowerCase();
   const phone = data.phone.trim().replace(/\s/g, "");
+  const locationId = data.locationId ?? null;
+
   try {
     let existing: Record<string, unknown> | null = null;
+
     if (email) {
-      const r = await pool.query(
-        "SELECT * FROM clients WHERE LOWER(TRIM(email)) = $1 LIMIT 1", [email],
-      );
-      if (r.rows.length) existing = r.rows[0];
+      let q = supabaseAdmin.from("clients").select("id").eq("email", email).limit(1);
+      if (locationId) q = q.eq("location_id", locationId);
+      const { data: rows } = await q;
+      if (rows?.length) existing = rows[0] as Record<string, unknown>;
     }
     if (!existing && phone) {
-      const r = await pool.query(
-        "SELECT * FROM clients WHERE REPLACE(REPLACE(phone,' ',''),'-','') = $1 LIMIT 1", [phone],
-      );
-      if (r.rows.length) existing = r.rows[0];
+      let q = supabaseAdmin.from("clients").select("id").eq("phone", phone).limit(1);
+      if (locationId) q = q.eq("location_id", locationId);
+      const { data: rows } = await q;
+      if (rows?.length) existing = rows[0] as Record<string, unknown>;
     }
     if (!existing && !email && !phone && data.name) {
-      const r = await pool.query(
-        "SELECT * FROM clients WHERE LOWER(TRIM(name)) = $1 LIMIT 1",
-        [data.name.trim().toLowerCase()],
-      );
-      if (r.rows.length) existing = r.rows[0];
+      let q = supabaseAdmin.from("clients").select("id")
+        .ilike("name", data.name.trim()).limit(1);
+      if (locationId) q = q.eq("location_id", locationId);
+      const { data: rows } = await q;
+      if (rows?.length) existing = rows[0] as Record<string, unknown>;
     }
 
     if (existing) {
-      await pool.query(
-        `UPDATE clients SET
-          email = CASE WHEN $2 != '' THEN $2 ELSE email END,
-          phone = CASE WHEN $3 != '' THEN $3 ELSE phone END,
-          date_of_birth = CASE WHEN $4 IS NOT NULL AND $4 != '' THEN $4 ELSE date_of_birth END
-         WHERE id = $1`,
-        [existing.id, email, phone, data.dob ?? null],
-      );
+      const updates: Record<string, unknown> = {};
+      if (email) updates.email = email;
+      if (phone) updates.phone = phone;
+      if (data.dob) updates.date_of_birth = data.dob;
+      await supabaseAdmin.from("clients").update(updates).eq("id", String(existing.id));
       return String(existing.id);
     } else {
-      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
-      await pool.query(
-        `INSERT INTO clients (id, name, email, phone, join_date, notes, source, created_at, date_of_birth)
-         VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT (id) DO NOTHING`,
-        [id, data.name, email, phone, data.date, data.notes ?? "", data.source, Date.now(), data.dob ?? null],
-      );
-      return id;
+      const payload: Record<string, unknown> = {
+        name: data.name,
+        email: email || null,
+        phone: phone || null,
+        notes: data.notes ?? "",
+        source: data.source,
+        created_at: new Date().toISOString(),
+      };
+      if (locationId) payload.location_id = locationId;
+      if (data.dob) payload.date_of_birth = data.dob;
+
+      const { data: inserted, error } = await supabaseAdmin
+        .from("clients")
+        .insert(payload)
+        .select("id")
+        .single();
+      if (error) throw error;
+      return String(inserted.id);
     }
   } catch (err) {
     console.error("upsertClientFromBooking", err);
@@ -278,9 +301,11 @@ export async function upsertClientFromBooking(data: {
   }
 }
 
-// DELETE /api/clients/sample  — remove seeded test data only
-export async function clearSampleClients(): Promise<void> {
+export async function clearSampleClients(locationId?: string): Promise<void> {
   const SAMPLE_NAMES = ["Ellisha W.", "Donna S.", "Sophie M.", "Chloe R.", "Amara J.", "Priya K.", "Zara T."];
-  const placeholders = SAMPLE_NAMES.map((_, i) => `$${i + 1}`).join(",");
-  await pool.query(`DELETE FROM clients WHERE name IN (${placeholders})`, SAMPLE_NAMES);
+  let q = supabaseAdmin.from("clients").delete().in("name", SAMPLE_NAMES);
+  if (locationId) q = q.eq("location_id", locationId);
+  await q;
 }
+
+export default router;

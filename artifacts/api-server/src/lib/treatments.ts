@@ -1,4 +1,4 @@
-import { pool } from "@workspace/db";
+import { supabaseAdmin } from "./supabase";
 
 /** Fallback prices (£) for all built-in treatments — used when no DB override exists */
 const TREATMENT_PRICES: Record<string, number> = {
@@ -50,20 +50,23 @@ const TREATMENT_PRICES: Record<string, number> = {
 
 /**
  * Returns the price (£, whole number) for a treatment.
- * Checks DB overrides (dd_treatment_overrides, dd_custom_treats) first,
+ * Checks Supabase portal_kv overrides (dd_treatment_overrides, dd_custom_treats) first,
  * then falls back to TREATMENT_PRICES.
  * Returns null if the treatment is completely unknown.
  */
-export async function getTreatmentPrice(treatmentName: string): Promise<number | null> {
+export async function getTreatmentPrice(treatmentName: string, locationId?: string): Promise<number | null> {
   try {
-    const res = await pool.query(
-      "SELECT key, value FROM portal_kv WHERE key = ANY($1)",
-      [["dd_treatment_overrides", "dd_custom_treats"]],
-    );
+    let query = supabaseAdmin
+      .from("portal_kv")
+      .select("key, value")
+      .in("key", ["dd_treatment_overrides", "dd_custom_treats"]);
+    if (locationId) {
+      query = query.eq("location_id", locationId);
+    }
+    const { data } = await query;
     const kv: Record<string, unknown> = {};
-    for (const row of res.rows) kv[row.key as string] = row.value;
+    for (const row of (data ?? [])) kv[row.key as string] = row.value;
 
-    // 1. Check built-in treatment override
     const overrides = (kv["dd_treatment_overrides"] && typeof kv["dd_treatment_overrides"] === "object" && !Array.isArray(kv["dd_treatment_overrides"]))
       ? kv["dd_treatment_overrides"] as Record<string, { price?: number }>
       : {};
@@ -71,7 +74,6 @@ export async function getTreatmentPrice(treatmentName: string): Promise<number |
       return Number(overrides[treatmentName].price);
     }
 
-    // 2. Check custom treatments
     const customs = Array.isArray(kv["dd_custom_treats"])
       ? kv["dd_custom_treats"] as Array<{ name?: string; price?: number }>
       : [];
@@ -79,7 +81,6 @@ export async function getTreatmentPrice(treatmentName: string): Promise<number |
     if (custom?.price != null) return Number(custom.price);
   } catch { /* fall through to hardcoded */ }
 
-  // 3. Hardcoded fallback
   return TREATMENT_PRICES[treatmentName] ?? null;
 }
 

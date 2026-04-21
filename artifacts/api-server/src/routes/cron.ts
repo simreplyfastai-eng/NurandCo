@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { pool } from "@workspace/db";
+import { supabaseAdmin } from "../lib/supabase";
 import jwt from "jsonwebtoken";
 import { runAutoComplete } from "./bookings";
 import { sendReminderEmail } from "../lib/email";
@@ -8,53 +8,84 @@ const router = Router();
 
 /** Send 24h reminders for Confirmed bookings arriving in 23–25h window */
 async function sendReminders(): Promise<number> {
-  const whatsappRes = await pool.query("SELECT value FROM portal_kv WHERE key='fbn_settings'").catch(() => null);
-  const settings = (whatsappRes?.rows[0]?.value as Record<string, string>) ?? {};
-  const whatsapp = settings.whatsapp ?? "";
+  // Load dd_settings per location to get WhatsApp numbers
+  const { data: kvRows } = await supabaseAdmin
+    .from("portal_kv")
+    .select("location_id, value")
+    .eq("key", "dd_settings");
 
-  try {
-    const result = await pool.query(`
-      SELECT b.id, b.client_name, b.client_email, b.treatment, b.time, b.date
-      FROM bookings b
-      WHERE b.status = 'Confirmed'
-        AND b.reminder_sent = false
-        AND b.client_email != ''
-        AND (
-          (b.date || ' ' || COALESCE(NULLIF(b.time,''), '00:00'))::timestamptz AT TIME ZONE 'Europe/London'
-          BETWEEN NOW() + INTERVAL '23 hours'
-          AND     NOW() + INTERVAL '25 hours'
-        )
-    `);
-
-    let sent = 0;
-    for (const row of result.rows) {
-      await sendReminderEmail({
-        clientEmail: row.client_email,
-        clientName: row.client_name,
-        treatment: row.treatment,
-        date: row.date,
-        time: row.time,
-        whatsapp,
-      });
-      await pool.query("UPDATE bookings SET reminder_sent=true WHERE id=$1", [row.id]);
-      sent++;
+  const settingsByLocation: Record<string, Record<string, string>> = {};
+  for (const row of (kvRows ?? [])) {
+    if (row.location_id) {
+      settingsByLocation[String(row.location_id)] = (row.value as Record<string, string>) ?? {};
     }
-    return sent;
-  } catch (err) {
-    console.error("sendReminders error", err);
+  }
+
+  // Time window: bookings due in 23–25 hours from now
+  const now = new Date();
+  const winStart = new Date(now.getTime() + 23 * 3600_000);
+  const winEnd = new Date(now.getTime() + 25 * 3600_000);
+
+  // Fetch candidate bookings (by date range; we'll filter by exact time in JS)
+  const startDate = winStart.toISOString().slice(0, 10);
+  const endDate = winEnd.toISOString().slice(0, 10);
+
+  const { data: bookings, error } = await supabaseAdmin
+    .from("bookings")
+    .select("id, client_name, client_email, treatment, time_slot, booking_date, location_id")
+    .eq("status", "Confirmed")
+    .eq("reminder_sent", false)
+    .not("client_email", "is", null)
+    .neq("client_email", "")
+    .gte("booking_date", startDate)
+    .lte("booking_date", endDate);
+
+  if (error) {
+    console.error("sendReminders fetch error", error);
     return 0;
   }
+
+  let sent = 0;
+  for (const row of (bookings ?? [])) {
+    const dateStr = String(row.booking_date ?? "");
+    const timeStr = String(row.time_slot ?? "09:00").slice(0, 5);
+
+    // Parse booking datetime as UTC (bookings stored as YYYY-MM-DD dates)
+    const bookingMs = new Date(`${dateStr}T${timeStr}:00Z`).getTime();
+    const diffHours = (bookingMs - now.getTime()) / 3600_000;
+
+    if (diffHours >= 23 && diffHours <= 25) {
+      const locId = String(row.location_id ?? "");
+      const whatsapp = settingsByLocation[locId]?.whatsapp ?? "";
+      try {
+        await sendReminderEmail({
+          clientEmail: String(row.client_email ?? ""),
+          clientName: String(row.client_name ?? ""),
+          treatment: String(row.treatment ?? ""),
+          date: dateStr,
+          time: timeStr,
+          whatsapp,
+        });
+        await supabaseAdmin
+          .from("bookings")
+          .update({ reminder_sent: true })
+          .eq("id", String(row.id));
+        sent++;
+      } catch (e) {
+        console.error("sendReminders email error", e);
+      }
+    }
+  }
+  return sent;
 }
 
 function requireCronSecret(req: import("express").Request, res: import("express").Response): boolean {
-  // Block everything if CRON_SECRET is not configured
   const secret = process.env.CRON_SECRET;
   if (!secret) {
     res.status(503).json({ error: "Cron secret not configured. Add CRON_SECRET to Replit Secrets." });
     return false;
   }
 
-  // Accept a valid admin JWT — only when SESSION_SECRET is explicitly configured
   const jwtSecret = process.env.SESSION_SECRET;
   const auth = req.headers.authorization;
   if (jwtSecret && auth?.startsWith("Bearer ")) {
@@ -65,7 +96,6 @@ function requireCronSecret(req: import("express").Request, res: import("express"
     } catch { /* invalid/expired token — fall through */ }
   }
 
-  // Accept x-cron-secret header
   if (req.headers["x-cron-secret"] !== secret) {
     res.status(401).json({ error: "Unauthorised" });
     return false;

@@ -1,16 +1,51 @@
 import { Router } from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
-import { pool } from "@workspace/db";
+import { supabaseAdmin } from "../lib/supabase";
 
 const router = Router();
 const SESSION_HOURS = 8;
 
-/** Returns the active primary admin password — DB override wins over env var */
+/** Read a global (location-agnostic) portal_kv entry */
+async function getGlobalKv(key: string): Promise<unknown> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("portal_kv")
+      .select("value")
+      .is("location_id", null)
+      .eq("key", key)
+      .maybeSingle();
+    return data?.value ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/** Write a global (location-agnostic) portal_kv entry */
+async function setGlobalKv(key: string, value: unknown): Promise<void> {
+  const { data: existing } = await supabaseAdmin
+    .from("portal_kv")
+    .select("id")
+    .is("location_id", null)
+    .eq("key", key)
+    .maybeSingle();
+  if (existing?.id) {
+    await supabaseAdmin
+      .from("portal_kv")
+      .update({ value, updated_at: new Date().toISOString() })
+      .eq("id", String(existing.id));
+  } else {
+    await supabaseAdmin
+      .from("portal_kv")
+      .insert({ location_id: null, key, value, updated_at: new Date().toISOString() });
+  }
+}
+
+/** Returns the active primary admin password — Supabase override wins over env var */
 async function getActivePassword(): Promise<string | null> {
   try {
-    const r = await pool.query("SELECT value FROM portal_kv WHERE key='admin_password_override' LIMIT 1");
-    if (r.rows.length > 0 && r.rows[0].value) return r.rows[0].value as string;
+    const val = await getGlobalKv("admin_password_override");
+    if (val) return String(val);
   } catch { /* fall through */ }
   return process.env.ADMIN_PASSWORD ?? null;
 }
@@ -31,7 +66,6 @@ router.post("/auth/login", async (req, res) => {
   const inputEmail = (email ?? "").trim().toLowerCase();
   const inputPassword = password ?? "";
 
-  // ── Primary admin (env var email + DB/env password) ──
   const adminEmail = process.env.ADMIN_EMAIL ?? "";
   if (inputEmail === adminEmail.toLowerCase()) {
     const activePassword = await getActivePassword();
@@ -43,18 +77,18 @@ router.post("/auth/login", async (req, res) => {
     return res.status(401).json({ error: "Invalid credentials" });
   }
 
-  // ── Extra admins (stored in portal_kv) ──
   try {
-    const r = await pool.query("SELECT value FROM portal_kv WHERE key='portal_extra_admins' LIMIT 1");
-    const extras = Array.isArray(r.rows[0]?.value) ? r.rows[0].value as { email: string; passwordHash: string }[] : [];
-    for (const extra of extras) {
-      if ((extra.email ?? "").toLowerCase() === inputEmail) {
-        if (extra.passwordHash && await checkPassword(inputPassword, extra.passwordHash)) {
-          const expiresAt = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
-          const token = jwt.sign({ role: "admin", expiresAt }, secret, { expiresIn: `${SESSION_HOURS}h` });
-          return res.json({ token, expiresAt });
+    const extras = (await getGlobalKv("portal_extra_admins")) as { email: string; passwordHash: string }[] | null;
+    if (Array.isArray(extras)) {
+      for (const extra of extras) {
+        if ((extra.email ?? "").toLowerCase() === inputEmail) {
+          if (extra.passwordHash && await checkPassword(inputPassword, extra.passwordHash)) {
+            const expiresAt = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
+            const token = jwt.sign({ role: "admin", expiresAt }, secret, { expiresIn: `${SESSION_HOURS}h` });
+            return res.json({ token, expiresAt });
+          }
+          return res.status(401).json({ error: "Invalid credentials" });
         }
-        return res.status(401).json({ error: "Invalid credentials" });
       }
     }
   } catch { /* fall through */ }
@@ -81,7 +115,6 @@ router.post("/auth/change-password", async (req, res) => {
   if (newPassword.length < 8) return res.status(400).json({ error: "New password must be at least 8 characters" });
 
   const activePassword = await getActivePassword();
-  // Verify current password — support both bcrypt hashes and plain text (migration)
   let currentMatch = false;
   if (activePassword && activePassword.startsWith("$2") && activePassword.length >= 60) {
     currentMatch = await bcrypt.compare(currentPassword, activePassword);
@@ -90,13 +123,9 @@ router.post("/auth/change-password", async (req, res) => {
   }
   if (!currentMatch) return res.status(401).json({ error: "Current password is incorrect" });
 
-  // Always store new password as a bcrypt hash
   const hashed = await bcrypt.hash(newPassword, 12);
   try {
-    await pool.query(
-      "INSERT INTO portal_kv (key, value) VALUES ('admin_password_override', $1) ON CONFLICT (key) DO UPDATE SET value=$1",
-      [hashed]
-    );
+    await setGlobalKv("admin_password_override", hashed);
     return res.json({ ok: true });
   } catch (err) {
     console.error("change-password db error", err);
@@ -104,8 +133,7 @@ router.post("/auth/change-password", async (req, res) => {
   }
 });
 
-// GET /api/auth/verify  — used by portal on page load to validate stored token
-// Also returns a refreshed token to reset the 8h inactivity window
+// GET /api/auth/verify  — validates stored token, returns refreshed token
 router.get("/auth/verify", (req, res) => {
   const auth = req.headers.authorization ?? "";
   const token = auth.startsWith("Bearer ") ? auth.slice(7) : "";
@@ -113,7 +141,6 @@ router.get("/auth/verify", (req, res) => {
   if (!secret) return res.status(500).json({ valid: false });
   try {
     jwt.verify(token, secret);
-    // Issue a fresh token to refresh the inactivity window
     const expiresAt = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
     const refreshed = jwt.sign({ role: "admin", expiresAt }, secret, { expiresIn: `${SESSION_HOURS}h` });
     return res.json({ valid: true, token: refreshed, expiresAt });
