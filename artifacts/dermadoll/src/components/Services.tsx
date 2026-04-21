@@ -78,7 +78,7 @@ export default function Services() {
         const groups = groupByCategory(treats.filter((t) => t.active !== false));
         setData((prev) => ({ ...prev, [loc]: groups }));
         setFetched((prev) => ({ ...prev, [loc]: true }));
-        if (loc === "hornchurch" && groups.length > 0) {
+        if (groups.length > 0) {
           setOpenGroups(new Set([groups[0].category]));
         }
       }
@@ -93,8 +93,14 @@ export default function Services() {
 
   const handleTabClick = (loc: "hornchurch" | "marylebone") => {
     setLocation(loc);
-    setOpenGroups(new Set());
-    fetchLocation(loc);
+    if (fetched[loc]) {
+      // Data already cached — restore first group open
+      const cached = data[loc];
+      setOpenGroups(cached.length > 0 ? new Set([cached[0].category]) : new Set());
+    } else {
+      setOpenGroups(new Set());
+      fetchLocation(loc);
+    }
   };
 
   const toggleGroup = (cat: string) => {
