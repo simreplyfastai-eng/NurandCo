@@ -81,11 +81,16 @@ router.get("/forms/check", async (req, res) => {
   try {
     const { data: booking, error: bkErr } = await supabaseAdmin
       .from("bookings")
-      .select("id, client_name, client_email, treatment_name, booking_date, booking_time, location_id, forms_completed")
+      .select("id, client_name, client_email, treatment_name, treatments(name), booking_date, time_slot, location_id, forms_completed")
       .eq("id", bookingId)
       .single();
 
     if (bkErr || !booking) return res.status(404).json({ error: "Booking not found" });
+
+    // Resolve treatment name from the row or via the JOIN
+    const treatJoin = booking.treatments as { name?: string } | null;
+    const treatmentName: string =
+      (booking.treatment_name as string | null) ?? treatJoin?.name ?? "your treatment";
 
     const [medRow, conRow] = await Promise.all([
       supabaseAdmin
@@ -101,8 +106,15 @@ router.get("/forms/check", async (req, res) => {
         .maybeSingle(),
     ]);
 
+    // Normalise booking shape so the client can rely on `treatment` and `time`
+    const normBooking = {
+      ...booking,
+      treatment: treatmentName,
+      time: (booking.time_slot as string | null) ?? null,
+    };
+
     return res.json({
-      booking,
+      booking: normBooking,
       medical_on_file: !!medRow.data,
       consent_done: !!conRow.data,
     });
@@ -270,10 +282,10 @@ router.post("/forms/consent", async (req, res) => {
   }
 
   try {
-    // Look up the full booking to populate NOT NULL columns
+    // Look up the full booking — join treatments so treatment_name is always populated
     const { data: booking, error: bkErr } = await supabaseAdmin
       .from("bookings")
-      .select("*")
+      .select("*, treatments(name)")
       .eq("id", bookingId)
       .single();
 
@@ -281,12 +293,19 @@ router.post("/forms/consent", async (req, res) => {
       return res.status(404).json({ error: "Booking not found" });
     }
 
+    // Resolve treatment name from the booking row or via the treatments join
+    const treatRow = booking.treatments as { name?: string } | null;
+    const resolvedTreatmentName: string =
+      (booking.treatment_name as string | null) ??
+      treatRow?.name ??
+      "your treatment";
+
     const insertData: Record<string, unknown> = {
       location_id: booking.location_id,
       booking_id: bookingId,
       client_email: booking.client_email,
       client_name: booking.client_name,
-      treatment_name: booking.treatment_name,
+      treatment_name: resolvedTreatmentName,
       treatment_date: booking.booking_date,
       consent_procedure: consent_procedure ?? false,
       consent_risks: consent_risks ?? false,
