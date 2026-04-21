@@ -1,0 +1,76 @@
+The homepage "Our Services" section is completely 
+hardcoded. It is NOT reading from Supabase.
+
+Read the homepage component/HTML — find the 
+"Our Services" section which has HORNCHURCH and 
+MARYLEBONE tabs and shows treatment categories 
+like "SIGNATURE TREATMENTS", "DERMAL FILLERS", 
+"SKIN TREATMENTS".
+
+This entire section needs to be replaced with 
+a live Supabase feed.
+
+WHAT IT CURRENTLY DOES (wrong):
+  - Treatments are hardcoded in the HTML/JSX
+  - MARYLEBONE tab click does nothing or shows 
+    wrong data
+  - Categories don't match Supabase
+  - Prices are wrong/old
+
+WHAT IT NEEDS TO DO (correct):
+
+On page load:
+  Fetch treatments for Hornchurch:
+  GET /api/treatments?location=hornchurch
+  
+  Store in state: hornchurchTreatments
+  Store in state: maryleboneTreatments (fetch lazily 
+  when tab clicked or fetch both on load)
+
+Tab logic:
+  HORNCHURCH tab → show hornchurchTreatments
+  MARYLEBONE tab → fetch if not already loaded,
+  show maryleboneTreatments
+
+Display logic — group by category from Supabase:
+  Each category = a collapsible accordion section
+  Category name from the category column
+  
+  Categories in order:
+    Aesthetics → header "AESTHETICS"
+    Lashes & Brows → header "LASHES & BROWS"
+    Facials → header "FACIALS"
+    Nails → header "NAILS"
+    SPMU → header "SPMU"
+
+Each treatment row shows:
+  Name (left, serif italic for sub-items)
+  Duration (muted, e.g. "45 mins" or "1 hr")
+  Price (right, italic gold — show "£[price]" 
+    OR if price = 0 show "POA")
+  BOOK button → links to 
+    /book?location=[slug]&treatment=[id]
+
+Treatments where price = 0:
+  Fat Dissolving, Skin Booster, Polynucleotides,
+  Lash Extension Infill
+  Show "POA" instead of £0
+
+The BOOK button on homepage treatments links to 
+the booking flow pre-selecting that treatment.
+
+Keep the same visual style as the current section 
+— just replace the hardcoded data with live data.
+
+Also remove ALL hardcoded treatment data from the 
+homepage component. Nothing hardcoded. 
+Everything from Supabase.
+
+After fix verify:
+  Homepage loads → Hornchurch treatments show ✓
+  Prices match Supabase exactly ✓
+  Click MARYLEBONE tab → Marylebone treatments 
+  load and show (11 treatments, different prices) ✓
+  Click HORNCHURCH tab → back to Hornchurch ✓
+  POA shows for £0 treatments ✓
+  BOOK button pre-selects correct treatment ✓
