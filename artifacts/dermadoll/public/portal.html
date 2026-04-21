@@ -929,6 +929,31 @@ select.form-input{background:var(--color-card)}
           </div>
         </div>
 
+        <!-- ── DEPOSIT SETTINGS CARD ── -->
+        <div class="avail-card" style="margin-top:20px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+            <div>
+              <div class="avail-card-title">Deposit Settings</div>
+              <div class="avail-card-sub">Set the deposit amount clients pay when booking at this location.</div>
+            </div>
+            <button class="btn-gold" onclick="saveDepositSettings()">Save Deposit</button>
+          </div>
+          <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap">
+            <div>
+              <div class="avail-section-label" style="margin-bottom:5px">Deposit Type</div>
+              <select id="dep-type" class="bs-select" onchange="updateDepositLabel()">
+                <option value="fixed">Fixed Amount (£)</option>
+                <option value="percent">Percentage (%)</option>
+              </select>
+            </div>
+            <div>
+              <div class="avail-section-label" style="margin-bottom:5px" id="dep-value-label">Amount (£)</div>
+              <input type="number" id="dep-value" class="avail-time-input" style="width:100px;padding:8px 10px" min="1" max="999" value="50">
+            </div>
+          </div>
+          <div id="dep-status" style="display:none;font-family:var(--font-sans);font-size:12px;margin-top:12px"></div>
+        </div>
+
       </div>
     </div>
 
@@ -1762,6 +1787,7 @@ async function selectLocation(loc){
 function switchLocation(){
   sessionStorage.removeItem('starr_location');
   sessionStorage.removeItem('starr_location_id');
+  _supabaseClients=null;
   document.getElementById('portal').classList.remove('visible');
   showLocationSelector();
 }
@@ -1859,8 +1885,8 @@ function showPage(id,el,fromKpi){
   if(id==='dashboard')renderDashboard();
   if(id==='schedule')buildCalendar();
   if(id==='bookings')renderBookings();
-  if(id==='availability')renderAvailability();
-  if(id==='clients')renderClients();
+  if(id==='availability'){renderAvailability();loadDepositSettings();}
+  if(id==='clients'){renderClients();loadSupabaseClients();}
   if(id==='treatments')renderTreatments();
   if(id==='finance')renderFinance();
   if(id==='enquiries')renderEnquiries();
@@ -2486,6 +2512,45 @@ async function deleteBlockedSlot(id){
   }
 }
 
+// ─── Deposit Settings ───────────────────────────────────────────────────────
+async function loadDepositSettings(){
+  const locId=sessionStorage.getItem('starr_location_id');
+  if(!locId)return;
+  try{
+    const res=await fetch('/api/admin/deposit-settings',{headers:authHdr()});
+    if(!res.ok)return;
+    const data=await res.json();
+    const typeEl=document.getElementById('dep-type');
+    const valEl=document.getElementById('dep-value');
+    if(typeEl)typeEl.value=data.deposit_type||'fixed';
+    if(valEl)valEl.value=String(data.deposit_value||50);
+    updateDepositLabel();
+  }catch(e){console.error('loadDepositSettings',e);}
+}
+function updateDepositLabel(){
+  const typeEl=document.getElementById('dep-type');
+  const lblEl=document.getElementById('dep-value-label');
+  if(!typeEl||!lblEl)return;
+  lblEl.textContent=typeEl.value==='percent'?'Percentage (%)':'Amount (£)';
+}
+async function saveDepositSettings(){
+  const locId=sessionStorage.getItem('starr_location_id');
+  if(!locId){showToast('No location selected');return;}
+  const typeEl=document.getElementById('dep-type');
+  const valEl=document.getElementById('dep-value');
+  const statEl=document.getElementById('dep-status');
+  const deposit_type=typeEl?typeEl.value:'fixed';
+  const deposit_value=Number(valEl?valEl.value:50);
+  if(!deposit_value||deposit_value<1){showToast('Enter a valid deposit amount');return;}
+  try{
+    const res=await fetch('/api/admin/deposit-settings',{method:'PUT',headers:{...authHdr(),'Content-Type':'application/json'},body:JSON.stringify({deposit_type,deposit_value})});
+    if(!res.ok){const e=await res.json().catch(()=>({}));showToast('Error: '+(e.error||res.status));return;}
+    if(statEl){statEl.style.display='block';statEl.style.color='var(--color-secondary)';statEl.textContent='\u2713 Deposit settings saved';}
+    showToast('\u2713 Deposit settings saved');
+    setTimeout(()=>{if(statEl)statEl.style.display='none';},3000);
+  }catch(e){showToast('Failed to save deposit settings');console.error('saveDepositSettings',e);}
+}
+
 let availCalDate=null;
 let selectedOverrideDate=null;
 const AVAIL_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
@@ -2865,39 +2930,74 @@ async function saveBooking(){
 // ═══════════════════════════════════════════════════
 // CLIENTS
 // ═══════════════════════════════════════════════════
+// ─── Supabase-backed Clients Tab ─────────────────
+let _supabaseClients=null;
+
+async function loadSupabaseClients(){
+  const locId=sessionStorage.getItem('starr_location_id');
+  if(!locId)return;
+  try{
+    const res=await fetch('/api/admin/clients-supabase',{headers:authHdr()});
+    if(!res.ok)return;
+    _supabaseClients=await res.json();
+    renderClients();
+  }catch(e){console.error('loadSupabaseClients',e);}
+}
+
 let clientFilter='';
 function renderClients(filter){
   filter=filter!==undefined?filter:clientFilter;
   clientFilter=filter;
-  const bookings=getBookings();
-  const clients=getClients()
-    .filter(c=>!filter||c.name.toLowerCase().includes(filter.toLowerCase()))
-    .sort((a,b)=>{
-      const lastA=[...bookings.filter(x=>x.clientName===a.name)].sort((p,q)=>new Date(q.date)-new Date(p.date))[0];
-      const lastB=[...bookings.filter(x=>x.clientName===b.name)].sort((p,q)=>new Date(q.date)-new Date(p.date))[0];
-      const dA=lastA?new Date(lastA.date).getTime():0;
-      const dB=lastB?new Date(lastB.date).getTime():0;
-      return dB-dA;
-    });
+
+  // Prefer Supabase data; fall back to localStorage
+  let clients;
+  if(_supabaseClients){
+    clients=_supabaseClients.filter(c=>!filter||c.name.toLowerCase().includes(filter.toLowerCase()));
+  } else {
+    const bookings=getBookings();
+    clients=getClients()
+      .filter(c=>!filter||c.name.toLowerCase().includes(filter.toLowerCase()))
+      .sort((a,b)=>{
+        const lastA=[...bookings.filter(x=>x.clientName===a.name)].sort((p,q)=>new Date(q.date)-new Date(p.date))[0];
+        const lastB=[...bookings.filter(x=>x.clientName===b.name)].sort((p,q)=>new Date(q.date)-new Date(p.date))[0];
+        const dA=lastA?new Date(lastA.date).getTime():0;
+        const dB=lastB?new Date(lastB.date).getTime():0;
+        return dB-dA;
+      });
+  }
+
   const countEl=document.getElementById('client-count');
   if(countEl)countEl.textContent=clients.length;
   if(!clients.length){
     document.getElementById('client-grid').innerHTML=`<div class="cl-empty"><div class="cl-empty-title">No clients yet</div><div class="cl-empty-sub">Clients will appear automatically when they book</div></div>`;
     return;
   }
+
+  const useSupabase=!!_supabaseClients;
   document.getElementById('client-grid').innerHTML='<div class="client-list">'+clients.map(c=>{
-    const cBookings=bookings.filter(b=>(c.id&&b.clientId?b.clientId===c.id:b.clientName.trim().toLowerCase()===c.name.trim().toLowerCase())&&b.status!=='Cancelled');
-    const spend=cBookings.reduce((s,b)=>s+Number(b.price),0);
-    const lastB=[...cBookings].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+    let visitCount,spend,lastDate,active;
+    if(useSupabase){
+      visitCount=Number(c.visitCount||0);
+      spend=Number(c.totalSpent||0);
+      lastDate=c.lastVisit||null;
+      active=visitCount>0;
+    } else {
+      const bookings=getBookings();
+      const cBookings=getBookings().filter(b=>(c.id&&b.clientId?b.clientId===c.id:b.clientName.trim().toLowerCase()===c.name.trim().toLowerCase())&&b.status!=='Cancelled');
+      visitCount=cBookings.length;
+      spend=cBookings.reduce((s,b)=>s+Number(b.price),0);
+      const lastB=[...cBookings].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+      lastDate=lastB?lastB.date:null;
+      active=visitCount>0;
+    }
     const initials=c.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
-    const active=cBookings.length>0;
     const dotCol=active?'#2e7d32':'#AAAAAA';
     const txtCol=active?'#2D6A4F':'#888888';
     return`<div class="client-row" onclick="openClientPanel('${c.id}')">
       <div class="cl-avatar">${initials}</div>
       <div class="cl-info">
         <div class="cl-name">${c.name}</div>
-        <div class="cl-meta">${cBookings.length} visit${cBookings.length!==1?'s':''} · Last: ${lastB?formatDate(lastB.date):'None'}</div>
+        <div class="cl-meta">${visitCount} visit${visitCount!==1?'s':''} · Last: ${lastDate?formatDate(lastDate):'None'}</div>
       </div>
       <div class="cl-stats">
         <div class="cl-spend">${gbp(spend)}</div>
@@ -2914,11 +3014,24 @@ function openClientByName(name){
   if(c){openClientPanel(c.id);}
 }
 function openClientPanel(id){
-  const clients=getClients();
-  const c=clients.find(x=>x.id===id);
-  if(!c)return;
-  const bookings=getBookings().filter(b=>c.id&&b.clientId?b.clientId===c.id:b.clientName.trim().toLowerCase()===c.name.trim().toLowerCase()).sort((a,b)=>new Date(b.date)-new Date(a.date));
-  const spend=bookings.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+Number(b.price),0);
+  // Prefer Supabase data when available
+  let c, bookings, spend;
+  if(_supabaseClients){
+    c=_supabaseClients.find(x=>String(x.id)===String(id));
+    if(!c){const lc=getClients().find(x=>x.id===id);if(lc)c=lc;}
+    if(!c)return;
+    bookings=(c.bookings||[]).map(b=>({
+      id:b.id, treatment:b.treatment||'', date:b.date||'', time:b.time||'',
+      status:b.status||'', price:Number(b.price||0), depositAmount:Number(b.depositAmount||0),
+    }));
+    spend=Number(c.totalSpent||bookings.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+b.price,0));
+  } else {
+    const clients=getClients();
+    c=clients.find(x=>x.id===id);
+    if(!c)return;
+    bookings=getBookings().filter(b=>c.id&&b.clientId?b.clientId===c.id:b.clientName.trim().toLowerCase()===c.name.trim().toLowerCase()).sort((a,b)=>new Date(b.date)-new Date(a.date));
+    spend=bookings.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+Number(b.price),0);
+  }
   const initials=c.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
   document.getElementById('cp-name').textContent=c.name;
   const visitPill=s=>{const cls={Complete:'complete',Pending:'pending',Confirmed:'confirmed',Cancelled:'cancelled'}[s]||'cancelled';return`<span class="cp-visit-pill ${cls}">${s}</span>`;};
@@ -2932,8 +3045,8 @@ function openClientPanel(id){
     </div>
     ${c.email?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">✉</span> ${c.email}</div>`:''}
     ${c.phone?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">📞</span> ${c.phone}</div>`:''}
-    ${c.dateOfBirth?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">🎂</span> DOB: ${c.dateOfBirth}</div>`:''}
-    <div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">👤</span> ${c.source||'Direct'} · Joined ${formatDate(c.joinDate)}</div>
+    ${(c.dateOfBirth||c.date_of_birth)?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">🎂</span> DOB: ${c.dateOfBirth||c.date_of_birth}</div>`:''}
+    <div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">👤</span> ${c.source||'Direct'}${(c.joinDate||c.createdAt)?` · Joined ${formatDate(c.joinDate||(c.createdAt?new Date(c.createdAt).toISOString().slice(0,10):null))}`:''}</div>
     ${(()=>{const cb=bookings.find(b=>b.category==='Consultation'||b.treatment==='Consultation');return cb&&cb.clientNotes?`<div class="cp-meta-row" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="color:var(--color-secondary);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700">Skin Concerns (Consultation)</span><span style="color:#555;font-size:13px">${cb.clientNotes}</span></div>`:''})()}
     <div class="cp-section-label">Visit History</div>
     ${bookings.map(b=>`<div class="cp-visit-row">

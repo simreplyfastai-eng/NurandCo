@@ -15,10 +15,12 @@ function getIp(req: import("express").Request): string {
 router.get("/forms/status", async (req, res) => {
   const bookingId = req.query.booking as string | undefined;
   if (!bookingId) return res.status(400).json({ error: "booking id required" });
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(bookingId)) return res.status(404).json({ error: "Booking not found" });
 
   try {
     const [bkRow, medRow, conRow] = await Promise.all([
-      supabaseAdmin.from("bookings").select("id,client_name,client_email,client_phone,treatment,date,time,status,location_id").eq("id", bookingId).maybeSingle(),
+      supabaseAdmin.from("bookings").select("id,client_name,client_email,client_phone,treatment_id,treatments(name),booking_date,time_slot,status,location_id").eq("id", bookingId).maybeSingle(),
       supabaseAdmin.from("medical_forms").select("id,submitted_at").eq("booking_id", bookingId).maybeSingle(),
       supabaseAdmin.from("consent_forms").select("id,signed_at").eq("booking_id", bookingId).maybeSingle(),
     ]);

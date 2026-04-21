@@ -72,6 +72,84 @@ async function getTreatmentInfo(
   return { id: null, durationMinutes: 30, price: 0 };
 }
 
+// ── helpers ─────────────────────────────────────────────────────────────────
+
+async function getDepositSettings(locationId: string): Promise<{ deposit_type: "percent" | "fixed"; deposit_value: number }> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("deposit_settings")
+      .select("deposit_type, deposit_value")
+      .eq("location_id", locationId)
+      .maybeSingle();
+    if (data) return { deposit_type: data.deposit_type as "percent" | "fixed", deposit_value: Number(data.deposit_value ?? 50) };
+  } catch { /* fall through */ }
+  return { deposit_type: "fixed", deposit_value: 50 };
+}
+
+async function upsertSupabaseClient(params: {
+  name: string;
+  email: string;
+  phone: string;
+  locationId: string;
+  depositAmount: number;
+  bookingDate: string;
+}): Promise<string | null> {
+  const { name, email, phone, locationId, depositAmount, bookingDate } = params;
+  if (!name) return null;
+  const emailLower = email.trim().toLowerCase();
+  try {
+    let existing: Record<string, unknown> | null = null;
+    if (emailLower) {
+      const { data } = await supabaseAdmin
+        .from("clients")
+        .select("id, visit_count, total_spent")
+        .eq("location_id", locationId)
+        .eq("email", emailLower)
+        .maybeSingle();
+      if (data) existing = data;
+    }
+    if (!existing && phone) {
+      const { data } = await supabaseAdmin
+        .from("clients")
+        .select("id, visit_count, total_spent")
+        .eq("location_id", locationId)
+        .eq("phone", phone.trim().replace(/\s/g, ""))
+        .maybeSingle();
+      if (data) existing = data;
+    }
+
+    if (existing) {
+      const newCount = Number(existing.visit_count ?? 0) + 1;
+      const newSpent = Number(existing.total_spent ?? 0) + depositAmount;
+      await supabaseAdmin
+        .from("clients")
+        .update({ visit_count: newCount, total_spent: newSpent, last_visit: bookingDate })
+        .eq("id", String(existing.id));
+      return String(existing.id);
+    } else {
+      const { data, error } = await supabaseAdmin
+        .from("clients")
+        .insert({
+          location_id: locationId,
+          name: name.trim(),
+          email: emailLower || null,
+          phone: phone.trim().replace(/\s/g, "") || null,
+          visit_count: 1,
+          total_spent: depositAmount,
+          last_visit: bookingDate,
+          source: "Website",
+        })
+        .select("id")
+        .single();
+      if (error) throw error;
+      return String(data.id);
+    }
+  } catch (err) {
+    console.error("upsertSupabaseClient", err);
+    return null;
+  }
+}
+
 // GET /api/config — public config + checklist
 router.get("/config", async (_req, res) => {
   const settings = await getSettings();
@@ -118,9 +196,17 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
   }
 
   const isConsultation = treatment.toLowerCase().includes("consultation");
-  const depositAmountPence = isConsultation
-    ? Math.round(treatmentPrice * 100)
-    : 5000;
+  let depositAmountPence = 5000;
+  if (isConsultation) {
+    depositAmountPence = Math.round(treatmentPrice * 100);
+  } else if (locationId) {
+    const depSettings = await getDepositSettings(locationId);
+    if (depSettings.deposit_type === "percent") {
+      depositAmountPence = Math.max(100, Math.round(treatmentPrice * depSettings.deposit_value / 100 * 100));
+    } else {
+      depositAmountPence = Math.round(depSettings.deposit_value * 100);
+    }
+  }
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
@@ -207,6 +293,37 @@ router.post("/stripe/webhook", async (req, res) => {
           const bTime = String(updated.time_slot ?? bookingTime ?? "");
           const dur = Number(treatmentRec?.duration_minutes ?? updated.duration_minutes ?? durationMinutes ?? 30);
           const totalAmount = Number(updated.total_amount ?? depositFromStripe);
+          const balanceDue = Math.max(0, totalAmount - depositFromStripe);
+
+          // 1a. Upsert Supabase clients table
+          let supabaseClientId: string | null = null;
+          if (clientName && locationId) {
+            supabaseClientId = await upsertSupabaseClient({
+              name: clientName,
+              email: clientEmail ?? "",
+              phone: clientPhone ?? "",
+              locationId,
+              depositAmount: depositFromStripe,
+              bookingDate: bDate,
+            }).catch(() => null);
+          }
+
+          // 1b. Create payments record
+          supabaseAdmin.from("payments").insert({
+            booking_id: bookingId,
+            client_id: supabaseClientId ?? String(updated.client_id ?? ""),
+            amount: depositFromStripe,
+            payment_type: "deposit",
+            stripe_payment_id: paymentIntentId,
+            status: "succeeded",
+            location_id: locationId ?? null,
+          }).then(() => {}).catch((e: unknown) => console.error("payments insert", e));
+
+          // 1c. Update booking balance_due + client_id if we resolved it
+          const bkUpdate: Record<string, unknown> = { balance_due: balanceDue };
+          if (supabaseClientId && !updated.client_id) bkUpdate.client_id = supabaseClientId;
+          supabaseAdmin.from("bookings").update(bkUpdate).eq("id", bookingId)
+            .then(() => {}).catch((e: unknown) => console.error("booking balance_due update", e));
 
           if (clientEmail) {
             const publicDomain = process.env.REPLIT_DOMAINS?.split(",")[0]?.trim()

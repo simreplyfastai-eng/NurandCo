@@ -150,4 +150,108 @@ router.delete("/admin/blocked-slots/:id", async (req, res) => {
   }
 });
 
+// GET /api/admin/deposit-settings — deposit config for the current location
+router.get("/admin/deposit-settings", async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  const locationId = getLocationId(req);
+  if (!locationId) return res.status(400).json({ error: "locationId required" });
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("deposit_settings")
+      .select("deposit_type, deposit_value")
+      .eq("location_id", locationId)
+      .maybeSingle();
+    if (error) throw error;
+    return res.json(data ?? { deposit_type: "fixed", deposit_value: 50 });
+  } catch (err) {
+    console.error("GET /api/admin/deposit-settings", err);
+    return res.status(500).json({ error: "Failed to fetch deposit settings" });
+  }
+});
+
+// PUT /api/admin/deposit-settings — upsert deposit config for location
+// Body: { deposit_type: 'percent'|'fixed', deposit_value: number }
+router.put("/admin/deposit-settings", async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  const locationId = getLocationId(req);
+  if (!locationId) return res.status(400).json({ error: "locationId required" });
+
+  const { deposit_type, deposit_value } = req.body as { deposit_type?: string; deposit_value?: number };
+  if (!deposit_type || deposit_value === undefined)
+    return res.status(400).json({ error: "deposit_type and deposit_value required" });
+  if (!["percent", "fixed"].includes(deposit_type))
+    return res.status(400).json({ error: "deposit_type must be 'percent' or 'fixed'" });
+
+  try {
+    const { error } = await supabaseAdmin
+      .from("deposit_settings")
+      .upsert({ location_id: locationId, deposit_type, deposit_value, updated_at: new Date().toISOString() }, { onConflict: "location_id" });
+    if (error) throw error;
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("PUT /api/admin/deposit-settings", err);
+    return res.status(500).json({ error: "Failed to save deposit settings" });
+  }
+});
+
+// GET /api/admin/clients-supabase — clients from Supabase with enriched stats + bookings
+router.get("/admin/clients-supabase", async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  const locationId = getLocationId(req);
+  if (!locationId) return res.status(400).json({ error: "locationId required" });
+
+  try {
+    const { data: clients, error: cErr } = await supabaseAdmin
+      .from("clients")
+      .select("id, name, email, phone, notes, source, visit_count, total_spent, last_visit, created_at, location_id")
+      .eq("location_id", locationId)
+      .order("last_visit", { ascending: false });
+    if (cErr) throw cErr;
+
+    const rows = clients ?? [];
+    if (!rows.length) return res.json([]);
+
+    const clientIds = rows.map((c) => c.id as string);
+    const { data: bookings } = await supabaseAdmin
+      .from("bookings")
+      .select("id, client_id, treatments(name), booking_date, time_slot, status, total_amount, deposit_amount")
+      .in("client_id", clientIds)
+      .order("booking_date", { ascending: false });
+
+    const bkMap: Record<string, unknown[]> = {};
+    for (const bk of bookings ?? []) {
+      const cid = String(bk.client_id ?? "");
+      if (!bkMap[cid]) bkMap[cid] = [];
+      bkMap[cid].push({
+        id: bk.id,
+        treatment: (bk.treatments as Record<string, unknown> | null)?.name ?? "",
+        date: bk.booking_date,
+        time: bk.time_slot,
+        status: bk.status,
+        price: bk.total_amount,
+        depositAmount: bk.deposit_amount,
+      });
+    }
+
+    const result = rows.map((c) => ({
+      id: c.id,
+      name: c.name,
+      email: c.email ?? "",
+      phone: c.phone ?? "",
+      notes: c.notes ?? "",
+      source: c.source ?? "Website",
+      visitCount: Number(c.visit_count ?? 0),
+      totalSpent: Number(c.total_spent ?? 0),
+      lastVisit: c.last_visit ?? null,
+      createdAt: c.created_at,
+      locationId: c.location_id,
+      bookings: bkMap[String(c.id)] ?? [],
+    }));
+    return res.json(result);
+  } catch (err) {
+    console.error("GET /api/admin/clients-supabase", err);
+    return res.status(500).json({ error: "Failed to fetch clients" });
+  }
+});
+
 export default router;
