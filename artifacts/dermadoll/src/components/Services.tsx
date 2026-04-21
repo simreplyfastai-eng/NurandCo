@@ -246,7 +246,7 @@ export default function Services() {
                                   onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
                                   onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
                                 >
-                                  BOOK NOW
+                                  BOOK
                                 </a>
                               ) : (
                                 <a
