@@ -45,7 +45,7 @@ function supabaseRowToBooking(row: Record<string, unknown>) {
     clientPhone: row.client_phone ?? "",
     clientDOB: "",
     clientNotes: "",
-    treatment: ((treatment?.name ?? row.treatment_name ?? "") as string),
+    treatment: ((treatment?.name ?? row.treatment_name ?? "Not specified") as string),
     category: (row.category ?? "") as string,
     price: Number(row.total_amount ?? row.price ?? 0),
     deposit: Number(row.deposit_amount ?? row.deposit ?? 0),
