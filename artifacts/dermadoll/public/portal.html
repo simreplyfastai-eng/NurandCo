@@ -1089,12 +1089,15 @@ select.form-input{background:var(--color-card)}
 
     <!-- ── MEDIA ── -->
     <div id="page-media" class="page">
-      <div class="topbar" style="display:flex;align-items:center;justify-content:space-between">
+      <div class="topbar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div>
           <span class="topbar-title serif">Media</span>
-          <div style="font-family:var(--font-sans);font-size:12px;color:var(--color-muted-fg);margin-top:2px">Changes save automatically and go live on the website instantly.</div>
+          <div style="font-family:var(--font-sans);font-size:12px;color:var(--color-muted-fg);margin-top:2px">Changes save to cloud and go live on the website instantly.</div>
         </div>
-        <span id="media-autosave-status" style="font-family:var(--font-sans);font-size:12px;color:#4CAF50;opacity:0;transition:opacity .4s;white-space:nowrap"></span>
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+          <span id="media-autosave-status" style="font-family:var(--font-sans);font-size:12px;color:#4CAF50;opacity:0;transition:opacity .4s;white-space:nowrap"></span>
+          <button class="btn-gold" onclick="saveAllMedia()" style="white-space:nowrap">SAVE CHANGES</button>
+        </div>
       </div>
       <div style="padding:28px;max-width:1100px;margin:0 auto" id="media-root"></div>
     </div>
@@ -3871,12 +3874,52 @@ function saveMediaData(d){
   clearTimeout(_mediaSaveTimer);
   _mediaSaveTimer=setTimeout(async function(){
     try{
-      await CloudStore.set('fbn_media',d);
-      _showMediaSaveStatus('saved');
+      const r=await fetch('/api/media/config',{
+        method:'POST',
+        headers:{...authHdr(),'Content-Type':'application/json'},
+        body:JSON.stringify({field:'all',value:d})
+      });
+      if(r.ok){_showMediaSaveStatus('saved');}
+      else{const e=await r.json().catch(()=>({}));console.warn('saveMediaData error',e);_showMediaSaveStatus('error');}
     }catch(e){
+      console.warn('saveMediaData failed',e);
       _showMediaSaveStatus('error');
     }
   },400);
+}
+
+async function saveMediaField(field,value){
+  const d=getMediaData();
+  if(field==='all'){Object.assign(d,value);}else{d[field]=value;}
+  localStorage.setItem('fbn_media',JSON.stringify(d));
+  _showMediaSaveStatus('syncing');
+  try{
+    const r=await fetch('/api/media/config',{
+      method:'POST',
+      headers:{...authHdr(),'Content-Type':'application/json'},
+      body:JSON.stringify({field,value})
+    });
+    if(r.ok){_showMediaSaveStatus('saved');showToast('Saved \u2713');}
+    else{_showMediaSaveStatus('error');showToast('Save failed \u2014 check connection');}
+  }catch(e){
+    _showMediaSaveStatus('error');showToast('Save failed \u2014 check connection');
+  }
+}
+
+async function saveAllMedia(){
+  const d=getMediaData();
+  _showMediaSaveStatus('syncing');
+  try{
+    const r=await fetch('/api/media/config',{
+      method:'POST',
+      headers:{...authHdr(),'Content-Type':'application/json'},
+      body:JSON.stringify({field:'all',value:d})
+    });
+    if(r.ok){_showMediaSaveStatus('saved');showToast('All media saved \u2713');}
+    else{_showMediaSaveStatus('error');showToast('Save failed \u2014 check connection');}
+  }catch(e){
+    _showMediaSaveStatus('error');showToast('Save failed \u2014 check connection');
+  }
 }
 
 /* media section helpers defined below */
@@ -4195,10 +4238,11 @@ function updateTransformItem(i,field,value){
 }
 
 /* ── Cloud upload helper — uses Supabase Storage via POST /api/media/upload ── */
-async function uploadToCloud(file,type){
+async function uploadToCloud(file,type,field){
   const formData=new FormData();
   formData.append('file',file);
   if(type)formData.append('type',type);
+  if(field)formData.append('field',field);
   const headers=authHdr();
   // Do NOT set Content-Type — browser sets it with multipart boundary automatically
   const res=await fetch('/api/media/upload',{
@@ -4228,109 +4272,112 @@ function showUploadProgress(id,msg){
 }
 
 /* ── Hero Video handlers ── */
-function setHeroVideo(){
-  const url=(document.getElementById('mc-hero-vid-url')||{}).value||'';
-  if(!url.trim())return;
-  const d=getMediaData();
-  d.heroVideo=url.trim();
-  saveMediaData(d);renderMedia();
+async function setHeroVideo(){
+  const input=document.getElementById('mc-hero-vid-url');
+  const url=((input||{}).value||'').trim();
+  if(!url){showToast('Please enter a URL');return;}
+  renderMedia();
+  await saveMediaField('heroVideo',url);
+  if(input)input.value='';
+  renderMedia();
 }
 
-function clearHeroVideo(){
+async function clearHeroVideo(){
   if(!confirm('Remove the hero video?'))return;
-  const d=getMediaData();
-  delete d.heroVideo;
-  saveMediaData(d);renderMedia();
+  await saveMediaField('heroVideo',null);
+  renderMedia();
 }
 
 async function handleMcHeroVideoUpload(input){
   const file=input.files[0];if(!file)return;
   showToast('Uploading video…');
   try{
-    const url=await uploadToCloud(file,'hero_video');
-    const d=getMediaData();
-    d.heroVideo=url;
-    saveMediaData(d);renderMedia();
-    showToast('✓ Hero video uploaded');
-  }catch(e){showToast('Upload failed: '+e.message);}
+    const url=await uploadToCloud(file,'hero_video','heroVideo');
+    await saveMediaField('heroVideo',url);
+    renderMedia();
+    showToast('Hero video uploaded \u2713');
+  }catch(e){showToast('Upload failed — try URL instead');}
+  input.value='';
 }
 
 /* ── Hero Image handlers ── */
-function setHeroImage(){
-  const url=(document.getElementById('mc-hero-img-url')||{}).value||'';
-  if(!url.trim())return;
-  const d=getMediaData();
-  d.heroImage=url.trim();
-  saveMediaData(d);renderMedia();
+async function setHeroImage(){
+  const input=document.getElementById('mc-hero-img-url');
+  const url=((input||{}).value||'').trim();
+  if(!url){showToast('Please enter a URL');return;}
+  await saveMediaField('heroImage',url);
+  if(input)input.value='';
+  renderMedia();
 }
 
-function clearHeroImage(){
+async function clearHeroImage(){
   if(!confirm('Remove the hero image?'))return;
-  const d=getMediaData();
-  delete d.heroImage;
-  saveMediaData(d);renderMedia();
+  await saveMediaField('heroImage',null);
+  renderMedia();
 }
 
 async function handleMcHeroImageUpload(input){
   const file=input.files[0];if(!file)return;
   showToast('Uploading image…');
   try{
-    const url=await uploadToCloud(file,'hero_image');
-    const d=getMediaData();
-    d.heroImage=url;
-    saveMediaData(d);renderMedia();
-    showToast('✓ Hero image uploaded');
-  }catch(e){showToast('Upload failed: '+e.message);}
+    const url=await uploadToCloud(file,'hero_image','heroImage');
+    await saveMediaField('heroImage',url);
+    renderMedia();
+    showToast('Hero photo uploaded \u2713');
+  }catch(e){showToast('Upload failed — try URL instead');}
+  input.value='';
 }
 
 /* ── About Image handlers ── */
-function setAboutImage(){
-  const url=(document.getElementById('mc-about-img-url')||{}).value||'';
-  if(!url.trim())return;
-  const d=getMediaData();
-  d.aboutImage=url.trim();
-  saveMediaData(d);renderMedia();
+async function setAboutImage(){
+  const input=document.getElementById('mc-about-img-url');
+  const url=((input||{}).value||'').trim();
+  if(!url){showToast('Please enter a URL');return;}
+  await saveMediaField('aboutImage',url);
+  if(input)input.value='';
+  renderMedia();
 }
 
-function clearAboutImage(){
+async function clearAboutImage(){
   if(!confirm('Remove the practitioner photo?'))return;
-  const d=getMediaData();
-  delete d.aboutImage;
-  saveMediaData(d);renderMedia();
+  await saveMediaField('aboutImage',null);
+  renderMedia();
 }
 
 async function handleMcAboutImageUpload(input){
   const file=input.files[0];if(!file)return;
   showToast('Uploading image…');
   try{
-    const url=await uploadToCloud(file,'about_image');
-    const d=getMediaData();
-    d.aboutImage=url;
-    saveMediaData(d);renderMedia();
-    showToast('✓ Practitioner photo uploaded');
-  }catch(e){showToast('Upload failed: '+e.message);}
+    const url=await uploadToCloud(file,'about_image','aboutImage');
+    await saveMediaField('aboutImage',url);
+    renderMedia();
+    showToast('Practitioner photo uploaded \u2713');
+  }catch(e){showToast('Upload failed — try URL instead');}
+  input.value='';
 }
 
 /* ── Gallery handlers ── */
-function addGalleryImage(){
+async function addGalleryImage(){
   const input=document.getElementById('mc-gallery-url');
   if(!input)return;
   const url=input.value.trim();
-  if(!url)return;
+  if(!url){showToast('Please enter a URL');return;}
   const d=getMediaData();
   if(!Array.isArray(d.galleryImages))d.galleryImages=[];
-  if(d.galleryImages.length>=20)return;
+  if(d.galleryImages.length>=20){showToast('Gallery is full (20 max)');return;}
   d.galleryImages.push(url);
   input.value='';
-  saveMediaData(d);renderMedia();
+  await saveMediaField('galleryImages',d.galleryImages);
+  renderMedia();
 }
 
-function deleteGalleryImage(index){
+async function deleteGalleryImage(index){
   if(!confirm('Remove this image?'))return;
   const d=getMediaData();
   if(!Array.isArray(d.galleryImages))return;
   d.galleryImages.splice(index,1);
-  saveMediaData(d);renderMedia();
+  await saveMediaField('galleryImages',d.galleryImages);
+  renderMedia();
 }
 
 async function handleGalleryUpload(input){
@@ -4344,14 +4391,17 @@ async function handleGalleryUpload(input){
   for(const file of files){
     if(d.galleryImages.length>=20)break;
     try{
-      const url=await uploadToCloud(file,'gallery');
+      const url=await uploadToCloud(file,'gallery','galleryImages');
       d.galleryImages.push(url);
       uploaded++;
       if(statusEl)statusEl.textContent='Uploaded '+uploaded+' of '+files.length+'…';
-    }catch(e){showToast('Upload failed: '+e.message);}
+    }catch(e){showToast('Upload failed — try URL instead');}
   }
-  if(uploaded>0){saveMediaData(d);renderMedia();showToast('✓ '+uploaded+' image'+(uploaded>1?'s':'')+' added to gallery');}
-  else if(statusEl)statusEl.textContent='';
+  if(uploaded>0){
+    await saveMediaField('galleryImages',d.galleryImages);
+    renderMedia();
+    showToast(uploaded+' image'+(uploaded>1?'s':'')+' added \u2713');
+  }else if(statusEl)statusEl.textContent='';
   input.value='';
 }
 
@@ -4362,37 +4412,40 @@ async function handleResultsVideoUpload(input){
   const statusEl=document.getElementById('results-upload-status');
   if(statusEl)statusEl.textContent='Uploading video…';
   try{
-    const url=await uploadToCloud(file,'results_video');
+    const url=await uploadToCloud(file,'results_video','resultsVideos');
     const d=getMediaData();
     if(!Array.isArray(d.resultsVideos))d.resultsVideos=[];
     d.resultsVideos.push(url);
-    saveMediaData(d);renderMedia();
-    showToast('✓ Results video uploaded');
+    await saveMediaField('resultsVideos',d.resultsVideos);
+    renderMedia();
+    showToast('Results video uploaded \u2713');
   }catch(e){
     if(statusEl)statusEl.textContent='';
-    showToast('Upload failed: '+e.message);
+    showToast('Upload failed — try URL instead');
   }
   input.value='';
 }
 
-function addResultsVideo(){
+async function addResultsVideo(){
   const input=document.getElementById('mc-vid-url');
   if(!input)return;
   const url=input.value.trim();
-  if(!url)return;
+  if(!url){showToast('Please enter a URL');return;}
   const d=getMediaData();
   if(!Array.isArray(d.resultsVideos))d.resultsVideos=[];
   d.resultsVideos.push(url);
   input.value='';
-  saveMediaData(d);renderMedia();
+  await saveMediaField('resultsVideos',d.resultsVideos);
+  renderMedia();
 }
 
-function deleteResultsVideo(index){
+async function deleteResultsVideo(index){
   if(!confirm('Remove this video?'))return;
   const d=getMediaData();
   if(!Array.isArray(d.resultsVideos))return;
   d.resultsVideos.splice(index,1);
-  saveMediaData(d);renderMedia();
+  await saveMediaField('resultsVideos',d.resultsVideos);
+  renderMedia();
 }
 
 // ═══════════════════════════════════════════════════

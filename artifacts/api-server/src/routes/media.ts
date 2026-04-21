@@ -154,6 +154,57 @@ router.get("/media/config", async (req, res) => {
   }
 });
 
+// POST /api/media/config — save one field (or all) to portal_kv dd_media
+router.post("/media/config", async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  try {
+    const locationId = (req.headers["x-location-id"] as string | undefined) ?? null;
+    if (!locationId) return res.status(400).json({ error: "X-Location-Id header required" });
+
+    const { field, value } = req.body as { field?: string; value?: unknown };
+    if (!field) return res.status(400).json({ error: "field required" });
+
+    // Read current dd_media row for this location (id + value in one query)
+    const { data: kvRow } = await supabaseAdmin
+      .from("portal_kv")
+      .select("id, value")
+      .eq("location_id", locationId)
+      .eq("key", "dd_media")
+      .maybeSingle();
+
+    const currentValue = (kvRow?.value as Record<string, unknown>) ?? {};
+    const updated: Record<string, unknown> =
+      field === "all" && value !== null && typeof value === "object" && !Array.isArray(value)
+        ? (value as Record<string, unknown>)
+        : { ...currentValue, [field]: value };
+
+    const now = new Date().toISOString();
+    let writeError;
+    if (kvRow?.id) {
+      const { error } = await supabaseAdmin
+        .from("portal_kv")
+        .update({ value: updated, updated_at: now })
+        .eq("id", String(kvRow.id));
+      writeError = error;
+    } else {
+      const { error } = await supabaseAdmin
+        .from("portal_kv")
+        .insert({ location_id: locationId, key: "dd_media", value: updated, updated_at: now });
+      writeError = error;
+    }
+
+    if (writeError) {
+      console.error("POST /api/media/config write error:", writeError);
+      return res.status(500).json({ error: writeError.message });
+    }
+
+    return res.json({ success: true, field });
+  } catch (err: any) {
+    console.error("POST /api/media/config", err);
+    return res.status(500).json({ error: err?.message ?? "Unknown error" });
+  }
+});
+
 // POST /api/media/upload — multipart file upload to Supabase Storage
 router.post("/media/upload", upload.single("file"), async (req, res) => {
   if (!requireAuth(req, res)) return;
@@ -180,6 +231,35 @@ router.post("/media/upload", upload.single("file"), async (req, res) => {
 
     const { data: urlData } = supabaseAdmin.storage.from("media").getPublicUrl(path);
     const publicUrl = urlData.publicUrl;
+
+    // Optionally persist the URL into portal_kv dd_media when a field is provided
+    const field = (req.body?.field as string | undefined) || null;
+    const locationId = (req.headers["x-location-id"] as string | undefined) ?? null;
+    if (field && locationId) {
+      try {
+        const { data: current } = await supabaseAdmin
+          .from("portal_kv")
+          .select("value")
+          .eq("location_id", locationId)
+          .eq("key", "dd_media")
+          .maybeSingle();
+        const existing = (current?.value as Record<string, unknown>) ?? {};
+        let updated: Record<string, unknown>;
+        if (field === "galleryImages" || field === "resultsVideos") {
+          const arr = Array.isArray(existing[field]) ? [...(existing[field] as string[])] : [];
+          arr.push(publicUrl);
+          updated = { ...existing, [field]: arr };
+        } else {
+          updated = { ...existing, [field]: publicUrl };
+        }
+        await supabaseAdmin.from("portal_kv").upsert(
+          { location_id: locationId, key: "dd_media", value: updated, updated_at: new Date().toISOString() },
+          { onConflict: "location_id,key" }
+        );
+      } catch (kvErr) {
+        console.warn("POST /api/media/upload: portal_kv update failed", kvErr);
+      }
+    }
 
     return res.json({ success: true, url: publicUrl });
   } catch (err: any) {
