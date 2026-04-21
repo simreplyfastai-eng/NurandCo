@@ -78,7 +78,7 @@ export default function Training() {
                     {mc.badge}
                   </span>
                 </div>
-                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", margin: "0 0 20px" }}>
+                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#C9A96E", margin: "0 0 20px" }}>
                   {mc.location}
                 </p>
                 <button
