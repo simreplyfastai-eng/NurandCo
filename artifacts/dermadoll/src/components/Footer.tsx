@@ -206,7 +206,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#B0A898", margin: 0 }}>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9A96E", margin: 0 }}>
           © {year} Starr Aesthetics. All rights reserved.
         </p>
       </div>
