@@ -8,18 +8,28 @@ function AdminLoginModal({ onClose }: { onClose: () => void }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setTimeout(() => {
-      if (email === "starr@starr.com" && password === "Starr") {
-        window.location.href = `${import.meta.env.BASE_URL}portal.html`;
-      } else {
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
         setError("Incorrect email or password.");
         setLoading(false);
+        return;
       }
-    }, 400);
+      localStorage.setItem("fbn_token", data.token);
+      window.location.href = `${import.meta.env.BASE_URL}portal.html`;
+    } catch {
+      setError("Unable to connect. Please try again.");
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
