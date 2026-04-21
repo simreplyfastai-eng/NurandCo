@@ -1,0 +1,343 @@
+Full logic correction for admin portal bookings, 
+treatments, calendar and location handling.
+Read every relevant file before touching anything.
+
+ISSUES FOUND FROM VISUAL INSPECTION:
+
+1. Location switches to MARYLEBONE when clicking 
+   Schedule tab — should stay on whichever location 
+   was selected at login. Fix immediately.
+
+2. Treatments all grouped under "Other Treatments" 
+   — they need proper categories.
+
+3. Bookings need full validation — no double bookings,
+   correct location scoping, correct treatment data.
+
+===============================================================
+FIX 1 — LOCATION MUST NEVER CHANGE BETWEEN TABS
+===============================================================
+
+The current location (HORNCHURCH or MARYLEBONE) 
+must be locked for the entire session.
+It must NEVER change when switching between tabs.
+
+Find wherever the location is being set/read.
+It should ONLY be set during login after the 
+location selector. Never touched again until logout.
+
+Every tab — Dashboard, Schedule, New Bookings, 
+Availability, Clients, Treatments, Finance, 
+Enquiries, Media, Settings — must all read from 
+the same session locationId.
+
+The sidebar must ALWAYS show the correct location:
+  "STARR AESTHETICS"
+  "— HORNCHURCH" or "— MARYLEBONE"
+
+Fix: make locationId a module-level constant set 
+once on login, never reassigned.
+
+===============================================================
+FIX 2 — TREATMENTS CATEGORIES IN ADMIN
+===============================================================
+
+Treatments in Supabase now have a `category` column.
+Currently all showing as "Other Treatments".
+
+First add the category column if not exists:
+  ALTER TABLE treatments 
+    ADD COLUMN IF NOT EXISTS category TEXT 
+    DEFAULT 'Aesthetics';
+
+Then the treatments tab must group by category.
+Read the category from each treatment and render 
+separate sections:
+  Aesthetics
+  Lashes & Brows
+  Facials
+  Nails
+  SPMU
+
+Each section is a collapsible group (same as 
+existing "Other Treatments" pattern) but with 
+the correct category name as the header.
+
+The treatments API GET /api/treatments must return 
+the category field.
+
+===============================================================
+FIX 3 — SEED CORRECT TREATMENTS INTO SUPABASE
+===============================================================
+
+Run this SQL in Supabase to seed all treatments 
+correctly with categories. Do NOT run from code — 
+this needs to happen via the Supabase connection.
+
+Use supabaseAdmin to run these upserts on server 
+startup if treatments table is empty for a location:
+
+HORNCHURCH treatments with categories:
+
+Aesthetics (deposit £20 injectables, £10 others):
+  NATURALE LIPS — 45min — injectable — £20 deposit
+  Smile Line Filler — 60min — injectable — £20
+  HD Sculpt Lips — 60min — injectable — £20
+  Lips Russian Technique — 40min — injectable — £20
+  Fat Dissolving Lemon Bottle — 30min — £10
+  Anti Wrinkle — 30min — £10
+  Chin Filler — 30min — injectable — £20
+  Skin Booster — 30min — £10
+  Filler Dissolve Only — 60min — injectable — £20
+  Lip Filler Dissolve and Refill Package — 60min — £20
+  Lip Hydration — 30min — injectable — £20
+  Tear Trough Filler — 30min — injectable — £20
+  Non-Surgical Rhinoplasty — 30min — injectable — £20
+  Jaw Filler — 40min — injectable — £20
+  Cheek Filler — 40min — injectable — £20
+  Lips Normal Technique — 30min — injectable — £20
+  Facial Contouring Package — 60min — injectable — £20
+  Polynucleotides — 30min — injectable — £20
+  Beautiform Facial Contouring Package — 135min — £20
+  Consultation — 30min — £0 deposit
+
+Lashes & Brows (all £10 deposit):
+  Classic Full Set Lashes — 120min
+  Mega Classics — 150min
+  Hybrid Full Set — 120min
+  Signature Wisp Me Hybrids — 120min
+  Russians Full Set — 120min
+  Mega Volumes Full Set — 120min
+  American Style Lash Set — 120min
+  Lash Extension Infill — 60min
+  Lash Removal — 30min
+  LVL Lash Lift — 90min
+  Korean Lash Lift — 60min
+  Eyebrow Wax — 15min
+  Eyebrow Wax and Tint — 20min
+
+Facials (all £10 deposit):
+  Microneedling Facial — 60min
+  STARRFACIAL Hydrofacial — 60min
+  Luxe Microneedling Facial — 30min
+  Microneedling — 30min
+
+Nails (all £10 deposit):
+  Nails Full Set — 120min
+  Nail Infill — 60min
+  BIAB Russian Manicure Plain — 120min
+  Toes Gel Acrylic Biab Polygel — 60min
+  Russian Wet Pedicure — 100min
+  Hard Gel Extensions — 120min
+  BIAB Russian Technique With Design — 120min
+
+SPMU (£20 deposit):
+  Lip Blush SPMU — 140min
+
+MARYLEBONE treatments (separate location):
+  Category: Aesthetics
+  Dermal Filler No Packages — 60min — £20 deposit
+  NATURALE LIPS — 60min — £20
+  HD Sculpt Lips — 60min — £20
+  Facial Contouring Beautification — 60min — £20
+  Non-Surgical Rhinoplasty — 60min — £20
+  Tear Trough Filler — 60min — £20
+  
+  Category: Lashes & Brows
+  Eyelash Extensions — 60min — £10 deposit
+
+Prices are TBC — Eva is filling them in.
+Set price = 0 as placeholder until she confirms.
+Set deposit_amount based on rules above.
+
+Write a seed function that:
+  1. Checks if treatments exist for each location
+  2. If 0 treatments for that location → seeds them
+  3. Never duplicates
+  4. Runs on server start
+
+===============================================================
+FIX 4 — BOOKING VALIDATION (NO DOUBLE BOOKINGS)
+===============================================================
+
+When a booking is created (customer or admin):
+
+STEP 1 — Check slot is available:
+  Query Supabase:
+  SELECT COUNT(*) FROM bookings
+  WHERE location_id = [locationId]
+  AND booking_date = [date]
+  AND booking_time = [time]
+  AND status NOT IN ('cancelled')
+  
+  If count > 0 → return 409 Conflict:
+    { error: 'This slot is already booked' }
+
+STEP 2 — Check date is not blocked:
+  SELECT COUNT(*) FROM blocked_dates
+  WHERE location_id = [locationId]
+  AND date = [date]
+  
+  If count > 0 → return 409:
+    { error: 'This date is not available' }
+
+STEP 3 — Check location is open on this day:
+  Get day_of_week from the booking_date
+  Query availability_settings:
+  SELECT is_open FROM availability_settings
+  WHERE location_id = [locationId]
+  AND day_of_week = [dayOfWeek]
+  
+  If is_open = false → return 409:
+    { error: 'Clinic is closed on this day' }
+
+STEP 4 — Check time is within working hours:
+  Get open_time and close_time from availability_settings
+  If booking_time < open_time OR 
+     booking_time >= close_time → return 409:
+    { error: 'Outside working hours' }
+
+STEP 5 — Check for blocked time slots:
+  SELECT COUNT(*) FROM blocked_slots
+  WHERE location_id = [locationId]
+  AND (
+    (day_of_week = [dayOfWeek] OR all_days = true)
+    AND start_time <= [bookingTime]
+    AND end_time > [bookingTime]
+  )
+  
+  If count > 0 → return 409:
+    { error: 'This time slot is blocked' }
+
+ALL 5 checks must pass before booking is created.
+Apply to both POST /api/bookings AND the Stripe 
+webhook booking creation.
+
+===============================================================
+FIX 5 — AVAILABLE SLOTS ENDPOINT
+===============================================================
+
+GET /api/availability/slots?location=[id]&date=[date]
+
+This endpoint powers the customer booking calendar.
+It must return only genuinely available slots.
+
+Algorithm:
+  1. Get availability_settings for this location + day
+     → If closed: return { available: false, slots: [] }
+  
+  2. Generate 30-min slots from open_time to close_time
+     e.g. 10:00, 10:30, 11:00... 18:30
+  
+  3. Remove blocked_slots for this location+day
+  
+  4. Remove slots that have existing bookings
+     (status NOT IN 'cancelled')
+  
+  5. Remove past slots if date is today
+  
+  6. Return: { available: true, slots: ['10:00','10:30'...] }
+
+This must be called by the booking widget before 
+showing the time picker to the customer.
+
+===============================================================
+FIX 6 — ADMIN SCHEDULE CALENDAR ACCURACY
+===============================================================
+
+The admin Schedule tab shows a calendar.
+Each day with bookings should show a dot/badge.
+Clicking a date shows bookings for that day.
+
+Fix the calendar to:
+  1. Only show bookings for current session location
+     (X-Location-Id header on every API call)
+  
+  2. When clicking a date show all bookings for 
+     that location + date sorted by time
+  
+  3. Each booking row shows:
+     Time | Client Name | Treatment | Status pill
+     
+     Status pill colours:
+       pending → amber/gold
+       confirmed → green  
+       cancelled → red/muted
+       complete → grey
+  
+  4. Clicking a booking opens a detail drawer
+     showing full booking info including:
+       Location (large, prominent)
+       Client details
+       Treatment + duration
+       Deposit paid / balance due
+       Forms status (📋 ✍️)
+       Notes
+
+===============================================================
+FIX 7 — NEW BOOKING FORM IN ADMIN
+===============================================================
+
+The + NEW BOOKING button in the portal creates 
+a booking manually (e.g. Eva books a client 
+over the phone).
+
+This form must:
+  1. Pre-select current session location
+  2. Show treatments for THIS location only
+     (from Supabase filtered by location_id)
+  3. Show available dates/times for this location
+     (respecting availability + blocked dates)
+  4. Auto-calculate deposit from treatment
+  5. Allow marking deposit as paid/unpaid
+  6. Save to Supabase bookings table with location_id
+
+When admin creates a booking:
+  status = 'confirmed' (not pending — Eva confirmed it)
+  source = 'Portal'
+  Skip the availability check for Portal bookings 
+  (Eva can override — she knows her own schedule)
+  But still prevent double-booking the same slot
+
+===============================================================
+FIX 8 — BOOKING STATUS CHANGES
+===============================================================
+
+When Eva changes a booking status in the portal:
+
+confirmed → cancelled:
+  Update Supabase booking status
+  Send cancellation email to client via Resend
+  (if RESEND_API_KEY is set)
+
+pending → confirmed:
+  Update status
+  Send confirmation email if not already sent
+
+Any status → complete:
+  Update status
+  Update clients table:
+    increment visit_count by 1
+    update last_visit to booking_date
+    add deposit_amount to total_spent
+
+All status changes must include location_id check:
+  WHERE id = bookingId AND location_id = sessionLocationId
+  (prevents cross-location tampering)
+
+===============================================================
+FINAL VERIFY
+===============================================================
+
+1. Login → location selector → Hornchurch → login ✓
+2. Sidebar shows HORNCHURCH throughout all tabs ✓
+3. Switch to Schedule — still shows HORNCHURCH ✓
+4. Treatments tab shows proper categories ✓
+5. Hornchurch has all correct treatments ✓
+6. Marylebone has its separate treatment list ✓
+7. Try booking same slot twice → second fails ✓
+8. Try booking on a blocked date → fails ✓
+9. Available slots endpoint returns correct times ✓
+10. Admin calendar only shows Hornchurch bookings ✓
+11. New booking form shows Hornchurch treatments ✓
+12. Status change updates Supabase ✓

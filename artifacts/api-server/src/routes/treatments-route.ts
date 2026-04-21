@@ -12,7 +12,7 @@ function getLocationId(req: import("express").Request): string | null {
   );
 }
 
-// GET /api/treatments — returns active treatments for a location
+// GET /api/treatments — returns active treatments for a location (public)
 router.get("/treatments", async (req, res) => {
   const locationId = getLocationId(req);
   if (!locationId) {
@@ -21,9 +21,10 @@ router.get("/treatments", async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from("treatments")
-      .select("id, name, duration_minutes, price, deposit_amount, active")
+      .select("id, name, duration_minutes, price, deposit_amount, category, active")
       .eq("location_id", locationId)
       .eq("active", true)
+      .order("category")
       .order("name");
     if (error) throw error;
     return res.json(data ?? []);
@@ -41,8 +42,9 @@ router.get("/treatments/all", async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from("treatments")
-      .select("id, name, duration_minutes, price, deposit_amount, active")
+      .select("id, name, duration_minutes, price, deposit_amount, category, active")
       .eq("location_id", locationId)
+      .order("category")
       .order("name");
     if (error) throw error;
     return res.json(data ?? []);
@@ -57,12 +59,20 @@ router.post("/treatments", async (req, res) => {
   if (!requireAuth(req, res)) return;
   const locationId = getLocationId(req);
   if (!locationId) return res.status(400).json({ error: "locationId required" });
-  const { name, duration_minutes, price, deposit_amount } = req.body as Record<string, unknown>;
+  const { name, duration_minutes, price, deposit_amount, category } = req.body as Record<string, unknown>;
   if (!name) return res.status(400).json({ error: "name required" });
   try {
     const { data, error } = await supabaseAdmin
       .from("treatments")
-      .insert({ location_id: locationId, name, duration_minutes, price, deposit_amount, active: true })
+      .insert({
+        location_id: locationId,
+        name,
+        duration_minutes,
+        price,
+        deposit_amount,
+        category: category ?? "Aesthetics",
+        active: true,
+      })
       .select()
       .single();
     if (error) throw error;
@@ -78,13 +88,14 @@ router.put("/treatments/:id", async (req, res) => {
   if (!requireAuth(req, res)) return;
   const locationId = getLocationId(req);
   if (!locationId) return res.status(400).json({ error: "locationId required" });
-  const { name, duration_minutes, price, deposit_amount, active } = req.body as Record<string, unknown>;
+  const { name, duration_minutes, price, deposit_amount, category, active } = req.body as Record<string, unknown>;
   try {
     const updates: Record<string, unknown> = {};
     if (name !== undefined) updates.name = name;
     if (duration_minutes !== undefined) updates.duration_minutes = duration_minutes;
     if (price !== undefined) updates.price = price;
     if (deposit_amount !== undefined) updates.deposit_amount = deposit_amount;
+    if (category !== undefined) updates.category = category;
     if (active !== undefined) updates.active = active;
     const { data, error } = await supabaseAdmin
       .from("treatments")

@@ -599,6 +599,34 @@ router.put("/bookings/:id", async (req, res) => {
       }).catch(() => {});
     }
 
+    // When a booking is marked completed, update client stats (visit count + total spent)
+    if (String(b.status ?? "").toLowerCase() === "completed" && prevStatus !== "completed" && booking.clientEmail) {
+      const clientEmail = String(booking.clientEmail).toLowerCase().trim();
+      const locId = locationId ?? String(existing.location_id ?? "");
+      const bookingDate = String(booking.date ?? new Date().toISOString().slice(0, 10));
+      const totalAmount = Number(booking.price ?? 0);
+      try {
+        const { data: existingClient } = await supabaseAdmin
+          .from("clients")
+          .select("id, visit_count, total_spent")
+          .eq("location_id", locId)
+          .ilike("email", clientEmail)
+          .maybeSingle();
+        if (existingClient) {
+          await supabaseAdmin
+            .from("clients")
+            .update({
+              visit_count: Number(existingClient.visit_count ?? 0) + 1,
+              total_spent: Number(existingClient.total_spent ?? 0) + totalAmount,
+              last_visit: bookingDate,
+            })
+            .eq("id", existingClient.id);
+        }
+      } catch (statsErr) {
+        console.warn("Could not update client stats on completion", statsErr);
+      }
+    }
+
     if (b.depositPaid === true && !prevDepositPaid && booking.clientEmail) {
       const dep = Number(booking.deposit ?? 0);
       sendClientConfirmationEmail({

@@ -209,7 +209,7 @@ router.get("/availability/slots", async (req, res) => {
       .select("time_slot")
       .eq("location_id", locationId)
       .eq("booking_date", date)
-      .in("status", ["Pending", "Confirmed"]);
+      .in("status", ["pending", "confirmed"]);
 
     const bookedTimes = new Set((bookings ?? []).map((b: { time_slot: string }) => b.time_slot));
     const available = afterBlockedSlots.filter((s) => !bookedTimes.has(s));

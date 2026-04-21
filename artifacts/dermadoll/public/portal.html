@@ -1447,13 +1447,20 @@ function gbp(v){const n=Number(v)||0;return'£'+n.toLocaleString('en-GB',{minimu
 // CLOUD STORE — real-time sync to PostgreSQL via API
 // Falls back gracefully to localStorage if API is down
 // ═══════════════════════════════════════════════════
+// ── Module-level location lock (set once on login, never changed between tabs) ──
+let _SESSION_LOC_ID='';
+let _SESSION_LOC_NAME='';
+
 function authHdr(){
   const t=localStorage.getItem('fbn_token');
-  const locId=sessionStorage.getItem('starr_location_id');
+  const locId=_SESSION_LOC_ID||sessionStorage.getItem('starr_location_id')||'';
   const h=t?{'Authorization':'Bearer '+t}:{};
   if(locId)h['X-Location-Id']=locId;
   return h;
 }
+
+function getSessionLocId(){return _SESSION_LOC_ID||sessionStorage.getItem('starr_location_id')||'';}
+function getSessionLocName(){return _SESSION_LOC_NAME||sessionStorage.getItem('starr_location')||'';}
 
 const CloudStore = {
   BASE: '/api/portal/store',
@@ -1482,6 +1489,24 @@ const CloudStore = {
       });
     } catch(e) {
       console.warn('CloudStore init failed — using localStorage', e);
+    }
+  },
+
+  async get(key) {
+    try {
+      const r = await fetch(`${this.BASE}?keys=${encodeURIComponent(key)}`, {headers:authHdr()});
+      if (!r.ok) return null;
+      const data = await r.json();
+      let val = data[key];
+      if (val === undefined || val === null) return null;
+      if (typeof val === 'string' && val.startsWith('"') && val.endsWith('"')) {
+        try { const inner = JSON.parse(val); if (typeof inner === 'string') val = inner; } catch(e) {}
+      }
+      if (typeof val === 'string') { try { return JSON.parse(val); } catch(e) { return val; } }
+      return val;
+    } catch(e) {
+      console.warn('CloudStore.get failed for', key, e);
+      return null;
     }
   },
 
@@ -1815,12 +1840,16 @@ function doLogout(){
 
 let _sessionWatcherStarted=false;
 function showPortal(loc){
+  // Lock location module-level on first call; ignore any subsequent attempt to change it
+  const resolvedLoc=loc||sessionStorage.getItem('starr_location')||'';
+  const resolvedLocId=sessionStorage.getItem('starr_location_id')||'';
+  if(!_SESSION_LOC_ID&&resolvedLocId){_SESSION_LOC_ID=resolvedLocId;_SESSION_LOC_NAME=resolvedLoc;}
   document.getElementById('login-page').style.display='none';
   document.getElementById('location-selector').classList.remove('visible');
   document.getElementById('portal').classList.add('visible');
-  // Show location label in sidebar
+  // Show location label in sidebar (always use the locked name)
   const locLabel=document.getElementById('sb-location-label');
-  const displayLoc=loc||sessionStorage.getItem('starr_location')||'';
+  const displayLoc=_SESSION_LOC_NAME||resolvedLoc;
   if(locLabel)locLabel.textContent=displayLoc?'— '+displayLoc:'— Admin Portal';
   if(!_sessionWatcherStarted){_sessionWatcherStarted=true;startSessionWatcher();}
   CloudStore.init().then(async ()=>{
@@ -2717,7 +2746,7 @@ function buildTreatmentSelect(){
   const sets=getSettings()||{};
   const depInj=Number(sets.depositInjectables||20);
   const depOther=Number(sets.depositOther||10);
-  const INJECTABLE_CATS=new Set(['FILLER','BOTOX','SKINBOOST','VITAMIN']);
+  const INJECTABLE_CATS=new Set(['FILLER','BOTOX','SKINBOOST','VITAMIN','Aesthetics','SPMU']);
   sel.innerHTML='<option value="">Select treatment</option>'+all.map(t=>{
     const ov=overrides[t.name]||{};
     const catDep=INJECTABLE_CATS.has(t.cat)?depInj:depOther;
@@ -3145,29 +3174,39 @@ function getTreatOverrides(){return JSON.parse(localStorage.getItem('fbn_treatme
 
 const CAT_LABELS={BOTOX:'Anti-Wrinkle',FILLER:'Dermal Fillers',FACIALS:'Facials',SKINBOOST:'Skin Boosters',VITAMIN:'Vitamin Injections'};
 
-function _inferCat(name){
-  if(/lip|filler|rhinoplasty|cheek|chin|jaw.*filler|tear|nasolab|dissolv|facial balancing|smile line/i.test(name))return'FILLER';
-  if(/anti.?wrinkle|wrinkle|masseter|brow.*lift|dao|dimple|gummy|bunny|platysma|jaw.*tox|nose.*tox|neck.*tox/i.test(name))return'BOTOX';
-  if(/polynucleotide|profhilo|jalupro|lumi|hyal|skin booster|biorevit|salmon dna/i.test(name))return'SKINBOOST';
-  if(/facial|microneedl|peel|dermapla|hydra|vitamin c facial/i.test(name))return'FACIALS';
-  if(/vitamin|b12|iv drip/i.test(name))return'VITAMIN';
-  if(/consult/i.test(name))return'CONSULT';
-  return'OTHER';
+// Category labels — keys are the raw category strings stored in Supabase
+const _SB_CAT_LABELS={
+  'Aesthetics':'Aesthetics',
+  'Lashes & Brows':'Lashes & Brows',
+  'Facials':'Facials',
+  'Nails':'Nails',
+  'SPMU':'SPMU',
+  // legacy fallbacks
+  'BOTOX':'Anti-Wrinkle','FILLER':'Dermal Fillers','SKINBOOST':'Skin Boosters',
+  'VITAMIN':'Vitamin Injections','CONSULT':'Consultation','OTHER':'Other Treatments'
+};
+// Canonical sort order for categories in the portal
+const _CAT_ORDER=['Aesthetics','Lashes & Brows','Facials','Nails','SPMU'];
+function _sortCats(a,b){
+  const ai=_CAT_ORDER.indexOf(a),bi=_CAT_ORDER.indexOf(b);
+  if(ai!==-1&&bi!==-1)return ai-bi;
+  if(ai!==-1)return-1; if(bi!==-1)return 1;
+  return a.localeCompare(b);
 }
+
 function allTreatments(){
   const sb=JSON.parse(localStorage.getItem('fbn_supabase_treats')||'[]');
   if(sb.length){
-    return sb.map(t=>({id:t.id,name:t.name,duration:t.duration_minutes,price:t.price,deposit:t.deposit_amount,cat:_inferCat(t.name),active:t.active}));
+    return sb.map(t=>({id:t.id,name:t.name,duration:t.duration_minutes,price:t.price,deposit:t.deposit_amount,cat:t.category||'Aesthetics',active:t.active}));
   }
   const custom=getCustomTreatments();
   return[...TREATMENTS,...custom];
 }
 
-const _SB_CAT_LABELS={BOTOX:'Anti-Wrinkle',FILLER:'Dermal Fillers',FACIALS:'Facials',SKINBOOST:'Skin Boosters',VITAMIN:'Vitamin Injections',CONSULT:'Consultation',OTHER:'Other Treatments'};
 function allCategories(){
   const sb=JSON.parse(localStorage.getItem('fbn_supabase_treats')||'[]');
   if(sb.length){
-    const cats=[...new Set(sb.map(t=>_inferCat(t.name)))];
+    const cats=[...new Set(sb.map(t=>t.category||'Aesthetics'))].sort(_sortCats);
     const builtIn=cats.map(k=>({key:k,label:_SB_CAT_LABELS[k]||k,builtIn:true}));
     const custom=getCustomCats().map(c=>({key:c.key,label:c.label,builtIn:false}));
     return[...builtIn,...custom];
