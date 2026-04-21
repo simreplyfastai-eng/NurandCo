@@ -13,6 +13,8 @@ interface Treatment {
 interface BookingModalProps {
   treatment: Treatment | null;
   onClose: () => void;
+  locationId?: string;
+  locationSlug?: string;
 }
 
 interface DayAvail {
@@ -239,7 +241,7 @@ function parsePrice(priceStr: string): number { return parseInt(priceStr.replace
 
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export default function BookingModal({ treatment, onClose }: BookingModalProps) {
+export default function BookingModal({ treatment, onClose, locationId, locationSlug }: BookingModalProps) {
   const [step, setStep] = useState<1 | 2 | 3 | 4 | "success">(1);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -263,6 +265,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const [paymentError, setPaymentError] = useState("");
   const [stripeElementMounted, setStripeElementMounted] = useState(false);
   const [stripeNotConfigured, setStripeNotConfigured] = useState(false);
+  const [testModeLoading, setTestModeLoading] = useState(false);
   const [whatsapp, setWhatsapp] = useState("");
   const bookingDuration = treatment?.durationMins ?? 30;
   const [hasResendKey, setHasResendKey] = useState(false);
@@ -279,11 +282,13 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
   // Fetch availability and config on mount
   useEffect(() => {
-    fetch("/api/availability")
+    const availHeaders: HeadersInit = locationId ? { "x-location-id": locationId } : {};
+    fetch("/api/availability", { headers: availHeaders })
       .then((r) => r.ok ? r.json() : null)
       .then((data) => { if (data) setAvail(data); })
       .catch(() => {});
-    fetch("/api/config")
+    const configUrl = locationId ? `/api/config?locationId=${locationId}` : "/api/config";
+    fetch(configUrl)
       .then((r) => r.ok ? r.json() : null)
       .then((data) => {
         if (data?.whatsapp) setWhatsapp(data.whatsapp);
@@ -293,7 +298,8 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
         }
       })
       .catch(() => {});
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locationId]);
 
   useEffect(() => {
     document.body.style.overflow = "hidden";
@@ -314,7 +320,8 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   const fetchDateBookings = useCallback(async (date: Date) => {
     setLoadingSlots(true);
     try {
-      const r = await fetch(`/api/bookings/date/${fmtDate(date)}`, { cache: "no-store" });
+      const qs = locationId ? `?locationId=${locationId}` : "";
+      const r = await fetch(`/api/bookings/date/${fmtDate(date)}${qs}`, { cache: "no-store" });
       if (r.ok) setDateBookings(await r.json());
       else setDateBookings([]);
     } catch {
@@ -322,7 +329,8 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
     } finally {
       setLoadingSlots(false);
     }
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locationId]);
 
   const handleDateSelect = async (date: Date) => {
     setSelectedDate(date);
@@ -430,6 +438,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
             bookingDate: selectedDate ? fmtDate(selectedDate) : "",
             bookingTime: selectedTime,
             bookingId: pendingBookingId,
+            locationId: locationId ?? null,
           }),
         });
 
@@ -533,6 +542,43 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
     // Redirect to pre-appointment forms page.
     setSubmitting(false);
     window.location.href = `${formsPath}?booking=${encodeURIComponent(bookingId)}`;
+  };
+
+  // Test mode handler — creates a confirmed booking without Stripe payment
+  const handleTestModeBooking = async () => {
+    setTestModeLoading(true);
+    try {
+      const bookingId = crypto.randomUUID();
+      const res = await fetch("/api/bookings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: bookingId,
+          clientName: name,
+          clientEmail: email,
+          clientPhone: phone,
+          treatment: treatment?.name ?? "",
+          date: selectedDate ? fmtDate(selectedDate) : "",
+          time: selectedTime ?? "",
+          locationId: locationId ?? null,
+          depositPaid: false,
+          status: "confirmed",
+          notes: "[TEST MODE — no payment taken]",
+        }),
+      });
+      if (!res.ok) {
+        const d = await res.json() as { error?: string };
+        setPaymentError(d.error ?? "Failed to create test booking.");
+        setTestModeLoading(false);
+        return;
+      }
+      const base = import.meta.env.BASE_URL ?? "/";
+      const formsPath = base.endsWith("/") ? `${base}forms.html` : `${base}/forms.html`;
+      window.location.href = `${formsPath}?booking=${encodeURIComponent(bookingId)}`;
+    } catch {
+      setPaymentError("Network error. Please try again.");
+      setTestModeLoading(false);
+    }
   };
 
   const formatDate = (d: Date) =>
@@ -982,7 +1028,7 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
                 style={{ color: "#C9A96E" }}
                 disabled={submitting}
               >← Back</button>
-              <h3 className="font-serif" style={{ fontSize: "20px" }}>{stripeNotConfigured ? "Get in Touch" : "Secure Payment"}</h3>
+              <h3 className="font-serif" style={{ fontSize: "20px" }}>{stripeNotConfigured ? "Test Mode" : "Secure Payment"}</h3>
             </div>
 
             {/* Booking summary */}
@@ -1023,52 +1069,41 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
               <div className="text-center py-4">
                 <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-full" style={{ backgroundColor: "rgba(201,169,110,0.1)" }}>
                   <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
                   </svg>
                 </div>
-                <h3 className="font-serif mb-2" style={{ fontSize: "20px" }}>We're getting ready to take bookings!</h3>
-                <p className="text-sm mb-6" style={{ color: "#888", fontFamily: "Inter, sans-serif", lineHeight: "1.65" }}>
-                  Online booking will be available very soon. In the meantime, please contact us to book your appointment:
+                <h3 className="font-serif mb-2" style={{ fontSize: "20px" }}>Test Mode</h3>
+                <p className="text-sm mb-2" style={{ color: "#888", fontFamily: "Inter, sans-serif", lineHeight: "1.65" }}>
+                  Stripe is not yet configured. Add <code style={{ fontSize: "12px", background: "#f5f0eb", padding: "1px 5px", borderRadius: "4px" }}>STRIPE_SECRET_KEY</code> in the portal to enable live payments.
                 </p>
-                <div className="space-y-3">
-                  <a
-                    href="https://instagram.com/starraesthetics"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-center gap-2 w-full py-3.5 font-medium text-sm transition-all duration-200 hover:opacity-90"
-                    style={{ backgroundColor: "#C9A96E", color: "#fff", borderRadius: "12px", fontFamily: "Inter, sans-serif", textDecoration: "none" }}
-                  >
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-                    </svg>
-                    Message on Instagram
-                  </a>
-                  {whatsapp && (
-                    <a
-                      href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full py-3.5 font-medium text-sm transition-all duration-200 hover:opacity-90"
-                      style={{ backgroundColor: "#25D366", color: "#fff", borderRadius: "12px", fontFamily: "Inter, sans-serif", textDecoration: "none" }}
-                    >
-                      <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347"/>
+                <p className="text-sm mb-6" style={{ color: "#aaa", fontFamily: "Inter, sans-serif", lineHeight: "1.65" }}>
+                  Click below to create a test booking and go through the forms flow without payment.
+                </p>
+                {paymentError && (
+                  <div className="mb-4 p-3 rounded-lg text-sm text-left" style={{ background: "#FFF3F3", color: "#C62828", border: "1px solid #FFCDD2" }}>
+                    {paymentError}
+                  </div>
+                )}
+                <button
+                  onClick={handleTestModeBooking}
+                  disabled={testModeLoading}
+                  className="flex items-center justify-center gap-2 w-full py-3.5 font-medium text-sm transition-all duration-200 hover:opacity-90 disabled:opacity-60"
+                  style={{ backgroundColor: "#5C1A1A", color: "#fff", borderRadius: "12px", fontFamily: "Inter, sans-serif", border: "none", cursor: testModeLoading ? "not-allowed" : "pointer" }}
+                >
+                  {testModeLoading ? (
+                    <>
+                      <span style={{ display: "inline-block", width: "16px", height: "16px", border: "2px solid rgba(255,255,255,0.3)", borderTopColor: "#fff", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                      Creating test booking…
+                    </>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                       </svg>
-                      WhatsApp Us
-                    </a>
+                      Create Test Booking &amp; Open Forms
+                    </>
                   )}
-                  {!whatsapp && (
-                    <a
-                      href="https://instagram.com/starraesthetics"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center justify-center gap-2 w-full py-3.5 font-medium text-sm transition-all duration-200 hover:opacity-90"
-                      style={{ border: "1px solid #C9A96E", color: "#C9A96E", borderRadius: "12px", fontFamily: "Inter, sans-serif", textDecoration: "none" }}
-                    >
-                      @starraesthetics
-                    </a>
-                  )}
-                </div>
+                </button>
               </div>
             )}
 

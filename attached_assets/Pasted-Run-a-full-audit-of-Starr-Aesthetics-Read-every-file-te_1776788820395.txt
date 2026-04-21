@@ -1,0 +1,428 @@
+Run a full audit of Starr Aesthetics. Read every 
+file, test every endpoint, report what works, 
+what is broken, and what is missing. Fix everything.
+
+IMPORTANT NOTE ON MISSING KEYS:
+The business owner still needs to provide:
+  STRIPE_SECRET_KEY
+  STRIPE_PUBLISHABLE_KEY
+  STRIPE_WEBHOOK_SECRET
+  RESEND_API_KEY
+
+These are NOT yet in Replit secrets. Do NOT 
+try to run Stripe or Resend functionality.
+Instead, build everything as if they are there
+but wrap all Stripe and Resend calls in a 
+clear guard:
+
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.warn('STRIPE_SECRET_KEY not set - 
+    skipping payment processing')
+    return
+  }
+  
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('RESEND_API_KEY not set - 
+    skipping email send')
+    return
+  }
+
+This way the site runs without errors now,
+and the moment the keys are added everything
+activates automatically with no code changes.
+
+For Stripe testing: use a mock response that
+creates the booking in Supabase and redirects
+to /forms?booking=[id] as if payment succeeded.
+This lets us test the full forms flow now.
+
+===============================================================
+AUDIT CHECKLIST — TEST ALL OF THESE
+===============================================================
+
+1. WEBSITE — PAGES & NAVIGATION
+   - Homepage loads correctly
+   - Page title says "Starr Aesthetics" not 
+     "Face By Niamh" or "Dermadoll"
+   - "BOOK HORNCHURCH" → /book?location=hornchurch
+     NOT to as.me or Acuity
+   - "BOOK MARYLEBONE" → /book?location=marylebone
+     NOT to as.me or Acuity
+   - Nav BOOK NOW → /book
+   - Treatment BOOK buttons pass location + treatment
+   - All nav links work
+   - Mobile menu opens and closes
+   - WhatsApp button visible and links correctly
+   - Footer links all work
+   - Zero references to as.me, Acuity, Dermadoll, 
+     Face By Niamh anywhere in the site
+
+2. TREATMENTS PAGE
+   - Treatments load from Supabase for both locations
+   - Hornchurch tab shows Hornchurch treatments only
+   - Marylebone tab shows Marylebone treatments only
+   - Prices show correctly
+   - Deposit shows correctly:
+     Injectables = £20, Others = £10
+   - Each BOOK button links to correct booking flow
+
+3. BOOKING FLOW (test with mock payment)
+   - /book?location=hornchurch loads correctly
+   - /book?location=marylebone loads correctly
+   - Treatment list shows for selected location
+   - Date picker loads correct available dates
+   - Blocked dates are greyed out
+   - Closed days show as unavailable
+   - Time slots load when date selected
+   - Client details form validates all fields
+   - Booking summary shows correct deposit (£20/£10)
+   - If Stripe keys missing: show a "Test Mode" 
+     button that bypasses payment and creates a 
+     test booking in Supabase then redirects to 
+     /forms?booking=[id]
+   - If Stripe keys present: real Stripe checkout
+
+4. STRIPE — WIRE UP READY FOR KEYS
+   Find or create stripe.ts. Set up like this:
+
+   import Stripe from 'stripe'
+   
+   export function getStripe() {
+     if (!process.env.STRIPE_SECRET_KEY) return null
+     return new Stripe(process.env.STRIPE_SECRET_KEY, {
+       apiVersion: '2024-06-20'
+     })
+   }
+
+   Payment intent when keys are added:
+   amount: depositAmount * 100 (pence)
+   currency: 'gbp'
+   metadata: {
+     locationId, locationName,
+     treatmentName, clientName,
+     clientEmail, clientPhone,
+     bookingDate, bookingTime,
+     totalPrice, depositAmount
+   }
+   receipt_email: clientEmail
+
+   Stripe webhook endpoint: POST /api/stripe/webhook
+   Must handle: payment_intent.succeeded
+   On success:
+     Extract metadata
+     Create booking in Supabase bookings table
+     Create/update client in Supabase clients table
+     Redirect to /forms?booking=[bookingId]
+
+5. RESEND — WIRE UP READY FOR KEYS
+   Find or create email.ts. Set up like this:
+
+   import { Resend } from 'resend'
+   
+   export function getResend() {
+     if (!process.env.RESEND_API_KEY) return null
+     return new Resend(process.env.RESEND_API_KEY)
+   }
+
+   Build all 5 email templates now even though 
+   keys are missing. They will fire the moment 
+   keys are added.
+
+   EMAIL 1 — CLIENT BOOKING CONFIRMATION
+   Trigger: after consent form submitted
+   From: Starr Aesthetics <info@starrbeautyy.co.uk>
+   To: client email
+   Subject: "Confirmed: [Treatment] at Starr Aesthetics"
+   HTML email — Starr brand colours:
+     Cream #F9F5F0 background
+     Burgundy headings (existing site var)
+     Gold accents (existing site var)
+   
+   Content:
+     "Hi [Name],"
+     "Your appointment is confirmed."
+     
+     Booking details box:
+       Treatment: [name]
+       Date: [date] at [time]
+       Location: [name and address]
+       Deposit paid today: £[X]
+       Balance due on the day: £[remainder]
+     
+     "Your forms have been received and stored
+     securely in line with UK GDPR."
+     
+     Before your appointment:
+       • Arrive 5 minutes early
+       • Come with a clean face
+       • Avoid alcohol 24 hours before
+       • No blood thinners 24hrs before if applicable
+       • Contact us if any medical details change
+     
+     Cancellation policy:
+       "Please give 48 hours notice to cancel or 
+       reschedule. Deposits are non-refundable 
+       for cancellations under 48 hours or no-shows."
+     
+     "To reschedule: WhatsApp us on [number]"
+     
+     Instagram: @starraestheticss
+     Website: www.starrbeautyy.co.uk
+
+   EMAIL 2 — ADMIN NEW BOOKING ALERT
+   Trigger: immediately after Stripe payment succeeds
+     (or after test booking created)
+   From: Starr Aesthetics <info@starrbeautyy.co.uk>
+   To: info@starrbeautyy.co.uk
+   Subject: "New booking: [Client] — [Treatment] 
+     [Date] [Location]"
+   
+   Content:
+     NEW BOOKING heading (large, burgundy)
+     
+     Client: [name]
+     Email: [email]
+     Phone: [phone]
+     Treatment: [treatment name]
+     Date: [date] at [time]
+     Location: [location name]
+     Deposit paid: £[X]
+     Balance due: £[X]
+     Forms: Pending (until forms submitted)
+     
+     "Log in to admin portal to manage this booking"
+     Link to /portal.html
+
+   EMAIL 3 — APPOINTMENT REMINDER (to client)
+   Trigger: cron job runs every hour
+     Finds bookings where:
+       booking_date = CURRENT_DATE + 1
+       AND reminder_sent = false
+       AND status IN ('pending', 'confirmed')
+     For each: send reminder, set reminder_sent = true
+   
+   Subject: "Reminder: [Treatment] tomorrow at [Time]"
+   
+   Content:
+     "Hi [Name], just a reminder..."
+     Booking details (treatment, date, time, location)
+     Pre-appointment checklist
+     "Need to reschedule? WhatsApp us at least 
+     24 hours before: [number]"
+     Contact details
+
+   EMAIL 4 — BOOKING CANCELLATION (to client)
+   Trigger: when admin sets booking status = 'cancelled'
+   Subject: "Your appointment has been cancelled"
+   
+   Content:
+     "Hi [Name],"
+     "Your [treatment] appointment on [date] at 
+     [time] at [location] has been cancelled."
+     "Please contact us to rebook:"
+     WhatsApp link + Instagram
+
+   EMAIL 5 — FORMS REMINDER (to client)
+   Trigger: if booking exists but forms_completed = false
+     AND booking is within 48 hours
+     AND no forms submitted yet
+   Subject: "Action required: complete your forms 
+     before your appointment"
+   
+   Content:
+     "Hi [Name], your appointment is coming up 
+     but we haven't received your forms yet."
+     "Please complete them here:"
+     Link to /forms?booking=[id]
+     "This only takes 2 minutes."
+
+6. MEDICAL FORM (/forms?booking=[id])
+   - Page loads with valid bookingId
+   - Invalid bookingId → redirect to homepage
+   - Fetch booking details on load
+   - Check if medical form on file for this 
+     client_email + location_id
+   - New client → show medical form (Step 1)
+   - Returning client → "Has anything changed?"
+     [No] → skip to consent
+     [Yes] → show medical form
+   - Progress stepper: Step 1 → Step 2 → Done
+   - All form sections render correctly:
+     Personal Details (pre-filled from booking)
+     Emergency Contact
+     GP Details
+     Health questions (Yes/No with expand)
+     Declaration checkbox (required)
+   - Submit saves to Supabase medical_forms
+   - On success → show consent form
+
+7. CONSENT FORM
+   - Booking summary at top (read-only)
+   - All 6 checkboxes present and required
+   - Signature canvas works mouse + touch
+   - Submit disabled until all ticked + signed
+   - Clear button resets canvas
+   - Print name field required
+   - On submit:
+     POST to Supabase consent_forms
+     Update booking: forms_completed = true,
+       status = 'confirmed'
+     Send EMAIL 1 (confirmation) via Resend
+       if RESEND_API_KEY is set
+     Redirect to /confirmed?booking=[id]
+
+8. CONFIRMATION PAGE (/confirmed?booking=[id])
+   - Loads booking details from Supabase
+   - Shows treatment, date, time, location, address
+   - Shows deposit paid + balance due on day
+   - What to expect section
+   - Location contact info
+   - Clean, matches Starr brand
+
+9. ADMIN PORTAL FULL CHECK
+   - /portal.html loads
+   - Location selector: Hornchurch + Marylebone
+   - Login with ADMIN_EMAIL + ADMIN_PASSWORD works
+   - Location badge in header after login
+   - Logout clears session
+
+   DASHBOARD TAB:
+   - Revenue, appointments, clients from Supabase
+   - Recent bookings list is real data
+   - Revenue by treatment chart is real data
+
+   BOOKINGS TAB:
+   - All bookings for current location only
+   - Status change saves to Supabase
+   - 📋 button: grey if no medical form,
+     brand colour if submitted
+     Click → slide-in drawer with form data
+   - ✍️ button: grey if no consent,
+     brand colour if submitted
+     Click → slide-in drawer with consent 
+     + signature image
+   - Location isolation enforced
+
+   CLIENTS TAB:
+   - All clients for current location only
+   - Total spent, visit count, last visit shown
+   - Click client → their bookings shown
+
+   AVAILABILITY TAB:
+   - Working hours load from Supabase
+   - Toggle days, change times, save works
+   - Blocked dates calendar works
+   - Customer calendar respects all settings
+
+   MEDIA TAB:
+   - Clean two-column layout (not Dermadoll layout)
+   - All 5 sections work (practitioner photo,
+     hero image, hero video, gallery, videos)
+   - Save to Live Site writes to Supabase portal_kv
+   - Website reads and reflects changes
+
+   SETTINGS TAB (build if missing):
+   - Injectable deposit amount: £20 (editable)
+   - Other treatments deposit: £10 (editable)
+   - Business WhatsApp number (editable)
+   - Business name (editable)
+   - All save to portal_kv dd_settings
+
+10. BOOKING BUTTONS — FINAL CHECK
+    Search entire codebase for as.me and acuity
+    Every single instance must be removed
+    All BOOK buttons must use our own flow
+
+===============================================================
+WHEN STRIPE + RESEND KEYS ARE ADDED
+===============================================================
+
+Document clearly in a comment at the top of 
+stripe.ts and email.ts exactly what the business
+owner needs to do:
+
+stripe.ts top comment:
+/*
+ * STRIPE SETUP — ACTION REQUIRED
+ * 
+ * Add these to Replit Secrets:
+ * 
+ * STRIPE_SECRET_KEY
+ *   Get from: stripe.com → Developers → API Keys
+ *   Use sk_test_... for testing
+ *   Use sk_live_... for live payments
+ * 
+ * STRIPE_PUBLISHABLE_KEY  
+ *   Same page — starts with pk_test_ or pk_live_
+ * 
+ * STRIPE_WEBHOOK_SECRET
+ *   stripe.com → Developers → Webhooks
+ *   Add endpoint URL: [REPLIT_URL]/api/stripe/webhook
+ *   Select event: payment_intent.succeeded
+ *   Copy the signing secret (whsec_...)
+ * 
+ * Once all 3 are added, payments activate 
+ * automatically. No code changes needed.
+ */
+
+email.ts top comment:
+/*
+ * RESEND SETUP — ACTION REQUIRED
+ * 
+ * Add this to Replit Secrets:
+ * 
+ * RESEND_API_KEY
+ *   Get from: resend.com → API Keys → Create API Key
+ *   Verify domain: starrbeautyy.co.uk in Resend
+ *   (or emails send from onboarding@resend.dev 
+ *   until domain is verified)
+ * 
+ * Once added, all 5 emails activate automatically.
+ * No code changes needed.
+ */
+
+===============================================================
+PRIORITY ORDER FOR FIXES
+===============================================================
+
+Fix in this order:
+
+1. Remove all Acuity/as.me links — critical
+2. Booking flow end to end with mock payment
+3. Medical + consent forms + confirmation page
+4. Admin bookings tab with real data + form drawers
+5. Email templates built and guarded
+6. Stripe integration guarded and ready
+7. Reminder cron job built and guarded
+8. Dashboard real data
+9. Clients tab real data
+10. Media tab rebuild
+11. Settings tab deposit amounts
+12. Mobile QA pass
+
+===============================================================
+FINAL TEST SEQUENCE
+===============================================================
+
+Run this end to end before reporting complete:
+
+1. Homepage — no Acuity links anywhere ✓
+2. Click BOOK HORNCHURCH → /book?location=hornchurch ✓
+3. Select a treatment ✓
+4. Pick a date + time ✓
+5. Fill client details ✓
+6. Click "Test Payment" (mock) ✓
+7. Booking created in Supabase ✓
+8. Redirect to /forms?booking=[id] ✓
+9. Complete medical form ✓
+10. Sign consent form ✓
+11. Redirect to /confirmed ✓
+12. Email sent if RESEND key set ✓
+13. Login to admin portal as Hornchurch ✓
+14. Booking appears in bookings tab ✓
+15. 📋 shows medical form data ✓
+16. ✍️ shows consent + signature ✓
+17. Login as Marylebone — cannot see booking ✓
+
+Report each test as PASS or FAIL.
+Fix all FAILs before finishing.

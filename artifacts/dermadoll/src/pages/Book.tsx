@@ -7,6 +7,11 @@ import { SERVICES, findTreatment, type Treatment } from "@/lib/treatments";
 
 const BASE = import.meta.env.BASE_URL;
 
+const LOCATION_IDS: Record<string, string> = {
+  hornchurch: "ccb325d5-6b17-4218-b97d-1a1a0383410a",
+  marylebone: "5b3d890a-bf6f-4e87-af43-5db0726a46ce",
+};
+
 function LocationSelector() {
   const [, navigate] = useLocation();
   const locations = [
@@ -183,6 +188,8 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
         <BookingModal
           treatment={{ name: activeTreatment.name, price: activeTreatment.price }}
           onClose={() => setActiveTreatment(null)}
+          locationId={LOCATION_IDS[locationSlug]}
+          locationSlug={locationSlug}
         />
       )}
     </div>
