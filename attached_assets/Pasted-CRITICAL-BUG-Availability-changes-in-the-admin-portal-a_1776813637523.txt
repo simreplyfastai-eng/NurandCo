@@ -1,0 +1,192 @@
+CRITICAL BUG — Availability changes in the 
+admin portal are NOT reflected on the customer 
+booking page or slot API.
+
+Eva changes Thursday close time from 19:00 
+to 21:00 and clicks SAVE CHANGES but the 
+/book page still shows old slots.
+
+CONFIRMED FROM INSPECTION:
+
+GET /api/availability/settings?location=hornchurch
+Returns: Thursday close_time = "19:00"
+Even after saving 21:00 in the portal.
+
+This means either:
+a) SAVE CHANGES is not writing to Supabase
+b) The slots API is not reading from Supabase
+c) There is a hardcoded fallback overriding 
+   the Supabase data
+
+READ EVERY FILE before fixing:
+  - The availability settings POST handler
+  - The availability slots GET handler
+  - The Supabase availability_settings table schema
+  - The portal SAVE CHANGES button handler
+
+===============================================================
+FIX 1 — SAVE CHANGES MUST WRITE TO SUPABASE
+===============================================================
+
+When Eva clicks SAVE CHANGES in the Availability 
+tab, the portal sends a POST to save hours.
+
+Find this POST handler. It must write to 
+the Supabase availability_settings table:
+
+  For each day (0=Sun through 6=Sat):
+    UPSERT into availability_settings:
+    {
+      location_id: [location UUID],
+      day_of_week: [0-6],
+      is_open: [true/false],
+      open_time: [HH:MM],
+      close_time: [HH:MM]
+    }
+    ON CONFLICT (location_id, day_of_week) 
+    DO UPDATE SET 
+      is_open = EXCLUDED.is_open,
+      open_time = EXCLUDED.open_time,
+      close_time = EXCLUDED.close_time
+
+Check the current POST endpoint — if it's 
+writing to a different table, a JSON file, 
+or an in-memory variable instead of 
+availability_settings → FIX IT.
+
+===============================================================
+FIX 2 — SLOTS API MUST READ FROM SUPABASE
+===============================================================
+
+GET /api/availability/slots?location=X&date=Y
+
+This endpoint generates time slots. It must:
+
+1. Query Supabase availability_settings:
+   SELECT open_time, close_time, is_open
+   FROM availability_settings
+   WHERE location_id = [locationUUID]
+   AND day_of_week = [dayOfWeek from date param]
+
+2. If is_open = false → return { available: false }
+
+3. If is_open = true → generate 2-hour slots:
+   Start from open_time
+   Add 2 hours each iteration
+   Stop when slot >= close_time
+   
+   Example: open=10:00 close=21:00
+   → 10:00, 12:00, 14:00, 16:00, 18:00, 20:00
+
+4. For each slot check against bookings:
+   SELECT id FROM bookings
+   WHERE location_id = [id]
+   AND booking_date = [date]
+   AND booking_time = [slot]
+   AND status != 'cancelled'
+   If exists → { time: slot, available: false }
+
+5. Also check blocked_slots table:
+   SELECT id FROM blocked_slots
+   WHERE location_id = [id]
+   AND (
+     (day_of_week = [dow] AND is_recurring = true)
+     OR 
+     (specific_date = [date] AND is_recurring = false)
+   )
+   AND [slot time] >= from_time 
+   AND [slot time] < to_time
+   If blocked → mark slot as unavailable
+
+CRITICAL: There must be NO hardcoded hours 
+anywhere in this endpoint. Every single value 
+must come from Supabase.
+
+Search for any hardcoded strings like:
+  '10:00', '19:00', '09:00', '16:00', '14:00'
+in the slots API file and REMOVE them.
+
+===============================================================
+FIX 3 — BLOCKED DATES MUST ALSO WORK
+===============================================================
+
+When Eva blocks a date in the Availability 
+calendar, it must:
+
+1. Write to Supabase blocked_dates table:
+   INSERT INTO blocked_dates 
+   (location_id, date, reason)
+   VALUES ([id], [date], 'blocked')
+
+2. GET /api/availability/slots for a blocked 
+   date must return:
+   { available: false, reason: 'DATE_BLOCKED' }
+
+3. The customer booking calendar must show 
+   blocked dates as greyed out / unselectable
+
+Check the blocked_dates write — is it writing 
+to Supabase or just memory?
+If memory → fix to write to Supabase.
+
+===============================================================
+FIX 4 — BLOCKED TIME SLOTS MUST WORK
+===============================================================
+
+Recurring weekly blocks (e.g. lunch 13:00-14:00 
+every Wednesday) and one-off date blocks must:
+
+1. Write to Supabase blocked_slots table
+2. The slots API must query blocked_slots 
+   and mark affected slots as unavailable
+3. Show immediately on customer booking page
+
+===============================================================
+FIX 5 — PORTAL AVAILABILITY TAB MUST LOAD 
+FROM SUPABASE ON OPEN
+===============================================================
+
+When Eva opens the Availability tab it must 
+load the CURRENT values from Supabase — not 
+cached/hardcoded defaults.
+
+GET /api/availability/settings?location=X
+Must query Supabase availability_settings 
+fresh every time — no in-memory cache.
+
+This ensures if Eva changes hours on one 
+device, opening the portal on another device 
+shows the updated hours.
+
+===============================================================
+VERIFY AFTER FIX
+===============================================================
+
+Test 1 — Hours change:
+  In portal, change Thursday close to 21:00
+  Click SAVE CHANGES
+  Toast shows ✓
+  GET /api/availability/settings → 
+    Thursday close_time = "21:00" ✓
+  GET /api/availability/slots?date=2026-04-23 →
+    Shows 10:00, 12:00, 14:00, 16:00, 18:00, 
+    20:00 ✓ (NEW 20:00 slot appeared)
+  Customer /book page → 20:00 slot visible ✓
+  
+Test 2 — Block a date:
+  Block April 30 in portal calendar
+  GET /api/availability/slots?date=2026-04-30 →
+    { available: false, reason: 'DATE_BLOCKED' } ✓
+  Customer /book calendar → April 30 greyed out ✓
+
+Test 3 — Recurring block:
+  Add recurring block Wed 13:00-14:00
+  GET /api/availability/slots?date=[next Wed] →
+    13:00 slot missing from results ✓
+  Customer booking page → 13:00 not available ✓
+
+Test 4 — Replit restart:
+  Restart the Replit server
+  GET /api/availability/settings → 
+    Still shows 21:00 for Thursday ✓
+    (confirms it reads from Supabase not memory)

@@ -2403,27 +2403,48 @@ function getAvailability(){
   return parsed;
 }
 
-function saveAvailability(){
+async function saveAvailability(){
   const avail=collectAvailabilityForm();
+  // Persist locally immediately so calendar re-renders
   localStorage.setItem('fbn_availability',JSON.stringify(avail));
-  CloudStore.set('fbn_availability',avail);
-  // Write-through to Supabase
-  const _locId=sessionStorage.getItem('starr_location_id');
-  if(_locId){
-    const _N2S={0:'Sun',1:'Mon',2:'Tue',3:'Wed',4:'Thu',5:'Fri',6:'Sat'};
-    const _named={};
-    for(const [k,v] of Object.entries(avail.defaults)){const s=_N2S[Number(k)];if(s)_named[s]=v;}
-    fetch('/api/availability/settings',{
-      method:'POST',
-      headers:{...authHdr(),'Content-Type':'application/json'},
-      body:JSON.stringify({defaults:_named})
-    }).catch(_e=>console.warn('Supabase avail save failed',_e));
-  }
   buildCalendar();
   const btn=document.getElementById('avail-save-btn');
-  const orig=btn.textContent;
-  btn.textContent='Saved ✓';btn.style.background='#4CAF50';
-  setTimeout(()=>{btn.textContent=orig;btn.style.background='';},2000);
+  const origText=btn?btn.textContent:'Save Changes';
+  if(btn){btn.disabled=true;btn.textContent='Saving…';}
+
+  const locId=sessionStorage.getItem('starr_location_id');
+  if(!locId){
+    showToast('No location selected — cannot save');
+    if(btn){btn.disabled=false;btn.textContent=origText;}
+    return;
+  }
+
+  // Build rows array for PUT /api/admin/availability
+  const rows=[0,1,2,3,4,5,6].map(dow=>{
+    const d=avail.defaults[dow]||{on:false};
+    return{day_of_week:dow,is_open:!!d.on,open_time:d.on?(d.start||'09:00'):null,close_time:d.on?(d.end||'17:00'):null};
+  });
+
+  try{
+    const res=await fetch('/api/admin/availability',{
+      method:'PUT',
+      headers:{...authHdr(),'Content-Type':'application/json'},
+      body:JSON.stringify(rows)
+    });
+    if(!res.ok){
+      const errBody=await res.json().catch(()=>({}));
+      throw new Error(errBody.error||'HTTP '+res.status);
+    }
+    // Also keep CloudStore in sync
+    CloudStore.set('fbn_availability',avail);
+    if(btn){btn.disabled=false;btn.textContent='Saved ✓';btn.style.background='#4CAF50';}
+    setTimeout(()=>{if(btn){btn.textContent=origText;btn.style.background='';}},2000);
+    showToast('Availability saved');
+  }catch(e){
+    console.error('saveAvailability',e);
+    if(btn){btn.disabled=false;btn.textContent=origText;}
+    showToast('Save failed — '+e.message);
+  }
 }
 
 function collectAvailabilityForm(){
@@ -2445,15 +2466,39 @@ function collectAvailabilityForm(){
   return avail;
 }
 
-function renderAvailability(){
+async function renderAvailability(){
+  // 1. Render immediately from localStorage so the tab feels instant
   const avail=getAvailability();
   renderAvailDays(avail);
-  // Render calendar immediately with whatever blocked dates we already have,
-  // then refresh once the Supabase fetch completes
   renderAvailMiniCal(avail);
+  // 2. Fetch FRESH data from Supabase and re-render — this is the source of truth
+  const locId=sessionStorage.getItem('starr_location_id');
+  if(locId){
+    try{
+      const r=await fetch('/api/admin/availability',{headers:authHdr()});
+      if(r.ok){
+        const rows=await r.json(); // [{day_of_week, is_open, start_time, end_time}]
+        if(Array.isArray(rows)&&rows.length){
+          const freshDefaults={};
+          rows.forEach(row=>{
+            freshDefaults[row.day_of_week]=row.is_open
+              ?{on:true,start:(row.start_time||'09:00').substring(0,5),end:(row.end_time||'17:00').substring(0,5)}
+              :{on:false};
+          });
+          // Merge fresh rows over the defaults (keeps any days not yet in DB as defaults)
+          const merged=Object.assign({},avail.defaults,freshDefaults);
+          avail.defaults=merged;
+          // Persist merged back to localStorage so offline renders are current
+          localStorage.setItem('fbn_availability',JSON.stringify(avail));
+          renderAvailDays(avail);
+          renderAvailMiniCal(avail);
+        }
+      }
+    }catch(e){console.warn('Could not refresh availability from Supabase',e);}
+  }
+  // 3. Load blocked dates then re-render calendar
   loadBlockedDates().then(()=>{
     renderAvailMiniCal(avail);
-    // If the one-off tab is already active, refresh it too
     const panel=document.getElementById('bs-panel-oneoff');
     if(panel&&panel.style.display!=='none'){renderOneOffCal(avail);renderUpcomingBlocked();}
   });
