@@ -1,6 +1,6 @@
 kind = "web"
 previewPath = "/"
-title = "Dermadoll Aesthetics"
+title = "Starr Aesthetics"
 version = "1.0.0"
 id = "artifacts/dermadoll"
 router = "path"
