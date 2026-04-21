@@ -213,7 +213,7 @@ tr:hover td{background:rgba(92,26,26,.02)}
 .cal-date{font-family:var(--font-sans);font-size:11px;font-weight:400;margin-bottom:4px}
 .cal-cell.today .cal-date{color:var(--color-primary)}
 .cal-dot{width:6px;height:6px;border-radius:var(--radius-pill);background:var(--color-secondary);position:absolute;bottom:6px;left:50%;transform:translateX(-50%)}
-.cal-cell.selected .cal-dot{display:none}
+.cal-cell.selected .cal-dot{background:#fff;opacity:0.85}
 .cal-overflow-pill{background:var(--color-muted);color:var(--color-muted-fg);font-size:9px;border-radius:var(--radius);padding:1px 5px;margin-bottom:2px;display:block}
 .cal-new-mobile{display:none}
 .day-panel{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius);padding:20px;min-height:300px;overflow-y:auto;box-sizing:border-box}
@@ -2249,16 +2249,28 @@ function buildCalendar(){
   const monthBookings=bookings.filter(b=>{const d=new Date(b.date);return d.getFullYear()===y&&d.getMonth()===m&&b.status!=='Cancelled';});
   const dpBody=document.getElementById('day-panel-body');
   const dpTitle=document.getElementById('day-panel-title');
-  // Auto-select today's date if this is the current month and there are bookings today
-  const todayIsThisMonth=todayStr.startsWith(String(y)+'-'+String(m+1).padStart(2,'0'));
+  const calMonthPrefix=String(y)+'-'+String(m+1).padStart(2,'0');
+  const todayIsThisMonth=todayStr.startsWith(calMonthPrefix);
   const hasTodayBookings=bookings.some(b=>b.date===todayStr&&b.status!=='Cancelled');
-  if(todayIsThisMonth&&hasTodayBookings){
-    // Select today's cell visually
-    document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));
-    document.querySelectorAll('.cal-cell').forEach(c=>{if(c.getAttribute('onclick')==="selectDay('"+todayStr+"')")c.classList.add('selected');});
-    if(dpTitle)dpTitle.textContent=formatDate(todayStr)+' — Today';
+
+  function applyCalSelection(dateStr){
+    document.querySelectorAll('.cal-cell').forEach(c=>{
+      c.classList.toggle('selected',c.getAttribute('onclick')==="selectDay('"+dateStr+"')");
+    });
+  }
+
+  // Priority 1: restore a previously selected date in this month (survives pollBookings rebuilds)
+  if(_lastSelectedDay&&_lastSelectedDay.startsWith(calMonthPrefix)){
+    applyCalSelection(_lastSelectedDay);
+    if(dpTitle)dpTitle.textContent=formatDate(_lastSelectedDay)+(_lastSelectedDay===todayStr?' — Today':'');
+    renderDayTimeline(_lastSelectedDay);
+  // Priority 2: auto-select today if it has bookings
+  } else if(todayIsThisMonth&&hasTodayBookings){
     _lastSelectedDay=todayStr;
+    applyCalSelection(todayStr);
+    if(dpTitle)dpTitle.textContent=formatDate(todayStr)+' — Today';
     renderDayTimeline(todayStr);
+  // Priority 3: empty state
   } else {
     if(dpBody){dpBody.innerHTML=monthBookings.length?'<p class="cal-empty-state">Click a date to see bookings</p>':'<p class="cal-empty-state">No bookings this month</p>';}
     if(dpTitle)dpTitle.textContent='Select a day';
@@ -2273,13 +2285,16 @@ function changeMonth(dir){
 let _lastSelectedDay='';
 function selectDay(dateStr){
   _lastSelectedDay=dateStr;
-  document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));
-  if(event&&event.currentTarget)event.currentTarget.classList.add('selected');
+  document.querySelectorAll('.cal-cell').forEach(c=>{
+    c.classList.toggle('selected',c.getAttribute('onclick')==="selectDay('"+dateStr+"')");
+  });
+  const dpTitle=document.getElementById('day-panel-title');
+  const todayStr=fmt(new Date());
+  if(dpTitle)dpTitle.textContent=formatDate(dateStr)+(dateStr===todayStr?' — Today':'');
   renderDayTimeline(dateStr);
 }
 function renderDayTimeline(dateStr){
   const bookings=getBookings().filter(b=>b.date===dateStr&&b.status!=='Cancelled').sort((a,b)=>a.time.localeCompare(b.time));
-  document.getElementById('day-panel-title').textContent=formatDate(dateStr);
   document.getElementById('day-panel-body').innerHTML=bookings.length?bookings.map(b=>{
     const t=(b.time||'').slice(0,5); // strip seconds → HH:MM
     return`<div class="timeline-item" onclick="openBookingDetailPanel('${b.id}')" style="cursor:pointer;display:block;padding:10px 0;border-bottom:1px solid var(--color-border-subtle)" title="Click to view details">
