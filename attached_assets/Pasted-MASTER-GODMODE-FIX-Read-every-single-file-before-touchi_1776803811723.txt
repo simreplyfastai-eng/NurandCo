@@ -1,0 +1,466 @@
+MASTER GODMODE FIX — Read every single file 
+before touching anything. Fix all issues below 
+in one pass. Do not skip a single one.
+
+===============================================================
+BUG 1 — TREATMENTS: TWO DIFFERENT DATA SOURCES
+===============================================================
+
+CRITICAL. The customer booking page and the admin 
+portal are showing completely different treatments.
+
+CONFIRMED FROM LIVE INSPECTION:
+  Customer /book page calls: GET /api/treatments/all
+  Admin portal calls: GET /api/treatments
+
+These are two separate endpoints returning 
+different data. The customer sees categories like 
+"Signature Treatments", "Dermal Fillers", 
+"Skin Treatments" — these do NOT match what's 
+in Supabase (Aesthetics, Lashes & Brows, Nails, 
+Facials, SPMU).
+
+THE FIX:
+There must be ONE single source of truth.
+All treatments come from the Supabase treatments 
+table — nothing hardcoded anywhere.
+
+Step 1: Find /api/treatments/all
+  Check what it returns.
+  If it reads from Supabase → merge with 
+    /api/treatments so they're the same endpoint.
+  If it's hardcoded → DELETE the hardcoded data 
+    and replace with a Supabase query.
+
+Step 2: The customer booking page must call:
+  GET /api/treatments?location=[slug or id]
+  Same endpoint as the admin portal uses.
+  NOT /api/treatments/all.
+
+Step 3: Categories on customer booking page:
+  Must use the category column from Supabase.
+  Current categories in Supabase:
+    Aesthetics → show as "AESTHETICS" 
+    Lashes & Brows → show as "LASHES & BROWS"
+    Facials → show as "FACIALS"
+    Nails → show as "NAILS"
+    SPMU → show as "SPMU"
+  
+  Delete ALL hardcoded category names like 
+  "Signature Treatments", "Dermal Fillers", 
+  "Skin Treatments" from the customer booking 
+  page code.
+
+Step 4: Admin portal treatments tab must also 
+  show the same categories from Supabase.
+  If admin is showing different categories than 
+  the customer view — fix it so both read from 
+  the same Supabase category column.
+
+Step 5: Confirm after fix:
+  Hornchurch customer view categories match 
+  Hornchurch admin portal categories exactly.
+  Marylebone customer view matches Marylebone 
+  admin portal exactly.
+
+===============================================================
+BUG 2 — TREATMENTS EDIT BUTTON DOES NOTHING
+===============================================================
+
+Clicking the pencil edit icon on any treatment 
+row in the admin portal does nothing.
+
+THE FIX:
+Use event delegation — bind ONE listener to the 
+treatments container, not individual buttons:
+
+  document.querySelector('#treatments-container')
+    ?.addEventListener('click', e => {
+      const btn = e.target.closest('[data-action]')
+      if (!btn) return
+      const action = btn.dataset.action
+      const row = btn.closest('[data-treatment-id]')
+      const id = row?.dataset.treatmentId
+      if (action === 'edit') openEditRow(row, id)
+      if (action === 'delete') deleteRow(row, id)
+      if (action === 'save-edit') saveRow(row, id)
+      if (action === 'cancel-edit') cancelEdit(row)
+    })
+
+Each treatment row must have:
+  data-treatment-id="[supabase uuid]"
+  data-name="[name]"
+  data-price="[price]"
+  data-duration="[mins]"
+  data-category="[category]"
+
+openEditRow converts cells to inputs pre-filled 
+with current values. Save calls PUT /api/treatments/:id.
+On success re-renders the row read-only.
+Cancel restores original values.
+
++ ADD per category calls POST /api/treatments.
+New treatment immediately appears in list AND 
+on the customer booking page on next load.
+
+SAVE CHANGES (top button) batch-saves all 
+rows currently in edit mode.
+
+===============================================================
+BUG 3 — DOUBLE LOGIN: LOGS IN THEN ASKS AGAIN
+===============================================================
+
+When entering credentials and clicking SIGN IN,
+it processes, then shows the login form AGAIN.
+Only after entering credentials a second time 
+does it proceed to the location selector.
+
+THE FIX:
+Find the auth flow. The issue is almost certainly:
+
+  a) The JWT is being stored but then immediately 
+     invalidated or not found on the next check
+  b) The page is calling verifyToken right after 
+     login before the token is stored
+  c) There's a page reload happening after login 
+     that clears the in-memory state before 
+     localStorage is read
+
+Fix the login flow to be a single step:
+  1. POST /api/auth/login with email + password
+  2. Receive JWT token in response
+  3. Store token in localStorage FIRST
+  4. Then and only then: show location selector
+  5. Never reload the page during this flow
+
+The check on page load:
+  const token = localStorage.getItem('portal_token')
+  if (!token) → show login form
+  if (token) → verify it → show location selector
+  
+  This check must NOT run during the login flow.
+  Once login succeeds and token is stored, 
+  go straight to location selector.
+
+===============================================================
+BUG 4 — SWITCH LOCATION DOES NOT SWITCH IMMEDIATELY
+===============================================================
+
+Clicking SWITCH LOCATION in the admin portal 
+sidebar does not update immediately — it either 
+requires a page reload or stays on the same location.
+
+THE FIX:
+When Eva clicks SWITCH LOCATION:
+
+  function switchLocation() {
+    // Clear current location data
+    localStorage.removeItem('portal_location')
+    localStorage.removeItem('portal_location_id')
+    localStorage.removeItem('portal_location_name')
+    
+    // Show location selector immediately
+    // WITHOUT clearing the JWT token
+    showLocationSelector()
+  }
+
+The location selector that appears must:
+  Show both location cards (Hornchurch/Marylebone)
+  On selection: update localStorage immediately
+  Then immediately reload portal content for 
+  the new location — all tabs refresh
+  Sidebar shows new location name at once
+
+The JWT token must NOT be cleared — Eva is 
+still logged in, just changing location.
+
+After selecting new location:
+  All API calls use new X-Location-Id header
+  Dashboard reloads for new location
+  Sidebar shows new location name
+  No full page reload needed
+
+===============================================================
+BUG 5 — MOBILE VIEWPORT NOT FILLING SCREEN
+===============================================================
+
+On mobile (iPhone etc) the page appears zoomed 
+out and user has to pinch-zoom to see properly.
+This means the viewport meta tag is missing or 
+wrong.
+
+THE FIX:
+Find the <head> section of index.html (and any 
+other HTML pages: portal.html, forms.html, 
+confirmed.html, book.html).
+
+Ensure this exact meta tag exists in every page:
+  <meta name="viewport" 
+    content="width=device-width, initial-scale=1.0,
+    maximum-scale=1.0, user-scalable=no">
+
+If it already exists check:
+  Is it using width=device-width? ✓
+  Is initial-scale=1.0? ✓
+  Is there any CSS overriding viewport width?
+  Is there any element with width > 100vw 
+    causing horizontal overflow?
+
+Also add to CSS:
+  html, body {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+Check every page for elements wider than the 
+screen on mobile (375px):
+  Any fixed-width elements > 375px
+  Any grid/flex that doesn't wrap on mobile
+  Tables that don't scroll
+  Images without max-width: 100%
+
+Fix all of them.
+
+===============================================================
+BUG 6 — NEW BOOKING FROM ADMIN: TREATMENT NOT SAVED
+===============================================================
+
+When creating a booking via + NEW BOOKING in 
+the admin portal and then clicking the client 
+name to view it:
+  Treatment shows as "Select treatment" (blank)
+  Email and phone not showing in the booking detail
+
+THE FIX:
+The admin new booking form must:
+  1. Require treatment selection before saving
+  2. Save treatment_id AND treatment_name to 
+     the bookings table on creation
+  3. The booking detail view must read 
+     treatment_name from the booking row
+     If null: JOIN to treatments table to get 
+     the name via treatment_id
+
+Fix the booking detail panel:
+  SELECT b.*, t.name as treatment_name_from_join,
+    t.duration_minutes
+  FROM bookings b
+  LEFT JOIN treatments t ON t.id = b.treatment_id
+  WHERE b.id = [bookingId]
+  
+  Display: b.treatment_name OR t.name OR 'Not specified'
+  Display: b.client_email (from booking row)
+  Display: b.client_phone (from booking row)
+
+===============================================================
+BUG 7 — CLIENTS TAB SHOWS 0 BUT BOOKING EXISTS
+===============================================================
+
+Dashboard shows "sim" booking confirmed.
+Clients tab shows "No clients yet — 0".
+
+The client record IS in Supabase clients table 
+(confirmed: id f75baddc, name Sim, 
+email sim6ix@icloud.com).
+
+THE FIX:
+The clients tab GET /api/clients endpoint must 
+be filtering by the correct location_id from 
+the X-Location-Id header.
+
+Check: is the client's location_id matching 
+the current portal session location?
+
+The test booking was made for Marylebone.
+The client record's location_id should match 
+Marylebone's UUID.
+
+If client was saved to the wrong location or 
+with null location_id:
+  UPDATE clients 
+  SET location_id = (
+    SELECT id FROM locations WHERE slug = 'marylebone'
+  )
+  WHERE email = 'sim6ix@icloud.com';
+
+Also check: the GET /api/clients endpoint — 
+what does it use to filter? Confirm it uses:
+  .eq('location_id', req.locationId)
+where req.locationId comes from X-Location-Id header.
+
+If the header isn't being sent from the portal 
+clients tab fetch → add it.
+
+===============================================================
+BUG 8 — MEDICAL AND CONSENT FORMS NOT VISIBLE
+===============================================================
+
+After a booking and completing both forms, the 
+admin portal should show:
+  📋 Medical form icon on the booking row
+  ✍️ Consent form icon on the booking row
+  Clicking them opens the form data
+
+These are not showing in the schedule view or 
+in the clients section.
+
+THE FIX:
+When loading bookings for the schedule/list:
+  JOIN or subquery to check for forms:
+  
+  SELECT b.*,
+    CASE WHEN mf.id IS NOT NULL THEN true 
+      ELSE false END as has_medical,
+    CASE WHEN cf.id IS NOT NULL THEN true 
+      ELSE false END as has_consent
+  FROM bookings b
+  LEFT JOIN medical_forms mf ON mf.booking_id = b.id
+  LEFT JOIN consent_forms cf ON cf.booking_id = b.id
+  WHERE b.location_id = [locationId]
+
+In the booking row UI:
+  If has_medical = true → show 📋 icon in gold
+  If has_medical = false → show 📋 in grey/muted
+  If has_consent = true → show ✍️ icon in gold
+  If has_consent = false → show ✍️ in grey/muted
+
+Clicking the gold 📋 or ✍️ opens a modal/drawer 
+showing the full form data.
+
+Medical form drawer shows:
+  All health questions and yes/no answers
+  Any additional notes on yes answers
+  Emergency contact details
+  GP details
+  Declaration confirmed with timestamp
+
+Consent form drawer shows:
+  All 6 consent items ticked ✓
+  Signature image (base64 rendered in <img>)
+  Signed by name
+  Signed at timestamp
+
+In the client detail view (clicking client name):
+  Also show forms status under "Visits":
+  Visit 1: [date] — [treatment] — 📋 ✍️ ✓
+
+===============================================================
+BUG 9 — MEDICAL FORM: 90-DAY RETURN RULE
+===============================================================
+
+Returning clients (same email OR same phone) 
+who have already submitted a medical form 
+should NOT have to fill it in again within 
+90 days of their last submission.
+
+THE FIX:
+In the forms flow, after a booking is confirmed 
+and client reaches /forms?booking=[id]:
+
+Check if client has an existing medical form 
+submitted within the last 90 days:
+
+  SELECT mf.created_at 
+  FROM medical_forms mf
+  JOIN bookings b ON b.id = mf.booking_id
+  WHERE (
+    b.client_email = [email] OR 
+    b.client_phone = [phone]
+  )
+  AND mf.created_at > NOW() - INTERVAL '90 days'
+  ORDER BY mf.created_at DESC
+  LIMIT 1
+
+If a recent form exists:
+  Skip the medical form step entirely
+  Show a message: 
+  "Your medical details are up to date.
+   Last updated: [date]"
+  
+  Small link: "Update my details" → 
+    If clicked, shows the full form pre-filled
+    with their previous answers so they can 
+    update anything that's changed
+  
+  Then proceed directly to consent form (Step 2)
+  Progress stepper shows Step 1 skipped/done ✓
+
+If no recent form (new client or >90 days):
+  Show the full medical form as normal
+
+This check happens in GET /api/forms/check:
+  Return additional field: 
+    { medical_on_file: true/false, 
+      medical_last_submitted: [date or null] }
+  
+  The forms page uses this to decide whether 
+  to show or skip the medical form.
+
+===============================================================
+BUG 10 — BOOKING DETAIL: MISSING FIELDS
+===============================================================
+
+When clicking a booking in the Schedule tab,
+the detail panel shows limited information.
+
+THE FIX:
+The booking detail drawer/panel must show ALL of:
+
+  HEADER:
+    Location name (large, gold pill)
+    Status pill (Confirmed/Pending/Complete/Cancelled)
+    Status change dropdown (Eva can change status)
+  
+  APPOINTMENT:
+    Treatment name (from booking OR treatments JOIN)
+    Date formatted: "Wednesday, 22 April 2026"
+    Time: "14:15"
+    Duration: "45 mins"
+    Location address
+  
+  CLIENT:
+    Full name (large)
+    Email (clickable mailto:)
+    Phone (clickable tel:)
+  
+  PAYMENT:
+    Deposit paid: £[amount] (green if paid)
+    Balance due on day: £[amount]
+    Payment source: "Website" or "Portal" or "Test"
+  
+  FORMS:
+    📋 Medical form → [Submitted ✓] or [Pending]
+    ✍️ Consent form → [Signed ✓] or [Pending]
+    Clicking submitted icons opens form drawer
+
+  NOTES:
+    Text area for Eva to add internal notes
+    Auto-saves on blur (not needing a Save button)
+
+===============================================================
+AFTER ALL FIXES — VERIFY:
+===============================================================
+
+1. Customer Hornchurch treatments = Supabase 
+   Hornchurch treatments ✓
+2. Customer Marylebone treatments = Supabase 
+   Marylebone treatments ✓
+3. Admin treatments tab edit button works ✓
+4. Login once → location selector → done ✓
+   No double login
+5. Switch Location → instant, no reload ✓
+6. Mobile viewport fills screen at 375px ✓
+   No pinch needed
+7. New booking saves treatment + email + phone ✓
+8. Clients tab shows Sim (1 client) ✓
+9. Booking detail shows treatment name ✓
+10. 📋 ✍️ icons show on bookings with forms ✓
+11. Clicking 📋 shows medical form data ✓
+12. Clicking ✍️ shows consent + signature ✓
+13. Returning client within 90 days skips 
+    medical form ✓
+14. Returning client > 90 days sees full form ✓
+
+Report each as PASS or FAIL.
+Fix every FAIL. Do not finish until all pass.
