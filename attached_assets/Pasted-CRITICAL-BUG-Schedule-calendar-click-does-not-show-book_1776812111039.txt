@@ -1,0 +1,99 @@
+CRITICAL BUG — Schedule calendar click 
+does not show bookings.
+
+Clicking April 22 (which has a dot/booking) 
+shows "Click a date to see bookings" in the 
+right panel instead of the booking.
+
+Read portal.html fully before fixing.
+
+WHAT IS HAPPENING:
+The calendar dot renders correctly showing 
+a booking exists. But when the date cell 
+is clicked, the right panel does not update.
+
+DEBUG FIRST — add console.log to trace:
+
+1. Find the calendar date click handler.
+   Log: console.log('date clicked:', dateStr)
+
+2. Find where bookings are fetched for the 
+   selected date. 
+   Log what URL is being called and what 
+   the response contains.
+
+3. Find the render function that should 
+   populate the right panel.
+   Log: console.log('rendering bookings:', bookings)
+
+THE MOST LIKELY CAUSES:
+
+A) The click handler is comparing dates 
+   in different formats.
+   The booking is stored as '2026-04-22'
+   but the calendar click might generate 
+   '22/04/2026' or 'April 22 2026'.
+   Fix: normalise both to 'YYYY-MM-DD'.
+
+B) The API call is missing the location header.
+   GET /api/bookings?date=2026-04-22
+   Must include: X-Location-Id header
+   If missing, returns empty array.
+
+C) The date cell click is firing but the 
+   _lastClickedDate variable or state is 
+   not being updated before the fetch runs.
+
+D) The renderDayTimeline() function exists 
+   but is not being called after the fetch.
+   Or it IS being called but with empty data.
+
+THE FIX:
+
+Find the calendar day cell click handler.
+It should do exactly this in order:
+
+  function onDayClick(dateStr) {
+    // dateStr must be 'YYYY-MM-DD'
+    _lastSelectedDay = dateStr
+    
+    // Show loading state in right panel
+    rightPanel.innerHTML = '<p>Loading...</p>'
+    
+    // Fetch bookings for this date
+    const res = await authFetch(
+      '/api/bookings?date=' + dateStr,
+      { headers: { 
+          'X-Location-Id': _SESSION_LOC_ID 
+        } 
+      }
+    )
+    const bookings = await res.json()
+    
+    // Render even if empty
+    renderDayTimeline(dateStr, bookings)
+  }
+
+renderDayTimeline(dateStr, bookings):
+  Show the date heading: "22 Apr 2026"
+  If bookings.length === 0:
+    Show "No bookings for this day"
+  If bookings.length > 0:
+    For each booking show:
+      [time.slice(0,5)] — [client_name] — [status pill]
+    Each row clickable → opens detail panel
+
+ALSO FIX: dot disappears when date is clicked.
+The dot should stay visible on the selected 
+date. The CSS for the selected date cell 
+(highlighted/active state) must not remove 
+the dot element — just change the cell 
+background/border.
+
+After fix verify:
+  April 22 shows dot ✓
+  Click April 22 → right panel shows date ✓
+  "14:15 — sim — Confirmed" appears ✓  
+  Dot stays visible on April 22 ✓
+  Clicking another date with no bookings 
+  shows "No bookings for this day" ✓
