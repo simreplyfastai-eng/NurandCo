@@ -1,412 +1,80 @@
-import { useState, useCallback, useEffect } from "react";
-
 export default function Footer() {
-  const currentYear = new Date().getFullYear();
-  const [clickCount, setClickCount] = useState(0);
-  const [lastClick, setLastClick] = useState(0);
-  const [whatsapp, setWhatsapp] = useState("");
-
-  useEffect(() => {
-    fetch("/api/config")
-      .then((r) => r.ok ? r.json() : null)
-      .then((d) => { if (d?.whatsapp) setWhatsapp(d.whatsapp); })
-      .catch(() => {});
-  }, []);
-
-  const handleSecretClick = useCallback(() => {
-    const now = Date.now();
-    const fresh = now - lastClick < 3000;
-    const next = fresh ? clickCount + 1 : 1;
-    setClickCount(next);
-    setLastClick(now);
-    if (next >= 5) {
-      setClickCount(0);
-      window.location.href = "/portal.html";
-    }
-  }, [clickCount, lastClick]);
+  const year = new Date().getFullYear();
 
   const navLinks = [
-    { name: "HOME", href: "#" },
-    { name: "TREATMENTS", href: "#services" },
-    { name: "ABOUT", href: "#about" },
-    { name: "PACKAGES", href: "#packages" },
-    { name: "PRICING", href: "#pricing" },
-    { name: "CONTACT", href: "#contact" },
+    { name: "SERVICES", href: "#services" },
+    { name: "LOCATIONS", href: "#locations" },
+    { name: "TRAINING", href: "#training" },
+    { name: "BOOK NOW", href: "#book" },
   ];
 
   const scrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     if (href === "#") { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
-    const element = document.querySelector(href);
-    if (element) element.scrollIntoView({ behavior: "smooth" });
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
-    <footer
-      style={{
-        background: "#F5F0EB",
-        color: "#3D3D3D",
-        position: "relative",
-        overflow: "hidden",
-      }}
-    >
-      {/* Background decorative watermark */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          fontFamily: "'Cormorant Garamond', serif",
-          fontStyle: "italic",
-          fontWeight: 700,
-          fontSize: "clamp(140px, 22vw, 280px)",
-          color: "rgba(201,169,110,0.09)",
-          whiteSpace: "nowrap",
-          pointerEvents: "none",
-          userSelect: "none",
-          letterSpacing: "-0.02em",
-          lineHeight: 1,
-        }}
-      >
-        Starr
-      </div>
+    <footer style={{ background: "#F5F0EB", borderTop: "1px solid #E2DDD5" }}>
+      <div style={{ maxWidth: 720, margin: "0 auto", padding: "72px 32px 40px", textAlign: "center" }}>
 
-      {/* Ambient glow blobs */}
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          top: "10%",
-          left: "-8%",
-          width: 320,
-          height: 320,
-          borderRadius: "50%",
-          background: "#C9A96E",
-          filter: "blur(100px)",
-          opacity: 0.1,
-          pointerEvents: "none",
-        }}
-      />
-      <div
-        aria-hidden="true"
-        style={{
-          position: "absolute",
-          bottom: "5%",
-          right: "-5%",
-          width: 280,
-          height: 280,
-          borderRadius: "50%",
-          background: "#C9A96E",
-          filter: "blur(90px)",
-          opacity: 0.08,
-          pointerEvents: "none",
-        }}
-      />
+        <a href="#" onClick={(e) => scrollTo(e, "#")} style={{ textDecoration: "none", display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 4, marginBottom: 16 }}>
+          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 44, fontWeight: 600, letterSpacing: "0.02em", color: "#5C1A1A", lineHeight: 1 }}>
+            STARR
+          </span>
+          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.4em", textTransform: "uppercase", fontWeight: 400, color: "#C9A96E", lineHeight: 1 }}>
+            AESTHETICS
+          </span>
+        </a>
 
-      {/* Decorative botanical corners */}
-      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", top: 20, left: 20, width: 180, height: 180, opacity: 0.13, pointerEvents: "none" }}>
-        <g stroke="#C9A96E" strokeWidth="1" fill="none">
-          <path d="M10,180 Q30,120 80,100 Q50,140 10,180Z" />
-          <path d="M10,180 Q60,150 100,120 Q70,155 10,180Z" />
-          <path d="M10,180 Q40,110 70,80" strokeLinecap="round" />
-          <circle cx="80" cy="100" r="3" fill="#C9A96E" />
-          <circle cx="100" cy="120" r="2" fill="#C9A96E" />
-          <circle cx="50" cy="145" r="1.5" fill="#C9A96E" />
-          <path d="M60,90 Q65,80 75,82 Q68,88 60,90Z" />
-          <path d="M55,110 Q60,100 70,103 Q63,109 55,110Z" />
-          <path d="M40,130 Q45,120 55,123 Q48,129 40,130Z" />
-        </g>
-      </svg>
-      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", top: 20, right: 20, width: 180, height: 180, opacity: 0.13, pointerEvents: "none", transform: "scaleX(-1)" }}>
-        <g stroke="#C9A96E" strokeWidth="1" fill="none">
-          <path d="M10,180 Q30,120 80,100 Q50,140 10,180Z" />
-          <path d="M10,180 Q60,150 100,120 Q70,155 10,180Z" />
-          <path d="M10,180 Q40,110 70,80" strokeLinecap="round" />
-          <circle cx="80" cy="100" r="3" fill="#C9A96E" />
-          <circle cx="100" cy="120" r="2" fill="#C9A96E" />
-          <circle cx="50" cy="145" r="1.5" fill="#C9A96E" />
-          <path d="M60,90 Q65,80 75,82 Q68,88 60,90Z" />
-          <path d="M55,110 Q60,100 70,103 Q63,109 55,110Z" />
-          <path d="M40,130 Q45,120 55,123 Q48,129 40,130Z" />
-        </g>
-      </svg>
-      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", bottom: 20, left: 20, width: 160, height: 160, opacity: 0.1, pointerEvents: "none", transform: "rotate(180deg) scaleX(-1)" }}>
-        <g stroke="#C9A96E" strokeWidth="1" fill="none">
-          <path d="M10,180 Q30,120 80,100 Q50,140 10,180Z" />
-          <path d="M10,180 Q60,150 100,120 Q70,155 10,180Z" />
-          <path d="M10,180 Q40,110 70,80" strokeLinecap="round" />
-          <circle cx="80" cy="100" r="2.5" fill="#C9A96E" />
-          <circle cx="50" cy="145" r="1.5" fill="#C9A96E" />
-        </g>
-      </svg>
-      <svg aria-hidden="true" viewBox="0 0 200 200" style={{ position: "absolute", bottom: 20, right: 20, width: 160, height: 160, opacity: 0.1, pointerEvents: "none", transform: "rotate(180deg)" }}>
-        <g stroke="#C9A96E" strokeWidth="1" fill="none">
-          <path d="M10,180 Q30,120 80,100 Q50,140 10,180Z" />
-          <path d="M10,180 Q60,150 100,120 Q70,155 10,180Z" />
-          <path d="M10,180 Q40,110 70,80" strokeLinecap="round" />
-          <circle cx="80" cy="100" r="2.5" fill="#C9A96E" />
-          <circle cx="50" cy="145" r="1.5" fill="#C9A96E" />
-        </g>
-      </svg>
+        <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.15rem", color: "#737373", margin: "0 0 40px" }}>
+          Beauty Redefined
+        </p>
 
-      {/* Scattered sparkles */}
-      {[
-        { top: "12%", left: "22%", size: 10, opacity: 0.25 },
-        { top: "28%", left: "8%", size: 7, opacity: 0.18 },
-        { top: "55%", left: "15%", size: 12, opacity: 0.2 },
-        { top: "75%", left: "28%", size: 6, opacity: 0.15 },
-        { top: "18%", right: "18%", size: 9, opacity: 0.22 },
-        { top: "42%", right: "10%", size: 13, opacity: 0.18 },
-        { top: "68%", right: "22%", size: 7, opacity: 0.2 },
-        { top: "85%", right: "35%", size: 5, opacity: 0.14 },
-        { top: "38%", left: "46%", size: 8, opacity: 0.12 },
-      ].map((s, i) => (
-        <div key={i} aria-hidden="true" style={{
-          position: "absolute",
-          top: s.top,
-          left: (s as any).left,
-          right: (s as any).right,
-          width: s.size,
-          height: s.size,
-          opacity: s.opacity,
-          pointerEvents: "none",
-          fontFamily: "'Cormorant Garamond', serif",
-          color: "#C9A96E",
-          fontSize: s.size * 1.4,
-          lineHeight: 1,
-          userSelect: "none",
-        }}>✦</div>
-      ))}
-
-      {/* Delicate ring ornaments */}
-      <svg aria-hidden="true" viewBox="0 0 60 60" style={{ position: "absolute", top: "30%", left: "5%", width: 48, height: 48, opacity: 0.12, pointerEvents: "none" }}>
-        <circle cx="30" cy="30" r="26" stroke="#C9A96E" strokeWidth="0.8" fill="none" />
-        <circle cx="30" cy="30" r="20" stroke="#C9A96E" strokeWidth="0.5" fill="none" />
-        <circle cx="30" cy="30" r="2" fill="#C9A96E" />
-        <line x1="30" y1="4" x2="30" y2="10" stroke="#C9A96E" strokeWidth="0.8" />
-        <line x1="30" y1="50" x2="30" y2="56" stroke="#C9A96E" strokeWidth="0.8" />
-        <line x1="4" y1="30" x2="10" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
-        <line x1="50" y1="30" x2="56" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
-      </svg>
-      <svg aria-hidden="true" viewBox="0 0 60 60" style={{ position: "absolute", bottom: "25%", right: "6%", width: 40, height: 40, opacity: 0.11, pointerEvents: "none" }}>
-        <circle cx="30" cy="30" r="26" stroke="#C9A96E" strokeWidth="0.8" fill="none" />
-        <circle cx="30" cy="30" r="20" stroke="#C9A96E" strokeWidth="0.5" fill="none" />
-        <circle cx="30" cy="30" r="2" fill="#C9A96E" />
-        <line x1="30" y1="4" x2="30" y2="10" stroke="#C9A96E" strokeWidth="0.8" />
-        <line x1="30" y1="50" x2="30" y2="56" stroke="#C9A96E" strokeWidth="0.8" />
-        <line x1="4" y1="30" x2="10" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
-        <line x1="50" y1="30" x2="56" y2="30" stroke="#C9A96E" strokeWidth="0.8" />
-      </svg>
-
-      {/* Top rule */}
-      <div style={{ height: 1, background: "linear-gradient(90deg, transparent, rgba(201,169,110,0.5), transparent)" }} />
-
-      <div className="container mx-auto px-6 max-w-5xl" style={{ position: "relative", zIndex: 1, padding: "40px 24px" }}>
-
-        {/* Glass panel */}
-        <div style={{
-          background: "rgba(255,255,255,0.50)",
-          backdropFilter: "blur(24px)",
-          WebkitBackdropFilter: "blur(24px)",
-          border: "1px solid rgba(201,169,110,0.25)",
-          boxShadow: "0 8px 48px rgba(201,169,110,0.09), 0 1px 0 rgba(255,255,255,0.88) inset",
-          borderRadius: 2,
-          padding: "64px 52px 40px",
-        }}>
-
-          {/* Logo + tagline */}
-          <div className="flex flex-col items-center" style={{ marginBottom: 52 }}>
-            <div className="flex flex-col items-center leading-none" style={{ gap: 4, marginBottom: 20 }}>
-              <span style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: 48,
-                fontWeight: 600,
-                letterSpacing: "0.01em",
-                color: "#5C1A1A",
-                lineHeight: 1,
-              }}>
-                STARR
-              </span>
-              <span style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: 12,
-                letterSpacing: "0.4em",
-                textTransform: "uppercase",
-                fontWeight: 400,
-                color: "#C9A96E",
-                lineHeight: 1,
-              }}>
-                AESTHETICS
-              </span>
-            </div>
-
-            {/* Divider */}
-            <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 20 }}>
-              <div style={{ height: 1, width: 40, background: "linear-gradient(90deg, transparent, #C9A96E)" }} />
-              <span style={{ color: "#C9A96E", fontSize: 12 }}>✦</span>
-              <div style={{ height: 1, width: 40, background: "linear-gradient(90deg, #C9A96E, transparent)" }} />
-            </div>
-
-            <p
-              style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontStyle: "italic",
-                fontSize: "1.25rem",
-                color: "#C9A96E",
-                marginBottom: 12,
-                cursor: "default",
-                userSelect: "none",
-                textAlign: "center",
-              }}
-              onClick={handleSecretClick}
-            >
-              Natural Aesthetics. Confident Results.
-            </p>
-
-            <p style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 10,
-              letterSpacing: "0.25em",
-              textTransform: "uppercase",
-              color: "rgba(28,28,30,0.4)",
-              marginBottom: 28,
-            }}>
-              Hornchurch · Marylebone
-            </p>
-
-            {/* Social links */}
-            <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
-              <a
-                href="https://instagram.com/starraesthetics"
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  color: "rgba(28,28,30,0.5)",
-                  textDecoration: "none",
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 13,
-                  transition: "color 0.2s",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = "#C9A96E"}
-                onMouseLeave={(e) => e.currentTarget.style.color = "rgba(28,28,30,0.5)"}
-              >
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                </svg>
-                @starraesthetics
-              </a>
-
-              <div style={{ width: 1, height: 16, background: "rgba(28,28,30,0.12)" }} />
-
-              {whatsapp && (
-                <a
-                  href={`https://wa.me/${whatsapp}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    color: "rgba(28,28,30,0.5)",
-                    textDecoration: "none",
-                    fontFamily: "'Inter', sans-serif",
-                    fontSize: 13,
-                    transition: "color 0.2s",
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = "#C9A96E"}
-                  onMouseLeave={(e) => e.currentTarget.style.color = "rgba(28,28,30,0.5)"}
-                >
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                  </svg>
-                  WhatsApp
-                </a>
-              )}
-            </div>
-          </div>
-
-          {/* Nav links */}
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              justifyContent: "center",
-              gap: "8px 32px",
-              marginBottom: 36,
-            }}
-          >
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => scrollTo(e, link.href)}
-                style={{
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 10,
-                  letterSpacing: "0.28em",
-                  textTransform: "uppercase",
-                  color: "rgba(28,28,30,0.4)",
-                  textDecoration: "none",
-                  transition: "color 0.2s",
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.color = "#C9A96E"}
-                onMouseLeave={(e) => e.currentTarget.style.color = "rgba(28,28,30,0.4)"}
-              >
-                {link.name}
-              </a>
-            ))}
-          </div>
-
-          {/* Divider */}
-          <div style={{ height: 1, background: "rgba(201,169,110,0.2)", marginBottom: 24 }} />
-
-          {/* Legal */}
-          <div style={{
-            display: "flex",
-            flexWrap: "wrap",
-            justifyContent: "space-between",
-            alignItems: "center",
-            gap: 12,
-            fontFamily: "'Inter', sans-serif",
-            fontSize: 11,
-            color: "rgba(28,28,30,0.5)",
-            fontWeight: 300,
-            letterSpacing: "0.04em",
-          }}>
-            <p style={{ margin: 0 }}>&copy; {currentYear} Starr Aesthetics. All rights reserved.</p>
-            <p style={{ margin: 0, textAlign: "right", maxWidth: 360 }}>
-              Results may vary. Treatments performed by a qualified aesthetics practitioner.
-            </p>
-          </div>
-
-          <div style={{
-            textAlign: "center",
-            paddingTop: 20,
-            fontFamily: "'Inter', sans-serif",
-            fontSize: 9,
-            color: "rgba(28,28,30,0.35)",
-            letterSpacing: "0.2em",
-            textTransform: "uppercase",
-          }}>
-            Powered by{" "}
+        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px 28px", marginBottom: 40 }}>
+          {navLinks.map((link) => (
             <a
-              href="https://aesthetix-systems.co.uk"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: "#C9A96E", textDecoration: "none", transition: "color 0.2s" }}
-              onMouseEnter={(e) => e.currentTarget.style.color = "#B8946A"}
-              onMouseLeave={(e) => e.currentTarget.style.color = "#C9A96E"}
+              key={link.name}
+              href={link.href}
+              onClick={(e) => scrollTo(e, link.href)}
+              style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: "#737373", textDecoration: "none", transition: "color 0.2s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#5C1A1A")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#737373")}
             >
-              AESTHETIX
+              {link.name}
+            </a>
+          ))}
+        </div>
+
+        <div style={{ height: 1, background: "#E2DDD5", marginBottom: 28 }} />
+
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", lineHeight: 2, marginBottom: 32 }}>
+          <div>
+            Instagram:{" "}
+            <a href="https://instagram.com/starraestheticss" target="_blank" rel="noopener noreferrer"
+              style={{ color: "#5C1A1A", textDecoration: "none" }}>
+              @starraestheticss
             </a>
           </div>
-
+          <div>
+            Website:{" "}
+            <a href="https://www.starrbeautyy.co.uk" target="_blank" rel="noopener noreferrer"
+              style={{ color: "#5C1A1A", textDecoration: "none" }}>
+              www.starrbeautyy.co.uk
+            </a>
+          </div>
+          <div>
+            Email:{" "}
+            <a href="mailto:starrbeautyyltd@gmail.com"
+              style={{ color: "#5C1A1A", textDecoration: "none" }}>
+              starrbeautyyltd@gmail.com
+            </a>
+          </div>
         </div>
+
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#B0A898", margin: 0 }}>
+          © {year} Starr Aesthetics. All rights reserved.
+        </p>
       </div>
     </footer>
   );

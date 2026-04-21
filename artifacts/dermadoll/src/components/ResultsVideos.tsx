@@ -80,7 +80,7 @@ function VideoCard({ vid, i }: { vid: VidSlot; i: number }) {
       transition={{ delay: i * 0.08, duration: 0.6 }}
       className="flex flex-col gap-2"
     >
-      <div className="rounded-sm overflow-hidden bg-[#FAF9F7] aspect-square border border-[#C9A96E]">
+      <div style={{ overflow: "hidden", background: "#E8E2D9", aspectRatio: "1/1" }}>
         <AutoPlayVideo src={src} />
       </div>
     </motion.div>
@@ -114,27 +114,19 @@ export default function ResultsVideos() {
   return (
     <section className="py-[100px] bg-white">
       <div className="container mx-auto px-6 max-w-5xl">
-        <div className="text-center mb-20">
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="font-serif text-[2rem] md:text-[56px] mb-5"
-          >
-            Real Results
-          </motion.h2>
-          <div className="w-[60px] h-px bg-primary mx-auto mb-5" />
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="font-light text-lg"
-            style={{ color: "#C9A96E" }}
-          >
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          style={{ textAlign: "center", marginBottom: 56 }}
+        >
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px" }}>
+            Watch Real Treatments
+          </h2>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", margin: 0 }}>
             Watch real treatments and transformations
-          </motion.p>
-        </div>
+          </p>
+        </motion.div>
 
         <div className="grid grid-cols-2 gap-3 md:gap-6 mb-3 md:mb-6">
           {top.map((vid, i) => <VideoCard key={vid.key} vid={vid} i={i} />)}

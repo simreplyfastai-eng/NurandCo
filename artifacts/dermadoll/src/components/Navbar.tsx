@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Menu, X, Lock } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
@@ -7,164 +7,122 @@ export default function Navbar() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   const navLinks = [
-    { name: "HOME", href: "#" },
-    { name: "TREATMENTS", href: "#services" },
-    { name: "ABOUT", href: "#about" },
-    { name: "PACKAGES", href: "#packages" },
-    { name: "PRICING", href: "#pricing" },
-    { name: "CONTACT", href: "#contact" },
+    { name: "SERVICES", href: "#services" },
+    { name: "LOCATIONS", href: "#locations" },
+    { name: "TRAINING", href: "#training" },
   ];
 
   const scrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
     e.preventDefault();
     setIsMobileMenuOpen(false);
-    if (href === "#") {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-      return;
-    }
-    const element = document.querySelector(href);
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
+    if (href === "#") { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
+    const el = document.querySelector(href);
+    if (el) el.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const scrollToBook = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+    e.preventDefault();
+    setIsMobileMenuOpen(false);
+    document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[#F5F0EB] ${isScrolled ? "py-3 shadow-sm" : "py-4"}`}
-        style={{ borderBottom: "1px solid #D9D2C7" }}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "py-3 shadow-sm" : "py-4"}`}
+        style={{ background: "#F5F0EB", borderBottom: "1px solid #E2DDD5" }}
       >
-        <div className="w-full pl-16 pr-8 flex items-center justify-between">
-          {/* Logo lockup */}
-          <a href="#" className="flex flex-col items-start relative z-50 leading-none gap-[3px]" onClick={(e) => scrollTo(e, "#")}>
-            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 600, letterSpacing: "0.01em", color: "#5C1A1A", lineHeight: 1 }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+
+          <a href="#" onClick={(e) => scrollTo(e, "#")} style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 2, lineHeight: 1 }}>
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, letterSpacing: "0.01em", color: "#5C1A1A", lineHeight: 1 }}>
               STARR
             </span>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 400, color: "#C9A96E", lineHeight: 1 }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 400, color: "#C9A96E", lineHeight: 1 }}>
               AESTHETICS
             </span>
           </a>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-7">
+          <div className="hidden md:flex" style={{ alignItems: "center", gap: 36 }}>
             {navLinks.map((link) => (
               <a
                 key={link.name}
                 href={link.href}
                 onClick={(e) => scrollTo(e, link.href)}
-                className="font-sans text-[11px] tracking-[0.18em] font-medium transition-colors duration-300 hover:text-[#C9A96E]"
-                style={{ color: "#737373" }}
+                style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.18em", fontWeight: 400, color: "#3D3D3D", textDecoration: "none", transition: "color 0.2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "#5C1A1A")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "#3D3D3D")}
               >
                 {link.name}
               </a>
             ))}
             <a
-              href="#services"
-              onClick={(e) => { e.preventDefault(); document.getElementById("services")?.scrollIntoView({ behavior: "smooth" }); }}
-              className="ml-2 font-sans text-[11px] tracking-[0.18em] font-medium uppercase transition-all duration-300 px-5 py-2.5 border"
-              style={{ background: "#C9A96E", color: "#3D3D3D", borderColor: "#C9A96E" }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "#C9A96E";
-                e.currentTarget.style.borderColor = "#C9A96E";
+              href="#book"
+              onClick={scrollToBook}
+              style={{
+                fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.18em", fontWeight: 400,
+                color: "#5C1A1A", border: "1px solid #5C1A1A", padding: "10px 20px",
+                textDecoration: "none", textTransform: "uppercase" as const, transition: "all 0.2s",
               }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "#C9A96E";
-                e.currentTarget.style.borderColor = "#C9A96E";
-              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
             >
-              Book Now
-            </a>
-            <a
-              href="/portal.html"
-              style={{ marginLeft: '4px', color: '#C8C0B4', cursor: 'pointer', display: 'flex', alignItems: 'center', transition: 'color 0.2s' }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = '#C9A96E')}
-              onMouseLeave={(e) => (e.currentTarget.style.color = '#C8C0B4')}
-            >
-              <Lock size={16} strokeWidth={1.8} />
+              BOOK NOW
             </a>
           </div>
 
-          {/* Mobile Menu Toggle */}
           <button
-            className="md:hidden relative z-50 p-2 -mr-2"
+            className="md:hidden"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            style={{ background: "none", border: "none", cursor: "pointer", padding: 8 }}
           >
-            {isMobileMenuOpen ? (
-              <X size={26} strokeWidth={2} className="text-[#3D3D3D]" />
-            ) : (
-              <Menu size={26} strokeWidth={2} style={{ color: "#3D3D3D" }} />
-            )}
+            {isMobileMenuOpen ? <X size={24} color="#5C1A1A" /> : <Menu size={24} color="#5C1A1A" />}
           </button>
         </div>
       </nav>
 
-      {/* Mobile Menu Overlay */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
             initial={{ opacity: 0, y: "-100%" }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "-100%" }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="fixed inset-0 z-40 flex flex-col items-center justify-center"
-            style={{ background: "#F5F0EB", fontFamily: "'Inter', sans-serif" }}
+            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+            style={{ position: "fixed", inset: 0, zIndex: 40, background: "#F5F0EB", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 32 }}
           >
-            <div className="flex flex-col items-center space-y-7">
-              {navLinks.map((link, i) => (
-                <motion.a
-                  key={link.name}
-                  href={link.href}
-                  onClick={(e) => scrollTo(e, link.href)}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.07 }}
-                  className="font-sans text-[12px] tracking-[0.3em] text-[#737373] hover:text-[#C9A96E] transition-colors"
-                >
-                  {link.name}
-                </motion.a>
-              ))}
-              <motion.div
-                initial={{ opacity: 0, scaleX: 0 }}
-                animate={{ opacity: 1, scaleX: 1 }}
-                transition={{ delay: 0.4 }}
-                className="h-px w-16 bg-[#E2DDD5] my-2"
-              />
+            {navLinks.map((link, i) => (
               <motion.a
-                href="#treatments"
-                onClick={(e) => { e.preventDefault(); document.getElementById("treatments")?.scrollIntoView({ behavior: "smooth" }); setIsMobileMenuOpen(false); }}
+                key={link.name}
+                href={link.href}
+                onClick={(e) => scrollTo(e, link.href)}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.45 }}
-                className="font-sans text-[11px] tracking-[0.2em] uppercase font-medium px-8 py-3 border border-[#C9A96E] text-[#3D3D3D] bg-[#C9A96E] hover:bg-[#B8946A] hover:border-[#B8946A] transition-all"
+                transition={{ delay: 0.08 + i * 0.06 }}
+                style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, letterSpacing: "0.3em", color: "#3D3D3D", textDecoration: "none" }}
               >
-                Book a Consultation
+                {link.name}
               </motion.a>
-              <motion.a
-                href="/portal.html"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.55 }}
-                style={{
-                  fontFamily: 'Inter, sans-serif',
-                  fontSize: '11px',
-                  color: '#C8C0B4',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                }}
-              >
-                <Lock size={11} strokeWidth={1.8} />
-                Admin Portal
-              </motion.a>
-            </div>
+            ))}
+            <motion.a
+              href="#book"
+              onClick={scrollToBook}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.28 }}
+              style={{
+                fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.18em",
+                color: "#5C1A1A", border: "1px solid #5C1A1A", padding: "12px 28px",
+                textDecoration: "none", textTransform: "uppercase" as const,
+              }}
+            >
+              BOOK NOW
+            </motion.a>
           </motion.div>
         )}
       </AnimatePresence>

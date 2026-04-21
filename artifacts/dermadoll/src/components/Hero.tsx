@@ -1,79 +1,9 @@
-import { useEffect, useRef, useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import ConsultationModal from "./ConsultationModal";
-
-function ParticleCanvas() {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animId: number;
-    const particles: { x: number; y: number; r: number; vy: number; opacity: number; }[] = [];
-
-    const resize = () => {
-      canvas.width = canvas.offsetWidth;
-      canvas.height = canvas.offsetHeight;
-    };
-    resize();
-    window.addEventListener("resize", resize);
-
-    for (let i = 0; i < 38; i++) {
-      particles.push({
-        x: Math.random() * canvas.width,
-        y: Math.random() * canvas.height,
-        r: Math.random() * 2.5 + 0.5,
-        vy: -(Math.random() * 0.5 + 0.2),
-        opacity: Math.random() * 0.7 + 0.15,
-      });
-    }
-
-    const draw = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (const p of particles) {
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(201,169,110,${p.opacity})`;
-        ctx.fill();
-        p.y += p.vy;
-        p.opacity -= 0.001;
-        if (p.y < -10 || p.opacity <= 0) {
-          p.y = canvas.height + 10;
-          p.x = Math.random() * canvas.width;
-          p.opacity = Math.random() * 0.7 + 0.15;
-        }
-      }
-      animId = requestAnimationFrame(draw);
-    };
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener("resize", resize);
-    };
-  }, []);
-
-  return (
-    <canvas
-      ref={canvasRef}
-      style={{
-        position: "absolute",
-        inset: 0,
-        width: "100%",
-        height: "100%",
-        pointerEvents: "none",
-        zIndex: 3,
-      }}
-    />
-  );
-}
 
 function mediaUrl(path: string | null): string | null {
   if (!path) return null;
-  if (path.startsWith("/objects/"))
-    return `/api/media/serve?path=${encodeURIComponent(path)}`;
+  if (path.startsWith("/objects/")) return `/api/media/serve?path=${encodeURIComponent(path)}`;
   return path;
 }
 
@@ -96,319 +26,111 @@ export default function Hero() {
   useEffect(() => {
     const video = videoRef.current;
     if (!video) return;
-    const tryPlay = () => {
-      video.muted = true;
-      video.playsInline = true;
-      const p = video.play();
-      if (p) p.catch(() => {});
-    };
+    const tryPlay = () => { video.muted = true; video.playsInline = true; const p = video.play(); if (p) p.catch(() => {}); };
     tryPlay();
     video.addEventListener("loadedmetadata", tryPlay);
     video.addEventListener("canplay", tryPlay);
-    document.addEventListener("visibilitychange", () => { if (!document.hidden) tryPlay(); });
-    return () => {
-      video.removeEventListener("loadedmetadata", tryPlay);
-      video.removeEventListener("canplay", tryPlay);
-    };
+    return () => { video.removeEventListener("loadedmetadata", tryPlay); video.removeEventListener("canplay", tryPlay); };
   }, [heroSrc]);
 
-  const scrollToServices = () => {
-    document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
-  };
+  const scrollToServices = () => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
+  const scrollToBook = () => document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <>
-      <section id="home" style={{ minHeight: "100dvh", display: "flex", flexDirection: "row" }} className="hero-wrap">
-        <style>{`
-          /* Desktop: content left, image right */
-          .hero-left  { order: 1; min-height: 100dvh; }
-          .hero-right { order: 2; min-height: 100dvh; }
-          .hero-divider { order: 3; min-height: 100dvh; }
-          @media (max-width: 768px) {
-            .hero-wrap { flex-direction: column !important; }
-            .hero-left {
-              order: 2;
-              width: 100% !important;
-              min-height: auto !important;
-              padding: 36px 24px 60px !important;
-              align-items: flex-start !important;
-            }
-            .hero-right {
-              order: 1;
-              width: 100% !important;
-              height: 58vw !important;
-              min-height: 280px !important;
-              max-height: 380px !important;
-            }
-            .hero-divider { display: none !important; }
-            .hero-eyebrow { gap: 8px !important; }
-            .hero-line { display: none !important; }
-            .hero-btns {
-              flex-direction: column !important;
-              width: 100% !important;
-            }
-            .hero-btn-1, .hero-btn-2 {
-              width: 100% !important;
-              text-align: center !important;
-              justify-content: center !important;
-            }
-          }
-          @keyframes pulseDot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(1.4); }
-          }
-          @keyframes heroFadeUp {
-            from { opacity: 0; transform: translateY(28px); }
-            to   { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes heroFadeIn {
-            from { opacity: 0; }
-            to   { opacity: 1; }
-          }
-          @keyframes watermarkFloat {
-            0%   { transform: translateY(0px); }
-            50%  { transform: translateY(-12px); }
-            100% { transform: translateY(0px); }
-          }
-          @keyframes lineGrow {
-            from { width: 0px; opacity: 0; }
-            to   { width: 22px; opacity: 0.5; }
-          }
-          .hero-eyebrow   { animation: heroFadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
-          .hero-h1-line1  { animation: heroFadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.35s both; }
-          .hero-h1-line2  { animation: heroFadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.55s both; }
-          .hero-body      { animation: heroFadeUp 0.9s cubic-bezier(0.22,1,0.36,1) 0.7s both; }
-          .hero-btn-1     { animation: heroFadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.88s both; }
-          .hero-btn-2     { animation: heroFadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 1.0s both; }
-          .hero-watermark { animation: heroFadeIn 1.8s ease 0.4s both, watermarkFloat 7s ease-in-out 2.2s infinite; }
-          .hero-line      { animation: lineGrow 0.8s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
-        `}</style>
+      <style>{`
+        .hero-wrap { display: flex; flex-direction: row; min-height: 100dvh; }
+        .hero-left { flex: 1; background: #F5F0EB; display: flex; align-items: center; padding: 120px 64px 80px 80px; box-sizing: border-box; }
+        .hero-right { flex: 1; background: #FFFFFF; position: relative; overflow: hidden; }
+        @media (max-width: 768px) {
+          .hero-wrap { flex-direction: column !important; }
+          .hero-left { padding: 100px 28px 48px !important; }
+          .hero-right { min-height: 60vw; max-height: 480px; }
+        }
+        @keyframes heroUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .h-ey { animation: heroUp 0.8s ease 0.1s both; }
+        .h-h1 { animation: heroUp 0.8s ease 0.25s both; }
+        .h-sub { animation: heroUp 0.8s ease 0.4s both; }
+        .h-chip { animation: heroUp 0.8s ease 0.52s both; }
+        .h-btns { animation: heroUp 0.8s ease 0.64s both; }
+      `}</style>
 
-        {/* LEFT — content (order:1 via CSS on desktop, order:2 on mobile) */}
-        <div
-          className="hero-left"
-          style={{
-            width: "50%",
-            background: "linear-gradient(145deg, #fdf9f3 0%, #F5F0EB 45%, #f3ede2 100%)",
-            display: "flex",
-            alignItems: "center",
-            padding: "48px 64px 80px",
-            boxSizing: "border-box",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          {/* Large decorative serif watermark */}
-          <div aria-hidden="true" className="hero-watermark" style={{
-            position: "absolute",
-            bottom: 0,
-            left: -6,
-            right: 0,
-            fontFamily: "'Cormorant Garamond', serif",
-            fontStyle: "italic",
-            fontWeight: 700,
-            fontSize: "clamp(96px, 15vw, 220px)",
-            color: "rgba(201,169,110,0.07)",
-            lineHeight: 0.9,
-            pointerEvents: "none",
-            userSelect: "none",
-            letterSpacing: "-0.03em",
-            whiteSpace: "nowrap",
-          }}>
-            STARR
-          </div>
-          {/* Subtle amber glow top right */}
-          <div aria-hidden="true" style={{
-            position: "absolute",
-            top: -40,
-            right: 0,
-            width: 280,
-            height: 280,
-            borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(201,169,110,0.07) 0%, transparent 70%)",
-            pointerEvents: "none",
-          }} />
-          <div style={{ maxWidth: 520 }}>
-            {/* Eyebrow */}
-            <div className="hero-eyebrow" style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 10,
-              letterSpacing: "3px",
-              textTransform: "uppercase",
-              color: "#C9A96E",
-              marginBottom: 24,
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-            }}>
-              <div className="hero-line" style={{ height: 1, width: 22, background: "#C9A96E" }} />
-              HORNCHURCH / MARYLEBONE
-              <div className="hero-line" style={{ height: 1, width: 22, background: "#C9A96E" }} />
+      <section className="hero-wrap" id="home">
+
+        <div className="hero-left">
+          <div style={{ maxWidth: 480 }}>
+
+            <div className="h-ey" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+              <div style={{ height: 1, width: 24, background: "#C9A96E" }} />
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
+                Hornchurch &amp; Marylebone
+              </span>
             </div>
 
-            {/* H1 */}
-            <h1 style={{
-              fontFamily: "'Cormorant Garamond', serif",
-              fontSize: "clamp(2.4rem, 5.5vw, 4.5rem)",
-              fontWeight: 600,
-              color: "#3D3D3D",
-              lineHeight: 1.1,
-              margin: "0 0 28px",
-            }}>
-              <span className="hero-h1-line1" style={{ display: "block" }}>Natural Aesthetics.</span>
-              <em className="hero-h1-line2" style={{ display: "block", color: "#C9A96E", fontStyle: "italic" }}>Confident Results.</em>
+            <h1 className="h-h1" style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2.6rem, 5.5vw, 4.4rem)", fontWeight: 400, color: "#5C1A1A", lineHeight: 1.1, margin: "0 0 20px" }}>
+              Welcome to<br />Starr Aesthetics
             </h1>
 
-            {/* Body */}
-            <p className="hero-body" style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 15,
-              color: "#737373",
-              lineHeight: 1.75,
-              margin: "0 0 40px",
-              maxWidth: 420,
-            }}>
-              Advanced aesthetics treatments in Hornchurch, Essex and Marylebone, London — delivered with care, precision, and a commitment to natural results.
+            <p className="h-sub" style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.7, margin: "0 0 32px", maxWidth: 380 }}>
+              Premium aesthetics treatments by Eva —<br />Essex &amp; London
             </p>
 
-            {/* Buttons */}
-            <div className="hero-btns" style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+            <div className="h-chip" style={{ marginBottom: 28 }}>
               <button
-                className="hero-btn-1"
                 onClick={scrollToServices}
                 style={{
-                  background: "transparent",
-                  border: "1px solid #C9A96E",
-                  color: "#3D3D3D",
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 11,
-                  letterSpacing: "2px",
-                  textTransform: "uppercase",
-                  padding: "14px 28px",
-                  borderRadius: 0,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
+                  fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
+                  border: "1px solid #3D3D3D", background: "transparent", color: "#3D3D3D",
+                  padding: "9px 18px", cursor: "pointer", transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#3D3D3D"; e.currentTarget.style.color = "#F5F0EB"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
+              >
+                SIGNATURE: NATURALÉLIPS™
+              </button>
+            </div>
+
+            <div className="h-btns" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+              <button
+                onClick={scrollToServices}
+                style={{
+                  fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase",
+                  border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                  padding: "14px 28px", cursor: "pointer", transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+              >
+                VIEW TREATMENTS
+              </button>
+              <button
+                onClick={scrollToBook}
+                style={{
+                  fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase",
+                  border: "1px solid #C9A96E", background: "transparent", color: "#3D3D3D",
+                  padding: "14px 28px", cursor: "pointer", transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#3D3D3D"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
               >
-                View Treatments
-              </button>
-              <button
-                className="hero-btn-2"
-                onClick={() => setConsultOpen(true)}
-                style={{
-                  background: "#C9A96E",
-                  border: "1px solid #C9A96E",
-                  color: "#3D3D3D",
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 11,
-                  letterSpacing: "2px",
-                  textTransform: "uppercase",
-                  padding: "14px 28px",
-                  borderRadius: 0,
-                  cursor: "pointer",
-                  transition: "opacity 0.2s",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.85"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
-              >
-                Book a Consultation
+                BOOK NOW
               </button>
             </div>
           </div>
         </div>
 
-        {/* Thin amber divider between panels */}
-        <div aria-hidden="true" className="hero-divider" style={{
-          width: 1,
-          background: "linear-gradient(180deg, transparent 0%, rgba(201,169,110,0.35) 20%, rgba(201,169,110,0.5) 50%, rgba(201,169,110,0.35) 80%, transparent 100%)",
-          flexShrink: 0,
-          zIndex: 5,
-        }} />
-
-        {/* RIGHT — image (order:2 via CSS on desktop, order:1 on mobile) */}
-        <div
-          className="hero-right"
-          style={{
-            width: "50%",
-            background: "#C9A96E",
-            position: "relative",
-            overflow: "hidden",
-          }}
-        >
-          {/* Media */}
+        <div className="hero-right">
           {heroSrc ? (
-            <video
-              ref={videoRef}
-              src={heroSrc}
-              loop
-              muted
-              playsInline
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }}
-            />
+            <video ref={videoRef} src={heroSrc} loop muted playsInline
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
           ) : heroImage ? (
-            <>
-              <img
-                src={heroImage}
-                alt="Starr Aesthetics clinic — Hornchurch & Marylebone"
-                style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }}
-              />
-              {/* Dark overlay so particles + branding stay legible */}
-              <div style={{
-                position: "absolute",
-                inset: 0,
-                background: "linear-gradient(160deg, rgba(26,15,0,0.55) 0%, rgba(26,15,0,0.35) 60%, rgba(26,15,0,0.5) 100%)",
-                zIndex: 2,
-              }} />
-            </>
+            <img src={heroImage} alt="Starr Aesthetics — Hornchurch & Marylebone"
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }} />
           ) : (
-            <div style={{
-              position: "absolute",
-              inset: 0,
-              background: "linear-gradient(160deg, #2a1800 0%, #3D3D3D 50%, #3d2200 100%)",
-              zIndex: 1,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}>
-              <div style={{ textAlign: "center", opacity: 0.3 }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 32, color: "#C9A96E", marginBottom: 8 }}>Starr Aesthetics</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "4px", textTransform: "uppercase", color: "#C9A96E" }}>Hornchurch · Marylebone</div>
-              </div>
+            <div style={{ position: "absolute", inset: 0, background: "#E8E2D9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 28, color: "#C9A96E", opacity: 0.5 }}>Starr Aesthetics</span>
             </div>
           )}
-
-          {/* Particle overlay */}
-          <ParticleCanvas />
-
-          {/* @starraesthetics label */}
-          <div style={{
-            position: "absolute",
-            bottom: 28,
-            left: 24,
-            zIndex: 10,
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-          }}>
-            <div style={{
-              width: 8,
-              height: 8,
-              borderRadius: "50%",
-              background: "#C9A96E",
-              animation: "pulseDot 2s ease-in-out infinite",
-            }} />
-            <span style={{
-              fontFamily: "'Inter', sans-serif",
-              fontSize: 11,
-              letterSpacing: "1.5px",
-              color: "rgba(255,255,255,0.75)",
-              textTransform: "uppercase",
-            }}>
-              @starr.aesthetics
-            </span>
-          </div>
         </div>
       </section>
 

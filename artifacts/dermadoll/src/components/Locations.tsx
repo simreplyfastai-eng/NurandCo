@@ -1,0 +1,81 @@
+import { motion } from "framer-motion";
+
+const clinics = [
+  {
+    region: "ESSEX",
+    name: "Hornchurch",
+    desc: "Our original home clinic — serving Essex and East London with our full treatment menu.",
+    highlight: true,
+  },
+  {
+    region: "LONDON ◆ NEW",
+    name: "Marylebone",
+    desc: "Now open in the heart of London — April 2026. Premium flat-rate pricing for all treatments.",
+    highlight: false,
+  },
+];
+
+export default function Locations() {
+  const scrollToBook = () => document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
+
+  return (
+    <section id="locations" style={{ background: "#F5F0EB", padding: "100px 0" }}>
+      <div style={{ maxWidth: 960, margin: "0 auto", padding: "0 32px" }}>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          style={{ textAlign: "center", marginBottom: 56 }}
+        >
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 12px" }}>
+            Our Clinics
+          </h2>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", margin: 0 }}>
+            Two locations — one standard of excellence
+          </p>
+        </motion.div>
+
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }} className="clinics-grid">
+          <style>{`@media (max-width: 640px) { .clinics-grid { grid-template-columns: 1fr !important; } }`}</style>
+          {clinics.map((clinic, i) => (
+            <motion.div
+              key={clinic.name}
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: i * 0.12 }}
+              style={{
+                background: "#FFFFFF",
+                border: clinic.highlight ? "1px solid #5C1A1A" : "1px solid #E2DDD5",
+                padding: "40px 36px",
+              }}
+            >
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E", marginBottom: 12 }}>
+                {clinic.region}
+              </div>
+              <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "2rem", fontWeight: 400, color: "#5C1A1A", margin: "0 0 16px", lineHeight: 1 }}>
+                {clinic.name}
+              </h3>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", lineHeight: 1.7, margin: "0 0 32px" }}>
+                {clinic.desc}
+              </p>
+              <button
+                onClick={scrollToBook}
+                style={{
+                  fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
+                  border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                  padding: "12px 28px", cursor: "pointer", transition: "all 0.2s", width: "100%",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+              >
+                BOOK HERE
+              </button>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}

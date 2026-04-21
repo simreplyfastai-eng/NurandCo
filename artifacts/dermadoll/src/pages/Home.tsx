@@ -3,16 +3,16 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Check, X } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
-import TrustTicker from "@/components/TrustTicker";
 import About from "@/components/About";
+import TrustTicker from "@/components/TrustTicker";
+import Locations from "@/components/Locations";
 import Services from "@/components/Services";
-import Packages from "@/components/Packages";
-import Pricing from "@/components/Pricing";
-import FacesGallery from "@/components/FacesGallery";
+import BeforeAfter from "@/components/BeforeAfter";
+import ResultsVideos from "@/components/ResultsVideos";
+import Training from "@/components/Training";
 import Reviews from "@/components/Reviews";
 import FAQ from "@/components/FAQ";
 import CTABanner from "@/components/CTABanner";
-import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 
 export default function Home() {
@@ -28,6 +28,7 @@ export default function Home() {
       const t = setTimeout(() => setShowBookingSuccess(false), 8000);
       return () => clearTimeout(t);
     }
+    return undefined;
   }, []);
 
   return (
@@ -42,22 +43,18 @@ export default function Home() {
             transition={{ duration: 0.4 }}
             style={{
               position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
-              background: "#3D3D3D",
-              borderBottom: "2px solid #C9A96E",
-              padding: "14px 24px",
-              display: "flex", alignItems: "center", justifyContent: "center", gap: "12px",
+              background: "#5C1A1A", borderBottom: "2px solid #C9A96E",
+              padding: "14px 24px", display: "flex", alignItems: "center", justifyContent: "center", gap: "12px",
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: "50%", background: "rgba(201,169,110,0.2)", flexShrink: 0 }}>
-              <Check size={14} color="#C9A96E" />
-            </div>
+            <Check size={14} color="#C9A96E" />
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "14px", color: "#F5F0EB", margin: 0 }}>
               <span style={{ color: "#C9A96E", fontWeight: 600 }}>Booking confirmed.</span>{" "}
               You'll receive a confirmation email shortly.
             </p>
             <button
               onClick={() => setShowBookingSuccess(false)}
-              style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", padding: 4, color: "#888", flexShrink: 0 }}
+              style={{ marginLeft: "auto", background: "none", border: "none", cursor: "pointer", padding: 4, color: "#C9A96E", flexShrink: 0 }}
               aria-label="Dismiss"
             >
               <X size={16} />
@@ -66,33 +63,19 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Floating WhatsApp button */}
       <a
         href="https://wa.me/447535173072"
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat on WhatsApp"
         style={{
-          position: "fixed",
-          bottom: "24px",
-          right: "24px",
-          zIndex: 9000,
-          width: "52px",
-          height: "52px",
-          borderRadius: "50%",
-          background: "#25D366",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 4px 16px rgba(37,211,102,0.45)",
-          transition: "transform 0.2s, box-shadow 0.2s",
+          position: "fixed", bottom: "24px", right: "24px", zIndex: 9000,
+          width: "52px", height: "52px", borderRadius: "50%", background: "#25D366",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          boxShadow: "0 4px 16px rgba(37,211,102,0.45)", transition: "transform 0.2s",
         }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.08)";
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)";
-        }}
+        onMouseEnter={(e) => ((e.currentTarget as HTMLAnchorElement).style.transform = "scale(1.08)")}
+        onMouseLeave={(e) => ((e.currentTarget as HTMLAnchorElement).style.transform = "scale(1)")}
       >
         <svg viewBox="0 0 24 24" fill="white" width="26" height="26" aria-hidden="true">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/>
@@ -102,40 +85,17 @@ export default function Home() {
 
       <Navbar />
 
-      {/* 1. Hero */}
       <Hero />
-
-      {/* 2. Trust Ticker */}
-      <TrustTicker />
-
-      {/* 3. About */}
       <About />
-
-      {/* 4. Services */}
+      <TrustTicker />
+      <Locations />
       <Services />
-
-      {/* 5. Packages */}
-      <Packages />
-
-      {/* 6. Pricing */}
-      <Pricing />
-
-      {/* 7. Gallery */}
-      <FacesGallery />
-
-      {/* 8. Reviews */}
+      <BeforeAfter />
+      <ResultsVideos />
+      <Training />
       <Reviews />
-
-      {/* 9. FAQ */}
       <FAQ />
-
-      {/* 10. CTA Banner */}
       <CTABanner />
-
-      {/* 11. Contact */}
-      <Contact />
-
-      {/* Footer */}
       <Footer />
     </div>
   );

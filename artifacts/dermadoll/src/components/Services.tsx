@@ -1,250 +1,292 @@
-import { useState, useRef } from "react";
-import { motion } from "framer-motion";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import ConsultationModal from "./ConsultationModal";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronUp, ChevronDown } from "lucide-react";
+import BookingModal from "./BookingModal";
 
-interface ServiceCard {
+interface Treatment {
+  id: string;
   name: string;
-  description: string;
-  from: string;
+  display: string;
+  duration: string;
+  price: string;
 }
 
-const services: ServiceCard[] = [
-  {
-    name: "Dermal Fillers",
-    description: "Lip, cheek, jaw, chin, tear trough and nose filler using premium hyaluronic acid.",
-    from: "From £100",
-  },
-  {
-    name: "Anti-Wrinkle",
-    description: "Smooth expression lines and lift the brow with precision toxin placement.",
-    from: "From £140",
-  },
-  {
-    name: "Skin Boosters",
-    description: "Profhilo, Seventy Hyal, Jalupro and Lumi Eyes for deep skin hydration.",
-    from: "From £100",
-  },
-  {
-    name: "Polynucleotides",
-    description: "PDRN treatments for skin regeneration and quality improvement.",
-    from: "From £120",
-  },
-  {
-    name: "Medical Facials",
-    description: "Dermaplaning and microneedling with Salmon DNA for glowing skin.",
-    from: "From £30",
-  },
-  {
-    name: "Vitamin Injections",
-    description: "B12 injections for an energy and wellness boost.",
-    from: "From £25",
-  },
-];
-
-function Eyebrow({ label }: { label: string }) {
-  return (
-    <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
-      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-    </div>
-  );
+interface TreatmentGroup {
+  group: string;
+  items: { subname: string; treatments: Treatment[] }[];
 }
+
+const SERVICES: Record<"hornchurch" | "marylebone", TreatmentGroup[]> = {
+  hornchurch: [
+    {
+      group: "SIGNATURE TREATMENTS",
+      items: [
+        {
+          subname: "NaturalèLips™",
+          treatments: [
+            { id: "nl-05", name: "NaturalèLips™ 0.5ml", display: "0.5ml", duration: "45 mins", price: "£140" },
+            { id: "nl-08", name: "NaturalèLips™ 0.8ml", display: "0.8ml", duration: "45 mins", price: "£185" },
+            { id: "nl-11", name: "NaturalèLips™ 1.1ml", display: "1.1ml", duration: "45 mins", price: "£200" },
+          ],
+        },
+        {
+          subname: "HD Sculpt Lips",
+          treatments: [
+            { id: "hd-08", name: "HD Sculpt Lips 0.8ml", display: "0.8ml", duration: "1 hr", price: "£195" },
+            { id: "hd-11", name: "HD Sculpt Lips 1.1ml", display: "1.1ml", duration: "1 hr", price: "£225" },
+          ],
+        },
+      ],
+    },
+    {
+      group: "DERMAL FILLERS",
+      items: [
+        {
+          subname: "Facial Contouring",
+          treatments: [
+            { id: "fc-cheek", name: "Cheek Filler", display: "Cheek Filler", duration: "45 mins", price: "£180" },
+            { id: "fc-jaw", name: "Jaw Filler", display: "Jaw Filler", duration: "45 mins", price: "£180" },
+            { id: "fc-chin", name: "Chin Filler", display: "Chin Filler", duration: "30 mins", price: "£150" },
+            { id: "fc-tt", name: "Tear Trough", display: "Tear Trough", duration: "45 mins", price: "£220" },
+          ],
+        },
+      ],
+    },
+    {
+      group: "SKIN TREATMENTS",
+      items: [
+        {
+          subname: "Injectables",
+          treatments: [
+            { id: "sb-prof", name: "Profhilo (2-session course)", display: "Profhilo", duration: "30 mins", price: "£280" },
+            { id: "sb-pdrn", name: "Polynucleotides", display: "Polynucleotides", duration: "45 mins", price: "£180" },
+            { id: "sb-lumi", name: "Lumi Eyes", display: "Lumi Eyes", duration: "30 mins", price: "£150" },
+          ],
+        },
+        {
+          subname: "Facials",
+          treatments: [
+            { id: "skin-dp", name: "Dermaplaning", display: "Dermaplaning", duration: "45 mins", price: "£55" },
+            { id: "skin-mn", name: "Microneedling", display: "Microneedling", duration: "1 hr", price: "£120" },
+          ],
+        },
+      ],
+    },
+    {
+      group: "ANTI-WRINKLE",
+      items: [
+        {
+          subname: "Toxin Treatments",
+          treatments: [
+            { id: "aw-1", name: "Anti-Wrinkle — 1 Area", display: "1 Area", duration: "20 mins", price: "£140" },
+            { id: "aw-2", name: "Anti-Wrinkle — 2 Areas", display: "2 Areas", duration: "20 mins", price: "£170" },
+            { id: "aw-3", name: "Anti-Wrinkle — 3 Areas", display: "3 Areas", duration: "30 mins", price: "£200" },
+            { id: "aw-lb", name: "Lip Blush Tox", display: "Lip Blush Tox", duration: "20 mins", price: "£80" },
+          ],
+        },
+      ],
+    },
+  ],
+  marylebone: [
+    {
+      group: "SIGNATURE TREATMENTS",
+      items: [
+        {
+          subname: "NaturalèLips™",
+          treatments: [
+            { id: "m-nl-05", name: "NaturalèLips™ 0.5ml", display: "0.5ml", duration: "45 mins", price: "£160" },
+            { id: "m-nl-08", name: "NaturalèLips™ 0.8ml", display: "0.8ml", duration: "45 mins", price: "£205" },
+            { id: "m-nl-11", name: "NaturalèLips™ 1.1ml", display: "1.1ml", duration: "45 mins", price: "£220" },
+          ],
+        },
+        {
+          subname: "HD Sculpt Lips",
+          treatments: [
+            { id: "m-hd-08", name: "HD Sculpt Lips 0.8ml", display: "0.8ml", duration: "1 hr", price: "£215" },
+            { id: "m-hd-11", name: "HD Sculpt Lips 1.1ml", display: "1.1ml", duration: "1 hr", price: "£245" },
+          ],
+        },
+      ],
+    },
+    {
+      group: "DERMAL FILLERS",
+      items: [
+        {
+          subname: "Facial Contouring",
+          treatments: [
+            { id: "m-fc-cheek", name: "Cheek Filler", display: "Cheek Filler", duration: "45 mins", price: "£200" },
+            { id: "m-fc-jaw", name: "Jaw Filler", display: "Jaw Filler", duration: "45 mins", price: "£200" },
+            { id: "m-fc-chin", name: "Chin Filler", display: "Chin Filler", duration: "30 mins", price: "£170" },
+            { id: "m-fc-tt", name: "Tear Trough", display: "Tear Trough", duration: "45 mins", price: "£240" },
+          ],
+        },
+      ],
+    },
+    {
+      group: "SKIN TREATMENTS",
+      items: [
+        {
+          subname: "Injectables",
+          treatments: [
+            { id: "m-sb-prof", name: "Profhilo (2-session course)", display: "Profhilo", duration: "30 mins", price: "£300" },
+            { id: "m-sb-pdrn", name: "Polynucleotides", display: "Polynucleotides", duration: "45 mins", price: "£200" },
+            { id: "m-sb-lumi", name: "Lumi Eyes", display: "Lumi Eyes", duration: "30 mins", price: "£170" },
+          ],
+        },
+      ],
+    },
+    {
+      group: "ANTI-WRINKLE",
+      items: [
+        {
+          subname: "Toxin Treatments",
+          treatments: [
+            { id: "m-aw-1", name: "Anti-Wrinkle — 1 Area", display: "1 Area", duration: "20 mins", price: "£160" },
+            { id: "m-aw-2", name: "Anti-Wrinkle — 2 Areas", display: "2 Areas", duration: "20 mins", price: "£190" },
+            { id: "m-aw-3", name: "Anti-Wrinkle — 3 Areas", display: "3 Areas", duration: "30 mins", price: "£220" },
+          ],
+        },
+      ],
+    },
+  ],
+};
 
 export default function Services() {
-  const [consultOpen, setConsultOpen] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const [location, setLocation] = useState<"hornchurch" | "marylebone">("hornchurch");
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(["SIGNATURE TREATMENTS"]));
+  const [bookingTreatment, setBookingTreatment] = useState<{ id: string; name: string; price: string } | null>(null);
 
-  const scroll = (dir: "left" | "right") => {
-    if (!scrollRef.current) return;
-    const amount = 340;
-    scrollRef.current.scrollBy({ left: dir === "left" ? -amount : amount, behavior: "smooth" });
+  const toggleGroup = (group: string) => {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(group)) next.delete(group);
+      else next.add(group);
+      return next;
+    });
   };
 
+  const services = SERVICES[location];
+
   return (
-    <section id="services" style={{ background: "#F5F0EB", padding: "100px 0", position: "relative", overflow: "hidden" }}>
-
-      {/* Background decorative layer */}
-      {/* Large "N" watermark — top right */}
-      <div style={{
-        position: "absolute", top: "-60px", right: "-40px",
-        fontFamily: "'Cormorant Garamond', serif", fontSize: "28rem", fontWeight: 700,
-        color: "#C9A96E", opacity: 0.04, lineHeight: 1, userSelect: "none", pointerEvents: "none",
-        letterSpacing: "-0.05em",
-      }}>N</div>
-
-      {/* Soft radial amber glow — bottom left */}
-      <div style={{
-        position: "absolute", bottom: "-80px", left: "-80px",
-        width: 400, height: 400,
-        background: "radial-gradient(circle, rgba(201,169,110,0.08) 0%, transparent 70%)",
-        pointerEvents: "none",
-      }} />
-
-      {/* Scattered ✦ ornaments */}
-      {[
-        { top: "12%", left: "6%", size: "1.1rem", opacity: 0.13 },
-        { top: "70%", left: "3%", size: "0.7rem", opacity: 0.09 },
-        { top: "30%", right: "5%", size: "0.85rem", opacity: 0.11 },
-        { top: "80%", right: "8%", size: "1.3rem", opacity: 0.08 },
-        { top: "55%", left: "50%", size: "0.6rem", opacity: 0.07 },
-      ].map((pos, i) => (
-        <div key={i} style={{
-          position: "absolute", ...pos as any,
-          fontFamily: "'Cormorant Garamond', serif",
-          fontSize: pos.size, color: "#C9A96E", opacity: pos.opacity,
-          pointerEvents: "none", userSelect: "none",
-        }}>✦</div>
-      ))}
-
-      {/* Thin horizontal rule lines — decorative */}
-      <div style={{
-        position: "absolute", top: 48, left: "50%", transform: "translateX(-50%)",
-        width: "60%", height: 1, background: "linear-gradient(to right, transparent, rgba(201,169,110,0.15), transparent)",
-        pointerEvents: "none",
-      }} />
-      <div style={{
-        position: "absolute", bottom: 48, left: "50%", transform: "translateX(-50%)",
-        width: "60%", height: 1, background: "linear-gradient(to right, transparent, rgba(201,169,110,0.15), transparent)",
-        pointerEvents: "none",
-      }} />
-
-      <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 24px", position: "relative", zIndex: 1 }}>
+    <section id="services" style={{ background: "#FFFFFF", padding: "100px 0" }}>
+      <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 32px" }}>
 
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          style={{ textAlign: "center", marginBottom: 56 }}
+          style={{ textAlign: "center", marginBottom: 48 }}
         >
-          <Eyebrow label="TREATMENTS" />
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#3D3D3D", margin: "0 0 12px" }}>
-            What I Offer
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 16 }}>
+            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Treatments</span>
+            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+          </div>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px" }}>
+            Our Services
           </h2>
-          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C9A96E", margin: 0 }}>
-            Every treatment is tailored to you.
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", margin: "0 0 36px" }}>
+            Precision aesthetics tailored to you
           </p>
+
+          <div style={{ display: "inline-flex", gap: 0 }}>
+            {(["hornchurch", "marylebone"] as const).map((loc) => (
+              <button
+                key={loc}
+                onClick={() => setLocation(loc)}
+                style={{
+                  fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase",
+                  padding: "11px 28px", cursor: "pointer", transition: "all 0.2s",
+                  background: location === loc ? "#5C1A1A" : "transparent",
+                  color: location === loc ? "#F5F0EB" : "#5C1A1A",
+                  border: "1px solid #5C1A1A",
+                  marginRight: loc === "hornchurch" ? -1 : 0,
+                }}
+              >
+                {loc === "hornchurch" ? "Hornchurch" : "Marylebone"}
+              </button>
+            ))}
+          </div>
         </motion.div>
 
-        {/* Scroll container */}
-        <div
-          ref={scrollRef}
-          style={{
-            display: "flex",
-            gap: 20,
-            overflowX: "auto",
-            scrollSnapType: "x mandatory",
-            paddingBottom: 16,
-            msOverflowStyle: "none",
-            scrollbarWidth: "none",
-          }}
-        >
-          <style>{`.services-scroll::-webkit-scrollbar { display: none; }`}</style>
-          {services.map((svc, i) => (
-            <motion.div
-              key={svc.name}
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.07 }}
-              style={{
-                minWidth: "clamp(260px, 31%, 320px)",
-                flexShrink: 0,
-                scrollSnapAlign: "start",
-                background: "#FFFFFF",
-                border: "1px solid #E8E2D9",
-                boxShadow: "0 2px 16px rgba(0,0,0,0.05)",
-                padding: "36px 28px",
-                display: "flex",
-                flexDirection: "column",
-              }}
-            >
-              <div style={{ fontSize: 20, color: "#C9A96E", marginBottom: 16 }}>✦</div>
-              <h3 style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: "1.4rem",
-                fontWeight: 600,
-                color: "#3D3D3D",
-                margin: "0 0 12px",
-              }}>
-                {svc.name}
-              </h3>
-              <p style={{
-                fontFamily: "'Inter', sans-serif",
-                fontSize: 13,
-                color: "#737373",
-                lineHeight: 1.7,
-                margin: "0 0 24px",
-                flexGrow: 1,
-              }}>
-                {svc.description}
-              </p>
-              <div style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontStyle: "italic",
-                fontSize: "1.2rem",
-                color: "#C9A96E",
-                marginBottom: 20,
-              }}>
-                {svc.from}
-              </div>
+        <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
+          {services.map((group, gi) => (
+            <div key={group.group}>
               <button
-                onClick={() => setConsultOpen(true)}
+                onClick={() => toggleGroup(group.group)}
                 style={{
-                  background: "transparent",
-                  border: "1px solid #C9A96E",
-                  color: "#3D3D3D",
-                  fontFamily: "'Inter', sans-serif",
-                  fontSize: 10,
-                  letterSpacing: "2px",
-                  textTransform: "uppercase",
-                  padding: "12px 20px",
-                  borderRadius: 0,
-                  cursor: "pointer",
-                  transition: "all 0.2s",
-                  alignSelf: "flex-start",
+                  width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
+                  padding: "16px 0", background: "none", border: "none", borderBottom: "1px solid #E2DDD5",
+                  cursor: "pointer", textAlign: "left",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#3D3D3D"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
               >
-                Book
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2.5px", textTransform: "uppercase", color: "#5C1A1A", fontWeight: 400 }}>
+                  {group.group}
+                </span>
+                {openGroups.has(group.group) ? <ChevronUp size={16} color="#C9A96E" /> : <ChevronDown size={16} color="#C9A96E" />}
               </button>
-            </motion.div>
+
+              <AnimatePresence initial={false}>
+                {openGroups.has(group.group) && (
+                  <motion.div
+                    key="content"
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: "auto", opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    style={{ overflow: "hidden" }}
+                  >
+                    {group.items.map((sub) => (
+                      <div key={sub.subname} style={{ paddingTop: 20, paddingBottom: 8 }}>
+                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#3D3D3D", marginBottom: 8, paddingLeft: 4 }}>
+                          {sub.subname}
+                        </div>
+                        {sub.treatments.map((t) => (
+                          <div
+                            key={t.id}
+                            style={{
+                              display: "flex", alignItems: "center", justifyContent: "space-between",
+                              padding: "14px 16px", background: "#F5F0EB", marginBottom: 2,
+                            }}
+                          >
+                            <div>
+                              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#3D3D3D" }}>{t.display}</span>
+                              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#737373", marginLeft: 12 }}>{t.duration}</span>
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C9A96E" }}>{t.price}</span>
+                              <button
+                                onClick={() => setBookingTreatment({ id: t.id, name: t.name, price: t.price })}
+                                style={{
+                                  fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "1.5px", textTransform: "uppercase",
+                                  border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                                  padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
+                                }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                              >
+                                BOOK
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           ))}
         </div>
-
-        {/* Carousel controls — centred below cards */}
-        <div style={{ display: "flex", justifyContent: "center", gap: 16, marginTop: 32 }}>
-          {[{ dir: "left" as const, icon: <ChevronLeft size={20} /> }, { dir: "right" as const, icon: <ChevronRight size={20} /> }].map(({ dir, icon }) => (
-            <button
-              key={dir}
-              onClick={() => scroll(dir)}
-              style={{
-                width: 48,
-                height: 48,
-                borderRadius: "50%",
-                border: "1.5px solid #C9A96E",
-                background: "transparent",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                cursor: "pointer",
-                color: "#3D3D3D",
-                transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#3D3D3D"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
-            >
-              {icon}
-            </button>
-          ))}
-        </div>
-
       </div>
 
-      {consultOpen && <ConsultationModal onClose={() => setConsultOpen(false)} />}
+      {bookingTreatment && (
+        <BookingModal
+          treatment={{ name: bookingTreatment.name, price: bookingTreatment.price }}
+          onClose={() => setBookingTreatment(null)}
+        />
+      )}
     </section>
   );
 }

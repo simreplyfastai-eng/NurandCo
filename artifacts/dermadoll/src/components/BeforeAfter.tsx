@@ -54,167 +54,58 @@ export default function BeforeAfter() {
   return (
     <>
       <section
-        style={{
-          padding: "100px 0",
-          background: "#F5F0EB",
-          position: "relative",
-          overflow: "hidden",
-        }}
+        id="results"
+        style={{ padding: "100px 0", background: "#F5F0EB" }}
       >
-        {/* Top-left decorative cross */}
-        <span
-          style={{
-            position: "absolute",
-            top: 40,
-            left: 40,
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 32,
-            color: "#C9A96E",
-            opacity: 0.4,
-            lineHeight: 1,
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-          aria-hidden="true"
-        >
-          +
-        </span>
+        <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 32px" }}>
 
-        {/* Bottom-right decorative cross */}
-        <span
-          style={{
-            position: "absolute",
-            bottom: 40,
-            right: 40,
-            fontFamily: "'Cormorant Garamond', serif",
-            fontSize: 32,
-            color: "#C9A96E",
-            opacity: 0.4,
-            lineHeight: 1,
-            pointerEvents: "none",
-            userSelect: "none",
-          }}
-          aria-hidden="true"
-        >
-          +
-        </span>
-
-        <div className="container mx-auto px-6 max-w-5xl">
-
-          {/* Heading block */}
-          <div className="text-center mb-20">
-            {/* Eyebrow */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}
-            >
-              <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>RESULTS</span>
-              <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-            </motion.div>
-
-            <motion.h2
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: "easeOut" }}
-              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#3D3D3D", margin: "0 0 12px" }}
-            >
-              Real Results
-            </motion.h2>
-
-            <motion.p
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
-              style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C9A96E", margin: "0 0 8px" }}
-            >
-              Every result is real. Every client is unique.
-            </motion.p>
-          </div>
-
-          {/* Grid wrapper */}
-          <div style={{ position: "relative" }}>
-
-            {/* Faint gold circle behind grid */}
-            <div
-              aria-hidden="true"
-              style={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                width: 500,
-                height: 500,
-                border: "1px solid #C9A96E",
-                borderRadius: "50%",
-                opacity: 0.06,
-                pointerEvents: "none",
-                zIndex: 0,
-              }}
-            />
-
-            <div
-              className="py-12"
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: "12px",
-                position: "relative",
-                zIndex: 1,
-              }}
-            >
-              {results.map((item, i) => (
-                <motion.div
-                  key={item.key}
-                  initial={{ opacity: 0, y: 40 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: IMAGE_DELAYS[i], duration: 0.6, ease: "easeOut" }}
-                  whileHover={{
-                    y: -4,
-                    boxShadow: "0 8px 24px rgba(201,169,110,0.2)",
-                  }}
-                  onClick={() => setLightbox(resolvedSrc(item.src))}
-                  style={{
-                    justifySelf: "center",
-                    width: "100%",
-                    maxWidth: "420px",
-                    borderRadius: "12px",
-                    border: "2px solid #C9A96E",
-                    overflow: "hidden",
-                    cursor: "zoom-in",
-                    transition: "border-color 0.3s ease, box-shadow 0.3s ease",
-                    position: "relative",
-                  }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "#B8934A";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.borderColor = "#C9A96E";
-                  }}
-                >
-                  <div style={{ aspectRatio: "1 / 1", width: "100%", overflow: "hidden" }}>
-                    <img
-                      src={resolvedSrc(item.src)}
-                      alt={item.label}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                        display: "block",
-                      }}
-                    />
-                  </div>
-                </motion.div>
-              ))}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            style={{ textAlign: "center", marginBottom: 56 }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
+              <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Real Results</span>
+              <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
             </div>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px" }}>
+              Real Transformations
+            </h2>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", margin: 0 }}>
+              Natural. Tailored. Uniquely yours.
+            </p>
+          </motion.div>
 
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            {results.map((item, i) => (
+              <motion.div
+                key={item.key}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: IMAGE_DELAYS[i], duration: 0.6 }}
+                onClick={() => setLightbox(resolvedSrc(item.src))}
+                style={{ cursor: "zoom-in", position: "relative" }}
+              >
+                <div style={{ aspectRatio: "1 / 1", width: "100%", overflow: "hidden", background: "#E8E2D9" }}>
+                  <img
+                    src={resolvedSrc(item.src)}
+                    alt={item.label}
+                    style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.4s ease" }}
+                    onMouseEnter={(e) => ((e.currentTarget as HTMLImageElement).style.transform = "scale(1.04)")}
+                    onMouseLeave={(e) => ((e.currentTarget as HTMLImageElement).style.transform = "scale(1)")}
+                  />
+                </div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", color: "#737373", marginTop: 8 }}>
+                  {item.label}
+                </div>
+              </motion.div>
+            ))}
           </div>
+
         </div>
       </section>
 

@@ -24,9 +24,11 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 ## Artifacts
 
 ### Starr Aesthetics (`artifacts/dermadoll`)
-Single-page luxury aesthetics clinic website with admin portal.
-- **Public site**: `/` — hero video, treatments accordion, before/after grid, booking modal
-- **Admin portal**: `/portal.html` — Starr Aesthetics rebrand (burgundy #5C1A1A, gold #C9A96E, cream #F5F0EB palette; Cormorant Garamond + Inter; 0 border-radius; location selector for Hornchurch / Marylebone)
+Single-page luxury aesthetics clinic website with admin portal. Founder: **Eva**. Two clinic locations: Hornchurch (Essex RM11) + Marylebone (London W1G). Signature: NaturalèLips™ technique.
+- **Design tokens**: Burgundy #5C1A1A · Gold #C9A96E · Cream #F5F0EB. Fonts: Cormorant Garamond (italic headings) + Inter (body). 0 border-radius, outlined buttons only.
+- **Brand**: Instagram @starraestheticss · Website www.starrbeautyy.co.uk · Email starrbeautyyltd@gmail.com
+- **Page sections** (in order): Navbar (SERVICES | LOCATIONS | TRAINING + BOOK NOW) → Hero (split cream/photo) → About (Eva founder, 6+ yrs, NL™ stats) → TreatmentMarquee (THE EDIT, dual scrolling rows) → Locations (Hornchurch/Marylebone cards) → Services (accordion with location toggle, per-location pricing) → BeforeAfter (Real Transformations grid) → ResultsVideos (Watch Real Treatments) → Training (Starr Academy, Essex/London masterclasses) → Reviews (6-card grid, CLIENT LOVE) → FAQ (NaturalèLips™ questions) → CTABanner (BOOK HORNCHURCH / BOOK MARYLEBONE) → Footer (Beauty Redefined, clean)
+- **Admin portal**: `/portal.html` — Starr Aesthetics rebrand; location selector for Hornchurch / Marylebone; localStorage uses fbn_ prefix (backward compat)
 
 ### API Server (`artifacts/api-server`)
 Express 5 REST API on port 8080. All routes prefixed `/api/`.
