@@ -381,7 +381,8 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
         // Reserve the booking slot FIRST — never take payment for an unsaved booking
         const price = parsePrice(treatment?.price ?? "0");
-        const depositAmount = 50; // flat £50 deposit for all treatments
+        const INJECTABLES = ['filler','lips','rhinoplasty','jaw','cheek','smile line','tear trough','polynucleotides','dissolve','hydration','naturale','hd sculpt','contouring','consultation','refill'];
+        const depositAmount = INJECTABLES.some(kw => (treatment?.name ?? "").toLowerCase().includes(kw)) ? 20 : 10;
         const pendingBookingId = uid();
         pendingBookingIdRef.current = pendingBookingId;
 
@@ -546,7 +547,17 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
   if (!treatment) return null;
 
   const price = parsePrice(treatment.price);
-  const deposit = serverDepositPence !== null ? Math.round(serverDepositPence / 100) : 50;
+  // Client-side injectable keyword detection — mirrors server logic in treatments.ts
+  const INJECTABLE_KEYWORDS = [
+    'filler', 'lips', 'rhinoplasty', 'jaw', 'cheek', 'smile line',
+    'tear trough', 'polynucleotides', 'dissolve', 'hydration',
+    'naturale', 'hd sculpt', 'contouring', 'consultation', 'refill',
+  ];
+  const isInjectable = INJECTABLE_KEYWORDS.some(kw =>
+    (treatment.name ?? "").toLowerCase().includes(kw)
+  );
+  const estimatedDeposit = isInjectable ? 20 : 10;
+  const deposit = serverDepositPence !== null ? Math.round(serverDepositPence / 100) : estimatedDeposit;
   const balance = price - deposit;
 
   // Compute available slots — 15-min grid, duration-aware, back-to-back

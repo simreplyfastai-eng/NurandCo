@@ -934,21 +934,20 @@ select.form-input{background:var(--color-card)}
           <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
             <div>
               <div class="avail-card-title">Deposit Settings</div>
-              <div class="avail-card-sub">Set the deposit amount clients pay when booking at this location.</div>
+              <div class="avail-card-sub">Fixed deposit amounts charged at the time of booking.</div>
             </div>
             <button class="btn-gold" onclick="saveDepositSettings()">Save Deposit</button>
           </div>
-          <div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap">
+          <div style="display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap">
             <div>
-              <div class="avail-section-label" style="margin-bottom:5px">Deposit Type</div>
-              <select id="dep-type" class="bs-select" onchange="updateDepositLabel()">
-                <option value="fixed">Fixed Amount (£)</option>
-                <option value="percent">Percentage (%)</option>
-              </select>
+              <div class="avail-section-label" style="margin-bottom:5px">Injectables deposit (£)</div>
+              <input type="number" id="dep-injectables" class="avail-time-input" style="width:100px;padding:8px 10px" min="1" max="999" value="20">
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">Fillers, lips, rhinoplasty, etc.</div>
             </div>
             <div>
-              <div class="avail-section-label" style="margin-bottom:5px" id="dep-value-label">Amount (£)</div>
-              <input type="number" id="dep-value" class="avail-time-input" style="width:100px;padding:8px 10px" min="1" max="999" value="50">
+              <div class="avail-section-label" style="margin-bottom:5px">Other treatments deposit (£)</div>
+              <input type="number" id="dep-other" class="avail-time-input" style="width:100px;padding:8px 10px" min="1" max="999" value="10">
+              <div style="font-size:11px;color:var(--muted);margin-top:4px">Anti-wrinkle, facials, etc.</div>
             </div>
           </div>
           <div id="dep-status" style="display:none;font-family:var(--font-sans);font-size:12px;margin-top:12px"></div>
@@ -1107,7 +1106,22 @@ select.form-input{background:var(--color-card)}
         <div class="settings-section">
           <div class="settings-section-header">Booking Settings</div>
           <div class="settings-body">
-            <div class="settings-row"><label>Deposit %</label><input type="number" id="s-deposit" value="30" min="1" max="100" style="width:80px;flex:unset"/><span style="font-size:12px;color:var(--muted)">Percentage of treatment price charged as deposit on booking (e.g. 30 = 30%)</span></div>
+            <div class="settings-row">
+              <label>Injectable deposit</label>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:14px;color:var(--color-foreground)">£</span>
+                <input type="number" id="s-deposit-injectables" value="20" min="1" max="999" style="width:70px;flex:unset"/>
+              </div>
+              <span style="font-size:12px;color:var(--muted)">Fixed deposit for injectables (fillers, lips, rhinoplasty, etc.)</span>
+            </div>
+            <div class="settings-row">
+              <label>Other treatments deposit</label>
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:14px;color:var(--color-foreground)">£</span>
+                <input type="number" id="s-deposit-other" value="10" min="1" max="999" style="width:70px;flex:unset"/>
+              </div>
+              <span style="font-size:12px;color:var(--muted)">Fixed deposit for all other treatments (anti-wrinkle, facials, etc.)</span>
+            </div>
             <div class="settings-row" style="align-items:flex-start"><label>Confirmation msg</label><textarea id="s-confirm-msg" rows="3" style="flex:1;padding:8px 12px;border:1px solid var(--color-border);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;resize:vertical;background:transparent;color:var(--color-foreground);outline:none">Thank you for booking with Starr Aesthetics. We'll be in touch to confirm your appointment shortly.</textarea></div>
             <div class="settings-row"><label>Notify email</label><input type="email" id="s-notify-email" placeholder="admin@starraesthetics.co.uk"/></div>
           </div>
@@ -2517,34 +2531,26 @@ async function loadDepositSettings(){
   const locId=sessionStorage.getItem('starr_location_id');
   if(!locId)return;
   try{
-    const res=await fetch('/api/admin/deposit-settings',{headers:authHdr()});
-    if(!res.ok)return;
-    const data=await res.json();
-    const typeEl=document.getElementById('dep-type');
-    const valEl=document.getElementById('dep-value');
-    if(typeEl)typeEl.value=data.deposit_type||'fixed';
-    if(valEl)valEl.value=String(data.deposit_value||50);
-    updateDepositLabel();
+    const s=await CloudStore.get('fbn_settings')||{};
+    const injEl=document.getElementById('dep-injectables');
+    const otherEl=document.getElementById('dep-other');
+    if(injEl)injEl.value=String(s.depositInjectables??20);
+    if(otherEl)otherEl.value=String(s.depositOther??10);
   }catch(e){console.error('loadDepositSettings',e);}
-}
-function updateDepositLabel(){
-  const typeEl=document.getElementById('dep-type');
-  const lblEl=document.getElementById('dep-value-label');
-  if(!typeEl||!lblEl)return;
-  lblEl.textContent=typeEl.value==='percent'?'Percentage (%)':'Amount (£)';
 }
 async function saveDepositSettings(){
   const locId=sessionStorage.getItem('starr_location_id');
   if(!locId){showToast('No location selected');return;}
-  const typeEl=document.getElementById('dep-type');
-  const valEl=document.getElementById('dep-value');
+  const injEl=document.getElementById('dep-injectables');
+  const otherEl=document.getElementById('dep-other');
   const statEl=document.getElementById('dep-status');
-  const deposit_type=typeEl?typeEl.value:'fixed';
-  const deposit_value=Number(valEl?valEl.value:50);
-  if(!deposit_value||deposit_value<1){showToast('Enter a valid deposit amount');return;}
+  const depositInjectables=Number(injEl?injEl.value:20);
+  const depositOther=Number(otherEl?otherEl.value:10);
+  if(!depositInjectables||depositInjectables<1||!depositOther||depositOther<1){showToast('Enter valid deposit amounts');return;}
   try{
-    const res=await fetch('/api/admin/deposit-settings',{method:'PUT',headers:{...authHdr(),'Content-Type':'application/json'},body:JSON.stringify({deposit_type,deposit_value})});
-    if(!res.ok){const e=await res.json().catch(()=>({}));showToast('Error: '+(e.error||res.status));return;}
+    const existing=await CloudStore.get('fbn_settings')||{};
+    const updated={...existing,depositInjectables,depositOther};
+    await CloudStore.set('fbn_settings',updated);
     if(statEl){statEl.style.display='block';statEl.style.color='var(--color-secondary)';statEl.textContent='\u2713 Deposit settings saved';}
     showToast('\u2713 Deposit settings saved');
     setTimeout(()=>{if(statEl)statEl.style.display='none';},3000);
@@ -4240,7 +4246,8 @@ function populateSettingsForm(){
   set('s-practitioner',s.practitioner);
   set('s-instagram',s.instagram);
   set('s-whatsapp',s.whatsapp);
-  set('s-deposit',s.depositPercent??s.deposit);
+  set('s-deposit-injectables',s.depositInjectables??20);
+  set('s-deposit-other',s.depositOther??10);
   set('s-confirm-msg',s.confirmMsg);
   set('s-notify-email',s.notifyEmail);
 }
@@ -4251,7 +4258,8 @@ async function saveSettings(){
     practitioner:document.getElementById('s-practitioner').value,
     instagram:document.getElementById('s-instagram').value,
     whatsapp:document.getElementById('s-whatsapp').value,
-    depositPercent:Number(document.getElementById('s-deposit').value)||30,
+    depositInjectables:Number(document.getElementById('s-deposit-injectables').value)||20,
+    depositOther:Number(document.getElementById('s-deposit-other').value)||10,
     confirmMsg:document.getElementById('s-confirm-msg').value,
     notifyEmail:document.getElementById('s-notify-email').value,
   };

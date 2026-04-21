@@ -184,6 +184,32 @@ export function getTreatmentCategory(treatmentName: string): string {
   return TREATMENT_CATEGORIES[treatmentName] ?? "";
 }
 
+// ── Deposit helpers ──────────────────────────────────────────────────────────
+
+const INJECTABLE_KEYWORDS = [
+  'filler', 'lips', 'rhinoplasty', 'jaw', 'cheek', 'smile line',
+  'tear trough', 'polynucleotides', 'dissolve', 'hydration',
+  'naturale', 'hd sculpt', 'contouring', 'consultation', 'refill',
+];
+
+export function isInjectableTreatment(treatmentName: string): boolean {
+  const lower = treatmentName.toLowerCase();
+  return INJECTABLE_KEYWORDS.some(kw => lower.includes(kw));
+}
+
+/**
+ * Returns the fixed deposit amount (£) for a treatment.
+ * Injectables = depositInjectables (default £20), everything else = depositOther (default £10).
+ */
+export function getDepositAmount(
+  treatmentName: string,
+  settings: { depositInjectables?: number; depositOther?: number },
+): number {
+  return isInjectableTreatment(treatmentName)
+    ? (settings.depositInjectables ?? 20)
+    : (settings.depositOther ?? 10);
+}
+
 /** Returns minutes since midnight for a "HH:MM" string */
 export function timeToMins(t: string): number {
   const [h, m] = t.split(":").map(Number);

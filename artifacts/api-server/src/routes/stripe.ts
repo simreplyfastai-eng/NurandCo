@@ -8,6 +8,7 @@ import Stripe from "stripe";
 import { supabaseAdmin } from "../lib/supabase";
 import { sendClientConfirmationEmail, sendAdminNotificationEmail } from "../lib/email";
 import { upsertClientFromBooking } from "./clients";
+import { getDepositAmount } from "../lib/treatments";
 import { ukDateStr } from "../lib/tz";
 
 const router = Router();
@@ -83,23 +84,19 @@ async function getTreatmentInfo(
 // ── helpers ─────────────────────────────────────────────────────────────────
 
 /**
- * Deposit settings come from dd_settings.depositPercent in portal_kv.
- * Falls back to 30% if not set. A value of 100 means full payment required.
+ * Returns fixed deposit amounts from dd_settings in portal_kv.
+ * Injectables default £20, everything else default £10.
  */
-async function getDepositSettings(locationId: string): Promise<{ deposit_type: "percent" | "fixed"; deposit_value: number }> {
+async function getDepositSettings(locationId: string): Promise<{ depositInjectables: number; depositOther: number }> {
   try {
     const settings = await getLocationSettings(locationId);
-    const pct = Number(settings.depositPercent ?? settings.deposit ?? 0);
-    if (pct > 0) return { deposit_type: "percent", deposit_value: pct };
-    // Also check deposit_settings table as fallback
-    const { data } = await supabaseAdmin
-      .from("deposit_settings")
-      .select("deposit_type, deposit_value")
-      .eq("location_id", locationId)
-      .maybeSingle();
-    if (data) return { deposit_type: data.deposit_type as "percent" | "fixed", deposit_value: Number(data.deposit_value ?? 30) };
+    const inj = Number(settings.depositInjectables ?? 0);
+    const other = Number(settings.depositOther ?? 0);
+    if (inj > 0 || other > 0) {
+      return { depositInjectables: inj || 20, depositOther: other || 10 };
+    }
   } catch { /* fall through */ }
-  return { deposit_type: "percent", deposit_value: 30 };
+  return { depositInjectables: 20, depositOther: 10 };
 }
 
 async function upsertSupabaseClient(params: {
@@ -214,18 +211,10 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
     return res.status(400).json({ error: "Unknown treatment. Please refresh and try again." });
   }
 
-  const isConsultation = treatment.toLowerCase().includes("consultation");
-  let depositAmountPence = 5000;
-  if (isConsultation) {
-    depositAmountPence = Math.round(treatmentPrice * 100);
-  } else if (locationId) {
-    const depSettings = await getDepositSettings(locationId);
-    if (depSettings.deposit_type === "percent") {
-      depositAmountPence = Math.max(100, Math.round(treatmentPrice * depSettings.deposit_value / 100 * 100));
-    } else {
-      depositAmountPence = Math.round(depSettings.deposit_value * 100);
-    }
-  }
+  const depSettings = locationId
+    ? await getDepositSettings(locationId)
+    : { depositInjectables: 20, depositOther: 10 };
+  const depositAmountPence = Math.max(100, Math.round(getDepositAmount(treatment, depSettings) * 100));
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
