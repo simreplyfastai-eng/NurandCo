@@ -152,7 +152,7 @@ export default function Footer() {
           </span>
         </a>
 
-        <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.15rem", color: "#737373", margin: "0 0 40px" }}>
+        <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.15rem", color: "#5C1A1A", margin: "0 0 40px" }}>
           Beauty Redefined
         </p>
 
