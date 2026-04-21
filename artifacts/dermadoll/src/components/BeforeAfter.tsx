@@ -83,7 +83,7 @@ export default function BeforeAfter() {
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px" }}>
               Real Transformations
             </h2>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", margin: 0 }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#C9A96E", margin: 0 }}>
               Natural. Tailored. Uniquely yours.
             </p>
           </motion.div>

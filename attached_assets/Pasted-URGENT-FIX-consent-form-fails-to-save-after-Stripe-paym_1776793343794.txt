@@ -1,0 +1,148 @@
+URGENT FIX — consent form fails to save after 
+Stripe payment redirect.
+
+The /forms page only loads after Stripe payment 
+so we cannot test manually without a real payment.
+Fix this proactively by reading the code carefully.
+
+The Supabase consent_forms table has these 
+NOT NULL columns that MUST be provided on insert:
+  location_id (uuid)
+  client_email (text)
+  client_name (text)
+  treatment_name (text)
+  treatment_date (date)
+
+The booking_id is nullable so that is not the issue.
+
+DO THIS:
+
+1. Find the POST /api/forms/consent handler
+
+2. When the consent form is submitted the 
+   bookingId is passed in the request body.
+   
+   Use it to look up the full booking first:
+   
+   const { data: booking } = await supabaseAdmin
+     .from('bookings')
+     .select('*')
+     .eq('id', bookingId)
+     .single()
+   
+   if (!booking) return res.status(404)
+     .json({ error: 'Booking not found' })
+
+3. Build the insert payload using the booking data 
+   to fill in all NOT NULL fields:
+   
+   const insertData = {
+     location_id: booking.location_id,
+     booking_id: bookingId,
+     client_email: booking.client_email,
+     client_name: booking.client_name,
+     treatment_name: booking.treatment_name,
+     treatment_date: booking.booking_date,
+     consent_procedure: body.consent_procedure || false,
+     consent_risks: body.consent_risks || false,
+     consent_aftercare: body.consent_aftercare || false,
+     consent_no_guarantee: body.consent_no_guarantee || false,
+     consent_over_18: body.consent_over_18 || false,
+     consent_medical_accurate: body.consent_medical_accurate || false,
+     signature_data: body.signature_data || null,
+     signature_name: body.signature_name || null,
+     ip_address: req.ip || req.headers['x-forwarded-for']
+   }
+
+4. Insert into consent_forms:
+   
+   const { error } = await supabaseAdmin
+     .from('consent_forms')
+     .insert(insertData)
+   
+   if (error) {
+     console.error('Consent form insert error:', error)
+     return res.status(500)
+       .json({ error: 'Failed to save consent form', 
+               details: error.message })
+   }
+
+5. After successful insert update the booking:
+   
+   await supabaseAdmin
+     .from('bookings')
+     .update({ 
+       forms_completed: true,
+       status: 'confirmed'
+     })
+     .eq('id', bookingId)
+
+6. Return success:
+   res.json({ success: true })
+
+ALSO FIX — medical_forms POST handler same way:
+
+   const { data: booking } = await supabaseAdmin
+     .from('bookings')
+     .select('*')
+     .eq('id', bookingId)
+     .single()
+   
+   Use booking.location_id for the medical form insert.
+   
+   Also check if medical form already exists for 
+   this client_email + location_id:
+   
+   const { data: existing } = await supabaseAdmin
+     .from('medical_forms')
+     .select('id')
+     .eq('client_email', booking.client_email)
+     .eq('location_id', booking.location_id)
+     .single()
+   
+   If existing → UPDATE it
+   If not → INSERT new row
+
+ALSO ADD — GET /api/forms/check endpoint:
+
+   GET /api/forms/check?booking=[id]
+   Public — no auth required
+   
+   const { data: booking } = await supabaseAdmin
+     .from('bookings')
+     .select('id, client_name, client_email, 
+       treatment_name, booking_date, booking_time,
+       location_id, forms_completed')
+     .eq('id', bookingId)
+     .single()
+   
+   if (!booking) return res.status(404)
+     .json({ error: 'Booking not found' })
+   
+   const { data: medicalForm } = await supabaseAdmin
+     .from('medical_forms')
+     .select('id')
+     .eq('client_email', booking.client_email)
+     .eq('location_id', booking.location_id)
+     .single()
+   
+   const { data: consentForm } = await supabaseAdmin
+     .from('consent_forms')
+     .select('id')
+     .eq('booking_id', bookingId)
+     .single()
+   
+   res.json({
+     booking,
+     medical_on_file: !!medicalForm,
+     consent_done: !!consentForm
+   })
+
+This endpoint is called by the /forms page on 
+load to decide what to show the client.
+
+After all fixes restart the server and confirm 
+these endpoints exist and return correct responses:
+  GET /api/forms/check?booking=[valid-id]
+  POST /api/forms/medical
+  POST /api/forms/consent
