@@ -19,15 +19,30 @@ function getStripe(): Stripe | null {
   return new Stripe(key, { apiVersion: "2025-02-24.acacia" });
 }
 
-/** Read dd_settings for a location from portal_kv */
+/** Read dd_settings for a specific location from portal_kv */
 async function getLocationSettings(locationId?: string | null): Promise<Record<string, unknown>> {
-  if (!locationId) return {};
+  if (!locationId) return getAnySettings();
   try {
     const { data } = await supabaseAdmin
       .from("portal_kv")
       .select("value")
       .eq("location_id", locationId)
       .eq("key", "dd_settings")
+      .maybeSingle();
+    return (data?.value as Record<string, unknown>) ?? getAnySettings();
+  } catch {
+    return {};
+  }
+}
+
+/** Fallback: read dd_settings from any location (for global config requests) */
+async function getAnySettings(): Promise<Record<string, unknown>> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("portal_kv")
+      .select("value")
+      .eq("key", "dd_settings")
+      .limit(1)
       .maybeSingle();
     return (data?.value as Record<string, unknown>) ?? {};
   } catch {
@@ -163,18 +178,35 @@ async function upsertSupabaseClient(params: {
   }
 }
 
+const IG_ACCOUNTS_DEFAULT = [
+  { handle: "@StarrFacess",      label: "Face Treatments", url: "https://instagram.com/StarrFacess" },
+  { handle: "@StarrAestheticss", label: "Aesthetics",       url: "https://instagram.com/StarrAestheticss" },
+  { handle: "@StarrSuitess",     label: "The Suite",        url: "https://instagram.com/StarrSuitess" },
+  { handle: "@StarrNailedd",     label: "Nails",            url: "https://instagram.com/StarrNailedd" },
+];
+const TT_ACCOUNTS_DEFAULT = [
+  { handle: "@StarrFacess",      label: "Face Treatments", url: "https://tiktok.com/@StarrFacess" },
+  { handle: "@StarrAestheticss", label: "Aesthetics",       url: "https://tiktok.com/@StarrAestheticss" },
+  { handle: "@StarrSuitess",     label: "The Suite",        url: "https://tiktok.com/@StarrSuitess" },
+  { handle: "@StarrNailedd",     label: "Nails",            url: "https://tiktok.com/@StarrNailedd" },
+];
+
 // GET /api/config — public config + checklist
 // ?locationId=<uuid>  optional — returns location-specific whatsapp/depositPercent
 router.get("/config", async (req, res) => {
   const locationId = (req.query.locationId as string | undefined) ??
                      (req.headers["x-location-id"] as string | undefined) ?? null;
   const settings = await getLocationSettings(locationId);
-  const whatsapp = await getWhatsApp(locationId);
+  const whatsapp = await getWhatsApp(locationId) || String(settings.whatsapp ?? "447701298985");
   const depositPercent = Number(settings.depositPercent ?? settings.deposit ?? 30);
+  const instagramAccounts = Array.isArray(settings.instagramAccounts) ? settings.instagramAccounts : IG_ACCOUNTS_DEFAULT;
+  const tiktokAccounts    = Array.isArray(settings.tiktokAccounts)    ? settings.tiktokAccounts    : TT_ACCOUNTS_DEFAULT;
   return res.json({
     stripePublishableKey: process.env.STRIPE_PUBLISHABLE_KEY ?? "",
     whatsapp,
     depositPercent,
+    instagramAccounts,
+    tiktokAccounts,
     hasStripeSecretKey: !!process.env.STRIPE_SECRET_KEY,
     hasStripePublishableKey: !!process.env.STRIPE_PUBLISHABLE_KEY,
     hasStripeWebhookSecret: !!process.env.STRIPE_WEBHOOK_SECRET,

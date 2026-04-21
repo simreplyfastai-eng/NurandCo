@@ -1,0 +1,210 @@
+The Supabase database has been updated with new 
+data in the past hour. Read all of this carefully 
+and update the code to match. No need to touch 
+Supabase — it's already done. Just make sure the 
+code reads and uses all of it correctly.
+
+===============================================================
+1. WHATSAPP NUMBER UPDATED
+===============================================================
+
+Eva's WhatsApp number is: +44 7701 298985
+Stored in Supabase as: 447701298985
+
+Find every place in the code that has a WhatsApp 
+link or hardcoded old number. Replace ALL of them:
+
+  wa.me/447000000000 → wa.me/447701298985
+  Any other placeholder numbers → 447701298985
+
+The WhatsApp floating button, footer links, 
+booking confirmation, emails, admin portal — 
+every single WhatsApp link must use 447701298985.
+
+The number is also in portal_kv dd_settings under 
+"whatsapp" key — make sure the code reads from 
+there so if Eva updates it in settings it changes 
+everywhere automatically.
+
+===============================================================
+2. INSTAGRAM — NOW 4 ACCOUNTS (NOT 1)
+===============================================================
+
+Supabase portal_kv dd_settings now contains:
+  "instagram": "@StarrAestheticss"
+  "instagramAccounts": [
+    { "handle": "@StarrFacess", "label": "Face Treatments", "url": "https://instagram.com/StarrFacess" },
+    { "handle": "@StarrAestheticss", "label": "Aesthetics", "url": "https://instagram.com/StarrAestheticss" },
+    { "handle": "@StarrSuitess", "label": "The Suite", "url": "https://instagram.com/StarrSuitess" },
+    { "handle": "@StarrNailedd", "label": "Nails", "url": "https://instagram.com/StarrNailedd" }
+  ]
+
+The footer and social sections must read 
+instagramAccounts array from the API and render 
+all 4 — NOT just one hardcoded handle.
+
+===============================================================
+3. TIKTOK — 4 ACCOUNTS ADDED
+===============================================================
+
+Supabase portal_kv dd_settings now contains:
+  "tiktok": "@StarrAestheticss"
+  "tiktokAccounts": [
+    { "handle": "@StarrFacess", "label": "Face Treatments", "url": "https://tiktok.com/@StarrFacess" },
+    { "handle": "@StarrAestheticss", "label": "Aesthetics", "url": "https://tiktok.com/@StarrAestheticss" },
+    { "handle": "@StarrSuitess", "label": "The Suite", "url": "https://tiktok.com/@StarrSuitess" },
+    { "handle": "@StarrNailedd", "label": "Nails", "url": "https://tiktok.com/@StarrNailedd" }
+  ]
+
+TikTok section must be added to the footer 
+reading tiktokAccounts from the API.
+
+===============================================================
+4. FOOTER — FULL REBUILD (SOCIAL + EMAIL)
+===============================================================
+
+Remove the website line (www.starrbeautyy.co.uk) 
+completely from the footer.
+
+Footer social section should now show:
+
+INSTAGRAM section:
+  Label "Instagram" — gold colour (existing gold var)
+  4 account pills from instagramAccounts array
+  Each pill:
+    Instagram SVG icon (gold, 13px)
+    @handle text — dark burgundy (existing dark var)
+    Small sub-label below: "Face Treatments" etc
+    Border: 1px existing line colour, radius 999px
+    Hover: gold border + gold text
+    Links to each URL, target="_blank"
+
+TIKTOK section (below Instagram):
+  Label "TikTok" — gold colour
+  4 account pills from tiktokAccounts array
+  Same pill style as Instagram
+  TikTok SVG icon instead of Instagram icon
+  Same sub-labels
+
+EMAIL section (below TikTok):
+  Label "Email" — gold colour
+  "starrbeautyyltd@gmail.com" — dark burgundy
+  Links to mailto:
+
+NO website line at all.
+
+Colour rules:
+  Section labels (Instagram / TikTok / Email) = gold
+  Handles and email address = dark burgundy/red
+  Use existing CSS variables — no new colours
+
+===============================================================
+5. SUPABASE COLUMN ADDITIONS — BOOKINGS TABLE
+===============================================================
+
+The bookings table now has these extra columns that 
+the code needs to write to:
+  forms_completed BOOLEAN DEFAULT false
+  reminder_sent BOOLEAN DEFAULT false
+  balance_due DECIMAL(10,2)
+  stripe_session_id TEXT
+
+Make sure when creating a booking these are 
+included where relevant:
+  forms_completed — set to true after consent submitted
+  reminder_sent — set to true after reminder email sent
+  balance_due — total_price minus deposit_amount
+  stripe_session_id — from Stripe checkout session
+
+===============================================================
+6. SUPABASE COLUMN ADDITIONS — CLIENTS TABLE  
+===============================================================
+
+Clients table now has:
+  source TEXT DEFAULT 'Website'
+  date_of_birth DATE
+  address TEXT
+
+When creating/updating a client record:
+  source = 'Website' for customer bookings
+  source = 'Portal' for admin-created bookings
+  date_of_birth and address come from medical form
+
+===============================================================
+7. LOCATIONS TABLE — NEW FIELDS
+===============================================================
+
+Locations now have:
+  instagram TEXT — '@StarrAestheticss'
+  whatsapp TEXT — '447701298985'
+  address_full TEXT — 'Hornchurch, Essex, RM11' 
+    or 'Marylebone, London, W1G'
+
+Use locations.address_full everywhere the 
+location address is displayed (booking confirmation, 
+emails, confirmation page, admin portal).
+
+Use locations.whatsapp for all WhatsApp links 
+scoped to that location.
+
+===============================================================
+8. DEPOSIT LOGIC — CONFIRMED IN SUPABASE
+===============================================================
+
+All 48 treatments now have:
+  deposit_type = 'fixed'
+  deposit_value = 20 (injectables) or 10 (others)
+
+The deposit calculation must read from:
+  treatment.deposit_value in the treatments table
+
+NOT from a hardcoded value or percentage.
+
+Also in portal_kv dd_settings:
+  "depositInjectables": 20
+  "depositOther": 10
+
+Admin can change these in settings and all new 
+bookings must use the updated values.
+
+===============================================================
+9. PORTAL_KV — DD_SETTINGS FULL STRUCTURE
+===============================================================
+
+The complete dd_settings object in Supabase is now:
+{
+  "depositInjectables": 20,
+  "depositOther": 10,
+  "depositType": "fixed",
+  "businessName": "Starr Aesthetics",
+  "currency": "GBP",
+  "whatsapp": "447701298985",
+  "instagram": "@StarrAestheticss",
+  "tiktok": "@StarrAestheticss",
+  "instagramAccounts": [...4 accounts...],
+  "tiktokAccounts": [...4 accounts...],
+  "email": "info@starrbeautyy.co.uk",
+  "website": "www.starrbeautyy.co.uk"
+}
+
+The API endpoint GET /api/portal-kv/dd_settings 
+must return this full object.
+
+The website reads from this on load and uses:
+  whatsapp → all WhatsApp links
+  instagramAccounts → footer + social sections
+  tiktokAccounts → footer TikTok section
+  depositInjectables / depositOther → booking deposits
+
+===============================================================
+10. FINAL CHECK — RUN THESE AFTER ALL CHANGES
+===============================================================
+
+1. WhatsApp button links to wa.me/447701298985 ✓
+2. Footer shows 4 Instagram pills + 4 TikTok pills ✓
+3. Footer shows no website line ✓
+4. Label colours = gold, handle colours = burgundy ✓
+5. All deposits read from treatment.deposit_value ✓
+6. Booking confirmation shows correct address ✓
+7. Admin portal WhatsApp link correct ✓
+8. Email templates use correct WhatsApp number ✓
