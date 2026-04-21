@@ -66,7 +66,7 @@ router.post("/auth/login", async (req, res) => {
   const inputEmail = (email ?? "").trim().toLowerCase();
   const inputPassword = password ?? "";
 
-  const adminEmail = process.env.ADMIN_EMAIL ?? "";
+  const adminEmail = (process.env.ADMIN_EMAIL ?? "").trim();
   if (inputEmail === adminEmail.toLowerCase()) {
     const activePassword = await getActivePassword();
     if (activePassword && await checkPassword(inputPassword, activePassword)) {

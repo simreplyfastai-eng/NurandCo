@@ -1,0 +1,375 @@
+Full master QA and fix pass for Starr Aesthetics.
+Read every relevant file before touching anything.
+Fix every issue listed below in one complete pass.
+
+===============================================================
+1. DOUBLE LOGIN BUG — FIX FIRST
+===============================================================
+
+When logging into the admin portal it asks for 
+credentials twice before showing the location selector.
+This should be ONE login only.
+
+Expected flow:
+  1. Go to /portal.html
+  2. Enter email + password ONCE
+  3. See location selector (Hornchurch / Marylebone)
+  4. Click a location
+  5. Go straight to dashboard for that location
+
+Find what is causing the double login and remove it.
+The JWT token should be set after the first 
+successful login and not expire or clear between 
+steps 2 and 4.
+
+===============================================================
+2. BOOKING FLOW — FULLY WIRED TO SUPABASE
+===============================================================
+
+Every new booking made on the website must:
+  - Save to Supabase bookings table with location_id
+  - Create or update client in Supabase clients table
+  - Allocate to the correct location
+  - Show immediately in the correct location's 
+    admin portal bookings tab
+  - Update the dashboard figures immediately
+
+The booking must include:
+  location_id, client_name, client_email, 
+  client_phone, treatment_name, booking_date,
+  booking_time, deposit_amount, total_price,
+  status: 'pending', stripe_payment_intent_id
+
+===============================================================
+3. DASHBOARD FIGURES — REAL DATA FROM SUPABASE
+===============================================================
+
+All dashboard figures must come from Supabase.
+No hardcoded or dummy data anywhere.
+
+Revenue this month:
+  SUM(deposit_amount) FROM bookings WHERE 
+  location_id = current AND 
+  created_at >= start of current month AND
+  status != 'cancelled'
+
+Appointments this month:
+  COUNT(*) FROM bookings WHERE 
+  location_id = current AND
+  booking_date >= start of current month AND
+  status != 'cancelled'
+
+Active clients:
+  COUNT(DISTINCT client_email) FROM bookings WHERE
+  location_id = current AND status != 'cancelled'
+
+Avg spend:
+  AVG(total_price) FROM bookings WHERE
+  location_id = current AND status = 'confirmed'
+  OR status = 'complete'
+
+Revenue by treatment chart:
+  GROUP BY treatment_name, SUM(total_price)
+  WHERE location_id = current
+
+Recent bookings list:
+  ORDER BY created_at DESC LIMIT 10
+  WHERE location_id = current
+
+All figures must update automatically when new 
+bookings come in — no manual refresh needed.
+
+===============================================================
+4. LOCATION ISOLATION — STRICTLY ENFORCED
+===============================================================
+
+Hornchurch and Marylebone must be 100% separate.
+
+Test this by checking every query in the codebase:
+  - Every bookings query has .eq('location_id', locationId)
+  - Every clients query has .eq('location_id', locationId)
+  - Every availability query has .eq('location_id', locationId)
+  - Every blocked_dates query has .eq('location_id', locationId)
+  - Every treatments query has .eq('location_id', locationId)
+  - Every portal_kv query has .eq('location_id', locationId)
+  - Every medical_forms query has .eq('location_id', locationId)
+  - Every consent_forms query has .eq('location_id', locationId)
+  - Every payments query has .eq('location_id', locationId)
+
+If ANY query is missing location_id filter → add it.
+
+===============================================================
+5. AVAILABILITY & BLOCKED DATES → LIVE CALENDARS
+===============================================================
+
+When Eva changes working hours in admin portal:
+  Save to Supabase availability_settings
+  Customer booking calendar immediately reflects 
+  new hours — no server restart needed
+
+When Eva blocks a date in admin portal:
+  Save to Supabase blocked_dates
+  That date immediately shows as unavailable 
+  on the customer booking calendar for that location
+
+When Eva adds a blocked time slot (lunch break etc):
+  Save to Supabase blocked_slots
+  Those time slots disappear from customer calendar
+
+Each location has completely separate availability:
+  Hornchurch availability ≠ Marylebone availability
+  Blocking a date at Hornchurch does NOT 
+  block it at Marylebone
+
+Availability endpoint:
+  GET /api/availability?location=[slug]&date=[date]
+  Returns available slots for that location + date
+  Respects: working hours, blocked dates, 
+  blocked slots, existing bookings
+
+===============================================================
+6. MEDIA TAB → SAVES TO LIVE SITE
+===============================================================
+
+When Eva clicks "Save to Live Site" in media tab:
+  All media URLs saved to portal_kv dd_media in Supabase
+  Website immediately reads new values
+  No server restart or cache needed
+
+Media fields saved:
+  heroVideo → website hero background video
+  heroImage → website hero background image
+  aboutImage → practitioner photo in About section
+  galleryImages → transformations/results gallery
+  resultsVideos → results video section
+
+Website reads dd_media on every page load:
+  GET /api/portal-kv/dd_media?location=[slug]
+  Returns the current dd_media object
+
+If Eva uploads a new practitioner photo URL 
+and saves → website shows new photo immediately.
+
+===============================================================
+7. TREATMENTS TAB — STARR'S TREATMENTS ONLY
+===============================================================
+
+The treatments tab in the admin portal must show:
+  ONLY Starr Aesthetics treatments
+  NOTHING from Dermadoll (no Teeth Whitening, 
+  Glass Skin Facial etc)
+  No hardcoded Dermadoll treatment list
+
+Eva's treatments are in Supabase treatments table.
+The treatments tab must read from Supabase only.
+
+Eva can:
+  Edit treatment name ✓
+  Edit price ✓
+  Edit duration ✓
+  Toggle active/inactive ✓
+  Add new treatment ✓
+  
+All changes save to Supabase treatments table
+and immediately reflect on the live website
+treatments list.
+
+Deposit amounts:
+  Injectables = £20 (deposit_value = 20)
+  Others = £10 (deposit_value = 10)
+  These come from treatment.deposit_value in Supabase
+
+Website treatment list reads from:
+  GET /api/treatments?location=[slug]
+  Returns active treatments for that location only
+
+===============================================================
+8. CLIENT HISTORY & FORMS — ADMIN PORTAL
+===============================================================
+
+Clients tab must show:
+  All clients for current location only
+  name, email, phone, total_spent, 
+  visit_count, last_visit
+  Ordered by last_visit DESC (most recent first)
+
+Clicking a client shows:
+  All their bookings for this location
+  Ordered by booking_date DESC
+
+Medical form button (📋) on each booking:
+  Grey if not submitted
+  Brand colour if submitted
+  Click → slide-in drawer showing all form data
+
+Consent form button (✍️) on each booking:
+  Grey if not submitted
+  Brand colour if submitted  
+  Click → slide-in drawer showing consent + signature
+
+When a new booking is confirmed:
+  clients.visit_count increments by 1
+  clients.total_spent increases by total_price
+  clients.last_visit updates to booking_date
+
+===============================================================
+9. BOOKINGS TAB — SORTED BY MOST RECENT
+===============================================================
+
+Bookings list:
+  ORDER BY created_at DESC (newest first)
+  Show: client name, treatment, date, time, status
+  Status badge colours:
+    Pending → amber
+    Confirmed → green
+    Cancelled → red
+    Complete → muted/grey
+
+Status change dropdown:
+  Saves immediately to Supabase
+  Changes booking.status
+
+When status changes to 'cancelled':
+  Send cancellation email to client via Resend
+  (if RESEND_API_KEY is set)
+
+Schedule/calendar tab:
+  Shows bookings plotted on a calendar
+  Each booking appears on its booking_date
+  Click a booking → shows booking details
+  Correct UK timezone (Europe/London / GMT)
+
+Recent activity section (if exists):
+  Shows most recent bookings/status changes
+  Ordered by created_at DESC
+
+===============================================================
+10. SETTINGS TAB — DEPOSIT AMOUNTS EDITABLE
+===============================================================
+
+In admin portal settings:
+  "Injectable deposit: £[20]" — editable field
+  "Other treatments deposit: £[10]" — editable field
+  
+  On save → updates portal_kv dd_settings:
+  { "depositInjectables": 20, "depositOther": 10 }
+  
+  All new Stripe payment intents use these values
+  immediately after save
+
+Also editable in settings:
+  Business WhatsApp: 447701298985
+  Business email: info@starrbeautyy.co.uk
+
+===============================================================
+11. UK TIMEZONE — ALL DATES/TIMES
+===============================================================
+
+All dates and times throughout the site must 
+use UK timezone (Europe/London / GMT+0 or BST).
+
+Booking times shown to clients: UK time
+Booking times in admin portal: UK time
+Dashboard date filters: UK time
+Email confirmations: UK time
+Reminder cron job: runs based on UK dates
+
+Set timezone on server:
+  process.env.TZ = 'Europe/London'
+  OR use date-fns-tz / dayjs with timezone
+
+===============================================================
+12. ZERO DERMADOLL REFERENCES
+===============================================================
+
+Search entire codebase for:
+  "dermadoll" "doll" "niamh" "face by niamh"
+  "dd_" in HTML displayed to users
+  Any Dermadoll treatment names
+  Any old placeholder data
+
+Remove or replace every single one.
+The admin portal must feel 100% Starr Aesthetics.
+
+Portal title: "Starr Aesthetics — Admin"
+Portal logo: Starr Aesthetics
+No Dermadoll branding anywhere visible
+
+===============================================================
+13. CONSENT FORM FIX (ALREADY IN PROGRESS)
+===============================================================
+
+The fix for consent form NOT NULL fields should 
+already be applied from the previous prompt.
+Verify it works by testing the endpoint:
+
+  POST /api/forms/consent with body:
+  {
+    "bookingId": "[real booking id from Supabase]",
+    "consent_procedure": true,
+    "consent_risks": true,
+    "consent_aftercare": true,
+    "consent_no_guarantee": true,
+    "consent_over_18": true,
+    "consent_medical_accurate": true,
+    "signature_data": "data:image/png;base64,test",
+    "signature_name": "Test User"
+  }
+  
+  Should return: { "success": true }
+  Should create row in consent_forms
+  Should update booking.forms_completed = true
+
+===============================================================
+14. PORTAL_KV — ALL READS/WRITES LOCATION-SCOPED
+===============================================================
+
+Every portal_kv read must include location_id:
+  .eq('location_id', locationId)
+
+This means Eva's Hornchurch settings are separate 
+from Marylebone settings — each location can have 
+different working hours, deposit amounts, media etc.
+
+Verify all these keys are scoped per location:
+  dd_settings, dd_availability, dd_custom_treats,
+  dd_custom_cats, dd_treatment_overrides, dd_media
+
+===============================================================
+15. FINAL END-TO-END TEST
+===============================================================
+
+After all fixes do this test sequence:
+
+1. Go to website homepage
+2. Click BOOK HORNCHURCH
+3. Select a treatment
+4. Pick a date and time
+5. Fill client details
+6. Click Pay (or Test Payment if Stripe not live)
+7. Booking created in Supabase ✓
+8. Redirect to /forms?booking=[id] ✓
+9. Complete medical form ✓
+10. Sign consent form ✓
+11. Redirect to /confirmed ✓
+12. Login to admin portal
+13. Enter password ONCE only ✓ 
+14. See location selector ✓
+15. Select Hornchurch ✓
+16. Dashboard shows new booking revenue ✓
+17. Bookings tab shows the test booking ✓
+18. Booking sorted as most recent at top ✓
+19. Click 📋 — medical form visible ✓
+20. Click ✍️ — consent + signature visible ✓
+21. Change status to Confirmed ✓
+22. Log out, log in as Marylebone ✓
+23. Cannot see Hornchurch booking ✓
+24. Change availability — customer calendar updates ✓
+25. Block a date — customer calendar shows unavailable ✓
+26. Change practitioner photo in media tab ✓
+27. Save to Live Site ✓
+28. Website shows new photo ✓
+
+Report every step as PASS or FAIL.
+Fix all FAILs.
+Do not finish until all 28 steps pass.

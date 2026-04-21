@@ -630,7 +630,7 @@ select.form-input{background:var(--color-card)}
     <input class="login-input" type="email" id="login-email" placeholder="admin@starraesthetics.co.uk" autocomplete="email"/>
     <label class="login-label">Password</label>
     <input class="login-input" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
-    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <button type="button" class="login-btn" onclick="doLogin()">Sign In</button>
     <div class="login-error" id="login-error"></div>
   </div>
 </div>
@@ -1858,9 +1858,9 @@ function showPortal(loc){
 window.addEventListener('DOMContentLoaded',async()=>{
   const token=localStorage.getItem('fbn_token');
   if(token&&localStorage.getItem('fbn_session')==='1'){
-    // Fast client-side expiry check
+    // Fast client-side expiry check — silently clear stale tokens on fresh page load
     if(isSessionExpired()){
-      clearSession('Your session has expired. Please log in again.');
+      clearSession();
       return;
     }
     // Verify token server-side and get a refreshed token
@@ -1875,8 +1875,8 @@ window.addEventListener('DOMContentLoaded',async()=>{
         return;
       }
     }catch(e){}
-    // Token invalid — clear and show login
-    clearSession('Your session has expired. Please log in again.');
+    // Token invalid — clear silently (no confusing "expired" message on fresh load)
+    clearSession();
   }
 });
 let _calResizeTimer;
@@ -1943,8 +1943,8 @@ function renderDashboard(){
   const thisMonth=bookings.filter(b=>{const d=new Date(b.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()});
   const lastMonth=bookings.filter(b=>{const d=new Date(b.date);const lm=new Date(now.getFullYear(),now.getMonth()-1);return d.getMonth()===lm.getMonth()&&d.getFullYear()===lm.getFullYear()});
 
-  const rev=thisMonth.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+Number(b.price),0);
-  const revLast=lastMonth.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+Number(b.price),0);
+  const rev=thisMonth.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+Number(b.deposit||b.price),0);
+  const revLast=lastMonth.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+Number(b.deposit||b.price),0);
   const revChange=revLast?Math.round((rev-revLast)/revLast*100):(rev>0?100:0);
 
   const appts=thisMonth.length;
@@ -1967,7 +1967,7 @@ function renderDashboard(){
   `;
 
   // Recent bookings
-  const recent=[...bookings].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5);
+  const recent=[...bookings].sort((a,b)=>(b.createdAt||0)-(a.createdAt||0)).slice(0,10);
   const recentTable=document.getElementById('recent-bookings-table');
   const recentEmpty=document.getElementById('dash-recent-empty');
   if(recent.length){
@@ -4202,9 +4202,8 @@ let _liveRefreshInterval=null;
 let _liveClientInterval=null;
 async function pollBookings(){
   try{
-    const token=localStorage.getItem('fbn_token');
-    if(!token)return;
-    const res=await fetch('/api/bookings',{headers:{Authorization:'Bearer '+token}});
+    if(!localStorage.getItem('fbn_token'))return;
+    const res=await fetch('/api/bookings',{headers:authHdr()});
     if(res.status===401){clearSession('Session expired — please log in again.');return;}
     if(!res.ok)return;
     const data=await res.json();
@@ -4213,25 +4212,24 @@ async function pollBookings(){
     const prevCount=prev.length;
     // Update local cache (bookings are managed by REST API, not CloudStore KV)
     localStorage.setItem('fbn_bookings',JSON.stringify(fresh));
+    // Always refresh dashboard/bookings after poll
+    const activePage=document.querySelector('.page.active');
+    if(activePage){
+      const id=activePage.id.replace('page-','');
+      if(id==='bookings')renderBookings();
+      else if(id==='dashboard')renderDashboard();
+    }
     if(fresh.length>prevCount){
       const diff=fresh.length-prevCount;
       showToast(`${diff} new booking${diff>1?'s':''} received!`);
       updateSidebarBadges();
-      // Refresh visible page
-      const activePage=document.querySelector('.page.active');
-      if(activePage){
-        const id=activePage.id.replace('page-','');
-        if(id==='bookings')renderBookings();
-        else if(id==='dashboard')renderDashboard();
-      }
     }
   }catch(e){/* silent */}
 }
 async function pollClients(){
   try{
-    const token=localStorage.getItem('fbn_token');
-    if(!token)return;
-    const res=await fetch('/api/clients',{headers:{Authorization:'Bearer '+token}});
+    if(!localStorage.getItem('fbn_token'))return;
+    const res=await fetch('/api/clients',{headers:authHdr()});
     if(!res.ok)return;
     const fresh=await res.json();
     if(!Array.isArray(fresh))return;

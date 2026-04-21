@@ -10,6 +10,10 @@
  * is filtered by location_id.
  * ═══════════════════════════════════════════════════════
  */
+
+// All dates/times in UK timezone (BST/GMT)
+process.env.TZ = "Europe/London";
+
 import app from "./app";
 import { logger } from "./lib/logger";
 import { testSupabaseConnection } from "./lib/supabase";

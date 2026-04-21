@@ -52,8 +52,6 @@ app.use(
 const allowedOrigins: (string | RegExp)[] = [
   "https://starrbeautyy.co.uk",
   "https://www.starrbeautyy.co.uk",
-  "https://facebyniamh.co.uk",
-  "https://www.facebyniamh.co.uk",
 ];
 // Allow Replit dev-domain proxy in development so the portal preview works
 if (process.env.REPLIT_DEV_DOMAIN) {

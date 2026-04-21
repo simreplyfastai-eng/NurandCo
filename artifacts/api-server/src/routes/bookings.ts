@@ -237,7 +237,7 @@ router.get("/bookings", async (req, res) => {
   if (!locationId) return res.status(400).json({ error: "X-Location-Id header required" });
 
   await runAutoComplete();
-  const { month, limit, sort } = req.query as Record<string, string>;
+  const { month, limit } = req.query as Record<string, string>;
 
   try {
     let query = supabaseAdmin
@@ -246,11 +246,7 @@ router.get("/bookings", async (req, res) => {
       .eq("location_id", locationId);
 
     if (month) query = query.like("booking_date", `${month}-%`);
-    if (sort === "newest") {
-      query = query.order("created_at", { ascending: false });
-    } else {
-      query = query.order("booking_date", { ascending: false });
-    }
+    query = query.order("created_at", { ascending: false });
     if (limit) query = query.limit(Number(limit));
 
     const { data, error } = await query;
@@ -403,6 +399,7 @@ router.post("/bookings", async (req, res) => {
       id: bookingId,
       location_id: locationId,
       treatment_id: treatInfo.id,
+      treatment_name: b.treatment ?? treatInfo.name ?? "",
       client_name: b.clientName,
       client_email: b.clientEmail ?? "",
       client_phone: b.clientPhone ?? "",
