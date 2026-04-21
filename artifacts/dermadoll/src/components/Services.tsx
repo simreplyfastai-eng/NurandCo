@@ -78,9 +78,6 @@ export default function Services() {
         const groups = groupByCategory(treats.filter((t) => t.active !== false));
         setData((prev) => ({ ...prev, [loc]: groups }));
         setFetched((prev) => ({ ...prev, [loc]: true }));
-        if (groups.length > 0) {
-          setOpenGroups(new Set([groups[0].category]));
-        }
       }
     } catch {
       // fail silently — section just stays empty
@@ -94,9 +91,7 @@ export default function Services() {
   const handleTabClick = (loc: "hornchurch" | "marylebone") => {
     setLocation(loc);
     if (fetched[loc]) {
-      // Data already cached — restore first group open
-      const cached = data[loc];
-      setOpenGroups(cached.length > 0 ? new Set([cached[0].category]) : new Set());
+      setOpenGroups(new Set());
     } else {
       setOpenGroups(new Set());
       fetchLocation(loc);
