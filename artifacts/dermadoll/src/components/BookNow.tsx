@@ -1,6 +1,16 @@
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 
 export default function BookNow() {
+  const [waNumber, setWaNumber] = useState("447701298985");
+
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((d) => { if (d?.whatsapp) setWaNumber(d.whatsapp); })
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="py-[100px] bg-white">
       <div className="container mx-auto px-6 text-center max-w-3xl">
@@ -25,7 +35,7 @@ export default function BookNow() {
               Book Now
             </a>
             <a
-              href="https://wa.me/447535173072"
+              href={`https://wa.me/${waNumber}`}
               target="_blank"
               rel="noopener noreferrer"
               className="border border-primary text-primary px-8 py-4 rounded-full text-sm uppercase tracking-wider font-medium hover:bg-primary hover:text-white transition-all duration-300 w-full sm:w-auto flex items-center justify-center gap-2"

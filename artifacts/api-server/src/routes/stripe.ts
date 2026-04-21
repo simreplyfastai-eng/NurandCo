@@ -320,6 +320,7 @@ router.post("/stripe/webhook", async (req, res) => {
             deposit_paid: true,
             status: "confirmed",
             stripe_payment_intent_id: paymentIntentId,
+            stripe_session_id: paymentIntentId,
             deposit_amount: depositFromStripe,
           })
           .eq("id", bookingId)

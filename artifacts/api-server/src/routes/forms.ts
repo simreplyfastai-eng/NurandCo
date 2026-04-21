@@ -200,6 +200,20 @@ router.post("/forms/medical", async (req, res) => {
 
     const { data, error } = await supabaseAdmin.from("medical_forms").insert(insertData).select("id").single();
     if (error) throw error;
+
+    // Update the client record with date_of_birth and address if provided
+    if (clientEmail && (dob || address)) {
+      const clientUpdate: Record<string, unknown> = {};
+      if (dob)     clientUpdate.date_of_birth = dob;
+      if (address) clientUpdate.address = address;
+      supabaseAdmin
+        .from("clients")
+        .update(clientUpdate)
+        .eq("email", clientEmail)
+        .then(() => {})
+        .catch((e: unknown) => console.error("client dob/address update", e));
+    }
+
     return res.json({ id: data.id });
   } catch (err) {
     console.error("POST /api/forms/medical", err);
@@ -252,6 +266,15 @@ router.post("/forms/consent", async (req, res) => {
 
     const { data, error } = await supabaseAdmin.from("consent_forms").insert(insertData).select("id").single();
     if (error) throw error;
+
+    // Mark booking as having all forms completed
+    supabaseAdmin
+      .from("bookings")
+      .update({ forms_completed: true })
+      .eq("id", bookingId)
+      .then(() => {})
+      .catch((e: unknown) => console.error("bookings forms_completed update", e));
+
     return res.json({ id: data.id });
   } catch (err) {
     console.error("POST /api/forms/consent", err);

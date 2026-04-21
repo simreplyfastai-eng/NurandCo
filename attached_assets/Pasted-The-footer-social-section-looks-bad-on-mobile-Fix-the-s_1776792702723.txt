@@ -1,0 +1,86 @@
+The footer social section looks bad on mobile. 
+Fix the styling — do NOT restructure the HTML, 
+just fix the CSS.
+
+PROBLEMS VISIBLE:
+- Pills are full-width rectangular blocks, 
+  not compact pills
+- Columns are too cramped together
+- No sub-labels under each pill
+- Labels sit oddly above columns
+
+===============================================================
+CSS FIXES NEEDED
+===============================================================
+
+1. PILLS — make them compact, not full width:
+   Remove any width: 100% on the pills
+   Pills should be auto width, fit-content
+   They should look like small tags not buttons
+
+   .insta-pill, .tiktok-pill,
+   [class*="social-pill"], [class*="pill"] {
+     width: auto !important;
+     display: inline-flex !important;
+     align-items: center !important;
+     gap: 6px !important;
+     padding: 5px 12px !important;
+     border-radius: 999px !important;
+     font-size: 12px !important;
+     white-space: nowrap !important;
+   }
+
+2. COLUMNS — more breathing room between them:
+   The grid gap between Instagram and TikTok 
+   columns needs to be wider — at least 24px
+
+3. SUB-LABELS — add them below each pill:
+   Each pill wrapper needs a tiny label below:
+   
+   Find the pill wrapper divs and add a 
+   <span> below each pill with the account label:
+     StarrFacess → "Face"
+     StarrAestheticss → "Aesthetics"  
+     StarrSuitess → "The Suite"
+     StarrNailedd → "Nails"
+   
+   Sub-label style:
+     font-size: 9px
+     color: existing muted text var
+     text-align: center
+     display: block
+     margin-top: 2px
+
+4. MOBILE — single column on small screens:
+   @media (max-width: 480px) {
+     Stack Instagram section above TikTok
+     Each section full width centred
+     Pills centred, auto width
+   }
+
+5. LABELS alignment:
+   "INSTAGRAM" label sits directly above 
+   its column of pills — not drifting left
+   Same for "TIKTOK" label
+
+6. Overall section padding:
+   Add padding: 0 16px on mobile so pills 
+   don't touch the screen edge
+
+Read the actual class names from the footer 
+HTML before applying — use the real class names 
+not placeholders.
+
+The end result on mobile should look like:
+
+  INSTAGRAM          TIKTOK
+  
+  [@StarrFacess] [@StarrFacess]
+     Face              Face
+  
+  [@StarrAe...ss] [@StarrAe...ss]
+    Aesthetics       Aesthetics
+  
+  [etc]              [etc]
+
+Clean, compact, properly spaced.

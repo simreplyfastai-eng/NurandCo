@@ -98,7 +98,9 @@ async function init() {
     const res = await fetch('/api/forms/status?booking=' + encodeURIComponent(BOOKING_ID));
     const data = await res.json();
     const bk = data.booking || {};
-    const waNum = '447535173072';
+    const cfgRes = await fetch('/api/config').catch(() => null);
+    const cfg = cfgRes ? await cfgRes.json().catch(() => ({})) : {};
+    const waNum = cfg.whatsapp || '447701298985';
     const waMsg = encodeURIComponent('Hi, I have just booked ' + (bk.treatment || 'an appointment') + ' — I had a quick question 😊');
 
     main.innerHTML = `

@@ -16,6 +16,14 @@ import Footer from "@/components/Footer";
 
 export default function Home() {
   const [showBookingSuccess, setShowBookingSuccess] = useState(false);
+  const [waNumber, setWaNumber] = useState("447701298985");
+
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((d) => { if (d?.whatsapp) setWaNumber(d.whatsapp); })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
@@ -63,7 +71,7 @@ export default function Home() {
       </AnimatePresence>
 
       <a
-        href="https://wa.me/447535173072"
+        href={`https://wa.me/${waNumber}`}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Chat on WhatsApp"

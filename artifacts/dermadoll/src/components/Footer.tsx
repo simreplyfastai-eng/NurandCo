@@ -1,15 +1,18 @@
-const igAccounts = [
-  { handle: "StarrFacess",      label: "Face Treatments",  url: "https://instagram.com/StarrFacess" },
-  { handle: "StarrAestheticss", label: "Aesthetics",       url: "https://instagram.com/StarrAestheticss" },
-  { handle: "StarrSuitess",     label: "The Suite",        url: "https://instagram.com/StarrSuitess" },
-  { handle: "StarrNailedd",     label: "Nails",            url: "https://instagram.com/StarrNailedd" },
-];
+import { useEffect, useState } from "react";
 
-const ttAccounts = [
-  { handle: "StarrFacess",      label: "Face Treatments",  url: "https://tiktok.com/@StarrFacess" },
-  { handle: "StarrAestheticss", label: "Aesthetics",       url: "https://tiktok.com/@StarrAestheticss" },
-  { handle: "StarrSuitess",     label: "The Suite",        url: "https://tiktok.com/@StarrSuitess" },
-  { handle: "StarrNailedd",     label: "Nails",            url: "https://tiktok.com/@StarrNailedd" },
+interface SocialAccount { handle: string; label: string; url: string; }
+
+const IG_DEFAULT: SocialAccount[] = [
+  { handle: "StarrFacess",      label: "Face Treatments", url: "https://instagram.com/StarrFacess" },
+  { handle: "StarrAestheticss", label: "Aesthetics",      url: "https://instagram.com/StarrAestheticss" },
+  { handle: "StarrSuitess",     label: "The Suite",       url: "https://instagram.com/StarrSuitess" },
+  { handle: "StarrNailedd",     label: "Nails",           url: "https://instagram.com/StarrNailedd" },
+];
+const TT_DEFAULT: SocialAccount[] = [
+  { handle: "StarrFacess",      label: "Face Treatments", url: "https://tiktok.com/@StarrFacess" },
+  { handle: "StarrAestheticss", label: "Aesthetics",      url: "https://tiktok.com/@StarrAestheticss" },
+  { handle: "StarrSuitess",     label: "The Suite",       url: "https://tiktok.com/@StarrSuitess" },
+  { handle: "StarrNailedd",     label: "Nails",           url: "https://tiktok.com/@StarrNailedd" },
 ];
 
 const IgIcon = () => (
@@ -26,7 +29,7 @@ const TtIcon = () => (
   </svg>
 );
 
-function SocialPill({ handle, url, icon }: { handle: string; url: string; icon: "ig" | "tt" }) {
+function SocialPill({ handle, label, url, icon }: { handle: string; label?: string; url: string; icon: "ig" | "tt" }) {
   return (
     <a
       href={url}
@@ -34,14 +37,13 @@ function SocialPill({ handle, url, icon }: { handle: string; url: string; icon: 
       rel="noopener noreferrer"
       style={{
         display: "inline-flex",
-        alignItems: "center",
-        gap: 6,
+        flexDirection: "column",
+        alignItems: "flex-start",
+        gap: 2,
         padding: "6px 14px",
         border: "1px solid #DDD8D0",
         borderRadius: 999,
         textDecoration: "none",
-        fontSize: 11.5,
-        letterSpacing: "0.01em",
         color: "#5C1A1A",
         background: "rgba(255,255,255,0.55)",
         transition: "border-color 160ms ease, color 160ms ease, background 160ms ease",
@@ -58,8 +60,15 @@ function SocialPill({ handle, url, icon }: { handle: string; url: string; icon: 
         e.currentTarget.style.background = "rgba(255,255,255,0.55)";
       }}
     >
-      {icon === "ig" ? <IgIcon /> : <TtIcon />}
-      @{handle}
+      <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, letterSpacing: "0.01em" }}>
+        {icon === "ig" ? <IgIcon /> : <TtIcon />}
+        @{handle}
+      </span>
+      {label && (
+        <span style={{ fontSize: 9.5, letterSpacing: "0.03em", opacity: 0.65, paddingLeft: 19 }}>
+          {label}
+        </span>
+      )}
     </a>
   );
 }
@@ -82,6 +91,30 @@ function ColLabel({ children }: { children: string }) {
 
 export default function Footer() {
   const year = new Date().getFullYear();
+  const [igAccounts, setIgAccounts] = useState<SocialAccount[]>(IG_DEFAULT);
+  const [ttAccounts, setTtAccounts] = useState<SocialAccount[]>(TT_DEFAULT);
+
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((d) => {
+        if (Array.isArray(d?.instagramAccounts) && d.instagramAccounts.length > 0) {
+          setIgAccounts(d.instagramAccounts.map((a: Record<string, string>) => ({
+            handle: (a.handle ?? "").replace(/^@/, ""),
+            label: a.label ?? "",
+            url: a.url ?? "#",
+          })));
+        }
+        if (Array.isArray(d?.tiktokAccounts) && d.tiktokAccounts.length > 0) {
+          setTtAccounts(d.tiktokAccounts.map((a: Record<string, string>) => ({
+            handle: (a.handle ?? "").replace(/^@/, ""),
+            label: a.label ?? "",
+            url: a.url ?? "#",
+          })));
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const navLinks = [
     { name: "SERVICES", href: "#services" },
@@ -151,8 +184,8 @@ export default function Footer() {
             {/* Account rows — flat array, grid auto-places pairs */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
               {igAccounts.flatMap((a, i) => [
-                <SocialPill key={"ig-" + a.handle} handle={a.handle} url={a.url} icon="ig" />,
-                <SocialPill key={"tt-" + ttAccounts[i].handle} handle={ttAccounts[i].handle} url={ttAccounts[i].url} icon="tt" />,
+                <SocialPill key={"ig-" + a.handle} handle={a.handle} label={a.label} url={a.url} icon="ig" />,
+                <SocialPill key={"tt-" + ttAccounts[i]?.handle} handle={ttAccounts[i]?.handle ?? a.handle} label={ttAccounts[i]?.label} url={ttAccounts[i]?.url ?? "#"} icon="tt" />,
               ])}
             </div>
           </div>

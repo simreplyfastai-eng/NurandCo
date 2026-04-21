@@ -616,7 +616,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
   if (step === "success") {
     const CLINIC_ADDRESS = "Starr Aesthetics, Hornchurch / Marylebone";
     const waMsg = encodeURIComponent(`Hi, I've just booked ${treatment.name} — I had a quick question about my appointment 😊`);
-    const waUrl = `https://wa.me/447535173072?text=${waMsg}`;
+    const waUrl = `https://wa.me/${whatsapp || "447701298985"}?text=${waMsg}`;
 
     const handleCopyAddress = (btn: HTMLButtonElement) => {
       navigator.clipboard.writeText(CLINIC_ADDRESS.replace(/\n/g, ", "));
