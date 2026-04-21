@@ -61,16 +61,26 @@ router.get("/media/config", async (req, res) => {
       if (row?.value) data = row.value as Record<string, unknown>;
     }
 
+    // Resolve new-format fields (dd_media structure)
+    const heroVideo = toServeUrl((data?.heroVideo ?? data?.heroSrc) as string);
+    const heroImage = toServeUrl(data?.heroImage as string);
+    const aboutImage = toServeUrl((data?.aboutImage ?? data?.practitionerImage) as string);
+
+    const rawGallery = Array.isArray(data?.galleryImages) ? (data.galleryImages as string[]) : [];
+    const galleryImages = rawGallery.map(url => toServeUrl(url) ?? url).filter(Boolean);
+
+    const rawVideos = Array.isArray(data?.resultsVideos) ? (data.resultsVideos as string[]) : [];
+    const resultsVideos = rawVideos.map(url => toServeUrl(url) ?? url).filter(Boolean);
+
+    // Legacy graduate slots (kept for backward compat)
     const defaultGraduates = [
       { slot: 1, name: "Sarah M.", course: "Foundation Anti-Wrinkle", src: "" },
       { slot: 2, name: "Jessica T.", course: "Advanced Dermal Filler", src: "" },
       { slot: 3, name: "Priya K.", course: "Pathway to Aesthetics", src: "" },
     ];
-
     const rawGraduates = Array.isArray(data?.graduates) && (data.graduates as unknown[]).length === 3
       ? (data.graduates as Array<Record<string, unknown>>)
       : defaultGraduates.map(g => ({ ...g }));
-
     const graduates = rawGraduates.map(g => ({
       slot: g.slot,
       name: g.name,
@@ -79,8 +89,14 @@ router.get("/media/config", async (req, res) => {
     }));
 
     return res.json({
-      practitionerImage: toServeUrl(data?.practitionerImage as string),
-      heroVideo: toServeUrl(data?.heroSrc as string),
+      // New structure
+      heroVideo,
+      heroImage,
+      aboutImage,
+      galleryImages,
+      resultsVideos,
+      // Legacy fields (backward compat)
+      practitionerImage: aboutImage,
       beforeAfter: convertMap(data?.baImages as Record<string, string>),
       baLabels: (data?.baLabels as Record<string, string>) ?? {},
       videos: convertMap(data?.vidSrcs as Record<string, string>),
@@ -89,7 +105,11 @@ router.get("/media/config", async (req, res) => {
     });
   } catch (err) {
     console.error("GET /api/media/config", err);
-    return res.json({ practitionerImage: null, heroVideo: null, beforeAfter: {}, baLabels: {}, videos: {}, vidLabels: {}, graduates: [] });
+    return res.json({
+      heroVideo: null, heroImage: null, aboutImage: null,
+      galleryImages: [], resultsVideos: [],
+      practitionerImage: null, beforeAfter: {}, baLabels: {}, videos: {}, vidLabels: {}, graduates: [],
+    });
   }
 });
 

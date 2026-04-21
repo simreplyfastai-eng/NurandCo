@@ -1,0 +1,134 @@
+Fix all booking buttons on the website. They are 
+currently linking to an old Acuity scheduling link 
+which is wrong. Everything should use our own 
+built-in booking system.
+
+PROBLEM:
+"BOOK HORNCHURCH" and "BOOK MARYLEBONE" buttons 
+both link to:
+https://starrbookingss.as.me/schedule/1b78ff68
+This is wrong — they must use our own booking flow.
+
+FIX ALL BOOKING BUTTONS IN ONE PASS:
+
+===============================================================
+1. "BOOK HORNCHURCH" button
+===============================================================
+
+Find the anchor tag with href containing "as.me" 
+and text "BOOK HORNCHURCH".
+
+Change href to: /book?location=hornchurch
+
+This takes the client to our own booking page 
+pre-scoped to Hornchurch — shows Hornchurch 
+treatments and Hornchurch calendar only.
+
+===============================================================
+2. "BOOK MARYLEBONE" button
+===============================================================
+
+Same — find anchor with text "BOOK MARYLEBONE".
+
+Change href to: /book?location=marylebone
+
+Pre-scoped to Marylebone treatments and calendar.
+
+===============================================================
+3. "BOOK NOW" buttons (nav + hero)
+===============================================================
+
+The nav "BOOK NOW" and hero "BOOK NOW" currently 
+scroll to #book anchor.
+
+Change these to: /book
+
+This takes them to the location selector page 
+(choose Hornchurch or Marylebone first) then 
+proceeds to the booking flow.
+
+===============================================================
+4. Treatment BOOK buttons (per treatment row)
+===============================================================
+
+Each treatment has a BOOK button with no href.
+These are the most important ones.
+
+Each BOOK button already has the treatment data 
+associated with it (treatment name, price etc).
+
+Update each BOOK button to navigate to:
+/book?location=[location_slug]&treatment=[treatment_id]
+
+The location_slug comes from whichever tab 
+is currently active (hornchurch or marylebone).
+The treatment_id or treatment_name is from 
+the treatment row data.
+
+So if user is on Hornchurch tab and clicks BOOK 
+on "NaturaleLips":
+→ /book?location=hornchurch&treatment=naturale-lips
+
+This pre-selects both the location AND the 
+treatment so the booking page skips straight 
+to the date/time picker.
+
+===============================================================
+5. "BOOK HERE" buttons (location cards)
+===============================================================
+
+There are two "BOOK HERE" buttons on location cards.
+Same fix as points 1 and 2:
+  Hornchurch BOOK HERE → /book?location=hornchurch
+  Marylebone BOOK HERE → /book?location=marylebone
+
+===============================================================
+6. /book ROUTE — LOCATION SELECTOR PAGE
+===============================================================
+
+Create or update the /book route.
+
+If NO location param in URL:
+  Show location selector:
+    "Choose your location"
+    Two cards: HORNCHURCH and MARYLEBONE
+    Same styling as existing location cards on homepage
+    Click Hornchurch → /book?location=hornchurch
+    Click Marylebone → /book?location=marylebone
+
+If location param IS set but NO treatment param:
+  Scroll past location selector straight to 
+  treatment list for that location
+  OR go directly to the booking widget scoped 
+  to that location
+
+If BOTH location AND treatment params set:
+  Skip treatment selection entirely
+  Go straight to date/time picker for that 
+  treatment at that location
+
+===============================================================
+7. REMOVE ALL ACUITY REFERENCES
+===============================================================
+
+Search the entire codebase for:
+  "as.me"
+  "acuity"
+  "starrbookingss"
+  "1b78ff68"
+
+Remove or replace every single instance.
+None of these should appear anywhere in the 
+final code. Our own booking system handles 
+everything.
+
+===============================================================
+DO NOT BREAK
+===============================================================
+
+Keep all existing booking flow logic intact:
+  Treatment list with Hornchurch/Marylebone tabs
+  Existing BOOK button handlers
+  Stripe payment integration
+  Supabase booking writes
+  Everything else on the page

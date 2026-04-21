@@ -13,7 +13,10 @@ export default function About() {
   useEffect(() => {
     fetch("/api/media/config")
       .then((r) => (r.ok ? r.json() : null))
-      .then((data) => { if (data?.practitionerImage) setPractImage(mediaUrl(data.practitionerImage)); })
+      .then((data) => {
+        const img = data?.aboutImage || data?.practitionerImage;
+        if (img) setPractImage(mediaUrl(img));
+      })
       .catch(() => {});
   }, []);
 

@@ -151,7 +151,9 @@ id, name, email, phone, join_date, notes, source, created_at
 | created_at | bigint | Unix timestamp ms |
 
 ### `portal_kv`
-Key-value store for portal settings: `fbn_settings`, `fbn_availability`, `fbn_media`
+Key-value store for portal settings: `fbn_settings`, `fbn_availability`, `fbn_media` (stored as `dd_media` in Supabase via KV_KEY_MAP).
+**`dd_media` structure (new format):** `{ heroVideo, heroImage, aboutImage, galleryImages: string[], resultsVideos: string[] }`
+The `/api/media/config` endpoint exposes these fields plus legacy `practitionerImage`, `beforeAfter`, `videos` for backward compatibility.
 
 ## Key Libraries
 

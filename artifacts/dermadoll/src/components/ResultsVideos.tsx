@@ -102,6 +102,17 @@ export default function ResultsVideos() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (!data) return;
+        // New format: resultsVideos is an array of URLs
+        if (Array.isArray(data.resultsVideos) && data.resultsVideos.length > 0) {
+          const mapped = data.resultsVideos.slice(0, DEFAULT_SLOTS.length).map((url: string, i: number) => ({
+            ...DEFAULT_SLOTS[i],
+            src: url,
+          }));
+          const filled = DEFAULT_SLOTS.map((s, i) => mapped[i] ?? s);
+          setSlots(filled);
+          return;
+        }
+        // Legacy format: videos map
         setSlots(DEFAULT_SLOTS.map((slot) => {
           const overrideSrc = data.videos?.[slot.key];
           const overrideLabel = data.vidLabels?.[slot.key];

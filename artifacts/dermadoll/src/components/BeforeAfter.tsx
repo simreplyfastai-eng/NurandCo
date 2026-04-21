@@ -21,6 +21,18 @@ export default function BeforeAfter() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (!data) return;
+        // New format: galleryImages is an array of URLs
+        if (Array.isArray(data.galleryImages) && data.galleryImages.length > 0) {
+          const mapped = data.galleryImages.slice(0, DEFAULT_SLOTS.length).map((url: string, i: number) => ({
+            ...DEFAULT_SLOTS[i],
+            src: url,
+          }));
+          // Fill remaining slots with defaults if fewer than 4 images
+          const filled = DEFAULT_SLOTS.map((s, i) => mapped[i] ?? s);
+          setResults(filled);
+          return;
+        }
+        // Legacy format: beforeAfter map
         setResults(DEFAULT_SLOTS.map((slot) => {
           const overrideSrc = data.beforeAfter?.[slot.key];
           const overrideLabel = data.baLabels?.[slot.key];

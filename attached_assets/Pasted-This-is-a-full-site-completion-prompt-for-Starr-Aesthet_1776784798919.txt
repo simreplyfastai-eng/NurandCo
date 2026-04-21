@@ -1,0 +1,607 @@
+This is a full site completion prompt for Starr 
+Aesthetics. Read every existing file carefully 
+before making any changes. Fix, complete and 
+wire up everything end to end.
+
+Project: Starr Aesthetics booking website
+Two locations: Hornchurch (Essex) and Marylebone (London)
+Database: Supabase (already connected, all tables exist)
+Payments: Stripe (already integrated)
+Emails: Resend (already integrated)
+
+===============================================================
+WHAT IS ALREADY WORKING — DO NOT BREAK
+===============================================================
+
+- Supabase connected, all 7 endpoints confirmed live
+- Location selector (Hornchurch / Marylebone)
+- Treatments list with BOOK buttons
+- Deposit logic: injectables £20, others £10
+- Admin portal with Dashboard, Bookings, Clients,
+  Availability, Media tabs
+- portal_kv reading/writing dd_* keys
+- JWT auth for admin portal
+- Stripe payment intents with location metadata
+
+===============================================================
+PART 1 — COMPLETE THE BOOKING FLOW
+===============================================================
+
+The BOOK button exists on treatments. Wire up the 
+complete booking journey:
+
+STEP 1 — Treatment selected:
+  When BOOK is clicked on a treatment:
+  Store selected treatment in state:
+    { name, price, depositAmount, duration, locationId }
+  Navigate to /book or show booking modal
+
+STEP 2 — Date & time picker:
+  Show a calendar for the selected location
+  Fetch available dates: GET /api/availability 
+    with location header
+  Fetch blocked dates from Supabase blocked_dates
+  Grey out unavailable/blocked dates
+  When date selected: fetch available time slots
+  Show slots as pills: "10:00" "10:30" "11:00" etc
+  Grey out already booked slots (check bookings table)
+  User selects a slot → store in state
+
+STEP 3 — Client details form:
+  Name (required)
+  Email (required)
+  Phone (required)
+  Any notes (optional)
+
+STEP 4 — Booking summary + payment:
+  Show summary card:
+    Treatment name
+    Date + time
+    Location name
+    "Deposit due today: £20" or "£10"
+    "Remaining balance: £X due on the day"
+  
+  "Pay Deposit" button — triggers Stripe
+
+STEP 5 — Stripe payment:
+  Create payment intent server-side
+  Use treatment.depositAmount (£20 or £10)
+  Include metadata:
+    { locationId, treatmentName, clientName,
+      clientEmail, clientPhone, bookingDate,
+      bookingTime }
+  Redirect to Stripe hosted checkout
+  OR use Stripe Elements inline
+
+STEP 6 — After payment success:
+  Stripe webhook fires → creates booking in Supabase
+  Booking status set to 'confirmed'
+  Create/update client record in Supabase
+  
+  REDIRECT CLIENT TO:
+  /forms?booking=[bookingId]
+  
+  This is the forms page (built in Part 2 below)
+
+===============================================================
+PART 2 — MEDICAL FORM + CONSENT FORM
+===============================================================
+
+After Stripe payment the client goes to /forms?booking=[id]
+
+This is a public page — no login needed.
+Styled to match Starr Aesthetics exactly:
+  Cream #F9F5F0 background
+  Dark burgundy headings (site colour var)
+  Gold accents (site colour var)
+  Same fonts as rest of site
+
+On load:
+  Fetch booking details using bookingId
+  If bookingId invalid → redirect to homepage
+  Check if medical_forms exists for this 
+    client_email + location_id in Supabase
+  Check if consent_forms exists for this booking_id
+
+DECISION LOGIC:
+  If medical NOT on file AND consent NOT done:
+    Show Step 1 (Medical) then Step 2 (Consent)
+  
+  If medical IS on file AND consent NOT done:
+    Show returning client screen:
+    "Welcome back [name]. We have your medical 
+    details on file."
+    "Has anything changed since your last visit?"
+    [Nothing changed] → skip to Consent form
+    [Update my details] → show Medical form first
+  
+  If BOTH already done:
+    Redirect straight to /confirmed?booking=[id]
+
+PROGRESS STEPPER (top of page):
+  Step 1: Medical  →  Step 2: Consent  →  Step 3: Done
+  Active step highlighted in brand colour
+  Completed steps show a tick
+
+═══════════════════════════════
+MEDICAL FORM (Step 1)
+═══════════════════════════════
+
+Title: "Medical Intake Form"
+Small note: "Kept strictly confidential. 
+Required before your treatment."
+
+Form sections with thin gold dividers:
+
+PERSONAL DETAILS (pre-filled from booking, editable):
+  Full Name
+  Date of Birth (required, must be 18+)
+  Phone Number
+  Home Address (textarea)
+  Email (pre-filled, read-only)
+
+EMERGENCY CONTACT:
+  Name
+  Phone Number
+
+GP DETAILS:
+  GP / Doctor Name
+  GP Surgery Address
+
+HEALTH QUESTIONS:
+  Each = bold question + Yes/No toggle
+  If Yes → textarea expands below
+  
+  Are you currently pregnant?
+  Are you currently breastfeeding?
+  Do you have any known allergies?
+    (If yes: describe — include anaesthetics, 
+    skincare, metals)
+  Do you have any skin conditions?
+    (If yes: eczema, psoriasis, rosacea, 
+    acne, cold sores)
+  Do you have any medical conditions?
+    (If yes: diabetes, epilepsy, heart conditions,
+    blood disorders, autoimmune, cancer history,
+    pacemaker, keloid scarring)
+  Are you currently taking any medications?
+    (If yes: include supplements + topicals)
+  Have you had aesthetic treatments before?
+    (If yes: describe + note any reactions)
+
+DECLARATION (required to submit):
+  Cream box with gold border:
+  "I confirm all information is accurate and 
+  complete. I understand it is my responsibility 
+  to inform my practitioner of any changes at 
+  future appointments."
+  Required checkbox: "I confirm the above"
+
+SUBMIT BUTTON:
+  "Continue to Consent Form →"
+  Gold/brand colour, full width
+  Disabled until declaration ticked
+  
+  On submit:
+    POST /api/forms/medical
+    Body: all fields + booking_id + location_id
+    Server captures IP address
+    If client already has medical form → UPDATE it
+    If new client → INSERT new row
+    On success → show Consent form (Step 2)
+
+═══════════════════════════════
+CONSENT FORM (Step 2)
+═══════════════════════════════
+
+Title: "Treatment Consent"
+
+Booking summary card (read-only, top of form):
+  "Treatment: [treatment name]"
+  "Date: [date] at [time]"
+  "Location: [location name]"
+  Cream card, gold border, serif font
+
+CONSENT CHECKBOXES (all required):
+  Clear error message if any missed on submit
+  
+  ☐ I understand what my treatment involves and 
+    have had the opportunity to ask questions.
+  
+  ☐ I understand the risks including bruising, 
+    swelling, infection, asymmetry and in rare 
+    cases more serious complications such as 
+    vascular occlusion.
+  
+  ☐ I understand results are not guaranteed and 
+    outcomes vary between individuals.
+  
+  ☐ I confirm I am 18 years of age or over.
+  
+  ☐ I confirm I am not pregnant or breastfeeding 
+    and my medical history is accurate.
+  
+  ☐ I agree to follow the aftercare instructions 
+    provided and understand the cancellation policy.
+
+DIGITAL SIGNATURE:
+  Label: "Sign below to confirm consent"
+  
+  Canvas element:
+    width: 100% height: 150px
+    white background
+    Gold border: 1px solid brand gold colour
+    border-radius: 8px
+    
+    Vanilla JS — touch + mouse drawing:
+    const canvas = document.getElementById('sig-canvas')
+    const ctx = canvas.getContext('2d')
+    ctx.strokeStyle = '#1a1a1a'
+    ctx.lineWidth = 1.5
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    let drawing = false
+    
+    canvas.addEventListener('mousedown', e => {
+      drawing = true
+      ctx.beginPath()
+      ctx.moveTo(e.offsetX, e.offsetY)
+    })
+    canvas.addEventListener('mousemove', e => {
+      if (!drawing) return
+      ctx.lineTo(e.offsetX, e.offsetY)
+      ctx.stroke()
+    })
+    canvas.addEventListener('mouseup', () => drawing = false)
+    canvas.addEventListener('mouseleave', () => drawing = false)
+    
+    canvas.addEventListener('touchstart', e => {
+      e.preventDefault()
+      drawing = true
+      const r = canvas.getBoundingClientRect()
+      const t = e.touches[0]
+      ctx.beginPath()
+      ctx.moveTo(t.clientX - r.left, t.clientY - r.top)
+    }, { passive: false })
+    canvas.addEventListener('touchmove', e => {
+      e.preventDefault()
+      if (!drawing) return
+      const r = canvas.getBoundingClientRect()
+      const t = e.touches[0]
+      ctx.lineTo(t.clientX - r.left, t.clientY - r.top)
+      ctx.stroke()
+    }, { passive: false })
+    canvas.addEventListener('touchend', () => drawing = false)
+    
+    function isCanvasBlank() {
+      const pixels = ctx.getImageData(
+        0, 0, canvas.width, canvas.height).data
+      return !pixels.some((p, i) => i % 4 !== 3 && p !== 255)
+    }
+  
+  "Clear" link below canvas — ctx.clearRect(...)
+  
+  Print name input (required):
+    placeholder: "Print your full name"
+  
+  Date display (auto, read-only):
+    "Date: [today's date formatted as DD MMM YYYY]"
+    Small muted text
+
+FINAL STATEMENT:
+  Small italic text below signature:
+  "By signing I give informed consent to proceed 
+  with [treatment name] at [clinic name] on [date]."
+
+SUBMIT BUTTON:
+  "Confirm Booking"
+  Active ONLY when:
+    All 6 checkboxes ticked
+    Canvas is NOT blank (isCanvasBlank() === false)
+    Print name is filled
+  Disabled + muted otherwise
+  
+  On click:
+    Convert canvas: canvas.toDataURL('image/png')
+    POST /api/forms/consent:
+      booking_id, location_id,
+      all consent booleans,
+      signature_data (base64 PNG),
+      signature_name,
+      treatment_name, treatment_date,
+      client_name, client_email
+    Server captures IP + timestamp
+    Server updates booking status to 'confirmed'
+    Server sends confirmation email via Resend
+    On success → redirect to /confirmed?booking=[id]
+
+===============================================================
+PART 3 — CONFIRMATION PAGE
+===============================================================
+
+URL: /confirmed?booking=[bookingId]
+
+Fetch booking details on load.
+
+Layout — centred, max-width 480px, cream bg:
+
+  Gold animated checkmark (SVG circle draw animation)
+    or large tick icon in brand colour
+  
+  "You're all booked in!"
+  Instrument Serif or site serif, large, burgundy
+  
+  Booking summary card:
+    Cream surface, gold border, rounded
+    Treatment: [name]
+    Date: [date] at [time]  
+    Location: [name + address]
+    "Deposit paid: £20" or "£10"
+    "Balance due on the day: £X"
+  
+  "What to expect" section:
+    Clean list, gold bullet points:
+    • Arrive 5 minutes before your appointment
+    • Come with a clean face — no makeup on 
+      the treatment area
+    • Avoid alcohol for 24 hours beforehand
+    • Contact us if any medical details change
+      before your appointment
+  
+  Location contact card:
+    Phone / WhatsApp / Instagram
+    Styled with existing site contact styling
+  
+  "Back to home" link — subtle, bottom of page
+
+===============================================================
+PART 4 — API ENDPOINTS FOR FORMS
+===============================================================
+
+POST /api/forms/medical
+  Public — no auth required
+  Validate bookingId exists in Supabase
+  Check if medical_forms row exists for 
+    this client_email + location_id:
+    If exists → UPDATE the row
+    If not → INSERT new row
+  Capture req.ip as ip_address
+  Return: { success: true, id: form_id }
+
+POST /api/forms/consent
+  Public — no auth required
+  Validate bookingId exists
+  Check consent not already submitted for booking
+    (prevent duplicates)
+  INSERT into consent_forms
+  Capture req.ip as ip_address
+  UPDATE bookings SET status = 'confirmed',
+    forms_completed = true WHERE id = bookingId
+  Send confirmation email via Resend (see Part 5)
+  Return: { success: true }
+
+GET /api/forms/check?booking=[id]
+  Public
+  Returns:
+    booking: { id, client_name, client_email,
+      treatment_name, booking_date, booking_time,
+      location_id }
+    medical_on_file: boolean (check by client_email)
+    consent_done: boolean (check by booking_id)
+  Used by /forms page on load to decide flow
+
+===============================================================
+PART 5 — CONFIRMATION EMAIL (RESEND)
+===============================================================
+
+After consent form submitted, send via Resend:
+
+From: Starr Aesthetics <info@starrbeautyy.co.uk>
+To: client email
+Subject: "Your appointment is confirmed — [Treatment]"
+
+Email body (HTML, match Starr brand colours):
+
+  Starr Aesthetics logo/wordmark at top
+  
+  "Hi [Name],"
+  
+  "Your appointment is confirmed."
+  
+  Booking details box:
+    Treatment: [name]
+    Date: [date] at [time]
+    Location: [name]
+    Address: [address]
+    Deposit paid: £[amount]
+    Balance due on the day: £[remainder]
+  
+  "Your forms have been received and stored 
+  securely in line with UK GDPR."
+  
+  "Before your appointment:"
+  • Arrive 5 minutes early
+  • Clean face — no makeup on treatment area
+  • Avoid alcohol 24 hours before
+  • Contact us immediately if your medical 
+    details change
+  
+  "Cancellation policy:"
+  "Please give at least 48 hours notice to 
+  reschedule or cancel. Deposits are 
+  non-refundable for no-shows."
+  
+  Contact details for the location
+  Instagram link
+
+===============================================================
+PART 6 — ADMIN PORTAL — VIEW FORMS
+===============================================================
+
+In the Bookings tab of the admin portal:
+  Each booking row already has client, treatment,
+  date, status columns.
+  
+  ADD two icon buttons to each booking row:
+  
+  📋 Medical form button:
+    If medical form exists → burgundy/brand colour
+    If not submitted → grey, cursor not-allowed
+    Tooltip: "Medical Form"
+  
+  ✍️ Consent form button:
+    If consent form exists → brand colour
+    If not → grey
+    Tooltip: "Consent Form"
+  
+  On click → slide-in drawer from right:
+    Width: 360px on desktop, full width mobile
+    Overlay backdrop
+    Close button (×) top right
+    
+    MEDICAL FORM DRAWER:
+      Header: "Medical Form — [Client Name]"
+      
+      All fields displayed read-only in sections:
+      Same sections as the form (Personal, Emergency,
+      GP, Health Questions, Declaration)
+      
+      Declaration confirmed: "✓ Confirmed" in green
+      
+      Footer:
+        "Submitted: [timestamp]"
+        "IP: [ip_address]"
+        Print button → window.print() for this drawer
+    
+    CONSENT FORM DRAWER:
+      Header: "Consent Form — [Treatment Name]"
+      
+      Treatment + date + location at top
+      
+      All consent checkboxes shown as:
+        ✓ in green if ticked
+      
+      Signature:
+        <img src={signature_data}
+          style="width:100%;border:1px solid #E5DFD3;
+          border-radius:8px;background:white">
+        "Signed by: [signature_name]"
+      
+      Footer:
+        "Submitted: [timestamp]"
+        "IP: [ip_address]"
+        Print button
+
+  GET /api/admin/forms?booking=[id]
+    Protected — requires JWT
+    Returns both forms for that booking_id
+    Scoped to session locationId
+
+===============================================================
+PART 7 — MISSING BOOKINGS TABLE COLUMNS
+===============================================================
+
+Run this in Supabase SQL editor before the server 
+can write forms data:
+
+ALTER TABLE bookings 
+  ADD COLUMN IF NOT EXISTS forms_completed 
+    BOOLEAN DEFAULT false;
+ALTER TABLE bookings 
+  ADD COLUMN IF NOT EXISTS reminder_sent 
+    BOOLEAN DEFAULT false;
+ALTER TABLE bookings 
+  ADD COLUMN IF NOT EXISTS balance_due 
+    DECIMAL(10,2);
+
+ALTER TABLE medical_forms 
+  ADD COLUMN IF NOT EXISTS emergency_contact_relationship TEXT;
+
+Also grant access on new tables:
+GRANT INSERT ON medical_forms TO anon;
+GRANT INSERT ON consent_forms TO anon;
+GRANT ALL ON medical_forms TO service_role;
+GRANT ALL ON consent_forms TO service_role;
+
+===============================================================
+PART 8 — MISSING SUPABASE COLUMNS FIX
+===============================================================
+
+The agent found these columns don't exist in Supabase:
+  bookings: client_dob, client_notes, duration_minutes,
+  balance_paid → already removed from code ✓
+  
+Confirm these columns DO exist in the bookings table
+(they were added in earlier migrations):
+  client_name, client_email, client_phone,
+  treatment_name, booking_date, booking_time,
+  deposit_amount, total_price, status,
+  stripe_payment_intent_id, stripe_session_id,
+  notes, forms_completed, reminder_sent
+
+If any are missing → ALTER TABLE to add them.
+
+===============================================================
+STYLING RULES FOR FORMS + CONFIRMATION
+===============================================================
+
+All new pages (/forms, /confirmed) must match
+the Starr Aesthetics website exactly:
+
+Import or use the same CSS variables:
+  --cream: #F9F5F0 or existing variable
+  --burgundy: existing dark burgundy variable
+  --gold: existing gold variable  
+  --text: existing body text colour
+  --muted: existing muted text colour
+  --border: existing border colour
+
+Typography:
+  Headings: existing site serif font
+  Body: existing site sans font
+  Same sizing as rest of site
+
+Form inputs:
+  Match existing booking form input styles
+  Focus: gold border
+  
+Buttons:
+  Match existing BOOK button style
+  
+Mobile first — all forms must work perfectly 
+on iPhone with touch signature
+
+Form max-width: 520px, centred on desktop
+
+===============================================================
+FINAL CHECKLIST
+===============================================================
+
+Run through this before marking complete:
+
+BOOKING FLOW:
+  BOOK button → date picker → time slots → 
+  client details → payment summary → Stripe → 
+  webhook fires → booking in Supabase → 
+  redirect to /forms?booking=[id]
+
+FORMS:
+  Medical form saves to Supabase medical_forms
+  Returning client check works
+  Consent form saves with base64 signature
+  Both forms update booking.forms_completed = true
+  Redirect to /confirmed on completion
+
+CONFIRMATION:
+  /confirmed shows booking summary
+  Confirmation email sent via Resend
+  Email includes deposit paid + balance due
+
+ADMIN:
+  📋 and ✍️ buttons on each booking row
+  Form drawers slide in with all data
+  Signature image renders correctly
+  All data scoped to correct location_id
+
+Everything saves to Supabase live in real time.
+No in-memory fallbacks for critical data.
