@@ -1060,12 +1060,9 @@ select.form-input{background:var(--color-card)}
       <div class="topbar" style="display:flex;align-items:center;justify-content:space-between">
         <div>
           <span class="topbar-title serif">Media</span>
-          <div style="font-family:var(--font-sans);font-size:12px;color:var(--color-muted-fg);margin-top:2px">Manage all images and videos shown on your website. Changes save when you click Save to Live Site.</div>
+          <div style="font-family:var(--font-sans);font-size:12px;color:var(--color-muted-fg);margin-top:2px">Changes save automatically and go live on the website instantly.</div>
         </div>
-        <div style="display:flex;align-items:center;gap:14px">
-          <span id="media-autosave-status" style="font-family:var(--font-sans);font-size:12px;color:#4CAF50;opacity:0;transition:opacity .4s"></span>
-          <button id="media-save-btn" onclick="publishMediaToCloud()" style="background:var(--color-secondary);color:#fff;border:none;border-radius:var(--radius-pill);padding:8px 20px;font-family:var(--font-sans);font-size:12px;font-weight:600;letter-spacing:.5px;cursor:pointer;transition:opacity .2s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">Save to Live Site</button>
-        </div>
+        <span id="media-autosave-status" style="font-family:var(--font-sans);font-size:12px;color:#4CAF50;opacity:0;transition:opacity .4s;white-space:nowrap"></span>
       </div>
       <div style="padding:28px;max-width:1100px;margin:0 auto" id="media-root"></div>
     </div>
@@ -3823,17 +3820,11 @@ function renderMedia(){
       +'</div>';
   }).join('');
 
-  const txSaveBar='<div style="display:flex;justify-content:flex-end;align-items:center;padding:16px 0 4px;margin-top:8px;border-top:1px solid #F0EAE2;gap:12px">'
-    +'<span id="tx-save-status" style="font-family:var(--font-sans);font-size:11px;color:#4CAF50;opacity:0;transition:opacity .3s"></span>'
-    +'<button onclick="saveTransformations()" style="background:#5C1A1A;color:#fff;border:none;border-radius:var(--radius-pill);padding:9px 24px;font-family:var(--font-sans);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.05em">Save Changes</button>'
-    +'</div>';
-
   const txCard='<div class="mc-card">'
     +'<style>@keyframes spin{to{transform:rotate(360deg)}}</style>'
     +'<div class="mc-section-label"><span class="mc-section-tag">Transformations</span><div class="mc-section-line"></div></div>'
     +'<div class="mc-slot-hint" style="margin-bottom:16px">Click any card to replace it with your own image or video. Changes save automatically and go live for all visitors.</div>'
     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+txCards+'</div>'
-    +txSaveBar
     +'</div>';
 
   document.getElementById('media-root').innerHTML=css+'<div style="max-width:780px">'+heroCard+aboutCard+txCard+'</div>';
@@ -3846,12 +3837,6 @@ function triggerTxReplace(i){
   if(el)el.click();
 }
 
-function saveTransformations(){
-  const d=getMediaData();
-  saveMediaData(d);
-  const st=document.getElementById('tx-save-status');
-  if(st){st.textContent='✓ Saved to cloud';st.style.opacity='1';setTimeout(function(){st.style.opacity='0';},3000);}
-}
 
 async function handleTxReplace(input,i){
   const file=input.files&&input.files[0];
