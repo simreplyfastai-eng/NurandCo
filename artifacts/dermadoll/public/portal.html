@@ -4035,7 +4035,7 @@ function renderMedia(){
     let mediaEl='';
     if(hasSrc){
       if(isVideo){
-        mediaEl='<video src="'+resolved+'" muted preload="metadata" loop playsinline'
+        mediaEl='<video src="'+resolved+'" autoplay muted preload="auto" loop playsinline webkit-playsinline="true"'
           +' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none"></video>';
       }else{
         mediaEl='<img src="'+resolved+'" alt="'+escHtml(item.label)+'"'
@@ -4084,7 +4084,54 @@ function renderMedia(){
     +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+txCards+'</div>'
     +'</div>';
 
-  document.getElementById('media-root').innerHTML=css+'<div style="max-width:780px">'+heroCard+aboutCard+txCard+'</div>';
+  /* ── GALLERY IMAGES CARD ── */
+  const galleryImages=Array.isArray(data.galleryImages)?data.galleryImages:[];
+  const galleryThumbsHtml=galleryImages.map(function(url,i){
+    const src=cloudSrc(url)||url;
+    return'<div style="position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:#E8E2D9">'
+      +'<img src="'+src+'" alt="Gallery '+i+'" style="width:100%;height:100%;object-fit:cover;display:block"/>'
+      +'<button onclick="deleteGalleryImage('+i+')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:20px;height:20px;font-size:11px;color:#fff;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center" title="Remove">&times;</button>'
+      +'</div>';
+  }).join('');
+
+  const galleryCard='<div class="mc-card">'
+    +'<div class="mc-section-label"><span class="mc-section-tag">Gallery Reel</span><div class="mc-section-line"></div></div>'
+    +'<div class="mc-slot-hint" style="margin-bottom:16px">Photos shown in the scrolling gallery on the homepage. Drag-and-drop files or paste image URLs below.</div>'
+    +(galleryImages.length>0?'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">'+galleryThumbsHtml+'</div>':'')
+    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+    +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-gallery-file\').click()">Upload Image</button>'
+    +'<input type="file" id="mc-gallery-file" accept="image/*" multiple style="display:none" onchange="handleGalleryUpload(this)"/>'
+    +'<input type="text" id="mc-gallery-url" class="mc-input" placeholder="Or paste image URL…" style="flex:1;min-width:160px"/>'
+    +'<button class="mc-btn-primary" onclick="addGalleryImage()">Add</button>'
+    +'</div>'
+    +'<div id="gallery-upload-status" style="font-family:var(--font-sans);font-size:11px;color:#C9A96E;margin-top:6px;min-height:14px"></div>'
+    +'</div>';
+
+  /* ── RESULTS VIDEOS CARD ── */
+  const resultsVideos=Array.isArray(data.resultsVideos)?data.resultsVideos:[];
+  const resultsThumbsHtml=resultsVideos.map(function(url,i){
+    const src=cloudSrc(url)||url;
+    return'<div style="position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:#1E1E1E">'
+      +'<video src="'+src+'" muted preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block"></video>'
+      +'<div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.55);border-radius:3px;padding:1px 5px;font-family:var(--font-sans);font-size:8px;color:#fff">Video '+(i+1)+'</div>'
+      +'<button onclick="deleteResultsVideo('+i+')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:20px;height:20px;font-size:11px;color:#fff;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center" title="Remove">&times;</button>'
+      +'</div>';
+  }).join('');
+
+  const resultsCard='<div class="mc-card">'
+    +'<div class="mc-section-label"><span class="mc-section-tag">Results Videos</span><div class="mc-section-line"></div></div>'
+    +'<div class="mc-slot-hint" style="margin-bottom:16px">Videos shown in the "Watch Real Treatments" section. Up to 4 videos displayed. Upload MP4 files or paste video URLs.</div>'
+    +(resultsVideos.length>0?'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">'+resultsThumbsHtml+'</div>':'')
+    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
+    +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-results-vid-file\').click()">Upload Video</button>'
+    +'<input type="file" id="mc-results-vid-file" accept="video/mp4,video/*" style="display:none" onchange="handleResultsVideoUpload(this)"/>'
+    +'<input type="text" id="mc-vid-url" class="mc-input" placeholder="Or paste video URL…" style="flex:1;min-width:160px"/>'
+    +'<button class="mc-btn-primary" onclick="addResultsVideo()">Add</button>'
+    +'</div>'
+    +'<div id="results-upload-status" style="font-family:var(--font-sans);font-size:11px;color:#C9A96E;margin-top:6px;min-height:14px"></div>'
+    +'</div>';
+
+  document.getElementById('media-root').innerHTML=css+'<div style="max-width:780px">'+heroCard+aboutCard+txCard+galleryCard+resultsCard+'</div>';
 }
 
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -4271,6 +4318,7 @@ function addGalleryImage(){
   if(!Array.isArray(d.galleryImages))d.galleryImages=[];
   if(d.galleryImages.length>=20)return;
   d.galleryImages.push(url);
+  input.value='';
   saveMediaData(d);renderMedia();
 }
 
@@ -4282,7 +4330,48 @@ function deleteGalleryImage(index){
   saveMediaData(d);renderMedia();
 }
 
+async function handleGalleryUpload(input){
+  const files=Array.from(input.files||[]);
+  if(!files.length)return;
+  const statusEl=document.getElementById('gallery-upload-status');
+  if(statusEl)statusEl.textContent='Uploading '+files.length+' image'+(files.length>1?'s':'')+'…';
+  const d=getMediaData();
+  if(!Array.isArray(d.galleryImages))d.galleryImages=[];
+  let uploaded=0;
+  for(const file of files){
+    if(d.galleryImages.length>=20)break;
+    try{
+      const url=await uploadToCloud(file,'gallery');
+      d.galleryImages.push(url);
+      uploaded++;
+      if(statusEl)statusEl.textContent='Uploaded '+uploaded+' of '+files.length+'…';
+    }catch(e){showToast('Upload failed: '+e.message);}
+  }
+  if(uploaded>0){saveMediaData(d);renderMedia();showToast('✓ '+uploaded+' image'+(uploaded>1?'s':'')+' added to gallery');}
+  else if(statusEl)statusEl.textContent='';
+  input.value='';
+}
+
 /* ── Results Video handlers ── */
+async function handleResultsVideoUpload(input){
+  const file=input.files&&input.files[0];
+  if(!file)return;
+  const statusEl=document.getElementById('results-upload-status');
+  if(statusEl)statusEl.textContent='Uploading video…';
+  try{
+    const url=await uploadToCloud(file,'results_video');
+    const d=getMediaData();
+    if(!Array.isArray(d.resultsVideos))d.resultsVideos=[];
+    d.resultsVideos.push(url);
+    saveMediaData(d);renderMedia();
+    showToast('✓ Results video uploaded');
+  }catch(e){
+    if(statusEl)statusEl.textContent='';
+    showToast('Upload failed: '+e.message);
+  }
+  input.value='';
+}
+
 function addResultsVideo(){
   const input=document.getElementById('mc-vid-url');
   if(!input)return;
@@ -4291,6 +4380,7 @@ function addResultsVideo(){
   const d=getMediaData();
   if(!Array.isArray(d.resultsVideos))d.resultsVideos=[];
   d.resultsVideos.push(url);
+  input.value='';
   saveMediaData(d);renderMedia();
 }
 
