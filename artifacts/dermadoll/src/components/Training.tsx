@@ -50,7 +50,7 @@ export default function Training() {
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
               Eva's background in education meets her clinical expertise, delivering world-class aesthetics training through Starr Academy. All courses are CPD accredited and open to candidates with no prior background required.
             </p>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: 0 }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#5C1A1A", lineHeight: 1.8, margin: 0 }}>
               Small groups. Real models. Real confidence.
             </p>
           </motion.div>
