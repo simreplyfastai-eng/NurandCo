@@ -27,9 +27,7 @@ export default function CTABanner() {
 
         <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
           <a
-            href="https://starrbookingss.as.me/schedule/1b78ff68"
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`${import.meta.env.BASE_URL}book?location=hornchurch`}
             style={{
               fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase",
               border: "1px solid #F5F0EB", background: "transparent", color: "#F5F0EB",
@@ -41,9 +39,7 @@ export default function CTABanner() {
             BOOK HORNCHURCH
           </a>
           <a
-            href="https://starrbookingss.as.me/schedule/1b78ff68"
-            target="_blank"
-            rel="noopener noreferrer"
+            href={`${import.meta.env.BASE_URL}book?location=marylebone`}
             style={{
               fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase",
               border: "1px solid #C9A96E", background: "transparent", color: "#C9A96E",

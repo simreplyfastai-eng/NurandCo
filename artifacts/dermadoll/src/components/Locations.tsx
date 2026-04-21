@@ -16,7 +16,6 @@ const clinics = [
 ];
 
 export default function Locations() {
-  const scrollToBook = () => document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <section id="locations" style={{ background: "#F5F0EB", padding: "100px 0" }}>
@@ -99,18 +98,19 @@ export default function Locations() {
               </div>
               <h3>{clinic.name}</h3>
               <p>{clinic.desc}</p>
-              <button
-                onClick={scrollToBook}
+              <a
+                href={`${import.meta.env.BASE_URL}book?location=${clinic.name.toLowerCase()}`}
                 style={{
                   fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
                   border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
                   padding: "11px 0", cursor: "pointer", transition: "all 0.2s", width: "100%",
+                  textDecoration: "none", display: "block", textAlign: "center",
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
               >
                 BOOK HERE
-              </button>
+              </a>
             </motion.div>
           ))}
         </div>

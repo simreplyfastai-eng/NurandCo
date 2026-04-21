@@ -8,10 +8,18 @@ export default function Footer() {
     { name: "BOOK NOW", href: "#book" },
   ];
 
+  const BASE = import.meta.env.BASE_URL;
+
   const scrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
-    e.preventDefault();
-    if (href === "#") { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
-    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+    if (href.startsWith("#") && href !== "#") {
+      e.preventDefault();
+      document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
+      return;
+    }
+    if (href === "#") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
   return (
@@ -35,8 +43,8 @@ export default function Footer() {
           {navLinks.map((link) => (
             <a
               key={link.name}
-              href={link.href}
-              onClick={(e) => scrollTo(e, link.href)}
+              href={link.href === "#book" ? `${BASE}book` : link.href}
+              onClick={(e) => link.href !== "#book" ? scrollTo(e, link.href) : undefined}
               style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: "#737373", textDecoration: "none", transition: "color 0.2s" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#5C1A1A")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#737373")}

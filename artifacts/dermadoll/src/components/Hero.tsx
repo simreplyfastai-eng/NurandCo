@@ -34,7 +34,6 @@ export default function Hero() {
   }, [heroSrc]);
 
   const scrollToServices = () => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });
-  const scrollToBook = () => document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
 
   return (
     <>
@@ -204,15 +203,15 @@ export default function Hero() {
               >
                 VIEW TREATMENTS
               </button>
-              <button
+              <a
                 className="hero-btn"
-                onClick={scrollToBook}
-                style={{ border: "1px solid #C9A96E", background: "transparent", color: "#3D3D3D" }}
+                href={`${import.meta.env.BASE_URL}book`}
+                style={{ border: "1px solid #C9A96E", background: "transparent", color: "#3D3D3D", textDecoration: "none", display: "inline-block", cursor: "pointer" }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#3D3D3D"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
               >
                 BOOK NOW
-              </button>
+              </a>
             </div>
           </div>
         </div>

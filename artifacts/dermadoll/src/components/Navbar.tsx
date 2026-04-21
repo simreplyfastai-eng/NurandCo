@@ -204,12 +204,6 @@ export default function Navbar() {
     if (el) el.scrollIntoView({ behavior: "smooth" });
   };
 
-  const scrollToBook = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
-    e.preventDefault();
-    setIsMobileMenuOpen(false);
-    document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
-  };
-
   return (
     <>
       <nav
@@ -241,8 +235,7 @@ export default function Navbar() {
               </a>
             ))}
             <a
-              href="#book"
-              onClick={scrollToBook}
+              href={`${import.meta.env.BASE_URL}book`}
               style={{
                 fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.18em", fontWeight: 400,
                 color: "#5C1A1A", border: "1px solid #5C1A1A", padding: "10px 20px",
@@ -297,8 +290,7 @@ export default function Navbar() {
               </motion.a>
             ))}
             <motion.a
-              href="#book"
-              onClick={scrollToBook}
+              href={`${import.meta.env.BASE_URL}book`}
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.28 }}
