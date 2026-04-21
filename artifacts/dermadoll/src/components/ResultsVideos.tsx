@@ -116,7 +116,7 @@ export default function ResultsVideos() {
   }, []);
 
   return (
-    <section style={{ padding: "100px 0", background: "#FFFFFF" }}>
+    <section style={{ padding: "100px 0", background: "#F5F0EB" }}>
       <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 32px" }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
