@@ -458,3 +458,64 @@ video::-webkit-media-controls-overlay-play-button {
   .footer-social-grid > *:nth-child(odd)  { order: 1; }
   .footer-social-grid > *:nth-child(even) { order: 2; }
 }
+
+/* ── Mobile: full single-column stack at 640px ─────────────── */
+/* This block is placed last so it wins the cascade over
+   the 480px and 360px blocks above on all mobile widths.     */
+@media (max-width: 640px) {
+  .footer-social-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    width: 100%;
+  }
+
+  .footer-social-headers {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 0;
+  }
+
+  /* Show only the Instagram label — TikTok pills are visually
+     separated below by margin-top on the first TikTok pill */
+  .footer-social-headers span:first-child {
+    display: block;
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .footer-social-headers span:last-child {
+    display: none;
+  }
+
+  .footer-social-grid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: 0;
+  }
+
+  /* Group all IG pills (odd) first, all TT pills (even) second */
+  .footer-social-grid > *:nth-child(odd)  { order: 1; }
+  .footer-social-grid > *:nth-child(even) { order: 2; }
+
+  /* Visual gap + implied "TikTok" section — first TT pill gets top margin */
+  .footer-social-grid > *:nth-child(2) {
+    margin-top: 20px;
+  }
+
+  .footer-social-pill {
+    width: auto !important;
+    min-width: 180px !important;
+    max-width: 280px !important;
+    text-align: center !important;
+    justify-content: center !important;
+    margin: 4px auto !important;
+    white-space: nowrap !important;
+    font-size: 12px !important;
+  }
+}
