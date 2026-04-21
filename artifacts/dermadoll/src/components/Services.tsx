@@ -7,7 +7,7 @@ const BASE = import.meta.env.BASE_URL;
 
 export default function Services() {
   const [location, setLocation] = useState<"hornchurch" | "marylebone">("hornchurch");
-  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(["SIGNATURE TREATMENTS"]));
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
 
   const toggleGroup = (group: string) => {
     setOpenGroups((prev) => {
