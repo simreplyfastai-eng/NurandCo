@@ -93,7 +93,7 @@ export default function About() {
                 </div>
               )}
             </div>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 13, color: "#737373", textAlign: "center", margin: 0 }}>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 13, color: "#C9A96E", textAlign: "center", margin: 0 }}>
               Eva, Founder
             </p>
           </motion.div>
