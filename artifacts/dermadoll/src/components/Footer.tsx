@@ -26,54 +26,53 @@ const TtIcon = () => (
   </svg>
 );
 
-function SocialPill({ handle, label, url, icon }: { handle: string; label: string; url: string; icon: "ig" | "tt" }) {
+function SocialPill({ handle, url, icon }: { handle: string; url: string; icon: "ig" | "tt" }) {
   return (
-    <div style={{ display: "inline-flex", flexDirection: "column", alignItems: "center", margin: "3px" }}>
-      <a
-        href={url}
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          display: "inline-flex",
-          alignItems: "center",
-          gap: 5,
-          padding: "5px 12px",
-          border: "1px solid #E2DDD5",
-          borderRadius: 999,
-          textDecoration: "none",
-          fontSize: 12,
-          color: "#5C1A1A",
-          transition: "border-color 150ms ease, color 150ms ease",
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.borderColor = "#C9A96E";
-          e.currentTarget.style.color = "#C9A96E";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.borderColor = "#E2DDD5";
-          e.currentTarget.style.color = "#5C1A1A";
-        }}
-      >
-        {icon === "ig" ? <IgIcon /> : <TtIcon />}
-        @{handle}
-      </a>
-      <span style={{ fontSize: 9, color: "#B0A898", display: "block", marginTop: 2, textAlign: "center" }}>
-        {label}
-      </span>
-    </div>
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "6px 14px",
+        border: "1px solid #DDD8D0",
+        borderRadius: 999,
+        textDecoration: "none",
+        fontSize: 11.5,
+        letterSpacing: "0.01em",
+        color: "#5C1A1A",
+        background: "rgba(255,255,255,0.55)",
+        transition: "border-color 160ms ease, color 160ms ease, background 160ms ease",
+        whiteSpace: "nowrap",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = "#C9A96E";
+        e.currentTarget.style.color = "#C9A96E";
+        e.currentTarget.style.background = "rgba(201,169,110,0.06)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = "#DDD8D0";
+        e.currentTarget.style.color = "#5C1A1A";
+        e.currentTarget.style.background = "rgba(255,255,255,0.55)";
+      }}
+    >
+      {icon === "ig" ? <IgIcon /> : <TtIcon />}
+      @{handle}
+    </a>
   );
 }
 
-function SectionLabel({ children }: { children: string }) {
+function ColLabel({ children }: { children: string }) {
   return (
     <span style={{
       display: "block",
-      fontSize: 10,
+      fontSize: 9,
       textTransform: "uppercase",
-      letterSpacing: "0.12em",
+      letterSpacing: "0.18em",
       color: "#C9A96E",
-      marginBottom: 8,
-      marginTop: 16,
+      marginBottom: 10,
       fontFamily: "'Inter', sans-serif",
     }}>
       {children}
@@ -141,23 +140,26 @@ export default function Footer() {
 
         <div style={{ fontFamily: "'Inter', sans-serif", marginBottom: 32 }}>
           {/* Two-column social grid */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 48, flexWrap: "wrap", textAlign: "left" }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 56, flexWrap: "wrap" }}>
             {/* Instagram column */}
-            <div>
-              <SectionLabel>Instagram</SectionLabel>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+              <ColLabel>Instagram</ColLabel>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {igAccounts.map((a) => (
-                  <SocialPill key={a.handle} handle={a.handle} label={a.label} url={a.url} icon="ig" />
+                  <SocialPill key={a.handle} handle={a.handle} url={a.url} icon="ig" />
                 ))}
               </div>
             </div>
 
+            {/* Vertical divider */}
+            <div style={{ width: 1, background: "#E2DDD5", alignSelf: "stretch", minHeight: 120 }} />
+
             {/* TikTok column */}
-            <div>
-              <SectionLabel>TikTok</SectionLabel>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+              <ColLabel>TikTok</ColLabel>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
                 {ttAccounts.map((a) => (
-                  <SocialPill key={a.handle} handle={a.handle} label={a.label} url={a.url} icon="tt" />
+                  <SocialPill key={a.handle} handle={a.handle} url={a.url} icon="tt" />
                 ))}
               </div>
             </div>
@@ -165,7 +167,7 @@ export default function Footer() {
 
           {/* Email centred below */}
           <div style={{ marginTop: 28, textAlign: "center" }}>
-            <SectionLabel>Email</SectionLabel>
+            <ColLabel>Email</ColLabel>
             <a
               href="mailto:starrbeautyyltd@gmail.com"
               style={{ color: "#5C1A1A", fontSize: 13, textDecoration: "none", transition: "color 150ms ease" }}
