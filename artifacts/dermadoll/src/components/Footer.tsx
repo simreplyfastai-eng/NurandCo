@@ -105,8 +105,21 @@ export default function Footer() {
 
         </div>
 
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9A96E", margin: 0 }}>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9A96E", margin: "0 0 10px" }}>
           © {year} Starr Aesthetics. All rights reserved.
+        </p>
+        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
+          <span style={{ color: "#C9A96E" }}>Powered By </span>
+          <a
+            href="https://aesthetix-systems.co.uk"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#A80000", textDecoration: "none", transition: "opacity 0.15s" }}
+            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.75")}
+            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+          >
+            AESTHETIX
+          </a>
         </p>
       </div>
     </footer>
