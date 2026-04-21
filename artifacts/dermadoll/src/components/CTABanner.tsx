@@ -27,7 +27,7 @@ export default function CTABanner() {
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1.8rem, 4vw, 2.8rem)", fontWeight: 400, color: "#F5F0EB", margin: "0 0 8px", lineHeight: 1.15 }}>
             Ready to Book?
           </h2>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "rgba(245,240,235,0.6)", margin: 0, lineHeight: 1.6 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#C9A96E", margin: 0, lineHeight: 1.6 }}>
             Choose your preferred location and book your appointment
           </p>
         </div>
