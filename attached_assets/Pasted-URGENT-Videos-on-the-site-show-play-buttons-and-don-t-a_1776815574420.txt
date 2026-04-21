@@ -1,0 +1,145 @@
+URGENT — Videos on the site show play buttons 
+and don't autoplay. Fix this completely.
+
+Read every component that renders a <video> 
+tag — the results/transformations section, 
+hero section, any video gallery.
+
+CONFIRMED FROM INSPECTION:
+  All video elements have correct attributes:
+    autoPlay={true} muted={true} loop={true} 
+    playsInline={true} controls={false}
+  
+  BUT all videos are paused on load.
+  Calling .play() manually works fine.
+  
+  So the issue is: the .play() promise is 
+  not being called after the component mounts
+  AND there is a visible play button showing.
+
+FIX 1 — Force play via useEffect/ref:
+
+Every video component must use a ref and 
+call .play() after mount:
+
+  import { useEffect, useRef } from 'react'
+  
+  function VideoPlayer({ src }) {
+    const ref = useRef(null)
+    
+    useEffect(() => {
+      const v = ref.current
+      if (!v) return
+      v.muted = true  // must set muted via JS too
+      v.play().catch(() => {}) // catch silently
+    }, [src])
+    
+    return (
+      <video
+        ref={ref}
+        src={src}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        style={{ width:'100%', height:'100%', 
+                 objectFit:'cover' }}
+      />
+    )
+  }
+
+Apply this pattern to EVERY video element 
+on the site — results videos, hero video, 
+any transformation videos.
+
+FIX 2 — Remove the play button overlay.
+
+There is a visible play button over each 
+video. Find and remove it completely.
+
+Search for:
+  - Any div/button with class containing 
+    'play', 'overlay', 'controls'
+  - Any CSS ::before or ::after on video 
+    containers that draws a play icon
+  - Any SVG play triangle icon near videos
+  - Any position:absolute element sitting 
+    over a video container
+
+Delete all of them. Videos must show with 
+ZERO UI overlay — just the raw video playing.
+
+FIX 3 — CSS to hide any browser-injected 
+play button:
+
+Add this CSS globally:
+
+  video::-webkit-media-controls {
+    display: none !important;
+  }
+  video::-webkit-media-controls-enclosure {
+    display: none !important;
+  }
+  video::-webkit-media-controls-panel {
+    display: none !important;
+  }
+  video::--internal-media-controls-download-button {
+    display: none !important;
+  }
+  video::-webkit-media-controls-start-playback-button {
+    display: none !important;
+  }
+  
+  /* Hide any custom play overlays */
+  [class*="play-overlay"],
+  [class*="play-button"],
+  [class*="video-overlay"],
+  [class*="playButton"] {
+    display: none !important;
+  }
+
+FIX 4 — Intersection Observer for off-screen 
+videos (performance + autoplay):
+
+For videos that are not in the hero 
+(results gallery etc), use an intersection 
+observer to play when visible and pause 
+when not:
+
+  useEffect(() => {
+    const v = ref.current
+    if (!v) return
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          v.muted = true
+          v.play().catch(()=>{})
+        } else {
+          v.pause()
+        }
+      },
+      { threshold: 0.3 }
+    )
+    obs.observe(v)
+    return () => obs.disconnect()
+  }, [src])
+
+This is especially important on mobile where 
+multiple autoplaying videos can cause issues.
+
+FIX 5 — Hero video specifically:
+
+The hero video (if set via media tab) must 
+autoplay immediately on page load with no 
+play button. Apply the same useEffect + ref 
+pattern to the hero video component.
+
+VERIFY AFTER FIX:
+  Visit homepage
+  All result videos play automatically ✓
+  No play button visible on any video ✓
+  No controls visible ✓
+  Videos loop silently ✓
+  Works on mobile (muted + playsInline) ✓
+  Hero video plays if set ✓

@@ -1486,6 +1486,7 @@ function gbp(v){const n=Number(v)||0;return'£'+n.toLocaleString('en-GB',{minimu
 let _SESSION_LOC_ID='';
 let _SESSION_LOC_NAME='';
 let _loginJustSucceeded=false;
+let _loginDone=false; // set true on successful login — prevents DOMContentLoaded from wiping state
 
 function authHdr(){
   const t=localStorage.getItem('fbn_token');
@@ -1769,8 +1770,8 @@ function saveSession(token,expiresAt){
 }
 
 function clearSession(message){
-  // Guard FIRST — if login just succeeded, never clear or re-show login during the
-  // login → location-selector → portal flow, no matter what fires in the background.
+  // Guard FIRST — if we're still in the login→portal transition, never clear.
+  // Only the session watcher (60s interval) or explicit logout may clear the session.
   if(_loginJustSucceeded){return;}
   SESSION_KEYS.forEach(k=>localStorage.removeItem(k));
   document.getElementById('portal').classList.remove('visible');
@@ -1824,6 +1825,7 @@ async function doLogin(){
     });
     if(r.ok){
       const {token,expiresAt}=await r.json();
+      _loginDone=true;
       _loginJustSucceeded=true;
       saveSession(token,expiresAt||Date.now()+8*3600*1000);
       showLocationSelector();
@@ -1874,6 +1876,8 @@ function switchLocation(){
 }
 
 function doLogout(){
+  _loginJustSucceeded=false; // ensure clearSession always runs on explicit logout
+  _loginDone=false;
   sessionStorage.removeItem('starr_location');
   sessionStorage.removeItem('starr_location_id');
   clearSession();
@@ -1934,6 +1938,7 @@ function showPortal(loc){
 }
 
 window.addEventListener('DOMContentLoaded',async()=>{
+  if(_loginDone)return; // login already completed in this page session — do nothing
   const token=localStorage.getItem('fbn_token');
   if(token&&localStorage.getItem('fbn_session')==='1'){
     // Fast client-side expiry check — silently clear stale tokens on fresh page load
@@ -4662,7 +4667,7 @@ async function pollBookings(){
   try{
     if(!localStorage.getItem('fbn_token'))return;
     const res=await fetch('/api/bookings',{headers:authHdr()});
-    if(res.status===401){clearSession('Session expired — please log in again.');return;}
+    if(res.status===401){return;} // session watcher handles expiry — never clearSession from background poll
     if(!res.ok)return;
     const data=await res.json();
     const fresh=Array.isArray(data)?data:(data.bookings||[]);
@@ -4743,7 +4748,7 @@ async function renderEnquiries(){
   try{
     const h=authHdr();
     const res=await fetch('/api/enquiries',{headers:h});
-    if(res.status===401){clearSession('Session expired — please log in again.');return;}
+    if(res.status===401){return;} // session watcher handles expiry — never clearSession from a tab render
     if(!res.ok){body.innerHTML='<tr><td colspan="7" style="padding:24px;text-align:center;color:#c62828">Failed to load enquiries.</td></tr>';return;}
     const data=await res.json();
     const enqs=data.enquiries||[];
