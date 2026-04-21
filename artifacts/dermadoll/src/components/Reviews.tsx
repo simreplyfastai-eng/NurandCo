@@ -34,45 +34,61 @@ const reviews = [
   },
 ];
 
-export default function Reviews() {
+function ReviewCard({ r }: { r: typeof reviews[number] }) {
   return (
-    <section id="reviews" style={{ background: "#F5F0EB", padding: "100px 0" }}>
+    <div
+      style={{
+        background: "#FFFFFF",
+        padding: "32px 28px",
+        border: "1px solid #F0EBE3",
+        width: 320,
+        flexShrink: 0,
+      }}
+    >
+      <div style={{ display: "flex", gap: 2, marginBottom: 16 }}>
+        {Array.from({ length: 5 }).map((_, si) => (
+          <Star key={si} size={13} fill="#C9A96E" color="#C9A96E" />
+        ))}
+      </div>
+      <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1rem", color: "#3D3D3D", lineHeight: 1.7, margin: "0 0 20px" }}>
+        "{r.quote}"
+      </p>
+      <div>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "0.95rem", color: "#5C1A1A" }}>{r.name}</div>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "#C9A96E", marginTop: 2 }}>{r.location}</div>
+      </div>
+    </div>
+  );
+}
+
+export default function Reviews() {
+  const doubled = [...reviews, ...reviews];
+
+  return (
+    <section id="reviews" style={{ background: "#F5F0EB", padding: "100px 0", overflow: "hidden" }}>
       <style>{`
-        .reviews-outer { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
-        .reviews-grid {
-          display: grid;
-          grid-template-columns: repeat(3, 1fr);
-          gap: 16px;
+        @keyframes marquee-scroll {
+          0%   { transform: translateX(0); }
+          100% { transform: translateX(-50%); }
         }
-        @media (max-width: 768px) {
-          .reviews-outer { padding: 0 !important; }
-          .reviews-grid {
-            display: flex !important;
-            flex-direction: row !important;
-            overflow-x: auto !important;
-            scroll-snap-type: x mandatory !important;
-            -webkit-overflow-scrolling: touch !important;
-            gap: 12px !important;
-            padding: 0 24px 16px !important;
-            scrollbar-width: none !important;
-          }
-          .reviews-grid::-webkit-scrollbar { display: none !important; }
-          .review-card {
-            min-width: calc(85vw) !important;
-            max-width: calc(85vw) !important;
-            scroll-snap-align: center !important;
-            flex-shrink: 0 !important;
-          }
-          .reviews-header { padding: 0 24px !important; }
+        .reviews-marquee-track {
+          display: flex;
+          gap: 16px;
+          width: max-content;
+          animation: marquee-scroll 30s linear infinite;
+          will-change: transform;
+        }
+        .reviews-marquee-track:hover {
+          animation-play-state: paused;
         }
       `}</style>
-      <div className="reviews-outer">
+
+      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="reviews-header"
           style={{ textAlign: "center", marginBottom: 48 }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 16 }}>
@@ -84,31 +100,12 @@ export default function Reviews() {
             What Our Clients Say
           </h2>
         </motion.div>
+      </div>
 
-        <div className="reviews-grid">
-          {reviews.map((r, i) => (
-            <motion.div
-              key={i}
-              className="review-card"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.07 }}
-              style={{ background: "#FFFFFF", padding: "32px 28px", border: "1px solid #F0EBE3" }}
-            >
-              <div style={{ display: "flex", gap: 2, marginBottom: 16 }}>
-                {Array.from({ length: 5 }).map((_, si) => (
-                  <Star key={si} size={13} fill="#C9A96E" color="#C9A96E" />
-                ))}
-              </div>
-              <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1rem", color: "#3D3D3D", lineHeight: 1.7, margin: "0 0 20px" }}>
-                "{r.quote}"
-              </p>
-              <div>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "0.95rem", color: "#5C1A1A" }}>{r.name}</div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "#C9A96E", marginTop: 2 }}>{r.location}</div>
-              </div>
-            </motion.div>
+      <div style={{ overflow: "hidden" }}>
+        <div className="reviews-marquee-track">
+          {doubled.map((r, i) => (
+            <ReviewCard key={i} r={r} />
           ))}
         </div>
       </div>
