@@ -40,7 +40,8 @@ function SocialPill({ handle, label, url, icon }: { handle: string; label?: stri
         flexDirection: "column",
         alignItems: "flex-start",
         gap: 2,
-        padding: "6px 14px",
+        width: "fit-content",
+        padding: "5px 12px",
         border: "1px solid #DDD8D0",
         borderRadius: 999,
         textDecoration: "none",
@@ -171,18 +172,18 @@ export default function Footer() {
 
         <div style={{ height: 1, background: "#E2DDD5", marginBottom: 28 }} />
 
-        <div style={{ fontFamily: "'Inter', sans-serif", marginBottom: 32 }}>
+        <div style={{ fontFamily: "'Inter', sans-serif", marginBottom: 32, maxWidth: 480, margin: "0 auto 32px" }}>
 
           {/* Paired grid: each row = one account, ig left | tt right */}
-          <div style={{ display: "inline-block", textAlign: "left" }}>
+          <div style={{ textAlign: "left" }}>
             {/* Column headers */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px", marginBottom: 10 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 32px", marginBottom: 10 }}>
               <ColLabel>Instagram</ColLabel>
               <ColLabel>TikTok</ColLabel>
             </div>
 
-            {/* Account rows — flat array, grid auto-places pairs */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
+            {/* Account rows — fit-content pills, tight gap */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 32px" }}>
               {igAccounts.flatMap((a, i) => [
                 <SocialPill key={"ig-" + a.handle} handle={a.handle} label={a.label} url={a.url} icon="ig" />,
                 <SocialPill key={"tt-" + ttAccounts[i]?.handle} handle={ttAccounts[i]?.handle ?? a.handle} label={ttAccounts[i]?.label} url={ttAccounts[i]?.url ?? "#"} icon="tt" />,
@@ -191,7 +192,7 @@ export default function Footer() {
           </div>
 
           {/* Email */}
-          <div style={{ marginTop: 24 }}>
+          <div style={{ marginTop: 24, textAlign: "center" }}>
             <ColLabel>Email</ColLabel>
             <a
               href="mailto:starrbeautyyltd@gmail.com"
