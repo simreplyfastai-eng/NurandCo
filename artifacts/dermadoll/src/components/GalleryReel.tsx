@@ -161,7 +161,7 @@ export default function GalleryReel() {
       {row2.length > 0 && <InfiniteRow cards={row2} direction="rtl" />}
 
       <div style={{ textAlign: "center", marginTop: 28 }}>
-        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "#A0A0A0" }}>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "#5C1A1A" }}>
           Client consent obtained · Results may vary
         </span>
       </div>

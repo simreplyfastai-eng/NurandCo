@@ -121,7 +121,7 @@ export default function BeforeAfter() {
           </div>
 
           <div style={{ textAlign: "center", marginTop: 32 }}>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "#A0A0A0" }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "#5C1A1A" }}>
               Client consent obtained · Results may vary
             </span>
           </div>
