@@ -345,6 +345,53 @@ router.post("/forms/consent", async (req, res) => {
       .update({ forms_completed: true, status: "confirmed" })
       .eq("id", bookingId);
 
+    // Send client confirmation email now that forms + consent are complete
+    if (booking.client_email) {
+      try {
+        // Fetch location info for the email
+        const locRes = await supabaseAdmin
+          .from("locations")
+          .select("name, address")
+          .eq("id", booking.location_id)
+          .maybeSingle();
+        const locName = String(locRes.data?.name ?? "Starr Aesthetics");
+        const locAddr = String(locRes.data?.address ?? locName);
+
+        // Fetch treatment duration + price
+        let durationMins = 60;
+        let totalPrice = 0;
+        let depositAmt = Number(booking.deposit_amount ?? 0);
+        if (booking.treatment_id) {
+          const txRes = await supabaseAdmin
+            .from("treatments")
+            .select("duration_minutes, price")
+            .eq("id", booking.treatment_id)
+            .maybeSingle();
+          durationMins = Number(txRes.data?.duration_minutes ?? 60);
+          totalPrice = Number(txRes.data?.price ?? 0);
+        }
+
+        const { sendClientConfirmationEmail } = await import("../lib/email");
+        await sendClientConfirmationEmail({
+          clientEmail: String(booking.client_email),
+          clientName: String(booking.client_name ?? ""),
+          treatment: resolvedTreatmentName,
+          date: String(booking.booking_date ?? ""),
+          time: String(booking.time_slot ?? ""),
+          durationMinutes: durationMins,
+          deposit: depositAmt,
+          balance: Math.max(0, totalPrice - depositAmt),
+          bookingId: String(bookingId),
+          depositPaid: true,
+          whatsapp: "447701298985",
+          locationName: locName,
+          locationAddress: locAddr,
+        });
+      } catch (emailErr) {
+        console.error("POST /api/forms/consent — confirmation email error", emailErr);
+      }
+    }
+
     return res.json({ success: true });
   } catch (err) {
     console.error("POST /api/forms/consent", err);

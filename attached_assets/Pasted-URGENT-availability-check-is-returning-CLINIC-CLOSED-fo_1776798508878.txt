@@ -1,0 +1,81 @@
+URGENT — availability check is returning 
+CLINIC_CLOSED for all dates even on open days.
+
+Two bugs found from live testing:
+
+BUG 1 — DAY OF WEEK MISMATCH
+The availability_settings table uses:
+  0 = Sunday (closed)
+  1 = Monday (open)
+  2 = Tuesday (open)
+  3 = Wednesday (open)
+  4 = Thursday (open) 
+  5 = Friday (open)
+  6 = Saturday (open)
+
+Confirmed: April 22 2026 = Thursday = DOW 4 
+= is_open TRUE in Supabase.
+
+But GET /api/availability/check?location=hornchurch
+&date=2026-04-22 returns CLINIC_CLOSED.
+
+The code is likely doing one of these wrong:
+  a) new Date(date).getDay() in local timezone 
+     causing off-by-one (use UTC instead)
+  b) Adjusting day incorrectly 
+     (e.g. dayOfWeek === 0 ? 6 : dayOfWeek - 1 
+     converts to Monday=0 system but Supabase 
+     has Sunday=0 system)
+  c) Querying with wrong location_id
+
+Fix the day of week calculation:
+  const d = new Date(date + 'T00:00:00Z')
+  const dayOfWeek = d.getUTCDay()
+  // 0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 
+  // 5=Fri, 6=Sat — matches Supabase exactly
+  
+  DO NOT adjust this. Query Supabase directly:
+  .eq('day_of_week', dayOfWeek)
+
+BUG 2 — LOCATION LOOKUP BY SLUG NOT UUID
+The endpoint receives location=hornchurch (slug)
+but availability_settings.location_id is a UUID.
+
+The code needs to resolve the slug to a UUID first:
+  
+  const { data: location } = await supabaseAdmin
+    .from('locations')
+    .select('id')
+    .eq('slug', locationSlug)
+    .single()
+  
+  if (!location) return res.status(404)
+    .json({ error: 'Location not found' })
+  
+  const locationId = location.id
+  
+  Then use locationId in all subsequent queries.
+
+ALSO FIX — booking widget slot display
+The customer-facing booking calendar calls this 
+endpoint to grey out unavailable slots.
+
+Make sure the booking widget:
+  1. Passes location as slug in the URL
+  2. The API resolves slug → UUID correctly
+  3. Only shows slots between open_time 
+     and close_time for the selected date
+  4. Greys out already booked slots
+  5. Greys out the past (if today)
+
+VERIFY after fix:
+  GET /api/availability/check?location=hornchurch
+    &date=2026-04-23&time=10:00
+  Should return: { "available": true }
+  (April 23 = Thursday = day 4 = is_open true)
+  
+  GET /api/availability/check?location=hornchurch
+    &date=2026-04-26&time=10:00
+  Should return: { "available": false, 
+    "reason": "CLINIC_CLOSED" }
+  (April 26 = Sunday = day 0 = is_open false)

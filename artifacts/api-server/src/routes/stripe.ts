@@ -6,7 +6,7 @@
 import { Router } from "express";
 import Stripe from "stripe";
 import { supabaseAdmin } from "../lib/supabase";
-import { sendClientConfirmationEmail, sendAdminNotificationEmail } from "../lib/email";
+import { sendAdminNotificationEmail } from "../lib/email";
 import { findOrCreateClient } from "./clients";
 import { getDepositAmount } from "../lib/treatments";
 import { ukDateStr } from "../lib/tz";
@@ -302,28 +302,6 @@ router.post("/stripe/webhook", async (req, res) => {
           supabaseAdmin.from("bookings").update(bkUpdate).eq("id", bookingId)
             .then(() => {}).catch((e: unknown) => console.error("booking balance_due update", e));
 
-          if (clientEmail) {
-            const publicDomain = process.env.REPLIT_DOMAINS?.split(",")[0]?.trim()
-              ?? process.env.REPLIT_DEV_DOMAIN?.trim();
-            const formsUrl = publicDomain && bookingId
-              ? `https://${publicDomain}/forms.html?booking=${bookingId}`
-              : undefined;
-            sendClientConfirmationEmail({
-              clientEmail,
-              clientName: clientName ?? "",
-              treatment: treatment ?? "",
-              date: bDate,
-              time: bTime,
-              durationMinutes: dur,
-              deposit: depositFromStripe,
-              balance: totalAmount - depositFromStripe,
-              depositPaid: true,
-              whatsapp,
-              locationName: locationInfo?.name,
-              locationAddress: locationInfo?.address,
-              formsUrl,
-            }).catch(() => {});
-          }
           if (adminEmail) {
             sendAdminNotificationEmail({
               adminEmail,
@@ -338,6 +316,8 @@ router.post("/stripe/webhook", async (req, res) => {
               depositPaid: true,
               source: "Website",
               locationName: locationInfo?.name,
+              locationAddress: locationInfo?.address,
+              bookingId: bookingId ?? undefined,
             }).catch(() => {});
           }
         }
@@ -408,22 +388,6 @@ router.post("/stripe/webhook", async (req, res) => {
           notes: slotFree ? "" : "⚠️ Slot conflict — review required",
         }, { onConflict: "id" });
 
-        if (clientEmail) {
-          sendClientConfirmationEmail({
-            clientEmail,
-            clientName,
-            treatment,
-            date: bDate,
-            time: bTime,
-            durationMinutes: dur,
-            deposit: depositFromStripe,
-            balance: price - depositFromStripe,
-            depositPaid: true,
-            whatsapp,
-            locationName: locationInfo?.name,
-            locationAddress: locationInfo?.address,
-          }).catch(() => {});
-        }
         if (adminEmail) {
           sendAdminNotificationEmail({
             adminEmail,
@@ -438,6 +402,8 @@ router.post("/stripe/webhook", async (req, res) => {
             depositPaid: true,
             source: "Website",
             locationName: locationInfo?.name,
+            locationAddress: locationInfo?.address,
+            bookingId: id,
           }).catch(() => {});
         }
       }

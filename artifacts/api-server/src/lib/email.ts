@@ -2,9 +2,7 @@ import { Resend } from "resend";
 
 const RESEND_KEY = process.env.RESEND_API_KEY ?? "";
 const FROM = "Starr Aesthetics <info@starrbeautyy.co.uk>";
-const INSTAGRAM = "@starraestheticss";
-const WEBSITE = "www.starrbeautyy.co.uk";
-const FALLBACK_ADDRESS = "Starr Aesthetics Clinic";
+const SITE_URL = (process.env.PUBLIC_URL ?? "").replace(/\/$/, "");
 
 let _resend: Resend | null = null;
 function getResend(): Resend | null {
@@ -13,14 +11,10 @@ function getResend(): Resend | null {
   return _resend;
 }
 
-function fmtDateUK(dateStr: string): string {
-  if (!dateStr) return dateStr;
-  const [y, m, d] = dateStr.split("-");
-  return `${d}/${m}/${y}`;
-}
+// ── Date / time helpers ───────────────────────────────────────────────────────
 
-function fmtDateLong(dateStr: string): string {
-  if (!dateStr) return dateStr;
+function formatDate(dateStr: string): string {
+  if (!dateStr) return "—";
   const [y, m, d] = dateStr.split("-").map(Number);
   const date = new Date(Date.UTC(y, m - 1, d, 12, 0, 0));
   return new Intl.DateTimeFormat("en-GB", {
@@ -32,86 +26,179 @@ function fmtDateLong(dateStr: string): string {
   }).format(date);
 }
 
-// ─── Shared layout wrapper ────────────────────────────────────────────────────
-function emailShell(body: string): string {
+function fmtDateUK(dateStr: string): string {
+  if (!dateStr) return dateStr;
+  const [y, m, d] = dateStr.split("-");
+  return `${d}/${m}/${y}`;
+}
+
+function addMinutesToTime(time: string, mins: number): string {
+  const [h, m] = time.slice(0, 5).split(":").map(Number);
+  const total = h * 60 + m + mins;
+  const nh = Math.floor(total / 60) % 24;
+  const nm = total % 60;
+  return `${String(nh).padStart(2, "0")}:${String(nm).padStart(2, "0")}`;
+}
+
+// ── Calendar helpers ──────────────────────────────────────────────────────────
+
+type CalBooking = {
+  treatment_name: string;
+  booking_date: string;
+  time_slot: string;
+  duration_minutes?: number;
+  id?: string;
+  deposit_amount?: number;
+  total_price?: number;
+};
+type CalLocation = { name: string; address_full: string };
+
+export function buildGoogleCalendarUrl(booking: CalBooking, location: CalLocation): string {
+  const start = booking.time_slot.slice(0, 5);
+  const end = addMinutesToTime(start, booking.duration_minutes ?? 60);
+  const fmt = (d: string, t: string) => d.replace(/-/g, "") + "T" + t.replace(":", "") + "00";
+  const title = encodeURIComponent(`${booking.treatment_name} @ Starr Aesthetics`);
+  const details = encodeURIComponent(
+    `Starr Aesthetics appointment\nTreatment: ${booking.treatment_name}\nLocation: ${location.address_full}\nContact: wa.me/447701298985`,
+  );
+  const loc = encodeURIComponent(location.address_full);
+  return (
+    `https://calendar.google.com/calendar/render?action=TEMPLATE` +
+    `&text=${title}&dates=${fmt(booking.booking_date, start)}/${fmt(booking.booking_date, end)}` +
+    `&details=${details}&location=${loc}`
+  );
+}
+
+export function buildICSContent(booking: CalBooking, location: CalLocation): string {
+  const start = booking.time_slot.slice(0, 5);
+  const end = addMinutesToTime(start, booking.duration_minutes ?? 60);
+  const dtFmt = (d: string, t: string) => `${d.replace(/-/g, "")}T${t.replace(":", "")}00`;
+  const stamp = new Date().toISOString().replace(/[-:.]/g, "").slice(0, 15) + "Z";
+  const uid = `${booking.id ?? Date.now()}@starrbeautyy.co.uk`;
+  return [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Starr Aesthetics//EN",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${stamp}`,
+    `DTSTART;TZID=Europe/London:${dtFmt(booking.booking_date, start)}`,
+    `DTEND;TZID=Europe/London:${dtFmt(booking.booking_date, end)}`,
+    `SUMMARY:${booking.treatment_name} @ Starr Aesthetics`,
+    `DESCRIPTION:Treatment: ${booking.treatment_name}\\nContact: +44 7701 298985`,
+    `LOCATION:${location.address_full}`,
+    `ORGANIZER;CN=Starr Aesthetics:mailto:info@starrbeautyy.co.uk`,
+    "STATUS:CONFIRMED",
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+}
+
+// ── Base email template ───────────────────────────────────────────────────────
+
+function buildEmail(content: string, subject: string): string {
   return `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Starr Aesthetics</title></head>
-<body style="margin:0;padding:0;background:#F5F0EB;font-family:Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5F0EB;padding:40px 16px;">
-    <tr><td align="center">
-      <table width="100%" cellpadding="0" cellspacing="0" style="max-width:520px;">
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>${subject}</title>
+</head>
+<body style="margin:0;padding:0;background:#FAF7F4;font-family:-apple-system,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#FAF7F4;padding:40px 20px;">
+  <tr><td align="center">
 
-        <!-- Header -->
-        <tr><td style="text-align:center;padding-bottom:28px;">
-          <p style="margin:0;font-size:10px;letter-spacing:4px;color:#C9A96E;font-family:Arial,sans-serif;text-transform:uppercase;">Luxury Aesthetics</p>
-          <h1 style="margin:8px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:30px;font-weight:400;color:#5C1A1A;letter-spacing:1px;font-style:italic;">Starr Aesthetics</h1>
-          <div style="width:50px;height:1px;background:#C9A96E;margin:16px auto 0;"></div>
-        </td></tr>
+  <table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:#FFFFFF;border-radius:12px;border:1px solid #E8DDD3;box-shadow:0 2px 12px rgba(92,30,30,0.06);">
+  <tr><td>
 
-        <!-- Card -->
-        <tr><td style="background:#ffffff;border:1px solid rgba(92,26,26,0.15);padding:36px 32px;">
-          ${body}
-        </td></tr>
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="background:#5C1E1E;padding:28px 40px;border-radius:12px 12px 0 0;text-align:center;">
+        <div style="font-family:Georgia,serif;font-size:26px;color:#FFFFFF;letter-spacing:0.12em;font-weight:normal;">STARR</div>
+        <div style="font-family:-apple-system,Arial,sans-serif;font-size:10px;color:#C9A96E;letter-spacing:0.28em;margin-top:2px;">AESTHETICS</div>
+      </td>
+    </tr>
+    </table>
 
-        <!-- Footer -->
-        <tr><td style="text-align:center;padding-top:28px;">
-          <p style="margin:0 0 6px;font-size:12px;color:#888;font-family:Arial,sans-serif;">${WEBSITE}</p>
-          <p style="margin:0 0 6px;font-size:12px;color:#888;font-family:Arial,sans-serif;">Instagram: <a href="https://instagram.com/starraestheticss" style="color:#C9A96E;text-decoration:none;">${INSTAGRAM}</a></p>
-          <p style="margin:16px 0 0;font-size:11px;color:#aaa;font-family:Arial,sans-serif;">© 2026 Starr Aesthetics. All rights reserved.</p>
-        </td></tr>
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="height:3px;background:#C9A96E;"></td></tr>
+    </table>
 
-      </table>
-    </td></tr>
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="padding:36px 40px;">${content}</td></tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="padding:24px 40px;border-top:1px solid #E8DDD3;text-align:center;">
+        <p style="margin:0 0 8px;font-size:11px;color:#8C7B6B;letter-spacing:0.08em;">STARR AESTHETICS &middot; ESSEX &amp; LONDON</p>
+        <p style="margin:0 0 4px;font-size:11px;color:#8C7B6B;">
+          <a href="mailto:info@starrbeautyy.co.uk" style="color:#C9A96E;text-decoration:none;">info@starrbeautyy.co.uk</a>
+          &nbsp;&middot;&nbsp;
+          <a href="https://wa.me/447701298985" style="color:#C9A96E;text-decoration:none;">WhatsApp Us</a>
+        </p>
+        <p style="margin:8px 0 0;font-size:10px;color:#B5A89A;">&copy; 2026 Starr Aesthetics. All rights reserved.</p>
+      </td>
+    </tr>
+    </table>
+
+  </td></tr>
+  </table>
+
+  </td></tr>
   </table>
 </body>
 </html>`;
 }
 
-function pill(text: string): string {
-  return `<div style="display:inline-block;background:rgba(92,26,26,0.08);border:1px solid rgba(92,26,26,0.25);color:#5C1A1A;font-family:Arial,sans-serif;font-size:10px;letter-spacing:2px;padding:5px 14px;text-transform:uppercase;margin-bottom:20px;">${text}</div>`;
-}
+// ── Booking details box ───────────────────────────────────────────────────────
 
-function divider(): string {
-  return `<div style="width:40px;height:1px;background:#C9A96E;margin:20px auto;"></div>`;
-}
-
-function heading(text: string): string {
-  return `<h2 style="margin:0 0 12px;font-family:Georgia,'Times New Roman',serif;font-size:26px;font-weight:400;color:#5C1A1A;line-height:1.25;text-align:center;font-style:italic;">${text}</h2>`;
-}
-
-function bodyText(text: string): string {
-  return `<p style="margin:0 0 16px;font-family:Arial,sans-serif;font-size:14px;color:#555;line-height:1.7;text-align:center;">${text}</p>`;
-}
-
-function detailRow(label: string, value: string): string {
+function buildBookingBox(booking: CalBooking, location: CalLocation): string {
+  const deposit = booking.deposit_amount ?? 0;
+  const balance = Math.max(0, (booking.total_price ?? 0) - deposit);
   return `
-    <tr>
-      <td style="padding:10px 12px;font-family:Arial,sans-serif;font-size:12px;color:#888;border-bottom:1px solid rgba(92,26,26,0.08);width:40%;">${label}</td>
-      <td style="padding:10px 12px;font-family:Arial,sans-serif;font-size:13px;color:#3D3D3D;font-weight:600;border-bottom:1px solid rgba(92,26,26,0.08);">${value}</td>
-    </tr>`;
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:20px 0;">
+  <tr><td style="padding:20px 24px;">
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td style="padding:6px 0;border-bottom:1px solid #E8DDD3;">
+      <span style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;">Treatment</span><br>
+      <span style="font-size:16px;color:#5C1E1E;font-family:Georgia,serif;">${booking.treatment_name}</span>
+    </td></tr>
+    <tr><td style="padding:10px 0;border-bottom:1px solid #E8DDD3;">
+      <span style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;">Date &amp; Time</span><br>
+      <span style="font-size:15px;color:#2C2420;font-weight:600;">${formatDate(booking.booking_date)} at ${booking.time_slot}</span>
+    </td></tr>
+    <tr><td style="padding:10px 0;border-bottom:1px solid #E8DDD3;">
+      <span style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;">Location</span><br>
+      <span style="font-size:14px;color:#2C2420;">${location.name}</span><br>
+      <span style="font-size:12px;color:#8C7B6B;">${location.address_full}</span>
+    </td></tr>
+    <tr><td style="padding:10px 0 6px;">
+      <table width="100%" cellpadding="0" cellspacing="0"><tr>
+        <td>
+          <span style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;">Deposit Paid</span><br>
+          <span style="font-size:15px;color:#5C1E1E;font-weight:600;">&pound;${deposit}</span>
+        </td>
+        <td align="right">
+          <span style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;">Balance Due on Day</span><br>
+          <span style="font-size:15px;color:#2C2420;font-weight:600;">&pound;${balance}</span>
+        </td>
+      </tr></table>
+    </td></tr>
+    </table>
+  </td></tr>
+  </table>`;
 }
 
-function detailTable(rows: string): string {
-  return `
-    <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;border:1px solid rgba(92,26,26,0.12);overflow:hidden;">
-      ${rows}
-    </table>`;
+// Helper: log HTML to console when Resend is not configured
+function logEmailPreview(subject: string, to: string, html: string): void {
+  console.log(`\n[EMAIL PREVIEW — no RESEND_API_KEY]\nTo: ${to}\nSubject: ${subject}\n${"─".repeat(60)}\n${html}\n${"─".repeat(60)}\n`);
 }
 
-function goldBox(content: string): string {
-  return `<div style="background:rgba(201,169,110,0.1);border:1px solid rgba(201,169,110,0.35);padding:16px 20px;margin:20px 0;text-align:center;">${content}</div>`;
-}
+// ── Email 1 — Client booking confirmation (trigger: after consent submitted) ──
 
-function ctaButton(href: string, text: string): string {
-  return `<div style="text-align:center;margin-top:24px;"><a href="${href}" style="display:inline-block;background:#5C1A1A;color:#F5F0EB;font-family:Arial,sans-serif;font-size:13px;font-weight:600;padding:14px 36px;text-decoration:none;letter-spacing:1px;text-transform:uppercase;">${text}</a></div>`;
-}
-
-function smallPrint(text: string): string {
-  return `<p style="margin:20px 0 0;font-family:Arial,sans-serif;font-size:11px;color:#aaa;text-align:center;font-style:italic;line-height:1.6;">${text}</p>`;
-}
-
-// ─── Client booking confirmation ──────────────────────────────────────────────
 export async function sendClientConfirmationEmail(params: {
   clientEmail: string;
   clientName: string;
@@ -121,158 +208,85 @@ export async function sendClientConfirmationEmail(params: {
   durationMinutes: number;
   deposit: number;
   balance: number;
+  bookingId?: string;
   depositPaid?: boolean;
   whatsapp: string;
   locationName?: string;
   locationAddress?: string;
   formsUrl?: string;
 }): Promise<void> {
-  const resend = getResend();
-  if (!resend || !params.clientEmail) return;
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
-  const depositPaid = params.depositPaid ?? true;
-  const dateStr = params.date ? fmtDateLong(params.date) : "To be confirmed";
-  const timeStr = params.time || "To be confirmed";
-  const wa = params.whatsapp || "available on request";
-  const locationName = params.locationName ?? "Starr Aesthetics";
-  const locationAddress = params.locationAddress ?? FALLBACK_ADDRESS;
+  const loc: CalLocation = {
+    name: params.locationName ?? "Starr Aesthetics",
+    address_full: params.locationAddress ?? "Starr Aesthetics Clinic",
+  };
+  const bk: CalBooking = {
+    treatment_name: params.treatment,
+    booking_date: params.date,
+    time_slot: params.time,
+    deposit_amount: params.deposit,
+    total_price: params.deposit + params.balance,
+    duration_minutes: params.durationMinutes,
+    id: params.bookingId,
+  };
+  const googleUrl = buildGoogleCalendarUrl(bk, loc);
+  const icsUrl = params.bookingId
+    ? `${SITE_URL}/api/calendar/ics?booking=${params.bookingId}`
+    : "#";
 
-  const body = `
-    <div style="text-align:center;">
-      ${pill("Booking Confirmed")}
-      ${heading(`You're booked in, ${firstName}`)}
-      ${bodyText("Your appointment is confirmed and we can't wait to see you. Here are your details:")}
-      ${divider()}
-    </div>
-    ${detailTable(
-      detailRow("Treatment", params.treatment) +
-      detailRow("Date", dateStr) +
-      detailRow("Time", timeStr) +
-      detailRow("Duration", `Approx. ${params.durationMinutes} minutes`) +
-      detailRow("Location", `${locationName}, ${locationAddress}`)
-    )}
-    ${goldBox(
-      depositPaid
-        ? `<p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#5C1A1A;font-weight:700;">✓ Deposit paid — £${params.deposit}</p>
-           <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#555;">Balance due on arrival: <strong style="color:#3D3D3D;">£${params.balance}</strong></p>`
-        : `<p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#555;">Balance due on arrival: <strong style="color:#3D3D3D;">£${params.balance}</strong></p>`
-    )}
-    ${params.formsUrl ? `<div style="margin:24px 0;text-align:center;background:#FDF8F3;border-radius:8px;padding:20px 24px;border:1px solid #e8d9c4;">
-      <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#5C1A1A;font-weight:700;">Action Required — Complete Your Pre-Appointment Forms</p>
-      <p style="margin:0 0 14px;font-family:Arial,sans-serif;font-size:13px;color:#666;">Please complete your medical questionnaire and consent form before your appointment. This only takes 2–3 minutes.</p>
-      <a href="${params.formsUrl}" style="display:inline-block;background:#5C1A1A;color:#fff;text-decoration:none;font-family:Arial,sans-serif;font-size:13px;font-weight:700;padding:12px 28px;border-radius:6px;letter-spacing:0.03em;">Complete Forms &rarr;</a>
-    </div>` : ""}
-    <p style="margin:20px 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#888;text-align:center;">Please arrive 5 minutes early. To reschedule, contact us at least 24 hours in advance.</p>
-    <p style="margin:6px 0;font-family:Arial,sans-serif;font-size:13px;color:#888;text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C9A96E;text-decoration:none;">${wa}</a></p>
-    ${smallPrint("Free cancellation 48 hours before your appointment.")}
-  `;
+  const content = `
+    <p style="font-size:24px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">You're booked in! &#10024;</p>
+    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment is confirmed. We can't wait to see you.</p>
 
+    ${buildBookingBox(bk, loc)}
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
+    <tr><td style="text-align:center;">
+      <p style="font-size:12px;color:#8C7B6B;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.1em;">Add to your calendar</p>
+      <a href="${googleUrl}" target="_blank" style="display:inline-block;margin:4px;padding:10px 18px;background:#C9A96E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:12px;letter-spacing:0.08em;">+ GOOGLE CALENDAR</a>
+      <a href="${icsUrl}" style="display:inline-block;margin:4px;padding:10px 18px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:12px;letter-spacing:0.08em;">+ APPLE CALENDAR</a>
+    </td></tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border-left:3px solid #C9A96E;margin:0 0 20px;">
+    <tr><td style="padding:16px 20px;">
+      <p style="font-size:12px;color:#C9A96E;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 10px;">Before your appointment</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Arrive 5 minutes before your slot</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Come with a clean face &mdash; no makeup on the treatment area</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Avoid alcohol for 24 hours beforehand</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Avoid blood thinners (aspirin, fish oil) 24hrs before injectables</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Contact us if any medical details change</p>
+    </td></tr>
+    </table>
+
+    <p style="font-size:12px;color:#8C7B6B;line-height:1.6;margin:0 0 20px;border-top:1px solid #E8DDD3;padding-top:16px;">
+      <strong style="color:#5C1E1E;">Cancellation policy:</strong> Please give at least 48 hours notice to cancel or reschedule. Deposits are non-refundable for cancellations under 48 hours or no-shows. To reschedule, WhatsApp us at <a href="https://wa.me/447701298985" style="color:#C9A96E;">+44 7701 298985</a>
+    </p>
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center">
+      <a href="https://instagram.com/StarrAestheticss" style="display:inline-block;margin:0 6px;font-size:11px;color:#C9A96E;text-decoration:none;letter-spacing:0.08em;">@StarrAestheticss</a>
+      <a href="https://instagram.com/StarrFacess" style="display:inline-block;margin:0 6px;font-size:11px;color:#C9A96E;text-decoration:none;letter-spacing:0.08em;">@StarrFacess</a>
+      <a href="https://instagram.com/StarrNailedd" style="display:inline-block;margin:0 6px;font-size:11px;color:#C9A96E;text-decoration:none;letter-spacing:0.08em;">@StarrNailedd</a>
+    </td></tr>
+    </table>`;
+
+  const subject = `✨ Confirmed: ${params.treatment} at Starr Aesthetics`;
+  const html = buildEmail(content, subject);
+  const resend = getResend();
+  if (!resend || !params.clientEmail) {
+    logEmailPreview(subject, params.clientEmail, html);
+    return;
+  }
   try {
-    await resend.emails.send({
-      from: FROM,
-      to: params.clientEmail,
-      subject: `Your appointment is confirmed — Starr Aesthetics ${locationName}`,
-      html: emailShell(body),
-    });
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html });
   } catch (err) {
     console.error("sendClientConfirmationEmail error", err);
   }
 }
 
-// ─── Cancellation ─────────────────────────────────────────────────────────────
-export async function sendCancellationEmail(params: {
-  clientEmail: string;
-  clientName: string;
-  treatment: string;
-  date: string;
-  time: string;
-  whatsapp: string;
-  locationName?: string;
-}): Promise<void> {
-  const resend = getResend();
-  if (!resend || !params.clientEmail) return;
-  const firstName = params.clientName.split(" ")[0] ?? params.clientName;
-  const wa = params.whatsapp || "available on request";
+// ── Email 2 — Admin new booking alert (trigger: after Stripe payment) ─────────
 
-  const body = `
-    <div style="text-align:center;">
-      ${pill("Appointment Cancelled")}
-      ${heading(`Sorry to see you go, ${firstName}`)}
-      ${bodyText("Your appointment has been cancelled. We'd love to rebook you at a time that works.")}
-      ${divider()}
-    </div>
-    ${detailTable(
-      detailRow("Treatment", params.treatment) +
-      detailRow("Date", fmtDateUK(params.date)) +
-      detailRow("Time", params.time)
-    )}
-    ${ctaButton(`https://wa.me/${wa.replace(/\s/g,"")}`, "Rebook via WhatsApp")}
-    ${smallPrint("If you have any questions, message us on Instagram @starraestheticss")}
-  `;
-
-  try {
-    await resend.emails.send({
-      from: FROM,
-      to: params.clientEmail,
-      subject: "Your Starr Aesthetics appointment has been cancelled",
-      html: emailShell(body),
-    });
-  } catch (err) {
-    console.error("sendCancellationEmail error", err);
-  }
-}
-
-// ─── Reminder ─────────────────────────────────────────────────────────────────
-export async function sendReminderEmail(params: {
-  clientEmail: string;
-  clientName: string;
-  treatment: string;
-  date: string;
-  time: string;
-  whatsapp: string;
-  locationName?: string;
-  locationAddress?: string;
-}): Promise<void> {
-  const resend = getResend();
-  if (!resend || !params.clientEmail) return;
-  const firstName = params.clientName.split(" ")[0] ?? params.clientName;
-  const dateStr = params.date ? fmtDateLong(params.date) : "To be confirmed";
-  const wa = params.whatsapp || "available on request";
-  const locationName = params.locationName ?? "Starr Aesthetics";
-  const locationAddress = params.locationAddress ?? FALLBACK_ADDRESS;
-
-  const body = `
-    <div style="text-align:center;">
-      ${pill("See You Tomorrow")}
-      ${heading(`We're looking forward to it, ${firstName}`)}
-      ${bodyText("Just a reminder that your appointment is tomorrow. We can't wait to see you!")}
-      ${divider()}
-    </div>
-    ${detailTable(
-      detailRow("Treatment", params.treatment) +
-      detailRow("Date", dateStr) +
-      detailRow("Time", params.time) +
-      detailRow("Location", `${locationName}, ${locationAddress}`)
-    )}
-    ${goldBox(`<p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#555;">Please arrive <strong style="color:#3D3D3D;">5 minutes early</strong> and come with a clean face — no makeup on the treatment area.</p>`)}
-    <p style="margin:16px 0 4px;font-family:Arial,sans-serif;font-size:13px;color:#888;text-align:center;">Need to reschedule? Message us ASAP:</p>
-    <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#888;text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C9A96E;text-decoration:none;">${wa}</a></p>
-    ${smallPrint(`Starr Aesthetics — ${locationName}`)}
-  `;
-
-  try {
-    await resend.emails.send({
-      from: FROM,
-      to: params.clientEmail,
-      subject: "See you tomorrow — Starr Aesthetics",
-      html: emailShell(body),
-    });
-  } catch (err) {
-    console.error("sendReminderEmail error", err);
-  }
-}
-
-// ─── Admin notification ───────────────────────────────────────────────────────
 export async function sendAdminNotificationEmail(params: {
   adminEmail: string;
   clientName: string;
@@ -286,50 +300,224 @@ export async function sendAdminNotificationEmail(params: {
   depositPaid?: boolean;
   source: string;
   locationName?: string;
+  locationAddress?: string;
+  bookingId?: string;
 }): Promise<void> {
-  const resend = getResend();
-  if (!resend || !params.adminEmail) return;
   const dateDisp = params.date ? fmtDateUK(params.date) : "TBC";
-  const timeDisp = params.time || "TBC";
-  const locationName = params.locationName ?? "Starr Aesthetics";
-  const depositStatus = params.depositPaid
-    ? `<span style="color:#2D6A4F;">✓ Paid via Stripe — £${params.deposit}</span>`
-    : `<span style="color:#C9A96E;">Pending — £${params.deposit}</span>`;
+  const loc: CalLocation = {
+    name: params.locationName ?? "Starr Aesthetics",
+    address_full: params.locationAddress ?? params.locationName ?? "Starr Aesthetics Clinic",
+  };
+  const bk: CalBooking = {
+    treatment_name: params.treatment,
+    booking_date: params.date,
+    time_slot: params.time,
+    deposit_amount: params.deposit,
+    total_price: params.deposit,
+    duration_minutes: params.durationMinutes,
+    id: params.bookingId,
+  };
+  const portalUrl = `${SITE_URL}/portal.html`;
 
-  const body = `
-    <div style="text-align:center;">
-      ${pill("New Booking")}
-      ${heading("New booking received")}
-      ${divider()}
-    </div>
-    ${detailTable(
-      detailRow("Location", locationName) +
-      detailRow("Client", params.clientName) +
-      detailRow("Email", params.clientEmail || "—") +
-      detailRow("Phone", params.clientPhone || "—") +
-      detailRow("Treatment", params.treatment) +
-      detailRow("Duration", `${params.durationMinutes} mins`) +
-      detailRow("Date", dateDisp) +
-      detailRow("Time", timeDisp) +
-      detailRow("Deposit", depositStatus) +
-      detailRow("Booked via", params.source)
-    )}
-    ${smallPrint("This is an automated notification from Starr Aesthetics booking system.")}
-  `;
+  const content = `
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">New Booking Received</p>
+    <p style="font-size:13px;color:#8C7B6B;margin:0 0 24px;">A new appointment has been booked and deposit payment received.</p>
 
+    ${buildBookingBox(bk, loc)}
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 20px;">
+    <tr><td style="padding:16px 24px;">
+      <p style="font-size:12px;color:#C9A96E;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 12px;">Client Details</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Name:</strong> ${params.clientName}</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Email:</strong> <a href="mailto:${params.clientEmail}" style="color:#C9A96E;">${params.clientEmail || "—"}</a></p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Phone:</strong> <a href="tel:${params.clientPhone}" style="color:#C9A96E;">${params.clientPhone || "—"}</a></p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Deposit:</strong> <span style="color:#5C1E1E;font-weight:600;">&pound;${params.deposit} ${params.depositPaid ? "&#x2713; paid" : "pending"}</span></p>
+      <p style="font-size:14px;color:#2C2420;margin:8px 0 4px;"><strong>Forms:</strong> <span style="background:#FFF3CD;color:#856404;padding:2px 8px;border-radius:4px;font-size:12px;">Pending</span></p>
+      <p style="font-size:12px;color:#8C7B6B;margin:4px 0;">Booked via ${params.source} &middot; ${dateDisp} at ${params.time}</p>
+    </td></tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center">
+      <a href="${portalUrl}" style="display:inline-block;padding:12px 28px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">VIEW IN ADMIN PORTAL &rarr;</a>
+    </td></tr>
+    </table>`;
+
+  const subject = `💅 New Booking: ${params.clientName} — ${params.treatment}`;
+  const html = buildEmail(content, subject);
+  const resend = getResend();
+  if (!resend || !params.adminEmail) {
+    logEmailPreview(subject, params.adminEmail, html);
+    return;
+  }
   try {
-    await resend.emails.send({
-      from: FROM,
-      to: params.adminEmail,
-      subject: `New booking — ${params.clientName} — ${params.treatment} — ${dateDisp} at ${timeDisp} [${locationName}]`,
-      html: emailShell(body),
-    });
+    await resend.emails.send({ from: FROM, to: params.adminEmail, subject, html });
   } catch (err) {
     console.error("sendAdminNotificationEmail error", err);
   }
 }
 
-// ─── Consultation confirmation (client) ───────────────────────────────────────
+// ── Email 3 — 24hr reminder (trigger: hourly cron) ───────────────────────────
+
+export async function sendReminderEmail(params: {
+  clientEmail: string;
+  clientName: string;
+  treatment: string;
+  date: string;
+  time: string;
+  whatsapp: string;
+  locationName?: string;
+  locationAddress?: string;
+  durationMinutes?: number;
+  bookingId?: string;
+}): Promise<void> {
+  const firstName = params.clientName.split(" ")[0] ?? params.clientName;
+  const loc: CalLocation = {
+    name: params.locationName ?? "Starr Aesthetics",
+    address_full: params.locationAddress ?? params.locationName ?? "Starr Aesthetics Clinic",
+  };
+  const bk: CalBooking = {
+    treatment_name: params.treatment,
+    booking_date: params.date,
+    time_slot: params.time,
+    duration_minutes: params.durationMinutes ?? 60,
+    id: params.bookingId,
+  };
+
+  const content = `
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Your appointment is tomorrow &#10024;</p>
+    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, just a friendly reminder about your upcoming appointment.</p>
+
+    ${buildBookingBox(bk, loc)}
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border-left:3px solid #C9A96E;margin:0 0 20px;">
+    <tr><td style="padding:16px 20px;">
+      <p style="font-size:12px;color:#C9A96E;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 10px;">Your pre-appointment checklist</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;">&#10022; Clean face, no makeup on treatment area</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;">&#10022; Avoid alcohol tonight</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;">&#10022; Arrive 5 minutes early</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;">&#10022; Bring a valid ID</p>
+    </td></tr>
+    </table>
+
+    <p style="font-size:13px;color:#8C7B6B;margin:0 0 16px;line-height:1.6;">Need to cancel or reschedule? Please let us know as soon as possible. <a href="https://wa.me/447701298985" style="color:#C9A96E;text-decoration:none;">WhatsApp us here &rarr;</a></p>`;
+
+  const subject = `⏰ Tomorrow: ${params.treatment} at ${params.time}`;
+  const html = buildEmail(content, subject);
+  const resend = getResend();
+  if (!resend || !params.clientEmail) {
+    logEmailPreview(subject, params.clientEmail, html);
+    return;
+  }
+  try {
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html });
+  } catch (err) {
+    console.error("sendReminderEmail error", err);
+  }
+}
+
+// ── Email 4 — Cancellation (trigger: admin sets status → cancelled) ───────────
+
+export async function sendCancellationEmail(params: {
+  clientEmail: string;
+  clientName: string;
+  treatment: string;
+  date: string;
+  time: string;
+  whatsapp: string;
+  locationName?: string;
+}): Promise<void> {
+  const firstName = params.clientName.split(" ")[0] ?? params.clientName;
+  const locationName = params.locationName ?? "Starr Aesthetics";
+
+  const content = `
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Appointment Cancelled</p>
+    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment has been cancelled. We hope to see you again soon.</p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 20px;">
+    <tr><td style="padding:16px 24px;">
+      <p style="font-size:12px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px;">Cancelled Appointment</p>
+      <p style="font-size:15px;color:#5C1E1E;font-family:Georgia,serif;margin:0 0 4px;text-decoration:line-through;">${params.treatment}</p>
+      <p style="font-size:13px;color:#8C7B6B;margin:0;">${formatDate(params.date)} at ${params.time} &middot; ${locationName}</p>
+    </td></tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+    <tr><td align="center">
+      <a href="https://wa.me/447701298985" style="display:inline-block;padding:12px 28px;background:#C9A96E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">REBOOK VIA WHATSAPP &rarr;</a>
+    </td></tr>
+    </table>`;
+
+  const subject = `Your Starr Aesthetics appointment has been cancelled`;
+  const html = buildEmail(content, subject);
+  const resend = getResend();
+  if (!resend || !params.clientEmail) {
+    logEmailPreview(subject, params.clientEmail, html);
+    return;
+  }
+  try {
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html });
+  } catch (err) {
+    console.error("sendCancellationEmail error", err);
+  }
+}
+
+// ── Email 5 — Forms reminder (trigger: cron — forms pending + appt within 48h) ─
+
+export async function sendFormsReminderEmail(params: {
+  clientEmail: string;
+  clientName: string;
+  treatment: string;
+  date: string;
+  time: string;
+  bookingId: string;
+  locationName?: string;
+  locationAddress?: string;
+  durationMinutes?: number;
+}): Promise<void> {
+  const firstName = params.clientName.split(" ")[0] ?? params.clientName;
+  const loc: CalLocation = {
+    name: params.locationName ?? "Starr Aesthetics",
+    address_full: params.locationAddress ?? params.locationName ?? "Starr Aesthetics Clinic",
+  };
+  const bk: CalBooking = {
+    treatment_name: params.treatment,
+    booking_date: params.date,
+    time_slot: params.time,
+    duration_minutes: params.durationMinutes ?? 60,
+    id: params.bookingId,
+  };
+  const formsUrl = `${SITE_URL}/forms.html?booking=${params.bookingId}`;
+
+  const content = `
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Please complete your forms</p>
+    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment is coming up but we still need your forms. It only takes 2 minutes.</p>
+
+    ${buildBookingBox(bk, loc)}
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+    <tr><td align="center">
+      <a href="${formsUrl}" style="display:inline-block;padding:14px 32px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:14px;letter-spacing:0.1em;">COMPLETE YOUR FORMS &rarr;</a>
+      <p style="font-size:11px;color:#8C7B6B;margin:8px 0 0;">Medical intake + consent form</p>
+    </td></tr>
+    </table>`;
+
+  const subject = `⚡ Action needed before your appointment`;
+  const html = buildEmail(content, subject);
+  const resend = getResend();
+  if (!resend || !params.clientEmail) {
+    logEmailPreview(subject, params.clientEmail, html);
+    return;
+  }
+  try {
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html });
+  } catch (err) {
+    console.error("sendFormsReminderEmail error", err);
+  }
+}
+
+// ── Consultation confirmation (kept for backwards compat) ─────────────────────
+
 export async function sendConsultationConfirmationEmail(params: {
   clientEmail: string;
   clientName: string;
@@ -339,50 +527,42 @@ export async function sendConsultationConfirmationEmail(params: {
   locationName?: string;
   locationAddress?: string;
 }): Promise<void> {
-  const resend = getResend();
-  if (!resend || !params.clientEmail) return;
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
-  const dateStr = params.date ? fmtDateLong(params.date) : "To be confirmed";
+  const dateStr = params.date ? formatDate(params.date) : "To be confirmed";
   const wa = params.whatsapp || "available on request";
   const locationName = params.locationName ?? "Starr Aesthetics";
-  const locationAddress = params.locationAddress ?? FALLBACK_ADDRESS;
+  const locationAddress = params.locationAddress ?? "Starr Aesthetics Clinic";
 
-  const body = `
-    <div style="text-align:center;">
-      ${pill("Consultation Confirmed")}
-      ${heading(`We're excited to meet you, ${firstName}`)}
-      ${bodyText("Your consultation is booked. This is your first step towards your aesthetic goals.")}
-      ${divider()}
-    </div>
-    ${detailTable(
-      detailRow("Type", "Aesthetic Consultation") +
-      detailRow("Date", dateStr) +
-      detailRow("Time", params.time) +
-      detailRow("Duration", "30 minutes") +
-      detailRow("Location", `${locationName}, ${locationAddress}`)
-    )}
-    ${goldBox(`
-      <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#5C1A1A;font-weight:700;">✓ Consultation fee: £25</p>
-      <p style="margin:0;font-family:Arial,sans-serif;font-size:12px;color:#888;font-style:italic;">We look forward to discussing your treatment goals with you.</p>
-    `)}
-    <p style="margin:16px 0 4px;font-family:Arial,sans-serif;font-size:13px;color:#888;text-align:center;">Questions before your visit?</p>
-    <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#888;text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C9A96E;text-decoration:none;">${wa}</a></p>
-    ${smallPrint("Please arrive 5 minutes early. We look forward to seeing you.")}
-  `;
+  const content = `
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">We're excited to meet you, ${firstName}</p>
+    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Your consultation is booked. This is your first step towards your aesthetic goals.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:20px 0;">
+    <tr><td style="padding:20px 24px;">
+      <p style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 4px;">Aesthetic Consultation</p>
+      <p style="font-size:16px;color:#5C1E1E;font-family:Georgia,serif;margin:0 0 8px;">${dateStr} at ${params.time}</p>
+      <p style="font-size:13px;color:#8C7B6B;margin:0;">${locationName}, ${locationAddress}</p>
+      <p style="font-size:13px;color:#5C1E1E;font-weight:600;margin:12px 0 0;">&pound;25 consultation fee</p>
+    </td></tr>
+    </table>
+    <p style="font-size:13px;color:#8C7B6B;margin:0 0 8px;">Questions before your visit? <a href="https://wa.me/${wa.replace(/\s/g, "")}" style="color:#C9A96E;text-decoration:none;">WhatsApp us</a></p>
+    <p style="font-size:12px;color:#8C7B6B;margin:0;font-style:italic;">Please arrive 5 minutes early. We look forward to seeing you.</p>`;
 
+  const subject = `Consultation confirmed — Starr Aesthetics ${locationName}`;
+  const html = buildEmail(content, subject);
+  const resend = getResend();
+  if (!resend || !params.clientEmail) {
+    logEmailPreview(subject, params.clientEmail, html);
+    return;
+  }
   try {
-    await resend.emails.send({
-      from: FROM,
-      to: params.clientEmail,
-      subject: `Consultation confirmed — Starr Aesthetics ${locationName}`,
-      html: emailShell(body),
-    });
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html });
   } catch (err) {
     console.error("sendConsultationConfirmationEmail error", err);
   }
 }
 
-// ─── Consultation admin notification ─────────────────────────────────────────
+// ── Consultation admin notification (kept for backwards compat) ───────────────
+
 export async function sendConsultationAdminEmail(params: {
   adminEmail: string;
   clientName: string;
@@ -395,46 +575,42 @@ export async function sendConsultationAdminEmail(params: {
   time: string;
   locationName?: string;
 }): Promise<void> {
-  const resend = getResend();
-  if (!resend || !params.adminEmail) return;
   const dateDisp = params.date ? fmtDateUK(params.date) : "TBC";
-  const timeDisp = params.time || "TBC";
   const locationName = params.locationName ?? "Starr Aesthetics";
 
-  const body = `
-    <div style="text-align:center;">
-      ${pill("New Consultation")}
-      ${heading("New consultation booked")}
-      ${divider()}
-    </div>
-    ${detailTable(
-      detailRow("Location", locationName) +
-      detailRow("Name", params.clientName) +
-      detailRow("Email", params.clientEmail || "—") +
-      detailRow("Phone", params.clientPhone || "—") +
-      detailRow("DOB", params.clientDOB || "—") +
-      detailRow("Treatment interest", params.treatmentInterest || "—") +
-      detailRow("Skin concerns", params.clientNotes || "—") +
-      detailRow("Date", dateDisp) +
-      detailRow("Time", timeDisp) +
-      detailRow("Fee", `<span style="color:#2D6A4F;">£25 ✓</span>`)
-    )}
-    ${smallPrint("This is an automated notification from Starr Aesthetics booking system.")}
-  `;
+  const content = `
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">New consultation booked</p>
+    <p style="font-size:13px;color:#8C7B6B;margin:0 0 24px;">A new aesthetic consultation has been scheduled.</p>
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 20px;">
+    <tr><td style="padding:16px 24px;">
+      <p style="font-size:12px;color:#C9A96E;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 12px;">Client Details</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Name:</strong> ${params.clientName}</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Email:</strong> <a href="mailto:${params.clientEmail}" style="color:#C9A96E;">${params.clientEmail || "—"}</a></p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Phone:</strong> <a href="tel:${params.clientPhone}" style="color:#C9A96E;">${params.clientPhone || "—"}</a></p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>DOB:</strong> ${params.clientDOB || "—"}</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Treatment interest:</strong> ${params.treatmentInterest || "—"}</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Skin concerns:</strong> ${params.clientNotes || "—"}</p>
+      <p style="font-size:14px;color:#2C2420;margin:8px 0 0;"><strong>Date:</strong> ${dateDisp} at ${params.time} &middot; ${locationName}</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Fee:</strong> <span style="color:#5C1E1E;font-weight:600;">&pound;25 &#x2713;</span></p>
+    </td></tr>
+    </table>`;
 
+  const subject = `New Consultation — ${params.clientName} — ${dateDisp} at ${params.time} [${locationName}]`;
+  const html = buildEmail(content, subject);
+  const resend = getResend();
+  if (!resend || !params.adminEmail) {
+    logEmailPreview(subject, params.adminEmail, html);
+    return;
+  }
   try {
-    await resend.emails.send({
-      from: FROM,
-      to: params.adminEmail,
-      subject: `New Consultation — ${params.clientName} — ${dateDisp} at ${timeDisp} [${locationName}]`,
-      html: emailShell(body),
-    });
+    await resend.emails.send({ from: FROM, to: params.adminEmail, subject, html });
   } catch (err) {
     console.error("sendConsultationAdminEmail error", err);
   }
 }
 
-// ─── Training enquiry ─────────────────────────────────────────────────────────
+// ── Training enquiry (kept for backwards compat) ──────────────────────────────
+
 export async function sendEnquiryEmails(params: {
   adminEmail: string;
   name: string;
@@ -443,57 +619,52 @@ export async function sendEnquiryEmails(params: {
   course: string;
   message: string;
 }): Promise<void> {
-  const resend = getResend();
-  if (!resend) return;
   const firstName = params.name.split(" ")[0] ?? params.name;
-  const promises: Promise<void>[] = [];
+  const resend = getResend();
+
+  const promises: Promise<unknown>[] = [];
 
   if (params.adminEmail) {
-    const adminBody = `
-      <div style="text-align:center;">
-        ${pill("Training Enquiry")}
-        ${heading("New training enquiry")}
-        ${divider()}
-      </div>
-      ${detailTable(
-        detailRow("Name", params.name) +
-        detailRow("Email", params.email) +
-        detailRow("Phone", params.phone) +
-        detailRow("Course", params.course) +
-        detailRow("Message", params.message || "—")
-      )}
-      ${smallPrint("This is an automated notification from Starr Aesthetics.")}
-    `;
-    promises.push(
-      resend.emails.send({
-        from: FROM,
-        to: params.adminEmail,
-        subject: `New training enquiry — ${params.name} — ${params.course}`,
-        html: emailShell(adminBody),
-      }).then(() => {}).catch((e) => console.error("sendEnquiryEmails admin error", e)),
-    );
+    const adminContent = `
+      <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">New training enquiry</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:20px 0;">
+      <tr><td style="padding:16px 24px;">
+        <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Name:</strong> ${params.name}</p>
+        <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Email:</strong> <a href="mailto:${params.email}" style="color:#C9A96E;">${params.email}</a></p>
+        <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Phone:</strong> <a href="tel:${params.phone}" style="color:#C9A96E;">${params.phone}</a></p>
+        <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Course:</strong> ${params.course}</p>
+        <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Message:</strong> ${params.message || "—"}</p>
+      </td></tr>
+      </table>`;
+    const adminSubject = `New training enquiry — ${params.name} — ${params.course}`;
+    const adminHtml = buildEmail(adminContent, adminSubject);
+    if (!resend) {
+      logEmailPreview(adminSubject, params.adminEmail, adminHtml);
+    } else {
+      promises.push(
+        resend.emails
+          .send({ from: FROM, to: params.adminEmail, subject: adminSubject, html: adminHtml })
+          .catch((e: unknown) => console.error("sendEnquiryEmails admin error", e)),
+      );
+    }
   }
 
   if (params.email) {
-    const clientBody = `
-      <div style="text-align:center;">
-        ${pill("Enquiry Received")}
-        ${heading(`Thank you, ${firstName}`)}
-        ${bodyText(`We've received your enquiry about <strong style="color:#5C1A1A;">${params.course}</strong> and will be in touch shortly with available dates and next steps.`)}
-        ${divider()}
-      </div>
-      ${goldBox(`<p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#555;">In the meantime, feel free to browse our training pathways or message us on Instagram.</p>`)}
-      ${ctaButton("https://instagram.com/starraestheticss", "Follow us on Instagram")}
-      ${smallPrint("We typically respond within 24 hours.")}
-    `;
-    promises.push(
-      resend.emails.send({
-        from: FROM,
-        to: params.email,
-        subject: "Thanks for your enquiry — Starr Aesthetics",
-        html: emailShell(clientBody),
-      }).then(() => {}).catch((e) => console.error("sendEnquiryEmails client error", e)),
-    );
+    const clientContent = `
+      <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Thank you, ${firstName}</p>
+      <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">We've received your enquiry about <strong style="color:#5C1E1E;">${params.course}</strong> and will be in touch shortly with available dates and next steps.</p>
+      <p style="font-size:13px;color:#8C7B6B;margin:0;font-style:italic;">We typically respond within 24 hours. In the meantime, feel free to browse our Instagram for inspiration.</p>`;
+    const clientSubject = `Thanks for your enquiry — Starr Aesthetics`;
+    const clientHtml = buildEmail(clientContent, clientSubject);
+    if (!resend) {
+      logEmailPreview(clientSubject, params.email, clientHtml);
+    } else {
+      promises.push(
+        resend.emails
+          .send({ from: FROM, to: params.email, subject: clientSubject, html: clientHtml })
+          .catch((e: unknown) => console.error("sendEnquiryEmails client error", e)),
+      );
+    }
   }
 
   await Promise.all(promises);

@@ -2,7 +2,7 @@ import { Router } from "express";
 import { supabaseAdmin } from "../lib/supabase";
 import jwt from "jsonwebtoken";
 import { runAutoComplete } from "./bookings";
-import { sendReminderEmail } from "../lib/email";
+import { sendReminderEmail, sendFormsReminderEmail } from "../lib/email";
 
 const router = Router();
 
@@ -79,6 +79,62 @@ async function sendReminders(): Promise<number> {
   return sent;
 }
 
+/** Send forms reminders for bookings with forms_completed=false within 48 hours */
+async function sendFormsReminders(): Promise<number> {
+  const now = new Date();
+  const winStart = now.toISOString().slice(0, 10); // from today
+  const winEnd = new Date(now.getTime() + 48 * 3600_000).toISOString().slice(0, 10);
+
+  const { data: bookings, error } = await supabaseAdmin
+    .from("bookings")
+    .select("id, client_name, client_email, treatment_name, booking_date, time_slot, location_id, forms_reminder_sent")
+    .eq("forms_completed", false)
+    .in("status", ["awaiting_forms", "confirmed"])
+    .not("client_email", "is", null)
+    .neq("client_email", "")
+    .gte("booking_date", winStart)
+    .lte("booking_date", winEnd);
+
+  if (error) {
+    console.error("sendFormsReminders fetch error", error);
+    return 0;
+  }
+
+  let sent = 0;
+  for (const row of (bookings ?? [])) {
+    if (row.forms_reminder_sent) continue;
+    try {
+      // Fetch location info
+      const locRes = await supabaseAdmin
+        .from("locations")
+        .select("name, address")
+        .eq("id", row.location_id)
+        .maybeSingle();
+      const locName = String(locRes.data?.name ?? "Starr Aesthetics");
+      const locAddr = String(locRes.data?.address ?? locName);
+
+      await sendFormsReminderEmail({
+        clientEmail: String(row.client_email ?? ""),
+        clientName: String(row.client_name ?? ""),
+        treatment: String(row.treatment_name ?? ""),
+        date: String(row.booking_date ?? ""),
+        time: String(row.time_slot ?? "").slice(0, 5),
+        bookingId: String(row.id),
+        locationName: locName,
+        locationAddress: locAddr,
+      });
+      await supabaseAdmin
+        .from("bookings")
+        .update({ forms_reminder_sent: true })
+        .eq("id", String(row.id));
+      sent++;
+    } catch (e) {
+      console.error("sendFormsReminders email error", e);
+    }
+  }
+  return sent;
+}
+
 function requireCronSecret(req: import("express").Request, res: import("express").Response): boolean {
   const secret = process.env.CRON_SECRET;
   if (!secret) {
@@ -114,6 +170,13 @@ router.get("/cron/autocomplete", async (req, res) => {
 router.get("/cron/reminders", async (req, res) => {
   if (!requireCronSecret(req, res)) return;
   const sent = await sendReminders();
+  return res.json({ ok: true, sent });
+});
+
+// GET /api/cron/forms-reminders
+router.get("/cron/forms-reminders", async (req, res) => {
+  if (!requireCronSecret(req, res)) return;
+  const sent = await sendFormsReminders();
   return res.json({ ok: true, sent });
 });
 

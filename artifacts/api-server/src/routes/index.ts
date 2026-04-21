@@ -14,6 +14,7 @@ import locationsRouter from "./locations";
 import treatmentsRouter from "./treatments-route";
 import adminRouter from "./admin";
 import formsRouter from "./forms";
+import calendarRouter from "./calendar";
 
 const router: IRouter = Router();
 
@@ -32,5 +33,6 @@ router.use(clientsRouter);
 router.use(enquiriesRouter);
 router.use(stripeRouter);
 router.use(formsRouter);
+router.use(calendarRouter);
 
 export default router;

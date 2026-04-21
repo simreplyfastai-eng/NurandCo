@@ -1,0 +1,336 @@
+Wire up the full training enquiry system end to end.
+The Enquiries tab already exists in the admin portal 
+but shows "Failed to load enquiries." — fix this 
+and build the complete flow.
+
+There are 2 courses on the website:
+  Essex Masterclass — Hornchurch Clinic
+  London Masterclass — Marylebone Clinic
+
+Each has an ENQUIRE NOW button that currently 
+does nothing. Wire it all up.
+
+===============================================================
+PART 1 — SUPABASE TABLE
+===============================================================
+
+Run this in Supabase to create the enquiries table:
+
+CREATE TABLE IF NOT EXISTS enquiries (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  location_id UUID REFERENCES locations(id),
+  course_name TEXT NOT NULL,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  phone TEXT NOT NULL,
+  experience_level TEXT,
+  message TEXT,
+  status TEXT DEFAULT 'new' 
+    CHECK (status IN ('new','contacted','enrolled','closed')),
+  notes TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE enquiries ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "enquiries_public_insert" 
+  ON enquiries FOR INSERT TO anon WITH CHECK (true);
+CREATE POLICY "enquiries_service_all" 
+  ON enquiries FOR ALL TO service_role USING (true);
+
+GRANT INSERT ON enquiries TO anon;
+GRANT ALL ON enquiries TO service_role;
+
+CREATE INDEX IF NOT EXISTS idx_enquiries_location 
+  ON enquiries(location_id);
+CREATE INDEX IF NOT EXISTS idx_enquiries_status 
+  ON enquiries(status);
+
+===============================================================
+PART 2 — ENQUIRY FORM MODAL ON WEBSITE
+===============================================================
+
+When ENQUIRE NOW is clicked on either course card,
+show a modal overlay — NOT a new page.
+
+The modal must be clean, premium, matching 
+the Starr brand exactly.
+
+Modal design:
+  Backdrop: rgba(0,0,0,0.5) blur(4px)
+  Card: white, border-radius 16px, max-width 480px
+  centred, padding 40px
+  
+  Close button: × top-right, gold on hover
+  
+  Header:
+    Gold overline: "STARR ACADEMY"
+    Serif heading: "Course Enquiry"
+    Subtext (auto-filled from which button clicked):
+      "Essex Masterclass — Hornchurch" 
+      OR "London Masterclass — Marylebone"
+    Gold pill badge showing the course name
+
+  Form fields (existing site input styles):
+  
+  Full Name *
+    placeholder: "Your full name"
+  
+  Email Address *
+    placeholder: "your@email.com"
+    type="email"
+  
+  Phone Number *
+    placeholder: "+44 7700 000000"
+    type="tel"
+  
+  Experience Level
+    Dropdown select:
+      "Select your background..."
+      "No prior experience"
+      "Beauty therapist"
+      "Nurse / Medical professional"
+      "Already practising aesthetics"
+      "Other"
+  
+  Message (optional)
+    textarea, 3 rows
+    placeholder: "Any questions or anything 
+    you'd like us to know..."
+  
+  Hidden field: course_name (auto from button clicked)
+  Hidden field: location_id (auto from course)
+
+  Submit button:
+    Full width
+    Background: existing burgundy (#5C1E1E)
+    Text: "SEND ENQUIRY" white uppercase
+    Letter-spacing: 0.12em
+    
+    On hover: gold background
+    Loading state: "Sending..." with spinner
+    Disabled until name + email + phone filled
+
+  Below button:
+    Small muted text:
+    "We'll be in touch within 24 hours 🤍"
+
+  After successful submit:
+    Replace form content with success state:
+    
+    Gold animated tick (same as /confirmed page)
+    
+    Heading: "Enquiry received!"
+    Subtext: "Thanks [name], Eva will be in 
+    touch within 24 hours."
+    
+    "WhatsApp us in the meantime:"
+    Gold button → wa.me/447701298985
+    
+    Close button: "Close" → closes modal
+
+===============================================================
+PART 3 — ENQUIRY API ENDPOINT
+===============================================================
+
+POST /api/enquiries
+Public — no auth required
+
+Validate:
+  name: required, min 2 chars
+  email: required, valid email format
+  phone: required, min 7 chars
+  course_name: required
+
+Resolve location_id from course_name:
+  'Essex Masterclass' → hornchurch location_id
+  'London Masterclass' → marylebone location_id
+
+Insert into Supabase enquiries table:
+  {
+    location_id,
+    course_name,
+    name: body.name.trim(),
+    email: body.email.toLowerCase().trim(),
+    phone: body.phone.trim(),
+    experience_level: body.experience_level || null,
+    message: body.message || null,
+    status: 'new'
+  }
+
+If RESEND_API_KEY is set, send two emails:
+  1. Admin alert to info@starrbeautyy.co.uk
+  2. Auto-reply to the enquirer
+
+Return: { success: true }
+On error: { error: 'Failed to submit enquiry' }
+
+GET /api/enquiries
+Protected — requires JWT + X-Location-Id header
+Returns all enquiries for that location
+Ordered by created_at DESC
+
+PUT /api/enquiries/:id
+Protected — requires JWT
+Body: { status, notes }
+Updates enquiry status and/or notes
+
+===============================================================
+PART 4 — ADMIN PORTAL ENQUIRIES TAB
+===============================================================
+
+The Enquiries tab already exists and shows:
+DATE | NAME | COURSE | PHONE | EMAIL | STATUS
+
+Fix the "Failed to load enquiries" error:
+  The GET /api/enquiries endpoint needs to exist
+  and return data filtered by location_id
+
+The enquiries table should look like this:
+
+Each row:
+  Date (formatted: "21 Apr 2026")
+  Name (bold)
+  Course (gold pill badge: "Essex Masterclass")
+  Phone (clickable tel: link)
+  Email (clickable mailto: link)
+  Status pill:
+    new → gold/amber "NEW" 
+    contacted → blue "CONTACTED"
+    enrolled → green "ENROLLED"
+    closed → grey "CLOSED"
+  
+  Action button: "..." → dropdown menu:
+    Mark as Contacted
+    Mark as Enrolled
+    Mark as Closed
+    Add Note
+    Delete
+
+When clicking a row → expand or open drawer showing:
+  Full enquiry details:
+    Name, Email, Phone
+    Course + Location
+    Experience Level
+    Message (if provided)
+    Date submitted
+    Current status
+    Notes field (Eva can type internal notes)
+    Save Notes button
+
+Status badge in sidebar:
+  Enquiries tab shows a red badge with count 
+  of unread/new enquiries:
+  "Enquiries  [3]"
+  Same as the Schedule badge (1) visible now
+  Updates in real time
+
+===============================================================
+PART 5 — ENQUIRY EMAILS
+===============================================================
+
+If RESEND_API_KEY is set:
+
+EMAIL A — Admin alert (to Eva):
+From: Starr Aesthetics <info@starrbeautyy.co.uk>
+To: info@starrbeautyy.co.uk
+Subject: "📚 New Training Enquiry: [Name] — [Course]"
+
+Use same email base template as other emails.
+Content:
+  "New Training Enquiry Received"
+  
+  Gold box showing:
+    Name: [name]
+    Email: [email] (clickable)
+    Phone: [phone] (clickable)
+    Course: [course_name]
+    Experience: [experience_level]
+    Message: [message if provided]
+    Submitted: [timestamp]
+  
+  "Reply via WhatsApp" button → wa.me/[phone]
+  "View in Portal" button → /portal.html
+
+EMAIL B — Auto-reply (to enquirer):
+From: Starr Aesthetics <info@starrbeautyy.co.uk>
+To: enquirer email
+Subject: "Thanks for your enquiry — Starr Academy"
+
+Use same email base template.
+Content:
+  "We've received your enquiry ✨"
+  
+  "Hi [name],"
+  
+  "Thank you for your interest in the 
+  [course_name]. Eva will be in touch 
+  within 24 hours."
+  
+  Gold info box:
+    Course: [course_name]
+    Location: [Hornchurch Clinic / 
+               Marylebone Clinic]
+    Reference: ENQ-[first 8 chars of id]
+  
+  "In the meantime, feel free to reach out:"
+  
+  WhatsApp button → wa.me/447701298985
+  
+  Instagram accounts:
+    @StarrAestheticss · @StarrFacess
+
+===============================================================
+PART 6 — CONNECT ENQUIRE NOW BUTTONS
+===============================================================
+
+Find the ENQUIRE NOW buttons in the training 
+section of index.html/main site file.
+
+There are 2 of them:
+  Essex Masterclass button → course: "Essex Masterclass"
+  London Masterclass button → course: "London Masterclass"
+
+Add click handlers:
+
+  // Essex Masterclass
+  document.querySelector('[data-course="essex"]')
+    ?.addEventListener('click', () => {
+      openEnquiryModal('Essex Masterclass', essexLocationId)
+    })
+  
+  // London Masterclass  
+  document.querySelector('[data-course="london"]')
+    ?.addEventListener('click', () => {
+      openEnquiryModal('London Masterclass', londonLocationId)
+    })
+
+Or use data attributes to identify them — 
+read the existing HTML to find the right selector.
+
+The openEnquiryModal function:
+  Creates/shows the modal overlay
+  Pre-fills the course name in the modal header
+  Pre-fills the hidden course_name field
+  Pre-fills the hidden location_id field
+  Focuses the first input field
+
+===============================================================
+FINAL VERIFY
+===============================================================
+
+1. Click ENQUIRE NOW on Essex Masterclass ✓
+2. Modal opens, shows "Essex Masterclass" ✓
+3. Fill in name, email, phone ✓
+4. Select experience level ✓
+5. Submit → success message shows ✓
+6. Check Supabase enquiries table has new row ✓
+7. Admin email received (when key is set) ✓
+8. Auto-reply email received ✓
+9. Login to admin portal as Hornchurch ✓
+10. Enquiries tab shows the submission ✓
+11. Status badge shows "1 new" on Enquiries tab ✓
+12. Click row → full details visible ✓
+13. Change status to "Contacted" ✓
+14. Status updates in Supabase ✓
+15. Same test for London Masterclass + Marylebone ✓
