@@ -139,34 +139,26 @@ export default function Footer() {
         <div style={{ height: 1, background: "#E2DDD5", marginBottom: 28 }} />
 
         <div style={{ fontFamily: "'Inter', sans-serif", marginBottom: 32 }}>
-          {/* Two-column social grid */}
-          <div style={{ display: "flex", justifyContent: "center", gap: 56, flexWrap: "wrap" }}>
-            {/* Instagram column */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
+
+          {/* Paired grid: each row = one account, ig left | tt right */}
+          <div style={{ display: "inline-block", textAlign: "left" }}>
+            {/* Column headers */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 16px", marginBottom: 10 }}>
               <ColLabel>Instagram</ColLabel>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {igAccounts.map((a) => (
-                  <SocialPill key={a.handle} handle={a.handle} url={a.url} icon="ig" />
-                ))}
-              </div>
+              <ColLabel>TikTok</ColLabel>
             </div>
 
-            {/* Vertical divider */}
-            <div style={{ width: 1, background: "#E2DDD5", alignSelf: "stretch", minHeight: 120 }} />
-
-            {/* TikTok column */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start" }}>
-              <ColLabel>TikTok</ColLabel>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {ttAccounts.map((a) => (
-                  <SocialPill key={a.handle} handle={a.handle} url={a.url} icon="tt" />
-                ))}
-              </div>
+            {/* Account rows — flat array, grid auto-places pairs */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "8px 16px" }}>
+              {igAccounts.flatMap((a, i) => [
+                <SocialPill key={"ig-" + a.handle} handle={a.handle} url={a.url} icon="ig" />,
+                <SocialPill key={"tt-" + ttAccounts[i].handle} handle={ttAccounts[i].handle} url={ttAccounts[i].url} icon="tt" />,
+              ])}
             </div>
           </div>
 
-          {/* Email centred below */}
-          <div style={{ marginTop: 28, textAlign: "center" }}>
+          {/* Email */}
+          <div style={{ marginTop: 24 }}>
             <ColLabel>Email</ColLabel>
             <a
               href="mailto:starrbeautyyltd@gmail.com"
