@@ -44,7 +44,7 @@ export default function Training() {
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px" }}>
               Train With Eva
             </h2>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", margin: "0 0 28px" }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#C9A96E", margin: "0 0 28px" }}>
               CPD accredited aesthetics training
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
