@@ -201,42 +201,66 @@ export default function Services() {
                     style={{ overflow: "hidden" }}
                   >
                     <div style={{ paddingTop: 4, paddingBottom: 8 }}>
-                      {group.items.map((t) => (
-                        <div
-                          key={t.id}
-                          style={{
-                            display: "flex", alignItems: "center", justifyContent: "space-between",
-                            padding: "14px 16px", background: "#F5F0EB", marginBottom: 2, gap: 8,
-                          }}
-                        >
-                          <div style={{ minWidth: 0 }}>
-                            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1rem", color: "#3D3D3D" }}>{t.name}</span>
-                            {t.duration_minutes > 0 && (
-                              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "#737373", marginLeft: 8, whiteSpace: "nowrap" }}>
-                                {fmtDuration(t.duration_minutes)}
-                              </span>
-                            )}
+                      {group.items.map((t) => {
+                        const isPoa = t.price === 0;
+                        const bookStyle = {
+                          fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "1.5px", textTransform: "uppercase" as const,
+                          border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                          padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
+                          textDecoration: "none", display: "inline-block", whiteSpace: "nowrap" as const,
+                        };
+                        return (
+                          <div
+                            key={t.id}
+                            style={{
+                              display: "flex", alignItems: "center", justifyContent: "space-between",
+                              padding: "14px 16px", background: "#F5F0EB", marginBottom: 2, gap: 8,
+                            }}
+                          >
+                            <div style={{ minWidth: 0 }}>
+                              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1rem", color: "#3D3D3D" }}>{t.name}</span>
+                              {t.duration_minutes > 0 && (
+                                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "#737373", marginLeft: 8, whiteSpace: "nowrap" }}>
+                                  {fmtDuration(t.duration_minutes)}
+                                </span>
+                              )}
+                              {isPoa && (
+                                <div style={{ fontFamily: "'Inter', sans-serif", fontStyle: "italic", fontSize: 11, color: "#737373", marginTop: 3 }}>
+                                  Ask for pricing
+                                </div>
+                              )}
+                            </div>
+                            <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
+                              {!isPoa && (
+                                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C9A96E", whiteSpace: "nowrap" }}>
+                                  {fmtPrice(t.price)}
+                                </span>
+                              )}
+                              {isPoa ? (
+                                <a
+                                  href="https://wa.me/447701298985"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={bookStyle}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                                >
+                                  BOOK NOW
+                                </a>
+                              ) : (
+                                <a
+                                  href={`${BASE}book?location=${location}&treatment=${t.id}`}
+                                  style={bookStyle}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                                >
+                                  BOOK
+                                </a>
+                              )}
+                            </div>
                           </div>
-                          <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
-                            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C9A96E", whiteSpace: "nowrap" }}>
-                              {fmtPrice(t.price)}
-                            </span>
-                            <a
-                              href={`${BASE}book?location=${location}&treatment=${t.id}`}
-                              style={{
-                                fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "1.5px", textTransform: "uppercase",
-                                border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
-                                padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
-                                textDecoration: "none", display: "inline-block", whiteSpace: "nowrap",
-                              }}
-                              onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
-                            >
-                              BOOK
-                            </a>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </motion.div>
                 )}

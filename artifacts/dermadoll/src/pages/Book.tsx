@@ -187,35 +187,62 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
                     transition={{ duration: 0.3 }}
                     style={{ overflow: "hidden" }}
                   >
-                    {group.items.map((t) => (
-                      <div
-                        key={t.id}
-                        style={{
-                          display: "flex", alignItems: "center", justifyContent: "space-between",
-                          padding: "14px 20px", background: "#F5F0EB", marginBottom: 2, gap: 8,
-                        }}
-                      >
-                        <div>
-                          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#3D3D3D" }}>{t.name}</span>
-                          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "#737373", marginLeft: 8 }}>{fmtDuration(t.duration_minutes)}</span>
+                    {group.items.map((t) => {
+                      const isPoa = t.price === 0;
+                      const bookBtnStyle = {
+                        fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "1.5px", textTransform: "uppercase" as const,
+                        border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                        padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
+                        textDecoration: "none", display: "inline-block", whiteSpace: "nowrap" as const,
+                      };
+                      return (
+                        <div
+                          key={t.id}
+                          style={{
+                            display: "flex", alignItems: "center", justifyContent: "space-between",
+                            padding: "14px 20px", background: "#F5F0EB", marginBottom: 2, gap: 8,
+                          }}
+                        >
+                          <div>
+                            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#3D3D3D" }}>{t.name}</span>
+                            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "#737373", marginLeft: 8 }}>{fmtDuration(t.duration_minutes)}</span>
+                            {isPoa && (
+                              <div style={{ fontFamily: "'Inter', sans-serif", fontStyle: "italic", fontSize: 11, color: "#737373", marginTop: 3 }}>
+                                Ask for pricing
+                              </div>
+                            )}
+                          </div>
+                          <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                            {!isPoa && (
+                              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C9A96E" }}>
+                                {fmtPrice(t.price)}
+                              </span>
+                            )}
+                            {isPoa ? (
+                              <a
+                                href="https://wa.me/447701298985"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={bookBtnStyle}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                              >
+                                BOOK NOW
+                              </a>
+                            ) : (
+                              <button
+                                onClick={() => setActiveTreatment(t)}
+                                style={bookBtnStyle}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                              >
+                                BOOK
+                              </button>
+                            )}
+                          </div>
                         </div>
-                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C9A96E" }}>{fmtPrice(t.price)}</span>
-                          <button
-                            onClick={() => setActiveTreatment(t)}
-                            style={{
-                              fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "1.5px", textTransform: "uppercase",
-                              border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
-                              padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
-                            }}
-                            onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
-                          >
-                            BOOK
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </motion.div>
                 )}
               </AnimatePresence>
