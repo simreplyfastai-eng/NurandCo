@@ -94,9 +94,26 @@ async function ensureCategoryColumn(): Promise<void> {
   }
 }
 
+/** Attempt to create the unique index for client deduplication.
+ *  Silently fails if exec_sql RPC is not available — app-level dedup still applies. */
+async function ensureClientUniqueIndex(): Promise<void> {
+  try {
+    await (supabaseAdmin as unknown as { rpc: (fn: string, args: Record<string, unknown>) => Promise<unknown> })
+      .rpc("exec_sql", {
+        query: `CREATE UNIQUE INDEX IF NOT EXISTS clients_location_email_unique
+                ON clients(location_id, LOWER(email))
+                WHERE email IS NOT NULL`,
+      });
+    console.log("Seed: clients unique index verified");
+  } catch {
+    // exec_sql RPC may not exist — that's fine, app-level dedup handles it
+  }
+}
+
 export async function seedTreatments(): Promise<void> {
   try {
     await ensureCategoryColumn();
+    ensureClientUniqueIndex().catch(() => {});
 
     const { data: locations, error: locErr } = await supabaseAdmin
       .from("locations")

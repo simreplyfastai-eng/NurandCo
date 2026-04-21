@@ -214,7 +214,7 @@ router.get("/admin/clients-supabase", async (req, res) => {
     const clientIds = rows.map((c) => c.id as string);
     const { data: bookings } = await supabaseAdmin
       .from("bookings")
-      .select("id, client_id, treatments(name), booking_date, time_slot, status, total_amount, deposit_amount")
+      .select("id, client_id, treatments(name), treatment_name, booking_date, time_slot, status, total_amount, deposit_amount")
       .in("client_id", clientIds)
       .order("booking_date", { ascending: false });
 
@@ -222,12 +222,18 @@ router.get("/admin/clients-supabase", async (req, res) => {
     for (const bk of bookings ?? []) {
       const cid = String(bk.client_id ?? "");
       if (!bkMap[cid]) bkMap[cid] = [];
+      // Resolve treatment: JOIN → treatment_name column → ""
+      const treatmentName = (bk.treatments as Record<string, unknown> | null)?.name
+        ?? (bk.treatment_name as string | null)
+        ?? "";
+      const rawStatus = String(bk.status ?? "pending");
+      const displayStatus = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
       bkMap[cid].push({
         id: bk.id,
-        treatment: (bk.treatments as Record<string, unknown> | null)?.name ?? "",
+        treatment: treatmentName,
         date: bk.booking_date,
         time: bk.time_slot,
-        status: bk.status,
+        status: displayStatus,
         price: bk.total_amount,
         depositAmount: bk.deposit_amount,
       });
@@ -243,6 +249,7 @@ router.get("/admin/clients-supabase", async (req, res) => {
       visitCount: Number(c.visit_count ?? 0),
       totalSpent: Number(c.total_spent ?? 0),
       lastVisit: c.last_visit ?? null,
+      joinDate: c.created_at ? new Date(String(c.created_at)).toISOString().slice(0, 10) : null,
       createdAt: c.created_at,
       locationId: c.location_id,
       bookings: bkMap[String(c.id)] ?? [],

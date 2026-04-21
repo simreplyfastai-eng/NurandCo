@@ -7,7 +7,7 @@ import { Router } from "express";
 import Stripe from "stripe";
 import { supabaseAdmin } from "../lib/supabase";
 import { sendClientConfirmationEmail, sendAdminNotificationEmail } from "../lib/email";
-import { upsertClientFromBooking } from "./clients";
+import { findOrCreateClient } from "./clients";
 import { getDepositAmount } from "../lib/treatments";
 import { ukDateStr } from "../lib/tz";
 
@@ -112,70 +112,6 @@ async function getDepositSettings(locationId: string): Promise<{ depositInjectab
     }
   } catch { /* fall through */ }
   return { depositInjectables: 20, depositOther: 10 };
-}
-
-async function upsertSupabaseClient(params: {
-  name: string;
-  email: string;
-  phone: string;
-  locationId: string;
-  depositAmount: number;
-  bookingDate: string;
-}): Promise<string | null> {
-  const { name, email, phone, locationId, depositAmount, bookingDate } = params;
-  if (!name) return null;
-  const emailLower = email.trim().toLowerCase();
-  try {
-    let existing: Record<string, unknown> | null = null;
-    if (emailLower) {
-      const { data } = await supabaseAdmin
-        .from("clients")
-        .select("id, visit_count, total_spent")
-        .eq("location_id", locationId)
-        .eq("email", emailLower)
-        .maybeSingle();
-      if (data) existing = data;
-    }
-    if (!existing && phone) {
-      const { data } = await supabaseAdmin
-        .from("clients")
-        .select("id, visit_count, total_spent")
-        .eq("location_id", locationId)
-        .eq("phone", phone.trim().replace(/\s/g, ""))
-        .maybeSingle();
-      if (data) existing = data;
-    }
-
-    if (existing) {
-      const newCount = Number(existing.visit_count ?? 0) + 1;
-      const newSpent = Number(existing.total_spent ?? 0) + depositAmount;
-      await supabaseAdmin
-        .from("clients")
-        .update({ visit_count: newCount, total_spent: newSpent, last_visit: bookingDate })
-        .eq("id", String(existing.id));
-      return String(existing.id);
-    } else {
-      const { data, error } = await supabaseAdmin
-        .from("clients")
-        .insert({
-          location_id: locationId,
-          name: name.trim(),
-          email: emailLower || null,
-          phone: phone.trim().replace(/\s/g, "") || null,
-          visit_count: 1,
-          total_spent: depositAmount,
-          last_visit: bookingDate,
-          source: "Website",
-        })
-        .select("id")
-        .single();
-      if (error) throw error;
-      return String(data.id);
-    }
-  } catch (err) {
-    console.error("upsertSupabaseClient", err);
-    return null;
-  }
 }
 
 const IG_ACCOUNTS_DEFAULT = [
@@ -336,16 +272,16 @@ router.post("/stripe/webhook", async (req, res) => {
           const totalAmount = Number(updated.total_amount ?? depositFromStripe);
           const balanceDue = Math.max(0, totalAmount - depositFromStripe);
 
-          // 1a. Upsert Supabase clients table
+          // 1a. Upsert Supabase clients table (with stat updates — payment confirmed)
           let supabaseClientId: string | null = null;
           if (clientName && locationId) {
-            supabaseClientId = await upsertSupabaseClient({
+            supabaseClientId = await findOrCreateClient({
+              locationId,
               name: clientName,
               email: clientEmail ?? "",
               phone: clientPhone ?? "",
-              locationId,
-              depositAmount: depositFromStripe,
-              bookingDate: bDate,
+              source: "Website",
+              updateStats: { depositAmount: depositFromStripe, bookingDate: bDate },
             }).catch(() => null);
           }
 
@@ -430,12 +366,26 @@ router.post("/stripe/webhook", async (req, res) => {
         const treatInfo = await getTreatmentInfo(treatment, locationId);
         const price = treatInfo.price || depositFromStripe * 2;
 
-        const clientId = await upsertClientFromBooking({
+        // Slot conflict check — payment already taken so we log but still create the booking
+        const slotFree = await (async () => {
+          try {
+            const { data } = await supabaseAdmin.from("bookings").select("id")
+              .eq("location_id", locationId).eq("booking_date", bDate).eq("time_slot", bTime)
+              .not("status", "eq", "cancelled").limit(1);
+            return !data || data.length === 0;
+          } catch { return true; }
+        })();
+        if (!slotFree) {
+          console.warn(`Stripe webhook: slot conflict for ${bDate} ${bTime} at ${locationId} — payment already taken, creating booking with conflict note`);
+        }
+
+        const clientId = await findOrCreateClient({
+          locationId,
           name: clientName,
           email: clientEmail ?? "",
           phone: clientPhone ?? "",
-          date: bDate,
           source: "Website",
+          updateStats: { depositAmount: depositFromStripe, bookingDate: bDate },
         }).catch(() => null);
 
         await supabaseAdmin.from("bookings").upsert({
@@ -455,6 +405,7 @@ router.post("/stripe/webhook", async (req, res) => {
           deposit_paid: true,
           stripe_payment_intent_id: paymentIntentId,
           reminder_sent: false,
+          notes: slotFree ? "" : "⚠️ Slot conflict — review required",
         }, { onConflict: "id" });
 
         if (clientEmail) {

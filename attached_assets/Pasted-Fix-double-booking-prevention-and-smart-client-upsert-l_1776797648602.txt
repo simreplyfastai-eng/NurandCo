@@ -1,0 +1,362 @@
+Fix double booking prevention and smart client 
+upsert logic. Read the existing bookings.ts and 
+clients.ts files carefully before touching anything.
+
+===============================================================
+PART 1 — NO DOUBLE BOOKINGS
+===============================================================
+
+In the booking creation logic (both customer-facing 
+POST /api/bookings AND the Stripe webhook handler),
+add this check BEFORE inserting any booking:
+
+async function isSlotAvailable(
+  locationId, bookingDate, timeSlot
+) {
+  const { data } = await supabaseAdmin
+    .from('bookings')
+    .select('id')
+    .eq('location_id', locationId)
+    .eq('booking_date', bookingDate)
+    .eq('time_slot', timeSlot)
+    .not('status', 'eq', 'cancelled')
+    .limit(1)
+  
+  return !data || data.length === 0
+}
+
+If slot is NOT available → return 409:
+{
+  error: 'Sorry, this slot has just been taken.',
+  code: 'SLOT_TAKEN'
+}
+
+On the frontend booking widget:
+  If the API returns SLOT_TAKEN:
+  Show a clear message:
+  "This time slot has just been booked by 
+  someone else. Please choose another time."
+  Refresh the available slots automatically
+  so the calendar updates immediately.
+
+Also check date is not blocked:
+async function isDateBlocked(locationId, date) {
+  const { data } = await supabaseAdmin
+    .from('blocked_dates')
+    .select('id')
+    .eq('location_id', locationId)
+    .eq('date', date)
+    .limit(1)
+  
+  return data && data.length > 0
+}
+
+If date is blocked → return 409:
+{ error: 'This date is not available.', 
+  code: 'DATE_BLOCKED' }
+
+Also check location is open that day:
+async function isLocationOpen(locationId, date) {
+  const dayOfWeek = new Date(date).getDay()
+  const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1
+  
+  const { data } = await supabaseAdmin
+    .from('availability_settings')
+    .select('is_open, open_time, close_time')
+    .eq('location_id', locationId)
+    .eq('day_of_week', adjustedDay)
+    .single()
+  
+  if (!data || !data.is_open) return false
+  return true
+}
+
+If location closed → return 409:
+{ error: 'The clinic is closed on this day.',
+  code: 'CLINIC_CLOSED' }
+
+Run ALL three checks before creating any booking.
+Order: date blocked → clinic closed → slot taken.
+
+===============================================================
+PART 2 — SMART CLIENT UPSERT (NO DUPLICATES)
+===============================================================
+
+When a booking is confirmed (via Stripe webhook 
+or admin portal), find or create the client.
+
+NEVER create a duplicate client record.
+A client is identified by:
+  email + location_id (primary)
+  OR phone + location_id (secondary fallback)
+
+Use this upsert logic:
+
+async function findOrCreateClient(
+  locationId, clientData
+) {
+  const { name, email, phone } = clientData
+  
+  // 1. Try to find by email first (most reliable)
+  if (email) {
+    const { data: existing } = await supabaseAdmin
+      .from('clients')
+      .select('*')
+      .eq('location_id', locationId)
+      .ilike('email', email.trim())
+      .single()
+    
+    if (existing) {
+      // Client exists — UPDATE their record
+      const { data: updated } = await supabaseAdmin
+        .from('clients')
+        .update({
+          // Update name if we have a better version
+          name: name || existing.name,
+          // Update phone if missing
+          phone: phone || existing.phone,
+          // Increment visit count
+          visit_count: (existing.visit_count || 0) + 1,
+          // Update last visit to today
+          last_visit: new Date().toISOString().split('T')[0]
+        })
+        .eq('id', existing.id)
+        .select()
+        .single()
+      
+      return updated
+    }
+  }
+  
+  // 2. Try to find by phone if email not found
+  if (phone) {
+    const cleanPhone = phone.replace(/\s+/g, '')
+      .replace(/^\+44/, '0')
+    
+    const { data: existingByPhone } = await supabaseAdmin
+      .from('clients')
+      .select('*')
+      .eq('location_id', locationId)
+      .or(`phone.eq.${phone},phone.eq.${cleanPhone}`)
+      .single()
+    
+    if (existingByPhone) {
+      // Found by phone — update email if we have it
+      const { data: updated } = await supabaseAdmin
+        .from('clients')
+        .update({
+          email: email || existingByPhone.email,
+          name: name || existingByPhone.name,
+          visit_count: (existingByPhone.visit_count || 0) + 1,
+          last_visit: new Date().toISOString().split('T')[0]
+        })
+        .eq('id', existingByPhone.id)
+        .select()
+        .single()
+      
+      return updated
+    }
+  }
+  
+  // 3. Client is genuinely new — INSERT
+  const { data: newClient } = await supabaseAdmin
+    .from('clients')
+    .insert({
+      location_id: locationId,
+      name: name || 'Unknown',
+      email: email || null,
+      phone: phone || null,
+      visit_count: 1,
+      last_visit: new Date().toISOString().split('T')[0],
+      total_spent: 0,
+      source: 'Website'
+    })
+    .select()
+    .single()
+  
+  return newClient
+}
+
+Call this function EVERY time a booking is 
+confirmed — never insert a client directly.
+
+After finding/creating the client:
+  Update the booking with the client_id:
+  
+  await supabaseAdmin
+    .from('bookings')
+    .update({ client_id: client.id })
+    .eq('id', bookingId)
+
+Also update total_spent when booking is complete:
+  await supabaseAdmin
+    .from('clients')
+    .update({
+      total_spent: supabase.rpc('increment', {
+        row_id: client.id,
+        amount: depositAmount
+      })
+    })
+    .eq('id', client.id)
+
+Or simpler — just fetch current total_spent 
+and add to it:
+  const newTotal = (client.total_spent || 0) + 
+    depositAmount
+  
+  await supabaseAdmin
+    .from('clients')
+    .update({ total_spent: newTotal })
+    .eq('id', client.id)
+
+===============================================================
+PART 3 — DATABASE UNIQUE CONSTRAINT
+===============================================================
+
+Add a unique constraint to prevent duplicate 
+clients at the database level as a safety net.
+
+Run this in Supabase SQL editor:
+
+CREATE UNIQUE INDEX IF NOT EXISTS 
+  clients_location_email_unique 
+  ON clients(location_id, LOWER(email))
+  WHERE email IS NOT NULL;
+
+This means even if the code somehow tries to 
+insert a duplicate, Supabase will reject it.
+
+On conflict (duplicate email for same location):
+  The upsert in code handles it above, but add 
+  a conflict handler as backup:
+  
+  .from('clients')
+  .upsert(clientData, { 
+    onConflict: 'location_id,email',
+    ignoreDuplicates: false 
+  })
+
+===============================================================
+PART 4 — CLIENT HISTORY IN ADMIN PORTAL
+===============================================================
+
+In the Clients tab of the admin portal, when 
+Eva views a client it must show:
+
+Client card:
+  Name (large)
+  Email + phone (clickable)
+  Member since: [created_at formatted]
+  Total visits: [visit_count]
+  Total spent: £[total_spent]
+  Last visit: [last_visit formatted]
+
+Below: All their bookings for this location:
+  Table: Date | Treatment | Status | Deposit
+  Sorted newest first
+  
+  Query:
+  SELECT * FROM bookings
+  WHERE client_id = [client.id]
+  AND location_id = [sessionLocationId]
+  ORDER BY booking_date DESC
+
+This shows Eva the full picture of who this 
+client is and their history without any 
+duplicate confusion.
+
+===============================================================
+PART 5 — STRIPE WEBHOOK FLOW UPDATE
+===============================================================
+
+In the Stripe webhook handler, update the 
+full flow to use findOrCreateClient:
+
+payment_intent.succeeded:
+  1. Extract metadata from payment intent:
+     locationId, treatmentName, clientName,
+     clientEmail, clientPhone, bookingDate,
+     bookingTime, depositAmount, totalPrice
+  
+  2. Run availability check (Part 1):
+     isSlotAvailable(locationId, bookingDate, bookingTime)
+     If not available → log warning but still 
+     create booking (payment already taken)
+     Mark booking with note: "Slot conflict - 
+     review required"
+  
+  3. Create booking in Supabase:
+     INSERT into bookings with all fields
+     status = 'confirmed'
+  
+  4. Find or create client (Part 2):
+     findOrCreateClient(locationId, {
+       name: clientName,
+       email: clientEmail,
+       phone: clientPhone
+     })
+  
+  5. Link client to booking:
+     UPDATE bookings SET client_id = client.id
+  
+  6. Redirect to /forms?booking=[bookingId]
+
+===============================================================
+PART 6 — CUSTOMER BOOKING WIDGET REAL-TIME CHECK
+===============================================================
+
+When a customer is on the booking page and 
+selects a time slot, before they proceed to 
+the details form, do a quick availability check:
+
+GET /api/availability/check?location=[id]
+  &date=[date]&time=[time]
+
+Server checks:
+  1. Is date blocked?
+  2. Is clinic open?
+  3. Is slot already booked?
+
+Returns:
+  { available: true } → let them proceed
+  { available: false, reason: 'SLOT_TAKEN' } → 
+    show message + refresh calendar
+
+Also when rendering the time slots grid:
+  Slots that are already booked → visually greyed out
+  Slots available → clickable gold/brand colour
+  
+  The available slots are fetched fresh every time 
+  the user selects a date. This prevents them 
+  seeing stale availability.
+
+===============================================================
+FINAL VERIFY
+===============================================================
+
+1. Book same slot twice simultaneously:
+   First booking succeeds ✓
+   Second returns "slot has just been taken" ✓
+
+2. Same client books twice:
+   First booking creates new client record ✓
+   Second booking finds existing client,
+   increments visit_count to 2 ✓
+   No duplicate client rows in Supabase ✓
+
+3. Same client at different location:
+   Creates SEPARATE client records per location ✓
+   (Hornchurch and Marylebone are isolated)
+
+4. Client identified by email primarily:
+   Different name same email → same client ✓
+   Same name different email → different client ✓
+
+5. Client identified by phone as fallback:
+   No email, same phone → same client ✓
+
+6. Admin portal Clients tab shows:
+   Correct visit count ✓
+   Correct total spent ✓
+   Full booking history ✓
+   No duplicate rows ✓

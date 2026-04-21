@@ -340,9 +340,37 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
     await fetchDateBookings(date);
   };
 
-  const handleTimeSelect = (time: string) => {
+  const handleTimeSelect = async (time: string) => {
     setSelectedTime(time);
     setSlotError("");
+
+    // Real-time availability check before moving to details form
+    if (locationId && selectedDate) {
+      try {
+        const date = fmtDate(selectedDate);
+        const r = await fetch(
+          `/api/availability/check?location=${encodeURIComponent(locationId)}&date=${date}&time=${encodeURIComponent(time)}`,
+          { cache: "no-store" },
+        );
+        if (r.ok) {
+          const data = await r.json() as { available: boolean; reason?: string };
+          if (!data.available) {
+            const msg = data.reason === "SLOT_TAKEN"
+              ? "This time slot has just been booked by someone else. Please choose another time."
+              : data.reason === "CLINIC_CLOSED"
+              ? "The clinic is closed on this day. Please select another date."
+              : "This date is not available. Please select another date.";
+            setSlotError(msg);
+            // Refresh slots so calendar shows current reality
+            if (selectedDate) await fetchDateBookings(selectedDate);
+            return; // Stay on step 2
+          }
+        }
+      } catch {
+        // Network error — fail open, let server validate
+      }
+    }
+
     setStep(3);
   };
 
@@ -418,10 +446,19 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
         });
 
         if (!bookingRes.ok) {
-          const bookingErr = await bookingRes.json() as { error?: string };
+          const bookingErr = await bookingRes.json() as { error?: string; code?: string };
           if (!cancelled) {
-            setPaymentError(bookingErr.error ?? "Failed to reserve your slot. Please try again.");
-            setPaymentLoading(false);
+            if (bookingErr.code === "SLOT_TAKEN") {
+              // Go back to time selection and refresh slots
+              setSlotError("This time slot has just been booked by someone else. Please choose another time.");
+              setSelectedTime(null);
+              if (selectedDate) await fetchDateBookings(selectedDate);
+              setStep(2);
+              setPaymentLoading(false);
+            } else {
+              setPaymentError(bookingErr.error ?? "Failed to reserve your slot. Please try again.");
+              setPaymentLoading(false);
+            }
           }
           return;
         }

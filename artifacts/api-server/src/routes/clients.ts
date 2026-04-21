@@ -228,7 +228,102 @@ router.delete("/clients", async (req, res) => {
   }
 });
 
-// Helper exported for use in bookings route — upsert a client silently
+/**
+ * findOrCreateClient — smart dedup with email-first, phone-fallback.
+ * When updateStats is provided the client's visit_count and total_spent are incremented.
+ * Call WITHOUT updateStats when reserving a slot (awaiting_payment); WITH updateStats
+ * when payment is confirmed (Stripe webhook).
+ */
+export async function findOrCreateClient(params: {
+  locationId: string;
+  name: string;
+  email?: string;
+  phone?: string;
+  source?: string;
+  dob?: string;
+  notes?: string;
+  updateStats?: { depositAmount: number; bookingDate: string };
+}): Promise<string | null> {
+  const { locationId, name, source, dob, notes, updateStats } = params;
+  if (!name || !locationId) return null;
+
+  const email = (params.email ?? "").trim().toLowerCase();
+  const rawPhone = (params.phone ?? "").trim().replace(/\s/g, "");
+  // Normalise +44XXXXXXXXXX → 0XXXXXXXXXX for phone dedup
+  const phone = rawPhone.replace(/^\+44/, "0");
+
+  try {
+    let existing: Record<string, unknown> | null = null;
+
+    // 1. Email lookup (primary)
+    if (email) {
+      const { data } = await supabaseAdmin
+        .from("clients")
+        .select("id, visit_count, total_spent, email, phone, name")
+        .eq("location_id", locationId)
+        .ilike("email", email)
+        .maybeSingle();
+      if (data) existing = data as Record<string, unknown>;
+    }
+
+    // 2. Phone lookup (fallback — try both normalised forms)
+    if (!existing && phone) {
+      const altPhone = rawPhone; // original (e.g. +447...)
+      const { data } = await supabaseAdmin
+        .from("clients")
+        .select("id, visit_count, total_spent, email, phone, name")
+        .eq("location_id", locationId)
+        .or(`phone.eq.${phone},phone.eq.${altPhone}`)
+        .maybeSingle();
+      if (data) existing = data as Record<string, unknown>;
+    }
+
+    if (existing) {
+      const updates: Record<string, unknown> = {
+        // Fill gaps — never overwrite existing values with empty
+        name: name || existing.name,
+        ...(email && !existing.email ? { email } : {}),
+        ...(phone && !existing.phone ? { phone } : {}),
+        ...(dob ? { date_of_birth: dob } : {}),
+      };
+      if (updateStats) {
+        updates.visit_count = Number(existing.visit_count ?? 0) + 1;
+        updates.total_spent = Number(existing.total_spent ?? 0) + updateStats.depositAmount;
+        updates.last_visit = updateStats.bookingDate;
+      }
+      await supabaseAdmin.from("clients").update(updates).eq("id", String(existing.id));
+      return String(existing.id);
+    }
+
+    // 3. Genuinely new client — INSERT
+    const payload: Record<string, unknown> = {
+      location_id: locationId,
+      name,
+      email: email || null,
+      phone: phone || null,
+      notes: notes ?? "",
+      source: source ?? "Website",
+      created_at: new Date().toISOString(),
+      visit_count: updateStats ? 1 : 0,
+      total_spent: updateStats ? updateStats.depositAmount : 0,
+      last_visit: updateStats ? updateStats.bookingDate : null,
+    };
+    if (dob) payload.date_of_birth = dob;
+
+    const { data: inserted, error } = await supabaseAdmin
+      .from("clients")
+      .insert(payload)
+      .select("id")
+      .single();
+    if (error) throw error;
+    return String(inserted.id);
+  } catch (err) {
+    console.error("findOrCreateClient", err);
+    return null;
+  }
+}
+
+/** Backward-compat alias used by bookings route (no stat updates) */
 export async function upsertClientFromBooking(data: {
   name: string;
   email: string;
@@ -239,65 +334,17 @@ export async function upsertClientFromBooking(data: {
   dob?: string;
   notes?: string;
 }): Promise<string | null> {
-  if (!data.name) return null;
-  const email = data.email.trim().toLowerCase();
-  const phone = data.phone.trim().replace(/\s/g, "");
-  const locationId = data.locationId ?? null;
-
-  try {
-    let existing: Record<string, unknown> | null = null;
-
-    if (email) {
-      let q = supabaseAdmin.from("clients").select("id").eq("email", email).limit(1);
-      if (locationId) q = q.eq("location_id", locationId);
-      const { data: rows } = await q;
-      if (rows?.length) existing = rows[0] as Record<string, unknown>;
-    }
-    if (!existing && phone) {
-      let q = supabaseAdmin.from("clients").select("id").eq("phone", phone).limit(1);
-      if (locationId) q = q.eq("location_id", locationId);
-      const { data: rows } = await q;
-      if (rows?.length) existing = rows[0] as Record<string, unknown>;
-    }
-    if (!existing && !email && !phone && data.name) {
-      let q = supabaseAdmin.from("clients").select("id")
-        .ilike("name", data.name.trim()).limit(1);
-      if (locationId) q = q.eq("location_id", locationId);
-      const { data: rows } = await q;
-      if (rows?.length) existing = rows[0] as Record<string, unknown>;
-    }
-
-    if (existing) {
-      const updates: Record<string, unknown> = {};
-      if (email) updates.email = email;
-      if (phone) updates.phone = phone;
-      if (data.dob) updates.date_of_birth = data.dob;
-      await supabaseAdmin.from("clients").update(updates).eq("id", String(existing.id));
-      return String(existing.id);
-    } else {
-      if (!locationId) return null;
-      const payload: Record<string, unknown> = {
-        name: data.name,
-        email: email || null,
-        phone: phone || null,
-        notes: data.notes ?? "",
-        created_at: new Date().toISOString(),
-        location_id: locationId,
-      };
-      if (data.dob) payload.date_of_birth = data.dob;
-
-      const { data: inserted, error } = await supabaseAdmin
-        .from("clients")
-        .insert(payload)
-        .select("id")
-        .single();
-      if (error) throw error;
-      return String(inserted.id);
-    }
-  } catch (err) {
-    console.error("upsertClientFromBooking", err);
-    return null;
-  }
+  if (!data.locationId) return null;
+  return findOrCreateClient({
+    locationId: data.locationId,
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    source: data.source,
+    dob: data.dob,
+    notes: data.notes,
+    // no updateStats — called before payment confirmed
+  });
 }
 
 export async function clearSampleClients(locationId?: string): Promise<void> {

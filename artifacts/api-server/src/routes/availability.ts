@@ -27,6 +27,63 @@ function getLocationId(req: import("express").Request): string | null {
   );
 }
 
+// GET /api/availability/check?location=<id>&date=YYYY-MM-DD&time=HH:MM
+// Real-time slot check for the booking widget
+router.get("/availability/check", async (req, res) => {
+  const locationId = (req.query.location as string | undefined) ?? getLocationId(req);
+  const date = req.query.date as string | undefined;
+  const time = req.query.time as string | undefined;
+
+  if (!locationId || !date || !time) {
+    return res.status(400).json({ error: "location, date and time required" });
+  }
+
+  try {
+    // 1. Date blocked?
+    const { data: blocked } = await supabaseAdmin
+      .from("blocked_dates")
+      .select("id")
+      .eq("location_id", locationId)
+      .eq("date", date)
+      .limit(1);
+    if (blocked && blocked.length > 0) {
+      return res.json({ available: false, reason: "DATE_BLOCKED" });
+    }
+
+    // 2. Clinic open?
+    const [y, mo, d] = date.split("-").map(Number);
+    const jsDay = new Date(y, mo - 1, d).getDay();
+    const { data: avail } = await supabaseAdmin
+      .from("availability_settings")
+      .select("is_open")
+      .eq("location_id", locationId)
+      .eq("day_of_week", jsDay)
+      .maybeSingle();
+    if (!avail?.is_open) {
+      return res.json({ available: false, reason: "CLINIC_CLOSED" });
+    }
+
+    // 3. Slot taken?
+    const { data: existing } = await supabaseAdmin
+      .from("bookings")
+      .select("id")
+      .eq("location_id", locationId)
+      .eq("booking_date", date)
+      .eq("time_slot", time)
+      .not("status", "eq", "cancelled")
+      .limit(1);
+    if (existing && existing.length > 0) {
+      return res.json({ available: false, reason: "SLOT_TAKEN" });
+    }
+
+    return res.json({ available: true });
+  } catch (err) {
+    console.error("GET /api/availability/check", err);
+    // Fail open — don't block the user if the check errors
+    return res.json({ available: true });
+  }
+});
+
 // GET /api/availability — returns {defaults, overrides} for a location
 // Reads from Supabase availability_settings + blocked_dates when locationId provided
 router.get("/availability", async (req, res) => {

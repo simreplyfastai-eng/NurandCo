@@ -3082,30 +3082,59 @@ function openClientPanel(id){
   const initials=c.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
   document.getElementById('cp-name').textContent=c.name;
   const visitPill=s=>{const cls={Complete:'complete',Pending:'pending',Confirmed:'confirmed',Cancelled:'cancelled'}[s]||'cancelled';return`<span class="cp-visit-pill ${cls}">${s}</span>`;};
+
+  // Use DB-sourced stats when available from Supabase
+  const dbVisitCount = Number(c.visitCount||0);
+  const dbTotalSpent = Number(c.totalSpent||spend);
+  const memberSince = c.joinDate||c.join_date||(c.createdAt?new Date(c.createdAt).toISOString().slice(0,10):null);
+  const lastVisit = c.lastVisit||c.last_visit||(bookings.length?bookings[0].date:null);
+
   document.getElementById('cp-body').innerHTML=`
-    <div style="display:flex;align-items:center;gap:14px;margin-bottom:20px">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px">
       <div class="cp-avatar">${initials}</div>
       <div>
-        <div class="cp-spend-amount">${gbp(spend)}</div>
-        <div class="cp-spend-meta">${bookings.filter(b=>b.status!=='Cancelled').length} visit${bookings.filter(b=>b.status!=='Cancelled').length!==1?'s':''}</div>
+        <div class="cp-spend-amount">${gbp(dbTotalSpent)}</div>
+        <div class="cp-spend-meta">${dbVisitCount} visit${dbVisitCount!==1?'s':''} total</div>
       </div>
     </div>
-    ${c.email?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">✉</span> ${c.email}</div>`:''}
-    ${c.phone?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">📞</span> ${c.phone}</div>`:''}
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+      <div style="background:#FAFAFA;border:1px solid #F0EDE8;border-radius:10px;padding:10px 12px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#BBBBBB;margin-bottom:3px">Member since</div>
+        <div style="font-size:13px;font-weight:600;color:#333">${memberSince?formatDate(memberSince):'—'}</div>
+      </div>
+      <div style="background:#FAFAFA;border:1px solid #F0EDE8;border-radius:10px;padding:10px 12px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:#BBBBBB;margin-bottom:3px">Last visit</div>
+        <div style="font-size:13px;font-weight:600;color:#333">${lastVisit?formatDate(lastVisit):'None'}</div>
+      </div>
+    </div>
+
+    ${c.email?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">✉</span> <a href="mailto:${c.email}" style="color:inherit;text-decoration:none">${c.email}</a></div>`:''}
+    ${c.phone?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">📞</span> <a href="tel:${c.phone}" style="color:inherit;text-decoration:none">${c.phone}</a></div>`:''}
     ${(c.dateOfBirth||c.date_of_birth)?`<div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">🎂</span> DOB: ${c.dateOfBirth||c.date_of_birth}</div>`:''}
-    <div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">👤</span> ${c.source||'Direct'}${(c.joinDate||c.createdAt)?` · Joined ${formatDate(c.joinDate||(c.createdAt?new Date(c.createdAt).toISOString().slice(0,10):null))}`:''}</div>
+    <div class="cp-meta-row"><span style="color:#BBBBBB;font-size:13px">👤</span> ${c.source||'Direct'}</div>
     ${(()=>{const cb=bookings.find(b=>b.category==='Consultation'||b.treatment==='Consultation');return cb&&cb.clientNotes?`<div class="cp-meta-row" style="flex-direction:column;align-items:flex-start;gap:4px"><span style="color:var(--color-secondary);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;font-weight:700">Skin Concerns (Consultation)</span><span style="color:#555;font-size:13px">${cb.clientNotes}</span></div>`:''})()}
-    <div class="cp-section-label">Visit History</div>
-    ${bookings.map(b=>`<div class="cp-visit-row">
-      <div>
-        <div class="cp-visit-treatment">${b.treatment}</div>
-        <div class="cp-visit-date">${formatDate(b.date)} · ${b.time}</div>
-      </div>
-      <div style="text-align:right">
-        <div class="cp-visit-price">${gbp(b.price)}</div>
-        ${visitPill(b.status)}
-      </div>
-    </div>`).join('')||'<p style="color:var(--muted);font-size:13px">No visits yet</p>'}
+
+    <div class="cp-section-label">Booking History</div>
+    ${bookings.length?`
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead>
+        <tr style="border-bottom:1px solid #F0EDE8">
+          <th style="text-align:left;padding:6px 0;color:#AAAAAA;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px">Date</th>
+          <th style="text-align:left;padding:6px 0;color:#AAAAAA;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px">Treatment</th>
+          <th style="text-align:right;padding:6px 0;color:#AAAAAA;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px">Status</th>
+          <th style="text-align:right;padding:6px 0;color:#AAAAAA;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px">Deposit</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${bookings.map(b=>`<tr style="border-bottom:1px solid #F8F6F2">
+          <td style="padding:8px 0;color:#555;white-space:nowrap">${formatDate(b.date)}</td>
+          <td style="padding:8px 4px;color:#333;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${b.treatment||'—'}">${b.treatment||'—'}</td>
+          <td style="padding:8px 0;text-align:right">${visitPill(b.status)}</td>
+          <td style="padding:8px 0;text-align:right;color:#C9A96E;font-weight:600">${gbp(b.depositAmount||b.price)}</td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`:'<p style="color:var(--muted);font-size:13px;margin-top:4px">No visits yet</p>'}
     <div class="cp-section-label">Notes</div>
     <textarea id="cp-notes" rows="3" style="width:100%;padding:12px;border:1px solid #E8E8E8;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;resize:vertical;min-height:80px;box-sizing:border-box;outline:none">${c.notes||''}</textarea>
     <div style="display:flex;gap:8px;margin-top:10px">

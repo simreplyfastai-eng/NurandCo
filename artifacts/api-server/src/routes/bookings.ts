@@ -1,7 +1,6 @@
 import { Router } from "express";
 import { supabaseAdmin } from "../lib/supabase";
-import { upsertClientFromBooking } from "./clients";
-import { hasConflict } from "../lib/treatments";
+import { findOrCreateClient } from "./clients";
 import {
   sendCancellationEmail,
   sendAdminNotificationEmail,
@@ -105,39 +104,58 @@ async function getTreatmentInfo(
   return { id: null, durationMinutes: 30, depositAmount: 0, price: 0 };
 }
 
-async function checkAvailability(
-  date: string,
-  time: string,
-  locationId: string,
-): Promise<{ ok: boolean; error?: string; status?: number }> {
+async function isDateBlocked(locationId: string, date: string): Promise<boolean> {
   try {
-    const { data: blocked } = await supabaseAdmin
+    const { data } = await supabaseAdmin
       .from("blocked_dates")
       .select("id")
       .eq("location_id", locationId)
       .eq("date", date)
-      .maybeSingle();
-    if (blocked) return { ok: false, error: "Sorry, we are not available on this day.", status: 400 };
+      .limit(1);
+    return !!(data && data.length > 0);
+  } catch { return false; }
+}
 
+async function isLocationOpen(locationId: string, date: string): Promise<boolean> {
+  try {
     const dayIndex = ukDayOfWeek(date);
-    const { data: settings } = await supabaseAdmin
+    const { data } = await supabaseAdmin
       .from("availability_settings")
-      .select("is_open, start_time, end_time")
+      .select("is_open")
       .eq("location_id", locationId)
       .eq("day_of_week", dayIndex)
       .maybeSingle();
+    return !!(data?.is_open);
+  } catch { return true; } // fail open — don't block bookings on DB error
+}
 
-    if (!settings || !settings.is_open) {
-      return { ok: false, error: "Sorry, we are not available on this day.", status: 400 };
-    }
+async function isSlotAvailable(locationId: string, date: string, time: string): Promise<boolean> {
+  try {
+    const { data } = await supabaseAdmin
+      .from("bookings")
+      .select("id")
+      .eq("location_id", locationId)
+      .eq("booking_date", date)
+      .eq("time_slot", time)
+      .not("status", "eq", "cancelled")
+      .limit(1);
+    return !data || data.length === 0;
+  } catch { return true; } // fail open
+}
 
-    if (time && settings.start_time && settings.end_time) {
-      if (time < settings.start_time || time >= settings.end_time) {
-        return { ok: false, error: "Sorry, this time is outside our working hours.", status: 400 };
-      }
-    }
-  } catch {
-    // If availability check fails, allow the booking
+async function runAvailabilityChecks(
+  locationId: string,
+  date: string,
+  time: string,
+): Promise<{ ok: boolean; error?: string; code?: string; status?: number }> {
+  if (await isDateBlocked(locationId, date)) {
+    return { ok: false, error: "This date is not available.", code: "DATE_BLOCKED", status: 409 };
+  }
+  if (!(await isLocationOpen(locationId, date))) {
+    return { ok: false, error: "The clinic is closed on this day.", code: "CLINIC_CLOSED", status: 409 };
+  }
+  if (!(await isSlotAvailable(locationId, date, time))) {
+    return { ok: false, error: "Sorry, this slot has just been taken.", code: "SLOT_TAKEN", status: 409 };
   }
   return { ok: true };
 }
@@ -337,46 +355,22 @@ router.post("/bookings", async (req, res) => {
       treatment === "Consultation";
 
     if (locationId && b.source !== "Portal") {
-      const avail = await checkAvailability(date, time, locationId);
-      if (!avail.ok) return res.status(avail.status ?? 400).json({ error: avail.error });
-    }
-
-    // Conflict check
-    if (time && locationId) {
-      const { data: existing } = await supabaseAdmin
-        .from("bookings")
-        .select("time_slot, status, treatments(duration_minutes)")
-        .eq("location_id", locationId)
-        .eq("booking_date", date)
-        .neq("status", "cancelled");
-
-      const conflict = hasConflict(
-        time,
-        durationMinutes,
-        (existing ?? []).map((r) => {
-          const t = r.treatments as Record<string, unknown> | null;
-          return {
-            time: String(r.time_slot ?? ""),
-            durationMinutes: Number(t?.duration_minutes ?? 30),
-            status: String(r.status ?? ""),
-          };
-        }),
-      );
-      if (conflict) {
-        return res.status(409).json({
-          error: "This time slot is no longer available. Please select another time.",
-        });
+      // Run all three checks in spec order: date blocked → clinic closed → slot taken
+      const avail = await runAvailabilityChecks(locationId, date, time ?? "");
+      if (!avail.ok) {
+        return res.status(avail.status ?? 409).json({ error: avail.error, code: avail.code });
       }
     }
 
-    const clientId = await upsertClientFromBooking({
+    const clientId = await findOrCreateClient({
+      locationId: locationId ?? "",
       name: b.clientName,
       email: b.clientEmail ?? "",
       phone: b.clientPhone ?? "",
-      date: b.date,
       source: b.source ?? "Website",
       dob: b.clientDOB ?? "",
       notes: isConsultation ? (b.clientNotes ?? "") : "",
+      // no updateStats — payment not yet confirmed at this point
     }).catch(() => null);
 
     // Check if webhook already confirmed this booking

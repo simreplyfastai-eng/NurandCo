@@ -1,0 +1,757 @@
+Build all email templates and the post-booking 
+confirmation screen for Starr Aesthetics.
+Read all existing email/template files first.
+
+BRAND COLOURS (use these exact hex values in 
+all HTML emails — no CSS variables, inline only):
+  Background:   #FAF7F4  (warm cream)
+  Card bg:      #FFFFFF
+  Burgundy:     #5C1E1E  (headings, logo)
+  Gold:         #C9A96E  (accents, dividers, buttons)
+  Body text:    #2C2420  (dark warm brown)
+  Muted text:   #8C7B6B  (secondary info)
+  Border:       #E8DDD3  (card borders)
+  Light cream:  #F5EFE8  (inner boxes)
+
+FONTS (email-safe stack):
+  Headings: Georgia, 'Times New Roman', serif
+  Body: -apple-system, Arial, sans-serif
+
+===============================================================
+PART 1 — EMAIL HTML TEMPLATE BASE
+===============================================================
+
+Create a function buildEmail(content, subject) 
+that wraps content in this base template:
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>{{subject}}</title>
+</head>
+<body style="margin:0;padding:0;background:#FAF7F4;
+  font-family:-apple-system,Arial,sans-serif;">
+
+  <!-- Wrapper -->
+  <table width="100%" cellpadding="0" cellspacing="0"
+    style="background:#FAF7F4;padding:40px 20px;">
+  <tr><td align="center">
+
+  <!-- Card -->
+  <table width="560" cellpadding="0" cellspacing="0"
+    style="max-width:560px;width:100%;
+    background:#FFFFFF;border-radius:12px;
+    border:1px solid #E8DDD3;
+    box-shadow:0 2px 12px rgba(92,30,30,0.06);">
+  <tr><td>
+
+    <!-- Header bar -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="background:#5C1E1E;padding:28px 40px;
+        border-radius:12px 12px 0 0;text-align:center;">
+        <div style="font-family:Georgia,serif;
+          font-size:26px;color:#FFFFFF;
+          letter-spacing:0.12em;font-weight:normal;">
+          STARR
+        </div>
+        <div style="font-family:-apple-system,Arial,sans-serif;
+          font-size:10px;color:#C9A96E;
+          letter-spacing:0.28em;margin-top:2px;">
+          AESTHETICS
+        </div>
+      </td>
+    </tr>
+    </table>
+
+    <!-- Gold divider line -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="height:3px;background:linear-gradient(
+        to right,#C9A96E,#E8C99A,#C9A96E);">
+      </td>
+    </tr>
+    </table>
+
+    <!-- Body content -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="padding:36px 40px;">
+        {{content}}
+      </td>
+    </tr>
+    </table>
+
+    <!-- Footer -->
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="padding:24px 40px;border-top:1px solid #E8DDD3;
+        text-align:center;">
+        <p style="margin:0 0 8px;font-size:11px;
+          color:#8C7B6B;letter-spacing:0.08em;">
+          STARR AESTHETICS · ESSEX & LONDON
+        </p>
+        <p style="margin:0 0 4px;font-size:11px;color:#8C7B6B;">
+          <a href="mailto:info@starrbeautyy.co.uk"
+            style="color:#C9A96E;text-decoration:none;">
+            info@starrbeautyy.co.uk
+          </a>
+          &nbsp;·&nbsp;
+          <a href="https://wa.me/447701298985"
+            style="color:#C9A96E;text-decoration:none;">
+            WhatsApp Us
+          </a>
+        </p>
+        <p style="margin:8px 0 0;font-size:10px;color:#B5A89A;">
+          © 2026 Starr Aesthetics. All rights reserved.
+        </p>
+      </td>
+    </tr>
+    </table>
+
+  </td></tr>
+  </table>
+  <!-- End Card -->
+
+  </td></tr>
+  </table>
+  <!-- End Wrapper -->
+
+</body>
+</html>
+
+===============================================================
+BOOKING DETAILS BOX (reusable component)
+===============================================================
+
+function buildBookingBox(booking, location) {
+  return `
+  <table width="100%" cellpadding="0" cellspacing="0"
+    style="background:#F5EFE8;border-radius:8px;
+    border:1px solid #E8DDD3;margin:20px 0;">
+  <tr><td style="padding:20px 24px;">
+    
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr>
+      <td style="padding:6px 0;border-bottom:1px solid #E8DDD3;">
+        <span style="font-size:11px;color:#8C7B6B;
+          text-transform:uppercase;letter-spacing:0.1em;">
+          Treatment
+        </span><br>
+        <span style="font-size:16px;color:#5C1E1E;
+          font-family:Georgia,serif;">
+          ${booking.treatment_name}
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:10px 0;border-bottom:1px solid #E8DDD3;">
+        <span style="font-size:11px;color:#8C7B6B;
+          text-transform:uppercase;letter-spacing:0.1em;">
+          Date & Time
+        </span><br>
+        <span style="font-size:15px;color:#2C2420;font-weight:600;">
+          ${formatDate(booking.booking_date)} 
+          at ${booking.time_slot}
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:10px 0;border-bottom:1px solid #E8DDD3;">
+        <span style="font-size:11px;color:#8C7B6B;
+          text-transform:uppercase;letter-spacing:0.1em;">
+          Location
+        </span><br>
+        <span style="font-size:14px;color:#2C2420;">
+          ${location.name}
+        </span><br>
+        <span style="font-size:12px;color:#8C7B6B;">
+          ${location.address_full}
+        </span>
+      </td>
+    </tr>
+    <tr>
+      <td style="padding:10px 0 6px;">
+        <table width="100%" cellpadding="0" cellspacing="0">
+        <tr>
+          <td>
+            <span style="font-size:11px;color:#8C7B6B;
+              text-transform:uppercase;letter-spacing:0.1em;">
+              Deposit Paid
+            </span><br>
+            <span style="font-size:15px;color:#5C1E1E;
+              font-weight:600;">
+              £${booking.deposit_amount}
+            </span>
+          </td>
+          <td align="right">
+            <span style="font-size:11px;color:#8C7B6B;
+              text-transform:uppercase;letter-spacing:0.1em;">
+              Balance Due on Day
+            </span><br>
+            <span style="font-size:15px;color:#2C2420;
+              font-weight:600;">
+              £${(booking.total_price||0) - 
+                (booking.deposit_amount||0)}
+            </span>
+          </td>
+        </tr>
+        </table>
+      </td>
+    </tr>
+
+  </td></tr>
+  </table>
+  `
+}
+
+===============================================================
+EMAIL 1 — CLIENT BOOKING CONFIRMATION
+===============================================================
+
+Trigger: after consent form submitted
+From: Starr Aesthetics <info@starrbeautyy.co.uk>
+To: client email
+Subject: ✨ Confirmed: ${treatment} at Starr Aesthetics
+
+Content:
+
+  <p style="font-size:24px;font-family:Georgia,serif;
+    color:#5C1E1E;margin:0 0 6px;">
+    You're booked in! ✨
+  </p>
+  <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">
+    Hi ${clientName}, your appointment is confirmed.
+    We can't wait to see you.
+  </p>
+
+  ${buildBookingBox(booking, location)}
+
+  <!-- Add to Calendar buttons -->
+  <table width="100%" cellpadding="0" cellspacing="0"
+    style="margin:24px 0;">
+  <tr>
+    <td style="text-align:center;">
+      <p style="font-size:12px;color:#8C7B6B;
+        margin:0 0 12px;text-transform:uppercase;
+        letter-spacing:0.1em;">
+        Add to your calendar
+      </p>
+      <!-- Google Calendar -->
+      <a href="${buildGoogleCalendarUrl(booking, location)}"
+        target="_blank"
+        style="display:inline-block;margin:4px;
+        padding:10px 18px;background:#C9A96E;
+        color:#FFFFFF;text-decoration:none;
+        border-radius:6px;font-size:12px;
+        letter-spacing:0.08em;">
+        + GOOGLE CALENDAR
+      </a>
+      <!-- Apple Calendar (ICS) -->
+      <a href="${buildICSUrl(booking, location)}"
+        style="display:inline-block;margin:4px;
+        padding:10px 18px;background:#5C1E1E;
+        color:#FFFFFF;text-decoration:none;
+        border-radius:6px;font-size:12px;
+        letter-spacing:0.08em;">
+        + APPLE CALENDAR
+      </a>
+    </td>
+  </tr>
+  </table>
+
+  <!-- Before your appointment -->
+  <table width="100%" cellpadding="0" cellspacing="0"
+    style="background:#F5EFE8;border-radius:8px;
+    border-left:3px solid #C9A96E;margin:0 0 20px;">
+  <tr><td style="padding:16px 20px;">
+    <p style="font-size:12px;color:#C9A96E;
+      text-transform:uppercase;letter-spacing:0.12em;
+      margin:0 0 10px;">
+      Before your appointment
+    </p>
+    <p style="font-size:13px;color:#2C2420;
+      margin:4px 0;line-height:1.6;">
+      ✦ Arrive 5 minutes before your slot
+    </p>
+    <p style="font-size:13px;color:#2C2420;
+      margin:4px 0;line-height:1.6;">
+      ✦ Come with a clean face — no makeup on 
+        the treatment area
+    </p>
+    <p style="font-size:13px;color:#2C2420;
+      margin:4px 0;line-height:1.6;">
+      ✦ Avoid alcohol for 24 hours beforehand
+    </p>
+    <p style="font-size:13px;color:#2C2420;
+      margin:4px 0;line-height:1.6;">
+      ✦ Avoid blood thinners (aspirin, fish oil) 
+        24hrs before injectables
+    </p>
+    <p style="font-size:13px;color:#2C2420;
+      margin:4px 0;line-height:1.6;">
+      ✦ Contact us if any medical details change
+    </p>
+  </td></tr>
+  </table>
+
+  <!-- Cancellation policy -->
+  <p style="font-size:12px;color:#8C7B6B;
+    line-height:1.6;margin:0 0 20px;
+    border-top:1px solid #E8DDD3;padding-top:16px;">
+    <strong style="color:#5C1E1E;">
+      Cancellation policy:
+    </strong>
+    Please give at least 48 hours notice to cancel 
+    or reschedule. Deposits are non-refundable for 
+    cancellations under 48 hours or no-shows.
+    To reschedule, WhatsApp us at 
+    <a href="https://wa.me/447701298985"
+      style="color:#C9A96E;">+44 7701 298985</a>
+  </p>
+
+  <!-- Social row -->
+  <table width="100%" cellpadding="0" cellspacing="0">
+  <tr>
+    <td align="center">
+      <a href="https://instagram.com/StarrAestheticss"
+        style="display:inline-block;margin:0 6px;
+        font-size:11px;color:#C9A96E;
+        text-decoration:none;letter-spacing:0.08em;">
+        @StarrAestheticss
+      </a>
+      <a href="https://instagram.com/StarrFacess"
+        style="display:inline-block;margin:0 6px;
+        font-size:11px;color:#C9A96E;
+        text-decoration:none;letter-spacing:0.08em;">
+        @StarrFacess
+      </a>
+      <a href="https://instagram.com/StarrNailedd"
+        style="display:inline-block;margin:0 6px;
+        font-size:11px;color:#C9A96E;
+        text-decoration:none;letter-spacing:0.08em;">
+        @StarrNailedd
+      </a>
+    </td>
+  </tr>
+  </table>
+
+===============================================================
+EMAIL 2 — ADMIN NEW BOOKING ALERT (to Eva)
+===============================================================
+
+From: Starr Aesthetics <info@starrbeautyy.co.uk>
+To: info@starrbeautyy.co.uk
+Subject: 💅 New Booking: ${clientName} — ${treatment}
+
+Content:
+
+  <p style="font-size:22px;font-family:Georgia,serif;
+    color:#5C1E1E;margin:0 0 6px;">
+    New Booking Received
+  </p>
+  <p style="font-size:13px;color:#8C7B6B;margin:0 0 24px;">
+    A new appointment has been booked and 
+    deposit payment received.
+  </p>
+
+  ${buildBookingBox(booking, location)}
+
+  <!-- Client details box -->
+  <table width="100%" cellpadding="0" cellspacing="0"
+    style="background:#F5EFE8;border-radius:8px;
+    border:1px solid #E8DDD3;margin:0 0 20px;">
+  <tr><td style="padding:16px 24px;">
+    <p style="font-size:12px;color:#C9A96E;
+      text-transform:uppercase;letter-spacing:0.12em;
+      margin:0 0 12px;">
+      Client Details
+    </p>
+    <p style="font-size:14px;color:#2C2420;margin:4px 0;">
+      <strong>Name:</strong> ${clientName}
+    </p>
+    <p style="font-size:14px;color:#2C2420;margin:4px 0;">
+      <strong>Email:</strong> 
+      <a href="mailto:${clientEmail}"
+        style="color:#C9A96E;">${clientEmail}</a>
+    </p>
+    <p style="font-size:14px;color:#2C2420;margin:4px 0;">
+      <strong>Phone:</strong>
+      <a href="tel:${clientPhone}"
+        style="color:#C9A96E;">${clientPhone}</a>
+    </p>
+    <p style="font-size:14px;color:#2C2420;margin:8px 0 4px;">
+      <strong>Forms:</strong>
+      <span style="background:#FFF3CD;color:#856404;
+        padding:2px 8px;border-radius:4px;font-size:12px;">
+        Pending
+      </span>
+    </p>
+  </td></tr>
+  </table>
+
+  <!-- Portal link -->
+  <table width="100%" cellpadding="0" cellspacing="0">
+  <tr><td align="center">
+    <a href="${REPLIT_URL}/portal.html"
+      style="display:inline-block;padding:12px 28px;
+      background:#5C1E1E;color:#FFFFFF;
+      text-decoration:none;border-radius:6px;
+      font-size:13px;letter-spacing:0.1em;">
+      VIEW IN ADMIN PORTAL →
+    </a>
+  </td></tr>
+  </table>
+
+===============================================================
+EMAIL 3 — 24HR REMINDER (to client)
+===============================================================
+
+Subject: ⏰ Tomorrow: ${treatment} at ${time}
+
+Content:
+
+  <p style="font-size:22px;font-family:Georgia,serif;
+    color:#5C1E1E;margin:0 0 6px;">
+    Your appointment is tomorrow ✨
+  </p>
+  <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">
+    Hi ${clientName}, just a friendly reminder 
+    about your upcoming appointment.
+  </p>
+
+  ${buildBookingBox(booking, location)}
+
+  <!-- Checklist -->
+  <table width="100%" cellpadding="0" cellspacing="0"
+    style="background:#F5EFE8;border-radius:8px;
+    border-left:3px solid #C9A96E;margin:0 0 20px;">
+  <tr><td style="padding:16px 20px;">
+    <p style="font-size:12px;color:#C9A96E;
+      text-transform:uppercase;letter-spacing:0.12em;
+      margin:0 0 10px;">
+      Your pre-appointment checklist
+    </p>
+    <p style="font-size:13px;color:#2C2420;margin:4px 0;">
+      ✦ Clean face, no makeup on treatment area
+    </p>
+    <p style="font-size:13px;color:#2C2420;margin:4px 0;">
+      ✦ Avoid alcohol tonight
+    </p>
+    <p style="font-size:13px;color:#2C2420;margin:4px 0;">
+      ✦ Arrive 5 minutes early
+    </p>
+    <p style="font-size:13px;color:#2C2420;margin:4px 0;">
+      ✦ Bring a valid ID
+    </p>
+  </td></tr>
+  </table>
+
+  <p style="font-size:13px;color:#8C7B6B;
+    margin:0 0 16px;line-height:1.6;">
+    Need to cancel or reschedule? Please let us 
+    know as soon as possible.
+    <a href="https://wa.me/447701298985"
+      style="color:#C9A96E;text-decoration:none;">
+      WhatsApp us here →
+    </a>
+  </p>
+
+===============================================================
+EMAIL 4 — CANCELLATION (to client)
+===============================================================
+
+Subject: Your Starr Aesthetics appointment 
+has been cancelled
+
+Content:
+
+  <p style="font-size:22px;font-family:Georgia,serif;
+    color:#5C1E1E;margin:0 0 6px;">
+    Appointment Cancelled
+  </p>
+  <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">
+    Hi ${clientName}, your appointment has been 
+    cancelled. We hope to see you again soon.
+  </p>
+
+  <!-- Cancelled booking summary -->
+  <table width="100%" cellpadding="0" cellspacing="0"
+    style="background:#F5EFE8;border-radius:8px;
+    border:1px solid #E8DDD3;margin:0 0 20px;
+    opacity:0.8;">
+  <tr><td style="padding:16px 24px;">
+    <p style="font-size:12px;color:#8C7B6B;
+      text-transform:uppercase;letter-spacing:0.1em;
+      margin:0 0 8px;">
+      Cancelled Appointment
+    </p>
+    <p style="font-size:15px;color:#5C1E1E;
+      font-family:Georgia,serif;margin:0 0 4px;
+      text-decoration:line-through;">
+      ${treatment}
+    </p>
+    <p style="font-size:13px;color:#8C7B6B;margin:0;">
+      ${formatDate(date)} at ${time} · ${locationName}
+    </p>
+  </td></tr>
+  </table>
+
+  <!-- Rebook CTA -->
+  <table width="100%" cellpadding="0" cellspacing="0"
+    style="margin:0 0 20px;">
+  <tr><td align="center">
+    <a href="https://wa.me/447701298985"
+      style="display:inline-block;padding:12px 28px;
+      background:#C9A96E;color:#FFFFFF;
+      text-decoration:none;border-radius:6px;
+      font-size:13px;letter-spacing:0.1em;">
+      REBOOK VIA WHATSAPP →
+    </a>
+  </td></tr>
+  </table>
+
+===============================================================
+EMAIL 5 — FORMS REMINDER (to client)
+===============================================================
+
+Subject: ⚡ Action needed before your appointment
+
+Content:
+
+  <p style="font-size:22px;font-family:Georgia,serif;
+    color:#5C1E1E;margin:0 0 6px;">
+    Please complete your forms
+  </p>
+  <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">
+    Hi ${clientName}, your appointment is coming 
+    up but we still need your forms. 
+    It only takes 2 minutes.
+  </p>
+
+  ${buildBookingBox(booking, location)}
+
+  <table width="100%" cellpadding="0" cellspacing="0"
+    style="margin:0 0 20px;">
+  <tr><td align="center">
+    <a href="${REPLIT_URL}/forms?booking=${bookingId}"
+      style="display:inline-block;padding:14px 32px;
+      background:#5C1E1E;color:#FFFFFF;
+      text-decoration:none;border-radius:6px;
+      font-size:14px;letter-spacing:0.1em;">
+      COMPLETE YOUR FORMS →
+    </a>
+    <p style="font-size:11px;color:#8C7B6B;margin:8px 0 0;">
+      Medical intake + consent form
+    </p>
+  </td></tr>
+  </table>
+
+===============================================================
+CALENDAR URL BUILDERS
+===============================================================
+
+function buildGoogleCalendarUrl(booking, location) {
+  const start = formatDateTimeForCal(
+    booking.booking_date, booking.time_slot
+  )
+  const end = formatDateTimeForCal(
+    booking.booking_date, 
+    addMinutes(booking.time_slot, 
+      booking.duration_minutes || 60)
+  )
+  const title = encodeURIComponent(
+    `${booking.treatment_name} @ Starr Aesthetics`
+  )
+  const details = encodeURIComponent(
+    `Starr Aesthetics appointment\n` +
+    `Treatment: ${booking.treatment_name}\n` +
+    `Location: ${location.address_full}\n` +
+    `Contact: wa.me/447701298985`
+  )
+  const loc = encodeURIComponent(location.address_full)
+  
+  return `https://calendar.google.com/calendar/render` +
+    `?action=TEMPLATE&text=${title}` +
+    `&dates=${start}/${end}` +
+    `&details=${details}&location=${loc}`
+}
+
+function buildICSContent(booking, location) {
+  const start = formatICS(
+    booking.booking_date, booking.time_slot
+  )
+  const end = formatICS(
+    booking.booking_date,
+    addMinutes(booking.time_slot, 
+      booking.duration_minutes || 60)
+  )
+  const uid = `${booking.id}@starrbeautyy.co.uk`
+  
+  return [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//Starr Aesthetics//EN',
+    'BEGIN:VEVENT',
+    `UID:${uid}`,
+    `DTSTAMP:${formatICS(new Date())}`,
+    `DTSTART:${start}`,
+    `DTEND:${end}`,
+    `SUMMARY:${booking.treatment_name} @ Starr Aesthetics`,
+    `DESCRIPTION:Treatment: ${booking.treatment_name}\\n` +
+      `Contact: +44 7701 298985`,
+    `LOCATION:${location.address_full}`,
+    `ORGANIZER;CN=Starr Aesthetics:` +
+      `mailto:info@starrbeautyy.co.uk`,
+    'STATUS:CONFIRMED',
+    'END:VEVENT',
+    'END:VCALENDAR'
+  ].join('\r\n')
+}
+
+Add a route to serve the ICS file:
+GET /api/calendar/ics?booking=[id]
+  Fetch booking + location from Supabase
+  Build ICS content
+  Set headers:
+    Content-Type: text/calendar; charset=utf-8
+    Content-Disposition: attachment; 
+      filename="starr-aesthetics-appointment.ics"
+  Send ICS content
+
+===============================================================
+PART 2 — ON-SITE CONFIRMATION SCREEN
+===============================================================
+
+The /confirmed?booking=[id] page must be 
+visually stunning and match the Starr brand.
+
+Layout (max-width 520px centred, cream bg):
+
+  <!-- Animated tick -->
+  <div style="text-align:center;padding:48px 0 24px;">
+    
+    Animated SVG checkmark:
+    <svg width="72" height="72" viewBox="0 0 72 72">
+      <circle cx="36" cy="36" r="34" 
+        fill="none" stroke="#C9A96E" stroke-width="2"
+        stroke-dasharray="213" stroke-dashoffset="213"
+        style="animation: drawCircle 0.6s ease forwards;">
+      </circle>
+      <polyline points="20,36 30,46 52,24"
+        fill="none" stroke="#5C1E1E" stroke-width="3"
+        stroke-linecap="round" stroke-linejoin="round"
+        stroke-dasharray="50" stroke-dashoffset="50"
+        style="animation: drawTick 0.4s ease 0.5s forwards;">
+      </polyline>
+    </svg>
+    
+    @keyframes drawCircle {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes drawTick {
+      to { stroke-dashoffset: 0; }
+    }
+
+  </div>
+
+  <h1 style serif, burgundy, large centred:
+    "You're all booked in ✨"
+
+  <p muted centred:
+    "See you soon, [clientName]"
+
+  <!-- Booking summary card -->
+  Cream card with gold border showing:
+    Treatment (serif, burgundy, 18px)
+    Date + time (bold, dark)
+    Location name + address (muted)
+    
+    Gold divider
+    
+    Two columns:
+      Left: "Deposit paid: £[X]"
+      Right: "Balance due on day: £[X]"
+
+  <!-- Add to Calendar -->
+  <div style="text-align:center;margin:28px 0;">
+    <p style gold label uppercase small:
+      "Add to your calendar"
+    
+    Two buttons side by side:
+    
+    [+ GOOGLE CALENDAR]  → google cal URL
+    gold background, white text, rounded
+    
+    [+ APPLE / OTHER]    → /api/calendar/ics?booking=[id]
+    burgundy background, white text, rounded
+    
+    On mobile stack vertically, full width
+  </div>
+
+  <!-- What to expect -->
+  <div cream inner box, gold left border:
+    Gold label: "BEFORE YOUR APPOINTMENT"
+    
+    ✦ Arrive 5 minutes early
+    ✦ Clean face — no makeup on treatment area
+    ✦ Avoid alcohol 24 hours before
+    ✦ No blood thinners 24hrs before injectables
+    ✦ Contact us if medical details change
+  </div>
+
+  <!-- Contact card -->
+  <div cream card, centred:
+    "Questions? We're here."
+    
+    WhatsApp button:
+    [💬 WHATSAPP US] → wa.me/447701298985
+    Gold background, white text
+    
+    Instagram: @StarrAestheticss (gold, links out)
+  </div>
+
+  <!-- Back to site -->
+  <p centred muted small:
+    <a href="/" gold colour>← Back to Starr Aesthetics</a>
+  </p>
+
+===============================================================
+IMPLEMENT ALL OF THIS
+===============================================================
+
+1. Create email.ts (or update existing) with:
+   - buildEmail() base template function
+   - buildBookingBox() component
+   - buildGoogleCalendarUrl() function
+   - buildICSContent() function
+   - sendConfirmationEmail() 
+   - sendAdminAlertEmail()
+   - sendReminderEmail()
+   - sendCancellationEmail()
+   - sendFormsReminderEmail()
+   All guarded by:
+   if (!process.env.RESEND_API_KEY) {
+     console.log('Email skipped - no RESEND_API_KEY')
+     return { success: true, skipped: true }
+   }
+
+2. Wire each email to its trigger:
+   - sendConfirmationEmail → after consent submitted
+   - sendAdminAlertEmail → after Stripe payment
+   - sendReminderEmail → cron job (hourly check)
+   - sendCancellationEmail → admin status → cancelled
+   - sendFormsReminderEmail → cron if forms pending 
+     and appointment within 48hrs
+
+3. Add GET /api/calendar/ics?booking=[id] route
+
+4. Build /confirmed page with animated tick,
+   booking summary, add to calendar buttons,
+   pre-appointment info, contact card
+
+5. Test all email HTML renders correctly by 
+   logging the HTML output to console when 
+   RESEND_API_KEY is missing (so we can inspect)
