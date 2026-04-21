@@ -50,6 +50,8 @@ app.use(
   }),
 );
 const allowedOrigins: (string | RegExp)[] = [
+  "https://starrbeautyy.co.uk",
+  "https://www.starrbeautyy.co.uk",
   "https://facebyniamh.co.uk",
   "https://www.facebyniamh.co.uk",
 ];

@@ -1,0 +1,368 @@
+The Supabase migration is already done or in progress.
+Do not touch any of the Supabase migration work.
+
+I need you to enhance the existing Availability section 
+in the admin portal with two specific features:
+
+1. Working hours per day of the week (open/close times)
+2. Blocked time slots within a working day (e.g. lunch)
+
+The admin portal already has a luxury cream, dark 
+burgundy, and gold aesthetic. Match it EXACTLY.
+Read portal.html and the existing CSS/styles carefully 
+before building anything.
+
+===============================================================
+WHAT ALREADY EXISTS — DO NOT DUPLICATE
+===============================================================
+
+The portal already has:
+- Location selector screen (Hornchurch / Marylebone)
+- Days Off calendar (block full dates)
+- Some availability section
+
+What we are ADDING to the availability section:
+- Working hours (open/close time per day)
+- Intra-day blocked slots (e.g. 12:00-13:00 every Monday)
+
+===============================================================
+STEP 1 — ADD blocked_slots TABLE TO SUPABASE
+===============================================================
+
+Run this SQL in Supabase before anything else:
+
+  CREATE TABLE IF NOT EXISTS blocked_slots (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    location_id UUID REFERENCES locations(id) 
+      ON DELETE CASCADE NOT NULL,
+    day_of_week INTEGER CHECK (day_of_week BETWEEN 0 AND 6),
+    all_days BOOLEAN DEFAULT false,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    label TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  );
+
+  ALTER TABLE blocked_slots ENABLE ROW LEVEL SECURITY;
+  
+  CREATE POLICY "blocked_slots_public_read" 
+    ON blocked_slots FOR SELECT USING (true);
+  
+  CREATE POLICY "blocked_slots_service_role"
+    ON blocked_slots FOR ALL 
+    USING (auth.role() = 'service_role');
+
+  CREATE INDEX IF NOT EXISTS idx_blocked_slots_location
+    ON blocked_slots(location_id, day_of_week);
+
+Add these API endpoints to the server:
+
+  GET /api/admin/blocked-slots
+    Returns all blocked_slots for session locationId
+    Uses supabaseAdmin
+
+  POST /api/admin/blocked-slots
+    Body: { day_of_week, all_days, start_time, end_time }
+    Inserts new slot for session locationId
+    Validates start_time < end_time
+    Returns created row
+
+  DELETE /api/admin/blocked-slots/:id
+    Deletes slot — verifies location_id matches session
+    Returns 200 success
+
+Also add endpoints for working hours if not exist:
+
+  GET /api/admin/availability
+    Returns availability_settings for session locationId
+    Ordered by day_of_week
+
+  PUT /api/admin/availability
+    Body: array of { day_of_week, open_time, close_time, is_open }
+    Upserts all rows for session locationId
+    Returns updated rows
+
+===============================================================
+STEP 2 — WORKING HOURS UI
+===============================================================
+
+Find the existing Availability section/tab in 
+portal.html. Add a "Working Hours" card inside it.
+
+Match the EXACT styling of existing cards in the portal:
+- Same background (white card on cream page)
+- Same border (likely 1px, light warm tone)  
+- Same border-radius
+- Same padding
+- Same card header style (title + subtitle)
+- Same font families and sizes
+- Same button styles
+
+CARD HEADER:
+  Title: "Working Hours"
+  Subtitle: "Set your opening and closing hours 
+  for each day at this location."
+  Style: match existing card headers in portal
+
+CONTENT — 7 day rows:
+
+Each row layout (flex, space-between, align-items center):
+  Padding: 14px 0
+  Border-bottom: 1px solid existing border colour
+  Last row: no border
+
+  LEFT — Day name + toggle:
+    Day name text (Monday, Tuesday... Sunday)
+    Font: existing portal body font, medium
+    
+    Toggle switch next to day name:
+      Pure CSS — no libraries
+      Width 40px, height 22px
+      Track: #D4B896 (muted gold) when OFF
+      Track: existing burgundy/brand when ON  
+      Thumb: white circle, 18px
+      CSS transition: 200ms ease
+      Input type=checkbox hidden, label styled as toggle
+      
+  RIGHT — Time inputs (visible when day is ON):
+    Wrapper: display flex, align-items center, gap 8px
+    
+    "Opens" label: 10px uppercase, letter-spacing, muted
+    Time input (open_time)
+    "—" separator
+    "Closes" label: same style
+    Time input (close_time)
+    
+    Time inputs:
+      Height: match existing form inputs
+      Width: 100px
+      Border: match existing input borders
+      Background: match existing input backgrounds
+      Font: match existing
+      Focus: gold/brand border colour
+      border-radius: match existing
+    
+    When toggle is OFF:
+      opacity: 0.35
+      pointer-events: none
+
+SAVE HOURS BUTTON:
+  Below all 7 rows
+  Full width OR right-aligned
+  Match existing primary button style in portal
+  Text: "Save Working Hours"
+  On click:
+    POST/PUT /api/admin/availability with all 7 rows
+    Show success notification matching portal style
+    
+LOADING STATE:
+  When page loads, fetch GET /api/admin/availability
+  Populate all 7 rows with existing values
+  Show a subtle loading state matching portal style
+
+===============================================================
+STEP 3 — BLOCKED TIME SLOTS UI
+===============================================================
+
+Below the Working Hours card, add a second card:
+"Blocked Time Slots"
+
+Match same card style as Working Hours card.
+
+CARD HEADER:
+  Title: "Blocked Time Slots"
+  Subtitle: "Block specific hours every week — 
+  perfect for lunch breaks or personal commitments. 
+  Clients cannot book during these times."
+
+ADD NEW SLOT FORM:
+  Sits at top of card content
+  Style: match existing form sections in portal
+  
+  Row layout desktop (flex, gap 12px, align-items end):
+  
+  Field 1 — Day:
+    Label: "Day" (small, uppercase, matching portal labels)
+    Select dropdown — match existing selects in portal
+    Options:
+      value="" → "Select day..."
+      value="all" → "Every Working Day"  
+      value="0" → "Monday"
+      value="1" → "Tuesday"
+      value="2" → "Wednesday"
+      value="3" → "Thursday"
+      value="4" → "Friday"
+      value="5" → "Saturday"
+      value="6" → "Sunday"
+  
+  Field 2 — From:
+    Label: "From"
+    Time input — match existing input style
+    
+  Field 3 — To:
+    Label: "To"  
+    Time input — match existing input style
+  
+  "Add Block" button:
+    Match small/secondary button style in portal
+    Or match existing "Add" button pattern if exists
+    On click:
+      Validate: day selected, from < to
+      If invalid: show inline error in portal style
+      POST /api/admin/blocked-slots
+      Clear form fields
+      Refresh slots list below
+
+  Mobile: stack fields vertically, full width
+
+EXISTING SLOTS LIST:
+  Below the form
+  Thin divider line between form and list
+  
+  On page load: GET /api/admin/blocked-slots
+  
+  EMPTY STATE (when no slots):
+    Small italic text centred
+    "No time slots blocked yet."
+    Muted colour matching portal muted text
+  
+  SLOT TAGS — flex-wrap row, gap 8px:
+  
+  Each tag:
+    Background: very light gold tint
+      Use the same light tint used elsewhere in portal
+      Or rgba of gold colour at opacity 0.08
+    Border: 1px solid gold at opacity 0.25
+    Border-radius: match portal (likely 4-6px)
+    Padding: 7px 12px
+    Display: inline-flex, align-items center, gap 8px
+    
+    Tag text:
+      "Every Day · 12:00 — 13:00"
+      OR "Monday · 12:00 — 13:00"
+      Font: existing portal font, 13px
+      Colour: existing portal text colour
+    
+    Delete button × :
+      No background, no border
+      Colour: muted/grey
+      Hover: burgundy/brand colour
+      Font-size: 16px
+      line-height: 1
+      cursor pointer
+      On click:
+        Show confirm: "Remove this blocked slot?"
+        Use existing portal confirm/modal style
+        If confirmed: DELETE /api/admin/blocked-slots/:id
+        Remove tag from DOM
+        Show brief success toast in portal style
+
+===============================================================
+STEP 4 — WIRE BLOCKED SLOTS INTO BOOKING CALENDAR
+===============================================================
+
+Find the endpoint that generates available time slots
+for a given date and location.
+
+Update it to also filter out blocked_slots:
+
+  async function getAvailableSlots(locationId, date) {
+    
+    const dayOfWeek = new Date(date).getDay();
+    const adjustedDay = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    
+    // 1. Get working hours for this day
+    const { data: avail } = await supabaseAdmin
+      .from('availability_settings')
+      .select('open_time, close_time, is_open')
+      .eq('location_id', locationId)
+      .eq('day_of_week', adjustedDay)
+      .single();
+    
+    if (!avail || !avail.is_open) return [];
+    
+    // 2. Generate 30-min slots between open and close
+    const slots = generateTimeSlots(
+      avail.open_time, avail.close_time, 30
+    );
+    
+    // 3. Get blocked time slots for this day
+    const { data: blockedSlots } = await supabaseAdmin
+      .from('blocked_slots')
+      .select('start_time, end_time')
+      .eq('location_id', locationId)
+      .or(`day_of_week.eq.${adjustedDay},all_days.eq.true`);
+    
+    // 4. Remove slots that fall within blocked ranges
+    const filtered = slots.filter(slot => {
+      return !blockedSlots?.some(b => 
+        slot >= b.start_time && slot < b.end_time
+      );
+    });
+    
+    // 5. Get existing bookings for this date
+    const { data: bookings } = await supabaseAdmin
+      .from('bookings')
+      .select('time_slot')
+      .eq('location_id', locationId)
+      .eq('booking_date', date)
+      .in('status', ['pending', 'confirmed']);
+    
+    const bookedTimes = bookings?.map(b => b.time_slot) || [];
+    
+    // 6. Remove booked slots
+    return filtered.filter(s => !bookedTimes.includes(s));
+  }
+
+  function generateTimeSlots(openTime, closeTime, intervalMins) {
+    const slots = [];
+    let [h, m] = openTime.split(':').map(Number);
+    const [ch, cm] = closeTime.split(':').map(Number);
+    const closeTotal = ch * 60 + cm;
+    
+    while (h * 60 + m < closeTotal) {
+      slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+      m += intervalMins;
+      if (m >= 60) { h += Math.floor(m/60); m = m % 60; }
+    }
+    return slots;
+  }
+
+===============================================================
+VISUAL MATCHING CHECKLIST
+===============================================================
+
+Before submitting read these files:
+  portal.html — extract exact CSS classes used
+  
+Match these from existing portal:
+  Card wrapper class/style
+  Card header class/style  
+  Form label style (small, uppercase, letter-spacing)
+  Input class/style
+  Primary button class/style
+  Secondary/small button class/style
+  Success toast/notification style
+  Border colour variable
+  Brand colour (burgundy) variable
+  Gold colour variable
+  Muted text colour
+
+The Availability section must feel like it was 
+always part of the portal — not added later.
+Same spacing rhythm, same visual weight.
+
+===============================================================
+FINAL VERIFY
+===============================================================
+
+1. Working hours card loads from Supabase on page load
+2. Toggle switches work — grey out times when OFF
+3. Save Hours button updates Supabase and shows toast
+4. Blocked slots form validates and saves to Supabase
+5. Tags render with correct day and time display
+6. Delete tag works with confirm and removes from DB
+7. Booking calendar now respects blocked time slots
+8. Both features are scoped to current location only
+9. Visually matches existing portal exactly
+10. Works on mobile

@@ -1316,7 +1316,13 @@ function gbp(v){const n=Number(v)||0;return'£'+n.toLocaleString('en-GB',{minimu
 // CLOUD STORE — real-time sync to PostgreSQL via API
 // Falls back gracefully to localStorage if API is down
 // ═══════════════════════════════════════════════════
-function authHdr(){const t=localStorage.getItem('fbn_token');return t?{'Authorization':'Bearer '+t}:{};}
+function authHdr(){
+  const t=localStorage.getItem('fbn_token');
+  const locId=sessionStorage.getItem('starr_location_id');
+  const h=t?{'Authorization':'Bearer '+t}:{};
+  if(locId)h['X-Location-Id']=locId;
+  return h;
+}
 
 const CloudStore = {
   BASE: '/api/portal/store',
@@ -1646,20 +1652,31 @@ function showLocationSelector(){
   document.getElementById('location-selector').classList.add('visible');
 }
 
-function selectLocation(loc){
+async function selectLocation(loc){
   sessionStorage.setItem('starr_location',loc);
+  // Resolve and store the location UUID so all API calls send X-Location-Id
+  try{
+    const r=await fetch('/api/locations');
+    if(r.ok){
+      const locs=await r.json();
+      const found=locs.find(l=>l.name===loc||l.slug===loc.toLowerCase().replace(/\s+/g,'-'));
+      if(found){sessionStorage.setItem('starr_location_id',found.id);}
+    }
+  }catch(e){console.warn('selectLocation: could not resolve location UUID',e);}
   document.getElementById('location-selector').classList.remove('visible');
   showPortal(loc);
 }
 
 function switchLocation(){
   sessionStorage.removeItem('starr_location');
+  sessionStorage.removeItem('starr_location_id');
   document.getElementById('portal').classList.remove('visible');
   showLocationSelector();
 }
 
 function doLogout(){
   sessionStorage.removeItem('starr_location');
+  sessionStorage.removeItem('starr_location_id');
   clearSession();
   window.location.href='/';
 }
@@ -1675,6 +1692,14 @@ function showPortal(loc){
   if(locLabel)locLabel.textContent=displayLoc?'— '+displayLoc:'— Admin Portal';
   if(!_sessionWatcherStarted){_sessionWatcherStarted=true;startSessionWatcher();}
   CloudStore.init().then(async ()=>{
+    // Load location-specific availability from Supabase
+    const _locId=sessionStorage.getItem('starr_location_id');
+    if(_locId){
+      try{
+        const _ar=await fetch('/api/availability',{headers:authHdr()});
+        if(_ar.ok){const _av=await _ar.json();localStorage.setItem('fbn_availability',JSON.stringify(_av));}
+      }catch(_e){console.warn('Could not load availability from Supabase',_e);}
+    }
     // Load bookings from API into local cache
     const hasAPIData = await BookingAPI.init();
     await ClientAPI.init();
@@ -2102,6 +2127,18 @@ function saveAvailability(){
   const avail=collectAvailabilityForm();
   localStorage.setItem('fbn_availability',JSON.stringify(avail));
   CloudStore.set('fbn_availability',avail);
+  // Write-through to Supabase
+  const _locId=sessionStorage.getItem('starr_location_id');
+  if(_locId){
+    const _N2S={0:'Sun',1:'Mon',2:'Tue',3:'Wed',4:'Thu',5:'Fri',6:'Sat'};
+    const _named={};
+    for(const [k,v] of Object.entries(avail.defaults)){const s=_N2S[Number(k)];if(s)_named[s]=v;}
+    fetch('/api/availability/settings',{
+      method:'POST',
+      headers:{...authHdr(),'Content-Type':'application/json'},
+      body:JSON.stringify({defaults:_named})
+    }).catch(_e=>console.warn('Supabase avail save failed',_e));
+  }
   buildCalendar();
   const btn=document.getElementById('avail-save-btn');
   const orig=btn.textContent;
@@ -2284,8 +2321,20 @@ function applyOverride(dateStr){
     const start=document.getElementById('oe-start').value;
     const end=document.getElementById('oe-end').value;
     avail.overrides[dateStr]={on:true,start,end};
+    // Also clear any Supabase block for this date (now open again)
+    const _locId=sessionStorage.getItem('starr_location_id');
+    if(_locId){fetch(`/api/availability/block/${encodeURIComponent(dateStr)}`,{method:'DELETE',headers:authHdr()}).catch(()=>{});}
   } else {
     avail.overrides[dateStr]={on:false};
+    // Write block to Supabase
+    const _locId=sessionStorage.getItem('starr_location_id');
+    if(_locId){
+      fetch('/api/availability/block',{
+        method:'POST',
+        headers:{...authHdr(),'Content-Type':'application/json'},
+        body:JSON.stringify({date:dateStr})
+      }).catch(()=>{});
+    }
   }
   localStorage.setItem('fbn_availability',JSON.stringify(avail));
   CloudStore.set('fbn_availability',avail);
@@ -2298,6 +2347,9 @@ function clearOverride(dateStr){
   delete avail.overrides[dateStr];
   localStorage.setItem('fbn_availability',JSON.stringify(avail));
   CloudStore.set('fbn_availability',avail);
+  // Remove from Supabase blocked_dates
+  const _locId=sessionStorage.getItem('starr_location_id');
+  if(_locId){fetch(`/api/availability/block/${encodeURIComponent(dateStr)}`,{method:'DELETE',headers:authHdr()}).catch(()=>{});}
   selectedOverrideDate=null;
   buildCalendar();
   renderAvailMiniCal(avail);

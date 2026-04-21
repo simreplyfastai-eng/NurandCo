@@ -11,7 +11,8 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Package manager**: pnpm
 - **TypeScript version**: 5.9
 - **API framework**: Express 5
-- **Database**: PostgreSQL (raw pool queries, no ORM)
+- **Primary Database**: Supabase (PostgreSQL, via @supabase/supabase-js v2)
+- **Legacy Database**: PostgreSQL pool (clients, portal_kv, enquiries, finance — still in use)
 - **Build**: esbuild (ESM bundle)
 - **Frontend**: React + Vite (Starr Aesthetics website)
 
@@ -69,8 +70,21 @@ Express 5 REST API on port 8080. All routes prefixed `/api/`.
 - `GET /api/portal/store/:key` — Fetch single setting [JWT]
 - `PUT /api/portal/store/:key` — Save setting [JWT]
 
+**Location routes (new):**
+- `GET /api/locations` — All clinic locations (id, slug, name, address) [public]
+- `GET /api/treatments` — Active treatments for a location (X-Location-Id header required) [public]
+- `GET /api/treatments/all` — All treatments incl. inactive [JWT]
+- `POST /api/treatments` — Create treatment [JWT]
+- `PUT /api/treatments/:id` — Update treatment [JWT]
+
+**Availability routes (rewritten — Supabase):**
+- `GET /api/availability` — Weekly schedule + blocked dates from Supabase (X-Location-Id or ?locationId) [public]
+- `POST /api/availability/settings` — Save weekly schedule to Supabase [JWT]
+- `POST /api/availability/block` — Block a date [JWT]
+- `DELETE /api/availability/block/:date` — Unblock a date [JWT]
+
 **Other public routes:**
-- `GET /api/availability` — Working hours from portal_kv (day-name keys) [public]
+- `GET /api/availability` — Working hours from Supabase (falls back to defaults) [public]
 - `POST /api/media/upload-url` — Presigned GCS upload URL
 - `GET /api/media/serve?path=` — Serve stored media objects
 - `GET /api/cron/autocomplete` — Mark past Confirmed bookings Complete [CRON_SECRET]
