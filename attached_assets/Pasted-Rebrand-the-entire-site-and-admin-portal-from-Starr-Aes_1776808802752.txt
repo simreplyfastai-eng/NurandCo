@@ -1,0 +1,133 @@
+Rebrand the entire site and admin portal from 
+"Starr Aesthetics" to "StarrBeauty".
+
+Read every file before touching anything.
+This is a global find and replace across the 
+entire codebase. Do not miss a single instance.
+
+===============================================================
+EXACT REPLACEMENTS — every file
+===============================================================
+
+"Starr Aesthetics" → "StarrBeauty"
+"STARR\nAESTHETICS" → "STARR\nBEAUTY"
+"STARRAESTHETICS" → "STARRBEAUTY"
+"Starr Aesthetics" in any string → "StarrBeauty"
+
+===============================================================
+FILES TO UPDATE
+===============================================================
+
+1. index.html (homepage)
+   - <title> tag: "Starr Aesthetics — ..." → "StarrBeauty — ..."
+   - Any <meta name="description"> containing "Starr Aesthetics"
+   - <meta property="og:site_name"> if present
+   - Logo text in nav: "STARR / AESTHETICS" → "STARR / BEAUTY"
+   - Any heading or paragraph containing "Starr Aesthetics"
+   - About section: "Eva founded Starr Aesthetics" → 
+     "Eva founded StarrBeauty"
+   - "delivering world-class aesthetics training through 
+     Starr Academy" — leave "Starr Academy" as-is
+     (that's the training brand, keep it)
+   - Any footer text mentioning "Starr Aesthetics"
+
+2. portal.html (admin portal)
+   - <title> tag → "StarrBeauty — Admin Portal"
+   - Sidebar logo: "Starr / AESTHETICS" → "Starr / BEAUTY"
+   - Any heading showing "Starr Aesthetics"
+
+3. book.html or Book.tsx (booking page)
+   - <title> tag → "StarrBeauty — Book"
+   - Any heading or text showing "Starr Aesthetics"
+   - Logo in nav → "STARR / BEAUTY"
+
+4. forms.html (medical/consent forms)
+   - <title> tag → "StarrBeauty — Forms"
+   - Any clinic name shown on forms
+   - Header logo → "STARR / BEAUTY"
+
+5. confirmed.html (booking confirmation)
+   - <title> tag → "StarrBeauty — Confirmed"
+   - Any "Starr Aesthetics" text shown to client
+
+6. All server/API files (server.ts, routes, etc.)
+   - Any hardcoded "Starr Aesthetics" in email 
+     subject lines or email bodies
+   - Any hardcoded clinic name in API responses
+   - Email from name: "Starr Aesthetics" → "StarrBeauty"
+
+7. Any config files, constants, or env references
+   - APP_NAME or CLINIC_NAME constants
+   - Any metadata or manifest files
+
+===============================================================
+LOGO STYLE
+===============================================================
+
+The logo in the nav currently shows:
+  STARR
+  AESTHETICS
+
+Change to:
+  STARR
+  BEAUTY
+
+Keep the exact same font, size, spacing, 
+colour and style — just swap the word.
+
+The logo is two lines:
+  Line 1: "STARR" (larger, serif or display)
+  Line 2: "AESTHETICS" → change to "BEAUTY"
+  (smaller, spaced caps underneath)
+
+===============================================================
+SUPABASE — update portal_kv
+===============================================================
+
+Run this to update the clinic name in Supabase:
+
+UPDATE portal_kv 
+SET value = jsonb_set(value, '{clinicName}', '"StarrBeauty"')
+WHERE key = 'dd_settings';
+
+Also update the locations table display name 
+if it shows "Starr Aesthetics":
+
+UPDATE locations 
+SET name = replace(name, 'Starr Aesthetics', 'StarrBeauty')
+WHERE name LIKE '%Starr Aesthetics%';
+
+===============================================================
+DO NOT CHANGE
+===============================================================
+
+These must stay exactly as they are:
+  - "Starr Academy" (training brand — separate)
+  - Social handles: @StarrFacess, @StarrAestheticss,
+    @StarrSuitess, @StarrNailedd (Eva's actual 
+    Instagram/TikTok handles — don't touch)
+  - Domain: starrbeautyy.co.uk (already correct)
+  - WhatsApp number: 447701298985
+  - Email: starrbeautyyltd@gmail.com
+
+===============================================================
+VERIFY AFTER
+===============================================================
+
+Search the entire codebase for any remaining 
+"Starr Aesthetics" strings:
+  grep -r "Starr Aesthetics" . 
+  (excluding node_modules and .git)
+
+If any remain — fix them.
+
+Check live site:
+  Browser tab title shows "StarrBeauty" ✓
+  Nav logo shows "STARR / BEAUTY" ✓
+  Homepage about text says "StarrBeauty" ✓
+  Admin portal title shows "StarrBeauty" ✓
+  Admin portal sidebar shows "Starr / BEAUTY" ✓
+  Booking page title shows "StarrBeauty" ✓
+  Forms show "StarrBeauty" ✓
+  Zero instances of "Starr Aesthetics" visible 
+  anywhere on any page ✓

@@ -583,8 +583,8 @@ router.get("/availability/slots", async (req, res) => {
       return res.json({ available: false, reason: "CLINIC_CLOSED", date, slots: [] });
     }
 
-    // 3. Generate all 30-min slots (RULE 4: string arithmetic, no Date objects)
-    const allSlots = generateTimeSlots(startTime, endTime, 30);
+    // 3. Generate 2-hour slots (RULE 4: string arithmetic, no Date objects)
+    const allSlots = generateTimeSlots(startTime, endTime, 120);
 
     // 4. Get intra-day recurring blocks
     const { data: blockedSlots } = await supabaseAdmin

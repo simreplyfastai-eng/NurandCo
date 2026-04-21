@@ -1257,11 +1257,11 @@ select.form-input{background:var(--color-card)}
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Date</label>
-        <input class="form-input" id="bm-date" type="date"/>
+        <input class="form-input" id="bm-date" type="date" onchange="populateBmTimeSlots(this.value)"/>
       </div>
       <div class="form-group">
         <label class="form-label">Time</label>
-        <input class="form-input" id="bm-time" type="time" step="900"/>
+        <select class="form-input" id="bm-time"></select>
       </div>
     </div>
     <div class="form-row">
@@ -2826,9 +2826,30 @@ function buildTreatmentSelect(){
 
   // Today as default date
   document.getElementById('bm-date').value=fmt(new Date());
-  document.getElementById('bm-time').value='09:00';
 }
 function pad(n){return n<10?'0'+n:n}
+
+async function populateBmTimeSlots(dateVal, keepTime){
+  const sel=document.getElementById('bm-time');
+  if(!dateVal){sel.innerHTML='<option value="">— select date first —</option>';return;}
+  try{
+    const r=await fetch(`/api/availability/slots?location=${encodeURIComponent(locId)}&date=${dateVal}`,{headers:authHdr()});
+    const data=await r.json();
+    const slots=data.slots||[];
+    if(!slots.length){
+      sel.innerHTML='<option value="">Clinic closed this day</option>';
+      return;
+    }
+    sel.innerHTML=slots.map(s=>`<option value="${s.time}"${!s.available?' style="color:#aaa"':''}>${s.time}${s.available?'':' (taken)'}</option>`).join('');
+    if(keepTime&&[...sel.options].some(o=>o.value===keepTime))sel.value=keepTime;
+    else sel.value=slots[0].time;
+  }catch(e){
+    // Fallback: static 2-hour slots 09:00–19:00
+    const fb=['09:00','11:00','13:00','15:00','17:00','19:00'];
+    sel.innerHTML=fb.map(t=>`<option value="${t}">${t}</option>`).join('');
+    if(keepTime)sel.value=keepTime;
+  }
+}
 
 function updateDeposit(){
   const sel=document.getElementById('bm-treatment');
@@ -2865,6 +2886,7 @@ function openBookingModal(prefill){
     document.getElementById('bm-email').value=booking.clientEmail||'';
     document.getElementById('bm-phone').value=booking.clientPhone||'';
     document.getElementById('bm-date').value=booking.date||'';
+    populateBmTimeSlots(booking.date||'', booking.time||'');
     document.getElementById('bm-notes').value=booking.notes||'';
     document.getElementById('bm-price').value=booking.price||'';
     document.getElementById('bm-deposit').value=booking.deposit||'';
@@ -2905,8 +2927,6 @@ function openBookingModal(prefill){
     } else {sel.selectedIndex=0;}
     // Show cancel booking button in edit mode
     document.getElementById('bm-cancel-booking-btn').style.display='';
-    // Set time
-    document.getElementById('bm-time').value=booking.time||'09:00';
     // Show consultation extra fields
     const consultFields=document.getElementById('bm-consultation-fields');
     if(booking.category==='Consultation'||booking.treatment==='Consultation'){
@@ -2929,7 +2949,7 @@ function openBookingModal(prefill){
     document.getElementById('bm-notes').value='';
     document.getElementById('bm-status').value='Confirmed';
     document.getElementById('bm-date').value=fmt(new Date());
-    document.getElementById('bm-time').value='09:00';
+    populateBmTimeSlots(fmt(new Date()));
     document.getElementById('bm-cancel-booking-btn').style.display='none';
     document.getElementById('bm-deposit-group').style.display='none';
     document.getElementById('bm-balance-group').style.display='none';
