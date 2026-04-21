@@ -1,0 +1,131 @@
+CRITICAL BUG — Admin portal shows login form 
+TWICE before reaching the location selector.
+
+Flow should be:
+  1. Open /portal.html → login form
+  2. Enter credentials → click SIGN IN
+  3. → location selector (Hornchurch/Marylebone)
+  4. Select location → dashboard
+
+Actual broken flow:
+  1. Open /portal.html → login form (1st)
+  2. Enter credentials → click SIGN IN  
+  3. → login form AGAIN (2nd) ← BUG
+  4. Enter credentials again → location selector
+  5. Select location → dashboard
+
+Read portal.html auth flow code fully.
+
+ROOT CAUSE — one of these:
+
+A) The _loginJustSucceeded flag is being 
+   reset or not checked properly.
+   After login succeeds, the page is doing 
+   a full reload which re-runs the init 
+   function, sees no token in localStorage 
+   (because it hasn't been stored yet), 
+   and shows the login form again.
+
+B) The token is being stored but the 
+   clearSession() or init() function runs 
+   AFTER the token is stored and clears it.
+
+C) There are TWO separate auth checks 
+   running on page load — one from an 
+   inline script and one from a module — 
+   and they're conflicting.
+
+THE FIX — make login a single linear flow:
+
+  async function handleLogin(email, password) {
+    // 1. Call API
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    })
+    
+    if (!res.ok) {
+      showError('Incorrect email or password')
+      return
+    }
+    
+    const { token } = await res.json()
+    
+    // 2. Store token IMMEDIATELY
+    localStorage.setItem('portal_token', token)
+    
+    // 3. Set flag to prevent init() from 
+    //    showing login again
+    window._loginJustSucceeded = true
+    
+    // 4. Go straight to location selector
+    //    DO NOT reload the page
+    //    DO NOT call init() again
+    showLocationSelector()
+  }
+
+  // Page init on load:
+  function init() {
+    // If login just succeeded, skip auth check
+    if (window._loginJustSucceeded) return
+    
+    const token = localStorage.getItem('portal_token')
+    if (!token) {
+      showLoginForm()
+      return
+    }
+    
+    // Verify token then show location selector
+    verifyToken(token)
+      .then(() => showLocationSelector())
+      .catch(() => {
+        localStorage.removeItem('portal_token')
+        showLoginForm()
+      })
+  }
+
+ALSO FIX — location selector after login:
+
+After selecting a location the portal must 
+go straight to the dashboard. Currently it 
+may be showing the login form a third time.
+
+  function handleLocationSelect(locationId, locationName) {
+    // Store location
+    localStorage.setItem('portal_location_id', locationId)
+    localStorage.setItem('portal_location_name', locationName)
+    
+    // Hide location selector
+    // Show portal immediately
+    window._SESSION_LOC_ID = locationId
+    window._SESSION_LOC_NAME = locationName
+    
+    showPortal()  // shows sidebar + dashboard
+  }
+
+The complete correct flow must be:
+  Visit /portal.html (no token) → login form
+  Enter correct credentials → location selector
+  Select location → dashboard
+  
+  Total: 3 steps, login form appears ONCE only.
+
+  Visit /portal.html (valid token stored) →
+  Goes straight to location selector
+  (skips login entirely)
+  
+  Visit /portal.html (valid token + location 
+  stored) → goes straight to dashboard
+
+Verify after fix:
+  Fresh login (no token):
+    Step 1: login form shows ✓
+    Enter credentials → Step 2: location 
+    selector shows ✓ (NOT login again)
+    Select location → Step 3: dashboard ✓
+    Login form NEVER appears twice ✓
+  
+  Return visit (token in localStorage):
+    Goes straight to location selector ✓
+    No login form shown ✓

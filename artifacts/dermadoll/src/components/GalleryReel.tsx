@@ -22,6 +22,8 @@ function VideoCard({ src }: { src: string }) {
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
+    // Explicitly reload so the browser picks up the new src
+    v.load();
     const tryPlay = () => { v.muted = true; v.playsInline = true; v.play().catch(() => {}); };
     v.addEventListener("loadeddata", tryPlay);
     v.addEventListener("canplay", tryPlay);
@@ -29,11 +31,20 @@ function VideoCard({ src }: { src: string }) {
     obs.observe(v);
     return () => { v.removeEventListener("loadeddata", tryPlay); v.removeEventListener("canplay", tryPlay); obs.disconnect(); };
   }, [src]);
+  // src directly on <video> (not <source>) — avoids content-type mismatch rejections from CDN URLs
+  // key={src} forces a full DOM remount when the URL changes
   return (
-    <video ref={ref} autoPlay muted loop playsInline preload="auto"
-      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}>
-      <source src={src} type="video/mp4" />
-    </video>
+    <video
+      ref={ref}
+      key={src}
+      src={src}
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}
+    />
   );
 }
 

@@ -17,6 +17,9 @@ function AutoPlayVideo({ src }: { src: string }) {
     const video = ref.current;
     if (!video) return;
 
+    // Explicitly reload so the browser picks up the new src
+    video.load();
+
     const tryPlay = () => {
       video.muted = true;
       video.playsInline = true;
@@ -29,11 +32,7 @@ function AutoPlayVideo({ src }: { src: string }) {
 
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting) {
-          tryPlay();
-        } else {
-          video.pause();
-        }
+        if (entry.isIntersecting) { tryPlay(); } else { video.pause(); }
       },
       { threshold: 0.25 },
     );
@@ -49,10 +48,13 @@ function AutoPlayVideo({ src }: { src: string }) {
     };
   }, [src]);
 
+  // src directly on <video> (not in a <source> child) — prevents content-type rejections from CDN URLs
+  // key={src} forces a full DOM remount whenever the URL changes
   return (
     <video
       ref={ref}
       key={src}
+      src={src}
       autoPlay
       muted
       loop
@@ -60,9 +62,7 @@ function AutoPlayVideo({ src }: { src: string }) {
       preload="auto"
       {...{ "webkit-playsinline": "true" } as any}
       style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}
-    >
-      <source src={src} type="video/mp4" />
-    </video>
+    />
   );
 }
 
