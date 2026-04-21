@@ -6,18 +6,15 @@ const res = (src: string) => src.startsWith("http") || src.startsWith("/api/") ?
 
 interface Card { key: string; type: "image" | "video"; src: string; label: string; category: string; }
 
-const ROW1: Card[] = [
-  { key: "r1a", type: "image", src: "result-1.jpg",  label: "NaturalèLips™",      category: "LIP FILLER" },
-  { key: "r1b", type: "video", src: "video1.mp4",    label: "HD Sculpt Lips",      category: "LIP FILLER" },
-  { key: "r1c", type: "image", src: "result-4.jpg",  label: "Facial Contouring",   category: "ADVANCED FILLER" },
+const DEFAULT_CARDS: Card[] = [
+  { key: "r1a", type: "image", src: "result-1.jpg",  label: "NaturalèLips™",           category: "LIP FILLER" },
+  { key: "r1b", type: "video", src: "video1.mp4",    label: "HD Sculpt Lips",           category: "LIP FILLER" },
+  { key: "r1c", type: "image", src: "result-4.jpg",  label: "Facial Contouring",        category: "ADVANCED FILLER" },
   { key: "r1d", type: "video", src: "video2.mp4",    label: "Filler Dissolve & Refill", category: "FLAT LIPS CORRECTED" },
-];
-
-const ROW2: Card[] = [
-  { key: "r2a", type: "image", src: "result-2.jpg",  label: "NaturalèLips™",      category: "LIP FILLER" },
-  { key: "r2b", type: "video", src: "video3.mp4",    label: "Anti-Wrinkle",        category: "NEW PRODUCT SHOWCASE" },
-  { key: "r2c", type: "image", src: "result-3.jpg",  label: "NaturalèLips™",      category: "HD SCULPT LIPS" },
-  { key: "r2d", type: "video", src: "video1.mp4",    label: "NaturalèLips™",       category: "SUBTLE YET CONFIDENT" },
+  { key: "r2a", type: "image", src: "result-2.jpg",  label: "NaturalèLips™",            category: "LIP FILLER" },
+  { key: "r2b", type: "video", src: "video3.mp4",    label: "Anti-Wrinkle",             category: "NEW PRODUCT SHOWCASE" },
+  { key: "r2c", type: "image", src: "result-3.jpg",  label: "NaturalèLips™",            category: "HD SCULPT LIPS" },
+  { key: "r2d", type: "video", src: "video1.mp4",    label: "NaturalèLips™",            category: "SUBTLE YET CONFIDENT" },
 ];
 
 function VideoCard({ src }: { src: string }) {
@@ -125,6 +122,23 @@ function InfiniteRow({ cards, direction }: { cards: Card[]; direction: "ltr" | "
 }
 
 export default function GalleryReel() {
+  const [cards, setCards] = useState<Card[]>(DEFAULT_CARDS);
+
+  useEffect(() => {
+    fetch("/api/media/config")
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        if (Array.isArray(data?.transformations) && data.transformations.length > 0) {
+          setCards(data.transformations as Card[]);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  const mid = Math.ceil(cards.length / 2);
+  const row1 = cards.slice(0, mid);
+  const row2 = cards.slice(mid);
+
   return (
     <section id="results" style={{ padding: "100px 0 90px", background: "#F5F0EB", overflow: "hidden" }}>
       <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 32px", marginBottom: 52 }}>
@@ -143,8 +157,8 @@ export default function GalleryReel() {
         </motion.div>
       </div>
 
-      <InfiniteRow cards={ROW1} direction="ltr" />
-      <InfiniteRow cards={ROW2} direction="rtl" />
+      {row1.length > 0 && <InfiniteRow cards={row1} direction="ltr" />}
+      {row2.length > 0 && <InfiniteRow cards={row2} direction="rtl" />}
 
       <div style={{ textAlign: "center", marginTop: 28 }}>
         <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "#A0A0A0" }}>

@@ -72,6 +72,17 @@ router.get("/media/config", async (req, res) => {
     const rawVideos = Array.isArray(data?.resultsVideos) ? (data.resultsVideos as string[]) : [];
     const resultsVideos = rawVideos.map(url => toServeUrl(url) ?? url).filter(Boolean);
 
+    // Transformations grid items
+    interface TransformItem { key?: string; type?: string; src?: string; label?: string; category?: string; }
+    const rawTransformations = Array.isArray(data?.transformations) ? (data.transformations as TransformItem[]) : [];
+    const transformations = rawTransformations.map((item, i) => ({
+      key: item.key ?? `t${i}`,
+      type: item.type === "video" ? "video" : "image",
+      src: toServeUrl(item.src) ?? item.src ?? "",
+      label: item.label ?? "",
+      category: item.category ?? "",
+    }));
+
     // Legacy graduate slots (kept for backward compat)
     const defaultGraduates = [
       { slot: 1, name: "Sarah M.", course: "Foundation Anti-Wrinkle", src: "" },
@@ -95,6 +106,7 @@ router.get("/media/config", async (req, res) => {
       aboutImage,
       galleryImages,
       resultsVideos,
+      transformations,
       // Legacy fields (backward compat)
       practitionerImage: aboutImage,
       beforeAfter: convertMap(data?.baImages as Record<string, string>),
@@ -107,7 +119,7 @@ router.get("/media/config", async (req, res) => {
     console.error("GET /api/media/config", err);
     return res.json({
       heroVideo: null, heroImage: null, aboutImage: null,
-      galleryImages: [], resultsVideos: [],
+      galleryImages: [], resultsVideos: [], transformations: [],
       practitionerImage: null, beforeAfter: {}, baLabels: {}, videos: {}, vidLabels: {}, graduates: [],
     });
   }
