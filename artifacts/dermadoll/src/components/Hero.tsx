@@ -39,10 +39,12 @@ export default function Hero() {
   return (
     <>
       <style>{`
+        /* ── DESKTOP ── */
         .hero-wrap {
           display: flex;
           flex-direction: row;
           min-height: 100dvh;
+          background: #F5F0EB;
         }
         .hero-left {
           flex: 1;
@@ -58,11 +60,9 @@ export default function Hero() {
           position: relative;
           overflow: hidden;
         }
-        .hero-btns {
-          display: flex;
-          gap: 12px;
-          flex-wrap: wrap;
-        }
+        .hero-mobile-gradient { display: none; }
+
+        .hero-btns { display: flex; gap: 12px; flex-wrap: wrap; }
         .hero-btn {
           font-family: 'Inter', sans-serif;
           font-size: 11px;
@@ -72,20 +72,49 @@ export default function Hero() {
           cursor: pointer;
           transition: all 0.2s;
         }
+
+        /* ── MOBILE ── */
         @media (max-width: 768px) {
           .hero-wrap {
-            flex-direction: column-reverse !important;
+            flex-direction: column !important;
             min-height: 100dvh;
-          }
-          .hero-left {
-            padding: 40px 24px 52px !important;
-            flex: unset !important;
+            background: #F5F0EB;
           }
           .hero-right {
             flex: unset !important;
-            height: 62dvh;
-            min-height: 300px;
-            max-height: 520px;
+            background: #F5F0EB !important;
+            height: 68dvh;
+            min-height: 320px;
+            max-height: 540px;
+            overflow: visible !important;
+            position: relative;
+          }
+          .hero-right img,
+          .hero-right video {
+            position: absolute !important;
+            inset: 0 !important;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            object-position: top center !important;
+            display: block !important;
+          }
+          .hero-mobile-gradient {
+            display: block !important;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 45%;
+            background: linear-gradient(to bottom, transparent 0%, #F5F0EB 100%);
+            pointer-events: none;
+            z-index: 2;
+          }
+          .hero-left {
+            flex: unset !important;
+            background: #F5F0EB !important;
+            padding: 0px 24px 52px !important;
+            align-items: flex-start !important;
           }
           .hero-btns {
             flex-direction: column !important;
@@ -97,21 +126,44 @@ export default function Hero() {
             padding: 16px 0 !important;
             box-sizing: border-box !important;
           }
+          .h-chip button {
+            width: 100% !important;
+            box-sizing: border-box !important;
+          }
         }
+
         @keyframes heroUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .h-ey  { animation: heroUp 0.8s ease 0.1s  both; }
-        .h-h1  { animation: heroUp 0.8s ease 0.25s both; }
-        .h-sub { animation: heroUp 0.8s ease 0.4s  both; }
+        .h-ey   { animation: heroUp 0.8s ease 0.1s  both; }
+        .h-h1   { animation: heroUp 0.8s ease 0.25s both; }
+        .h-sub  { animation: heroUp 0.8s ease 0.4s  both; }
         .h-chip { animation: heroUp 0.8s ease 0.52s both; }
         .h-btns { animation: heroUp 0.8s ease 0.64s both; }
       `}</style>
 
       <section className="hero-wrap" id="home">
 
+        {/* IMAGE PANEL — appears first in DOM = top on mobile (column flow) */}
+        <div className="hero-right">
+          {heroSrc ? (
+            <video ref={videoRef} src={heroSrc} loop muted playsInline
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : heroImage ? (
+            <img src={heroImage} alt="Eva — Starr Aesthetics"
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }} />
+          ) : (
+            <div style={{ position: "absolute", inset: 0, background: "#E8E2D9", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 28, color: "#C9A96E", opacity: 0.5 }}>Starr Aesthetics</span>
+            </div>
+          )}
+          {/* Gradient fade — visible only on mobile */}
+          <div className="hero-mobile-gradient" />
+        </div>
+
+        {/* TEXT PANEL — appears second in DOM = below image on mobile */}
         <div className="hero-left">
           <div style={{ maxWidth: 480, width: "100%" }}>
 
-            <div className="h-ey" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
+            <div className="h-ey" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
               <div style={{ height: 1, width: 24, background: "#C9A96E" }} />
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
                 Hornchurch &amp; Marylebone
@@ -122,17 +174,17 @@ export default function Hero() {
               Welcome to<br />Starr Aesthetics
             </h1>
 
-            <p className="h-sub" style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.7, margin: "0 0 32px", maxWidth: 380 }}>
+            <p className="h-sub" style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.7, margin: "0 0 28px", maxWidth: 380 }}>
               Premium aesthetics treatments by Eva —<br />Essex &amp; London
             </p>
 
-            <div className="h-chip" style={{ marginBottom: 28 }}>
+            <div className="h-chip" style={{ marginBottom: 24 }}>
               <button
                 onClick={scrollToServices}
                 style={{
                   fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
                   border: "1px solid #3D3D3D", background: "transparent", color: "#3D3D3D",
-                  padding: "9px 18px", cursor: "pointer", transition: "all 0.2s",
+                  padding: "10px 18px", cursor: "pointer", transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "#3D3D3D"; e.currentTarget.style.color = "#F5F0EB"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
@@ -145,9 +197,7 @@ export default function Hero() {
               <button
                 className="hero-btn"
                 onClick={scrollToServices}
-                style={{
-                  border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
-                }}
+                style={{ border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A" }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
               >
@@ -156,9 +206,7 @@ export default function Hero() {
               <button
                 className="hero-btn"
                 onClick={scrollToBook}
-                style={{
-                  border: "1px solid #C9A96E", background: "transparent", color: "#3D3D3D",
-                }}
+                style={{ border: "1px solid #C9A96E", background: "transparent", color: "#3D3D3D" }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#3D3D3D"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
               >
@@ -168,19 +216,6 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="hero-right">
-          {heroSrc ? (
-            <video ref={videoRef} src={heroSrc} loop muted playsInline
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-          ) : heroImage ? (
-            <img src={heroImage} alt="Starr Aesthetics — Hornchurch & Marylebone"
-              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }} />
-          ) : (
-            <div style={{ position: "absolute", inset: 0, background: "#E8E2D9", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 28, color: "#C9A96E", opacity: 0.5 }}>Starr Aesthetics</span>
-            </div>
-          )}
-        </div>
       </section>
 
       {consultOpen && <ConsultationModal onClose={() => setConsultOpen(false)} />}
