@@ -82,14 +82,6 @@ function VideoCard({ vid, i }: { vid: VidSlot; i: number }) {
       <div style={{ overflow: "hidden", background: "#E8E2D9", aspectRatio: "1/1" }}>
         <AutoPlayVideo src={src} />
       </div>
-      <div>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "0.95rem", color: "#3D3D3D", marginBottom: 3 }}>
-          {vid.label}
-        </div>
-        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "#C9A96E" }}>
-          {vid.category}
-        </div>
-      </div>
     </motion.div>
   );
 }

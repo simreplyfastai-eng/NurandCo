@@ -69,19 +69,6 @@ function ReelCard({ card, onClick }: { card: Card; onClick?: () => void }) {
       ) : (
         <VideoCard src={res(card.src)} />
       )}
-      <div style={{
-        position: "absolute", inset: 0,
-        background: "linear-gradient(to top, rgba(0,0,0,0.72) 0%, rgba(0,0,0,0.18) 45%, transparent 70%)",
-        pointerEvents: "none",
-      }} />
-      <div style={{ position: "absolute", bottom: 18, left: 18, right: 18, pointerEvents: "none" }}>
-        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "#C9A96E", marginBottom: 5 }}>
-          {card.category}
-        </div>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.05rem", fontWeight: 400, color: "#F5F0EB", lineHeight: 1.2 }}>
-          {card.label}
-        </div>
-      </div>
     </div>
   );
 }
