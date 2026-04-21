@@ -2,13 +2,13 @@ import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
 const DEFAULT_SLOTS = [
-  { key: "vid0", label: "Medical Needling", src: "video1.mp4" },
-  { key: "vid1", label: "Lip Filler", src: "video2.mp4" },
-  { key: "vid2", label: "Masseter Botox", src: "video3.mp4" },
-  { key: "vid3", label: "Skin Booster Results", src: "video1.mp4" },
+  { key: "vid0", label: "HD Sculpt Lips", category: "LIP FILLER", src: "video1.mp4" },
+  { key: "vid1", label: "Lip Filler Dissolve & Refill", category: "FLAT LIPS CORRECTED", src: "video2.mp4" },
+  { key: "vid2", label: "Anti-Wrinkle Treatment", category: "NEW PRODUCT SHOWCASE", src: "video3.mp4" },
+  { key: "vid3", label: "NaturalèLips™", category: "SUBTLE YET CONFIDENT", src: "video1.mp4" },
 ];
 
-interface VidSlot { key: string; label: string; src: string; }
+interface VidSlot { key: string; label: string; category: string; src: string; }
 
 function AutoPlayVideo({ src }: { src: string }) {
   const ref = useRef<HTMLVideoElement>(null);
@@ -59,8 +59,7 @@ function AutoPlayVideo({ src }: { src: string }) {
       playsInline
       preload="auto"
       {...{ "webkit-playsinline": "true" } as any}
-      className="w-full h-full object-cover"
-      style={{ pointerEvents: "none" }}
+      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}
     >
       <source src={src} type="video/mp4" />
     </video>
@@ -78,10 +77,18 @@ function VideoCard({ vid, i }: { vid: VidSlot; i: number }) {
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ delay: i * 0.08, duration: 0.6 }}
-      className="flex flex-col gap-2"
+      style={{ display: "flex", flexDirection: "column", gap: 10 }}
     >
       <div style={{ overflow: "hidden", background: "#E8E2D9", aspectRatio: "1/1" }}>
         <AutoPlayVideo src={src} />
+      </div>
+      <div>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "0.95rem", color: "#3D3D3D", marginBottom: 3 }}>
+          {vid.label}
+        </div>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "#C9A96E" }}>
+          {vid.category}
+        </div>
       </div>
     </motion.div>
   );
@@ -99,7 +106,7 @@ export default function ResultsVideos() {
           const overrideSrc = data.videos?.[slot.key];
           const overrideLabel = data.vidLabels?.[slot.key];
           return {
-            key: slot.key,
+            ...slot,
             src: overrideSrc || slot.src,
             label: overrideLabel || slot.label,
           };
@@ -108,18 +115,22 @@ export default function ResultsVideos() {
       .catch(() => {});
   }, []);
 
-  const top = slots.slice(0, 2);
-  const bottom = slots.slice(2, 4);
-
   return (
-    <section className="py-[100px] bg-white">
-      <div className="container mx-auto px-6 max-w-5xl">
+    <section style={{ padding: "100px 0", background: "#FFFFFF" }}>
+      <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 32px" }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           style={{ textAlign: "center", marginBottom: 56 }}
         >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 16 }}>
+            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
+              See the Results
+            </span>
+            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+          </div>
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px" }}>
             Watch Real Treatments
           </h2>
@@ -128,12 +139,8 @@ export default function ResultsVideos() {
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 gap-3 md:gap-6 mb-3 md:mb-6">
-          {top.map((vid, i) => <VideoCard key={vid.key} vid={vid} i={i} />)}
-        </div>
-
-        <div className="grid grid-cols-2 gap-3 md:gap-6">
-          {bottom.map((vid, i) => <VideoCard key={vid.key} vid={vid} i={i + 2} />)}
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+          {slots.map((vid, i) => <VideoCard key={vid.key} vid={vid} i={i} />)}
         </div>
       </div>
     </section>

@@ -2,15 +2,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useEffect, useState } from "react";
 
 const DEFAULT_SLOTS = [
-  { key: "ba0", src: "result-1.jpg", label: "Liquid Rhinoplasty" },
-  { key: "ba1", src: "result-4.jpg", label: "Teeth Whitening" },
-  { key: "ba2", src: "result-2.jpg", label: "Lip Filler" },
-  { key: "ba3", src: "result-3.jpg", label: "Glass Skin Facial & Microneedling" },
+  { key: "ba0", src: "result-1.jpg", label: "NaturalèLips™", category: "LIP FILLER" },
+  { key: "ba1", src: "result-4.jpg", label: "Facial Contouring", category: "ADVANCED FILLER" },
+  { key: "ba2", src: "result-2.jpg", label: "NaturalèLips™", category: "LIP FILLER" },
+  { key: "ba3", src: "result-3.jpg", label: "NaturalèLips™", category: "HD SCULPT LIPS" },
 ];
 
 const IMAGE_DELAYS = [0.2, 0.4, 0.6, 0.8];
 
-interface Slot { key: string; src: string; label: string; }
+interface Slot { key: string; src: string; label: string; category: string; }
 
 export default function BeforeAfter() {
   const [results, setResults] = useState<Slot[]>(DEFAULT_SLOTS);
@@ -25,7 +25,7 @@ export default function BeforeAfter() {
           const overrideSrc = data.beforeAfter?.[slot.key];
           const overrideLabel = data.baLabels?.[slot.key];
           return {
-            key: slot.key,
+            ...slot,
             src: overrideSrc || slot.src,
             label: overrideLabel || slot.label,
           };
@@ -53,10 +53,7 @@ export default function BeforeAfter() {
 
   return (
     <>
-      <section
-        id="results"
-        style={{ padding: "100px 0", background: "#F5F0EB" }}
-      >
+      <section id="results" style={{ padding: "100px 0", background: "#F5F0EB" }}>
         <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 32px" }}>
 
           <motion.div
@@ -88,7 +85,7 @@ export default function BeforeAfter() {
                 viewport={{ once: true }}
                 transition={{ delay: IMAGE_DELAYS[i], duration: 0.6 }}
                 onClick={() => setLightbox(resolvedSrc(item.src))}
-                style={{ cursor: "zoom-in", position: "relative" }}
+                style={{ cursor: "zoom-in" }}
               >
                 <div style={{ aspectRatio: "1 / 1", width: "100%", overflow: "hidden", background: "#E8E2D9" }}>
                   <img
@@ -99,17 +96,27 @@ export default function BeforeAfter() {
                     onMouseLeave={(e) => ((e.currentTarget as HTMLImageElement).style.transform = "scale(1)")}
                   />
                 </div>
-                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", color: "#737373", marginTop: 8 }}>
-                  {item.label}
+                <div style={{ marginTop: 8 }}>
+                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "0.95rem", color: "#3D3D3D" }}>
+                    {item.label}
+                  </div>
+                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "#C9A96E", marginTop: 2 }}>
+                    {item.category}
+                  </div>
                 </div>
               </motion.div>
             ))}
           </div>
 
+          <div style={{ textAlign: "center", marginTop: 32 }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "#A0A0A0" }}>
+              Client consent obtained · Results may vary
+            </span>
+          </div>
+
         </div>
       </section>
 
-      {/* Lightbox */}
       <AnimatePresence>
         {lightbox && (
           <motion.div
@@ -140,7 +147,6 @@ export default function BeforeAfter() {
                 position: "relative",
                 maxWidth: "min(90vw, 800px)",
                 maxHeight: "90vh",
-                borderRadius: 12,
                 border: "2px solid #C9A96E",
                 overflow: "hidden",
               }}
@@ -148,45 +154,24 @@ export default function BeforeAfter() {
               <img
                 src={lightbox}
                 alt="Enlarged result"
-                style={{
-                  display: "block",
-                  width: "100%",
-                  height: "100%",
-                  maxHeight: "90vh",
-                  objectFit: "contain",
-                }}
+                style={{ display: "block", width: "100%", height: "100%", maxHeight: "90vh", objectFit: "contain" }}
               />
-              {/* Close button */}
               <button
                 onClick={() => setLightbox(null)}
                 aria-label="Close"
                 style={{
-                  position: "absolute",
-                  top: 12,
-                  right: 12,
-                  width: 36,
-                  height: 36,
-                  borderRadius: "50%",
+                  position: "absolute", top: 12, right: 12,
+                  width: 36, height: 36,
                   background: "rgba(0,0,0,0.6)",
                   border: "1px solid rgba(255,255,255,0.2)",
-                  color: "#fff",
-                  fontSize: 18,
-                  fontFamily: "Inter, sans-serif",
-                  lineHeight: 1,
+                  color: "#fff", fontSize: 18,
                   cursor: "pointer",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  display: "flex", alignItems: "center", justifyContent: "center",
                   backdropFilter: "blur(4px)",
-                  WebkitBackdropFilter: "blur(4px)",
                   transition: "background 0.2s",
                 }}
-                onMouseEnter={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "rgba(201,169,110,0.8)";
-                }}
-                onMouseLeave={(e) => {
-                  (e.currentTarget as HTMLElement).style.background = "rgba(0,0,0,0.6)";
-                }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(201,169,110,0.8)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.background = "rgba(0,0,0,0.6)"; }}
               >
                 ×
               </button>

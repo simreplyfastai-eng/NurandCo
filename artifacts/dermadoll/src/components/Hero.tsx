@@ -10,7 +10,7 @@ function mediaUrl(path: string | null): string | null {
 export default function Hero() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [heroSrc, setHeroSrc] = useState<string | null>(null);
-  const [heroImage, setHeroImage] = useState<string | null>(`${import.meta.env.BASE_URL}hero-room.jpg`);
+  const [heroImage, setHeroImage] = useState<string | null>(`${import.meta.env.BASE_URL}eva-about.jpg`);
   const [consultOpen, setConsultOpen] = useState(false);
 
   useEffect(() => {
@@ -39,18 +39,69 @@ export default function Hero() {
   return (
     <>
       <style>{`
-        .hero-wrap { display: flex; flex-direction: row; min-height: 100dvh; }
-        .hero-left { flex: 1; background: #F5F0EB; display: flex; align-items: center; padding: 120px 64px 80px 80px; box-sizing: border-box; }
-        .hero-right { flex: 1; background: #FFFFFF; position: relative; overflow: hidden; }
+        .hero-wrap {
+          display: flex;
+          flex-direction: row;
+          min-height: 100dvh;
+        }
+        .hero-left {
+          flex: 1;
+          background: #F5F0EB;
+          display: flex;
+          align-items: center;
+          padding: 120px 64px 80px 80px;
+          box-sizing: border-box;
+        }
+        .hero-right {
+          flex: 1;
+          background: #FFFFFF;
+          position: relative;
+          overflow: hidden;
+        }
+        .hero-btns {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+        }
+        .hero-btn {
+          font-family: 'Inter', sans-serif;
+          font-size: 11px;
+          letter-spacing: 2px;
+          text-transform: uppercase;
+          padding: 14px 28px;
+          cursor: pointer;
+          transition: all 0.2s;
+        }
         @media (max-width: 768px) {
-          .hero-wrap { flex-direction: column !important; }
-          .hero-left { padding: 100px 28px 48px !important; }
-          .hero-right { min-height: 60vw; max-height: 480px; }
+          .hero-wrap {
+            flex-direction: column-reverse !important;
+            min-height: 100dvh;
+          }
+          .hero-left {
+            padding: 40px 24px 52px !important;
+            flex: unset !important;
+          }
+          .hero-right {
+            flex: unset !important;
+            height: 62dvh;
+            min-height: 300px;
+            max-height: 520px;
+          }
+          .hero-btns {
+            flex-direction: column !important;
+            gap: 10px !important;
+          }
+          .hero-btn {
+            width: 100% !important;
+            text-align: center !important;
+            padding: 16px 0 !important;
+            box-sizing: border-box !important;
+          }
         }
         @keyframes heroUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-        .h-ey { animation: heroUp 0.8s ease 0.1s both; }
-        .h-h1 { animation: heroUp 0.8s ease 0.25s both; }
-        .h-sub { animation: heroUp 0.8s ease 0.4s both; }
+        .h-ey  { animation: heroUp 0.8s ease 0.1s  both; }
+        .h-h1  { animation: heroUp 0.8s ease 0.25s both; }
+        .h-sub { animation: heroUp 0.8s ease 0.4s  both; }
         .h-chip { animation: heroUp 0.8s ease 0.52s both; }
         .h-btns { animation: heroUp 0.8s ease 0.64s both; }
       `}</style>
@@ -58,7 +109,7 @@ export default function Hero() {
       <section className="hero-wrap" id="home">
 
         <div className="hero-left">
-          <div style={{ maxWidth: 480 }}>
+          <div style={{ maxWidth: 480, width: "100%" }}>
 
             <div className="h-ey" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
               <div style={{ height: 1, width: 24, background: "#C9A96E" }} />
@@ -90,13 +141,12 @@ export default function Hero() {
               </button>
             </div>
 
-            <div className="h-btns" style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <div className="h-btns hero-btns">
               <button
+                className="hero-btn"
                 onClick={scrollToServices}
                 style={{
-                  fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase",
                   border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
-                  padding: "14px 28px", cursor: "pointer", transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
@@ -104,11 +154,10 @@ export default function Hero() {
                 VIEW TREATMENTS
               </button>
               <button
+                className="hero-btn"
                 onClick={scrollToBook}
                 style={{
-                  fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase",
                   border: "1px solid #C9A96E", background: "transparent", color: "#3D3D3D",
-                  padding: "14px 28px", cursor: "pointer", transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#3D3D3D"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}

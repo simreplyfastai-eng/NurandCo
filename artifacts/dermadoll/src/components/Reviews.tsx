@@ -23,7 +23,7 @@ const reviews = [
     location: "Essex",
   },
   {
-    quote: "The Wisp Me Hybrids are my absolute favourite. Eva really listens to what you want and delivers every single time.",
+    quote: "The NaturalèLips™ technique is my absolute favourite. Eva really listens to what you want and delivers every single time.",
     name: "Priya S.",
     location: "Essex",
   },
@@ -37,13 +37,43 @@ const reviews = [
 export default function Reviews() {
   return (
     <section id="reviews" style={{ background: "#F5F0EB", padding: "100px 0" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
+      <style>{`
+        .reviews-outer { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+        .reviews-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 16px;
+        }
+        @media (max-width: 768px) {
+          .reviews-outer { padding: 0 !important; }
+          .reviews-grid {
+            display: flex !important;
+            flex-direction: row !important;
+            overflow-x: auto !important;
+            scroll-snap-type: x mandatory !important;
+            -webkit-overflow-scrolling: touch !important;
+            gap: 12px !important;
+            padding: 0 24px 16px !important;
+            scrollbar-width: none !important;
+          }
+          .reviews-grid::-webkit-scrollbar { display: none !important; }
+          .review-card {
+            min-width: calc(85vw) !important;
+            max-width: calc(85vw) !important;
+            scroll-snap-align: center !important;
+            flex-shrink: 0 !important;
+          }
+          .reviews-header { padding: 0 24px !important; }
+        }
+      `}</style>
+      <div className="reviews-outer">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          style={{ textAlign: "center", marginBottom: 56 }}
+          className="reviews-header"
+          style={{ textAlign: "center", marginBottom: 48 }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 16 }}>
             <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
@@ -55,11 +85,11 @@ export default function Reviews() {
           </h2>
         </motion.div>
 
-        <div className="reviews-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
-          <style>{`@media (max-width: 768px) { .reviews-grid { grid-template-columns: 1fr !important; } }`}</style>
+        <div className="reviews-grid">
           {reviews.map((r, i) => (
             <motion.div
               key={i}
+              className="review-card"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}

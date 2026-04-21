@@ -86,6 +86,28 @@ const SERVICES: Record<"hornchurch" | "marylebone", TreatmentGroup[]> = {
         },
       ],
     },
+    {
+      group: "EYELASH & BROW",
+      items: [
+        {
+          subname: "Lash Extensions",
+          treatments: [
+            { id: "lb-classic", name: "Classic Lash Set", display: "Classic Set", duration: "1.5 hrs", price: "£55" },
+            { id: "lb-hybrid", name: "Hybrid Lash Set", display: "Hybrid Set", duration: "2 hrs", price: "£65" },
+            { id: "lb-volume", name: "Russian Volume", display: "Russian Volume", duration: "2.5 hrs", price: "£75" },
+            { id: "lb-infill", name: "Lash Infill", display: "Infill", duration: "1 hr", price: "£35" },
+          ],
+        },
+        {
+          subname: "Brows",
+          treatments: [
+            { id: "br-laminate", name: "Brow Lamination", display: "Lamination", duration: "45 mins", price: "£45" },
+            { id: "br-tint", name: "Brow Tint & Shape", display: "Tint & Shape", duration: "30 mins", price: "£22" },
+            { id: "br-henna", name: "Henna Brows", display: "Henna Brows", duration: "45 mins", price: "£35" },
+          ],
+        },
+      ],
+    },
   ],
   marylebone: [
     {
@@ -148,6 +170,28 @@ const SERVICES: Record<"hornchurch" | "marylebone", TreatmentGroup[]> = {
         },
       ],
     },
+    {
+      group: "EYELASH & BROW",
+      items: [
+        {
+          subname: "Lash Extensions",
+          treatments: [
+            { id: "m-lb-classic", name: "Classic Lash Set", display: "Classic Set", duration: "1.5 hrs", price: "£65" },
+            { id: "m-lb-hybrid", name: "Hybrid Lash Set", display: "Hybrid Set", duration: "2 hrs", price: "£75" },
+            { id: "m-lb-volume", name: "Russian Volume", display: "Russian Volume", duration: "2.5 hrs", price: "£85" },
+            { id: "m-lb-infill", name: "Lash Infill", display: "Infill", duration: "1 hr", price: "£40" },
+          ],
+        },
+        {
+          subname: "Brows",
+          treatments: [
+            { id: "m-br-laminate", name: "Brow Lamination", display: "Lamination", duration: "45 mins", price: "£55" },
+            { id: "m-br-tint", name: "Brow Tint & Shape", display: "Tint & Shape", duration: "30 mins", price: "£28" },
+            { id: "m-br-henna", name: "Henna Brows", display: "Henna Brows", duration: "45 mins", price: "£42" },
+          ],
+        },
+      ],
+    },
   ],
 };
 
@@ -190,10 +234,18 @@ export default function Services() {
             Precision aesthetics tailored to you
           </p>
 
-          <div style={{ display: "inline-flex", gap: 0 }}>
+          <div className="svc-loc-toggle" style={{ display: "inline-flex", gap: 0 }}>
+            <style>{`
+              .svc-loc-toggle { display: inline-flex; }
+              @media (max-width: 768px) {
+                .svc-loc-toggle { display: flex !important; width: 100% !important; }
+                .svc-loc-btn { flex: 1 !important; }
+              }
+            `}</style>
             {(["hornchurch", "marylebone"] as const).map((loc) => (
               <button
                 key={loc}
+                className="svc-loc-btn"
                 onClick={() => setLocation(loc)}
                 style={{
                   fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase",
@@ -247,12 +299,12 @@ export default function Services() {
                             key={t.id}
                             style={{
                               display: "flex", alignItems: "center", justifyContent: "space-between",
-                              padding: "14px 16px", background: "#F5F0EB", marginBottom: 2,
+                              padding: "14px 16px", background: "#F5F0EB", marginBottom: 2, gap: 8,
                             }}
                           >
-                            <div>
-                              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#3D3D3D" }}>{t.display}</span>
-                              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#737373", marginLeft: 12 }}>{t.duration}</span>
+                            <div style={{ minWidth: 0 }}>
+                              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#3D3D3D" }}>{t.display}</span>
+                              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "#737373", marginLeft: 8, whiteSpace: "nowrap" }}>{t.duration}</span>
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                               <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C9A96E" }}>{t.price}</span>

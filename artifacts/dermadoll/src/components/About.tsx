@@ -8,7 +8,7 @@ function mediaUrl(path: string | null): string | null {
 }
 
 export default function About() {
-  const [practImage, setPractImage] = useState<string | null>(`${import.meta.env.BASE_URL}practitioner.jpg`);
+  const [practImage, setPractImage] = useState<string | null>(`${import.meta.env.BASE_URL}eva-hero.jpg`);
 
   useEffect(() => {
     fetch("/api/media/config")
