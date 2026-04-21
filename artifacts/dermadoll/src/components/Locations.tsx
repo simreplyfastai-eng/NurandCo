@@ -4,25 +4,15 @@ const clinics = [
   {
     region: "ESSEX",
     name: "Hornchurch",
-    desc: (
-      <>
-        Our original home clinic in Essex.
-        <br />
-        Serving Essex &amp; East London with our full treatment menu.
-      </>
-    ),
+    line1: "Our original home clinic in Essex.",
+    line2: "Serving Essex & East London with our full treatment menu.",
     highlight: true,
   },
   {
     region: "LONDON ◆ NEW",
     name: "Marylebone",
-    desc: (
-      <>
-        Now open in the heart of London.
-        <br />
-        Premium flat-rate pricing for all treatments.
-      </>
-    ),
+    line1: "Now open in the heart of London.",
+    line2: "Premium flat-rate pricing for all treatments.",
     highlight: false,
   },
 ];
@@ -36,10 +26,13 @@ export default function Locations() {
           display: grid;
           grid-template-columns: 1fr 1fr;
           gap: 24px;
+          align-items: stretch;
         }
         .clinic-card {
           background: #FFFFFF;
           padding: 40px 36px;
+          display: flex;
+          flex-direction: column;
         }
         .clinic-card h3 {
           font-family: 'Cormorant Garamond', serif;
@@ -47,15 +40,26 @@ export default function Locations() {
           font-size: 2rem;
           font-weight: 400;
           color: #5C1A1A;
-          margin: 0 0 16px;
+          margin: 0 0 20px;
           line-height: 1;
         }
-        .clinic-card p {
+        .clinic-card .desc-line1 {
           font-family: 'Inter', sans-serif;
           font-size: 14px;
+          color: #5C1A1A;
+          line-height: 1.6;
+          margin: 0 0 8px;
+          font-weight: 500;
+        }
+        .clinic-card .desc-line2 {
+          font-family: 'Inter', sans-serif;
+          font-size: 13px;
           color: #737373;
           line-height: 1.7;
           margin: 0 0 32px;
+        }
+        .clinic-card .cta-spacer {
+          margin-top: auto;
         }
         @media (max-width: 768px) {
           .clinics-grid { gap: 12px !important; }
@@ -64,12 +68,15 @@ export default function Locations() {
           }
           .clinic-card h3 {
             font-size: 1.4rem !important;
-            margin-bottom: 10px !important;
+            margin-bottom: 14px !important;
           }
-          .clinic-card p {
+          .clinic-card .desc-line1 {
+            font-size: 13px !important;
+            margin-bottom: 6px !important;
+          }
+          .clinic-card .desc-line2 {
             font-size: 12px !important;
-            line-height: 1.6 !important;
-            margin-bottom: 20px !important;
+            margin-bottom: 24px !important;
           }
         }
       `}</style>
@@ -109,20 +116,23 @@ export default function Locations() {
                 {clinic.region}
               </div>
               <h3>{clinic.name}</h3>
-              <p>{clinic.desc}</p>
-              <a
-                href={`${import.meta.env.BASE_URL}book?location=${clinic.name.toLowerCase()}`}
-                style={{
-                  fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
-                  border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
-                  padding: "11px 0", cursor: "pointer", transition: "all 0.2s", width: "100%",
-                  textDecoration: "none", display: "block", textAlign: "center",
-                }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
-              >
-                BOOK HERE
-              </a>
+              <p className="desc-line1">{clinic.line1}</p>
+              <p className="desc-line2">{clinic.line2}</p>
+              <div className="cta-spacer">
+                <a
+                  href={`${import.meta.env.BASE_URL}book?location=${clinic.name.toLowerCase()}`}
+                  style={{
+                    fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
+                    border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                    padding: "11px 0", cursor: "pointer", transition: "all 0.2s", width: "100%",
+                    textDecoration: "none", display: "block", textAlign: "center",
+                  }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                >
+                  BOOK HERE
+                </a>
+              </div>
             </motion.div>
           ))}
         </div>
