@@ -18,7 +18,7 @@ export default function About() {
   }, []);
 
   return (
-    <section id="about" style={{ background: "#F5F0EB", padding: "100px 0" }}>
+    <section id="about" style={{ background: "#FFFFFF", padding: "100px 0" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
         <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
           <style>{`

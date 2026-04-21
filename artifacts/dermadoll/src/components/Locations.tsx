@@ -19,7 +19,7 @@ export default function Locations() {
   const scrollToBook = () => document.getElementById("book")?.scrollIntoView({ behavior: "smooth" });
 
   return (
-    <section id="locations" style={{ background: "#FFFFFF", padding: "100px 0" }}>
+    <section id="locations" style={{ background: "#F5F0EB", padding: "100px 0" }}>
       <style>{`
         .clinics-grid {
           display: grid;
@@ -27,7 +27,7 @@ export default function Locations() {
           gap: 24px;
         }
         .clinic-card {
-          background: #F5F0EB;
+          background: #FFFFFF;
           padding: 40px 36px;
         }
         .clinic-card h3 {

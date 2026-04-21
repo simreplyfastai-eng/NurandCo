@@ -53,7 +53,7 @@ export default function BeforeAfter() {
 
   return (
     <>
-      <section id="results" style={{ padding: "100px 0", background: "#FFFFFF" }}>
+      <section id="results" style={{ padding: "100px 0", background: "#F5F0EB" }}>
         <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 32px" }}>
 
           <motion.div

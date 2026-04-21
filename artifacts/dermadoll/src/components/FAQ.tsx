@@ -41,7 +41,7 @@ export default function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section id="faq" style={{ background: "#FFFFFF", padding: "100px 0" }}>
+    <section id="faq" style={{ background: "#F5F0EB", padding: "100px 0" }}>
       <div style={{ maxWidth: 750, margin: "0 auto", padding: "0 32px" }}>
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -68,7 +68,7 @@ export default function FAQ() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.05 }}
-              style={{ background: "#F5F0EB", border: "1px solid #E8E2D9", overflow: "hidden" }}
+              style={{ background: "#FFFFFF", border: "1px solid #E8E2D9", overflow: "hidden" }}
             >
               <button
                 onClick={() => setOpen(open === i ? null : i)}

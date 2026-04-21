@@ -212,7 +212,7 @@ export default function Services() {
   const services = SERVICES[location];
 
   return (
-    <section id="services" style={{ background: "#F5F0EB", padding: "100px 0" }}>
+    <section id="services" style={{ background: "#FFFFFF", padding: "100px 0" }}>
       <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 32px" }}>
 
         <motion.div
@@ -299,7 +299,7 @@ export default function Services() {
                             key={t.id}
                             style={{
                               display: "flex", alignItems: "center", justifyContent: "space-between",
-                              padding: "14px 16px", background: "#FFFFFF", marginBottom: 2, gap: 8,
+                              padding: "14px 16px", background: "#F5F0EB", marginBottom: 2, gap: 8,
                             }}
                           >
                             <div style={{ minWidth: 0 }}>
