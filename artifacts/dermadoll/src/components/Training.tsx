@@ -254,7 +254,7 @@ export default function Training() {
             className="font-light text-sm md:text-lg max-w-2xl mx-auto"
             style={{ color: "#C9A96E" }}
           >
-            CPD accredited · No background needed · Leeds & Wakefield
+            CPD accredited · No background needed · Hornchurch & Marylebone
           </motion.p>
         </div>
 
@@ -266,7 +266,7 @@ export default function Training() {
         >
           <img
             src={trainingPathwayImg}
-            alt="Pathway to Aesthetics — Face By Niamh Training"
+            alt="Pathway to Aesthetics — Starr Aesthetics Training"
             className="w-full max-w-sm md:max-w-md lg:max-w-lg rounded-2xl shadow-lg object-cover"
             style={{ display: "block" }}
           />
@@ -298,7 +298,7 @@ export default function Training() {
               <ul className="space-y-2 md:space-y-4 text-foreground/80 font-light text-[13px] md:text-base mb-4 md:mb-8">
                 <li><strong className="font-medium text-foreground">Add-on:</strong> Skin Boosters or Advanced Dermal Filler +£500</li>
                 <li><strong className="font-medium text-foreground">Duration:</strong> 3-day course | Max 3 students</li>
-                <li><strong className="font-medium text-foreground">Location:</strong> Leeds | Wakefield</li>
+                <li><strong className="font-medium text-foreground">Location:</strong> Hornchurch | Marylebone</li>
                 <li><strong className="font-medium text-foreground">Deposit:</strong> £300 deposit secures your place</li>
                 <li><strong className="font-medium text-foreground">Finance:</strong> Finance options available</li>
               </ul>

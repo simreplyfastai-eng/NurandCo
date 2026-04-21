@@ -31,7 +31,7 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="min-h-[100dvh]" style={{ background: "#FAF7F2", color: "#1C1C1E" }}>
+    <div className="min-h-[100dvh]" style={{ background: "#F5F0EB", color: "#3D3D3D" }}>
 
       <AnimatePresence>
         {showBookingSuccess && (
@@ -42,7 +42,7 @@ export default function Home() {
             transition={{ duration: 0.4 }}
             style={{
               position: "fixed", top: 0, left: 0, right: 0, zIndex: 9999,
-              background: "#1C1C1E",
+              background: "#3D3D3D",
               borderBottom: "2px solid #C9A96E",
               padding: "14px 24px",
               display: "flex", alignItems: "center", justifyContent: "center", gap: "12px",
@@ -51,7 +51,7 @@ export default function Home() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 28, height: 28, borderRadius: "50%", background: "rgba(201,169,110,0.2)", flexShrink: 0 }}>
               <Check size={14} color="#C9A96E" />
             </div>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: "14px", color: "#FAF7F2", margin: 0 }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: "14px", color: "#F5F0EB", margin: 0 }}>
               <span style={{ color: "#C9A96E", fontWeight: 600 }}>Booking confirmed.</span>{" "}
               You'll receive a confirmation email shortly.
             </p>

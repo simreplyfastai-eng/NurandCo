@@ -189,7 +189,7 @@ export default function Hero() {
           className="hero-left"
           style={{
             width: "50%",
-            background: "linear-gradient(145deg, #fdf9f3 0%, #FAF7F2 45%, #f3ede2 100%)",
+            background: "linear-gradient(145deg, #fdf9f3 0%, #F5F0EB 45%, #f3ede2 100%)",
             display: "flex",
             alignItems: "center",
             padding: "48px 64px 80px",
@@ -198,7 +198,7 @@ export default function Hero() {
             overflow: "hidden",
           }}
         >
-          {/* Large decorative serif watermark — "FACE BY NIAMH" stacked */}
+          {/* Large decorative serif watermark */}
           <div aria-hidden="true" className="hero-watermark" style={{
             position: "absolute",
             bottom: 0,
@@ -215,7 +215,7 @@ export default function Hero() {
             letterSpacing: "-0.03em",
             whiteSpace: "nowrap",
           }}>
-            FACE<br />BY<br />NIAMH
+            STARR
           </div>
           {/* Subtle amber glow top right */}
           <div aria-hidden="true" style={{
@@ -231,7 +231,7 @@ export default function Hero() {
           <div style={{ maxWidth: 520 }}>
             {/* Eyebrow */}
             <div className="hero-eyebrow" style={{
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 10,
               letterSpacing: "3px",
               textTransform: "uppercase",
@@ -242,7 +242,7 @@ export default function Hero() {
               gap: 10,
             }}>
               <div className="hero-line" style={{ height: 1, width: 22, background: "#C9A96E" }} />
-              LEEDS / WAKEFIELD
+              HORNCHURCH / MARYLEBONE
               <div className="hero-line" style={{ height: 1, width: 22, background: "#C9A96E" }} />
             </div>
 
@@ -251,7 +251,7 @@ export default function Hero() {
               fontFamily: "'Cormorant Garamond', serif",
               fontSize: "clamp(2.4rem, 5.5vw, 4.5rem)",
               fontWeight: 600,
-              color: "#1C1C1E",
+              color: "#3D3D3D",
               lineHeight: 1.1,
               margin: "0 0 28px",
             }}>
@@ -261,14 +261,14 @@ export default function Hero() {
 
             {/* Body */}
             <p className="hero-body" style={{
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 15,
-              color: "#6B6260",
+              color: "#737373",
               lineHeight: 1.75,
               margin: "0 0 40px",
               maxWidth: 420,
             }}>
-              Advanced aesthetics treatments in Leeds and Wakefield — delivered with care, precision, and a commitment to natural results.
+              Advanced aesthetics treatments in Hornchurch, Essex and Marylebone, London — delivered with care, precision, and a commitment to natural results.
             </p>
 
             {/* Buttons */}
@@ -279,8 +279,8 @@ export default function Hero() {
                 style={{
                   background: "transparent",
                   border: "1px solid #C9A96E",
-                  color: "#1C1C1E",
-                  fontFamily: "'DM Sans', sans-serif",
+                  color: "#3D3D3D",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 11,
                   letterSpacing: "2px",
                   textTransform: "uppercase",
@@ -289,8 +289,8 @@ export default function Hero() {
                   cursor: "pointer",
                   transition: "all 0.2s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#1C1C1E"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1C1C1E"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#3D3D3D"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
               >
                 View Treatments
               </button>
@@ -300,8 +300,8 @@ export default function Hero() {
                 style={{
                   background: "#C9A96E",
                   border: "1px solid #C9A96E",
-                  color: "#1C1C1E",
-                  fontFamily: "'DM Sans', sans-serif",
+                  color: "#3D3D3D",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 11,
                   letterSpacing: "2px",
                   textTransform: "uppercase",
@@ -351,7 +351,7 @@ export default function Hero() {
             <>
               <img
                 src={heroImage}
-                alt="Face By Niamh clinic"
+                alt="Starr Aesthetics clinic — Hornchurch & Marylebone"
                 style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", zIndex: 1 }}
               />
               {/* Dark overlay so particles + branding stay legible */}
@@ -366,15 +366,15 @@ export default function Hero() {
             <div style={{
               position: "absolute",
               inset: 0,
-              background: "linear-gradient(160deg, #2a1800 0%, #1C1C1E 50%, #3d2200 100%)",
+              background: "linear-gradient(160deg, #2a1800 0%, #3D3D3D 50%, #3d2200 100%)",
               zIndex: 1,
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
             }}>
               <div style={{ textAlign: "center", opacity: 0.3 }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 32, color: "#C9A96E", marginBottom: 8 }}>Face By Niamh</div>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "4px", textTransform: "uppercase", color: "#C9A96E" }}>Aesthetics</div>
+                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 32, color: "#C9A96E", marginBottom: 8 }}>Starr Aesthetics</div>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "4px", textTransform: "uppercase", color: "#C9A96E" }}>Hornchurch · Marylebone</div>
               </div>
             </div>
           )}
@@ -382,7 +382,7 @@ export default function Hero() {
           {/* Particle overlay */}
           <ParticleCanvas />
 
-          {/* @facebyniamh label */}
+          {/* @starraesthetics label */}
           <div style={{
             position: "absolute",
             bottom: 28,
@@ -400,13 +400,13 @@ export default function Hero() {
               animation: "pulseDot 2s ease-in-out infinite",
             }} />
             <span style={{
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 11,
               letterSpacing: "1.5px",
               color: "rgba(255,255,255,0.75)",
               textTransform: "uppercase",
             }}>
-              @facebyniamh
+              @starr.aesthetics
             </span>
           </div>
         </div>

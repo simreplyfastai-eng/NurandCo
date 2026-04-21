@@ -45,7 +45,7 @@ export default function FacesGallery() {
     <section
       style={{
         padding: "96px 0",
-        background: "#F0EBE1",
+        background: "#F5F0EB",
         position: "relative",
         overflow: "hidden",
       }}
@@ -65,7 +65,7 @@ export default function FacesGallery() {
           {/* Eyebrow */}
           <div style={{ display: "flex", alignItems: "center", gap: 14, justifyContent: "center", marginBottom: 16 }}>
             <div style={{ height: 1, width: 32, background: "#C9A96E", opacity: 0.5 }} />
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Gallery</span>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Gallery</span>
             <div style={{ height: 1, width: 32, background: "#C9A96E", opacity: 0.5 }} />
           </div>
 
@@ -73,7 +73,7 @@ export default function FacesGallery() {
             fontFamily: "'Cormorant Garamond', serif",
             fontSize: "clamp(2rem, 5vw, 3.2rem)",
             fontWeight: 600,
-            color: "#1C1C1E",
+            color: "#3D3D3D",
             margin: "0 0 10px",
             lineHeight: 1.15,
           }}>
@@ -120,7 +120,7 @@ export default function FacesGallery() {
           position: "absolute",
           left: 0, top: 0, bottom: 0,
           width: 120,
-          background: "linear-gradient(90deg, #F0EBE1, transparent)",
+          background: "linear-gradient(90deg, #F5F0EB, transparent)",
           zIndex: 2,
           pointerEvents: "none",
         }} />
@@ -128,7 +128,7 @@ export default function FacesGallery() {
           position: "absolute",
           right: 0, top: 0, bottom: 0,
           width: 120,
-          background: "linear-gradient(270deg, #F0EBE1, transparent)",
+          background: "linear-gradient(270deg, #F5F0EB, transparent)",
           zIndex: 2,
           pointerEvents: "none",
         }} />

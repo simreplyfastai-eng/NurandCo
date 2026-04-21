@@ -44,8 +44,8 @@ export default function Footer() {
   return (
     <footer
       style={{
-        background: "#FAF7F2",
-        color: "#1C1C1E",
+        background: "#F5F0EB",
+        color: "#3D3D3D",
         position: "relative",
         overflow: "hidden",
       }}
@@ -70,7 +70,7 @@ export default function Footer() {
           lineHeight: 1,
         }}
       >
-        Niamh
+        Starr
       </div>
 
       {/* Ambient glow blobs */}
@@ -218,44 +218,25 @@ export default function Footer() {
 
           {/* Logo + tagline */}
           <div className="flex flex-col items-center" style={{ marginBottom: 52 }}>
-            <div className="flex flex-col items-center leading-none" style={{ gap: 3, marginBottom: 20 }}>
+            <div className="flex flex-col items-center leading-none" style={{ gap: 4, marginBottom: 20 }}>
               <span style={{
                 fontFamily: "'Cormorant Garamond', serif",
-                fontStyle: "italic",
-                fontSize: 22,
-                fontWeight: 300,
-                color: "rgba(28,28,30,0.8)",
-                letterSpacing: "0.02em",
-              }}>
-                Face
-              </span>
-              <span style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 9,
-                letterSpacing: "0.5em",
-                textTransform: "uppercase",
-                fontWeight: 500,
-                color: "#C9A96E",
-              }}>
-                BY
-              </span>
-              <span style={{
-                fontFamily: "'Cormorant Garamond', serif",
-                fontSize: 34,
-                fontWeight: 700,
-                color: "#1C1C1E",
+                fontSize: 48,
+                fontWeight: 600,
                 letterSpacing: "0.01em",
+                color: "#5C1A1A",
                 lineHeight: 1,
               }}>
-                Niamh
+                STARR
               </span>
               <span style={{
-                fontFamily: "'DM Sans', sans-serif",
-                fontSize: 8,
-                letterSpacing: "0.5em",
+                fontFamily: "'Inter', sans-serif",
+                fontSize: 12,
+                letterSpacing: "0.4em",
                 textTransform: "uppercase",
-                fontWeight: 300,
-                color: "rgba(28,28,30,0.35)",
+                fontWeight: 400,
+                color: "#C9A96E",
+                lineHeight: 1,
               }}>
                 AESTHETICS
               </span>
@@ -285,20 +266,20 @@ export default function Footer() {
             </p>
 
             <p style={{
-              fontFamily: "'DM Sans', sans-serif",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 10,
               letterSpacing: "0.25em",
               textTransform: "uppercase",
               color: "rgba(28,28,30,0.4)",
               marginBottom: 28,
             }}>
-              Leeds · Wakefield
+              Hornchurch · Marylebone
             </p>
 
             {/* Social links */}
             <div style={{ display: "flex", alignItems: "center", gap: 24 }}>
               <a
-                href="https://instagram.com/facebyniamh"
+                href="https://instagram.com/starraesthetics"
                 target="_blank"
                 rel="noopener noreferrer"
                 style={{
@@ -307,7 +288,7 @@ export default function Footer() {
                   gap: 8,
                   color: "rgba(28,28,30,0.5)",
                   textDecoration: "none",
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 13,
                   transition: "color 0.2s",
                 }}
@@ -317,7 +298,7 @@ export default function Footer() {
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
                 </svg>
-                @facebyniamh
+                @starraesthetics
               </a>
 
               <div style={{ width: 1, height: 16, background: "rgba(28,28,30,0.12)" }} />
@@ -333,7 +314,7 @@ export default function Footer() {
                     gap: 8,
                     color: "rgba(28,28,30,0.5)",
                     textDecoration: "none",
-                    fontFamily: "'DM Sans', sans-serif",
+                    fontFamily: "'Inter', sans-serif",
                     fontSize: 13,
                     transition: "color 0.2s",
                   }}
@@ -365,7 +346,7 @@ export default function Footer() {
                 href={link.href}
                 onClick={(e) => scrollTo(e, link.href)}
                 style={{
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 10,
                   letterSpacing: "0.28em",
                   textTransform: "uppercase",
@@ -391,13 +372,13 @@ export default function Footer() {
             justifyContent: "space-between",
             alignItems: "center",
             gap: 12,
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 11,
             color: "rgba(28,28,30,0.5)",
             fontWeight: 300,
             letterSpacing: "0.04em",
           }}>
-            <p style={{ margin: 0 }}>&copy; {currentYear} Face By Niamh Aesthetics. All rights reserved.</p>
+            <p style={{ margin: 0 }}>&copy; {currentYear} Starr Aesthetics. All rights reserved.</p>
             <p style={{ margin: 0, textAlign: "right", maxWidth: 360 }}>
               Results may vary. Treatments performed by a qualified aesthetics practitioner.
             </p>
@@ -406,7 +387,7 @@ export default function Footer() {
           <div style={{
             textAlign: "center",
             paddingTop: 20,
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 9,
             color: "rgba(28,28,30,0.35)",
             letterSpacing: "0.2em",

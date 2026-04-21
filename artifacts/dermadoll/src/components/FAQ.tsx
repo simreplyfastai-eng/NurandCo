@@ -26,7 +26,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: "Where are you based?",
-    answer: "Niamh works from a private home clinic in Leeds and is available at Laurenanaisbeauty in Horsforth two days a month. Exact address details are provided upon booking confirmation.",
+    answer: "We operate from two premium clinic locations — Hornchurch in Essex (RM11) and Marylebone in London (W1G). Exact address details are provided upon booking confirmation.",
   },
   {
     question: "How long do results last?",
@@ -34,7 +34,7 @@ const faqs: FAQItem[] = [
   },
   {
     question: "What aftercare is provided?",
-    answer: "Full aftercare guidance is provided after every treatment. A complimentary 2-week review is included for anti-wrinkle treatments. Niamh is always available via Instagram DM or WhatsApp for any questions after your appointment.",
+    answer: "Full aftercare guidance is provided after every treatment. A complimentary 2-week review is included for anti-wrinkle treatments. Our team is always available via Instagram DM or WhatsApp for any questions after your appointment.",
   },
 ];
 
@@ -42,7 +42,7 @@ function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
       <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
+      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
       <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
     </div>
   );
@@ -52,7 +52,7 @@ export default function FAQ() {
   const [open, setOpen] = useState<number | null>(null);
 
   return (
-    <section id="faq" style={{ background: "#F0EBE1", padding: "100px 0" }}>
+    <section id="faq" style={{ background: "#F5F0EB", padding: "100px 0" }}>
       <div style={{ maxWidth: 750, margin: "0 auto", padding: "0 24px" }}>
 
         <motion.div
@@ -63,7 +63,7 @@ export default function FAQ() {
           style={{ textAlign: "center", marginBottom: 56 }}
         >
           <Eyebrow label="FAQ" />
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1C1C1E", margin: 0 }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#3D3D3D", margin: 0 }}>
             Common Questions
           </h2>
         </motion.div>
@@ -86,7 +86,7 @@ export default function FAQ() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "20px 24px",
-                  background: open === i ? "#C9A96E" : "#FAF7F2",
+                  background: open === i ? "#C9A96E" : "#F5F0EB",
                   border: "none",
                   cursor: "pointer",
                   gap: 16,
@@ -95,16 +95,16 @@ export default function FAQ() {
                 }}
               >
                 <span style={{
-                  fontFamily: "'DM Sans', sans-serif",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 14,
                   fontWeight: 500,
-                  color: "#1C1C1E",
+                  color: "#3D3D3D",
                 }}>
                   {faq.question}
                 </span>
                 <ChevronDown
                   size={16}
-                  color={open === i ? "#C9A96E" : "#6B6260"}
+                  color={open === i ? "#C9A96E" : "#737373"}
                   style={{ flexShrink: 0, transform: open === i ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s" }}
                 />
               </button>
@@ -117,12 +117,12 @@ export default function FAQ() {
                     animate={{ height: "auto", opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }}
                     transition={{ duration: 0.3 }}
-                    style={{ overflow: "hidden", background: "#FAF7F2" }}
+                    style={{ overflow: "hidden", background: "#F5F0EB" }}
                   >
                     <p style={{
-                      fontFamily: "'DM Sans', sans-serif",
+                      fontFamily: "'Inter', sans-serif",
                       fontSize: 14,
-                      color: "#6B6260",
+                      color: "#737373",
                       lineHeight: 1.8,
                       margin: 0,
                       padding: "20px 24px",

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=DM+Sans:wght@300;400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,600&family=Inter:wght@300;400;500&display=swap');
 @import "tailwindcss";
 @import "tw-animate-css";
 @plugin "@tailwindcss/typography";
@@ -79,9 +79,9 @@
   --elevate-1: rgba(0,0,0, .03);
   --elevate-2: rgba(0,0,0, .08);
 
-  /* Face By Niamh palette */
-  --background: 39 44% 97%;       /* #FAF7F2 cream */
-  --foreground: 35 100% 5%;       /* #1C1C1E dark brown */
+  /* Starr Aesthetics palette */
+  --background: 39 44% 97%;       /* #F5F0EB cream */
+  --foreground: 35 100% 5%;       /* #3D3D3D dark brown */
   --border: 38 18% 86%;           /* #E2DDD5 */
 
   --card: 39 44% 97%;
@@ -104,11 +104,11 @@
   --primary: 39 46% 61%;          /* #C9A96E amber */
   --primary-foreground: 39 44% 97%;
 
-  --secondary: 41 34% 91%;        /* #F0EBE1 cream dark */
+  --secondary: 41 34% 91%;        /* #F5F0EB cream dark */
   --secondary-foreground: 35 100% 5%;
 
   --muted: 41 34% 91%;
-  --muted-foreground: 11 6% 40%;  /* #6B6260 muted brown */
+  --muted-foreground: 11 6% 40%;  /* #737373 muted brown */
 
   --accent: 39 46% 61%;
   --accent-foreground: 39 44% 97%;
@@ -124,7 +124,7 @@
   --chart-4: 11 6% 40%;
   --chart-5: 39 46% 72%;
 
-  --app-font-sans: 'DM Sans', sans-serif;
+  --app-font-sans: 'Inter', sans-serif;
   --app-font-serif: 'Cormorant Garamond', serif;
   --app-font-mono: Menlo, monospace;
   --radius: 0.5rem; /* 8px */

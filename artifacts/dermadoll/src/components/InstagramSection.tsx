@@ -20,7 +20,7 @@ const floatVariants = [
 
 export default function InstagramSection() {
   return (
-    <section className="py-[100px] overflow-hidden" style={{ backgroundColor: "#FAF7F2" }}>
+    <section className="py-[100px] overflow-hidden" style={{ backgroundColor: "#F5F0EB" }}>
       <div className="container mx-auto px-6 max-w-5xl">
         {/* Heading */}
         <div className="text-center mb-16">
@@ -34,7 +34,7 @@ export default function InstagramSection() {
             Follow Along
           </motion.p>
           <motion.a
-            href="https://instagram.com/facebyniamh"
+            href="https://instagram.com/starraesthetics"
             target="_blank"
             rel="noopener noreferrer"
             initial={{ opacity: 0, y: 16 }}
@@ -43,7 +43,7 @@ export default function InstagramSection() {
             transition={{ delay: 0.1 }}
             className="font-serif text-[2rem] md:text-[48px] text-white hover:text-primary transition-colors duration-300 block"
           >
-            @facebyniamh
+            @starraesthetics
           </motion.a>
           <motion.div
             initial={{ scaleX: 0 }}
@@ -61,7 +61,7 @@ export default function InstagramSection() {
             return (
               <motion.a
                 key={`${post.src}-${i}`}
-                href="https://instagram.com/facebyniamh"
+                href="https://instagram.com/starraesthetics"
                 target="_blank"
                 rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 30, scale: 0.9 }}
@@ -117,7 +117,7 @@ export default function InstagramSection() {
           className="text-center"
         >
           <a
-            href="https://instagram.com/facebyniamh"
+            href="https://instagram.com/starraesthetics"
             target="_blank"
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full text-sm uppercase tracking-wider font-medium transition-all duration-300 hover:opacity-90"

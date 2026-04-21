@@ -46,7 +46,7 @@ function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
       <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
+      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
       <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
     </div>
   );
@@ -63,7 +63,7 @@ export default function Services() {
   };
 
   return (
-    <section id="services" style={{ background: "#FAF7F2", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+    <section id="services" style={{ background: "#F5F0EB", padding: "100px 0", position: "relative", overflow: "hidden" }}>
 
       {/* Background decorative layer */}
       {/* Large "N" watermark — top right */}
@@ -120,7 +120,7 @@ export default function Services() {
           style={{ textAlign: "center", marginBottom: 56 }}
         >
           <Eyebrow label="TREATMENTS" />
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1C1C1E", margin: "0 0 12px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#3D3D3D", margin: "0 0 12px" }}>
             What I Offer
           </h2>
           <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C9A96E", margin: 0 }}>
@@ -166,15 +166,15 @@ export default function Services() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: "1.4rem",
                 fontWeight: 600,
-                color: "#1C1C1E",
+                color: "#3D3D3D",
                 margin: "0 0 12px",
               }}>
                 {svc.name}
               </h3>
               <p style={{
-                fontFamily: "'DM Sans', sans-serif",
+                fontFamily: "'Inter', sans-serif",
                 fontSize: 13,
-                color: "#6B6260",
+                color: "#737373",
                 lineHeight: 1.7,
                 margin: "0 0 24px",
                 flexGrow: 1,
@@ -195,8 +195,8 @@ export default function Services() {
                 style={{
                   background: "transparent",
                   border: "1px solid #C9A96E",
-                  color: "#1C1C1E",
-                  fontFamily: "'DM Sans', sans-serif",
+                  color: "#3D3D3D",
+                  fontFamily: "'Inter', sans-serif",
                   fontSize: 10,
                   letterSpacing: "2px",
                   textTransform: "uppercase",
@@ -206,8 +206,8 @@ export default function Services() {
                   transition: "all 0.2s",
                   alignSelf: "flex-start",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#1C1C1E"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1C1C1E"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#3D3D3D"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
               >
                 Book
               </button>
@@ -231,11 +231,11 @@ export default function Services() {
                 alignItems: "center",
                 justifyContent: "center",
                 cursor: "pointer",
-                color: "#1C1C1E",
+                color: "#3D3D3D",
                 transition: "all 0.2s",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#1C1C1E"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#1C1C1E"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#3D3D3D"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
             >
               {icon}
             </button>

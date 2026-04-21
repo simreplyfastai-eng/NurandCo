@@ -7,7 +7,7 @@ export default function TrustTicker() {
     "VITAMIN INJECTIONS",
     "NATURAL RESULTS",
     "5-STAR RATED",
-    "LEEDS / WAKEFIELD",
+    "HORNCHURCH / MARYLEBONE",
   ];
 
   const separator = (
@@ -19,12 +19,12 @@ export default function TrustTicker() {
       {items.map((item, i) => (
         <span key={i} style={{ display: "inline-flex", alignItems: "center" }}>
           <span style={{
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 10,
             fontWeight: 500,
             letterSpacing: "3px",
             textTransform: "uppercase",
-            color: "#1C1C1E",
+            color: "#3D3D3D",
           }}>
             {item}
           </span>
@@ -52,7 +52,7 @@ export default function TrustTicker() {
       `}</style>
 
       <div style={{
-        background: "#EDE7DC",
+        background: "#EAE4DD",
         height: 52,
         overflow: "hidden",
         display: "flex",
@@ -64,7 +64,7 @@ export default function TrustTicker() {
           position: "absolute",
           left: 0, top: 0, bottom: 0,
           width: 80,
-          background: "linear-gradient(90deg, #EDE7DC, transparent)",
+          background: "linear-gradient(90deg, #EAE4DD, transparent)",
           zIndex: 2,
           pointerEvents: "none",
         }} />
@@ -73,7 +73,7 @@ export default function TrustTicker() {
           position: "absolute",
           right: 0, top: 0, bottom: 0,
           width: 80,
-          background: "linear-gradient(270deg, #EDE7DC, transparent)",
+          background: "linear-gradient(270deg, #EAE4DD, transparent)",
           zIndex: 2,
           pointerEvents: "none",
         }} />

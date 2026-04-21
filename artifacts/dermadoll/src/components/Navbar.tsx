@@ -39,22 +39,16 @@ export default function Navbar() {
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[#FAF7F2] ${isScrolled ? "py-3 shadow-sm" : "py-4"}`}
+        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 bg-[#F5F0EB] ${isScrolled ? "py-3 shadow-sm" : "py-4"}`}
         style={{ borderBottom: "1px solid #D9D2C7" }}
       >
         <div className="w-full pl-16 pr-8 flex items-center justify-between">
           {/* Logo lockup */}
-          <a href="#" className="flex flex-col items-start relative z-50 leading-none gap-[1px]" onClick={(e) => scrollTo(e, "#")}>
-            <span className="font-serif italic text-[18px] font-normal leading-none" style={{ color: "#1C1C1E" }}>
-              Face
+          <a href="#" className="flex flex-col items-start relative z-50 leading-none gap-[3px]" onClick={(e) => scrollTo(e, "#")}>
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 24, fontWeight: 600, letterSpacing: "0.01em", color: "#5C1A1A", lineHeight: 1 }}>
+              STARR
             </span>
-            <span className="font-sans text-[9px] tracking-[0.28em] uppercase font-medium leading-none" style={{ color: "#C9A96E" }}>
-              BY
-            </span>
-            <span className="font-serif text-[22px] font-bold leading-none" style={{ color: "#1C1C1E" }}>
-              Niamh
-            </span>
-            <span className="font-sans text-[8px] tracking-[0.38em] uppercase font-light leading-none" style={{ color: "#6B6260" }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.2em", textTransform: "uppercase", fontWeight: 400, color: "#C9A96E", lineHeight: 1 }}>
               AESTHETICS
             </span>
           </a>
@@ -67,7 +61,7 @@ export default function Navbar() {
                 href={link.href}
                 onClick={(e) => scrollTo(e, link.href)}
                 className="font-sans text-[11px] tracking-[0.18em] font-medium transition-colors duration-300 hover:text-[#C9A96E]"
-                style={{ color: "#6B6260" }}
+                style={{ color: "#737373" }}
               >
                 {link.name}
               </a>
@@ -76,7 +70,7 @@ export default function Navbar() {
               href="#services"
               onClick={(e) => { e.preventDefault(); document.getElementById("services")?.scrollIntoView({ behavior: "smooth" }); }}
               className="ml-2 font-sans text-[11px] tracking-[0.18em] font-medium uppercase transition-all duration-300 px-5 py-2.5 border"
-              style={{ background: "#C9A96E", color: "#1C1C1E", borderColor: "#C9A96E" }}
+              style={{ background: "#C9A96E", color: "#3D3D3D", borderColor: "#C9A96E" }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "#C9A96E";
                 e.currentTarget.style.borderColor = "#C9A96E";
@@ -104,9 +98,9 @@ export default function Navbar() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
           >
             {isMobileMenuOpen ? (
-              <X size={26} strokeWidth={2} className="text-[#1C1C1E]" />
+              <X size={26} strokeWidth={2} className="text-[#3D3D3D]" />
             ) : (
-              <Menu size={26} strokeWidth={2} style={{ color: "#1C1C1E" }} />
+              <Menu size={26} strokeWidth={2} style={{ color: "#3D3D3D" }} />
             )}
           </button>
         </div>
@@ -121,7 +115,7 @@ export default function Navbar() {
             exit={{ opacity: 0, y: "-100%" }}
             transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="fixed inset-0 z-40 flex flex-col items-center justify-center"
-            style={{ background: "#FAF7F2" }}
+            style={{ background: "#F5F0EB", fontFamily: "'Inter', sans-serif" }}
           >
             <div className="flex flex-col items-center space-y-7">
               {navLinks.map((link, i) => (
@@ -132,7 +126,7 @@ export default function Navbar() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 + i * 0.07 }}
-                  className="font-sans text-[12px] tracking-[0.3em] text-[#6B6260] hover:text-[#C9A96E] transition-colors"
+                  className="font-sans text-[12px] tracking-[0.3em] text-[#737373] hover:text-[#C9A96E] transition-colors"
                 >
                   {link.name}
                 </motion.a>
@@ -149,7 +143,7 @@ export default function Navbar() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.45 }}
-                className="font-sans text-[11px] tracking-[0.2em] uppercase font-medium px-8 py-3 border border-[#C9A96E] text-[#1C1C1E] bg-[#C9A96E] hover:bg-[#B8946A] hover:border-[#B8946A] transition-all"
+                className="font-sans text-[11px] tracking-[0.2em] uppercase font-medium px-8 py-3 border border-[#C9A96E] text-[#3D3D3D] bg-[#C9A96E] hover:bg-[#B8946A] hover:border-[#B8946A] transition-all"
               >
                 Book a Consultation
               </motion.a>
@@ -159,7 +153,7 @@ export default function Navbar() {
                 animate={{ opacity: 1 }}
                 transition={{ delay: 0.55 }}
                 style={{
-                  fontFamily: 'DM Sans, sans-serif',
+                  fontFamily: 'Inter, sans-serif',
                   fontSize: '11px',
                   color: '#C8C0B4',
                   display: 'flex',

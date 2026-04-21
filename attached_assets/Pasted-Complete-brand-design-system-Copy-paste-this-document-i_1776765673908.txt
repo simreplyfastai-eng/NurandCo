@@ -1,0 +1,579 @@
+Complete brand design system. Copy-paste this document into any new Replit project to replicate the exact visual identity.
+
+1. Colour Palette
+Role	Name	Hex	HSL	Usage
+Page background	Warm Cream	#F5F0EB	hsl(30 33% 93%)	Body, hero text panel, section backgrounds
+Primary	Deep Burgundy	#5C1A1A	hsl(0 55% 23%)	Headings, borders, buttons, navbar logo
+Primary foreground	Cream	#F5F0EB	hsl(30 33% 93%)	Text on burgundy backgrounds
+Secondary	Antique Gold	#C9A96E	hsl(36 45% 60%)	Accents, labels, dividers, star ratings, "AESTHETICS" wordmark
+Accent	Dusty Rose	#E8B4B8	hsl(351 46% 81%)	Soft hover tints, light decorative use
+Foreground / Body text	Charcoal	#3D3D3D	hsl(0 0% 24%)	Body copy, nav links
+Muted foreground	Mid-grey	#737373	hsl(0 0% 45%)	Secondary copy, placeholder text
+Muted background	Off-white	#F7F4F1	hsl(30 30% 96%)	Subtle section backgrounds
+Card surface	White	#FFFFFF	hsl(0 0% 100%)	Review cards, modal panels, service cards
+Calendar surface	Pale cream	#FAF7F4	—	Booking modal calendar, confirmation panel
+Border	Burgundy (10–20% opacity)	#5C1A1A @ 10–20%	—	Card borders, input borders, dividers
+Destructive / Error	Red	#F23A3A	hsl(0 85% 60%)	Form errors, destructive actions
+Disabled / Past dates	Charcoal 20%	#3D3D3D @ 20%	—	Disabled buttons, past calendar days
+Hover & State Colours
+State	Colour
+Button burgundy hover fill	#5C1A1A (bg) + #F5F0EB (text)
+Button gold hover fill	#C9A96E (bg) + #FFFFFF (text)
+Nav link hover	#5C1A1A (primary)
+Calendar day hover	rgba(92,26,26,0.10) bg tint
+Calendar day selected	#5C1A1A bg + #FFFFFF text
+Today indicator	#C9A96E dot (2×2px circle, rounded-full)
+Input focus border	#5C1A1A (primary)
+Card/image hover	scale(1.02) + duration-700
+2. Typography
+Font Families
+<!-- Paste in <head> -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+Family	Variable	Role
+Cormorant Garamond	--font-serif	All headings h1–h6, serif italic accents, modal titles, quote text
+Inter	--font-sans	All body copy, nav links, buttons, labels, captions
+Font Weights Used
+Weight	Name	Usage
+300	Light	Body copy, card descriptions, paragraphs
+400	Regular	Body fallback, serif upright
+500	Medium	Nav links (serif), strong body
+600	SemiBold	Author names in reviews
+400 italic	Serif Italic	All headings, pull quotes, treatment names
+700 italic	Bold Italic	Heavy editorial headings if needed
+Type Scale
+Element	Font	Size (clamp / fixed)	Weight	Style	Line-height	Letter-spacing
+h1 — Hero	Cormorant Garamond	clamp(2.2rem, 4.5vw, 4.4rem)	400	italic	1.1	default
+h2 — Section	Cormorant Garamond	clamp(2rem, 4vw, 3.2rem)	400	italic	tight	default
+h3 — Modal/Sub	Cormorant Garamond	1.25rem (20px)	400	italic	default	default
+h4 — Card title	Cormorant Garamond	0.875rem (14px)	400	italic	tight	default
+Footer logo	Cormorant Garamond	3rem (48px)	400	upright	none	default
+Navbar logo	Cormorant Garamond	1.5rem (24px)	400	upright	none	default
+Body — large	Inter	1.125rem (18px)	300	—	relaxed (1.625)	default
+Body — base	Inter	1rem (16px)	300	—	relaxed	default
+Body — small	Inter	0.875rem (14px)	300–400	—	default	default
+Label / eyebrow	Inter	9–10px	400	uppercase	—	0.2em–0.3em
+Button text	Inter	0.75rem (12px, text-xs)	400	uppercase	—	0.15em
+Caption / fine	Inter	9px	400	uppercase	—	0.18em–0.22em
+Nav links	Inter	11px	400	uppercase	—	0.15em
+Rules
+Headings are always italic Cormorant Garamond
+Body text is always Inter weight 300 (light)
+All uppercase text uses Inter with letter-spacing: 0.15em minimum
+No heading is ever bold or non-italic in normal use
+3. Spacing Scale
+Based on Tailwind v4 default spacing. Values actually used:
+
+Token	px	Usage
+1	4px	Tiny gaps (star ratings, micro-spacing)
+2	8px	Small gaps, time slot gap
+3	12px	Caption padding, small button padding
+4	16px	Grid gaps (mobile cards), form field gaps
+5	20px	Label-to-heading gaps
+6	24px	Container horizontal padding, card padding
+8	32px	Card inner padding, modal padding
+10	40px	Section sub-spacing
+12	48px	Between header and content
+14	56px	Header bottom margin (editorial sections)
+16	64px	Larger section gaps
+20	80px	Section vertical padding (mobile)
+24	96px	Section vertical padding (desktop)
+28	112px	Generous section vertical padding
+Container
+max-width: 896px (max-w-4xl) for content sections
+max-width: 1280px default container
+padding: 0 24px (px-6)
+
+4. Border Radius
+All radii are 0 — sharp rectangular everywhere.
+
+--radius: 0rem;
+
+Component	Radius
+Buttons	0
+Cards	0
+Inputs	0
+Modals/Dialogs	0
+Images	0
+Today dot (calendar)	9999px (rounded-full) — only exception
+Loading spinner	9999px (rounded-full) — only exception
+5. Shadows
+Use case	Value
+Navbar (scrolled)	shadow-md — 0 4px 6px -1px rgb(0 0 0/0.1), 0 2px 4px -2px rgb(0 0 0/0.1)
+Modal/Dialog	shadow-2xl — 0 25px 50px -12px rgb(0 0 0/0.25)
+Review cards	shadow-sm — 0 1px 2px 0 rgb(0 0 0/0.05)
+Hero / image panels	None
+Buttons	None (outline style only)
+Before/After images	None
+6. Component Styles
+6.1 Buttons
+All buttons are outline style, rectangular (0 radius), uppercase, small tracking text.
+
+Primary — Burgundy Outlined (.btn-burgundy)
+border: 1px solid #5C1A1A;
+color: #5C1A1A;
+background: transparent;
+padding: 12px 24px;        /* py-3 px-6 */
+font-size: 12px;           /* text-xs */
+text-transform: uppercase;
+letter-spacing: 0.15em;
+transition: background-color 300ms, color 300ms;
+/* Hover */
+background: #5C1A1A;
+color: #F5F0EB;
+/* Disabled */
+opacity: 0.4;
+cursor: not-allowed;
+
+Secondary — Gold Outlined (.btn-gold)
+border: 1px solid #C9A96E;
+color: #C9A96E;
+background: transparent;
+padding: 12px 24px;
+font-size: 12px;
+text-transform: uppercase;
+letter-spacing: 0.15em;
+transition: background-color 300ms, color 300ms;
+/* Hover */
+background: #C9A96E;
+color: #FFFFFF;
+
+Ghost / Back button
+border: 1px solid rgba(92,26,26,0.25);
+color: #5C1A1A;
+background: transparent;
+padding: 12px 16px;
+font-size: 12px;
+text-transform: uppercase;
+letter-spacing: 0.15em;
+/* Hover */
+border-color: #5C1A1A;
+
+6.2 Cards
+Review Cards
+background: #FFFFFF;
+border: 1px solid rgba(92,26,26,0.1);
+box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+padding: 24px;              /* p-6 */
+border-radius: 0;
+
+Service / Treatment Cards
+background: #FFFFFF;
+border: 1px solid rgba(92,26,26,0.1);
+border-radius: 0;
+padding: 32px;              /* p-8 */
+
+Before/After Image Cards
+background: #E7E0D9;        /* stone-100 equivalent */
+overflow: hidden;
+aspect-ratio: 1/1;
+border-radius: 0;
+/* Hover */
+transform: scale(1.02);
+transition: transform 700ms ease;
+
+Booking Confirmation Panel
+background: #FAF7F4;
+border: 1px solid rgba(92,26,26,0.15);
+padding: 24px;
+border-radius: 0;
+
+6.3 Inputs / Form Fields
+width: 100%;
+padding: 12px 16px;         /* py-3 px-4 */
+border: 1px solid rgba(92,26,26,0.2);
+background: transparent;
+color: #3D3D3D;
+font-size: 14px;
+border-radius: 0;
+outline: none;
+transition: border-color 300ms;
+/* Placeholder */
+color: rgba(61,61,61,0.4);
+/* Focus */
+border-color: #5C1A1A;
+
+6.4 Navigation
+Desktop Navbar
+position: fixed;
+top: 0;
+width: 100%;
+z-index: 50;
+background: #F5F0EB;
+border-bottom: 1px solid rgba(92,26,26,0.15);
+transition: all 300ms;
+/* Default state */
+padding: 24px 0;            /* py-6 */
+/* Scrolled state (>20px scroll) */
+padding: 16px 0;            /* py-4 */
+box-shadow: 0 4px 6px -1px rgb(0 0 0/0.1);
+
+Logo
+"STARR" — Cormorant Garamond, 24px, colour #5C1A1A, upright
+"AESTHETICS" — Inter, 10px, colour #C9A96E, tracking 0.2em, uppercase
+Stacked vertically, left-aligned
+
+Nav Links (desktop)
+font-family: Inter;
+font-size: 11px;
+text-transform: uppercase;
+letter-spacing: 0.15em;
+color: #3D3D3D;
+transition: color 300ms;
+/* Hover */
+color: #5C1A1A;
+
+Mobile Menu
+/* Full-screen overlay */
+position: fixed;
+inset: 0;
+z-index: 60;
+background: #F5F0EB;
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+/* Close button: top-right, X icon (lucide), 32px, #5C1A1A */
+/* Links: same style as desktop nav but font-size: 14px */
+/* Gap between links: 32px (space-y-8) */
+
+6.5 Section Headers (Editorial Pattern)
+All section headers follow this same pattern:
+
+/* 1. Gold rule + eyebrow label + gold rule */
+<div style={{ display:"flex", alignItems:"center", gap:20, marginBottom:20 }}>
+  <span style={{ display:"block", height:1, flex:1, maxWidth:60, background:"#C9A96E", opacity:0.4 }} />
+  <span style={{ fontSize:9, letterSpacing:"0.3em", textTransform:"uppercase", color:"#C9A96E" }}>
+    Section Label
+  </span>
+  <span style={{ display:"block", height:1, flex:1, maxWidth:60, background:"#C9A96E", opacity:0.4 }} />
+</div>
+/* 2. Large italic serif heading */
+<h2 style={{ fontFamily:"Cormorant Garamond", fontStyle:"italic", color:"#5C1A1A",
+             fontSize:"clamp(2rem, 4vw, 3.2rem)" }}>
+  Section Heading
+</h2>
+/* 3. Light body subline */
+<p style={{ fontFamily:"Inter", fontWeight:300, fontSize:14, letterSpacing:"0.05em" }}>
+  Supporting description text.
+</p>
+
+6.6 Modal / Dialog
+max-width: 512px;           /* max-w-lg */
+width: 100%;
+background: #F5F0EB;
+border: 1px solid rgba(92,26,26,0.2);
+border-radius: 0;
+overflow: hidden;
+box-shadow: 0 25px 50px -12px rgb(0 0 0/0.25);
+padding: 0;                 /* padding handled per-section */
+max-height: 90vh;
+overflow-y: auto;
+
+Modal header band:
+
+background: #5C1A1A;
+padding: 24px 32px;
+text-align: center;
+color: white;
+/* Step progress: 4 × hairline bars */
+height: 1px;
+width: 32px;
+/* active: background white; inactive: rgba(255,255,255,0.25) */
+
+6.7 Time Slots (Booking)
+/* Unselected */
+padding: 8px 12px;
+border: 1px solid rgba(92,26,26,0.2);
+background: transparent;
+color: #5C1A1A;
+font-size: 12px;
+min-width: 60px;
+letter-spacing: 0.05em;
+transition: border-color 300ms;
+/* Selected */
+background: #5C1A1A;
+color: white;
+border-color: #5C1A1A;
+/* Hover (unselected) */
+border-color: rgba(92,26,26,0.6);
+
+6.8 Icons
+Library: Lucide React
+Style: outline (default Lucide stroke style)
+Size: w-5 h-5 (20px) for functional icons; w-4 h-4 (16px) for chevrons/small
+Hamburger menu: size={24}, Close X: size={32}
+Colour: always text-primary (#5C1A1A) or text-foreground/40 for inactive states
+Star ratings: custom SVG stars in #C9A96E (gold), 12×12px
+7. Responsive Breakpoints
+Name	Min-width	Behaviour
+(mobile default)	0px	Single column, stacked layouts
+sm	640px	Side-by-side buttons, 2-col grids
+md	768px	Desktop nav visible, hero split layout, 3-col grids
+lg	1024px	Wider hero text padding (px-20), larger type
+Key layout changes at md:
+
+Hero: stacked (photo top, text below) → split 50/50 columns
+Navbar: hamburger → full horizontal nav
+Reviews: auto-scroll carousel → static 3-column grid
+Before/After: 2-col grid (stays 2-col across all sizes)
+8. Unique Brand Details
+Background Texture
+Plain flat #F5F0EB — no pattern or texture. The warmth comes from the HSL hue alone.
+
+Section Dividers
+/* Thin hairline rule */
+height: 1px;
+background: rgba(92,26,26,0.1);  /* primary/10 */
+width: 100%;
+
+Editorial Eyebrow Labels
+font-size: 9px;
+text-transform: uppercase;
+letter-spacing: 0.2em–0.3em;
+color: #C9A96E;   /* always gold */
+
+Decorative Symbol
+✦ — used as a brand separator in the Treatment Marquee ticker. Never used as emoji; always inline text.
+
+Treatment Marquee
+Dual-row infinite horizontal scroll (CSS @keyframes marquee)
+Row 1 scrolls left, Row 2 scrolls right (using animation-direction: reverse)
+Speed: 30s linear infinite
+Separator: ✦ between treatment names
+Section label: THE EDIT in gold caps
+Heading: "Precision. Artistry. Results." in large serif italic
+Before/After Image Cards
+Images are already combined (before left, after right in one file)
+Full image displayed, no slider
+Decorative centre hairline: 1px solid rgba(255,255,255,0.55)
+Corner labels: background: rgba(0,0,0,0.2), backdrop-filter: blur(4px), 8px white text
+Mobile Reviews Carousel
+Infinite auto-scrolling via requestAnimationFrame
+Speed: 0.5px/frame (~30px/s)
+Pause on touchStart / resume on touchEnd
+Soft edge fade: linear-gradient overlay, width: 40px on each side
+Card width: 78vw, max 300px
+Duplicated array ([...reviews, ...reviews]) for seamless loop
+Hero Fade (Mobile)
+/* Bottom gradient fade from cream to transparent, 20% height */
+background: linear-gradient(to top, #F5F0EB, rgba(245,240,235,0));
+
+Page Load Animation
+/* Hero text panel fades in with slight upward drift */
+transition: opacity 700ms, transform 700ms;
+initial: opacity 0, translateY(16px);
+loaded: opacity 1, translateY(0);
+delay: 80ms
+
+9. Animation & Transition Values
+Element	Property	Duration	Easing	Trigger
+All buttons	background-color, color	300ms	ease (default)	hover
+Nav links	color	300ms	ease	hover
+Navbar	padding, shadow	300ms	ease	scroll
+Hero text panel	opacity, transform	700ms	ease	page load
+Before/After image	transform (scale 1.02)	700ms	ease	hover
+Modal content	opacity, translateY (slide up 16px)	300ms	ease	step change
+Modal success	scale (zoom-in-95)	500ms	ease	success state
+Calendar day	background-color	instant	—	click
+Time slot	background, border	instant	—	click
+Mobile nav menu	instant overlay	—	—	tap
+Reviews carousel	continuous translateX	60fps rAF	linear	auto
+Image hover zoom	transform: scale(1.02)	700ms	ease	hover
+10. Logo Details
+Logotype (text-based, no image file)
+Line 1: "STARR"
+  Font: Cormorant Garamond
+  Weight: 400
+  Style: upright (not italic)
+  Size (navbar): 24px
+  Size (footer): 48px (text-5xl)
+  Colour: #5C1A1A
+Line 2: "AESTHETICS"
+  Font: Inter
+  Weight: 400
+  Size (navbar): 10px
+  Size (footer): 12px (text-xs)
+  Colour: #C9A96E
+  Letter-spacing: 0.2em (navbar), 0.4em (footer)
+  Text-transform: uppercase
+  Margin-top: 4px
+Layout: stacked vertically, left-aligned (navbar), center-aligned (footer)
+Cursor: pointer — clicking scrolls to top
+
+11. Page Section Order
+Navbar (fixed)
+↓
+Hero — split 50/50, photo right, text left
+↓
+About — Eva's story + portrait photo
+↓
+TreatmentMarquee — dual-scroll ticker editorial strip
+↓
+Locations — Hornchurch + Marylebone cards
+↓
+Services — treatment menu with book buttons
+↓
+BeforeAfter — 2×2 editorial results grid
+↓
+ResultsVideos — 2×2 autoplay video grid (9:16 portrait)
+↓
+TrainingAcademy — Starr Academy section
+↓
+Reviews — auto-carousel (mobile) / 3-col grid (desktop)
+↓
+FAQ — accordion or expanded paragraphs
+↓
+BookCTA — full-width call to action banner
+↓
+Footer — logo, links, contact, copyright
+
+12. CSS Variables — Ready-to-Use Token Block
+Paste this into the :root of your CSS file. All values match the Starr Aesthetics system exactly.
+
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap');
+:root {
+  /* ─── Colours ─────────────────────────────────────── */
+  --color-background:       #F5F0EB;   /* warm cream */
+  --color-foreground:       #3D3D3D;   /* charcoal body text */
+  --color-primary:          #5C1A1A;   /* deep burgundy */
+  --color-primary-fg:       #F5F0EB;   /* text on primary */
+  --color-secondary:        #C9A96E;   /* antique gold */
+  --color-secondary-fg:     #3D3D3D;
+  --color-accent:           #E8B4B8;   /* dusty rose */
+  --color-accent-fg:        #5C1A1A;
+  --color-muted:            #F7F4F1;   /* off-white panels */
+  --color-muted-fg:         #737373;
+  --color-card:             #FFFFFF;
+  --color-card-fg:          #3D3D3D;
+  --color-calendar-bg:      #FAF7F4;   /* booking modal surfaces */
+  --color-border:           rgba(92,26,26,0.15);
+  --color-border-subtle:    rgba(92,26,26,0.10);
+  --color-destructive:      #F23A3A;
+  --color-destructive-fg:   #FFFFFF;
+  /* ─── Typography ──────────────────────────────────── */
+  --font-serif:   'Cormorant Garamond', Georgia, serif;
+  --font-sans:    'Inter', system-ui, sans-serif;
+  --font-mono:    Menlo, monospace;
+  /* ─── Border Radius ───────────────────────────────── */
+  --radius:       0rem;   /* sharp/rectangular everywhere */
+  --radius-pill:  9999px; /* only for dots / spinners */
+  /* ─── Spacing ─────────────────────────────────────── */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-20:  80px;
+  --space-24:  96px;
+  /* ─── Shadows ─────────────────────────────────────── */
+  --shadow-sm:  0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.10), 0 2px 4px -2px rgb(0 0 0 / 0.10);
+  --shadow-2xl: 0 25px 50px -12px rgb(0 0 0 / 0.25);
+  /* ─── Transitions ─────────────────────────────────── */
+  --transition-fast:    150ms ease;
+  --transition-base:    300ms ease;
+  --transition-slow:    700ms ease;
+  --transition-spring:  500ms ease;
+  /* ─── Type sizes ──────────────────────────────────── */
+  --text-hero:     clamp(2.2rem, 4.5vw, 4.4rem);
+  --text-h2:       clamp(2rem, 4vw, 3.2rem);
+  --text-h3:       1.25rem;
+  --text-h4:       0.875rem;
+  --text-body-lg:  1.125rem;
+  --text-body:     1rem;
+  --text-sm:       0.875rem;
+  --text-xs:       0.75rem;
+  --text-label:    9px;
+  --text-nav:      11px;
+  /* ─── Letter spacing ──────────────────────────────── */
+  --tracking-label:   0.3em;
+  --tracking-button:  0.15em;
+  --tracking-nav:     0.15em;
+  --tracking-logo:    0.2em;
+  --tracking-wide:    0.4em;
+  /* ─── Line heights ────────────────────────────────── */
+  --leading-tight:    1.1;
+  --leading-snug:     1.375;
+  --leading-normal:   1.5;
+  --leading-relaxed:  1.625;
+  /* ─── Z-index ─────────────────────────────────────── */
+  --z-navbar:  50;
+  --z-modal:   60;
+  --z-overlay: 70;
+}
+/* ─── Base styles ─────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+}
+/* ─── Button utilities ────────────────────────────────── */
+.btn-burgundy {
+  border: 1px solid var(--color-primary);
+  color: var(--color-primary);
+  background: transparent;
+  padding: 12px 24px;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-button);
+  transition: background-color var(--transition-base), color var(--transition-base);
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+.btn-burgundy:hover {
+  background: var(--color-primary);
+  color: var(--color-primary-fg);
+}
+.btn-burgundy:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.btn-gold {
+  border: 1px solid var(--color-secondary);
+  color: var(--color-secondary);
+  background: transparent;
+  padding: 12px 24px;
+  font-family: var(--font-sans);
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-button);
+  transition: background-color var(--transition-base), color var(--transition-base);
+  cursor: pointer;
+  border-radius: var(--radius);
+}
+.btn-gold:hover {
+  background: var(--color-secondary);
+  color: #FFFFFF;
+}
+/* ─── Hide scrollbar utility ──────────────────────────── */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+/* ─── Marquee animation ───────────────────────────────── */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.animate-marquee {
+  animation: marquee 30s linear infinite;
+}
+.animate-marquee-reverse {
+  animation: marquee 30s linear infinite reverse;
+}
+

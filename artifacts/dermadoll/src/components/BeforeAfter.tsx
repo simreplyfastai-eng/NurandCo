@@ -56,7 +56,7 @@ export default function BeforeAfter() {
       <section
         style={{
           padding: "100px 0",
-          background: "#F0EBE1",
+          background: "#F5F0EB",
           position: "relative",
           overflow: "hidden",
         }}
@@ -112,7 +112,7 @@ export default function BeforeAfter() {
               style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}
             >
               <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-              <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>RESULTS</span>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>RESULTS</span>
               <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
             </motion.div>
 
@@ -121,7 +121,7 @@ export default function BeforeAfter() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, ease: "easeOut" }}
-              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1C1C1E", margin: "0 0 12px" }}
+              style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#3D3D3D", margin: "0 0 12px" }}
             >
               Real Results
             </motion.h2>

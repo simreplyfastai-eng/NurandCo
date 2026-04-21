@@ -18,7 +18,7 @@ export default function SectionDivider() {
       <div style={{
         flex: 1,
         height: 1,
-        background: "linear-gradient(90deg, transparent, #1C1C1E)",
+        background: "linear-gradient(90deg, transparent, #3D3D3D)",
         opacity: 0.18,
       }} />
 
@@ -55,7 +55,7 @@ export default function SectionDivider() {
       <div style={{
         flex: 1,
         height: 1,
-        background: "linear-gradient(270deg, transparent, #1C1C1E)",
+        background: "linear-gradient(270deg, transparent, #3D3D3D)",
         opacity: 0.18,
       }} />
     </div>

@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 
 const reviews = [
   {
-    quote: "Absolutely love my lips — so natural and exactly what I wanted. Niamh made me feel so comfortable throughout.",
+    quote: "Absolutely love my lips — so natural and exactly what I wanted. My practitioner made me feel so comfortable throughout.",
     name: "Chloe",
     treatment: "Lip Filler",
   },
@@ -14,7 +14,7 @@ const reviews = [
     treatment: "Skin Boosters",
   },
   {
-    quote: "Niamh is so professional and knowledgeable. My anti-wrinkle looked so fresh — not overdone at all.",
+    quote: "So professional and knowledgeable. My anti-wrinkle looked so fresh — not overdone at all.",
     name: "Lauren",
     treatment: "Anti-Wrinkle",
   },
@@ -24,7 +24,7 @@ function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
       <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
+      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
       <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
     </div>
   );
@@ -34,7 +34,7 @@ export default function Reviews() {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <section id="reviews" style={{ background: "#FAF7F2", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+    <section id="reviews" style={{ background: "#F5F0EB", padding: "100px 0", position: "relative", overflow: "hidden" }}>
 
       {/* Decorative background layer */}
       {/* Large faint quotation mark — top right */}
@@ -101,7 +101,7 @@ export default function Reviews() {
           style={{ textAlign: "center", marginBottom: 56 }}
         >
           <Eyebrow label="REVIEWS" />
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#1C1C1E", margin: "0 0 12px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#3D3D3D", margin: "0 0 12px" }}>
             What Clients Say
           </h2>
           <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C9A96E", margin: 0 }}>
@@ -149,7 +149,7 @@ export default function Reviews() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontStyle: "italic",
                 fontSize: "1.1rem",
-                color: "#1C1C1E",
+                color: "#3D3D3D",
                 lineHeight: 1.7,
                 margin: "0 0 24px",
                 flexGrow: 1,
@@ -157,10 +157,10 @@ export default function Reviews() {
                 "{r.quote}"
               </p>
               <div style={{ borderTop: "1px solid #E2DDD5", paddingTop: 16 }}>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 13, fontWeight: 500, color: "#1C1C1E" }}>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, fontWeight: 500, color: "#3D3D3D" }}>
                   {r.name}
                 </div>
-                <div style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 12, color: "#6B6260", marginTop: 3 }}>
+                <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#737373", marginTop: 3 }}>
                   {r.treatment}
                 </div>
               </div>

@@ -5,7 +5,7 @@ function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
       <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
+      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
       <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
     </div>
   );
@@ -16,10 +16,10 @@ const inputStyle: React.CSSProperties = {
   padding: "14px 16px",
   border: "1px solid #E2DDD5",
   borderRadius: 0,
-  background: "#FAF7F2",
-  fontFamily: "'DM Sans', sans-serif",
+  background: "#F5F0EB",
+  fontFamily: "'Inter', sans-serif",
   fontSize: 14,
-  color: "#1C1C1E",
+  color: "#3D3D3D",
   outline: "none",
   boxSizing: "border-box",
   transition: "border-color 0.2s",
@@ -39,7 +39,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" style={{ background: "#F0EBE1", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+    <section id="contact" style={{ background: "#F5F0EB", padding: "100px 0", position: "relative", overflow: "hidden" }}>
 
       {/* Decorative background layer */}
       {/* Large faint "@" watermark — right side */}
@@ -113,18 +113,18 @@ export default function Contact() {
             transition={{ duration: 0.6 }}
           >
             <Eyebrow label="CONTACT" />
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 600, color: "#1C1C1E", margin: "0 0 20px" }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 600, color: "#3D3D3D", margin: "0 0 20px" }}>
               Get In Touch
             </h2>
-            <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 15, color: "#6B6260", lineHeight: 1.8, margin: "0 0 40px" }}>
-              Based in Leeds and Wakefield. DM on Instagram or send an email — Niamh will get back to you promptly.
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 40px" }}>
+              Clinics in Hornchurch, Essex and Marylebone, London. DM on Instagram or send an email — we'll get back to you promptly.
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {[
-                { icon: "📍", text: "Leeds / Wakefield" },
-                { icon: "📸", text: "@facebyniamh", href: "https://instagram.com/facebyniamh" },
-                { icon: "✉", text: "hello@facebyniamh.co.uk", href: "mailto:hello@facebyniamh.co.uk" },
+                { icon: "📍", text: "Hornchurch / Marylebone" },
+                { icon: "📸", text: "@starraesthetics", href: "https://instagram.com/starraesthetics" },
+                { icon: "✉", text: "hello@starraesthetics.co.uk", href: "mailto:hello@starraesthetics.co.uk" },
               ].map((item) => (
                 <div key={item.text} style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <span style={{ fontSize: 18 }}>{item.icon}</span>
@@ -133,12 +133,12 @@ export default function Contact() {
                       href={item.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#C9A96E", textDecoration: "none" }}
+                      style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#C9A96E", textDecoration: "none" }}
                     >
                       {item.text}
                     </a>
                   ) : (
-                    <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#6B6260" }}>{item.text}</span>
+                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373" }}>{item.text}</span>
                   )}
                 </div>
               ))}
@@ -155,22 +155,22 @@ export default function Contact() {
             {sent ? (
               <div style={{
                 padding: "48px 32px",
-                background: "#F0EBE1",
+                background: "#F5F0EB",
                 border: "1px solid #E2DDD5",
                 textAlign: "center",
               }}>
                 <div style={{ fontSize: 32, marginBottom: 16 }}>✦</div>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.8rem", color: "#1C1C1E", margin: "0 0 10px" }}>
+                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.8rem", color: "#3D3D3D", margin: "0 0 10px" }}>
                   Message Received
                 </h3>
-                <p style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 14, color: "#6B6260", margin: 0 }}>
-                  Niamh will be in touch within 24 hours.
+                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", margin: 0 }}>
+                  We'll be in touch within 24 hours.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <div>
-                  <label style={{ display: "block", fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#6B6260", marginBottom: 8 }}>
+                  <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#737373", marginBottom: 8 }}>
                     Name
                   </label>
                   <input
@@ -185,7 +185,7 @@ export default function Contact() {
                   />
                 </div>
                 <div>
-                  <label style={{ display: "block", fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#6B6260", marginBottom: 8 }}>
+                  <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#737373", marginBottom: 8 }}>
                     Email
                   </label>
                   <input
@@ -200,7 +200,7 @@ export default function Contact() {
                   />
                 </div>
                 <div>
-                  <label style={{ display: "block", fontFamily: "'DM Sans', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#6B6260", marginBottom: 8 }}>
+                  <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#737373", marginBottom: 8 }}>
                     Message
                   </label>
                   <textarea
@@ -211,7 +211,7 @@ export default function Contact() {
                     style={{ ...inputStyle, resize: "none" }}
                     onFocus={(e) => e.currentTarget.style.borderColor = "#C9A96E"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "#E2DDD5"}
-                    placeholder="How can Niamh help you?"
+                    placeholder="How can we help you?"
                   />
                 </div>
                 <button
@@ -220,8 +220,8 @@ export default function Contact() {
                   style={{
                     background: "#C9A96E",
                     border: "1px solid #C9A96E",
-                    color: "#1C1C1E",
-                    fontFamily: "'DM Sans', sans-serif",
+                    color: "#3D3D3D",
+                    fontFamily: "'Inter', sans-serif",
                     fontSize: 11,
                     letterSpacing: "2px",
                     textTransform: "uppercase",

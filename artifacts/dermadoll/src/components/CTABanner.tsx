@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 export default function CTABanner() {
   return (
     <section style={{
-      background: "#FAF7F2",
+      background: "#F5F0EB",
       padding: "120px 24px",
       textAlign: "center",
       position: "relative",
@@ -151,7 +151,7 @@ export default function CTABanner() {
           {/* Eyebrow */}
           <div style={{ display: "flex", alignItems: "center", gap: 14, justifyContent: "center", marginBottom: 28 }}>
             <div style={{ height: 1, width: 36, background: "linear-gradient(90deg, transparent, #C9A96E)" }} />
-            <span style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 9, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Book Your Appointment</span>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Book Your Appointment</span>
             <div style={{ height: 1, width: 36, background: "linear-gradient(90deg, #C9A96E, transparent)" }} />
           </div>
 
@@ -160,24 +160,24 @@ export default function CTABanner() {
             fontStyle: "italic",
             fontSize: "clamp(2.4rem,6vw,4.2rem)",
             fontWeight: 300,
-            color: "#1C1C1E",
+            color: "#3D3D3D",
             margin: "0 0 20px",
             lineHeight: 1.15,
           }}>
             Ready for a consultation?
           </h2>
           <p style={{
-            fontFamily: "'DM Sans', sans-serif",
+            fontFamily: "'Inter', sans-serif",
             fontSize: 15,
-            color: "#6B6260",
+            color: "#737373",
             margin: "0 0 44px",
             lineHeight: 1.7,
           }}>
             Online booking — coming soon.<br />
-            Message <span style={{ color: "#C9A96E" }}>@facebyniamh</span> on Instagram to enquire.
+            Message <span style={{ color: "#C9A96E" }}>@starr.aesthetics</span> on Instagram to enquire.
           </p>
           <a
-            href="https://instagram.com/facebyniamh"
+            href="https://instagram.com/starr.aesthetics"
             target="_blank"
             rel="noopener noreferrer"
             style={{
@@ -186,8 +186,8 @@ export default function CTABanner() {
               gap: 10,
               background: "transparent",
               border: "1px solid #C9A96E",
-              color: "#1C1C1E",
-              fontFamily: "'DM Sans', sans-serif",
+              color: "#3D3D3D",
+              fontFamily: "'Inter', sans-serif",
               fontSize: 11,
               letterSpacing: "2.5px",
               textTransform: "uppercase",
@@ -198,11 +198,11 @@ export default function CTABanner() {
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.background = "#C9A96E";
-              e.currentTarget.style.color = "#1C1C1E";
+              e.currentTarget.style.color = "#3D3D3D";
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.background = "transparent";
-              e.currentTarget.style.color = "#1C1C1E";
+              e.currentTarget.style.color = "#3D3D3D";
             }}
           >
             Get In Touch
