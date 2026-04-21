@@ -45,7 +45,7 @@ router.get("/finance/summary", async (req, res) => {
     for (const b of (data ?? [])) {
       const total = Number(b.total_amount ?? 0);
       const dep = Number(b.deposit_amount ?? 0);
-      if (b.status !== "Cancelled") {
+      if (b.status !== "cancelled") {
         totalRevenue += total;
         bookingCount++;
         const bal = b.balance_due != null ? Number(b.balance_due) : Math.max(0, total - dep);
@@ -95,7 +95,7 @@ router.get("/finance/monthly", async (req, res) => {
 
     const dailyMap: Record<number, number> = {};
     for (const b of (data ?? [])) {
-      if (b.status !== "Cancelled") {
+      if (b.status !== "cancelled") {
         const day = new Date(b.booking_date as string).getUTCDate();
         dailyMap[day] = (dailyMap[day] ?? 0) + Number(b.total_amount ?? 0);
       }

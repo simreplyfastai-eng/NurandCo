@@ -33,7 +33,7 @@ async function sendReminders(): Promise<number> {
   const { data: bookings, error } = await supabaseAdmin
     .from("bookings")
     .select("id, client_name, client_email, treatment, time_slot, booking_date, location_id")
-    .eq("status", "Confirmed")
+    .eq("status", "confirmed")
     .eq("reminder_sent", false)
     .not("client_email", "is", null)
     .neq("client_email", "")

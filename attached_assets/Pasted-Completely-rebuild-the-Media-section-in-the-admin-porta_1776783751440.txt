@@ -1,0 +1,300 @@
+Completely rebuild the Media section in the admin 
+portal. Keep all existing functionality but redesign 
+it with a clean, premium layout matching Starr 
+Aesthetics — NOT Dermadoll.
+
+Read the current Media tab HTML carefully before 
+touching anything. Then replace the entire Media 
+tab content with this new layout.
+
+All media saves to Supabase via portal_kv dd_media.
+Changes must reflect live on the website immediately
+when Save to Live Site is clicked.
+
+The dd_media structure in portal_kv:
+{
+  "heroVideo": "",
+  "heroImage": "",
+  "aboutImage": "",
+  "galleryImages": [],
+  "resultsVideos": []
+}
+
+===============================================================
+NEW MEDIA TAB LAYOUT
+===============================================================
+
+Page header:
+  Title: "Media" — existing serif style
+  Subtitle: "Manage all images and videos shown 
+  on your website. Changes save when you click 
+  Save to Live Site."
+  "Save to Live Site" button — TOP RIGHT
+  Keep existing save button behaviour exactly
+
+Layout: TWO COLUMN GRID on desktop (gap 20px)
+  LEFT COLUMN: Hero Video + Hero Image + About Image
+  RIGHT COLUMN: Transformations Gallery + Results Videos
+  
+  On mobile: single column, left column first
+
+All cards:
+  background white
+  border 1px solid #F0EAE2 (existing card border)
+  border-radius 12px
+  padding 24px
+  Same shadow as existing portal cards
+
+Card header pattern (same for all cards):
+  Small gold/brand overline label uppercase 9px
+    letter-spacing 0.15em
+  Title: existing portal heading style 16px
+  Subtitle: existing muted text style 12px
+  No border-bottom — just spacing
+
+===============================================================
+LEFT COLUMN — CARD 1: HERO VIDEO
+===============================================================
+
+Overline: "HOMEPAGE"
+Title: "Hero Video"
+Subtitle: "Plays fullscreen behind your homepage 
+hero text. Leave empty to use a photo instead."
+
+Content:
+  If heroVideo is set:
+    Video preview — small, 100% width, 
+    max-height 140px, rounded-lg
+    Video element with controls
+    Below preview: URL shown in read-only pill
+      background #F9F5F0 border #E5DFD3
+      10px text, truncated with ...
+    Row below: "Replace" button (outline) + 
+    "Remove" button (ghost, red on hover)
+  
+  If empty:
+    Dashed border upload zone (match existing style)
+    Icon: video/film icon centred
+    Text: "No video set"
+    Below: text input "Paste video URL"
+    + "Set Video" button (brand colour)
+
+===============================================================
+LEFT COLUMN — CARD 2: HERO IMAGE
+===============================================================
+
+Overline: "HOMEPAGE"
+Title: "Hero Image"
+Subtitle: "Shown as hero background if no video 
+is set. Use a high quality portrait photo."
+
+Content:
+  If heroImage is set:
+    Image preview — 100% width, height 160px,
+    object-fit cover, border-radius 8px
+    On hover: dark overlay with "Replace" button
+    Below image: "Remove" link (small, muted)
+  
+  If empty:
+    Dashed border zone, image icon, "No image set"
+    Text input "Paste image URL"
+    "Set Image" button
+
+===============================================================
+LEFT COLUMN — CARD 3: ABOUT IMAGE
+===============================================================
+
+Overline: "ABOUT SECTION"
+Title: "Practitioner Photo"
+Subtitle: "Your photo shown in the About Me 
+section on the website."
+
+Content:
+  Same pattern as Hero Image card above.
+  Circular preview (border-radius 50%) 
+  120px × 120px centred — portrait style
+  Below circle: same Replace/Remove buttons
+
+  Saves to dd_media.aboutImage
+
+===============================================================
+RIGHT COLUMN — CARD 4: TRANSFORMATIONS GALLERY
+===============================================================
+
+Overline: "TRANSFORMATIONS SECTION"
+Title: "Before & After Gallery"
+Subtitle: "Images shown in the Transformations 
+section. Add as many as you like."
+
+Add image row at top:
+  Text input (flex 1): placeholder "Paste image URL..."
+  "Add" button (brand colour, compact)
+  Input + button on same row, gap 8px
+
+Gallery grid below:
+  CSS grid: 2 columns, gap 10px
+  Each image cell:
+    aspect-ratio 1/1
+    object-fit cover
+    border-radius 8px
+    position relative
+    
+    On hover: 
+      dark overlay rgba(0,0,0,0.4)
+      × delete button appears centre
+        white circle, charcoal ×
+        24px × 24px
+    
+    On mobile: always show × (no hover needed)
+  
+  Empty state (no images):
+    Full width dashed box, muted
+    "No images added yet. Paste a URL above 
+    to add your first transformation photo."
+    12px muted text centred, 40px padding
+
+  Max 20 images — if 20 reached hide add row 
+  and show "Maximum 20 images reached"
+
+  Saves to dd_media.galleryImages array
+  On add: push URL to array, save, show in grid
+  On delete: remove from array, save, remove from grid
+  Instant save — no separate save button for this card
+
+===============================================================
+RIGHT COLUMN — CARD 5: RESULTS VIDEOS
+===============================================================
+
+Overline: "RESULTS SECTION"
+Title: "Results Videos"
+Subtitle: "Videos shown in the results/highlights 
+section on your website."
+
+Add video row at top:
+  Same pattern as gallery — URL input + "Add" button
+
+Video list below (NOT a grid — a vertical list):
+  Each video item:
+    background #F9F5F0
+    border-radius 8px
+    padding 12px
+    display flex, align-items center, gap 12px
+    margin-bottom 8px
+    
+    Left: small video thumbnail/preview
+      60px × 60px, object-fit cover, 
+      border-radius 6px
+      Use <video> element, no controls, 
+      loads first frame as thumbnail
+    
+    Right text:
+      URL truncated to 40 chars + "..."
+      12px muted text
+    
+    Far right: × delete button
+      Same style as gallery delete
+
+  Empty state:
+    "No videos added yet."
+    Same muted style as gallery empty state
+
+  Saves to dd_media.resultsVideos array
+
+===============================================================
+SAVE TO LIVE SITE BUTTON
+===============================================================
+
+Keep existing "Save to Live Site" button exactly 
+as it is — same position, same style, same behaviour.
+
+When clicked:
+  Reads all current dd_media values from state
+  PUT /api/portal-kv/dd_media with full object
+  Includes X-Location-Id header
+  Shows existing success toast on save
+  Website immediately reads new values from Supabase
+
+===============================================================
+WEBSITE — HOW IT READS THE MEDIA
+===============================================================
+
+On the Starr Aesthetics website, update these 
+sections to read dd_media from the API:
+
+GET /api/portal-kv/dd_media?location=[slug]
+
+Hero section:
+  if heroVideo → <video autoplay muted loop playsinline>
+  else if heroImage → background-image CSS
+  else → keep existing placeholder
+
+About section:
+  if aboutImage → <img src={aboutImage}>
+  else → keep existing placeholder
+
+Transformations section:
+  if galleryImages.length > 0 → 
+    map each URL to <img> in existing grid layout
+  else → keep existing placeholder cards
+
+Results section:
+  if resultsVideos.length > 0 →
+    map each URL to <video> in existing layout
+  else → keep existing placeholders
+
+Fetch dd_media once on page load. Cache in memory.
+No need to refetch unless page is refreshed.
+
+===============================================================
+STYLING RULES
+===============================================================
+
+Match existing portal exactly:
+  Cream background: #F9F5F0 or existing variable
+  Card background: white
+  Card border: existing border colour
+  Title font: existing portal serif
+  Body font: existing portal sans
+  Brand/gold colour: existing gold variable
+  Muted text: existing muted text colour
+  
+  Overline labels:
+    font-size 9px
+    text-transform uppercase
+    letter-spacing 0.15em
+    color existing gold/brand colour
+    margin-bottom 4px
+  
+  Input fields: match existing portal inputs
+  Buttons: match existing portal button styles
+    Primary (Add/Set): brand colour background
+    Outline (Replace): brand colour border + text
+    Ghost delete: no border, red on hover
+  
+  Dashed upload zones:
+    border 2px dashed existing line colour
+    border-radius 8px
+    padding 28px
+    text-align center
+    background rgba(cream, 0.5)
+  
+  Card grid gap: 20px desktop / 16px mobile
+  Cards same height — don't force equal height
+
+Mobile (max-width 768px):
+  Single column layout
+  Left column cards first, then right column
+  Gallery grid: 2 cols (unchanged)
+  Video list: unchanged
+
+===============================================================
+DO NOT CHANGE
+===============================================================
+
+Keep these exactly as they are:
+  - Portal navigation/tabs
+  - All other portal sections (Dashboard, Bookings etc)
+  - The "Save to Live Site" button behaviour
+  - How portal_kv reads/writes work
+  - Authentication/JWT logic
+  - Any existing upload functionality that works

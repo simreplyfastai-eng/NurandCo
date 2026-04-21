@@ -297,8 +297,8 @@ router.post("/stripe/webhook", async (req, res) => {
           .from("bookings")
           .update({
             deposit_paid: true,
-            status: "Confirmed",
-            stripe_payment_id: paymentIntentId,
+            status: "confirmed",
+            stripe_payment_intent_id: paymentIntentId,
             deposit_amount: depositFromStripe,
           })
           .eq("id", bookingId)
@@ -310,7 +310,7 @@ router.post("/stripe/webhook", async (req, res) => {
           const treatmentRec = updated.treatments as Record<string, unknown> | null;
           const bDate = String(updated.booking_date ?? bookingDate ?? "");
           const bTime = String(updated.time_slot ?? bookingTime ?? "");
-          const dur = Number(treatmentRec?.duration_minutes ?? updated.duration_minutes ?? durationMinutes ?? 30);
+          const dur = Number(treatmentRec?.duration_minutes ?? durationMinutes ?? 30);
           const totalAmount = Number(updated.total_amount ?? depositFromStripe);
           const balanceDue = Math.max(0, totalAmount - depositFromStripe);
 
@@ -389,14 +389,14 @@ router.post("/stripe/webhook", async (req, res) => {
       const { data: existingByPi } = await supabaseAdmin
         .from("bookings")
         .select("id")
-        .eq("stripe_payment_id", paymentIntentId)
+        .eq("stripe_payment_intent_id", paymentIntentId)
         .maybeSingle();
 
       if (existingByPi) {
         await supabaseAdmin
           .from("bookings")
-          .update({ deposit_paid: true, status: "Confirmed" })
-          .eq("stripe_payment_id", paymentIntentId)
+          .update({ deposit_paid: true, status: "confirmed" })
+          .eq("stripe_payment_intent_id", paymentIntentId)
           .eq("deposit_paid", false);
       } else if (treatment && clientName && locationId) {
         // 3. Fallback: create booking from metadata
@@ -426,14 +426,11 @@ router.post("/stripe/webhook", async (req, res) => {
           client_phone: clientPhone ?? "",
           booking_date: bDate,
           time_slot: bTime,
-          status: "Confirmed",
+          status: "confirmed",
           deposit_amount: depositFromStripe,
           total_amount: price,
           deposit_paid: true,
-          balance_paid: false,
-          stripe_payment_id: paymentIntentId,
-          source: "Website",
-          duration_minutes: dur,
+          stripe_payment_intent_id: paymentIntentId,
           reminder_sent: false,
         }, { onConflict: "id" });
 

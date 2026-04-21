@@ -34,29 +34,33 @@ function supabaseRowToBooking(row: Record<string, unknown>) {
       ? new Date(String(createdRaw)).getTime()
       : Date.now();
 
+  // DB stores lowercase statuses; capitalise for UI
+  const rawStatus = String(row.status ?? "pending");
+  const status = rawStatus.charAt(0).toUpperCase() + rawStatus.slice(1);
+
   return {
     id: String(row.id ?? ""),
     clientId: row.client_id ?? null,
     clientName: row.client_name ?? "",
     clientEmail: row.client_email ?? "",
     clientPhone: row.client_phone ?? "",
-    clientDOB: row.client_dob ?? "",
-    clientNotes: row.client_notes ?? "",
+    clientDOB: "",
+    clientNotes: "",
     treatment: ((treatment?.name ?? row.treatment_name ?? "") as string),
     category: (row.category ?? "") as string,
     price: Number(row.total_amount ?? row.price ?? 0),
     deposit: Number(row.deposit_amount ?? row.deposit ?? 0),
     depositPaid: Boolean(row.deposit_paid),
-    balancePaid: Boolean(row.balance_paid),
+    balancePaid: false,
     date: (row.booking_date ?? row.date ?? "") as string,
     time: (row.time_slot ?? row.time ?? "") as string,
-    status: (row.status ?? "Pending") as string,
+    status,
     paymentMethod: (row.payment_method ?? "Stripe") as string,
-    stripePaymentId: (row.stripe_payment_id ?? null) as string | null,
+    stripePaymentId: (row.stripe_payment_intent_id ?? null) as string | null,
     notes: (row.notes ?? "") as string,
     createdAt,
-    source: (row.source ?? "Website") as string,
-    durationMinutes: Number(treatment?.duration_minutes ?? row.duration_minutes ?? 30),
+    source: "Website",
+    durationMinutes: Number(treatment?.duration_minutes ?? 30),
     reminderSent: Boolean(row.reminder_sent),
     locationId: row.location_id as string | undefined,
   };
@@ -170,8 +174,8 @@ export async function runAutoComplete(): Promise<number> {
   try {
     const { data } = await supabaseAdmin
       .from("bookings")
-      .select("id, booking_date, time_slot, duration_minutes, treatments(duration_minutes)")
-      .eq("status", "Confirmed");
+      .select("id, booking_date, time_slot, treatments(duration_minutes)")
+      .eq("status", "confirmed");
 
     if (!data?.length) return 0;
 
@@ -197,7 +201,7 @@ export async function runAutoComplete(): Promise<number> {
 
     await supabaseAdmin
       .from("bookings")
-      .update({ status: "Complete" })
+      .update({ status: "completed" })
       .in("id", toComplete);
 
     return toComplete.length;
@@ -264,9 +268,9 @@ router.get("/bookings/date/:date", async (req, res) => {
   try {
     let query = supabaseAdmin
       .from("bookings")
-      .select("id, time_slot, duration_minutes, status, treatments(name, duration_minutes)")
+      .select("id, time_slot, status, treatments(name, duration_minutes)")
       .eq("booking_date", req.params.date)
-      .neq("status", "Cancelled")
+      .neq("status", "cancelled")
       .order("time_slot", { ascending: true });
 
     if (locationId) query = query.eq("location_id", locationId);
@@ -279,8 +283,8 @@ router.get("/bookings/date/:date", async (req, res) => {
         return {
           id: r.id,
           time: r.time_slot ?? "",
-          durationMinutes: Number(t?.duration_minutes ?? r.duration_minutes ?? 30),
-          status: r.status ?? "Pending",
+          durationMinutes: Number(t?.duration_minutes ?? 30),
+          status: r.status ?? "pending",
           treatment: (t?.name ?? "") as string,
         };
       }),
@@ -336,7 +340,7 @@ router.post("/bookings", async (req, res) => {
       treatment === "Virtual Consultation" ||
       treatment === "Consultation";
 
-    if (locationId) {
+    if (locationId && b.source !== "Portal") {
       const avail = await checkAvailability(date, time, locationId);
       if (!avail.ok) return res.status(avail.status ?? 400).json({ error: avail.error });
     }
@@ -345,10 +349,10 @@ router.post("/bookings", async (req, res) => {
     if (time && locationId) {
       const { data: existing } = await supabaseAdmin
         .from("bookings")
-        .select("time_slot, duration_minutes, status, treatments(duration_minutes)")
+        .select("time_slot, status, treatments(duration_minutes)")
         .eq("location_id", locationId)
         .eq("booking_date", date)
-        .neq("status", "Cancelled");
+        .neq("status", "cancelled");
 
       const conflict = hasConflict(
         time,
@@ -357,7 +361,7 @@ router.post("/bookings", async (req, res) => {
           const t = r.treatments as Record<string, unknown> | null;
           return {
             time: String(r.time_slot ?? ""),
-            durationMinutes: Number(t?.duration_minutes ?? r.duration_minutes ?? 30),
+            durationMinutes: Number(t?.duration_minutes ?? 30),
             status: String(r.status ?? ""),
           };
         }),
@@ -388,7 +392,7 @@ router.post("/bookings", async (req, res) => {
           .from("bookings")
           .select("id")
           .eq("id", b.id)
-          .eq("status", "Confirmed")
+          .eq("status", "confirmed")
           .maybeSingle()
       ).data
     );
@@ -404,18 +408,13 @@ router.post("/bookings", async (req, res) => {
       client_phone: b.clientPhone ?? "",
       booking_date: date,
       time_slot: time ?? "",
-      status: b.status ?? "Pending",
+      status: (b.status ?? "pending").toLowerCase(),
       deposit_amount: deposit,
       total_amount: price,
       deposit_paid: depositPaid,
-      balance_paid: b.balancePaid ?? false,
-      stripe_payment_id: b.stripePaymentId ?? null,
+      stripe_payment_intent_id: b.stripePaymentId ?? null,
       notes: b.notes ?? "",
-      source: b.source ?? "Portal",
-      duration_minutes: durationMinutes,
       client_id: clientId ?? null,
-      client_dob: b.clientDOB ?? null,
-      client_notes: isConsultation ? (b.clientNotes ?? null) : null,
       created_at: b.createdAt ? new Date(Number(b.createdAt)).toISOString() : new Date().toISOString(),
       reminder_sent: false,
     };
@@ -523,15 +522,12 @@ router.post("/bookings/bulk", async (req, res) => {
         client_phone: String(b.clientPhone ?? ""),
         booking_date: String(b.date ?? ""),
         time_slot: String(b.time ?? ""),
-        status: String(b.status ?? "Pending"),
+        status: String(b.status ?? "pending").toLowerCase(),
         deposit_amount: Number(b.deposit ?? treatInfo.depositAmount),
         total_amount: Number(b.price ?? treatInfo.price),
         deposit_paid: Boolean(b.depositPaid),
-        balance_paid: Boolean(b.balancePaid),
-        stripe_payment_id: b.stripePaymentId ?? null,
+        stripe_payment_intent_id: b.stripePaymentId ?? null,
         notes: String(b.notes ?? ""),
-        source: String(b.source ?? "Portal"),
-        duration_minutes: treatInfo.durationMinutes,
       }, { onConflict: "id" });
     }
     return res.json({ ok: true, count: bookings.length });
@@ -568,21 +564,17 @@ router.put("/bookings/:id", async (req, res) => {
     if (b.clientPhone != null) updates.client_phone = b.clientPhone;
     if (b.date != null) updates.booking_date = b.date;
     if (b.time != null) updates.time_slot = b.time;
-    if (b.status != null) updates.status = b.status;
+    if (b.status != null) updates.status = String(b.status).toLowerCase();
     if (b.notes != null) updates.notes = b.notes;
     if (b.depositPaid != null) updates.deposit_paid = b.depositPaid;
-    if (b.balancePaid != null) updates.balance_paid = b.balancePaid;
-    if (b.stripePaymentId != null) updates.stripe_payment_id = b.stripePaymentId;
+    if (b.stripePaymentId != null) updates.stripe_payment_intent_id = b.stripePaymentId;
     if (b.price != null) updates.total_amount = Number(b.price);
     if (b.deposit != null) updates.deposit_amount = Number(b.deposit);
-    if (b.clientDOB != null) updates.client_dob = b.clientDOB;
-    if (b.clientNotes != null) updates.client_notes = b.clientNotes;
 
     if (b.treatment != null) {
       const locId = locationId ?? String(existing.location_id ?? "");
       const treatInfo = await getTreatmentInfo(String(b.treatment), locId);
       if (treatInfo.id) updates.treatment_id = treatInfo.id;
-      updates.duration_minutes = treatInfo.durationMinutes;
     }
 
     const { data: updated, error: updateErr } = await supabaseAdmin
@@ -598,7 +590,7 @@ router.put("/bookings/:id", async (req, res) => {
     const whatsapp = await getWhatsApp(locationId);
     const locationInfo = locationId ? await getLocationInfo(locationId) : null;
 
-    if (b.status === "Cancelled" && prevStatus !== "Cancelled" && booking.clientEmail) {
+    if (String(b.status ?? "").toLowerCase() === "cancelled" && prevStatus !== "cancelled" && booking.clientEmail) {
       sendCancellationEmail({
         clientEmail: booking.clientEmail as string,
         clientName: booking.clientName as string,

@@ -8,6 +8,7 @@ function getLocationId(req: import("express").Request): string | null {
   return (
     (req.headers["x-location-id"] as string | undefined) ??
     (req.query.locationId as string | undefined) ??
+    (req.body?.locationId as string | undefined) ??
     null
   );
 }
@@ -82,21 +83,20 @@ router.post("/clients", async (req, res) => {
       if (email) updates.email = email;
       if (phone) updates.phone = phone;
       if (c.notes) updates.notes = c.notes;
-      if (c.source) updates.source = c.source;
       await supabaseAdmin.from("clients").update(updates).eq("id", String(existing.id));
       const { data: updated } = await supabaseAdmin.from("clients").select("*").eq("id", String(existing.id)).maybeSingle();
       return res.status(200).json(rowToClient((updated ?? {}) as Record<string, unknown>));
     }
 
+    if (!locationId) return res.status(400).json({ error: "locationId required" });
     const payload: Record<string, unknown> = {
       name: c.name,
       email: email || null,
       phone: phone || null,
       notes: c.notes ?? "",
-      source: c.source ?? "Website",
       created_at: now,
+      location_id: locationId,
     };
-    if (locationId) payload.location_id = locationId;
 
     const { data: inserted, error } = await supabaseAdmin
       .from("clients")
@@ -146,15 +146,15 @@ router.post("/clients/bulk", async (req, res) => {
       if (phone) updates.phone = phone;
       await supabaseAdmin.from("clients").update(updates).eq("id", String(existing.id));
     } else {
+      if (!locationId) continue;
       const payload: Record<string, unknown> = {
         name: String(raw.name),
         email: email || null,
         phone: phone || null,
         notes: String(raw.notes ?? ""),
-        source: String(raw.source ?? "Website"),
         created_at: new Date().toISOString(),
+        location_id: locationId,
       };
-      if (locationId) payload.location_id = locationId;
       await supabaseAdmin.from("clients").insert(payload).catch(() => {});
     }
     upserted++;
@@ -174,7 +174,6 @@ router.put("/clients/:id", async (req, res) => {
     if (c.email != null) updates.email = c.email;
     if (c.phone != null) updates.phone = c.phone;
     if (c.notes != null) updates.notes = c.notes;
-    if (c.source != null) updates.source = c.source;
 
     await supabaseAdmin.from("clients").update(updates).eq("id", id);
     const { data: updated } = await supabaseAdmin.from("clients").select("*").eq("id", id).maybeSingle();
@@ -276,15 +275,15 @@ export async function upsertClientFromBooking(data: {
       await supabaseAdmin.from("clients").update(updates).eq("id", String(existing.id));
       return String(existing.id);
     } else {
+      if (!locationId) return null;
       const payload: Record<string, unknown> = {
         name: data.name,
         email: email || null,
         phone: phone || null,
         notes: data.notes ?? "",
-        source: data.source,
         created_at: new Date().toISOString(),
+        location_id: locationId,
       };
-      if (locationId) payload.location_id = locationId;
       if (data.dob) payload.date_of_birth = data.dob;
 
       const { data: inserted, error } = await supabaseAdmin

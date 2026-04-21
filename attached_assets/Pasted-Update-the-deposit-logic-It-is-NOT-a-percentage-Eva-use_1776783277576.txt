@@ -1,0 +1,77 @@
+Update the deposit logic. It is NOT a percentage.
+Eva uses fixed deposit amounts per treatment type:
+
+RULE:
+- Injectables = £20 deposit
+- Everything else = £10 deposit
+
+INJECTABLE treatments (£20 deposit):
+Filler Dissolve Only
+Lip Filler Dissolve and Refill Package
+Lip Hydration
+Tear Trough Filler
+NATURALE LIPS
+Smile Line Filler
+HD Sculpt Lips
+Lips Russian Technique
+Non-Surgical Rhinoplasty
+Jaw Filler
+Cheek Filler
+Lips Normal Technique
+Facial Contouring Package
+Polynucleotides
+Beautiform Facial Contouring Package
+Consultation
+
+ALL OTHER treatments = £10 deposit
+
+===============================================================
+CHANGES NEEDED
+===============================================================
+
+1. In the treatments data/seed:
+   Add a field: deposit_amount (number, fixed £)
+   Injectable treatments → deposit_amount: 20
+   All others → deposit_amount: 10
+   Remove any % based deposit logic
+
+2. When Stripe payment intent is created:
+   Look up the treatment being booked
+   Use treatment.deposit_amount as the charge
+   NOT a % calculation
+   
+   const depositAmount = treatment.deposit_amount
+   (either 20 or 10 depending on treatment)
+
+3. In the booking summary shown to the client:
+   Show "Deposit required: £20" or "Deposit required: £10"
+   NOT a percentage
+
+4. In the admin portal deposit settings:
+   Remove the % input
+   Instead show two fixed fields:
+   "Injectable deposit: £20" (editable)
+   "Other treatments deposit: £10" (editable)
+   These are stored in portal_kv dd_settings as:
+   { "depositInjectables": 20, "depositOther": 10 }
+   
+5. The deposit calculation function:
+   
+   function getDepositAmount(treatmentName, settings) {
+     const injectables = [
+       'filler', 'lips', 'rhinoplasty', 'jaw',
+       'cheek', 'smile line', 'tear trough',
+       'polynucleotides', 'dissolve', 'hydration',
+       'naturale', 'hd sculpt', 'contouring',
+       'consultation', 'refill'
+     ]
+     const isInjectable = injectables.some(keyword =>
+       treatmentName.toLowerCase().includes(keyword)
+     )
+     return isInjectable 
+       ? settings.depositInjectables 
+       : settings.depositOther
+   }
+
+Once this is wired up confirm the logic is correct
+then I will update Supabase to match.
