@@ -1699,7 +1699,7 @@ const ClientAPI = {
 /* ── Session helpers ── */
 const SESSION_KEYS=['fbn_session','fbn_token','fbn_token_expires','fbn_bookings','fbn_clients',
   'fbn_settings','fbn_custom_treats','fbn_custom_cats','fbn_cat_states',
-  'fbn_treatment_overrides','fbn_video_labels','fbn_availability','fbn_media'];
+  'fbn_treatment_overrides','fbn_video_labels','fbn_availability','fbn_media','fbn_supabase_treats'];
 
 function saveSession(token,expiresAt){
   localStorage.setItem('fbn_token',token);
@@ -1831,6 +1831,11 @@ function showPortal(loc){
         const _ar=await fetch('/api/availability',{headers:authHdr()});
         if(_ar.ok){const _av=await _ar.json();localStorage.setItem('fbn_availability',JSON.stringify(_av));}
       }catch(_e){console.warn('Could not load availability from Supabase',_e);}
+      // Load Supabase treatments (all, including inactive) for admin portal
+      try{
+        const _tr=await fetch('/api/treatments/all',{headers:authHdr()});
+        if(_tr.ok){const _treats=await _tr.json();if(Array.isArray(_treats)&&_treats.length)localStorage.setItem('fbn_supabase_treats',JSON.stringify(_treats));}
+      }catch(_e){/* silent */}
     }
     // Load bookings from API into local cache
     const hasAPIData = await BookingAPI.init();
@@ -2709,9 +2714,15 @@ function buildTreatmentSelect(){
   const sel=document.getElementById('bm-treatment');
   const all=allTreatments?allTreatments():TREATMENTS;
   const overrides=getTreatOverrides?getTreatOverrides():{};
+  const sets=getSettings()||{};
+  const depInj=Number(sets.depositInjectables||20);
+  const depOther=Number(sets.depositOther||10);
+  const INJECTABLE_CATS=new Set(['FILLER','BOTOX','SKINBOOST','VITAMIN']);
   sel.innerHTML='<option value="">Select treatment</option>'+all.map(t=>{
     const ov=overrides[t.name]||{};
-    return`<option value="${t.name}" data-price="${ov.price||t.price}" data-cat="${t.cat}">${t.name}</option>`;
+    const catDep=INJECTABLE_CATS.has(t.cat)?depInj:depOther;
+    const dep=t.deposit!=null?t.deposit:(ov.deposit!=null?ov.deposit:catDep);
+    return`<option value="${t.name}" data-price="${ov.price||t.price}" data-cat="${t.cat}" data-deposit="${dep}">${t.name}</option>`;
   }).join('');
 
   // Today as default date
@@ -2724,9 +2735,10 @@ function updateDeposit(){
   const sel=document.getElementById('bm-treatment');
   const opt=sel.options[sel.selectedIndex];
   const price=opt&&opt.dataset.price?Number(opt.dataset.price):0;
+  const deposit=opt&&opt.dataset.deposit?Number(opt.dataset.deposit):10;
   const pInput=document.getElementById('bm-price');
   if(price)pInput.value=price;
-  document.getElementById('bm-deposit').value=50;
+  document.getElementById('bm-deposit').value=deposit;
 }
 
 function autofillClientContact(name){
@@ -3133,12 +3145,33 @@ function getTreatOverrides(){return JSON.parse(localStorage.getItem('fbn_treatme
 
 const CAT_LABELS={BOTOX:'Anti-Wrinkle',FILLER:'Dermal Fillers',FACIALS:'Facials',SKINBOOST:'Skin Boosters',VITAMIN:'Vitamin Injections'};
 
+function _inferCat(name){
+  if(/lip|filler|rhinoplasty|cheek|chin|jaw.*filler|tear|nasolab|dissolv|facial balancing|smile line/i.test(name))return'FILLER';
+  if(/anti.?wrinkle|wrinkle|masseter|brow.*lift|dao|dimple|gummy|bunny|platysma|jaw.*tox|nose.*tox|neck.*tox/i.test(name))return'BOTOX';
+  if(/polynucleotide|profhilo|jalupro|lumi|hyal|skin booster|biorevit|salmon dna/i.test(name))return'SKINBOOST';
+  if(/facial|microneedl|peel|dermapla|hydra|vitamin c facial/i.test(name))return'FACIALS';
+  if(/vitamin|b12|iv drip/i.test(name))return'VITAMIN';
+  if(/consult/i.test(name))return'CONSULT';
+  return'OTHER';
+}
 function allTreatments(){
+  const sb=JSON.parse(localStorage.getItem('fbn_supabase_treats')||'[]');
+  if(sb.length){
+    return sb.map(t=>({id:t.id,name:t.name,duration:t.duration_minutes,price:t.price,deposit:t.deposit_amount,cat:_inferCat(t.name),active:t.active}));
+  }
   const custom=getCustomTreatments();
   return[...TREATMENTS,...custom];
 }
 
+const _SB_CAT_LABELS={BOTOX:'Anti-Wrinkle',FILLER:'Dermal Fillers',FACIALS:'Facials',SKINBOOST:'Skin Boosters',VITAMIN:'Vitamin Injections',CONSULT:'Consultation',OTHER:'Other Treatments'};
 function allCategories(){
+  const sb=JSON.parse(localStorage.getItem('fbn_supabase_treats')||'[]');
+  if(sb.length){
+    const cats=[...new Set(sb.map(t=>_inferCat(t.name)))];
+    const builtIn=cats.map(k=>({key:k,label:_SB_CAT_LABELS[k]||k,builtIn:true}));
+    const custom=getCustomCats().map(c=>({key:c.key,label:c.label,builtIn:false}));
+    return[...builtIn,...custom];
+  }
   const builtIn=[...new Set(TREATMENTS.map(t=>t.cat))].map(k=>({key:k,label:CAT_LABELS[k]||k,builtIn:true}));
   const custom=getCustomCats().map(c=>({key:c.key,label:c.label,builtIn:false}));
   return[...builtIn,...custom];
@@ -4512,11 +4545,14 @@ function renderFormsDrawer(data) {
   } else {
     const consents = consent.consents || {};
     const consentLabels = {
-      informed:'Informed about treatment',risks:'Understands risks',
-      not_pregnant:'Not pregnant/breastfeeding',no_alcohol:'No alcohol 24hrs',
-      no_thinners:'No blood thinners 24hrs',results:'Understands results not guaranteed',
-      accurate:'Information is accurate',consent:'Consents to treatment',
-      photo_clinical:'Photo consent (clinical)',photo_marketing:'Photo consent (marketing)',
+      procedure:'Consents to procedure',risks:'Understands risks',
+      aftercare:'Agrees to follow aftercare',no_guarantee:'Understands results not guaranteed',
+      over_18:'Confirms aged 18+',medical_accurate:'Medical information is accurate',
+      informed:'Informed about treatment',not_pregnant:'Not pregnant/breastfeeding',
+      no_alcohol:'No alcohol 24hrs',no_thinners:'No blood thinners 24hrs',
+      results:'Understands results not guaranteed',accurate:'Information is accurate',
+      consent:'Consents to treatment',photo_clinical:'Photo consent (clinical)',
+      photo_marketing:'Photo consent (marketing)',
     };
     const agreedItems = Object.entries(consents).filter(([,v])=>v).map(([k])=>consentLabels[k]||k);
     conHtml = `

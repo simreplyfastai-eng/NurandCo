@@ -33,6 +33,24 @@ function expandMedical(row: Record<string, unknown>): Record<string, unknown> {
 }
 
 function expandConsent(row: Record<string, unknown>): Record<string, unknown> {
+  // New format: individual consent_* columns
+  if (row.consent_procedure !== undefined || row.consent_risks !== undefined) {
+    const consents: Record<string, boolean> = {
+      procedure: !!row.consent_procedure,
+      risks: !!row.consent_risks,
+      aftercare: !!row.consent_aftercare,
+      no_guarantee: !!row.consent_no_guarantee,
+      over_18: !!row.consent_over_18,
+      medical_accurate: !!row.consent_medical_accurate,
+    };
+    return {
+      ...row,
+      treatment: row.treatment_name ?? null,
+      consents,
+      signed_at: row.created_at ?? null,
+    };
+  }
+  // Legacy packed format: JSON|||base64img in signature_data
   const sig = String(row.signature_data ?? "");
   if (sig.includes("|||")) {
     const idx = sig.indexOf("|||");
@@ -304,7 +322,8 @@ router.post("/forms/consent", async (req, res) => {
 });
 
 // ── GET /api/admin/forms/:bookingId — auth required ────────────────────────
-router.get("/admin/forms/:bookingId", requireAuth, async (req, res) => {
+router.get("/admin/forms/:bookingId", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const { bookingId } = req.params;
   try {
     const [medRow, conRow] = await Promise.all([
