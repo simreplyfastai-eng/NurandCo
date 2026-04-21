@@ -29,8 +29,8 @@ router.get("/calendar/ics", async (req, res) => {
       .maybeSingle();
 
     const location = {
-      name: String(locRes.data?.name ?? "Starr Aesthetics"),
-      address_full: String(locRes.data?.address ?? locRes.data?.name ?? "Starr Aesthetics Clinic"),
+      name: String(locRes.data?.name ?? "StarrBeauty"),
+      address_full: String(locRes.data?.address ?? locRes.data?.name ?? "StarrBeauty Clinic"),
     };
 
     const bk = {
@@ -47,7 +47,7 @@ router.get("/calendar/ics", async (req, res) => {
 
     res.set({
       "Content-Type": "text/calendar; charset=utf-8",
-      "Content-Disposition": 'attachment; filename="starr-aesthetics-appointment.ics"',
+      "Content-Disposition": 'attachment; filename="starrbeauty-appointment.ics"',
       "Cache-Control": "no-cache",
     });
     return res.send(ics);

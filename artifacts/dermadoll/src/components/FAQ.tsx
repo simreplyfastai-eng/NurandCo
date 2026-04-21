@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: "Which location should I choose?",
-    answer: "Both clinics offer the full Starr Aesthetics treatment menu. Hornchurch is our original Essex home clinic, perfect for those in Essex and East London. Marylebone is our new London clinic, ideal for those based in or near Central London.",
+    answer: "Both clinics offer the full StarrBeauty treatment menu. Hornchurch is our original Essex home clinic, perfect for those in Essex and East London. Marylebone is our new London clinic, ideal for those based in or near Central London.",
   },
   {
     question: "Does it hurt?",

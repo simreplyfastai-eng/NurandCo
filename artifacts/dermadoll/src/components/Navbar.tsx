@@ -93,7 +93,7 @@ function AdminLoginModal({ onClose }: { onClose: () => void }) {
             Admin Access
           </h2>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#A09080", margin: 0 }}>
-            Starr Aesthetics Portal
+            StarrBeauty Portal
           </p>
         </div>
 
@@ -217,7 +217,7 @@ export default function Navbar() {
               STARR
             </span>
             <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 400, color: "#C9A96E", lineHeight: 1 }}>
-              AESTHETICS
+              BEAUTY
             </span>
           </a>
 

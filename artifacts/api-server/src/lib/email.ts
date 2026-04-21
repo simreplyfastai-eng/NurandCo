@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const RESEND_KEY = process.env.RESEND_API_KEY ?? "";
-const FROM = "Starr Aesthetics <info@starrbeautyy.co.uk>";
+const FROM = "StarrBeauty <info@starrbeautyy.co.uk>";
 const SITE_URL = (process.env.PUBLIC_URL ?? "").replace(/\/$/, "");
 
 let _resend: Resend | null = null;
@@ -57,9 +57,9 @@ export function buildGoogleCalendarUrl(booking: CalBooking, location: CalLocatio
   const start = booking.time_slot.slice(0, 5);
   const end = addMinutesToTime(start, booking.duration_minutes ?? 60);
   const fmt = (d: string, t: string) => d.replace(/-/g, "") + "T" + t.replace(":", "") + "00";
-  const title = encodeURIComponent(`${booking.treatment_name} @ Starr Aesthetics`);
+  const title = encodeURIComponent(`${booking.treatment_name} @ StarrBeauty`);
   const details = encodeURIComponent(
-    `Starr Aesthetics appointment\nTreatment: ${booking.treatment_name}\nLocation: ${location.address_full}\nContact: wa.me/447701298985`,
+    `StarrBeauty appointment\nTreatment: ${booking.treatment_name}\nLocation: ${location.address_full}\nContact: wa.me/447701298985`,
   );
   const loc = encodeURIComponent(location.address_full);
   return (
@@ -78,7 +78,7 @@ export function buildICSContent(booking: CalBooking, location: CalLocation): str
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//Starr Aesthetics//EN",
+    "PRODID:-//StarrBeauty//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
@@ -86,10 +86,10 @@ export function buildICSContent(booking: CalBooking, location: CalLocation): str
     `DTSTAMP:${stamp}`,
     `DTSTART;TZID=Europe/London:${dtFmt(booking.booking_date, start)}`,
     `DTEND;TZID=Europe/London:${dtFmt(booking.booking_date, end)}`,
-    `SUMMARY:${booking.treatment_name} @ Starr Aesthetics`,
+    `SUMMARY:${booking.treatment_name} @ StarrBeauty`,
     `DESCRIPTION:Treatment: ${booking.treatment_name}\\nContact: +44 7701 298985`,
     `LOCATION:${location.address_full}`,
-    `ORGANIZER;CN=Starr Aesthetics:mailto:info@starrbeautyy.co.uk`,
+    `ORGANIZER;CN=StarrBeauty:mailto:info@starrbeautyy.co.uk`,
     "STATUS:CONFIRMED",
     "END:VEVENT",
     "END:VCALENDAR",
@@ -117,7 +117,7 @@ function buildEmail(content: string, subject: string): string {
     <tr>
       <td style="background:#5C1E1E;padding:28px 40px;border-radius:12px 12px 0 0;text-align:center;">
         <div style="font-family:Georgia,serif;font-size:26px;color:#FFFFFF;letter-spacing:0.12em;font-weight:normal;">STARR</div>
-        <div style="font-family:-apple-system,Arial,sans-serif;font-size:10px;color:#C9A96E;letter-spacing:0.28em;margin-top:2px;">AESTHETICS</div>
+        <div style="font-family:-apple-system,Arial,sans-serif;font-size:10px;color:#C9A96E;letter-spacing:0.28em;margin-top:2px;">BEAUTY</div>
       </td>
     </tr>
     </table>
@@ -133,13 +133,13 @@ function buildEmail(content: string, subject: string): string {
     <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
       <td style="padding:24px 40px;border-top:1px solid #E8DDD3;text-align:center;">
-        <p style="margin:0 0 8px;font-size:11px;color:#8C7B6B;letter-spacing:0.08em;">STARR AESTHETICS &middot; ESSEX &amp; LONDON</p>
+        <p style="margin:0 0 8px;font-size:11px;color:#8C7B6B;letter-spacing:0.08em;">STARR BEAUTY &middot; ESSEX &amp; LONDON</p>
         <p style="margin:0 0 4px;font-size:11px;color:#8C7B6B;">
           <a href="mailto:info@starrbeautyy.co.uk" style="color:#C9A96E;text-decoration:none;">info@starrbeautyy.co.uk</a>
           &nbsp;&middot;&nbsp;
           <a href="https://wa.me/447701298985" style="color:#C9A96E;text-decoration:none;">WhatsApp Us</a>
         </p>
-        <p style="margin:8px 0 0;font-size:10px;color:#B5A89A;">&copy; 2026 Starr Aesthetics. All rights reserved.</p>
+        <p style="margin:8px 0 0;font-size:10px;color:#B5A89A;">&copy; 2026 StarrBeauty. All rights reserved.</p>
       </td>
     </tr>
     </table>
@@ -217,8 +217,8 @@ export async function sendClientConfirmationEmail(params: {
 }): Promise<void> {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
   const loc: CalLocation = {
-    name: params.locationName ?? "Starr Aesthetics",
-    address_full: params.locationAddress ?? "Starr Aesthetics Clinic",
+    name: params.locationName ?? "StarrBeauty",
+    address_full: params.locationAddress ?? "StarrBeauty Clinic",
   };
   const bk: CalBooking = {
     treatment_name: params.treatment,
@@ -271,7 +271,7 @@ export async function sendClientConfirmationEmail(params: {
     </td></tr>
     </table>`;
 
-  const subject = `✨ Confirmed: ${params.treatment} at Starr Aesthetics`;
+  const subject = `✨ Confirmed: ${params.treatment} at StarrBeauty`;
   const html = buildEmail(content, subject);
   const resend = getResend();
   if (!resend || !params.clientEmail) {
@@ -305,8 +305,8 @@ export async function sendAdminNotificationEmail(params: {
 }): Promise<void> {
   const dateDisp = params.date ? fmtDateUK(params.date) : "TBC";
   const loc: CalLocation = {
-    name: params.locationName ?? "Starr Aesthetics",
-    address_full: params.locationAddress ?? params.locationName ?? "Starr Aesthetics Clinic",
+    name: params.locationName ?? "StarrBeauty",
+    address_full: params.locationAddress ?? params.locationName ?? "StarrBeauty Clinic",
   };
   const bk: CalBooking = {
     treatment_name: params.treatment,
@@ -373,8 +373,8 @@ export async function sendReminderEmail(params: {
 }): Promise<void> {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
   const loc: CalLocation = {
-    name: params.locationName ?? "Starr Aesthetics",
-    address_full: params.locationAddress ?? params.locationName ?? "Starr Aesthetics Clinic",
+    name: params.locationName ?? "StarrBeauty",
+    address_full: params.locationAddress ?? params.locationName ?? "StarrBeauty Clinic",
   };
   const bk: CalBooking = {
     treatment_name: params.treatment,
@@ -428,7 +428,7 @@ export async function sendCancellationEmail(params: {
   locationName?: string;
 }): Promise<void> {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
-  const locationName = params.locationName ?? "Starr Aesthetics";
+  const locationName = params.locationName ?? "StarrBeauty";
 
   const content = `
     <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Appointment Cancelled</p>
@@ -448,7 +448,7 @@ export async function sendCancellationEmail(params: {
     </td></tr>
     </table>`;
 
-  const subject = `Your Starr Aesthetics appointment has been cancelled`;
+  const subject = `Your StarrBeauty appointment has been cancelled`;
   const html = buildEmail(content, subject);
   const resend = getResend();
   if (!resend || !params.clientEmail) {
@@ -477,8 +477,8 @@ export async function sendFormsReminderEmail(params: {
 }): Promise<void> {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
   const loc: CalLocation = {
-    name: params.locationName ?? "Starr Aesthetics",
-    address_full: params.locationAddress ?? params.locationName ?? "Starr Aesthetics Clinic",
+    name: params.locationName ?? "StarrBeauty",
+    address_full: params.locationAddress ?? params.locationName ?? "StarrBeauty Clinic",
   };
   const bk: CalBooking = {
     treatment_name: params.treatment,
@@ -530,8 +530,8 @@ export async function sendConsultationConfirmationEmail(params: {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
   const dateStr = params.date ? formatDate(params.date) : "To be confirmed";
   const wa = params.whatsapp || "available on request";
-  const locationName = params.locationName ?? "Starr Aesthetics";
-  const locationAddress = params.locationAddress ?? "Starr Aesthetics Clinic";
+  const locationName = params.locationName ?? "StarrBeauty";
+  const locationAddress = params.locationAddress ?? "StarrBeauty Clinic";
 
   const content = `
     <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">We're excited to meet you, ${firstName}</p>
@@ -547,7 +547,7 @@ export async function sendConsultationConfirmationEmail(params: {
     <p style="font-size:13px;color:#8C7B6B;margin:0 0 8px;">Questions before your visit? <a href="https://wa.me/${wa.replace(/\s/g, "")}" style="color:#C9A96E;text-decoration:none;">WhatsApp us</a></p>
     <p style="font-size:12px;color:#8C7B6B;margin:0;font-style:italic;">Please arrive 5 minutes early. We look forward to seeing you.</p>`;
 
-  const subject = `Consultation confirmed — Starr Aesthetics ${locationName}`;
+  const subject = `Consultation confirmed — StarrBeauty ${locationName}`;
   const html = buildEmail(content, subject);
   const resend = getResend();
   if (!resend || !params.clientEmail) {
@@ -576,7 +576,7 @@ export async function sendConsultationAdminEmail(params: {
   locationName?: string;
 }): Promise<void> {
   const dateDisp = params.date ? fmtDateUK(params.date) : "TBC";
-  const locationName = params.locationName ?? "Starr Aesthetics";
+  const locationName = params.locationName ?? "StarrBeauty";
 
   const content = `
     <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">New consultation booked</p>

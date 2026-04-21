@@ -361,7 +361,7 @@ router.post("/forms/consent", async (req, res) => {
           .select("name, address")
           .eq("id", booking.location_id)
           .maybeSingle();
-        const locName = String(locRes.data?.name ?? "Starr Aesthetics");
+        const locName = String(locRes.data?.name ?? "StarrBeauty");
         const locAddr = String(locRes.data?.address ?? locName);
 
         // Fetch treatment duration + price

@@ -51,7 +51,7 @@ export default function Footer() {
             STARR
           </span>
           <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.4em", textTransform: "uppercase", fontWeight: 400, color: "#C9A96E", lineHeight: 1 }}>
-            AESTHETICS
+            BEAUTY
           </span>
         </a>
 
@@ -106,7 +106,7 @@ export default function Footer() {
         </div>
 
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9A96E", margin: "0 0 10px" }}>
-          © {year} Starr Aesthetics. All rights reserved.
+          © {year} StarrBeauty. All rights reserved.
         </p>
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
           <span style={{ color: "#C9A96E" }}>Powered By </span>

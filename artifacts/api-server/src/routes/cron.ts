@@ -110,7 +110,7 @@ async function sendFormsReminders(): Promise<number> {
         .select("name, address")
         .eq("id", row.location_id)
         .maybeSingle();
-      const locName = String(locRes.data?.name ?? "Starr Aesthetics");
+      const locName = String(locRes.data?.name ?? "StarrBeauty");
       const locAddr = String(locRes.data?.address ?? locName);
 
       await sendFormsReminderEmail({

@@ -147,11 +147,11 @@ export default function Hero() {
             <video ref={videoRef} src={heroSrc} autoPlay loop muted playsInline preload="auto"
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
           ) : heroImage ? (
-            <img src={heroImage} alt="Eva — Starr Aesthetics"
+            <img src={heroImage} alt="Eva — StarrBeauty"
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }} />
           ) : (
             <div style={{ position: "absolute", inset: 0, background: "#E8E2D9", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 28, color: "#C9A96E", opacity: 0.5 }}>Starr Aesthetics</span>
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 28, color: "#C9A96E", opacity: 0.5 }}>StarrBeauty</span>
             </div>
           )}
           {/* Gradient fade — visible only on mobile */}
@@ -170,7 +170,7 @@ export default function Hero() {
             </div>
 
             <h1 className="h-h1" style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2.6rem, 5.5vw, 4.4rem)", fontWeight: 400, color: "#5C1A1A", lineHeight: 1.1, margin: "0 0 20px" }}>
-              Welcome to<br />Starr Aesthetics
+              Welcome to<br />StarrBeauty
             </h1>
 
             <p className="h-sub" style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, lineHeight: 1.7, margin: "0 0 28px", maxWidth: 380 }}>

@@ -38,7 +38,7 @@ function LocationSelector() {
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ width: "100%", maxWidth: 680, textAlign: "center" }}>
         <a href={BASE} style={{ display: "inline-block", marginBottom: 48, textDecoration: "none" }}>
           <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", letterSpacing: "0.15em", color: "#5C1A1A", lineHeight: 1 }}>STARR</div>
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "0.35em", color: "#C9A96E", textTransform: "uppercase" }}>AESTHETICS</div>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "0.35em", color: "#C9A96E", textTransform: "uppercase" }}>BEAUTY</div>
         </a>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
@@ -129,7 +129,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
       <div style={{ background: "#fff", borderBottom: "1px solid #F0EAE2", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <a href={BASE} style={{ textDecoration: "none" }}>
           <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.2rem", letterSpacing: "0.15em", color: "#5C1A1A", lineHeight: 1 }}>STARR</div>
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "0.35em", color: "#C9A96E", textTransform: "uppercase" }}>AESTHETICS</div>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "0.35em", color: "#C9A96E", textTransform: "uppercase" }}>BEAUTY</div>
         </a>
         <button
           onClick={() => navigate("/book")}

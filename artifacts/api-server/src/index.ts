@@ -1,6 +1,6 @@
 /*
  * ═══════════════════════════════════════════════════════
- * STARR AESTHETICS — BOOKING SYSTEM API
+ * STARRBEAUTY — BOOKING SYSTEM API
  * ═══════════════════════════════════════════════════════
  *
  * Clinics: Hornchurch (Essex RM11) & Marylebone (London W1G)
@@ -73,6 +73,6 @@ for (const key of pendingVars) {
 
   app.listen(port, (err) => {
     if (err) { logger.error({ err }, "Error listening on port"); process.exit(1); }
-    logger.info({ port }, "Starr Aesthetics API server listening");
+    logger.info({ port }, "StarrBeauty API server listening");
   });
 })();

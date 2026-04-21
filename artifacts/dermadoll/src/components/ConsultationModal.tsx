@@ -645,7 +645,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
 
             <div className="p-4 rounded-xl mb-4 text-sm" style={{ background: "#FAFAF8", border: "1px solid #E8E8E8", fontFamily: "Inter, sans-serif" }}>
               <p style={{ color: "#C9A96E", fontWeight: 700, fontSize: "10px", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px" }}>Find Us</p>
-              <p style={{ color: "#111", fontWeight: 600, marginBottom: "2px" }}>Starr Aesthetics</p>
+              <p style={{ color: "#111", fontWeight: 600, marginBottom: "2px" }}>StarrBeauty</p>
               <p style={{ color: "#666" }}>Hornchurch, Essex (RM11)</p>
               <p style={{ color: "#666" }}>Marylebone, London (W1G)</p>
               {whatsapp && (
