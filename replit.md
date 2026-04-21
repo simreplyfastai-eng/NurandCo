@@ -13,7 +13,7 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **API framework**: Express 5
 - **Database**: PostgreSQL (raw pool queries, no ORM)
 - **Build**: esbuild (ESM bundle)
-- **Frontend**: React + Vite (Face By Niamh website)
+- **Frontend**: React + Vite (Starr Aesthetics website)
 
 ## Key Commands
 
@@ -23,10 +23,10 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 
 ## Artifacts
 
-### Face By Niamh Aesthetics (`artifacts/dermadoll`)
-Single-page luxury aesthetics clinic website (Leeds & Wakefield).
+### Starr Aesthetics (`artifacts/dermadoll`)
+Single-page luxury aesthetics clinic website with admin portal.
 - **Public site**: `/` — hero video, treatments accordion, before/after grid, booking modal
-- **Admin portal**: `/portal.html` — hidden admin interface
+- **Admin portal**: `/portal.html` — Starr Aesthetics rebrand (burgundy #5C1A1A, gold #C9A96E, cream #F5F0EB palette; Cormorant Garamond + Inter; 0 border-radius; location selector for Hornchurch / Marylebone)
 
 ### API Server (`artifacts/api-server`)
 Express 5 REST API on port 8080. All routes prefixed `/api/`.
