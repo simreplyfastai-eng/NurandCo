@@ -174,8 +174,9 @@ export default function Hero() {
               Welcome to<br />Starr Aesthetics
             </h1>
 
-            <p className="h-sub" style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#C9A96E", lineHeight: 1.7, margin: "0 0 28px", maxWidth: 380 }}>
-              Premium aesthetics treatments by Eva<br />Essex &amp; London
+            <p className="h-sub" style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, lineHeight: 1.7, margin: "0 0 28px", maxWidth: 380 }}>
+              <span style={{ color: "#C9A96E" }}>Premium aesthetics treatments by Eva</span><br />
+              <span style={{ color: "#5C1A1A" }}>Essex &amp; London</span>
             </p>
 
             <div className="h-chip" style={{ marginBottom: 24 }}>
