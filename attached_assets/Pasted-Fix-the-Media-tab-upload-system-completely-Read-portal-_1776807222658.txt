@@ -1,0 +1,285 @@
+Fix the Media tab upload system completely.
+Read portal.html and all media-related API 
+files before touching anything.
+
+THREE PROBLEMS TO FIX:
+
+===============================================================
+PROBLEM 1 — FILE UPLOADS FAIL
+===============================================================
+
+When Eva picks a file from her camera roll or 
+file system, the upload fails with a URL error.
+
+ROOT CAUSE: The upload is trying to store files 
+on Replit's filesystem which has no persistent 
+storage. Files disappear on restart.
+
+THE FIX — Use Supabase Storage:
+
+Step 1: Create a Supabase storage bucket
+  Run this in Supabase SQL editor OR via the 
+  Supabase JS client on server startup:
+  
+  Use supabaseAdmin.storage to create a bucket 
+  called 'media' if it doesn't exist:
+  
+  await supabaseAdmin.storage.createBucket('media', {
+    public: true,
+    allowedMimeTypes: [
+      'image/jpeg', 'image/jpg', 'image/png', 
+      'image/webp', 'video/mp4', 'video/mov',
+      'video/quicktime', 'video/webm'
+    ],
+    fileSizeLimit: 52428800 // 50MB
+  })
+
+Step 2: Create an upload API endpoint:
+
+  POST /api/media/upload
+  Protected — JWT required
+  Content-Type: multipart/form-data
+  
+  Fields:
+    file: the file binary
+    type: 'hero_video' | 'hero_image' | 
+          'about_image' | 'gallery' | 'results_video'
+    location: optional location slug
+  
+  Server logic:
+    1. Receive the multipart form data
+    2. Generate a unique filename:
+       const ext = file.originalname.split('.').pop()
+       const filename = `${type}-${Date.now()}.${ext}`
+       const path = `starr/${type}/${filename}`
+    
+    3. Upload to Supabase storage:
+       const { data, error } = await supabaseAdmin
+         .storage
+         .from('media')
+         .upload(path, file.buffer, {
+           contentType: file.mimetype,
+           upsert: true
+         })
+    
+    4. Get the public URL:
+       const { data: { publicUrl } } = supabaseAdmin
+         .storage
+         .from('media')
+         .getPublicUrl(path)
+    
+    5. Save URL to portal_kv dd_media:
+       await supabaseAdmin
+         .from('portal_kv')
+         .upsert({ key: 'dd_media', value: updatedMedia })
+    
+    6. Return: { success: true, url: publicUrl }
+  
+  Install multer if not already:
+    npm install multer
+  
+  Use multer with memory storage:
+    const multer = require('multer')
+    const upload = multer({ 
+      storage: multer.memoryStorage(),
+      limits: { fileSize: 50 * 1024 * 1024 }
+    })
+    
+    app.post('/api/media/upload',
+      authMiddleware,
+      upload.single('file'),
+      async (req, res) => { ... }
+    )
+
+Step 3: Fix the portal.html upload handlers:
+
+  Replace the current handleMcHeroVideoUpload, 
+  handleMcHeroImgUpload, handleMcAboutImgUpload 
+  etc with a unified upload function:
+  
+  async function uploadMediaFile(file, type) {
+    const formData = new FormData()
+    formData.append('file', file)
+    formData.append('type', type)
+    
+    // Show loading state on the upload area
+    showUploadProgress(type)
+    
+    try {
+      const res = await authFetch('/api/media/upload', {
+        method: 'POST',
+        body: formData,
+        // Don't set Content-Type — let browser set 
+        // it with the correct boundary for multipart
+        headers: {
+          'Authorization': `Bearer ${getToken()}`,
+          'X-Location-Id': getLocationId()
+        }
+      })
+      
+      if (!res.ok) throw new Error('Upload failed')
+      
+      const { url } = await res.json()
+      
+      // Update the preview immediately
+      updateMediaPreview(type, url)
+      
+      // Show success
+      showToast('Media saved and live ✓')
+      
+    } catch (err) {
+      showToast('Upload failed — please try again', 'error')
+      console.error('Upload error:', err)
+    }
+  }
+  
+  Wire up each file input:
+    hero video: uploadMediaFile(file, 'hero_video')
+    hero image: uploadMediaFile(file, 'hero_image')  
+    about/Eva photo: uploadMediaFile(file, 'about_image')
+    gallery images: uploadMediaFile(file, 'gallery')
+    results videos: uploadMediaFile(file, 'results_video')
+
+===============================================================
+PROBLEM 2 — CHANGES MUST AUTO-SAVE TO SUPABASE INSTANTLY
+===============================================================
+
+When any media is set (via upload OR URL paste),
+it must IMMEDIATELY:
+  1. Save to Supabase portal_kv dd_media
+  2. Be served on the live site on next load
+
+The portal_kv dd_media structure:
+{
+  "heroVideo": "[url or null]",
+  "heroImage": "[url or null]",
+  "aboutImage": "[url or null]",
+  "galleryImages": ["url1", "url2", ...],
+  "resultsVideos": ["url1", "url2", ...]
+}
+
+When any Set button is clicked (URL paste):
+  Validate the URL is not empty
+  Save immediately via POST /api/media/config:
+    { key: 'hero_video', value: url }
+  Show success toast
+  Update preview in the portal instantly
+
+When any file upload completes:
+  Same — save URL to Supabase immediately
+  No separate "Save" button needed
+  Auto-save on every change
+
+The "Changes save automatically and go live 
+on the website instantly." message already 
+shows at the top — make it actually true.
+
+GET /api/media/config (already exists):
+  Must return the current dd_media from Supabase
+  Used by both the portal (to show previews) 
+  and the website (to display media)
+
+POST /api/media/config (update or create):
+  Protected — JWT required
+  Body: { key: string, value: any }
+  Upserts into portal_kv dd_media JSON
+  Returns: { success: true }
+
+===============================================================
+PROBLEM 3 — VIDEOS MUST AUTOPLAY WITHOUT PLAY BUTTON
+===============================================================
+
+All video elements on the customer-facing site 
+must autoplay silently on page load — no visible 
+play button, no click needed.
+
+Find every <video> tag in the website 
+(index.html, any React/JSX components).
+
+Every video must have these exact attributes:
+  autoPlay
+  muted
+  loop
+  playsInline
+  preload="auto"
+  
+  Remove or hide any controls attribute
+  Remove any poster attribute that shows a 
+  static frame with a play button overlay
+
+HTML example:
+  <video 
+    autoplay 
+    muted 
+    loop 
+    playsinline
+    preload="auto"
+    style="width:100%;height:100%;object-fit:cover;">
+    <source src="[url]" type="video/mp4">
+  </video>
+
+JSX example:
+  <video
+    autoPlay
+    muted
+    loop
+    playsInline
+    preload="auto"
+    style={{ width:'100%', height:'100%', 
+             objectFit:'cover' }}>
+    <source src={videoUrl} type="video/mp4" />
+  </video>
+
+Important for mobile autoplay:
+  muted is REQUIRED for autoplay to work on iOS
+  playsInline is REQUIRED to prevent fullscreen 
+    on iOS
+  Without both of these, mobile won't autoplay
+
+Also check the hero section specifically:
+  If the hero video is loaded dynamically from 
+  portal_kv dd_media, ensure the video element 
+  is created with all these attributes when the 
+  URL is set, not just when the component loads
+
+If there's a custom play button overlay div:
+  Remove it entirely or hide with CSS:
+  display: none !important
+
+If there's a poster image showing before play:
+  Remove the poster attribute
+
+===============================================================
+ALSO: SUPABASE STORAGE BUCKET POLICY
+===============================================================
+
+After creating the bucket, set RLS policy 
+to allow public reads:
+
+In Supabase dashboard → Storage → media bucket 
+→ Policies, OR run via the admin client:
+
+The bucket is already set to public: true 
+so files will be publicly accessible via URL.
+
+The upload endpoint requires JWT auth so only 
+Eva can upload — but anyone can view the files 
+via their public Supabase Storage URLs.
+
+===============================================================
+VERIFY AFTER FIX
+===============================================================
+
+1. Go to Media tab in admin portal ✓
+2. Click Upload Video → pick an MP4 from files ✓
+3. Progress indicator shows during upload ✓
+4. Preview appears in the portal immediately ✓
+5. Success toast shows ✓
+6. Check Supabase portal_kv dd_media → URL saved ✓
+7. Visit homepage → hero video plays automatically ✓
+8. No play button visible on video ✓
+9. Video loops silently ✓
+10. Works on mobile (muted + playsinline) ✓
+11. Paste a URL in the URL field → click Set ✓
+12. URL saved to Supabase immediately ✓
+13. Homepage shows the new image/video ✓
