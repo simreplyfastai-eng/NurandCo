@@ -2285,20 +2285,20 @@ function selectDay(dateStr){
 function renderDayTimeline(dateStr){
   const bookings=getBookings().filter(b=>b.date===dateStr&&b.status!=='Cancelled').sort((a,b)=>a.time.localeCompare(b.time));
   document.getElementById('day-panel-title').textContent=formatDate(dateStr);
-  document.getElementById('day-panel-body').innerHTML=bookings.length?bookings.map(b=>`
-    <div class="timeline-item" onclick="openBookingDetailPanel('${b.id}')" style="cursor:pointer" title="Click to view details">
-      <div class="timeline-time">${b.time}</div>
-      <div class="timeline-body">
-        <div class="timeline-name">${b.clientName}</div>
-        <div class="timeline-treat">${b.treatment} · ${gbp(b.price)}</div>
-        <div style="display:flex;gap:8px;margin-top:4px">
-          <span title="${b.hasMedical?'Medical form on file':'No medical form'}" style="font-size:13px;opacity:${b.hasMedical?1:0.3}">📋</span>
-          <span title="${b.hasConsent?'Consent signed':'No consent form'}" style="font-size:13px;opacity:${b.hasConsent?1:0.3}">✍️</span>
-        </div>
+  document.getElementById('day-panel-body').innerHTML=bookings.length?bookings.map(b=>{
+    const t=(b.time||'').slice(0,5); // strip seconds → HH:MM
+    return`<div class="timeline-item" onclick="openBookingDetailPanel('${b.id}')" style="cursor:pointer;display:block;padding:10px 0;border-bottom:1px solid var(--color-border-subtle)" title="Click to view details">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+        <div class="timeline-name" style="margin:0">${t} — ${escPortal(b.clientName)}</div>
+        <div class="timeline-status">${statusPill(b.status)}</div>
       </div>
-      <div class="timeline-status">${statusPill(b.status)}</div>
-    </div>
-  `).join(''):`<p class="cal-empty-state">No bookings for this date</p>`;
+      <div class="timeline-treat" style="margin-top:4px">${b.treatment?escPortal(b.treatment)+' · ':''} ${gbp(b.price)}</div>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <span title="${b.hasMedical?'Medical form on file':'No medical form'}" style="font-size:13px;opacity:${b.hasMedical?1:0.3}">📋</span>
+        <span title="${b.hasConsent?'Consent signed':'No consent form'}" style="font-size:13px;opacity:${b.hasConsent?1:0.3}">✍️</span>
+      </div>
+    </div>`;
+  }).join(''):`<p class="cal-empty-state">No bookings for this date</p>`;
 }
 function openBookingDetailPanel(bookingId){
   const b=getBookings().find(x=>x.id===bookingId);
@@ -2327,7 +2327,7 @@ function openBookingDetailPanel(bookingId){
       </div>
       <div style="margin-bottom:10px">
         <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Date &amp; Time</div>
-        <div>${escPortal(formatDate(b.date))} at ${escPortal(b.time)}</div>
+        <div>${escPortal(formatDate(b.date))} at ${escPortal((b.time||'').slice(0,5))}</div>
       </div>
       ${b.durationMinutes?`<div style="margin-bottom:10px"><div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Duration</div><div>${b.durationMinutes} mins</div></div>`:''}
       <div style="margin-bottom:10px">
