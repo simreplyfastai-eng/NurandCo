@@ -1,0 +1,105 @@
+URGENT — run this seed script RIGHT NOW.
+Do not modify anything. Just run it.
+
+The treatments table was wiped clean.
+Insert exactly these treatments and nothing else.
+No hardcoded fallbacks. No extra POA treatments.
+Only what's listed here.
+
+In server.ts or a seed file, run this once 
+on startup if treatments count = 0:
+
+const H_SLUG = 'hornchurch';
+const M_SLUG = 'marylebone';
+
+const { data: locs } = await supabaseAdmin
+  .from('locations').select('id,slug');
+const H = locs.find(l => l.slug === H_SLUG)?.id;
+const M = locs.find(l => l.slug === M_SLUG)?.id;
+
+const { count } = await supabaseAdmin
+  .from('treatments')
+  .select('*', { count: 'exact', head: true });
+
+if (count === 0) {
+  await supabaseAdmin.from('treatments').insert([
+    {location_id:H,name:'NATURALE LIPS 0.5ml',duration_minutes:45,price:135,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'NATURALE LIPS 0.8ml',duration_minutes:45,price:175,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'NATURALE LIPS 1.1ml',duration_minutes:45,price:185,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Smile Line Filler',duration_minutes:60,price:185,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'HD Sculpt Lips 0.8ml',duration_minutes:60,price:175,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'HD Sculpt Lips 1.1ml',duration_minutes:60,price:210,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Lips Russian Technique 0.5ml',duration_minutes:40,price:135,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Lips Russian Technique 0.8ml',duration_minutes:40,price:175,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Lips Russian Technique 1.1ml',duration_minutes:40,price:185,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Fat Dissolving Lemon Bottle',duration_minutes:30,price:0,deposit_amount:10,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Anti Wrinkle 1 Area',duration_minutes:30,price:180,deposit_amount:10,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Anti Wrinkle 2 Areas',duration_minutes:30,price:220,deposit_amount:10,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Anti Wrinkle 3 Areas',duration_minutes:30,price:300,deposit_amount:10,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Chin Filler 0.5ml',duration_minutes:30,price:130,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Chin Filler 1.1ml',duration_minutes:30,price:150,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Filler Dissolve Only',duration_minutes:60,price:20,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Lip Filler Dissolve and Refill Package',duration_minutes:60,price:350,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Tear Trough Filler',duration_minutes:30,price:230,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Non-Surgical Rhinoplasty',duration_minutes:30,price:180,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Jaw Filler 1ml',duration_minutes:40,price:150,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Jaw Filler 2ml',duration_minutes:40,price:180,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Cheek Filler 1ml',duration_minutes:40,price:150,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Cheek Filler 2ml',duration_minutes:40,price:180,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Facial Contouring 3ml',duration_minutes:60,price:360,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Facial Contouring 4ml',duration_minutes:60,price:470,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Facial Contouring 5ml',duration_minutes:60,price:580,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Consultation',duration_minutes:30,price:30,deposit_amount:0,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:H,name:'Classic Full Set Lashes',duration_minutes:120,price:55,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Mega Classics',duration_minutes:150,price:55,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Hybrid Full Set',duration_minutes:120,price:60,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Signature Wisp Me Hybrids',duration_minutes:120,price:70,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Russians Full Set',duration_minutes:120,price:70,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Mega Volumes Full Set',duration_minutes:120,price:75,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Classic Infill',duration_minutes:60,price:35,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Mega Classics Infill',duration_minutes:60,price:35,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Hybrid Infill',duration_minutes:60,price:40,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Signature Wisp Me Infill',duration_minutes:60,price:50,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Russians Infill',duration_minutes:60,price:50,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Mega Volumes Infill',duration_minutes:60,price:55,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Lash Removal',duration_minutes:30,price:15,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'LVL Lash Lift',duration_minutes:90,price:50,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Korean Lash Lift',duration_minutes:60,price:60,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Eyebrow Wax',duration_minutes:15,price:15,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Eyebrow Wax and Tint',duration_minutes:20,price:25,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'},
+    {location_id:H,name:'Microneedling Facial',duration_minutes:60,price:55,deposit_amount:10,deposit_type:'fixed',active:true,category:'Facials'},
+    {location_id:H,name:'STARRFACIAL Hydrofacial',duration_minutes:60,price:70,deposit_amount:10,deposit_type:'fixed',active:true,category:'Facials'},
+    {location_id:H,name:'Luxe Microneedling Facial',duration_minutes:30,price:75,deposit_amount:10,deposit_type:'fixed',active:true,category:'Facials'},
+    {location_id:H,name:'Plain Acrylic Set',duration_minutes:120,price:50,deposit_amount:10,deposit_type:'fixed',active:true,category:'Nails'},
+    {location_id:H,name:'French Tip Acrylic Set',duration_minutes:120,price:55,deposit_amount:10,deposit_type:'fixed',active:true,category:'Nails'},
+    {location_id:H,name:'Nail Art Acrylic Set',duration_minutes:120,price:55,deposit_amount:10,deposit_type:'fixed',active:true,category:'Nails'},
+    {location_id:H,name:'Plain BIAB Set',duration_minutes:120,price:45,deposit_amount:10,deposit_type:'fixed',active:true,category:'Nails'},
+    {location_id:H,name:'French Tip BIAB Set',duration_minutes:120,price:50,deposit_amount:10,deposit_type:'fixed',active:true,category:'Nails'},
+    {location_id:H,name:'Nail Art BIAB Set',duration_minutes:120,price:55,deposit_amount:10,deposit_type:'fixed',active:true,category:'Nails'},
+    {location_id:H,name:'Plain Hard Gel Set',duration_minutes:120,price:53,deposit_amount:10,deposit_type:'fixed',active:true,category:'Nails'},
+    {location_id:H,name:'French Tip Hard Gel Set',duration_minutes:120,price:55,deposit_amount:10,deposit_type:'fixed',active:true,category:'Nails'},
+    {location_id:H,name:'Nail Art Hard Gel Set',duration_minutes:120,price:60,deposit_amount:10,deposit_type:'fixed',active:true,category:'Nails'},
+    {location_id:H,name:'Toes',duration_minutes:60,price:25,deposit_amount:10,deposit_type:'fixed',active:true,category:'Nails'},
+    {location_id:H,name:'Russian Wet Pedicure',duration_minutes:100,price:40,deposit_amount:10,deposit_type:'fixed',active:true,category:'Nails'},
+    {location_id:H,name:'Lip Blush SPMU',duration_minutes:140,price:120,deposit_amount:20,deposit_type:'fixed',active:true,category:'SPMU'},
+    {location_id:H,name:'Lip Blush SPMU Top Up',duration_minutes:90,price:95,deposit_amount:20,deposit_type:'fixed',active:true,category:'SPMU'},
+    {location_id:H,name:'Phlenyage 3 Sessions Full Face',duration_minutes:90,price:800,deposit_amount:20,deposit_type:'fixed',active:true,category:'Skin Boosters'},
+    {location_id:H,name:'Phlenyage 3 Sessions Eyes Only',duration_minutes:90,price:450,deposit_amount:20,deposit_type:'fixed',active:true,category:'Skin Boosters'},
+    {location_id:H,name:'Phlenyage Full Face Combo',duration_minutes:90,price:1000,deposit_amount:20,deposit_type:'fixed',active:true,category:'Skin Boosters'},
+    {location_id:H,name:'Vitaran / Plinest / Nucleofill 3 Sessions Full Face',duration_minutes:90,price:570,deposit_amount:20,deposit_type:'fixed',active:true,category:'Skin Boosters'},
+    {location_id:H,name:'Vitaran / Plinest / Nucleofill 3 Sessions Eyes Only',duration_minutes:90,price:380,deposit_amount:20,deposit_type:'fixed',active:true,category:'Skin Boosters'},
+    {location_id:H,name:'Vitaran / Plinest / Nucleofill Full Face Combo',duration_minutes:90,price:850,deposit_amount:20,deposit_type:'fixed',active:true,category:'Skin Boosters'},
+    {location_id:M,name:'NATURALE LIPS 0.5ml',duration_minutes:60,price:140,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:M,name:'NATURALE LIPS 0.8ml',duration_minutes:60,price:185,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:M,name:'NATURALE LIPS 1.1ml',duration_minutes:60,price:200,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:M,name:'HD Sculpt Lips 0.8ml',duration_minutes:60,price:195,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:M,name:'HD Sculpt Lips 1ml',duration_minutes:60,price:225,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:M,name:'Facial Contouring 3ml',duration_minutes:60,price:395,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:M,name:'Facial Contouring 4ml',duration_minutes:60,price:495,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:M,name:'Facial Contouring 5ml',duration_minutes:60,price:595,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:M,name:'Non-Surgical Rhinoplasty with 2 Week Top Up',duration_minutes:60,price:250,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:M,name:'Tear Trough Filler',duration_minutes:60,price:250,deposit_amount:20,deposit_type:'fixed',active:true,category:'Aesthetics'},
+    {location_id:M,name:'Eyelash Extensions',duration_minutes:60,price:75,deposit_amount:10,deposit_type:'fixed',active:true,category:'Lashes & Brows'}
+  ]);
+  console.log('Seed complete: 77 treatments inserted');
+}
