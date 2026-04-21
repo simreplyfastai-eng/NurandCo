@@ -3,7 +3,7 @@ import { Star } from "lucide-react";
 
 const reviews = [
   {
-    quote: "Eva is absolutely incredible. My lips look so natural — everyone thinks I was born with them. NaturalèLips™ is unlike anything I've had before.",
+    quote: "Eva is absolutely incredible. My lips look so natural, everyone thinks I was born with them. NaturalèLips™ is unlike anything I've had before.",
     name: "Sarah M.",
     location: "Essex",
   },

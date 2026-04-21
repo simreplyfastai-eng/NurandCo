@@ -5,7 +5,7 @@ import { ChevronDown } from "lucide-react";
 const faqs = [
   {
     question: "What is NaturalèLips™?",
-    answer: "NaturalèLips™ is Eva's signature lip filler technique, designed to create beautifully natural, defined lips that suit your unique facial anatomy. The technique focuses on hydration, shape and symmetry — never overdone.",
+    answer: "NaturalèLips™ is Eva's signature lip filler technique, designed to create beautifully natural, defined lips that suit your unique facial anatomy. The technique focuses on hydration, shape and symmetry, never overdone.",
   },
   {
     question: "Which location should I choose?",
@@ -13,7 +13,7 @@ const faqs = [
   },
   {
     question: "Does it hurt?",
-    answer: "Comfort is a priority at every appointment. Topical numbing cream is applied before all filler treatments. Most clients find the experience very manageable — any discomfort is brief and minimal.",
+    answer: "Comfort is a priority at every appointment. Topical numbing cream is applied before all filler treatments. Most clients find the experience very manageable, any discomfort is brief and minimal.",
   },
   {
     question: "How long do results last?",
@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     question: "Do you offer training?",
-    answer: "Yes — through Starr Academy, Eva offers CPD accredited aesthetics training at both the Hornchurch and Marylebone clinics. Courses are open to candidates with no prior background required. Enquire via Instagram or email.",
+    answer: "Yes, through Starr Academy, Eva offers CPD accredited aesthetics training at both the Hornchurch and Marylebone clinics. Courses are open to candidates with no prior background required. Enquire via Instagram or email.",
   },
   {
     question: "How do I book?",

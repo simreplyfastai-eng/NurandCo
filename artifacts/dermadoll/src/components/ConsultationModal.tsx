@@ -631,7 +631,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
                 <div><span style={{ color: "#888" }}>Duration: </span>15 minutes</div>
                 <div><span style={{ color: "#888" }}>Treatment interest: </span>{treatmentInterest}</div>
                 <div className="pt-2 mt-2" style={{ borderTop: "1px solid #E8E8E8" }}>
-                  <span style={{ color: "#2D6A4F", fontWeight: 600 }}>✓ Free consultation — no charge</span>
+                  <span style={{ color: "#2D6A4F", fontWeight: 600 }}>✓ Free consultation, no charge</span>
                 </div>
               </div>
             </div>

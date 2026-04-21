@@ -78,9 +78,9 @@ const SERVICES: Record<"hornchurch" | "marylebone", TreatmentGroup[]> = {
         {
           subname: "Toxin Treatments",
           treatments: [
-            { id: "aw-1", name: "Anti-Wrinkle — 1 Area", display: "1 Area", duration: "20 mins", price: "£140" },
-            { id: "aw-2", name: "Anti-Wrinkle — 2 Areas", display: "2 Areas", duration: "20 mins", price: "£170" },
-            { id: "aw-3", name: "Anti-Wrinkle — 3 Areas", display: "3 Areas", duration: "30 mins", price: "£200" },
+            { id: "aw-1", name: "Anti-Wrinkle, 1 Area", display: "1 Area", duration: "20 mins", price: "£140" },
+            { id: "aw-2", name: "Anti-Wrinkle, 2 Areas", display: "2 Areas", duration: "20 mins", price: "£170" },
+            { id: "aw-3", name: "Anti-Wrinkle, 3 Areas", display: "3 Areas", duration: "30 mins", price: "£200" },
             { id: "aw-lb", name: "Lip Blush Tox", display: "Lip Blush Tox", duration: "20 mins", price: "£80" },
           ],
         },
@@ -163,9 +163,9 @@ const SERVICES: Record<"hornchurch" | "marylebone", TreatmentGroup[]> = {
         {
           subname: "Toxin Treatments",
           treatments: [
-            { id: "m-aw-1", name: "Anti-Wrinkle — 1 Area", display: "1 Area", duration: "20 mins", price: "£160" },
-            { id: "m-aw-2", name: "Anti-Wrinkle — 2 Areas", display: "2 Areas", duration: "20 mins", price: "£190" },
-            { id: "m-aw-3", name: "Anti-Wrinkle — 3 Areas", display: "3 Areas", duration: "30 mins", price: "£220" },
+            { id: "m-aw-1", name: "Anti-Wrinkle, 1 Area", display: "1 Area", duration: "20 mins", price: "£160" },
+            { id: "m-aw-2", name: "Anti-Wrinkle, 2 Areas", display: "2 Areas", duration: "20 mins", price: "£190" },
+            { id: "m-aw-3", name: "Anti-Wrinkle, 3 Areas", display: "3 Areas", duration: "30 mins", price: "£220" },
           ],
         },
       ],

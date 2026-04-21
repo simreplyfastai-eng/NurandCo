@@ -42,7 +42,7 @@ export default function Contact() {
     <section id="contact" style={{ background: "#F5F0EB", padding: "100px 0", position: "relative", overflow: "hidden" }}>
 
       {/* Decorative background layer */}
-      {/* Large faint "@" watermark — right side */}
+      {/* Large faint "@" watermark, right side */}
       <div aria-hidden="true" style={{
         position: "absolute", top: "50%", right: "-40px", transform: "translateY(-50%)",
         fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontWeight: 700,
@@ -50,7 +50,7 @@ export default function Contact() {
         lineHeight: 1, pointerEvents: "none", userSelect: "none", letterSpacing: "-0.04em",
       }}>@</div>
 
-      {/* Radial amber glow — top left */}
+      {/* Radial amber glow, top left */}
       <div aria-hidden="true" style={{
         position: "absolute", top: -60, left: -60,
         width: 380, height: 380,
@@ -58,7 +58,7 @@ export default function Contact() {
         pointerEvents: "none",
       }} />
 
-      {/* Radial amber glow — bottom right */}
+      {/* Radial amber glow, bottom right */}
       <div aria-hidden="true" style={{
         position: "absolute", bottom: -60, right: 80,
         width: 300, height: 300,
@@ -117,7 +117,7 @@ export default function Contact() {
               Get In Touch
             </h2>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 40px" }}>
-              Clinics in Hornchurch, Essex and Marylebone, London. DM on Instagram or send an email — we'll get back to you promptly.
+              Clinics in Hornchurch, Essex and Marylebone, London. DM on Instagram or send an email, we'll get back to you promptly.
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -145,7 +145,7 @@ export default function Contact() {
             </div>
           </motion.div>
 
-          {/* Right — form */}
+          {/* Right, form */}
           <motion.div
             initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}

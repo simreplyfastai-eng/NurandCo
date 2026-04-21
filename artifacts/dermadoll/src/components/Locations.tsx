@@ -4,13 +4,13 @@ const clinics = [
   {
     region: "ESSEX",
     name: "Hornchurch",
-    desc: "Our original home clinic — serving Essex and East London with our full treatment menu.",
+    desc: "Our original home clinic, serving Essex and East London with our full treatment menu.",
     highlight: true,
   },
   {
     region: "LONDON ◆ NEW",
     name: "Marylebone",
-    desc: "Now open in the heart of London — April 2026. Premium flat-rate pricing for all treatments.",
+    desc: "Now open in the heart of London, April 2026. Premium flat-rate pricing for all treatments.",
     highlight: false,
   },
 ];
