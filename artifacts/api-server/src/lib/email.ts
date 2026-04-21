@@ -609,34 +609,59 @@ export async function sendConsultationAdminEmail(params: {
   }
 }
 
-// ── Training enquiry (kept for backwards compat) ──────────────────────────────
+// ── Training enquiry emails ────────────────────────────────────────────────────
 
 export async function sendEnquiryEmails(params: {
   adminEmail: string;
   name: string;
   email: string;
   phone: string;
-  course: string;
-  message: string;
+  courseName: string;
+  locationLabel: string;
+  experienceLevel?: string | null;
+  message?: string | null;
+  enquiryId?: string;
 }): Promise<void> {
   const firstName = params.name.split(" ")[0] ?? params.name;
+  const refCode = `ENQ-${(params.enquiryId ?? "").slice(0, 8).toUpperCase()}`;
   const resend = getResend();
+  const submittedAt = new Date().toLocaleString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    timeZone: "Europe/London",
+  });
 
   const promises: Promise<unknown>[] = [];
 
+  // EMAIL A — Admin alert
   if (params.adminEmail) {
+    const adminSubject = `📚 New Training Enquiry: ${params.name} — ${params.courseName}`;
     const adminContent = `
-      <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">New training enquiry</p>
-      <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:20px 0;">
-      <tr><td style="padding:16px 24px;">
-        <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Name:</strong> ${params.name}</p>
-        <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Email:</strong> <a href="mailto:${params.email}" style="color:#C9A96E;">${params.email}</a></p>
-        <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Phone:</strong> <a href="tel:${params.phone}" style="color:#C9A96E;">${params.phone}</a></p>
-        <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Course:</strong> ${params.course}</p>
-        <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Message:</strong> ${params.message || "—"}</p>
-      </td></tr>
+      <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 16px;">New Training Enquiry Received</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 24px;">
+        <tr><td style="padding:20px 24px;">
+          <p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Name:</strong> ${params.name}</p>
+          <p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Email:</strong> <a href="mailto:${params.email}" style="color:#C9A96E;">${params.email}</a></p>
+          <p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Phone:</strong> <a href="tel:${params.phone}" style="color:#C9A96E;">${params.phone}</a></p>
+          <p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Course:</strong> ${params.courseName}</p>
+          <p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Experience:</strong> ${params.experienceLevel || "—"}</p>
+          ${params.message ? `<p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Message:</strong> ${params.message}</p>` : ""}
+          <p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Submitted:</strong> ${submittedAt}</p>
+        </td></tr>
+      </table>
+      <table cellpadding="0" cellspacing="0" style="margin:0 auto 8px;">
+        <tr>
+          <td style="padding-right:8px;">
+            <a href="https://wa.me/${params.phone.replace(/\D/g, "")}" style="display:inline-block;background:#C9A96E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:12px 24px;text-decoration:none;border-radius:4px;">Reply via WhatsApp</a>
+          </td>
+          <td>
+            <a href="/portal.html" style="display:inline-block;background:#5C1E1E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:12px 24px;text-decoration:none;border-radius:4px;">View in Portal</a>
+          </td>
+        </tr>
       </table>`;
-    const adminSubject = `New training enquiry — ${params.name} — ${params.course}`;
     const adminHtml = buildEmail(adminContent, adminSubject);
     if (!resend) {
       logEmailPreview(adminSubject, params.adminEmail, adminHtml);
@@ -649,12 +674,31 @@ export async function sendEnquiryEmails(params: {
     }
   }
 
+  // EMAIL B — Auto-reply to enquirer
   if (params.email) {
+    const clientSubject = `Thanks for your enquiry — Starr Academy`;
     const clientContent = `
-      <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Thank you, ${firstName}</p>
-      <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">We've received your enquiry about <strong style="color:#5C1E1E;">${params.course}</strong> and will be in touch shortly with available dates and next steps.</p>
-      <p style="font-size:13px;color:#8C7B6B;margin:0;font-style:italic;">We typically respond within 24 hours. In the meantime, feel free to browse our Instagram for inspiration.</p>`;
-    const clientSubject = `Thanks for your enquiry — Starr Aesthetics`;
+      <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 16px;">We've received your enquiry ✨</p>
+      <p style="font-size:15px;color:#2C2420;margin:0 0 8px;">Hi ${firstName},</p>
+      <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Thank you for your interest in the <strong style="color:#5C1E1E;">${params.courseName}</strong>. Eva will be in touch within 24 hours.</p>
+      <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 24px;">
+        <tr><td style="padding:20px 24px;">
+          <p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Course:</strong> ${params.courseName}</p>
+          <p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Location:</strong> ${params.locationLabel}</p>
+          <p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Reference:</strong> ${refCode}</p>
+        </td></tr>
+      </table>
+      <p style="font-size:14px;color:#8C7B6B;margin:0 0 16px;">In the meantime, feel free to reach out:</p>
+      <table cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+        <tr>
+          <td>
+            <a href="https://wa.me/447701298985" style="display:inline-block;background:#C9A96E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:12px 28px;text-decoration:none;border-radius:4px;">WhatsApp Us</a>
+          </td>
+        </tr>
+      </table>
+      <p style="font-size:13px;color:#8C7B6B;margin:0;">
+        Instagram: <a href="https://instagram.com/StarrAestheticss" style="color:#C9A96E;">@StarrAestheticss</a> &nbsp;·&nbsp; <a href="https://instagram.com/StarrFacess" style="color:#C9A96E;">@StarrFacess</a>
+      </p>`;
     const clientHtml = buildEmail(clientContent, clientSubject);
     if (!resend) {
       logEmailPreview(clientSubject, params.email, clientHtml);

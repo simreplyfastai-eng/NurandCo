@@ -5,26 +5,50 @@ import { requireAuth } from "../lib/auth";
 
 const router = Router();
 
+const COURSE_LOCATION_SLUG: Record<string, string> = {
+  "Essex Masterclass": "hornchurch",
+  "London Masterclass": "marylebone",
+};
+
+const COURSE_LOCATION_LABEL: Record<string, string> = {
+  "Essex Masterclass": "Hornchurch Clinic",
+  "London Masterclass": "Marylebone Clinic",
+};
+
+function getLocationId(req: import("express").Request): string | null {
+  return (
+    (req.headers["x-location-id"] as string | undefined) ??
+    (req.query.locationId as string | undefined) ??
+    null
+  );
+}
+
 function rowToEnquiry(row: Record<string, unknown>) {
   return {
     id: row.id,
+    locationId: row.location_id ?? null,
+    courseName: row.course_name ?? "",
     name: row.name,
     email: row.email ?? "",
     phone: row.phone ?? "",
-    course: row.course ?? "",
-    message: row.message ?? "",
-    status: row.status ?? "New",
-    createdAt: Number(row.created_at ?? 0),
+    experienceLevel: row.experience_level ?? null,
+    message: row.message ?? null,
+    status: row.status ?? "new",
+    notes: row.notes ?? null,
+    createdAt: row.created_at ?? null,
   };
 }
 
-// GET /api/enquiries  — protected (admin portal only)
+// GET /api/enquiries — protected, filtered by location
 router.get("/enquiries", async (req, res) => {
   if (!requireAuth(req, res)) return;
+  const locationId = getLocationId(req);
+  if (!locationId) return res.status(400).json({ error: "locationId required" });
   try {
     const { data, error } = await supabaseAdmin
       .from("enquiries")
       .select("*")
+      .eq("location_id", locationId)
       .order("created_at", { ascending: false });
     if (error) throw error;
     return res.json({ enquiries: (data ?? []).map(rowToEnquiry) });
@@ -36,55 +60,89 @@ router.get("/enquiries", async (req, res) => {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-// POST /api/enquiries
+// POST /api/enquiries — public
 router.post("/enquiries", async (req, res) => {
-  const { name, email, phone, course, message } = req.body as Record<string, string>;
-  if (!name || !email || !phone || !course) {
-    return res.status(400).json({ error: "name, email, phone, course required" });
+  const { name, email, phone, course_name, experience_level, message } =
+    req.body as Record<string, string>;
+
+  if (!name || name.trim().length < 2)
+    return res.status(400).json({ error: "name required (min 2 chars)" });
+  if (!email || !EMAIL_RE.test(email.trim()))
+    return res.status(400).json({ error: "valid email required" });
+  if (!phone || phone.trim().length < 7)
+    return res.status(400).json({ error: "phone required (min 7 chars)" });
+  if (!course_name)
+    return res.status(400).json({ error: "course_name required" });
+
+  // Resolve location_id from course name
+  const slug = COURSE_LOCATION_SLUG[course_name.trim()];
+  let locationId: string | null = null;
+  if (slug) {
+    const { data: loc } = await supabaseAdmin
+      .from("locations")
+      .select("id")
+      .eq("slug", slug)
+      .maybeSingle();
+    locationId = loc?.id ?? null;
   }
-  if (!EMAIL_RE.test(email.trim())) {
-    return res.status(400).json({ error: "Invalid email address" });
-  }
-  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+
   try {
-    const { error } = await supabaseAdmin.from("enquiries").insert({
-      id,
+    const { data: row, error } = await supabaseAdmin
+      .from("enquiries")
+      .insert({
+        location_id: locationId,
+        course_name: course_name.trim(),
+        name: name.trim(),
+        email: email.trim().toLowerCase(),
+        phone: phone.trim(),
+        experience_level: experience_level?.trim() || null,
+        message: message?.trim() || null,
+        status: "new",
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+
+    const enquiryId = (row?.id as string) ?? "";
+    const locationLabel = COURSE_LOCATION_LABEL[course_name.trim()] ?? course_name.trim();
+    const adminEmail = process.env.ADMIN_EMAIL ?? "info@starrbeautyy.co.uk";
+
+    sendEnquiryEmails({
+      adminEmail,
       name: name.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
-      course: course.trim(),
-      message: (message ?? "").trim(),
-      status: "New",
-      created_at: Date.now(),
-    });
-    if (error) throw error;
+      courseName: course_name.trim(),
+      locationLabel,
+      experienceLevel: experience_level?.trim() || null,
+      message: message?.trim() || null,
+      enquiryId,
+    }).catch(() => {});
 
-    const { data: row } = await supabaseAdmin
-      .from("enquiries")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
-
-    const adminEmail = process.env.ADMIN_EMAIL ?? "";
-    sendEnquiryEmails({ adminEmail, name, email, phone, course, message: message ?? "" }).catch(() => {});
-
-    return res.status(201).json(rowToEnquiry((row ?? {}) as Record<string, unknown>));
+    return res.status(201).json({ success: true });
   } catch (err) {
     console.error("POST /api/enquiries", err);
-    return res.status(500).json({ error: "db error" });
+    return res.status(500).json({ error: "Failed to submit enquiry" });
   }
 });
 
-// PUT /api/enquiries/:id  — update status (protected)
+// PUT /api/enquiries/:id — protected, update status and/or notes
 router.put("/enquiries/:id", async (req, res) => {
   if (!requireAuth(req, res)) return;
   const { id } = req.params;
-  const { status } = req.body as { status: string };
-  if (!status) return res.status(400).json({ error: "status required" });
+  const { status, notes } = req.body as { status?: string; notes?: string };
+  if (!status && notes === undefined)
+    return res.status(400).json({ error: "status or notes required" });
+
+  const update: Record<string, unknown> = {};
+  if (status) update.status = status;
+  if (notes !== undefined) update.notes = notes;
+
   try {
     const { error } = await supabaseAdmin
       .from("enquiries")
-      .update({ status })
+      .update(update)
       .eq("id", id);
     if (error) throw error;
 
@@ -97,6 +155,23 @@ router.put("/enquiries/:id", async (req, res) => {
     return res.json(rowToEnquiry(row as Record<string, unknown>));
   } catch (err) {
     console.error("PUT /api/enquiries/:id", err);
+    return res.status(500).json({ error: "db error" });
+  }
+});
+
+// DELETE /api/enquiries/:id — protected
+router.delete("/enquiries/:id", async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  const { id } = req.params;
+  try {
+    const { error } = await supabaseAdmin
+      .from("enquiries")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
+    return res.json({ success: true });
+  } catch (err) {
+    console.error("DELETE /api/enquiries/:id", err);
     return res.status(500).json({ error: "db error" });
   }
 });

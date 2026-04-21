@@ -110,10 +110,63 @@ async function ensureClientUniqueIndex(): Promise<void> {
   }
 }
 
+/** Create enquiries table if it doesn't exist via exec_sql RPC. */
+async function ensureEnquiriesTable(): Promise<void> {
+  const client = supabaseAdmin as unknown as {
+    rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+  };
+  try {
+    const { error } = await client.rpc("exec_sql", {
+      query: `
+        CREATE TABLE IF NOT EXISTS enquiries (
+          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+          location_id UUID REFERENCES locations(id),
+          course_name TEXT NOT NULL,
+          name TEXT NOT NULL,
+          email TEXT NOT NULL,
+          phone TEXT NOT NULL,
+          experience_level TEXT,
+          message TEXT,
+          status TEXT DEFAULT 'new'
+            CHECK (status IN ('new','contacted','enrolled','closed')),
+          notes TEXT,
+          created_at TIMESTAMPTZ DEFAULT NOW()
+        );
+      `,
+    });
+    if (error) {
+      console.warn("Seed: enquiries table exec_sql error:", error.message);
+      return;
+    }
+    // Enable RLS and policies separately
+    await client.rpc("exec_sql", { query: `ALTER TABLE enquiries ENABLE ROW LEVEL SECURITY;` }).catch(() => {});
+    await client.rpc("exec_sql", {
+      query: `DO $$ BEGIN
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='enquiries' AND policyname='enquiries_public_insert') THEN
+          CREATE POLICY "enquiries_public_insert" ON enquiries FOR INSERT TO anon WITH CHECK (true);
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='enquiries' AND policyname='enquiries_service_all') THEN
+          CREATE POLICY "enquiries_service_all" ON enquiries FOR ALL TO service_role USING (true);
+        END IF;
+      END $$;`,
+    }).catch(() => {});
+    await client.rpc("exec_sql", {
+      query: `CREATE INDEX IF NOT EXISTS idx_enquiries_location ON enquiries(location_id);
+              CREATE INDEX IF NOT EXISTS idx_enquiries_status ON enquiries(status);`,
+    }).catch(() => {});
+    // Notify PostgREST to reload its schema cache
+    await client.rpc("exec_sql", { query: `NOTIFY pgrst, 'reload schema';` }).catch(() => {});
+    console.log("Seed: enquiries table created/verified");
+  } catch (err) {
+    console.warn("Seed: exec_sql RPC not available — enquiries table must be created manually in Supabase dashboard", err);
+  }
+}
+
 export async function seedTreatments(): Promise<void> {
   try {
     await ensureCategoryColumn();
     ensureClientUniqueIndex().catch(() => {});
+    ensureEnquiriesTable().catch(() => {});
 
     const { data: locations, error: locErr } = await supabaseAdmin
       .from("locations")

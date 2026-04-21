@@ -536,11 +536,25 @@ select.form-input{background:var(--color-card)}
 .toast.show{opacity:1;transform:translateY(0)}
 
 /* ── ENQUIRIES TABLE ── */
-#enq-body tr:nth-child(even){background:rgba(92,26,26,.02)}
-#enq-body td{padding:12px 16px;font-family:var(--font-sans);font-size:13px;font-weight:300;border-bottom:1px solid var(--color-border-subtle);vertical-align:top}
+#enq-body td{padding:11px 14px;font-family:var(--font-sans);font-size:13px;font-weight:300;border-bottom:1px solid var(--color-border-subtle);vertical-align:middle}
 #enq-body tr:last-child td{border-bottom:none}
-.enq-status-select{font-family:var(--font-sans);font-size:12px;font-weight:300;padding:4px 8px;border:1px solid var(--color-border);border-radius:var(--radius);background:transparent;cursor:pointer}
-.enq-status-select:focus{outline:none;border-color:var(--color-primary)}
+#enq-body tr.enq-detail-row td{padding:0;background:#faf7f4}
+.enq-pill-new{display:inline-block;font-family:var(--font-sans);font-size:10px;font-weight:600;letter-spacing:.05em;padding:3px 9px;border-radius:99px;background:#FFF3CD;color:#856404}
+.enq-pill-contacted{display:inline-block;font-family:var(--font-sans);font-size:10px;font-weight:600;letter-spacing:.05em;padding:3px 9px;border-radius:99px;background:#D1ECF1;color:#0C5460}
+.enq-pill-enrolled{display:inline-block;font-family:var(--font-sans);font-size:10px;font-weight:600;letter-spacing:.05em;padding:3px 9px;border-radius:99px;background:#D4EDDA;color:#155724}
+.enq-pill-closed{display:inline-block;font-family:var(--font-sans);font-size:10px;font-weight:600;letter-spacing:.05em;padding:3px 9px;border-radius:99px;background:#E2E3E5;color:#383D41}
+.enq-course-badge{display:inline-block;font-family:var(--font-sans);font-size:10px;font-weight:500;padding:3px 9px;border-radius:99px;background:rgba(201,169,110,.15);color:#8B6914;white-space:nowrap}
+.enq-action-btn{background:none;border:1px solid var(--color-border);border-radius:var(--radius);cursor:pointer;font-size:14px;padding:2px 8px;color:var(--color-muted-fg);transition:background var(--transition-base)}
+.enq-action-btn:hover{background:var(--color-muted)}
+.enq-action-menu{position:absolute;right:0;top:100%;margin-top:4px;background:#fff;border:1px solid var(--color-border);border-radius:var(--radius);box-shadow:0 4px 12px rgba(0,0,0,.1);z-index:200;min-width:160px;overflow:hidden}
+.enq-action-menu button{display:block;width:100%;text-align:left;font-family:var(--font-sans);font-size:13px;font-weight:300;padding:9px 14px;background:none;border:none;cursor:pointer;color:var(--color-foreground)}
+.enq-action-menu button:hover{background:var(--color-muted)}
+.enq-action-menu button.danger{color:#c62828}
+.enq-detail-inner{padding:20px 24px;display:grid;grid-template-columns:1fr 1fr;gap:14px 32px}
+.enq-detail-label{font-family:var(--font-sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-muted-fg);margin-bottom:3px}
+.enq-detail-value{font-family:var(--font-sans);font-size:13px;color:var(--color-foreground)}
+.enq-notes-area{font-family:var(--font-sans);font-size:13px;font-weight:300;border:1px solid var(--color-border);border-radius:var(--radius);padding:8px 10px;resize:vertical;width:100%;box-sizing:border-box;min-height:64px;background:#fff}
+.enq-notes-area:focus{outline:none;border-color:var(--color-primary)}
 
 /* ── RESPONSIVE ──────────────────────────────────── */
 @media(max-width:1100px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
@@ -1036,17 +1050,18 @@ select.form-input{background:var(--color-card)}
     <!-- ── ENQUIRIES ── -->
     <div id="page-enquiries" class="page">
       <div class="topbar"><span class="topbar-title serif">Training Enquiries</span></div>
-      <div style="padding:20px 24px;box-sizing:border-box;overflow-x:hidden">
+      <div style="padding:20px 24px;box-sizing:border-box;overflow-x:auto">
         <div class="card" style="padding:0;overflow:hidden">
-          <table id="enq-table" style="width:100%;border-collapse:collapse">
+          <table id="enq-table" style="width:100%;border-collapse:collapse;min-width:640px">
             <thead>
-              <tr>
-                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Date</th>
-                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Name</th>
-                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Course</th>
-                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Phone</th>
-                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Email</th>
-                <th style="text-align:left;padding:12px 16px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);border-bottom:1px solid var(--border);font-weight:600">Status</th>
+              <tr style="background:var(--color-muted)">
+                <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Date</th>
+                <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Name</th>
+                <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Course</th>
+                <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Phone</th>
+                <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Email</th>
+                <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Status</th>
+                <th style="width:48px;border-bottom:1px solid var(--color-border)"></th>
               </tr>
             </thead>
             <tbody id="enq-body"></tbody>
@@ -4355,74 +4370,166 @@ function startLiveRefresh(){
 // ═══════════════════════════════════════════════════
 // ENQUIRIES
 // ═══════════════════════════════════════════════════
+function enqStatusPill(status){
+  const map={new:'enq-pill-new',contacted:'enq-pill-contacted',enrolled:'enq-pill-enrolled',closed:'enq-pill-closed'};
+  const cls=map[status]||'enq-pill-closed';
+  return `<span class="${cls}">${status.toUpperCase()}</span>`;
+}
+
+let _enqOpenId=null;
+let _enqOpenMenuId=null;
+
+function enqCloseMenu(){
+  if(_enqOpenMenuId!==null){
+    const m=document.getElementById('enq-menu-'+_enqOpenMenuId);
+    if(m)m.remove();
+    _enqOpenMenuId=null;
+  }
+}
+
+document.addEventListener('click',()=>enqCloseMenu());
+
 async function renderEnquiries(){
   const body=document.getElementById('enq-body');
-  body.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--muted)">Loading…</td></tr>';
+  body.innerHTML='<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--color-muted-fg)">Loading…</td></tr>';
   try{
-    const token=localStorage.getItem('fbn_token');
-    const res=await fetch('/api/enquiries',{headers:{Authorization:'Bearer '+token}});
+    const h=authHdr();
+    const res=await fetch('/api/enquiries',{headers:h});
     if(res.status===401){clearSession('Session expired — please log in again.');return;}
-    if(!res.ok){body.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:#c62828">Failed to load enquiries.</td></tr>';return;}
+    if(!res.ok){body.innerHTML='<tr><td colspan="7" style="padding:24px;text-align:center;color:#c62828">Failed to load enquiries.</td></tr>';return;}
     const data=await res.json();
     const enqs=data.enquiries||[];
-    // Update badge
-    const newCount=enqs.filter(e=>e.status==='New').length;
+    const newCount=enqs.filter(e=>e.status==='new').length;
     const badge=document.getElementById('sb-enq-badge');
     if(badge){badge.textContent=newCount;badge.style.display=newCount>0?'inline-flex':'none';}
-    if(!enqs.length){body.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:var(--muted)">No enquiries yet.</td></tr>';return;}
+    if(!enqs.length){body.innerHTML='<tr><td colspan="7" style="padding:24px;text-align:center;color:var(--color-muted-fg)">No enquiries yet.</td></tr>';return;}
     body.innerHTML=enqs.map(e=>{
       const ts=e.createdAt||e.created_at||0;
-      const d=new Date(Number(ts));
-      const dateStr=d.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
-      return `<tr>
-        <td style="white-space:nowrap">${dateStr}</td>
+      const dateStr=new Date(ts).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'});
+      return `<tr id="enq-row-${e.id}" style="cursor:pointer" onclick="enqToggleDetail('${e.id}',this)">
+        <td style="white-space:nowrap;color:var(--color-muted-fg)">${dateStr}</td>
         <td>
-          <div style="font-weight:500">${e.name}</div>
-          <div style="font-size:11px;color:var(--muted)">${e.email}</div>
+          <div style="font-weight:500;font-family:var(--font-sans)">${e.name}</div>
         </td>
-        <td>${e.course||'—'}</td>
-        <td>${e.phone||'—'}</td>
-        <td><a href="mailto:${e.email}" style="color:var(--gold);text-decoration:none">${e.email}</a></td>
-        <td>
-          <select class="enq-status-select" onchange="updateEnquiryStatus(${e.id},this.value)">
-            ${['New','Contacted','Closed'].map(s=>`<option${s===e.status?' selected':''}>${s}</option>`).join('')}
-          </select>
+        <td><span class="enq-course-badge">${e.courseName||'—'}</span></td>
+        <td><a href="tel:${e.phone}" onclick="event.stopPropagation()" style="color:var(--color-foreground);text-decoration:none">${e.phone||'—'}</a></td>
+        <td><a href="mailto:${e.email}" onclick="event.stopPropagation()" style="color:var(--color-gold,#C9A96E);text-decoration:none">${e.email}</a></td>
+        <td>${enqStatusPill(e.status)}</td>
+        <td style="position:relative" onclick="event.stopPropagation()">
+          <button class="enq-action-btn" onclick="enqOpenMenu(event,'${e.id}')">···</button>
+        </td>
+      </tr>
+      <tr id="enq-detail-${e.id}" class="enq-detail-row" style="display:none">
+        <td colspan="7">
+          <div class="enq-detail-inner">
+            <div>
+              <div class="enq-detail-label">Full Name</div>
+              <div class="enq-detail-value">${e.name}</div>
+            </div>
+            <div>
+              <div class="enq-detail-label">Email</div>
+              <div class="enq-detail-value"><a href="mailto:${e.email}" style="color:var(--color-gold,#C9A96E)">${e.email}</a></div>
+            </div>
+            <div>
+              <div class="enq-detail-label">Phone</div>
+              <div class="enq-detail-value"><a href="tel:${e.phone}" style="color:var(--color-foreground)">${e.phone}</a></div>
+            </div>
+            <div>
+              <div class="enq-detail-label">Course</div>
+              <div class="enq-detail-value">${e.courseName||'—'}</div>
+            </div>
+            <div>
+              <div class="enq-detail-label">Experience Level</div>
+              <div class="enq-detail-value">${e.experienceLevel||'—'}</div>
+            </div>
+            <div>
+              <div class="enq-detail-label">Date Submitted</div>
+              <div class="enq-detail-value">${dateStr}</div>
+            </div>
+            ${e.message?`<div style="grid-column:1/-1"><div class="enq-detail-label">Message</div><div class="enq-detail-value" style="white-space:pre-wrap">${e.message}</div></div>`:''}
+            <div style="grid-column:1/-1">
+              <div class="enq-detail-label" style="margin-bottom:6px">Internal Notes</div>
+              <textarea id="enq-notes-${e.id}" class="enq-notes-area" placeholder="Add internal notes here…">${e.notes||''}</textarea>
+              <button onclick="saveEnquiryNotes('${e.id}')" style="margin-top:8px;font-family:var(--font-sans);font-size:11px;letter-spacing:.08em;text-transform:uppercase;background:var(--color-primary);color:var(--color-primary-fg);border:none;padding:8px 16px;border-radius:var(--radius);cursor:pointer">Save Notes</button>
+            </div>
+          </div>
         </td>
       </tr>`;
     }).join('');
   }catch(ex){
-    body.innerHTML='<tr><td colspan="6" style="padding:24px;text-align:center;color:#c62828">Error loading enquiries.</td></tr>';
+    body.innerHTML='<tr><td colspan="7" style="padding:24px;text-align:center;color:#c62828">Error loading enquiries.</td></tr>';
   }
 }
 
-async function updateEnquiryStatus(id,status){
+function enqToggleDetail(id,rowEl){
+  enqCloseMenu();
+  const detail=document.getElementById('enq-detail-'+id);
+  if(!detail)return;
+  const isOpen=detail.style.display!=='none';
+  if(_enqOpenId&&_enqOpenId!==id){
+    const prev=document.getElementById('enq-detail-'+_enqOpenId);
+    if(prev)prev.style.display='none';
+  }
+  detail.style.display=isOpen?'none':'table-row';
+  _enqOpenId=isOpen?null:id;
+}
+
+function enqOpenMenu(event,id){
+  event.stopPropagation();
+  enqCloseMenu();
+  const btn=event.currentTarget;
+  const menu=document.createElement('div');
+  menu.className='enq-action-menu';
+  menu.id='enq-menu-'+id;
+  menu.innerHTML=`
+    <button onclick="enqSetStatus('${id}','contacted');enqCloseMenu()">Mark as Contacted</button>
+    <button onclick="enqSetStatus('${id}','enrolled');enqCloseMenu()">Mark as Enrolled</button>
+    <button onclick="enqSetStatus('${id}','closed');enqCloseMenu()">Mark as Closed</button>
+    <button onclick="enqSetStatus('${id}','new');enqCloseMenu()">Mark as New</button>
+    <button class="danger" onclick="deleteEnquiry('${id}');enqCloseMenu()">Delete</button>`;
+  btn.parentElement.style.position='relative';
+  btn.parentElement.appendChild(menu);
+  _enqOpenMenuId=id;
+}
+
+async function enqSetStatus(id,status){
   try{
-    const token=localStorage.getItem('fbn_token');
-    await fetch(`/api/enquiries/${id}`,{
-      method:'PUT',
-      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-      body:JSON.stringify({status})
-    });
-    showToast(`Enquiry marked as ${status}`);
-    // Refresh badge
-    const badgeRes=await fetch('/api/enquiries',{headers:{Authorization:'Bearer '+token}});
-    if(badgeRes.ok){
-      const d=await badgeRes.json();
-      const newCount=(d.enquiries||[]).filter(e=>e.status==='New').length;
-      const badge=document.getElementById('sb-enq-badge');
-      if(badge){badge.textContent=newCount;badge.style.display=newCount>0?'inline-flex':'none';}
-    }
+    const h={...authHdr(),'Content-Type':'application/json'};
+    await fetch(`/api/enquiries/${id}`,{method:'PUT',headers:h,body:JSON.stringify({status})});
+    showToast('Status updated');
+    await renderEnquiries();
   }catch(e){showToast('Failed to update status');}
+}
+
+async function saveEnquiryNotes(id){
+  const ta=document.getElementById('enq-notes-'+id);
+  if(!ta)return;
+  try{
+    const h={...authHdr(),'Content-Type':'application/json'};
+    await fetch(`/api/enquiries/${id}`,{method:'PUT',headers:h,body:JSON.stringify({notes:ta.value})});
+    showToast('Notes saved');
+  }catch(e){showToast('Failed to save notes');}
+}
+
+async function deleteEnquiry(id){
+  if(!confirm('Delete this enquiry?'))return;
+  try{
+    const h=authHdr();
+    await fetch(`/api/enquiries/${id}`,{method:'DELETE',headers:h});
+    showToast('Enquiry deleted');
+    await renderEnquiries();
+  }catch(e){showToast('Failed to delete enquiry');}
 }
 
 async function updateEnquiryBadge(){
   try{
     const token=localStorage.getItem('fbn_token');
     if(!token)return;
-    const res=await fetch('/api/enquiries',{headers:{Authorization:'Bearer '+token}});
+    const h=authHdr();
+    const res=await fetch('/api/enquiries',{headers:h});
     if(!res.ok)return;
     const data=await res.json();
-    const newCount=(data.enquiries||[]).filter(e=>e.status==='New').length;
+    const newCount=(data.enquiries||[]).filter(e=>e.status==='new').length;
     const badge=document.getElementById('sb-enq-badge');
     if(badge){badge.textContent=newCount;badge.style.display=newCount>0?'inline-flex':'none';}
   }catch(e){}

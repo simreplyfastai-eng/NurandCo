@@ -1,0 +1,553 @@
+Full availability system rebuild. Read every 
+file related to availability before touching 
+anything — availability tab HTML, all API routes, 
+booking widget, slot generation logic.
+
+This must be 100% correct. The Dermadoll project 
+had a critical bug where bookings were saving 
+on the wrong date (one day behind) and wrong 
+time (1-2 hours behind) due to timezone handling.
+This must be completely eliminated.
+
+===============================================================
+CRITICAL — TIMEZONE RULES (NON-NEGOTIABLE)
+===============================================================
+
+ALL dates and times in this entire system must 
+use UTC/GMT. No local timezone conversions. Ever.
+
+RULE 1 — Date parsing:
+  NEVER use: new Date('2026-04-23')
+  This parses as midnight UTC then converts to 
+  local time, causing off-by-one date bugs.
+  
+  ALWAYS use: new Date('2026-04-23T00:00:00Z')
+  Or: new Date('2026-04-23T00:00:00.000Z')
+  This forces UTC midnight, no timezone shift.
+
+RULE 2 — Day of week:
+  NEVER use: date.getDay()
+  This returns day in LOCAL timezone.
+  
+  ALWAYS use: date.getUTCDay()
+  Returns: 0=Sun, 1=Mon, 2=Tue, 3=Wed, 
+           4=Thu, 5=Fri, 6=Sat
+  
+  Example that caused the Dermadoll bug:
+    new Date('2026-04-17').getDay() 
+    → could return 3 (Wed) in UTC+1
+    BUT the date is actually Thursday Apr 17
+    
+    new Date('2026-04-17T00:00:00Z').getUTCDay()
+    → returns 4 (Thu) ✓ CORRECT
+
+RULE 3 — Storing dates in Supabase:
+  Booking date → store as DATE type (YYYY-MM-DD)
+  Booking time → store as TIME type (HH:MM:SS)
+  Both in UTC/GMT. No timezone offset.
+  
+  When inserting: 
+    booking_date: '2026-04-23'  (plain date string)
+    time_slot: '14:00'          (plain time string)
+  
+  NEVER store a full ISO datetime for booking_date
+  as this causes the timezone shift bug.
+
+RULE 4 — Time slot generation:
+  Generate slots using plain string arithmetic
+  NOT Date objects:
+  
+  function generateSlots(openTime, closeTime, 
+    durationMins) {
+    const slots = []
+    let [h, m] = openTime.split(':').map(Number)
+    const [closeH, closeM] = closeTime.split(':')
+      .map(Number)
+    
+    while (h < closeH || (h === closeH && m < closeM)) {
+      slots.push(
+        `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`
+      )
+      m += durationMins
+      if (m >= 60) { h += Math.floor(m/60); m = m%60 }
+    }
+    return slots
+  }
+  
+  This generates "10:00", "10:30"... with NO 
+  timezone involvement whatsoever.
+
+RULE 5 — Displaying dates to the customer:
+  When showing "Thursday 23 April 2026":
+  
+  function formatDate(dateStr) {
+    // dateStr = '2026-04-23'
+    const [y, m, d] = dateStr.split('-').map(Number)
+    const date = new Date(Date.UTC(y, m-1, d))
+    return date.toLocaleDateString('en-GB', {
+      weekday: 'long',
+      day: 'numeric', 
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'Europe/London'
+    })
+  }
+  
+  Always pass timeZone: 'Europe/London' to 
+  display functions so UK clients see correct 
+  dates regardless of server timezone.
+
+RULE 6 — Stripe metadata:
+  Store booking_date as 'YYYY-MM-DD' string
+  Store booking_time as 'HH:MM' string
+  Extract from metadata with no conversion:
+  
+  const bookingDate = metadata.bookingDate  // '2026-04-23'
+  const timeSlot = metadata.bookingTime     // '14:00'
+  
+  Insert directly to Supabase without parsing 
+  through Date objects.
+
+RULE 7 — "Is this slot in the past?" check:
+  If date is today, remove past slots:
+  
+  const now = new Date()
+  const nowUTCHours = now.getUTCHours()
+  const nowUTCMins = now.getUTCMinutes()
+  
+  slots = slots.filter(slot => {
+    const [slotH, slotM] = slot.split(':').map(Number)
+    return slotH > nowUTCHours || 
+      (slotH === nowUTCHours && slotM > nowUTCMins)
+  })
+  
+  Note: UK is UTC+1 in BST (summer) and UTC+0 in 
+  GMT (winter). To handle BST properly:
+  
+  const londonNow = new Date().toLocaleString(
+    'en-GB', { timeZone: 'Europe/London' }
+  )
+  // Parse the local London time and compare
+  
+  Or simpler — just add 1hr buffer so slots 
+  at least 1 hour in the future are shown.
+
+Apply ALL 7 rules everywhere in the codebase.
+Search for any instance of:
+  new Date(someString) without T00:00:00Z
+  .getDay() without UTC
+  .getHours() for slot comparison
+  
+And fix every instance.
+
+===============================================================
+SECTION 1 — WORKING HOURS (weekly schedule)
+===============================================================
+
+The top card "Working Hours & Availability" 
+already has the correct weekly schedule UI:
+  Monday–Sunday toggles + time pickers
+  SAVE CHANGES button
+
+Fix 1a — Remove duplicate "Working Hours" card:
+  There is a second "Working Hours" card below 
+  showing "Could not load working hours."
+  DELETE this entire card from the HTML.
+  The top card handles everything.
+
+Fix 1b — Wire SAVE CHANGES to Supabase:
+  When clicked, read all 7 day rows and upsert:
+  
+  for each day 0–6 (Sun–Sat):
+    supabaseAdmin.from('availability_settings')
+    .upsert({
+      location_id: resolvedLocationId,
+      day_of_week: dayIndex,  // 0=Sun through 6=Sat
+      is_open: toggle.checked,
+      open_time: openTimeInput.value,   // "10:00"
+      close_time: closeTimeInput.value, // "19:00"
+      slot_duration_minutes: 30
+    }, { onConflict: 'location_id,day_of_week' })
+  
+  On success: toast "Working hours saved ✓"
+  On error: toast "Failed to save"
+
+Fix 1c — Load current hours on page load:
+  Fetch availability_settings for current location
+  Populate toggles and time inputs from DB values
+  If no row for a day → default to closed
+
+Fix 1d — Resolve location slug to UUID:
+  The portal has a locationId in session.
+  Use that UUID directly — not the slug.
+  All API calls use the UUID.
+
+===============================================================
+SECTION 2 — DATE OVERRIDES CALENDAR
+===============================================================
+
+The calendar on the right side of the top card
+already exists (April 2026, Working/Off/Overridden 
+legend). Wire it to blocked_dates in Supabase.
+
+On calendar date click:
+  Check if date exists in blocked_dates for 
+  this location:
+  
+  If NOT blocked → INSERT to block it:
+    { location_id, date: 'YYYY-MM-DD' }
+    Visual: date cell turns red/off tint
+  
+  If blocked → DELETE to unblock:
+    Visual: date cell returns to normal
+
+On page load:
+  Fetch all blocked_dates for this location
+  Apply red/off styling to those dates
+  
+  Fetch all dates with existing bookings
+  Apply green dot to those dates
+
+Calendar navigation (prev/next month):
+  Works correctly — fetches blocked dates 
+  for the new month on navigation
+
+Visual legend:
+  Working (cream) → open day
+  Off (grey) → closed day (based on day_of_week)
+  Overridden (gold border) → specifically blocked date
+
+===============================================================
+SECTION 3 — BLOCKED TIME SLOTS (CALENDAR VIEW)
+===============================================================
+
+COMPLETELY REBUILD THIS SECTION.
+
+Current design (wrong): 
+  "Select day..." dropdown + FROM/TO time inputs
+  This is weekly recurring only — wrong for 
+  future one-off events.
+
+New design (correct):
+  Split into TWO tabs or TWO sections:
+
+───────────────────────────────────────
+TAB A: "Block Off Dates" (one-off events)
+───────────────────────────────────────
+
+This is for blocking specific future dates:
+e.g. "I'm away 5–7 May" or "No bookings on 
+Bank Holiday 26 May"
+
+UI: A clean calendar picker
+
+  Month navigation: ‹ April 2026 ›
+  
+  Grid of dates (same style as the date overrides 
+  calendar above)
+  
+  Click a date → block it (turns red/off)
+  Click again → unblock
+  
+  Below calendar: list of upcoming blocked dates
+  
+  Each item:
+    "Mon 4 May 2026  — Full day off"
+    × remove button
+  
+  Sorted by date ascending (soonest first)
+  Only shows future dates
+  
+  Saves to: blocked_dates table in Supabase
+  { location_id, date: 'YYYY-MM-DD', 
+    reason: 'Manual block' }
+  
+  This is THE SAME blocked_dates table used by 
+  the date overrides calendar above — they're 
+  the same thing. The two UIs should stay in sync.
+  If Eva blocks May 4 here, it also shows as 
+  blocked in the date overrides calendar.
+
+───────────────────────────────────────
+TAB B: "Recurring Weekly Blocks"
+───────────────────────────────────────
+
+This is for weekly time blocks that repeat:
+e.g. "Every day, lunch 13:00–14:00"
+or "Every Monday, school run 15:00–16:30"
+
+UI:
+
+  Add a recurring block:
+  
+  DAY:
+    Dropdown: All Days | Mon | Tue | Wed | 
+              Thu | Fri | Sat | Sun
+  
+  FROM: time input (HH:MM)
+  TO: time input (HH:MM)
+  
+  LABEL (optional): text input
+    e.g. "Lunch break", "School run"
+  
+  [+ ADD BLOCK] button
+  
+  On click: validate then INSERT to 
+  blocked_slots table:
+    { location_id, day_of_week (null if all),
+      all_days (true if all), start_time, 
+      end_time, label }
+  
+  List of current blocks below:
+    "Every day · 13:00 – 14:00 · Lunch break  ×"
+    "Every Monday · 15:00 – 16:30 · School run  ×"
+    × removes from Supabase + list
+
+Create blocked_slots table if not exists:
+  CREATE TABLE IF NOT EXISTS blocked_slots (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    location_id UUID REFERENCES locations(id) 
+      ON DELETE CASCADE NOT NULL,
+    day_of_week INTEGER,
+    all_days BOOLEAN DEFAULT false,
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    label TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+  );
+  ALTER TABLE blocked_slots ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY "blocked_slots_service" 
+    ON blocked_slots FOR ALL TO service_role USING (true);
+  CREATE POLICY "blocked_slots_public_read"
+    ON blocked_slots FOR SELECT TO anon USING (true);
+  GRANT SELECT ON blocked_slots TO anon;
+  GRANT ALL ON blocked_slots TO service_role;
+
+===============================================================
+SECTION 4 — AVAILABILITY APIs
+===============================================================
+
+GET /api/availability/settings?location=[slug]
+  Resolve slug → UUID
+  Return availability_settings for all 7 days
+  Return blocked_dates for next 90 days
+  Return blocked_slots for this location
+
+PUT /api/availability/settings
+  JWT required
+  Body: { days: [{day_of_week, is_open, 
+    open_time, close_time}] }
+  Upsert all 7 days to availability_settings
+  X-Location-Id header for location_id
+
+GET /api/availability/slots?location=[slug]&date=[YYYY-MM-DD]
+  PUBLIC — no auth required
+  
+  1. Resolve slug → UUID
+  
+  2. Parse date SAFELY:
+     const [y,m,d] = dateStr.split('-').map(Number)
+     const dayOfWeek = new Date(Date.UTC(y,m-1,d))
+       .getUTCDay()
+  
+  3. Check blocked_dates:
+     If this date is blocked → return:
+     { available: false, reason: 'DATE_BLOCKED',
+       slots: [] }
+  
+  4. Get availability_settings for this 
+     location + dayOfWeek:
+     If is_open = false → return:
+     { available: false, reason: 'CLINIC_CLOSED',
+       slots: [] }
+  
+  5. Generate all slots (string arithmetic, 
+     NO Date objects):
+     open_time to close_time, 30-min intervals
+  
+  6. Remove blocked_slots for this day:
+     WHERE location_id = id
+     AND (all_days = true OR day_of_week = dayOfWeek)
+     Remove any slot that falls within start_time 
+     to end_time of any block
+  
+  7. Remove booked slots:
+     SELECT time_slot FROM bookings
+     WHERE location_id = id
+     AND booking_date = dateStr
+     AND status NOT IN ('cancelled')
+  
+  8. If today, remove past slots using 
+     London time:
+     Compare against current London time 
+     with 30-min buffer
+  
+  9. Return:
+     {
+       available: true,
+       date: dateStr,
+       dayName: 'Thursday',
+       openTime: '10:00',
+       closeTime: '19:00',
+       slots: [
+         { time: '10:00', available: true },
+         { time: '10:30', available: false,
+           reason: 'booked' },
+         { time: '13:00', available: false,
+           reason: 'blocked' }
+       ]
+     }
+
+GET /api/availability/check?location=[slug]
+  &date=[YYYY-MM-DD]&time=[HH:MM]
+  PUBLIC
+  Quick check: is this specific slot available?
+  Returns { available: bool, reason: string }
+  Uses same logic as /slots but for one slot only.
+
+GET /api/availability/blocked-dates?location=[slug]
+  &from=[YYYY-MM-DD]&to=[YYYY-MM-DD]
+  PUBLIC
+  Returns array of blocked dates in range
+  Used by booking calendar to grey out dates
+
+POST /api/availability/block-date
+  JWT required
+  Body: { date: 'YYYY-MM-DD' }
+  Toggles blocked_dates for this location
+
+DELETE /api/availability/block-date/:date
+  JWT required
+  Removes from blocked_dates
+
+POST /api/availability/blocked-slots
+  JWT required
+  Adds to blocked_slots
+
+DELETE /api/availability/blocked-slots/:id
+  JWT required
+  Removes from blocked_slots
+
+===============================================================
+SECTION 5 — CUSTOMER BOOKING WIDGET
+===============================================================
+
+The booking calendar shown to customers must:
+
+CALENDAR DISPLAY:
+  Load blocked_dates for the month from:
+  GET /api/availability/blocked-dates?location=[slug]
+    &from=2026-04-01&to=2026-04-30
+  
+  For each date in the calendar:
+    Check day_of_week against availability_settings
+    → If closed day: grey cell, not clickable
+    
+    Check against blocked_dates
+    → If blocked: grey cell, not clickable
+    
+    Past dates → grey, not clickable
+    Available dates → normal, clickable
+    
+  NEVER show a month without fetching fresh 
+  data from Supabase first.
+
+TIME SLOT DISPLAY:
+  When customer selects a date:
+  GET /api/availability/slots?location=[slug]
+    &date=[YYYY-MM-DD]
+  
+  Show all slots from response:
+    available: true → cream pill, clickable
+    available: false → grey pill, not clickable
+    (show unavailable slots but greyed — 
+    Eva wants clients to see the day is busy)
+  
+  Refresh slots on every date selection.
+  Never cache slots client-side.
+
+DATE DISPLAY TO CUSTOMER:
+  Always use Europe/London timezone for display:
+  
+  "Thursday, 23 April 2026 at 14:00"
+  
+  function formatBookingDisplay(date, time) {
+    const [y,m,d] = date.split('-').map(Number)
+    const dateObj = new Date(Date.UTC(y, m-1, d))
+    const dayStr = dateObj.toLocaleDateString('en-GB', {
+      weekday: 'long', day: 'numeric',
+      month: 'long', year: 'numeric',
+      timeZone: 'Europe/London'
+    })
+    return `${dayStr} at ${time}`
+  }
+
+BOOKING SUBMISSION:
+  Send to server exactly as strings:
+    booking_date: '2026-04-23'  (selected date)
+    time_slot: '14:00'          (selected time)
+  
+  The server stores these strings directly.
+  No Date object conversion.
+
+===============================================================
+SECTION 6 — ADMIN SCHEDULE CALENDAR SYNC
+===============================================================
+
+The admin Schedule calendar must also reflect 
+availability and blocked dates:
+
+Blocked dates → show date cell with 
+  strikethrough or red/orange tint
+Closed days → all cells for that day-of-week 
+  show as slightly greyed
+Days with bookings → green dot on date
+Today → gold border
+
+When Eva blocks a date in the Availability tab,
+the Schedule calendar updates on next load.
+
+===============================================================
+VERIFY AFTER ALL CHANGES
+===============================================================
+
+DATE/TIME BUG TESTS:
+  Test 1: Book appointment for April 23 2026
+  Check Supabase: booking_date = '2026-04-23' ✓
+  
+  Test 2: Book appointment for 14:00
+  Check Supabase: time_slot = '14:00' ✓
+  
+  Test 3: Day of week for April 23 2026
+  Should be Thursday → check availability_settings
+  day_of_week = 4, is_open = true ✓
+  /api/availability/check?location=hornchurch
+    &date=2026-04-23&time=10:00
+  → { available: true } ✓
+
+WORKING HOURS TESTS:
+  Change Friday to 09:00–17:00 → SAVE ✓
+  Customer calendar Friday slots end at 16:30 ✓
+  API: close_time = '17:00' in Supabase ✓
+
+BLOCKED DATES TESTS:
+  Block May 5 in calendar → click ✓
+  blocked_dates has row for May 5 ✓
+  Customer can't book May 5 ✓
+  Unblock May 5 → click again ✓
+  Row removed from Supabase ✓
+
+RECURRING BLOCKS TEST:
+  Add recurring block: All Days 13:00–14:00 ✓
+  Slots 13:00 and 13:30 greyed on every date ✓
+  Delete block ✓
+  Slots available again ✓
+
+ONE-OFF DATE BLOCK TEST (future event):
+  Block a range: May 5–7 ✓
+  Customer calendar shows all 3 dates grey ✓
+  Supabase has 3 rows in blocked_dates ✓
+
+Report each as PASS or FAIL.
+Fix all FAILs. Do not mark complete until 
+all tests pass.
