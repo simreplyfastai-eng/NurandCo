@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import BookingModal from "@/components/BookingModal";
@@ -264,7 +264,8 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
 }
 
 export default function BookPage() {
-  const params = new URLSearchParams(window.location.search);
+  const search = useSearch();
+  const params = new URLSearchParams(search);
   const locationSlug = params.get("location") ?? "";
   const treatmentId = params.get("treatment") ?? "";
 
