@@ -149,4 +149,89 @@ router.delete("/availability/block/:date", async (req, res) => {
   }
 });
 
+// GET /api/availability/slots?date=YYYY-MM-DD — returns available time slots for a date+location
+// Filters by: working hours, blocked_dates overrides, blocked_slots (intra-day), existing bookings
+router.get("/availability/slots", async (req, res) => {
+  const locationId = getLocationId(req);
+  const date = req.query.date as string | undefined;
+  if (!date) return res.status(400).json({ error: "date required" });
+  if (!locationId) return res.status(400).json({ error: "locationId required" });
+
+  try {
+    // day_of_week: 0=Sun, 1=Mon, ..., 6=Sat (matches availability_settings seed)
+    const [y, mo, d] = date.split("-").map(Number);
+    const jsDay = new Date(y, mo - 1, d).getDay();
+
+    // 1. Check for full-day override (blocked date)
+    const { data: blocked } = await supabaseAdmin
+      .from("blocked_dates")
+      .select("date")
+      .eq("location_id", locationId)
+      .eq("date", date)
+      .maybeSingle();
+
+    if (blocked) return res.json([]);
+
+    // 2. Get working hours for this day
+    const { data: avail } = await supabaseAdmin
+      .from("availability_settings")
+      .select("is_open, start_time, end_time")
+      .eq("location_id", locationId)
+      .eq("day_of_week", jsDay)
+      .maybeSingle();
+
+    if (!avail || !avail.is_open) return res.json([]);
+
+    // 3. Generate 30-min slots
+    const allSlots = generateTimeSlots(
+      avail.start_time ?? "09:00",
+      avail.end_time ?? "17:00",
+      30,
+    );
+
+    // 4. Get intra-day blocked slots for this day (or all_days)
+    const { data: blockedSlots } = await supabaseAdmin
+      .from("blocked_slots")
+      .select("start_time, end_time")
+      .eq("location_id", locationId)
+      .or(`day_of_week.eq.${jsDay},all_days.eq.true`);
+
+    const afterBlockedSlots = allSlots.filter((slot) => {
+      return !(blockedSlots ?? []).some(
+        (b: { start_time: string; end_time: string }) =>
+          slot >= b.start_time.substring(0, 5) && slot < b.end_time.substring(0, 5),
+      );
+    });
+
+    // 5. Get existing bookings for this date (treat Pending + Confirmed as taken)
+    const { data: bookings } = await supabaseAdmin
+      .from("bookings")
+      .select("time_slot")
+      .eq("location_id", locationId)
+      .eq("booking_date", date)
+      .in("status", ["Pending", "Confirmed"]);
+
+    const bookedTimes = new Set((bookings ?? []).map((b: { time_slot: string }) => b.time_slot));
+    const available = afterBlockedSlots.filter((s) => !bookedTimes.has(s));
+
+    return res.json(available);
+  } catch (err) {
+    console.error("GET /api/availability/slots", err);
+    return res.status(500).json({ error: "Failed to get available slots" });
+  }
+});
+
+function generateTimeSlots(openTime: string, closeTime: string, intervalMins: number): string[] {
+  const slots: string[] = [];
+  let [h, m] = openTime.split(":").map(Number);
+  const [ch, cm] = closeTime.split(":").map(Number);
+  const closeTotal = ch * 60 + cm;
+  while (h * 60 + m < closeTotal) {
+    slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+    m += intervalMins;
+    if (m >= 60) { h += Math.floor(m / 60); m = m % 60; }
+  }
+  return slots;
+}
+
 export default router;

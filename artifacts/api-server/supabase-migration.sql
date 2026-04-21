@@ -14,12 +14,28 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 ALTER DEFAULT PRIVILEGES IN SCHEMA public
   GRANT ALL ON SEQUENCES TO anon, authenticated, service_role;
 
+-- ── 1b. Create blocked_slots table (intra-day recurring blocks) ────
+CREATE TABLE IF NOT EXISTS blocked_slots (
+  id           UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  location_id  UUID REFERENCES locations(id) ON DELETE CASCADE NOT NULL,
+  day_of_week  INTEGER CHECK (day_of_week BETWEEN 0 AND 6),
+  all_days     BOOLEAN DEFAULT false,
+  start_time   TIME NOT NULL,
+  end_time     TIME NOT NULL,
+  label        TEXT,
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX IF NOT EXISTS idx_blocked_slots_location
+  ON blocked_slots(location_id, day_of_week);
+
 -- ── 2. Enable RLS on all tables ────────────────────────────────────
-ALTER TABLE locations          ENABLE ROW LEVEL SECURITY;
-ALTER TABLE treatments         ENABLE ROW LEVEL SECURITY;
-ALTER TABLE bookings           ENABLE ROW LEVEL SECURITY;
+ALTER TABLE locations             ENABLE ROW LEVEL SECURITY;
+ALTER TABLE treatments            ENABLE ROW LEVEL SECURITY;
+ALTER TABLE bookings              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE availability_settings ENABLE ROW LEVEL SECURITY;
-ALTER TABLE blocked_dates      ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blocked_dates         ENABLE ROW LEVEL SECURITY;
+ALTER TABLE blocked_slots         ENABLE ROW LEVEL SECURITY;
 
 -- service_role automatically bypasses RLS in Supabase — no policies needed for it.
 
@@ -39,6 +55,9 @@ CREATE POLICY IF NOT EXISTS "blocked_dates_anon_read"
 -- Bookings: anon can INSERT (for website bookings) but not SELECT
 CREATE POLICY IF NOT EXISTS "bookings_anon_insert"
   ON bookings FOR INSERT TO anon WITH CHECK (true);
+
+CREATE POLICY IF NOT EXISTS "blocked_slots_anon_read"
+  ON blocked_slots FOR SELECT TO anon USING (true);
 
 -- ── 4. Seed clinic locations ───────────────────────────────────────
 INSERT INTO locations (id, slug, name, address)

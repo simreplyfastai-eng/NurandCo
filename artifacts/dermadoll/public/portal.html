@@ -264,6 +264,19 @@ tr:hover td{background:rgba(92,26,26,.02)}
   .avail-time-input{width:76px}
 }
 
+/* ── WORKING HOURS & BLOCKED SLOTS ──────────────── */
+.wh-time-label{font-family:var(--font-sans);font-size:10px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--color-muted-fg)}
+.bs-tag{display:inline-flex;align-items:center;gap:8px;background:rgba(201,169,110,.08);border:1px solid rgba(201,169,110,.25);border-radius:var(--radius);padding:7px 12px;font-family:var(--font-sans);font-size:13px;font-weight:300;color:var(--color-foreground)}
+.bs-tag-del{background:none;border:none;color:var(--color-muted-fg);cursor:pointer;font-size:16px;line-height:1;padding:0 2px;transition:color var(--transition-base)}
+.bs-tag-del:hover{color:var(--color-primary)}
+.bs-select{border:1px solid var(--color-border);border-radius:var(--radius);padding:5px 8px;font-size:12px;font-family:var(--font-sans);color:var(--color-foreground);background:transparent;cursor:pointer;outline:none;height:34px}
+.bs-select:focus{border-color:var(--color-primary)}
+@media(max-width:600px){
+  .bs-form-row{flex-direction:column !important}
+  .bs-form-row>div,.bs-form-row>button{width:100% !important}
+  .bs-select{width:100% !important}
+}
+
 /* ── CALENDAR MOBILE ─────────────────────────────── */
 @media(max-width:767px){
   #schedule-layout{display:block !important;padding:12px !important}
@@ -837,6 +850,58 @@ select.form-input{background:var(--color-card)}
             </div>
           </div>
         </div>
+
+        <!-- ── WORKING HOURS CARD ── -->
+        <div class="avail-card" style="margin-top:20px">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+            <div>
+              <div class="avail-card-title">Working Hours</div>
+              <div class="avail-card-sub">Set your opening and closing hours for each day at this location.</div>
+            </div>
+            <button class="btn-gold" onclick="saveWorkingHours()">Save Working Hours</button>
+          </div>
+          <div id="wh-loading" style="padding:16px 0;font-family:var(--font-sans);font-size:13px;font-style:italic;color:var(--color-muted-fg)">Loading…</div>
+          <div id="wh-days-list" style="display:none"></div>
+        </div>
+
+        <!-- ── BLOCKED TIME SLOTS CARD ── -->
+        <div class="avail-card" style="margin-top:20px">
+          <div style="margin-bottom:20px">
+            <div class="avail-card-title">Blocked Time Slots</div>
+            <div class="avail-card-sub">Block specific hours every week — perfect for lunch breaks or personal commitments. Clients cannot book during these times.</div>
+          </div>
+          <div class="bs-form-row" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+            <div>
+              <div class="avail-section-label" style="margin-bottom:5px">Day</div>
+              <select id="bs-day" class="bs-select">
+                <option value="">Select day…</option>
+                <option value="all">Every Working Day</option>
+                <option value="1">Monday</option>
+                <option value="2">Tuesday</option>
+                <option value="3">Wednesday</option>
+                <option value="4">Thursday</option>
+                <option value="5">Friday</option>
+                <option value="6">Saturday</option>
+                <option value="0">Sunday</option>
+              </select>
+            </div>
+            <div>
+              <div class="avail-section-label" style="margin-bottom:5px">From</div>
+              <input type="time" id="bs-from" class="avail-time-input">
+            </div>
+            <div>
+              <div class="avail-section-label" style="margin-bottom:5px">To</div>
+              <input type="time" id="bs-to" class="avail-time-input">
+            </div>
+            <button class="btn-gold" style="white-space:nowrap" onclick="addBlockedSlot()">Add Block</button>
+          </div>
+          <div id="bs-error" style="display:none;font-family:var(--font-sans);font-size:12px;color:var(--color-destructive);margin-bottom:10px"></div>
+          <div style="border-top:1px solid var(--color-border-subtle);padding-top:16px">
+            <div id="bs-empty" style="text-align:center;padding:20px 0;font-family:var(--font-sans);font-size:13px;font-style:italic;color:var(--color-muted-fg)">No time slots blocked yet.</div>
+            <div id="bs-tags" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+          </div>
+        </div>
+
       </div>
     </div>
 
@@ -2169,6 +2234,8 @@ function renderAvailability(){
   const avail=getAvailability();
   renderAvailDays(avail);
   renderAvailMiniCal(avail);
+  loadWorkingHours();
+  loadBlockedSlots();
 }
 
 function renderAvailDays(avail){
@@ -2209,6 +2276,183 @@ function onToggleAvailDay(dow,checked){
       span.textContent='Day off';
       row.appendChild(span);
     }
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// WORKING HOURS (Supabase-native)
+// ═══════════════════════════════════════════════════
+const WH_DAYS=[
+  {dow:1,name:'Monday'},{dow:2,name:'Tuesday'},{dow:3,name:'Wednesday'},
+  {dow:4,name:'Thursday'},{dow:5,name:'Friday'},{dow:6,name:'Saturday'},{dow:0,name:'Sunday'}
+];
+
+async function loadWorkingHours(){
+  const listEl=document.getElementById('wh-days-list');
+  const loadEl=document.getElementById('wh-loading');
+  if(!listEl||!loadEl)return;
+  loadEl.style.display='block';
+  listEl.style.display='none';
+  const locId=sessionStorage.getItem('starr_location_id');
+  if(!locId){loadEl.textContent='No location selected.';return;}
+  try{
+    const res=await fetch('/api/admin/availability',{headers:authHdr()});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    const rows=await res.json();
+    const byDow={};
+    (rows||[]).forEach(r=>{byDow[r.day_of_week]=r;});
+    let html='';
+    WH_DAYS.forEach(({dow,name})=>{
+      const r=byDow[dow]||{is_open:false,start_time:'09:00',end_time:'17:00'};
+      const isOn=!!r.is_open;
+      const open=(r.start_time||'09:00').substring(0,5);
+      const close=(r.end_time||'17:00').substring(0,5);
+      html+=`<div class="avail-day-row" id="wh-row-${dow}">
+        <span class="avail-day-name">${name}</span>
+        <label class="avail-toggle">
+          <input type="checkbox" id="wh-toggle-${dow}" ${isOn?'checked':''} onchange="onToggleWH(${dow},this.checked)">
+          <span class="avail-slider"></span>
+        </label>
+        <div id="wh-times-${dow}" style="display:flex;align-items:center;gap:8px;${isOn?'':'opacity:.35;pointer-events:none'}">
+          <span class="wh-time-label">Opens</span>
+          <input type="time" class="avail-time-input" id="wh-open-${dow}" value="${open}">
+          <span style="color:var(--color-muted-fg);font-size:11px">—</span>
+          <span class="wh-time-label">Closes</span>
+          <input type="time" class="avail-time-input" id="wh-close-${dow}" value="${close}">
+        </div>
+        ${isOn?'':'<span class="avail-off-label">Day off</span>'}
+      </div>`;
+    });
+    listEl.innerHTML=html;
+    loadEl.style.display='none';
+    listEl.style.display='block';
+  }catch(e){
+    loadEl.textContent='Could not load working hours.';
+    console.error('loadWorkingHours',e);
+  }
+}
+
+function onToggleWH(dow,checked){
+  const timesEl=document.getElementById('wh-times-'+dow);
+  const row=document.getElementById('wh-row-'+dow);
+  if(timesEl){timesEl.style.opacity=checked?'1':'.35';timesEl.style.pointerEvents=checked?'':'none';}
+  const offLabel=row&&row.querySelector('.avail-off-label');
+  if(offLabel)offLabel.remove();
+  if(!checked){
+    const span=document.createElement('span');
+    span.className='avail-off-label';
+    span.textContent='Day off';
+    row.appendChild(span);
+  }
+}
+
+async function saveWorkingHours(){
+  const locId=sessionStorage.getItem('starr_location_id');
+  if(!locId){showToast('No location selected');return;}
+  const rows=WH_DAYS.map(({dow})=>{
+    const toggle=document.getElementById('wh-toggle-'+dow);
+    const openEl=document.getElementById('wh-open-'+dow);
+    const closeEl=document.getElementById('wh-close-'+dow);
+    return{day_of_week:dow,is_open:toggle?toggle.checked:false,open_time:openEl?openEl.value:'09:00',close_time:closeEl?closeEl.value:'17:00'};
+  });
+  try{
+    const res=await fetch('/api/admin/availability',{
+      method:'PUT',
+      headers:{...authHdr(),'Content-Type':'application/json'},
+      body:JSON.stringify(rows)
+    });
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    showToast('\u2713 Working hours saved');
+  }catch(e){
+    showToast('Failed to save working hours');
+    console.error('saveWorkingHours',e);
+  }
+}
+
+// ═══════════════════════════════════════════════════
+// BLOCKED TIME SLOTS (Supabase-native)
+// ═══════════════════════════════════════════════════
+const BS_DAY_NAMES={0:'Sunday',1:'Monday',2:'Tuesday',3:'Wednesday',4:'Thursday',5:'Friday',6:'Saturday'};
+let _blockedSlots=[];
+
+async function loadBlockedSlots(){
+  const locId=sessionStorage.getItem('starr_location_id');
+  if(!locId)return;
+  try{
+    const res=await fetch('/api/admin/blocked-slots',{headers:authHdr()});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    _blockedSlots=await res.json();
+    renderBlockedSlots();
+  }catch(e){console.error('loadBlockedSlots',e);}
+}
+
+function renderBlockedSlots(){
+  const tagsEl=document.getElementById('bs-tags');
+  const emptyEl=document.getElementById('bs-empty');
+  if(!tagsEl||!emptyEl)return;
+  if(!_blockedSlots.length){
+    tagsEl.innerHTML='';
+    emptyEl.style.display='block';
+    return;
+  }
+  emptyEl.style.display='none';
+  tagsEl.innerHTML=_blockedSlots.map(s=>{
+    const dayLabel=s.all_days?'Every Day':(BS_DAY_NAMES[s.day_of_week]||'?');
+    const start=(s.start_time||'').substring(0,5);
+    const end=(s.end_time||'').substring(0,5);
+    return `<span class="bs-tag"><span>${dayLabel} · ${start} — ${end}</span><button class="bs-tag-del" onclick="deleteBlockedSlot('${s.id}')" title="Remove this slot">×</button></span>`;
+  }).join('');
+}
+
+async function addBlockedSlot(){
+  const dayEl=document.getElementById('bs-day');
+  const fromEl=document.getElementById('bs-from');
+  const toEl=document.getElementById('bs-to');
+  const errEl=document.getElementById('bs-error');
+  const dayVal=dayEl.value;
+  const fromVal=fromEl.value;
+  const toVal=toEl.value;
+  errEl.style.display='none';
+  if(!dayVal){_showBsError('Please select a day.');return;}
+  if(!fromVal||!toVal){_showBsError('Please enter both start and end times.');return;}
+  if(fromVal>=toVal){_showBsError('Start time must be before end time.');return;}
+  const body={start_time:fromVal,end_time:toVal,all_days:dayVal==='all',day_of_week:dayVal!=='all'?parseInt(dayVal):undefined};
+  try{
+    const res=await fetch('/api/admin/blocked-slots',{
+      method:'POST',
+      headers:{...authHdr(),'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!res.ok){const d=await res.json().catch(()=>({}));_showBsError(d.error||'Save failed.');return;}
+    const created=await res.json();
+    _blockedSlots.push(created);
+    renderBlockedSlots();
+    dayEl.value='';fromEl.value='';toEl.value='';
+    showToast('\u2713 Time slot blocked');
+  }catch(e){
+    _showBsError('Save failed — please try again.');
+    console.error('addBlockedSlot',e);
+  }
+}
+
+function _showBsError(msg){
+  const errEl=document.getElementById('bs-error');
+  if(!errEl)return;
+  errEl.textContent=msg;
+  errEl.style.display='block';
+}
+
+async function deleteBlockedSlot(id){
+  if(!confirm('Remove this blocked slot?'))return;
+  try{
+    const res=await fetch('/api/admin/blocked-slots/'+id,{method:'DELETE',headers:authHdr()});
+    if(!res.ok)throw new Error('HTTP '+res.status);
+    _blockedSlots=_blockedSlots.filter(s=>s.id!==id);
+    renderBlockedSlots();
+    showToast('\u2713 Slot removed');
+  }catch(e){
+    showToast('Failed to remove slot');
+    console.error('deleteBlockedSlot',e);
   }
 }
 

@@ -12,6 +12,7 @@ import enquiriesRouter from "./enquiries";
 import stripeRouter from "./stripe";
 import locationsRouter from "./locations";
 import treatmentsRouter from "./treatments-route";
+import adminRouter from "./admin";
 
 const router: IRouter = Router();
 
@@ -20,6 +21,7 @@ router.use(authRouter);
 router.use(locationsRouter);
 router.use(treatmentsRouter);
 router.use(availabilityRouter);
+router.use(adminRouter);
 router.use(mediaRouter);
 router.use(cronRouter);
 router.use(portalRouter);
