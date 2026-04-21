@@ -1,0 +1,175 @@
+Completely rebuild the footer social section.
+Remove all pills, sub-labels, icons, and the 
+two-column grid. Replace with a clean simple 
+list layout.
+
+Find the footer-social-block section.
+Replace its entire contents with this structure:
+
+RESULT WANTED:
+
+  Instagram
+  @StarrFacess
+  @StarrAestheticss
+  @StarrSuitess
+  @StarrNailedd
+
+  TikTok
+  @StarrFacess
+  @StarrAestheticss
+  @StarrSuitess
+  @StarrNailedd
+
+  Email
+  starrbeautyyltd@gmail.com
+
+Rules:
+  "Instagram" / "TikTok" / "Email" labels:
+    Gold colour (existing site gold var)
+    Font: existing portal sans (Inter Tight or site font)
+    Font size: 10px
+    Uppercase
+    Letter spacing: 0.14em
+    No icons
+    Margin bottom: 8px
+
+  Each @handle and email:
+    Colour: existing site dark burgundy 
+      (#5C1E1E or site dark colour var)
+    Font size: 13px
+    Font weight: 400
+    No icon
+    No sub-label underneath
+    No pill/border/background
+    Display as a plain link (text-decoration: none)
+    Each on its own line
+    Line height: 1.8 so they're nicely spaced
+    Hover: gold colour
+
+  Spacing between sections (Instagram/TikTok/Email):
+    margin-top: 20px on each section after the first
+
+  The whole social block:
+    Text align: centre on all screen sizes
+    No columns — single column always
+    Width: 100%
+
+Links:
+  @StarrFacess Instagram → https://instagram.com/StarrFacess
+  @StarrAestheticss Instagram → https://instagram.com/StarrAestheticss
+  @StarrSuitess Instagram → https://instagram.com/StarrSuitess
+  @StarrNailedd Instagram → https://instagram.com/StarrNailedd
+  @StarrFacess TikTok → https://tiktok.com/@StarrFacess
+  @StarrAestheticss TikTok → https://tiktok.com/@StarrAestheticss
+  @StarrSuitess TikTok → https://tiktok.com/@StarrSuitess
+  @StarrNailedd TikTok → https://tiktok.com/@StarrNailedd
+  Email → mailto:starrbeautyyltd@gmail.com
+  All target="_blank" except email
+
+HTML structure to use:
+
+<div class="footer-social-block">
+  <div class="footer-social-section">
+    <span class="footer-social-label">Instagram</span>
+    <a href="https://instagram.com/StarrFacess" 
+      target="_blank" class="footer-social-link">
+      @StarrFacess
+    </a>
+    <a href="https://instagram.com/StarrAestheticss"
+      target="_blank" class="footer-social-link">
+      @StarrAestheticss
+    </a>
+    <a href="https://instagram.com/StarrSuitess"
+      target="_blank" class="footer-social-link">
+      @StarrSuitess
+    </a>
+    <a href="https://instagram.com/StarrNailedd"
+      target="_blank" class="footer-social-link">
+      @StarrNailedd
+    </a>
+  </div>
+  
+  <div class="footer-social-section">
+    <span class="footer-social-label">TikTok</span>
+    <a href="https://tiktok.com/@StarrFacess"
+      target="_blank" class="footer-social-link">
+      @StarrFacess
+    </a>
+    <a href="https://tiktok.com/@StarrAestheticss"
+      target="_blank" class="footer-social-link">
+      @StarrAestheticss
+    </a>
+    <a href="https://tiktok.com/@StarrSuitess"
+      target="_blank" class="footer-social-link">
+      @StarrSuitess
+    </a>
+    <a href="https://tiktok.com/@StarrNailedd"
+      target="_blank" class="footer-social-link">
+      @StarrNailedd
+    </a>
+  </div>
+  
+  <div class="footer-social-section">
+    <span class="footer-social-label">Email</span>
+    <a href="mailto:starrbeautyyltd@gmail.com"
+      class="footer-social-link">
+      starrbeautyyltd@gmail.com
+    </a>
+  </div>
+</div>
+
+CSS to add:
+
+.footer-social-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.footer-social-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.footer-social-section:first-child {
+  margin-top: 0;
+}
+
+.footer-social-label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: var(--color-gold, #C9A96E);
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
+.footer-social-link {
+  display: block;
+  font-size: 13px;
+  color: var(--color-dark, #5C1E1E);
+  text-decoration: none;
+  line-height: 1.8;
+  transition: color 0.15s ease;
+}
+
+.footer-social-link:hover {
+  color: var(--color-gold, #C9A96E);
+}
+
+Remove all old CSS for:
+  .footer-social-grid
+  .footer-social-headers
+  .insta-pill
+  .tiktok-pill
+  Any pill-related styles in the footer
+  Any 2-column grid styles in the footer
+
+This applies on ALL screen sizes — 
+desktop and mobile both get the same 
+clean single-column list.

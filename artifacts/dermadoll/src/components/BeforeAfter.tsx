@@ -108,14 +108,6 @@ export default function BeforeAfter() {
                     onMouseLeave={(e) => ((e.currentTarget as HTMLImageElement).style.transform = "scale(1)")}
                   />
                 </div>
-                <div style={{ marginTop: 8 }}>
-                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "0.95rem", color: "#3D3D3D" }}>
-                    {item.label}
-                  </div>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "#C9A96E", marginTop: 2 }}>
-                    {item.category}
-                  </div>
-                </div>
               </motion.div>
             ))}
           </div>
