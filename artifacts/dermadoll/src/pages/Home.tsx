@@ -86,8 +86,8 @@ export default function Home() {
       <Navbar />
 
       <Hero />
-      <About />
       <TrustTicker />
+      <About />
       <Locations />
       <Services />
       <BeforeAfter />
