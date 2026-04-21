@@ -82,7 +82,7 @@ export default function Services() {
                   cursor: "pointer", textAlign: "left",
                 }}
               >
-                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2.5px", textTransform: "uppercase", color: "#5C1A1A", fontWeight: 400 }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2.5px", textTransform: "uppercase", color: openGroups.has(group.group) ? "#5C1A1A" : "#C9A96E", fontWeight: 400 }}>
                   {group.group}
                 </span>
                 {openGroups.has(group.group) ? <ChevronUp size={16} color="#C9A96E" /> : <ChevronDown size={16} color="#C9A96E" />}
