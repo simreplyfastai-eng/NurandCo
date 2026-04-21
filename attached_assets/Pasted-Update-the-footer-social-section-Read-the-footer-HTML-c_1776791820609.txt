@@ -1,0 +1,168 @@
+Update the footer social section. Read the footer 
+HTML carefully before touching anything.
+
+CHANGES NEEDED:
+1. Remove the website line completely
+2. Show all 4 Instagram accounts + all 4 TikTok accounts
+3. "Instagram:" and "TikTok:" and "Email:" labels = gold
+4. The actual handles and email address = dark burgundy
+5. Remove www.starrbeautyy.co.uk line entirely
+
+===============================================================
+EVA'S SOCIAL ACCOUNTS
+===============================================================
+
+INSTAGRAM (same usernames as TikTok):
+  @StarrFacess      — Face Treatments
+  @StarrAestheticss — Aesthetics
+  @StarrSuitess     — The Suite
+  @StarrNailedd     — Nails
+
+TIKTOK (exact same usernames):
+  @StarrFacess      → https://tiktok.com/@StarrFacess
+  @StarrAestheticss → https://tiktok.com/@StarrAestheticss
+  @StarrSuitess     → https://tiktok.com/@StarrSuitess
+  @StarrNailedd     → https://tiktok.com/@StarrNailedd
+
+===============================================================
+FOOTER LAYOUT — EXACT RESULT WANTED
+===============================================================
+
+Remove website line. Footer social section becomes:
+
+─────────────────────────────────────
+[gold] Instagram [/gold]
+
+  [@StarrFacess]  [@StarrAestheticss]
+  [@StarrSuitess] [@StarrNailedd]
+  
+  Face Treatments / Aesthetics / The Suite / Nails
+  (tiny label 9px muted below each pill)
+
+[gold] TikTok [/gold]
+
+  [@StarrFacess]  [@StarrAestheticss]
+  [@StarrSuitess] [@StarrNailedd]
+
+  Face Treatments / Aesthetics / The Suite / Nails
+
+[gold] Email [/gold]
+[burgundy] starrbeautyyltd@gmail.com [/burgundy]
+─────────────────────────────────────
+
+===============================================================
+PILL STYLING
+===============================================================
+
+Each social pill:
+  display: inline-flex
+  align-items: center
+  gap: 5px
+  padding: 5px 12px
+  border: 1px solid existing line/border colour
+  border-radius: 999px
+  margin: 3px
+  text-decoration: none
+  font-size: 12px
+  
+  Left icon: platform icon (Instagram or TikTok SVG)
+    size: 13px
+    colour: existing gold var
+  
+  Handle text: existing dark burgundy var
+    (same colour as headings/dark text on site)
+  
+  Hover state:
+    border-color: gold var
+    text colour: gold var
+    icon colour: gold var
+    transition: 150ms ease
+
+Small label below each pill:
+  font-size: 9px
+  colour: existing muted text var
+  text-align: center
+  display: block
+  margin-top: 2px
+
+Section label ("Instagram", "TikTok", "Email"):
+  font-size: 10px
+  text-transform: uppercase
+  letter-spacing: 0.12em
+  colour: existing gold var
+  margin-bottom: 8px
+  margin-top: 16px
+  display: block
+
+Email value:
+  colour: existing dark burgundy var
+  font-size: 13px
+  text-decoration: none
+  hover: gold colour
+
+===============================================================
+INSTAGRAM SVG ICON (inline, 13px)
+===============================================================
+
+<svg width="13" height="13" viewBox="0 0 24 24" 
+  fill="none" stroke="currentColor" stroke-width="2"
+  stroke-linecap="round" stroke-linejoin="round">
+  <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
+  <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+  <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+</svg>
+
+===============================================================
+TIKTOK SVG ICON (inline, 13px)
+===============================================================
+
+<svg width="13" height="13" viewBox="0 0 24 24"
+  fill="currentColor">
+  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.16 8.16 0 0 0 4.77 1.52V6.76a4.85 4.85 0 0 1-1-.07z"/>
+</svg>
+
+===============================================================
+LINKS
+===============================================================
+
+Instagram links:
+  @StarrFacess → https://instagram.com/StarrFacess
+  @StarrAestheticss → https://instagram.com/StarrAestheticss
+  @StarrSuitess → https://instagram.com/StarrSuitess
+  @StarrNailedd → https://instagram.com/StarrNailedd
+
+TikTok links:
+  @StarrFacess → https://tiktok.com/@StarrFacess
+  @StarrAestheticss → https://tiktok.com/@StarrAestheticss
+  @StarrSuitess → https://tiktok.com/@StarrSuitess
+  @StarrNailedd → https://tiktok.com/@StarrNailedd
+
+All open in new tab: target="_blank" rel="noopener"
+
+===============================================================
+ALSO UPDATE ANYWHERE ELSE ON SITE
+===============================================================
+
+Search for @starraestheticss anywhere else it 
+appears (contact section, about, confirmation page).
+
+Single line space → show just @StarrAestheticss
+  with gold "Instagram:" label + burgundy handle
+
+Full section space → show all 8 pills (4 IG + 4 TT)
+  same styling as footer
+
+Remove www.starrbeautyy.co.uk anywhere it appears
+as a displayed link on the site.
+
+===============================================================
+DO NOT CHANGE
+===============================================================
+
+Everything else in the footer stays identical:
+  Logo, nav links, copyright line
+  Layout, spacing, background
+  Any other footer content
+
+Only change: social handles display + email styling
++ remove website line.

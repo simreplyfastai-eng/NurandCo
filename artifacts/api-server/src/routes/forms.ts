@@ -22,7 +22,7 @@ async function getMedicalCols(): Promise<Set<string>> {
   if (medicalCols) return medicalCols;
   const candidates = [
     "id","booking_id","client_email","client_name","submitted_at",
-    "address","gp_name","medications","allergies","ip_address",
+    "address","gp_name","medications","allergies","ip_address","location_id",
     "dob","gp_practice","gp_phone","conditions","previous_treatments","skin_concerns",
   ];
   const present = new Set<string>();
@@ -153,6 +153,13 @@ router.post("/forms/medical", async (req, res) => {
   try {
     const cols = await getMedicalCols();
 
+    // Resolve location_id from the booking (required NOT NULL column)
+    let locationId: string | null = null;
+    if (cols.has("location_id")) {
+      const bk = await supabaseAdmin.from("bookings").select("location_id").eq("id", bookingId).maybeSingle();
+      locationId = (bk.data as Record<string, unknown> | null)?.location_id as string ?? null;
+    }
+
     // Base insert — always-present columns
     const insertData: Record<string, unknown> = {
       booking_id: bookingId,
@@ -161,6 +168,7 @@ router.post("/forms/medical", async (req, res) => {
       ip_address: getIp(req),
     };
 
+    if (locationId !== null)        insertData.location_id = locationId;
     if (cols.has("address"))        insertData.address = address ?? null;
     if (cols.has("gp_name"))        insertData.gp_name = gpName ?? null;
     if (cols.has("medications"))    insertData.medications = medications ?? null;

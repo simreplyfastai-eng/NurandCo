@@ -120,7 +120,7 @@ export default function Training() {
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", lineHeight: 1.7 }}>
               To enquire about our training courses, please reach out via Instagram{" "}
-              <a href="https://instagram.com/starraestheticss" target="_blank" rel="noopener noreferrer" style={{ color: "#C9A96E" }}>@starraestheticss</a>{" "}
+              <a href="https://instagram.com/StarrAestheticss" target="_blank" rel="noopener noreferrer" style={{ color: "#C9A96E" }}>@StarrAestheticss</a>{" "}
               or email{" "}
               <a href="mailto:starrbeautyyltd@gmail.com" style={{ color: "#C9A96E" }}>starrbeautyyltd@gmail.com</a>.
             </p>

@@ -123,8 +123,8 @@ export default function Contact() {
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {[
                 { icon: "📍", text: "Hornchurch / Marylebone" },
-                { icon: "📸", text: "@starraesthetics", href: "https://instagram.com/starraesthetics" },
-                { icon: "✉", text: "hello@starraesthetics.co.uk", href: "mailto:hello@starraesthetics.co.uk" },
+                { icon: "📸", text: "@StarrAestheticss", href: "https://instagram.com/StarrAestheticss" },
+                { icon: "✉", text: "starrbeautyyltd@gmail.com", href: "mailto:starrbeautyyltd@gmail.com" },
               ].map((item) => (
                 <div key={item.text} style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <span style={{ fontSize: 18 }}>{item.icon}</span>
