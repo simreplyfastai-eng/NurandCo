@@ -563,6 +563,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
           locationId: locationId ?? null,
           depositPaid: false,
           status: "confirmed",
+          source: "Portal",
           notes: "[TEST MODE — no payment taken]",
         }),
       });
