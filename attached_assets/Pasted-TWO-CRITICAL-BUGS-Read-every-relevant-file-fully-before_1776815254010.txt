@@ -1,0 +1,253 @@
+TWO CRITICAL BUGS. Read every relevant file 
+fully before making any changes.
+
+===============================================================
+BUG 1 — LOGIN: WRONG CREDENTIALS + DOUBLE LOGIN
+===============================================================
+
+PROBLEM A: Login returns 401 for 
+starr@starr.com / Starr12!
+
+The ADMIN_EMAIL and ADMIN_PASSWORD Replit 
+Secrets must be updated to:
+  ADMIN_EMAIL = starr@starr.com
+  ADMIN_PASSWORD = Starr12!
+
+Update these in Replit Secrets NOW.
+Then confirm POST /api/auth/login with 
+these credentials returns 200 + JWT token.
+
+PROBLEM B: Login form appears TWICE.
+
+The complete login flow must be exactly:
+  1. Visit /portal.html → login form shows
+  2. Enter starr@starr.com / Starr12! → SIGN IN
+  3. → Location selector (ONE step, no repeat)
+  4. Select location → dashboard
+
+Find the init() function in portal.html.
+It runs on page load AND after login.
+This is why the form shows twice.
+
+THE FIX — gate init() with a flag:
+
+  let _loginDone = false;
+
+  async function handleSignIn(email, pass) {
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, password: pass})
+    });
+    if (!res.ok) {
+      showError('Incorrect email or password');
+      return;
+    }
+    const { token } = await res.json();
+    localStorage.setItem('portal_token', token);
+    _loginDone = true;
+    // Go straight to location selector
+    // NEVER call init() or showLogin() again
+    showLocationSelector();
+  }
+
+  function init() {
+    if (_loginDone) return; // never re-run after login
+    const token = localStorage.getItem('portal_token');
+    if (!token) { showLoginForm(); return; }
+    verifyToken(token)
+      .then(() => showLocationSelector())
+      .catch(() => {
+        localStorage.removeItem('portal_token');
+        showLoginForm();
+      });
+  }
+
+Remove ANY other place that calls 
+showLoginForm() or clearSession() unless 
+the user explicitly clicks SIGN OUT.
+
+Check for setTimeout/setInterval that 
+might re-run init() and add the 
+_loginDone guard to those too.
+
+===============================================================
+BUG 2 — AVAILABILITY CHANGES NOT SAVING
+===============================================================
+
+When Eva changes hours (e.g. Thursday close 
+from 19:00 to 21:00) and clicks SAVE CHANGES 
+— nothing updates. Refreshing the portal 
+shows the old times. The booking page still 
+shows old slots.
+
+This means the SAVE CHANGES button is either:
+  a) Not sending a request at all
+  b) Sending to the wrong endpoint
+  c) The endpoint exists but doesn't write 
+     to Supabase availability_settings table
+  d) Writing to Supabase but the slots API 
+     reads from hardcoded values instead
+
+STEP 1 — Find the SAVE CHANGES handler 
+in the Availability tab.
+
+Add console.log to confirm it fires:
+  console.log('saveAvailability called', payload)
+
+Find what endpoint it posts to.
+Check if that endpoint actually exists.
+
+STEP 2 — Fix the POST endpoint.
+
+POST /api/availability/settings must:
+  Require JWT auth (X-Auth-Token header)
+  Accept body: { days: [...], location: slug }
+  
+  For each day in the array:
+    UPSERT into availability_settings:
+    {
+      location_id: (SELECT id FROM locations 
+                    WHERE slug = req.body.location),
+      day_of_week: day.day_of_week,  // 0=Sun, 6=Sat
+      is_open: day.is_open,
+      open_time: day.open_time,      // 'HH:MM'
+      close_time: day.close_time     // 'HH:MM'
+    }
+    ON CONFLICT (location_id, day_of_week)
+    DO UPDATE SET
+      is_open = EXCLUDED.is_open,
+      open_time = EXCLUDED.open_time,
+      close_time = EXCLUDED.close_time
+  
+  Return: { success: true }
+
+STEP 3 — Fix the GET /api/availability/slots 
+endpoint to read from Supabase.
+
+This endpoint MUST read open_time and 
+close_time from Supabase availability_settings 
+for the given location and day of week.
+
+There must be ZERO hardcoded times in this 
+file. Search for and delete any of:
+  '10:00', '19:00', '09:00', '16:00', '14:00'
+  as hardcoded string literals for slot times.
+
+The correct logic:
+
+  // 1. Get day of week from date param
+  const date = new Date(req.query.date + 'T12:00:00Z')
+  const dow = date.getUTCDay() // 0=Sun, 6=Sat
+  
+  // 2. Get hours from Supabase
+  const { data: settings } = await supabaseAdmin
+    .from('availability_settings')
+    .select('is_open, open_time, close_time')
+    .eq('location_id', locationId)
+    .eq('day_of_week', dow)
+    .single()
+  
+  if (!settings || !settings.is_open) {
+    return res.json({ available: false, 
+                      reason: 'CLINIC_CLOSED' })
+  }
+  
+  // 3. Check blocked dates
+  const { data: blocked } = await supabaseAdmin
+    .from('blocked_dates')
+    .select('id')
+    .eq('location_id', locationId)
+    .eq('date', req.query.date)
+    .single()
+  
+  if (blocked) {
+    return res.json({ available: false,
+                      reason: 'DATE_BLOCKED' })
+  }
+  
+  // 4. Generate 2-hour slots from open to close
+  const slots = []
+  const [openH, openM] = settings.open_time
+    .split(':').map(Number)
+  const [closeH, closeM] = settings.close_time
+    .split(':').map(Number)
+  const openMins = openH * 60 + openM
+  const closeMins = closeH * 60 + closeM
+  
+  for (let m = openMins; m < closeMins; m += 120) {
+    const h = Math.floor(m / 60)
+    const min = m % 60
+    const timeStr = 
+      String(h).padStart(2,'0') + ':' + 
+      String(min).padStart(2,'0')
+    slots.push({ time: timeStr, available: true })
+  }
+  
+  // 5. Mark booked slots as unavailable
+  const { data: bookings } = await supabaseAdmin
+    .from('bookings')
+    .select('booking_time')
+    .eq('location_id', locationId)
+    .eq('booking_date', req.query.date)
+    .neq('status', 'cancelled')
+  
+  bookings?.forEach(b => {
+    const slot = slots.find(s => 
+      s.time === b.booking_time?.slice(0,5))
+    if (slot) slot.available = false
+  })
+  
+  return res.json({
+    available: true,
+    date: req.query.date,
+    dayName: date.toLocaleDateString('en-GB', 
+      { weekday: 'long' }),
+    openTime: settings.open_time,
+    closeTime: settings.close_time,
+    slots
+  })
+
+STEP 4 — Fix blocked dates saving.
+
+When Eva clicks a date in the blocked dates 
+calendar, it must write to Supabase:
+
+  POST /api/availability/block-date:
+    INSERT INTO blocked_dates 
+    (location_id, date, reason)
+    VALUES (locationId, dateStr, 'blocked')
+    ON CONFLICT DO NOTHING
+  
+  DELETE (unblock) endpoint:
+    DELETE FROM blocked_dates
+    WHERE location_id = locationId
+    AND date = dateStr
+
+STEP 5 — Availability tab must reload from 
+Supabase every time it's opened.
+
+GET /api/availability/settings must always 
+query Supabase fresh — no in-memory cache.
+
+===============================================================
+VERIFY AFTER BOTH FIXES
+===============================================================
+
+Login test:
+  Visit portal, enter starr@starr.com / Starr12!
+  Login form shows ONCE then location 
+  selector — never twice ✓
+
+Availability test:
+  Open Availability tab
+  Change Thursday close to 21:00
+  Click SAVE CHANGES
+  Refresh portal → Thursday still shows 21:00 ✓
+  Visit /book → Thursday slots include 20:00 ✓
+  Change back to 19:00, save, verify ✓
+
+Blocked date test:
+  Click April 30 in calendar → turns red ✓
+  Visit /book → April 30 greyed out ✓
+  Click again → unblocked ✓
