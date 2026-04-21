@@ -46,7 +46,7 @@ export default function Locations() {
         .clinic-card .desc-line1 {
           font-family: 'Inter', sans-serif;
           font-size: 14px;
-          color: #5C1A1A;
+          color: #C9A96E;
           line-height: 1.6;
           margin: 0 0 8px;
           font-weight: 500;
