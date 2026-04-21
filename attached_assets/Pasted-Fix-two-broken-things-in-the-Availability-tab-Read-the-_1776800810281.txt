@@ -1,0 +1,116 @@
+Fix two broken things in the Availability tab.
+Read the portal.html availability section carefully 
+before touching anything.
+
+PROBLEM 1 — BLOCKED DATES CALENDAR IS EMPTY
+The "BLOCKED DATES" section on the right side of 
+the Working Hours card shows only ‹ and › arrows 
+with nothing between them. The calendar grid 
+(days of the week headers + date cells) is not 
+rendering at all.
+
+Find the function that renders the blocked dates 
+calendar. It is likely called something like:
+  renderBlockedCalendar()
+  renderCalendar()
+  buildCalendar()
+  updateCalendar()
+
+The issue is either:
+  a) The function is not being called on page load
+  b) The container element it tries to inject into 
+     doesn't exist or has the wrong ID
+  c) A JS error is preventing it from running
+  d) It's waiting for data that never arrives
+
+Fix:
+  - Find the calendar container between the ‹ › 
+    arrows — it likely has an ID or class
+  - Make sure renderBlockedCalendar() is called 
+    on page load AND after month navigation
+  - The calendar must show: month name + year in 
+    the header between the arrows, then a 7-column 
+    grid (M T W T F S S headers) then the date cells
+  - Each date cell: clickable, shows the day number
+  - Dates in blocked_dates table: red/burgundy tint
+  - Closed days (based on day_of_week is_open=false): 
+    grey tint, not clickable
+  - Today: gold border
+  - When a date is clicked: toggle blocked status 
+    (INSERT or DELETE from blocked_dates via API)
+    then re-render the calendar
+
+PROBLEM 2 — ONE-OFF DATE TAB DOES NOTHING
+The "Blocked Time Slots" section has two tabs:
+  "Recurring Weekly" (works, shows day+from+to)
+  "One-Off Date" (clicking does nothing)
+
+The tab button exists and has an onclick handler 
+but clicking it does not switch the displayed 
+content — Recurring Weekly content stays visible.
+
+Find the tab switching logic. It is likely:
+  - Setting an active class on the tab but not 
+    hiding/showing the correct content panels
+  - The content panels for One-Off Date either 
+    don't exist or have the wrong ID/class
+  - The display:none / display:block toggle is 
+    not working
+
+Fix the tab switching so:
+
+RECURRING WEEKLY tab shows:
+  DAY dropdown (Select day... / All Days / 
+    Mon / Tue / Wed / Thu / Fri / Sat / Sun)
+  FROM time input
+  TO time input  
+  ADD BLOCK button
+  List of existing recurring blocks below
+
+ONE-OFF DATE tab shows:
+  A proper calendar — same style as the Blocked 
+  Dates calendar above (month grid, clickable dates)
+  
+  When Eva clicks a date in this calendar:
+    It adds that specific date to blocked_dates
+    (same table, same logic as the Blocked Dates 
+    calendar in the Working Hours card)
+  
+  Below the calendar: list of upcoming blocked dates
+    "Thu 30 Apr 2026 — Full day  ×"
+    Sorted by date, future dates only
+    × removes it (DELETE from blocked_dates)
+  
+  This is essentially the SAME blocked_dates 
+  functionality as the top calendar — they should 
+  both read/write from the same blocked_dates 
+  Supabase table and stay in sync. If you block 
+  a date in one, it shows as blocked in the other.
+
+Active tab styling:
+  Active tab: gold underline border-bottom, 
+    gold text colour
+  Inactive tab: muted text, no underline
+  On click: switch active styles + switch content
+
+After both fixes the availability page should have:
+  Working Hours card:
+    Left: 7-day toggles + times
+    Right: Blocked Dates calendar (fully rendered, 
+      clickable, synced with Supabase)
+  
+  Blocked Time Slots card:
+    Tab 1 Recurring Weekly: day+time block form
+    Tab 2 One-Off Date: calendar + list of blocks
+    
+    Both tabs functional, content switches correctly
+
+Test after fixing:
+  1. Blocked Dates calendar shows April 2026 grid ✓
+  2. Click a date → turns red ✓
+  3. Check Supabase blocked_dates has the row ✓
+  4. Click the date again → unblocks, row removed ✓
+  5. Click One-Off Date tab → content switches ✓
+  6. Calendar shows in One-Off Date tab ✓
+  7. Click a date there → same result as above ✓
+  8. Blocked date shows in both calendars ✓

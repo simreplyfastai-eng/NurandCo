@@ -937,27 +937,25 @@ select.form-input{background:var(--color-card)}
               <div id="bs-tags" style="display:flex;flex-wrap:wrap;gap:8px"></div>
             </div>
           </div>
-          <!-- Tab B: One-Off Date -->
+          <!-- Tab B: One-Off Date — shares same blocked_dates table -->
           <div id="bs-panel-oneoff" style="display:none">
-            <div class="bs-form-row" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
-              <div>
-                <div class="avail-section-label" style="margin-bottom:5px">Date</div>
-                <input type="date" id="bso-date" class="avail-time-input" style="width:150px;padding:8px 10px">
-              </div>
-              <div>
-                <div class="avail-section-label" style="margin-bottom:5px">From (optional)</div>
-                <input type="time" id="bso-from" class="avail-time-input" placeholder="whole day">
-              </div>
-              <div>
-                <div class="avail-section-label" style="margin-bottom:5px">To (optional)</div>
-                <input type="time" id="bso-to" class="avail-time-input" placeholder="whole day">
-              </div>
-              <button class="btn-gold" style="white-space:nowrap" onclick="addOneOffBlock()">Add Block</button>
+            <p style="font-family:var(--font-sans);font-size:12px;color:var(--muted);margin:0 0 12px">Click any date to block or unblock it. Changes sync with the calendar above.</p>
+            <!-- Mini calendar (same style as top blocked-dates cal) -->
+            <div class="avail-mini-hdr">
+              <button class="avail-mini-nav" onclick="changeOneOffMonth(-1)">‹</button>
+              <span id="bso-mini-title" class="avail-mini-title"></span>
+              <button class="avail-mini-nav" onclick="changeOneOffMonth(1)">›</button>
             </div>
-            <div id="bso-error" style="display:none;font-family:var(--font-sans);font-size:12px;color:var(--color-destructive);margin-bottom:10px"></div>
-            <div style="border-top:1px solid var(--color-border-subtle);padding-top:16px">
-              <div id="bso-empty" style="text-align:center;padding:20px 0;font-family:var(--font-sans);font-size:13px;font-style:italic;color:var(--color-muted-fg)">No one-off blocks yet.</div>
-              <div id="bso-tags" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+            <div class="avail-mini-grid" id="bso-mini-day-hdrs"></div>
+            <div class="avail-mini-grid" id="bso-mini-grid" style="margin-top:2px"></div>
+            <p style="font-size:11px;color:var(--muted);margin:8px 0 16px;line-height:1.5">
+              <span style="display:inline-block;width:10px;height:10px;background:#f8d7da;border:2px solid #c0392b;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Blocked
+            </p>
+            <!-- List of upcoming blocked dates -->
+            <div style="border-top:1px solid var(--color-border-subtle);padding-top:14px">
+              <div class="avail-section-label" style="margin-bottom:8px">Upcoming Blocked Dates</div>
+              <div id="bso-empty" style="text-align:center;padding:16px 0;font-family:var(--font-sans);font-size:13px;font-style:italic;color:var(--color-muted-fg)">No dates blocked yet.</div>
+              <div id="bso-list"></div>
             </div>
           </div>
         </div>
@@ -2371,7 +2369,15 @@ function collectAvailabilityForm(){
 function renderAvailability(){
   const avail=getAvailability();
   renderAvailDays(avail);
-  loadBlockedDates().then(()=>renderAvailMiniCal(avail));
+  // Render calendar immediately with whatever blocked dates we already have,
+  // then refresh once the Supabase fetch completes
+  renderAvailMiniCal(avail);
+  loadBlockedDates().then(()=>{
+    renderAvailMiniCal(avail);
+    // If the one-off tab is already active, refresh it too
+    const panel=document.getElementById('bs-panel-oneoff');
+    if(panel&&panel.style.display!=='none'){renderOneOffCal(avail);renderUpcomingBlocked();}
+  });
   loadBlockedSlots();
 }
 
@@ -2444,7 +2450,11 @@ async function toggleBlockedDate(dateStr){
     if(!res.ok)throw new Error('HTTP '+res.status);
     const data=await res.json();
     if(data.blocked){_blockedDates.add(dateStr);}else{_blockedDates.delete(dateStr);}
-    renderAvailMiniCal(getAvailability());
+    // Re-render both calendars so they stay in sync
+    const avail=getAvailability();
+    renderAvailMiniCal(avail);
+    renderOneOffCal(avail);
+    renderUpcomingBlocked();
     showToast(data.blocked?'Date blocked':'Date unblocked');
   }catch(e){
     showToast('Failed to update date');
@@ -2594,8 +2604,12 @@ function renderAvailMiniCal(avail){
   let cells='';
   for(let i=0;i<startOffset;i++) cells+=`<div class="avail-mini-cell empty"></div>`;
 
+  // Today's date string (UTC)
+  const todayNow=new Date();
+  const todayStr=`${todayNow.getUTCFullYear()}-${String(todayNow.getUTCMonth()+1).padStart(2,'0')}-${String(todayNow.getUTCDate()).padStart(2,'0')}`;
+
   for(let d=1;d<=daysInMonth;d++){
-    // RULE 1: string arithmetic for dateStr — never new Date(str) without T00:00:00Z
+    // RULE 1: string arithmetic — never new Date(str) without T00:00:00Z
     const mm=String(m+1).padStart(2,'0'),dd=String(d).padStart(2,'0');
     const dateStr=`${y}-${mm}-${dd}`;
     // RULE 2: UTC-safe day-of-week
@@ -2603,11 +2617,13 @@ function renderAvailMiniCal(avail){
     const dayDefault=avail.defaults[dow]||{on:false};
     const isWorking=dayDefault.on;
     const isBlocked=_blockedDates.has(dateStr);
+    const isToday=dateStr===todayStr;
     let cls='avail-mini-cell';
     if(isBlocked) cls+=' blocked-date';
     else if(isWorking) cls+=' working';
     else cls+=' off';
-    cells+=`<div class="${cls}" onclick="toggleBlockedDate('${dateStr}')" title="${isBlocked?'Click to unblock':'Click to block'}">${d}</div>`;
+    const todayExtra=isToday&&!isBlocked?' style="border-color:var(--gold);border-width:2px"':'';
+    cells+=`<div class="${cls}" onclick="toggleBlockedDate('${dateStr}')" title="${isBlocked?'Click to unblock':'Click to block'}"${todayExtra}>${d}</div>`;
   }
 
   const gridEl=document.getElementById('avail-mini-grid');
@@ -2623,7 +2639,7 @@ function changeAvailMonth(dir){
 }
 
 // ═══════════════════════════════════════════════════
-// BLOCKED TIME SLOTS — TAB SWITCHING + ONE-OFF BLOCKS
+// BLOCKED TIME SLOTS — TAB SWITCHING + ONE-OFF CAL
 // ═══════════════════════════════════════════════════
 function switchBsTab(tab){
   const recurring=document.getElementById('bs-panel-recurring');
@@ -2632,68 +2648,102 @@ function switchBsTab(tab){
   const tabOne=document.getElementById('bs-tab-oneoff');
   if(!recurring||!oneoff||!tabRec||!tabOne)return;
   if(tab==='recurring'){
-    recurring.style.display='';
+    recurring.style.display='block';
     oneoff.style.display='none';
-    tabRec.style.borderBottomColor='var(--gold)';tabRec.style.color='var(--gold)';tabRec.style.fontWeight='600';
-    tabOne.style.borderBottomColor='transparent';tabOne.style.color='var(--muted)';tabOne.style.fontWeight='500';
+    tabRec.style.cssText=tabRec.style.cssText.replace(/border-bottom:[^;]+;?/g,'');
+    tabOne.style.cssText=tabOne.style.cssText.replace(/border-bottom:[^;]+;?/g,'');
+    tabRec.style.setProperty('border-bottom','2px solid var(--gold)');
+    tabRec.style.setProperty('color','var(--gold)');
+    tabRec.style.setProperty('font-weight','600');
+    tabOne.style.setProperty('border-bottom','2px solid transparent');
+    tabOne.style.setProperty('color','var(--color-muted-fg)');
+    tabOne.style.setProperty('font-weight','500');
   } else {
     recurring.style.display='none';
-    oneoff.style.display='';
-    tabOne.style.borderBottomColor='var(--gold)';tabOne.style.color='var(--gold)';tabOne.style.fontWeight='600';
-    tabRec.style.borderBottomColor='transparent';tabRec.style.color='var(--muted)';tabRec.style.fontWeight='500';
-    renderOneOffBlocks();
+    oneoff.style.display='block';
+    tabRec.style.setProperty('border-bottom','2px solid transparent');
+    tabRec.style.setProperty('color','var(--color-muted-fg)');
+    tabRec.style.setProperty('font-weight','500');
+    tabOne.style.setProperty('border-bottom','2px solid var(--gold)');
+    tabOne.style.setProperty('color','var(--gold)');
+    tabOne.style.setProperty('font-weight','600');
+    const avail=getAvailability();
+    renderOneOffCal(avail);
+    renderUpcomingBlocked();
   }
 }
 
-let _oneOffBlocks=[]; // blocked_slots where date_only IS NOT NULL (or all_days=false and has date)
+// ── ONE-OFF BLOCKED DATES CALENDAR (shares _blockedDates + toggleBlockedDate) ──
+let _oneOffCalDate=null;
 
-function renderOneOffBlocks(){
-  const tagsEl=document.getElementById('bso-tags');
+function renderOneOffCal(avail){
+  if(!_oneOffCalDate){
+    const now=new Date();
+    _oneOffCalDate=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),1));
+  }
+  const y=_oneOffCalDate.getUTCFullYear(),m=_oneOffCalDate.getUTCMonth();
+  const titleEl=document.getElementById('bso-mini-title');
+  if(titleEl)titleEl.textContent=AVAIL_MONTHS[m]+' '+y;
+
+  const hdrsEl=document.getElementById('bso-mini-day-hdrs');
+  if(hdrsEl)hdrsEl.innerHTML=['M','T','W','T','F','S','S'].map(d=>`<div class="avail-mini-day-hdr">${d}</div>`).join('');
+
+  const daysInMonth=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+  const firstDow=new Date(Date.UTC(y,m,1)).getUTCDay();
+  const startOffset=firstDow===0?6:firstDow-1;
+
+  let cells='';
+  for(let i=0;i<startOffset;i++) cells+=`<div class="avail-mini-cell empty"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const mm=String(m+1).padStart(2,'0'),dd=String(d).padStart(2,'0');
+    const dateStr=`${y}-${mm}-${dd}`;
+    const isBlocked=_blockedDates.has(dateStr);
+    // Today highlight
+    const now2=new Date();
+    const todayStr=`${now2.getUTCFullYear()}-${String(now2.getUTCMonth()+1).padStart(2,'0')}-${String(now2.getUTCDate()).padStart(2,'0')}`;
+    const isToday=dateStr===todayStr;
+    let cls='avail-mini-cell'+(isBlocked?' blocked-date':'');
+    const todayStyle=isToday&&!isBlocked?';border:2px solid var(--gold)':'';
+    cells+=`<div class="${cls}" onclick="toggleBlockedDate('${dateStr}')" title="${isBlocked?'Click to unblock':'Click to block'}" style="${todayStyle}">${d}</div>`;
+  }
+  const gridEl=document.getElementById('bso-mini-grid');
+  if(gridEl)gridEl.innerHTML=cells;
+}
+
+function changeOneOffMonth(dir){
+  if(!_oneOffCalDate){const now=new Date();_oneOffCalDate=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),1));}
+  const y=_oneOffCalDate.getUTCFullYear(),m=_oneOffCalDate.getUTCMonth()+dir;
+  _oneOffCalDate=new Date(Date.UTC(y,m,1));
+  renderOneOffCal(getAvailability());
+}
+
+function renderUpcomingBlocked(){
+  const listEl=document.getElementById('bso-list');
   const emptyEl=document.getElementById('bso-empty');
-  if(!tagsEl||!emptyEl)return;
-  // Filter blocked slots that have a specific date (not recurring)
-  const oneOffs=(_blockedSlots||[]).filter(s=>s.specific_date);
-  if(!oneOffs.length){tagsEl.innerHTML='';emptyEl.style.display='block';return;}
-  emptyEl.style.display='none';
-  tagsEl.innerHTML=oneOffs.map(s=>{
-    const start=(s.start_time||'').substring(0,5);
-    const end=(s.end_time||'').substring(0,5);
-    const timeLabel=(start&&end)?` · ${start} — ${end}`:'· All day';
-    return `<span class="bs-tag"><span>${s.specific_date}${timeLabel}</span><button class="bs-tag-del" onclick="deleteBlockedSlot('${s.id}')" title="Remove">×</button></span>`;
-  }).join('');
-}
-
-async function addOneOffBlock(){
-  const dateEl=document.getElementById('bso-date');
-  const fromEl=document.getElementById('bso-from');
-  const toEl=document.getElementById('bso-to');
-  const errEl=document.getElementById('bso-error');
-  if(errEl)errEl.style.display='none';
-  const dateVal=dateEl?dateEl.value:'';
-  const fromVal=fromEl?fromEl.value:'';
-  const toVal=toEl?toEl.value:'';
-  if(!dateVal){if(errEl){errEl.textContent='Please select a date.';errEl.style.display='block';}return;}
-  if((fromVal&&!toVal)||(toVal&&!fromVal)){if(errEl){errEl.textContent='Enter both start and end times, or leave both empty for all-day.';errEl.style.display='block';}return;}
-  if(fromVal&&toVal&&fromVal>=toVal){if(errEl){errEl.textContent='Start time must be before end time.';errEl.style.display='block';}return;}
-  const body={specific_date:dateVal,start_time:fromVal||null,end_time:toVal||null,all_days:false};
-  try{
-    const res=await fetch('/api/admin/blocked-slots',{
-      method:'POST',
-      headers:{...authHdr(),'Content-Type':'application/json'},
-      body:JSON.stringify(body)
-    });
-    if(!res.ok){const d=await res.json().catch(()=>({}));if(errEl){errEl.textContent=d.error||'Save failed.';errEl.style.display='block';}return;}
-    const created=await res.json();
-    _blockedSlots.push(created);
-    renderOneOffBlocks();
-    if(dateEl)dateEl.value='';
-    if(fromEl)fromEl.value='';
-    if(toEl)toEl.value='';
-    showToast('\u2713 One-off block added');
-  }catch(e){
-    if(errEl){errEl.textContent='Save failed — please try again.';errEl.style.display='block';}
-    console.error('addOneOffBlock',e);
+  if(!listEl||!emptyEl)return;
+  // Today's dateStr (UTC)
+  const now=new Date();
+  const todayStr=`${now.getUTCFullYear()}-${String(now.getUTCMonth()+1).padStart(2,'0')}-${String(now.getUTCDate()).padStart(2,'0')}`;
+  // Sort future blocked dates
+  const upcoming=[..._blockedDates].filter(d=>d>=todayStr).sort();
+  if(!upcoming.length){
+    emptyEl.style.display='block';
+    listEl.innerHTML='';
+    return;
   }
+  emptyEl.style.display='none';
+  const DAY_ABBR=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const MON_ABBR=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  listEl.innerHTML=upcoming.map(dateStr=>{
+    const [y,m,d]=dateStr.split('-').map(Number);
+    const dow=new Date(Date.UTC(y,m-1,d)).getUTCDay();
+    const label=`${DAY_ABBR[dow]} ${d} ${MON_ABBR[m-1]} ${y}`;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--color-border-subtle);font-family:var(--font-sans);font-size:13px">
+      <span style="color:#c0392b;font-weight:500">${label}</span>
+      <span style="color:var(--color-muted-fg);font-size:12px;margin:0 12px">Full day</span>
+      <button onclick="toggleBlockedDate('${dateStr}')" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;line-height:1;padding:0 4px" title="Unblock this date">×</button>
+    </div>`;
+  }).join('');
 }
 
 // ═══════════════════════════════════════════════════
