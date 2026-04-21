@@ -442,6 +442,7 @@ router.post("/stripe/webhook", async (req, res) => {
           id,
           location_id: locationId,
           treatment_id: treatInfo.id,
+          treatment_name: treatment,
           client_id: clientId,
           client_name: clientName,
           client_email: clientEmail ?? "",

@@ -133,7 +133,7 @@ router.get("/forms/status", async (req, res) => {
 
   try {
     const [bkRow, medRow, conRow] = await Promise.all([
-      supabaseAdmin.from("bookings").select("id,client_name,client_email,client_phone,treatment_id,treatments(name),booking_date,time_slot,status,location_id").eq("id", bookingId).maybeSingle(),
+      supabaseAdmin.from("bookings").select("id,client_name,client_email,client_phone,treatment_name,treatment_id,treatments(name),booking_date,time_slot,status,location_id,forms_completed").eq("id", bookingId).maybeSingle(),
       supabaseAdmin.from("medical_forms").select("id,submitted_at").eq("booking_id", bookingId).maybeSingle(),
       supabaseAdmin.from("consent_forms").select("id").eq("booking_id", bookingId).maybeSingle(),
     ]);
@@ -145,8 +145,20 @@ router.get("/forms/status", async (req, res) => {
       ? await supabaseAdmin.from("medical_forms").select("id,submitted_at").eq("client_email", bkRow.data.client_email).order("submitted_at", { ascending: false }).limit(1).maybeSingle()
       : { data: null };
 
+    // Normalise booking shape: resolve treatment name and add convenience aliases
+    const bkData = bkRow.data as Record<string, unknown>;
+    const treatJoin = bkData.treatments as { name?: string } | null;
+    const resolvedTreatment: string =
+      (bkData.treatment_name as string | null) ?? treatJoin?.name ?? "";
+    const normBooking = {
+      ...bkData,
+      treatment: resolvedTreatment,            // for confirmed.html
+      time: (bkData.time_slot as string) ?? null, // alias
+      date: (bkData.booking_date as string) ?? null, // alias
+    };
+
     return res.json({
-      booking: bkRow.data,
+      booking: normBooking,
       hasMedical: !!medRow.data,
       hasConsent: !!conRow.data,
       medicalOnFileForEmail: !!emailMedRow.data,
