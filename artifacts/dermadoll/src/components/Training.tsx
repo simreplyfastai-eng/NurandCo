@@ -24,7 +24,7 @@ export default function Training() {
   };
 
   return (
-    <section id="training" style={{ background: "#F5F0EB", padding: "100px 0" }}>
+    <section id="training" style={{ background: "#FFFFFF", padding: "100px 0" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
         <div className="training-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }}>
           <style>{`@media (max-width: 768px) { .training-grid { grid-template-columns: 1fr !important; gap: 40px !important; } }`}</style>
@@ -65,7 +65,7 @@ export default function Training() {
             {masterclasses.map((mc, i) => (
               <div
                 key={mc.title}
-                style={{ background: "#FFFFFF", border: "1px solid #E2DDD5", padding: "28px 28px 24px" }}
+                style={{ background: "#F5F0EB", border: "1px solid #E2DDD5", padding: "28px 28px 24px" }}
               >
                 <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
                   <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.3rem", fontWeight: 400, color: "#5C1A1A", margin: 0 }}>

@@ -7,8 +7,7 @@ import About from "@/components/About";
 import TrustTicker from "@/components/TrustTicker";
 import Locations from "@/components/Locations";
 import Services from "@/components/Services";
-import BeforeAfter from "@/components/BeforeAfter";
-import ResultsVideos from "@/components/ResultsVideos";
+import GalleryReel from "@/components/GalleryReel";
 import Training from "@/components/Training";
 import Reviews from "@/components/Reviews";
 import FAQ from "@/components/FAQ";
@@ -90,8 +89,7 @@ export default function Home() {
       <About />
       <Locations />
       <Services />
-      <BeforeAfter />
-      <ResultsVideos />
+      <GalleryReel />
       <Training />
       <Reviews />
       <FAQ />

@@ -36,7 +36,7 @@ const reviews = [
 
 export default function Reviews() {
   return (
-    <section id="reviews" style={{ background: "#FFFFFF", padding: "100px 0" }}>
+    <section id="reviews" style={{ background: "#F5F0EB", padding: "100px 0" }}>
       <style>{`
         .reviews-outer { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
         .reviews-grid {
@@ -94,7 +94,7 @@ export default function Reviews() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.07 }}
-              style={{ background: "#F5F0EB", padding: "32px 28px", border: "1px solid #F0EBE3" }}
+              style={{ background: "#FFFFFF", padding: "32px 28px", border: "1px solid #F0EBE3" }}
             >
               <div style={{ display: "flex", gap: 2, marginBottom: 16 }}>
                 {Array.from({ length: 5 }).map((_, si) => (
