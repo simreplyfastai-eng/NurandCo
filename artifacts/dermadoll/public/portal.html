@@ -4067,7 +4067,7 @@ async function handleTxReplace(input,i){
   const loadEl=document.getElementById('tx-loading-'+i);
   if(loadEl){loadEl.style.display='flex';}
   try{
-    const objectPath=await uploadToCloud(file);
+    const objectPath=await uploadToCloud(file,isVideo?'results_video':'gallery');
     const d=getMediaData();
     const DEFAULT_TX=[
       {key:'r1a',type:'image',src:'result-1.jpg',  label:'NaturalèLips™',           category:'LIP FILLER'},
@@ -4109,18 +4109,26 @@ function updateTransformItem(i,field,value){
   saveMediaData(d);
 }
 
-/* ── Cloud upload helper ── */
-async function uploadToCloud(file){
-  const res=await fetch('/api/media/upload-url',{
+/* ── Cloud upload helper — uses Supabase Storage via POST /api/media/upload ── */
+async function uploadToCloud(file,type){
+  const formData=new FormData();
+  formData.append('file',file);
+  if(type)formData.append('type',type);
+  const headers=authHdr();
+  // Do NOT set Content-Type — browser sets it with multipart boundary automatically
+  const res=await fetch('/api/media/upload',{
     method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contentType:file.type||'application/octet-stream'})
+    headers:headers,
+    body:formData
   });
-  if(!res.ok)throw new Error('Failed to get upload URL');
-  const {uploadURL,objectPath}=await res.json();
-  const put=await fetch(uploadURL,{method:'PUT',body:file,headers:{'Content-Type':file.type||'application/octet-stream'}});
-  if(!put.ok)throw new Error('Upload failed: '+put.status);
-  return objectPath;
+  if(!res.ok){
+    let msg='Upload failed: '+res.status;
+    try{const j=await res.json();if(j.detail)msg=j.detail;}catch(e){}
+    throw new Error(msg);
+  }
+  const {url}=await res.json();
+  if(!url)throw new Error('No URL returned from upload');
+  return url;
 }
 
 function cloudSrc(objectPath){
@@ -4154,9 +4162,9 @@ async function handleMcHeroVideoUpload(input){
   const file=input.files[0];if(!file)return;
   showToast('Uploading video…');
   try{
-    const objectPath=await uploadToCloud(file);
+    const url=await uploadToCloud(file,'hero_video');
     const d=getMediaData();
-    d.heroVideo=objectPath;
+    d.heroVideo=url;
     saveMediaData(d);renderMedia();
     showToast('✓ Hero video uploaded');
   }catch(e){showToast('Upload failed: '+e.message);}
@@ -4182,9 +4190,9 @@ async function handleMcHeroImageUpload(input){
   const file=input.files[0];if(!file)return;
   showToast('Uploading image…');
   try{
-    const objectPath=await uploadToCloud(file);
+    const url=await uploadToCloud(file,'hero_image');
     const d=getMediaData();
-    d.heroImage=objectPath;
+    d.heroImage=url;
     saveMediaData(d);renderMedia();
     showToast('✓ Hero image uploaded');
   }catch(e){showToast('Upload failed: '+e.message);}
@@ -4210,9 +4218,9 @@ async function handleMcAboutImageUpload(input){
   const file=input.files[0];if(!file)return;
   showToast('Uploading image…');
   try{
-    const objectPath=await uploadToCloud(file);
+    const url=await uploadToCloud(file,'about_image');
     const d=getMediaData();
-    d.aboutImage=objectPath;
+    d.aboutImage=url;
     saveMediaData(d);renderMedia();
     showToast('✓ Practitioner photo uploaded');
   }catch(e){showToast('Upload failed: '+e.message);}

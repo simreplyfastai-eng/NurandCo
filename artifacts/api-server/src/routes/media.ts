@@ -1,9 +1,38 @@
 import { Router } from "express";
+import multer from "multer";
 import { supabaseAdmin } from "../lib/supabase";
+import { requireAuth } from "../lib/auth";
 import { ObjectStorageService, ObjectNotFoundError } from "../lib/objectStorage";
 
 const router = Router();
 const storage = new ObjectStorageService();
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 50 * 1024 * 1024 },
+});
+
+// Ensure the Supabase storage bucket exists on startup
+async function ensureMediaBucket() {
+  try {
+    const { data: buckets } = await supabaseAdmin.storage.listBuckets();
+    const exists = buckets?.some((b) => b.name === "media");
+    if (!exists) {
+      await supabaseAdmin.storage.createBucket("media", {
+        public: true,
+        allowedMimeTypes: [
+          "image/jpeg", "image/jpg", "image/png", "image/webp",
+          "video/mp4", "video/mov", "video/quicktime", "video/webm",
+        ],
+        fileSizeLimit: 52428800,
+      });
+      console.log("Created Supabase storage bucket: media");
+    }
+  } catch (err) {
+    console.warn("ensureMediaBucket warning:", err);
+  }
+}
+ensureMediaBucket();
 
 function toServeUrl(path: string | null | undefined): string | null {
   if (!path) return null;
@@ -125,7 +154,41 @@ router.get("/media/config", async (req, res) => {
   }
 });
 
-// POST /api/media/upload-url
+// POST /api/media/upload — multipart file upload to Supabase Storage
+router.post("/media/upload", upload.single("file"), async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  try {
+    const file = (req as any).file as Express.Multer.File | undefined;
+    if (!file) return res.status(400).json({ error: "No file provided" });
+
+    const type = (req.body?.type as string) || "gallery";
+    const ext = (file.originalname.split(".").pop() || "bin").toLowerCase();
+    const filename = `${type}-${Date.now()}.${ext}`;
+    const path = `starr/${type}/${filename}`;
+
+    const { error: uploadError } = await supabaseAdmin.storage
+      .from("media")
+      .upload(path, file.buffer, {
+        contentType: file.mimetype,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error("Supabase storage upload error:", uploadError);
+      return res.status(500).json({ error: "Storage upload failed", detail: uploadError.message });
+    }
+
+    const { data: urlData } = supabaseAdmin.storage.from("media").getPublicUrl(path);
+    const publicUrl = urlData.publicUrl;
+
+    return res.json({ success: true, url: publicUrl });
+  } catch (err: any) {
+    console.error("POST /api/media/upload", err);
+    return res.status(500).json({ error: "Upload failed", detail: err?.message });
+  }
+});
+
+// POST /api/media/upload-url (legacy — kept for any existing callers)
 router.post("/media/upload-url", async (req, res) => {
   const { contentType } = req.body as { contentType?: string };
   if (!contentType) {
