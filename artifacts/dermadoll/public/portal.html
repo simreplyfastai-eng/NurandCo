@@ -1769,8 +1769,10 @@ function saveSession(token,expiresAt){
 }
 
 function clearSession(message){
+  // Guard FIRST — if login just succeeded, never clear or re-show login during the
+  // login → location-selector → portal flow, no matter what fires in the background.
+  if(_loginJustSucceeded){return;}
   SESSION_KEYS.forEach(k=>localStorage.removeItem(k));
-  if(_loginJustSucceeded){return;} // guard: don't re-show login if user just signed in
   document.getElementById('portal').classList.remove('visible');
   document.getElementById('login-page').style.display='flex';
   if(message){
@@ -1926,6 +1928,8 @@ function showPortal(loc){
     // Live booking polling every 30s + enquiry badge
     startLiveRefresh();
     updateEnquiryBadge();
+    // Portal is now fully initialised — allow clearSession to work normally again
+    _loginJustSucceeded=false;
   });
 }
 

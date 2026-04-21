@@ -1,0 +1,275 @@
+CRITICAL — Availability changes don't persist.
+When Eva saves new hours in the portal, they 
+reset on page reload. Blocked dates/times also 
+don't save. Nothing is reaching Supabase.
+
+Read ALL of these files before touching anything:
+- The availability tab in portal.html
+- POST /api/availability/settings handler
+- GET /api/availability/slots handler
+- GET /api/availability/settings handler
+- The availability_settings table in Supabase
+
+CONFIRMED FROM INSPECTION:
+GET /api/availability/settings returns correct 
+Supabase data — so the READ is working.
+
+But when SAVE CHANGES is clicked the portal 
+resets to defaults on reload — meaning the 
+POST is either:
+a) Not hitting Supabase at all
+b) Hitting the wrong table
+c) Not using the correct location_id
+d) Supabase is writing but the GET reads 
+   from hardcoded values instead
+
+ALSO: The slots API still returns hardcoded 
+hours regardless of what's in Supabase.
+
+===============================================================
+FIX 1 — POST /api/availability/settings
+MUST WRITE TO SUPABASE
+===============================================================
+
+Find the POST handler for availability settings.
+
+It should receive this body from the portal:
+{
+  days: [
+    { day_of_week: 0, is_open: false, 
+      open_time: "09:00", close_time: "17:00" },
+    { day_of_week: 1, is_open: false, ... },
+    { day_of_week: 2, is_open: true, 
+      open_time: "10:00", close_time: "21:00" },
+    ... 7 days total
+  ]
+}
+
+For each day, UPSERT to availability_settings:
+
+  for (const day of req.body.days) {
+    await supabaseAdmin
+      .from('availability_settings')
+      .upsert({
+        location_id: req.locationId,
+        day_of_week: day.day_of_week,
+        is_open: day.is_open,
+        open_time: day.open_time,
+        close_time: day.close_time
+      }, { onConflict: 'location_id,day_of_week' })
+  }
+  
+  return res.json({ success: true })
+
+req.locationId comes from the X-Location-Id 
+header — must be the UUID not the slug.
+
+If the current POST handler is writing to 
+a different table, a JSON file, or an 
+in-memory object → DELETE that code and 
+replace with the Supabase upsert above.
+
+===============================================================
+FIX 2 — GET /api/availability/slots
+MUST READ FROM SUPABASE — NO HARDCODING
+===============================================================
+
+Find the slots generation code.
+
+Search for ANY hardcoded time strings:
+'10:00', '19:00', '09:00', '16:00', '14:00', 
+'08:00', '21:00', '17:00'
+
+If ANY of these appear as fallback values 
+or defaults in the slots logic → REMOVE THEM.
+
+The slots endpoint must ONLY use Supabase:
+
+  async function getSlots(locationId, date) {
+    // Get day of week (0=Sun, 6=Sat)
+    const dow = new Date(date + 'T12:00:00Z')
+      .getUTCDay()
+    
+    // Read from Supabase
+    const { data: setting } = await supabaseAdmin
+      .from('availability_settings')
+      .select('is_open, open_time, close_time')
+      .eq('location_id', locationId)
+      .eq('day_of_week', dow)
+      .single()
+    
+    if (!setting || !setting.is_open) {
+      return { available: false, 
+               reason: 'CLINIC_CLOSED', slots: [] }
+    }
+    
+    // Generate 2-hour slots from Supabase times
+    const slots = []
+    const [openH, openM] = setting.open_time
+      .split(':').map(Number)
+    const [closeH, closeM] = setting.close_time
+      .split(':').map(Number)
+    
+    let h = openH, m = openM
+    while (h * 60 + m < closeH * 60 + closeM) {
+      const time = 
+        String(h).padStart(2,'0') + ':' + 
+        String(m).padStart(2,'0')
+      slots.push({ time, available: true })
+      h += 2  // 2-hour intervals
+    }
+    
+    return { 
+      available: true,
+      openTime: setting.open_time,
+      closeTime: setting.close_time,
+      slots
+    }
+  }
+
+===============================================================
+FIX 3 — BLOCKED DATES MUST WRITE TO SUPABASE
+===============================================================
+
+When Eva clicks a date in the blocked dates 
+calendar to block it:
+
+  POST to server: { date: '2026-05-01' }
+  
+  Server handler:
+  await supabaseAdmin
+    .from('blocked_dates')
+    .upsert({
+      location_id: req.locationId,
+      date: req.body.date,
+      reason: 'blocked'
+    }, { onConflict: 'location_id,date' })
+
+When unblocking (clicking again):
+  await supabaseAdmin
+    .from('blocked_dates')
+    .delete()
+    .eq('location_id', req.locationId)
+    .eq('date', req.body.date)
+
+The slots API must also check blocked_dates:
+  const { data: blocked } = await supabaseAdmin
+    .from('blocked_dates')
+    .select('id')
+    .eq('location_id', locationId)
+    .eq('date', date)
+    .single()
+  
+  if (blocked) return { 
+    available: false, 
+    reason: 'DATE_BLOCKED', 
+    slots: [] 
+  }
+
+===============================================================
+FIX 4 — BLOCKED TIME SLOTS MUST WRITE TO SUPABASE
+===============================================================
+
+Recurring weekly blocks and one-off blocks 
+must write to blocked_slots table.
+
+When Eva adds a recurring block 
+(e.g. Wed 13:00-14:00 every week):
+
+  await supabaseAdmin
+    .from('blocked_slots')
+    .insert({
+      location_id: req.locationId,
+      day_of_week: req.body.day_of_week,
+      from_time: req.body.from_time,
+      to_time: req.body.to_time,
+      is_recurring: true,
+      specific_date: null
+    })
+
+When Eva adds a one-off block 
+(specific date and time):
+
+  await supabaseAdmin
+    .from('blocked_slots')
+    .insert({
+      location_id: req.locationId,
+      day_of_week: null,
+      from_time: req.body.from_time,
+      to_time: req.body.to_time,
+      is_recurring: false,
+      specific_date: req.body.date
+    })
+
+The slots API must check blocked_slots 
+for each generated slot:
+
+  const { data: blockedSlots } = await supabaseAdmin
+    .from('blocked_slots')
+    .select('from_time, to_time')
+    .eq('location_id', locationId)
+    .or(
+      `and(is_recurring.eq.true,day_of_week.eq.${dow}),` +
+      `and(is_recurring.eq.false,specific_date.eq.${date})`
+    )
+  
+  For each slot, check if it falls within 
+  any blocked_slots range:
+    if blocked → slot.available = false
+
+===============================================================
+FIX 5 — BOTH LOCATIONS INDEPENDENT
+===============================================================
+
+Hornchurch and Marylebone have completely 
+separate availability_settings rows in 
+Supabase — one set per location per day.
+
+The portal Availability tab must:
+  - Load settings for the CURRENT session 
+    location only (using X-Location-Id header)
+  - Save settings for the CURRENT location only
+  - Never mix Hornchurch and Marylebone data
+
+When Eva switches to Marylebone in the portal 
+and changes hours → only Marylebone rows update.
+When she switches to Hornchurch → only 
+Hornchurch rows update.
+
+Confirm the GET and POST both use:
+  .eq('location_id', req.locationId)
+where req.locationId is the UUID from the 
+X-Location-Id header.
+
+===============================================================
+VERIFY AFTER ALL FIXES
+===============================================================
+
+Test 1 — Hours save and persist:
+  Login as Hornchurch
+  Change Thursday close to 21:00
+  Click SAVE CHANGES → toast shows ✓
+  Reload portal → Thursday still shows 21:00 ✓
+  GET /api/availability/slots?location=hornchurch
+    &date=2026-04-23
+  Returns 20:00 slot ✓
+  Customer /book page Thursday → shows 20:00 ✓
+
+Test 2 — Marylebone independent:
+  Switch to Marylebone
+  Change Wednesday to Day Off
+  Save → Marylebone Wednesday = closed ✓
+  Switch back to Hornchurch
+  Hornchurch Wednesday still open ✓
+
+Test 3 — Block date persists:
+  Block May 1st
+  Reload portal → May 1st still blocked ✓
+  Customer tries to book May 1st → 
+  calendar shows it greyed out ✓
+
+Test 4 — Replit restart:
+  Restart server
+  GET /api/availability/settings → 
+  still shows 21:00 for Thursday ✓
+  (proves Supabase is being read not memory)
