@@ -265,14 +265,12 @@ function toggleCond(id) {
 
 // ── Consent items ──────────────────────────────────────────────
 const CONSENT_REQUIRED = [
-  { id:'informed',    label:'I have been fully informed about my treatment, including the procedure, expected results, and recovery.' },
-  { id:'risks',       label:'I understand that aesthetic treatments carry risks including bruising, swelling, temporary asymmetry, and rare complications.' },
-  { id:'not_pregnant',label:'I confirm I am not currently pregnant or breastfeeding (unless declared in my medical form).' },
-  { id:'no_alcohol',  label:'I have not consumed alcohol in the 24 hours prior to my appointment.' },
-  { id:'no_thinners', label:'I have not taken ibuprofen, aspirin, or blood-thinning medication in the 24 hours before my appointment unless medically required.' },
-  { id:'results',     label:'I understand that results are not guaranteed and a top-up or follow-up treatment may be required.' },
-  { id:'accurate',    label:'I confirm that all health information provided in this form is true, complete, and accurate.' },
-  { id:'consent',     label:'I consent to receive the treatment discussed and agree to the outlined treatment plan.' },
+  { id:'procedure',        label:'I have been fully informed about my treatment, I understand what it involves, and I consent to receive it.' },
+  { id:'risks',            label:'I understand that aesthetic treatments carry risks including bruising, swelling, temporary asymmetry, and rare complications.' },
+  { id:'aftercare',        label:'I agree to follow all aftercare advice provided by my practitioner and to avoid alcohol, blood-thinning medication, and strenuous activity as advised.' },
+  { id:'no_guarantee',     label:'I understand that results are not guaranteed and a top-up or follow-up treatment may be required.' },
+  { id:'over_18',          label:'I confirm that I am 18 years of age or older, and am not currently pregnant or breastfeeding (unless declared in my medical form).' },
+  { id:'medical_accurate', label:'I confirm that all health information provided in this form is true, complete, and accurate.' },
 ];
 const CONSENT_OPTIONAL = [
   { id:'photo_clinical', label:'I consent to before-and-after photographs being taken for clinical records purposes.' },
@@ -301,6 +299,28 @@ function toggleCst(id) {
   const cb = document.getElementById('cst-' + id);
   cb.checked = !cb.checked;
   document.getElementById('cst-wrap-' + id).classList.toggle('checked', cb.checked);
+  updateSubmitBtn();
+}
+
+// ── Signature canvas blank check (alpha channel) ───────────────
+function isCanvasBlank(canvas) {
+  const ctx = canvas.getContext('2d');
+  const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+  for (let i = 3; i < pixelData.length; i += 4) {
+    if (pixelData[i] > 0) return false;
+  }
+  return true;
+}
+
+// ── Real-time submit button enable/disable ─────────────────────
+function updateSubmitBtn() {
+  const btn = document.getElementById('consent-submit-btn');
+  if (!btn) return;
+  const allChecked = CONSENT_REQUIRED.every(c => !!document.getElementById('cst-' + c.id)?.checked);
+  const signatureCanvas = document.getElementById('sig-canvas') || document.querySelector('canvas');
+  const signatureValid = signatureCanvas && !isCanvasBlank(signatureCanvas);
+  const printName = (document.getElementById('sig-name')?.value || '').trim();
+  btn.disabled = !(allChecked && signatureValid && printName.length > 0);
 }
 
 // ── Signature pad ──────────────────────────────────────────────
@@ -318,15 +338,24 @@ function initSignaturePad() {
     canvas.style.height = '180px';
     canvas.getContext('2d').scale(ratio, ratio);
     if (signaturePad) signaturePad.clear();
+    updateSubmitBtn();
   }
   signaturePad = new SignaturePad(canvas, {
     penColor: '#1a1a1a',
-    backgroundColor: 'rgba(255,255,255,1)',
+    backgroundColor: 'rgba(255,255,255,0)',
     minWidth: 1,
     maxWidth: 2.5,
   });
   resizeCanvas();
   window.addEventListener('resize', resizeCanvas);
+
+  // Re-check button state after each stroke
+  canvas.addEventListener('mouseup', updateSubmitBtn);
+  canvas.addEventListener('touchend', updateSubmitBtn);
+
+  // Prevent page scroll while drawing on mobile
+  canvas.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+  canvas.addEventListener('touchmove',  e => e.preventDefault(), { passive: false });
 }
 
 // ── Step 1: Medical form ────────────────────────────────────────
@@ -463,12 +492,17 @@ function renderConsent() {
         <button class="sig-clear" onclick="clearSig()">Clear Signature</button>
       </div>
 
+      <div class="field" style="margin-top:12px">
+        <label for="sig-name">Print name <span style="color:var(--burgundy)">*</span></label>
+        <input type="text" id="sig-name" placeholder="Your full name" autocomplete="name" oninput="updateSubmitBtn()">
+      </div>
+
       <div class="declaration">
         I, <strong>${escHtml(bk.client_name || '')}</strong>, consent to receive <strong>${escHtml(treatment)}</strong> at Starr Aesthetics on ${escHtml(formatDate(bk.date))}. I confirm I have read and agreed to the above statements.
       </div>
 
       <div id="consent-error"></div>
-      <button class="btn-primary" onclick="submitConsent()">Sign &amp; Submit Forms</button>
+      <button id="consent-submit-btn" class="btn-primary" onclick="submitConsent()" disabled>Sign &amp; Submit Forms</button>
       <button class="btn-secondary" onclick="goBack()">← Back to Medical Form</button>
     </div>
     <div class="gdpr-footer">Your signature is stored as an encrypted image. All data is held in accordance with UK GDPR and retained for 7 years as required for medical/aesthetic records.</div>
@@ -479,6 +513,7 @@ function renderConsent() {
 
 function clearSig() {
   if (signaturePad) signaturePad.clear();
+  updateSubmitBtn();
 }
 
 function goBack() {
@@ -492,23 +527,28 @@ function goBack() {
 // ── Submit consent form ─────────────────────────────────────────
 async function submitConsent() {
   const bk = bookingData.booking;
+
   // Validate all required consents are checked
   const missing = CONSENT_REQUIRED.filter(c => !document.getElementById('cst-' + c.id)?.checked);
   if (missing.length > 0) {
     showError('consent-error', 'Please read and tick all required consent statements before signing.');
     return;
   }
-  if (!signaturePad || signaturePad.isEmpty()) {
+
+  // Validate signature using alpha channel (works regardless of background colour)
+  const sigCanvas = document.getElementById('sig-canvas') || document.querySelector('canvas');
+  if (!sigCanvas || isCanvasBlank(sigCanvas)) {
     showError('consent-error', 'Please sign the form before submitting.');
     return;
   }
 
-  const consentsObj = {};
-  [...CONSENT_REQUIRED, ...CONSENT_OPTIONAL].forEach(c => {
-    consentsObj[c.id] = !!document.getElementById('cst-' + c.id)?.checked;
-  });
+  const printName = (document.getElementById('sig-name')?.value || '').trim();
+  if (!printName) {
+    showError('consent-error', 'Please print your full name before submitting.');
+    return;
+  }
 
-  const btn = document.querySelector('button.btn-primary[onclick="submitConsent()"]');
+  const btn = document.getElementById('consent-submit-btn');
   btn.disabled = true;
   btn.textContent = 'Submitting…';
 
@@ -518,12 +558,14 @@ async function submitConsent() {
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
         bookingId: BOOKING_ID,
-        clientEmail: bk.client_email,
-        clientName: bk.client_name,
-        treatment: bk.treatment,
-        consents: consentsObj,
-        additionalNotes: document.getElementById('c-notes')?.value?.trim() || null,
-        signatureData: signaturePad.toDataURL('image/png'),
+        consent_procedure:       !!document.getElementById('cst-procedure')?.checked,
+        consent_risks:           !!document.getElementById('cst-risks')?.checked,
+        consent_aftercare:       !!document.getElementById('cst-aftercare')?.checked,
+        consent_no_guarantee:    !!document.getElementById('cst-no_guarantee')?.checked,
+        consent_over_18:         !!document.getElementById('cst-over_18')?.checked,
+        consent_medical_accurate:!!document.getElementById('cst-medical_accurate')?.checked,
+        signature_data:  signaturePad ? signaturePad.toDataURL('image/png') : sigCanvas.toDataURL('image/png'),
+        signature_name:  printName,
       }),
     });
     if (!res.ok) throw new Error((await res.json()).error || 'Failed to submit');
