@@ -1,0 +1,233 @@
+MEDIA TAB FIX — changes must save to Supabase 
+and persist after restart. Read all files 
+before touching anything.
+
+THE CONFIRMED SITUATION:
+  Supabase portal_kv table already has a row 
+  with key = 'dd_media' containing:
+  {
+    "heroVideo": null,
+    "heroImage": null,
+    "aboutImage": null,
+    "galleryImages": [],
+    "resultsVideos": [],
+    "practitionerImage": null
+  }
+
+  The GET /api/media/config endpoint exists 
+  and returns this data.
+
+  BUT: when Eva pastes a URL and clicks Set, 
+  or uploads a file, nothing is being written 
+  back to Supabase. Changes are lost on refresh 
+  or server restart.
+
+===============================================================
+FIX 1 — VERIFY AND FIX POST /api/media/config
+===============================================================
+
+Find the POST /api/media/config endpoint.
+Check if it actually writes to Supabase.
+
+It MUST do this:
+
+  app.post('/api/media/config', authMiddleware, 
+    async (req, res) => {
+      const { field, value } = req.body
+      
+      // Get current value from Supabase
+      const { data: current } = await supabaseAdmin
+        .from('portal_kv')
+        .select('value')
+        .eq('key', 'dd_media')
+        .single()
+      
+      const existing = current?.value || {}
+      const updated = { ...existing, [field]: value }
+      
+      // Write back to Supabase
+      const { error } = await supabaseAdmin
+        .from('portal_kv')
+        .upsert(
+          { key: 'dd_media', value: updated },
+          { onConflict: 'key' }
+        )
+      
+      if (error) {
+        console.error('Media save error:', error)
+        return res.status(500).json({ error: error.message })
+      }
+      
+      return res.json({ success: true, field, value })
+    }
+  )
+
+If this endpoint doesn't exist — create it.
+If it exists but uses filesystem or memory — 
+replace it with the Supabase version above.
+
+===============================================================
+FIX 2 — WIRE UP EACH SET BUTTON IN PORTAL.HTML
+===============================================================
+
+Find each Set button in the media tab.
+Each one must call POST /api/media/config 
+with the correct field name when clicked.
+
+Hero Video Set button:
+  field: 'heroVideo'
+  value: the URL from the input
+
+Hero Photo Set button:
+  field: 'heroImage'  
+  value: the URL from the input
+
+Meet Eva photo Set button:
+  field: 'practitionerImage'
+  value: the URL from the input
+
+Gallery image Set buttons:
+  field: 'galleryImages'
+  value: updated array with new URL added
+
+Results video Set buttons:
+  field: 'resultsVideos'
+  value: updated array with new URL added
+
+Each Set button click flow:
+  1. Get URL from input field
+  2. If empty — show error "Please enter a URL"
+  3. POST /api/media/config with field + value
+  4. If success — show toast "Saved ✓"
+     Update preview in the portal
+     Clear the input field
+  5. If error — show toast "Save failed"
+
+===============================================================
+FIX 3 — ADD SAVE CHANGES BUTTON AT TOP
+===============================================================
+
+Add a gold SAVE CHANGES button at the top 
+of the media tab — same style as other 
+SAVE CHANGES buttons in the portal.
+
+This button saves ALL current media values 
+at once in a single POST call.
+
+When clicked:
+  Collect current values from all preview 
+  states / cached media object
+  POST /api/media/config with 
+    field: 'all', value: { entire media object }
+  
+  OR post each field individually in sequence.
+  
+  Show: "All media saved ✓"
+
+Also add a subtitle under the page title:
+  "Changes save to cloud and go live on 
+   the website instantly."
+
+===============================================================
+FIX 4 — FILE UPLOAD VIA SUPABASE STORAGE
+===============================================================
+
+Upload buttons (Upload Video, Upload Image, 
+Upload Photo) currently fail.
+
+Fix using Supabase Storage:
+
+  npm install multer (if not installed)
+
+  Create POST /api/media/upload:
+    authMiddleware required
+    multer({ storage: multer.memoryStorage() })
+    Fields: file, field (which slot)
+    
+    Upload to Supabase Storage bucket 'media':
+      path: starr/[field]/[timestamp].[ext]
+    
+    Get public URL from Supabase storage
+    
+    Save URL to portal_kv dd_media via 
+    same upsert logic as Fix 1
+    
+    Return { success: true, url: publicUrl }
+
+  Create bucket 'media' in Supabase Storage 
+  if it doesn't exist (public: true, 50MB limit)
+
+  In portal.html, file input onChange:
+    Build FormData with file + field name
+    POST to /api/media/upload with auth header
+    On success: update preview + show toast
+    On error: show "Upload failed — try URL instead"
+
+===============================================================
+FIX 5 — HOMEPAGE READS FROM SUPABASE
+===============================================================
+
+The homepage must read media config from 
+Supabase on every page load.
+
+Find where the homepage loads its hero image, 
+hero video, and practitioner photo.
+
+It should call GET /api/media/config and use 
+the returned values:
+  heroVideo → set as hero video src
+  heroImage → set as hero background/image
+  practitionerImage → set as Eva's photo
+
+If any value is null → fall back to the 
+current default/hardcoded image.
+
+This ensures: when Eva saves a new image 
+in the portal → visitors see it immediately 
+on next page load.
+
+===============================================================
+FIX 6 — VIDEOS AUTOPLAY WITHOUT PLAY BUTTON
+===============================================================
+
+All <video> elements on the site must have:
+  autoplay muted loop playsinline preload="auto"
+
+No controls attribute.
+No custom play button overlay div.
+
+Without muted + playsinline iOS will not 
+autoplay — this is critical for mobile.
+
+===============================================================
+VERIFY AFTER ALL FIXES
+===============================================================
+
+Test 1 — URL paste:
+  Media tab → Hero Photo → paste any image URL
+  Click Set
+  Toast shows "Saved ✓" ✓
+  Preview updates in portal ✓
+  Refresh portal → URL still shows in preview ✓
+  Refresh homepage → image shows on site ✓
+  Check Supabase portal_kv dd_media → 
+    heroImage = that URL ✓
+
+Test 2 — Server restart persistence:
+  Save a URL via Set
+  Restart Replit server
+  Check GET /api/media/config → URL still there ✓
+  Proves it's reading from Supabase not memory ✓
+
+Test 3 — File upload:
+  Click Upload Photo → pick a file
+  No "upload failed" error ✓
+  Preview shows uploaded image ✓
+  Check Supabase storage bucket 'media' → 
+    file exists ✓
+  Check portal_kv dd_media → URL saved ✓
+
+Test 4 — SAVE CHANGES button:
+  Button visible at top of media tab ✓
+  Clicking it saves all fields ✓
+  Toast shows "All media saved ✓" ✓
