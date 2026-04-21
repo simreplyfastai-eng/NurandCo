@@ -17,15 +17,16 @@ function AutoPlayVideo({ src }: { src: string }) {
     const video = ref.current;
     if (!video) return;
 
-    // Explicitly reload so the browser picks up the new src
-    video.load();
-
     const tryPlay = () => {
       video.muted = true;
       video.playsInline = true;
       const p = video.play();
       if (p) p.catch(() => {});
     };
+
+    // Explicitly reload so the browser picks up the new src, then play immediately
+    video.load();
+    tryPlay();
 
     video.addEventListener("loadeddata", tryPlay);
     video.addEventListener("canplay", tryPlay);

@@ -22,9 +22,10 @@ function VideoCard({ src }: { src: string }) {
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
-    // Explicitly reload so the browser picks up the new src
-    v.load();
     const tryPlay = () => { v.muted = true; v.playsInline = true; v.play().catch(() => {}); };
+    // Reload to pick up new src, then play immediately — don't wait for events only
+    v.load();
+    tryPlay();
     v.addEventListener("loadeddata", tryPlay);
     v.addEventListener("canplay", tryPlay);
     const obs = new IntersectionObserver(([e]) => e.isIntersecting ? tryPlay() : v.pause(), { threshold: 0.1 });
