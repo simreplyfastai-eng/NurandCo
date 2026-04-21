@@ -1,0 +1,468 @@
+This project is built on the Dermadoll template.
+We are now migrating all data storage to Supabase.
+The Supabase project is already created and the 
+secrets are already added to Replit:
+  SUPABASE_URL
+  SUPABASE_ANON_KEY  
+  SUPABASE_SERVICE_KEY
+
+The database already has these tables created:
+  locations (2 rows: Hornchurch + Marylebone)
+  treatments (empty - needs seeding)
+  availability_settings (14 rows seeded)
+  blocked_dates (empty)
+  bookings (empty)
+
+This is for STARR AESTHETICS by Eva.
+Two locations: Hornchurch (Essex) and Marylebone (London).
+NOTHING must ever sync between the two locations.
+Completely separate calendars, bookings, and availability.
+
+===============================================================
+STEP 1 — INSTALL AND CONFIGURE SUPABASE CLIENT
+===============================================================
+
+Install the Supabase JS client:
+  npm install @supabase/supabase-js
+
+Create a new file: server/supabase.js
+
+Content:
+  import { createClient } from '@supabase/supabase-js';
+
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
+
+  export const supabase = createClient(
+    supabaseUrl, supabaseAnonKey
+  );
+
+  export const supabaseAdmin = createClient(
+    supabaseUrl, supabaseServiceKey,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  );
+
+Test the connection immediately:
+  const { data, error } = await supabaseAdmin
+    .from('locations').select('*');
+  console.log('Supabase connected:', data, error);
+
+If error — fix before continuing.
+
+===============================================================
+STEP 2 — SEED TREATMENTS FOR BOTH LOCATIONS
+===============================================================
+
+First get the location IDs:
+  const { data: locations } = await supabaseAdmin
+    .from('locations').select('id, slug');
+  
+  const hornchurchId = locations.find(l => 
+    l.slug === 'hornchurch').id;
+  const maryleboneId = locations.find(l => 
+    l.slug === 'marylebone').id;
+
+Seed treatments for BOTH locations.
+Use the existing Dermadoll/Starr treatments list.
+Each treatment gets inserted twice — once per location.
+Treatments can be edited later via admin portal.
+
+Treatments to seed (insert for EACH location):
+  { name: 'Russian Lips 0.5ml', duration_minutes: 60, price: 85, deposit_amount: 43 }
+  { name: 'Russian Lips 1ml', duration_minutes: 60, price: 95, deposit_amount: 48 }
+  { name: 'Signature Lips 0.5ml', duration_minutes: 75, price: 75, deposit_amount: 38 }
+  { name: 'Signature Lips 1ml', duration_minutes: 75, price: 95, deposit_amount: 48 }
+  { name: 'Cheek Filler 1ml', duration_minutes: 60, price: 90, deposit_amount: 45 }
+  { name: 'Cheek Filler 2ml', duration_minutes: 60, price: 165, deposit_amount: 83 }
+  { name: 'Chin Filler 1ml', duration_minutes: 60, price: 90, deposit_amount: 45 }
+  { name: 'Jawline Filler 1ml', duration_minutes: 65, price: 90, deposit_amount: 45 }
+  { name: 'Jawline Filler 2ml', duration_minutes: 65, price: 165, deposit_amount: 83 }
+  { name: 'Liquid Rhinoplasty 1ml', duration_minutes: 60, price: 90, deposit_amount: 45 }
+  { name: 'Smile Lines Filler 1ml', duration_minutes: 75, price: 90, deposit_amount: 45 }
+  { name: 'Facial Balancing Tweak 2ml', duration_minutes: 90, price: 155, deposit_amount: 78 }
+  { name: 'Facial Balancing Refine 3ml', duration_minutes: 90, price: 175, deposit_amount: 88 }
+  { name: 'Facial Balancing Balance 4ml', duration_minutes: 105, price: 195, deposit_amount: 98 }
+  { name: 'Facial Balancing Harmonise 5ml', duration_minutes: 105, price: 215, deposit_amount: 108 }
+  { name: 'Anti-Wrinkle 1 Area', duration_minutes: 45, price: 145, deposit_amount: 73 }
+  { name: 'Anti-Wrinkle 2 Areas', duration_minutes: 45, price: 180, deposit_amount: 90 }
+  { name: 'Anti-Wrinkle 3 Areas', duration_minutes: 45, price: 190, deposit_amount: 95 }
+  { name: 'Filler Dissolving 1 Area', duration_minutes: 90, price: 90, deposit_amount: 45 }
+  { name: 'Lip Dissolve + 1ml Refill', duration_minutes: 90, price: 170, deposit_amount: 85 }
+  { name: 'Polynucleotides Full Face', duration_minutes: 60, price: 110, deposit_amount: 55 }
+  { name: 'Polynucleotides Under Eye', duration_minutes: 60, price: 100, deposit_amount: 50 }
+  { name: 'In-Person Consultation', duration_minutes: 30, price: 25, deposit_amount: 25 }
+  { name: 'Virtual Consultation', duration_minutes: 15, price: 0, deposit_amount: 0 }
+
+Insert with location_id for each:
+  await supabaseAdmin.from('treatments').insert(
+    treatments.map(t => ({ ...t, location_id: hornchurchId }))
+  );
+  await supabaseAdmin.from('treatments').insert(
+    treatments.map(t => ({ ...t, location_id: maryleboneId }))
+  );
+
+Run this as a one-time seed script that checks if 
+treatments already exist before inserting to avoid 
+duplicates on server restart.
+
+===============================================================
+STEP 3 — REPLACE ALL DATABASE CALLS WITH SUPABASE
+===============================================================
+
+Find every place in the codebase that reads or 
+writes booking data. Replace ALL of them with 
+Supabase queries.
+
+CRITICAL: Every single Supabase query MUST include 
+a location_id filter. No exceptions.
+
+PATTERN TO FOLLOW FOR ALL QUERIES:
+
+GET BOOKINGS:
+  const { data, error } = await supabaseAdmin
+    .from('bookings')
+    .select('*, treatments(name, duration_minutes)')
+    .eq('location_id', locationId)
+    .eq('booking_date', date)
+    .order('time_slot', { ascending: true });
+
+CREATE BOOKING:
+  const { data, error } = await supabaseAdmin
+    .from('bookings')
+    .insert({
+      location_id: locationId,
+      treatment_id: treatmentId,
+      client_name: name,
+      client_email: email,
+      client_phone: phone,
+      booking_date: date,
+      time_slot: time,
+      status: 'pending',
+      deposit_amount: depositAmount,
+      total_amount: totalAmount
+    })
+    .select()
+    .single();
+
+UPDATE BOOKING STATUS:
+  await supabaseAdmin
+    .from('bookings')
+    .update({ status: newStatus })
+    .eq('id', bookingId)
+    .eq('location_id', locationId);
+
+GET TREATMENTS:
+  const { data } = await supabaseAdmin
+    .from('treatments')
+    .select('*')
+    .eq('location_id', locationId)
+    .eq('active', true)
+    .order('name');
+
+GET AVAILABILITY:
+  const { data } = await supabaseAdmin
+    .from('availability_settings')
+    .select('*')
+    .eq('location_id', locationId)
+    .order('day_of_week');
+
+GET BLOCKED DATES:
+  const { data } = await supabaseAdmin
+    .from('blocked_dates')
+    .select('date, reason')
+    .eq('location_id', locationId);
+
+BLOCK A DATE:
+  await supabaseAdmin
+    .from('blocked_dates')
+    .insert({ location_id: locationId, date: dateStr, reason })
+    .onConflict('location_id, date')
+    .ignore();
+
+UNBLOCK A DATE:
+  await supabaseAdmin
+    .from('blocked_dates')
+    .delete()
+    .eq('location_id', locationId)
+    .eq('date', dateStr);
+
+CHECK SLOT AVAILABILITY:
+  First check if date is blocked:
+  const { data: blocked } = await supabaseAdmin
+    .from('blocked_dates')
+    .select('id')
+    .eq('location_id', locationId)
+    .eq('date', date)
+    .single();
+  if (blocked) return { available: false, reason: 'blocked' };
+
+  Then check existing bookings for that slot:
+  const { data: existing } = await supabaseAdmin
+    .from('bookings')
+    .select('id')
+    .eq('location_id', locationId)
+    .eq('booking_date', date)
+    .eq('time_slot', timeSlot)
+    .in('status', ['pending', 'confirmed']);
+  if (existing?.length) return { available: false, reason: 'booked' };
+
+===============================================================
+STEP 4 — LOGIN PAGE WITH LOCATION SELECTOR
+===============================================================
+
+Update the admin login page to show location 
+selection BEFORE the password form.
+
+The login page must work like this:
+
+STEP 1 — Location Selection screen:
+  Show two large cards side by side (stack on mobile):
+  
+  Card 1: HORNCHURCH
+    Address: "Hornchurch, Essex"
+    Click → stores 'hornchurch' in component state
+    Selected: rose/brand colour border highlight
+  
+  Card 2: MARYLEBONE
+    Address: "Marylebone, London"  
+    Click → stores 'marylebone' in component state
+    Selected: same highlight
+  
+  "Continue" button appears once one is selected
+  Button click → shows STEP 2
+
+STEP 2 — Password form:
+  Shows which location is selected at top:
+    Small pill: "HORNCHURCH" or "MARYLEBONE"
+    With a "Change" link that goes back to Step 1
+  
+  Email field (pre-filled with ADMIN_EMAIL if set)
+  Password field
+  "Login" button
+  
+  On submit:
+    Verify credentials against ADMIN_EMAIL + ADMIN_PASSWORD
+    If correct:
+      Store locationId in session
+      Get location data from Supabase:
+        const { data: location } = await supabaseAdmin
+          .from('locations')
+          .select('id, name, slug')
+          .eq('slug', selectedSlug)
+          .single();
+      Store location.id and location.name in session
+      Redirect to admin dashboard
+    If wrong: show error message
+
+The locationId stored in session is used for 
+every single database query throughout the admin portal.
+
+===============================================================
+STEP 5 — ADMIN PORTAL HEADER
+===============================================================
+
+Add a location badge to the admin portal header.
+This must be ALWAYS visible so Eva knows which 
+location she is managing.
+
+Header layout:
+  Left: Starr Aesthetics logo
+  Centre: Location badge pill
+    "📍 HORNCHURCH" or "📍 MARYLEBONE"
+    Brand colour background
+    White text, uppercase, small
+    DM Sans or Inter, 11px
+  Right: existing nav + logout button
+
+Logout button:
+  Clears the session completely
+  Redirects to login page (location selector)
+  There is NO way to switch location without 
+  logging out — this is intentional for safety
+
+===============================================================
+STEP 6 — ADMIN PORTAL — ALL TABS USE LOCATION
+===============================================================
+
+Every tab in the admin portal must pass the 
+locationId from session to ALL queries.
+
+BOOKINGS TAB:
+  Load bookings for current location only:
+  Filter by location_id = session.locationId
+  Show booking date, time, client name, 
+  treatment, status, deposit paid
+  Allow status updates (confirm/cancel/no-show)
+  All updates include location_id check
+
+CALENDAR TAB (Days Off):
+  Load blocked dates for current location only
+  Admin blocks/unblocks dates for their location
+  Changes only affect their location calendar
+  
+AVAILABILITY TAB:
+  Load availability_settings for current location
+  Admin sets open/close times per day of week
+  Changes only affect their location
+
+TREATMENTS TAB:
+  Load treatments for current location only
+  Admin can toggle active/inactive per treatment
+  Add new treatments (scoped to their location)
+  Edit prices and durations
+
+===============================================================
+STEP 7 — CUSTOMER BOOKING FLOW (LOCATION AWARE)
+===============================================================
+
+The customer-facing booking calendar needs to be 
+location-aware. Two approaches — use Option A:
+
+OPTION A — URL-based (recommended):
+  /book/hornchurch → books at Hornchurch
+  /book/marylebone → books at Marylebone
+
+  Each URL loads:
+    Treatments for that location
+    Availability for that location
+    Blocked dates for that location
+    Existing bookings for that location
+
+  The location landing page at /book shows 
+  both locations for the customer to choose:
+    "Choose your location"
+    [HORNCHURCH — Essex]  [MARYLEBONE — London]
+    Each links to /book/hornchurch or /book/marylebone
+
+BOOKING FLOW per location:
+  1. Treatment selection (from that location's treatments)
+  2. Date selection (respects that location's:
+      - Availability settings (open days/hours)
+      - Blocked dates (days off)
+      - Existing bookings (taken slots))
+  3. Time slot selection
+  4. Client details form
+  5. Stripe deposit payment
+  6. Confirmation
+
+ALL availability checks use location_id.
+A slot taken at Hornchurch does NOT affect Marylebone.
+
+===============================================================
+STEP 8 — STRIPE — KEEP EXISTING INTEGRATION
+===============================================================
+
+The Stripe integration from Dermadoll template 
+should continue to work as-is.
+
+When a booking is created after Stripe payment:
+  Store location_id with the booking
+  The booking is only visible to that location's admin
+
+Update the Stripe webhook handler to include 
+location_id when creating/updating bookings.
+
+Get location_id from the payment metadata:
+  When creating payment intent, store:
+  metadata: { location_id: locationId, ... }
+  
+  In webhook: 
+  const locationId = event.data.object.metadata.location_id;
+  Use this when updating booking status.
+
+===============================================================
+STEP 9 — EMAIL CONFIRMATIONS (RESEND)
+===============================================================
+
+Keep existing Resend email integration.
+Update confirmation emails to include location details:
+
+  "Your appointment at Starr Aesthetics [LOCATION NAME]
+  [Location address]
+  [Date and time]"
+
+Get location address from the locations table:
+  const { data: location } = await supabaseAdmin
+    .from('locations')
+    .select('name, address')
+    .eq('id', locationId)
+    .single();
+
+  Use location.name and location.address in emails.
+
+===============================================================
+STEP 10 — REMOVE ALL OLD DATABASE REFERENCES
+===============================================================
+
+Find and remove ALL references to the old 
+in-memory or SQLite database from the 
+Dermadoll template. Replace with Supabase.
+
+Search for these patterns and replace:
+  - Any imports from 'better-sqlite3' or 'sqlite'
+  - Any db.prepare() or db.run() calls
+  - Any in-memory arrays storing bookings
+  - Any JSON file reads/writes for bookings
+  - Any references to 'dermadoll' in data paths
+
+After replacing, verify:
+  npm run build -- no errors
+  Server starts cleanly
+  /api/health returns 200
+  Supabase connection confirmed in logs
+
+===============================================================
+STEP 11 — TEST EVERYTHING
+===============================================================
+
+After all changes, run these tests:
+
+1. Login as Hornchurch admin
+   Verify location badge shows HORNCHURCH
+   Verify treatments list is Hornchurch treatments
+   Verify calendar shows Hornchurch availability
+
+2. Create a test booking at Hornchurch
+   Verify it appears in Hornchurch admin bookings
+   Verify it does NOT appear when logged in as Marylebone
+
+3. Block a date at Hornchurch
+   Verify that date is unavailable in Hornchurch calendar
+   Verify that same date IS available in Marylebone calendar
+
+4. Login as Marylebone admin  
+   Verify completely separate data from Hornchurch
+   Verify no Hornchurch bookings visible
+
+5. Customer booking flow
+   /book/hornchurch — loads Hornchurch treatments and slots
+   /book/marylebone — loads Marylebone treatments and slots
+   Verify slots are independent
+
+6. Stripe payment flow
+   Payment goes through for test booking
+   Webhook updates correct location's booking
+   Confirmation email includes correct location
+
+Report what passed and what failed.
+Fix any failures before finishing.
+
+===============================================================
+FINAL CHECKLIST
+===============================================================
+
+Supabase connected and verified
+Treatments seeded for both locations (48 rows total)
+Login page has location selector as Step 1
+Session stores location_id after login
+Admin portal shows location badge always
+Every DB query includes location_id filter
+Blocked dates are location-specific
+Availability is location-specific
+Customer booking URLs are /book/[slug]
+Stripe metadata includes location_id
+Email confirmations include location name
+Old SQLite/in-memory DB references removed
+Build passes with no errors
+All 6 tests above pass
