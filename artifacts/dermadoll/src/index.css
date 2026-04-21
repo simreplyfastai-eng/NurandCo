@@ -393,129 +393,47 @@ video::-webkit-media-controls-overlay-play-button {
 }
 /* ── Footer social section ─────────────────────────────────── */
 .footer-social-block {
-  max-width: 480px;
-  margin: 0 auto 32px;
-  padding: 0 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  margin-bottom: 32px;
 }
 
-.footer-social-headers {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 32px;
-  margin-bottom: 10px;
+.footer-social-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
 }
 
-.footer-social-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px 32px;
-  justify-items: start;   /* pills don't stretch to fill the cell */
+.footer-social-section:first-child {
+  margin-top: 0;
 }
 
-.footer-social-pill {
-  width: fit-content !important;
-  display: inline-flex !important;
-  white-space: nowrap !important;
+.footer-social-label {
+  display: block;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: #C9A96E;
+  margin-bottom: 8px;
+  font-weight: 500;
+  font-family: 'Inter', sans-serif;
 }
 
-/* Mobile: keep 2 columns but tighten and allow wrapping */
-@media (max-width: 480px) {
-  .footer-social-block {
-    padding: 0 16px;
-  }
-
-  .footer-social-headers {
-    gap: 0 24px;
-  }
-
-  .footer-social-grid {
-    gap: 8px 24px;
-    /* Use auto columns so each column is only as wide as its widest pill */
-    grid-template-columns: auto auto;
-    justify-content: center;
-  }
-
-  .footer-social-pill {
-    font-size: 11px !important;
-    padding: 4px 10px !important;
-  }
+.footer-social-link {
+  display: block;
+  font-size: 13px;
+  color: #5C1A1A;
+  text-decoration: none;
+  line-height: 1.8;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  transition: color 0.15s ease;
 }
 
-@media (max-width: 360px) {
-  /* Very small screens: stack IG above TT by switching grid to 1 col
-     and using nth-child ordering via row placement */
-  .footer-social-headers {
-    grid-template-columns: 1fr;
-    gap: 0;
-  }
-  .footer-social-headers > span:last-child {
-    margin-top: 16px;
-  }
-  .footer-social-grid {
-    grid-template-columns: 1fr;
-  }
-  /* Re-order: all IG pills (odd positions) before all TT (even) */
-  .footer-social-grid > *:nth-child(odd)  { order: 1; }
-  .footer-social-grid > *:nth-child(even) { order: 2; }
-}
-
-/* ── Mobile: full single-column stack at 640px ─────────────── */
-/* This block is placed last so it wins the cascade over
-   the 480px and 360px blocks above on all mobile widths.     */
-@media (max-width: 640px) {
-  .footer-social-block {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
-    width: 100%;
-  }
-
-  .footer-social-headers {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    gap: 0;
-  }
-
-  /* Show only the Instagram label — TikTok pills are visually
-     separated below by margin-top on the first TikTok pill */
-  .footer-social-headers span:first-child {
-    display: block;
-    text-align: center;
-    margin-bottom: 12px;
-  }
-
-  .footer-social-headers span:last-child {
-    display: none;
-  }
-
-  .footer-social-grid {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    gap: 0;
-  }
-
-  /* Group all IG pills (odd) first, all TT pills (even) second */
-  .footer-social-grid > *:nth-child(odd)  { order: 1; }
-  .footer-social-grid > *:nth-child(even) { order: 2; }
-
-  /* Visual gap + implied "TikTok" section — first TT pill gets top margin */
-  .footer-social-grid > *:nth-child(2) {
-    margin-top: 20px;
-  }
-
-  .footer-social-pill {
-    width: auto !important;
-    min-width: 180px !important;
-    max-width: 280px !important;
-    text-align: center !important;
-    justify-content: center !important;
-    margin: 4px auto !important;
-    white-space: nowrap !important;
-    font-size: 12px !important;
-  }
+.footer-social-link:hover {
+  color: #C9A96E;
 }

@@ -1,128 +1,31 @@
 import { useEffect, useState } from "react";
 
-interface SocialAccount { handle: string; label: string; url: string; }
-
-const IG_DEFAULT: SocialAccount[] = [
-  { handle: "StarrFacess",      label: "Face Treatments", url: "https://instagram.com/StarrFacess" },
-  { handle: "StarrAestheticss", label: "Aesthetics",      url: "https://instagram.com/StarrAestheticss" },
-  { handle: "StarrSuitess",     label: "The Suite",       url: "https://instagram.com/StarrSuitess" },
-  { handle: "StarrNailedd",     label: "Nails",           url: "https://instagram.com/StarrNailedd" },
-];
-const TT_DEFAULT: SocialAccount[] = [
-  { handle: "StarrFacess",      label: "Face Treatments", url: "https://tiktok.com/@StarrFacess" },
-  { handle: "StarrAestheticss", label: "Aesthetics",      url: "https://tiktok.com/@StarrAestheticss" },
-  { handle: "StarrSuitess",     label: "The Suite",       url: "https://tiktok.com/@StarrSuitess" },
-  { handle: "StarrNailedd",     label: "Nails",           url: "https://tiktok.com/@StarrNailedd" },
-];
-
-const IgIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-    <rect x="2" y="2" width="20" height="20" rx="5" ry="5"/>
-    <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
-    <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
-  </svg>
-);
-
-const TtIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
-    <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.16 8.16 0 0 0 4.77 1.52V6.76a4.85 4.85 0 0 1-1-.07z"/>
-  </svg>
-);
-
-function SocialPill({ handle, label, url, icon }: { handle: string; label?: string; url: string; icon: "ig" | "tt" }) {
-  return (
-    <a
-      href={url}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="footer-social-pill"
-      style={{
-        display: "inline-flex",
-        flexDirection: "column",
-        alignItems: "flex-start",
-        gap: 2,
-        width: "fit-content",
-        padding: "5px 12px",
-        border: "1px solid #DDD8D0",
-        borderRadius: 999,
-        textDecoration: "none",
-        color: "#5C1A1A",
-        background: "rgba(255,255,255,0.55)",
-        transition: "border-color 160ms ease, color 160ms ease, background 160ms ease",
-        whiteSpace: "nowrap",
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = "#C9A96E";
-        e.currentTarget.style.color = "#C9A96E";
-        e.currentTarget.style.background = "rgba(201,169,110,0.06)";
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.borderColor = "#DDD8D0";
-        e.currentTarget.style.color = "#5C1A1A";
-        e.currentTarget.style.background = "rgba(255,255,255,0.55)";
-      }}
-    >
-      <span style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11.5, letterSpacing: "0.01em" }}>
-        {icon === "ig" ? <IgIcon /> : <TtIcon />}
-        @{handle}
-      </span>
-      {label && (
-        <span style={{ fontSize: 9.5, letterSpacing: "0.03em", opacity: 0.65, paddingLeft: 19 }}>
-          {label}
-        </span>
-      )}
-    </a>
-  );
-}
-
-function ColLabel({ children }: { children: string }) {
-  return (
-    <span style={{
-      display: "block",
-      fontSize: 9,
-      textTransform: "uppercase",
-      letterSpacing: "0.18em",
-      color: "#C9A96E",
-      marginBottom: 10,
-      fontFamily: "'Inter', sans-serif",
-    }}>
-      {children}
-    </span>
-  );
-}
+const SOCIAL = {
+  instagram: [
+    { handle: "@StarrFacess",      url: "https://instagram.com/StarrFacess" },
+    { handle: "@StarrAestheticss", url: "https://instagram.com/StarrAestheticss" },
+    { handle: "@StarrSuitess",     url: "https://instagram.com/StarrSuitess" },
+    { handle: "@StarrNailedd",     url: "https://instagram.com/StarrNailedd" },
+  ],
+  tiktok: [
+    { handle: "@StarrFacess",      url: "https://tiktok.com/@StarrFacess" },
+    { handle: "@StarrAestheticss", url: "https://tiktok.com/@StarrAestheticss" },
+    { handle: "@StarrSuitess",     url: "https://tiktok.com/@StarrSuitess" },
+    { handle: "@StarrNailedd",     url: "https://tiktok.com/@StarrNailedd" },
+  ],
+};
 
 export default function Footer() {
   const year = new Date().getFullYear();
-  const [igAccounts, setIgAccounts] = useState<SocialAccount[]>(IG_DEFAULT);
-  const [ttAccounts, setTtAccounts] = useState<SocialAccount[]>(TT_DEFAULT);
+  const [, setLoaded] = useState(false);
 
-  useEffect(() => {
-    fetch("/api/config")
-      .then((r) => r.json())
-      .then((d) => {
-        if (Array.isArray(d?.instagramAccounts) && d.instagramAccounts.length > 0) {
-          setIgAccounts(d.instagramAccounts.map((a: Record<string, string>) => ({
-            handle: (a.handle ?? "").replace(/^@/, ""),
-            label: a.label ?? "",
-            url: a.url ?? "#",
-          })));
-        }
-        if (Array.isArray(d?.tiktokAccounts) && d.tiktokAccounts.length > 0) {
-          setTtAccounts(d.tiktokAccounts.map((a: Record<string, string>) => ({
-            handle: (a.handle ?? "").replace(/^@/, ""),
-            label: a.label ?? "",
-            url: a.url ?? "#",
-          })));
-        }
-      })
-      .catch(() => {});
-  }, []);
+  useEffect(() => { setLoaded(true); }, []);
 
   const navLinks = [
-    { name: "SERVICES", href: "#services" },
+    { name: "SERVICES",  href: "#services" },
     { name: "LOCATIONS", href: "#locations" },
-    { name: "TRAINING", href: "#training" },
-    { name: "BOOK NOW", href: "#book" },
+    { name: "TRAINING",  href: "#training" },
+    { name: "BOOK NOW",  href: "#book" },
   ];
 
   const BASE = import.meta.env.BASE_URL;
@@ -173,37 +76,33 @@ export default function Footer() {
 
         <div style={{ height: 1, background: "#E2DDD5", marginBottom: 28 }} />
 
-        <div className="footer-social-block" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <div className="footer-social-block">
 
-          {/* Paired grid: each row = one account, ig left | tt right */}
-          <div style={{ textAlign: "left" }}>
-            {/* Column headers */}
-            <div className="footer-social-headers">
-              <ColLabel>Instagram</ColLabel>
-              <ColLabel>TikTok</ColLabel>
-            </div>
-
-            {/* Account rows — fit-content pills, tight gap */}
-            <div className="footer-social-grid">
-              {igAccounts.flatMap((a, i) => [
-                <SocialPill key={"ig-" + a.handle} handle={a.handle} label={a.label} url={a.url} icon="ig" />,
-                <SocialPill key={"tt-" + ttAccounts[i]?.handle} handle={ttAccounts[i]?.handle ?? a.handle} label={ttAccounts[i]?.label} url={ttAccounts[i]?.url ?? "#"} icon="tt" />,
-              ])}
-            </div>
+          <div className="footer-social-section">
+            <span className="footer-social-label">Instagram</span>
+            {SOCIAL.instagram.map((a) => (
+              <a key={a.handle} href={a.url} target="_blank" rel="noopener noreferrer" className="footer-social-link">
+                {a.handle}
+              </a>
+            ))}
           </div>
 
-          {/* Email */}
-          <div style={{ marginTop: 24, textAlign: "center" }}>
-            <ColLabel>Email</ColLabel>
-            <a
-              href="mailto:starrbeautyyltd@gmail.com"
-              style={{ color: "#5C1A1A", fontSize: 13, textDecoration: "none", transition: "color 150ms ease" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#C9A96E")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#5C1A1A")}
-            >
+          <div className="footer-social-section">
+            <span className="footer-social-label">TikTok</span>
+            {SOCIAL.tiktok.map((a) => (
+              <a key={a.handle} href={a.url} target="_blank" rel="noopener noreferrer" className="footer-social-link">
+                {a.handle}
+              </a>
+            ))}
+          </div>
+
+          <div className="footer-social-section">
+            <span className="footer-social-label">Email</span>
+            <a href="mailto:starrbeautyyltd@gmail.com" className="footer-social-link">
               starrbeautyyltd@gmail.com
             </a>
           </div>
+
         </div>
 
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9A96E", margin: 0 }}>
