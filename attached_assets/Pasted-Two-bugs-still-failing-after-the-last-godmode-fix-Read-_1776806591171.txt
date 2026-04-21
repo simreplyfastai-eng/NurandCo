@@ -1,0 +1,70 @@
+Two bugs still failing after the last godmode fix.
+Read the relevant files carefully before touching.
+
+BUG 7 — CLIENTS TAB STILL SHOWS 0
+Confirmed in Supabase: client record exists
+  id: f75baddc-215b-49b0-ac56-a223913ba140
+  name: Sim
+  email: sim6ix@icloud.com
+  location_id: ccb325d5-6b17-4218-b97d-1a1a0383410a
+
+The portal is logged in as MARYLEBONE.
+Check: what is the Marylebone location UUID?
+  SELECT id FROM locations WHERE slug='marylebone'
+
+If it does NOT equal ccb325d5-6b17-4218-b97d-1a1a0383410a
+then the client is saved against the wrong location.
+
+Run this fix in the server code on startup 
+OR paste in Supabase SQL:
+  UPDATE clients
+  SET location_id = (SELECT id FROM locations 
+    WHERE slug = 'marylebone')
+  WHERE email = 'sim6ix@icloud.com';
+
+Also check GET /api/clients:
+  Log what location_id header value it receives
+  Log what it queries in Supabase
+  Log how many rows it gets back
+  If 0 rows returned despite the client existing
+  → the location_id filter is wrong
+
+BUG 10 — SCHEDULE: APRIL 22 SHOWS NOTHING
+Clicking April 22 shows "Click a date to see 
+bookings" even though the booking exists.
+
+Also the dot on April 22 is gone — it was 
+there before the godmode fix.
+
+The booking in Supabase:
+  booking_date: 2026-04-22
+  status: confirmed
+  location_id: ccb325d5 (Marylebone)
+
+Check GET /api/bookings (or whatever the 
+schedule uses to load bookings for a date):
+  What date format does it expect?
+  What location_id does it filter by?
+  Does it return the booking when called 
+  with date=2026-04-22?
+
+Also check the calendar dot logic:
+  The dots show on dates that have bookings
+  April 22 had a dot before → now it's gone
+  The dot logic must be using a different 
+  API call or date comparison
+  Find it and fix it so April 22 shows the dot
+
+After clicking April 22:
+  The booking must appear in the right panel
+  Showing: 14:15 — Sim — Confirmed
+  
+  Clicking that booking must open the full 
+  detail panel (openBookingDetailPanel) showing 
+  all the fields from Bug 10 in the godmode fix
+
+Fix both of these. Verify:
+  Clients tab shows Sim (1 client) ✓
+  April 22 has a dot ✓
+  Clicking April 22 shows the booking ✓
+  Clicking the booking shows full detail panel ✓
