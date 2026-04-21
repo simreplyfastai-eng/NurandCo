@@ -266,7 +266,7 @@ export async function findOrCreateClient(params: {
       if (data) existing = data as Record<string, unknown>;
     }
 
-    // 2. Phone lookup (fallback — try both normalised forms)
+    // 2. Phone lookup within location (fallback — try both normalised forms)
     if (!existing && phone) {
       const altPhone = rawPhone; // original (e.g. +447...)
       const { data } = await supabaseAdmin
@@ -276,6 +276,23 @@ export async function findOrCreateClient(params: {
         .or(`phone.eq.${phone},phone.eq.${altPhone}`)
         .maybeSingle();
       if (data) existing = data as Record<string, unknown>;
+    }
+
+    // 3. Cross-location email lookup — client exists under a different (or null) location_id
+    if (!existing && email) {
+      const { data } = await supabaseAdmin
+        .from("clients")
+        .select("id, visit_count, total_spent, email, phone, name, location_id")
+        .ilike("email", email)
+        .maybeSingle();
+      if (data) {
+        existing = data as Record<string, unknown>;
+        // Migrate their location_id to the current location silently
+        await supabaseAdmin
+          .from("clients")
+          .update({ location_id: locationId })
+          .eq("id", String(data.id));
+      }
     }
 
     if (existing) {

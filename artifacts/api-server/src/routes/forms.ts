@@ -142,8 +142,14 @@ router.get("/forms/status", async (req, res) => {
     if (!bkRow.data) return res.status(404).json({ error: "Booking not found" });
 
     const emailMedRow = bkRow.data.client_email
-      ? await supabaseAdmin.from("medical_forms").select("id,submitted_at").eq("client_email", bkRow.data.client_email).order("submitted_at", { ascending: false }).limit(1).maybeSingle()
+      ? await supabaseAdmin.from("medical_forms").select("id,submitted_at,created_at").eq("client_email", String(bkRow.data.client_email)).order("submitted_at", { ascending: false }).limit(1).maybeSingle()
       : { data: null };
+
+    // 90-day rule: only skip medical form if last submission was within 90 days
+    const rawMedDate = emailMedRow.data?.submitted_at ?? emailMedRow.data?.created_at ?? null;
+    const medLastDate = rawMedDate ? new Date(String(rawMedDate)) : null;
+    const ninetyDaysAgo = new Date(Date.now() - 90 * 24 * 60 * 60 * 1000);
+    const medWithin90Days = medLastDate ? medLastDate > ninetyDaysAgo : false;
 
     // Normalise booking shape: resolve treatment name and add convenience aliases
     const bkData = bkRow.data as Record<string, unknown>;
@@ -161,7 +167,8 @@ router.get("/forms/status", async (req, res) => {
       booking: normBooking,
       hasMedical: !!medRow.data,
       hasConsent: !!conRow.data,
-      medicalOnFileForEmail: !!emailMedRow.data,
+      medicalOnFileForEmail: !!emailMedRow.data && medWithin90Days,
+      medicalLastSubmitted: medLastDate ? medLastDate.toISOString() : null,
       medicalFormId: medRow.data?.id ?? null,
       consentFormId: conRow.data?.id ?? null,
     });

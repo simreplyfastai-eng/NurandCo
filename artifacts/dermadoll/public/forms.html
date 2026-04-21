@@ -372,10 +372,11 @@ function renderMedical() {
     </div>`;
   }
 
+  const lastSubmitNote = (isReturningClient && window._medLastSubmitted) ? ` Last submitted ${window._medLastSubmitted}.` : '';
   main.innerHTML = `
     ${isReturningClient ? `<div class="returning-notice">
       <strong>Welcome back!</strong>
-      We already have your health information on file. Please complete the consent form for your upcoming appointment.
+      We already have your health information on file from a previous appointment within the last 90 days.${lastSubmitNote} Please complete the consent form for your upcoming appointment.
       <br><button class="btn-primary" style="margin-top:12px" onclick="renderConsent()">Continue to Consent Form &rarr;</button>
     </div>
     <div class="form-card" style="opacity:.7">
@@ -616,8 +617,11 @@ async function init() {
       return;
     }
 
-    // If client already has a medical form from a previous booking → skip medical
+    // If client already has a medical form from a previous booking (within 90 days) → skip medical
     isReturningClient = data.medicalOnFileForEmail && !data.hasMedical;
+    if (data.medicalLastSubmitted) {
+      window._medLastSubmitted = new Date(data.medicalLastSubmitted).toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+    }
 
     if (data.hasMedical || isReturningClient) {
       // Show consent form directly (or offer choice)

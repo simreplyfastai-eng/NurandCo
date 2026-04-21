@@ -180,3 +180,27 @@ The `/api/media/config` endpoint exposes these fields plus legacy `practitionerI
 - **Auto-complete**: Cron at `/api/cron/autocomplete` and on every `GET /api/bookings`; marks Confirmed bookings past their end time as Complete
 - **Session expiry**: 8h inactivity. Portal checks expiry every 60s, refreshes token on verify
 - **Timezone**: All date logic uses `Europe/London` (BST-aware). Dates stored as text `YYYY-MM-DD`, times as `HH:MM` local UK time
+
+## GODMODE 10-Bug Fix Pass (April 2026)
+
+All 10 bugs from the MASTER GODMODE spec fixed:
+
+1. **Bug 1 — Book.tsx hardcoded treatments**: TreatmentPicker now fetches live from `/api/treatments?locationId=xxx`. Groups by category, renders duration + price from DB. `treatments.ts` SERVICES array no longer used by booking flow (still used by Services.tsx homepage section).
+
+2. **Bug 2 — Edit treatment broken for Supabase UUIDs**: `openEditTreat` checks `fbn_supabase_treats` cache first by UUID. `saveEditTreatment` calls `PUT /api/treatments/:id` for Supabase treats. `saveNewTreatment` calls `POST /api/treatments` when Supabase treats are active.
+
+3. **Bug 3 — Login/clearSession race**: Added `_loginJustSucceeded` flag. `doLogin` sets it true before calling `showLocationSelector`. `clearSession` returns early if flag is set.
+
+4. **Bug 4 — switchLocation stale module vars**: `switchLocation` now also resets `_SESSION_LOC_ID=''` and `_SESSION_LOC_NAME=''`.
+
+5. **Bug 5 — Portal viewport meta**: Updated to `maximum-scale=1.0,user-scalable=no`.
+
+6. **Bug 6 — New booking treatment blank on edit**: `openBookingModal` edit mode inserts a dynamic `(legacy)` option if the booking's treatment name is not found in the current select options.
+
+7. **Bug 7 — findOrCreateClient location filter**: Added Step 3 cross-location email lookup as fallback. If client found under different/null location_id, updates their location_id to the current one.
+
+8. **Bug 8 — Form icons always same color**: `GET /api/bookings` batch-queries `medical_forms` + `consent_forms` by booking IDs and adds `hasMedical`/`hasConsent` flags. Bookings list now shows dual 📋/✍️ icons using `.has-form` class. Day panel timeline items also show form status icons.
+
+9. **Bug 9 — Medical form 90-day skip rule**: `GET /api/forms/status` now applies 90-day check to `medicalOnFileForEmail` (only true if last submission was within 90 days). Returns `medicalLastSubmitted` ISO date. `forms.html` shows last submission date in the returning client notice.
+
+10. **Bug 10 — Schedule booking opens edit modal**: Day panel now calls `openBookingDetailPanel(id)` instead of `openBookingModal(id)`. New function renders a rich read-only detail panel with all fields: client info, email/phone links, treatment, date/time/duration, location, payment status, form status icons (click to open forms drawer), notes. Has "← Back" and "Edit" buttons.

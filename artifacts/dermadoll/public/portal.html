@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no"/>
 <title>Starr Aesthetics — Admin Portal</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -1482,6 +1482,7 @@ function gbp(v){const n=Number(v)||0;return'£'+n.toLocaleString('en-GB',{minimu
 // ── Module-level location lock (set once on login, never changed between tabs) ──
 let _SESSION_LOC_ID='';
 let _SESSION_LOC_NAME='';
+let _loginJustSucceeded=false;
 
 function authHdr(){
   const t=localStorage.getItem('fbn_token');
@@ -1766,6 +1767,7 @@ function saveSession(token,expiresAt){
 
 function clearSession(message){
   SESSION_KEYS.forEach(k=>localStorage.removeItem(k));
+  if(_loginJustSucceeded){return;} // guard: don't re-show login if user just signed in
   document.getElementById('portal').classList.remove('visible');
   document.getElementById('login-page').style.display='flex';
   if(message){
@@ -1817,6 +1819,7 @@ async function doLogin(){
     });
     if(r.ok){
       const {token,expiresAt}=await r.json();
+      _loginJustSucceeded=true;
       saveSession(token,expiresAt||Date.now()+8*3600*1000);
       showLocationSelector();
     } else {
@@ -1858,6 +1861,8 @@ async function selectLocation(loc){
 function switchLocation(){
   sessionStorage.removeItem('starr_location');
   sessionStorage.removeItem('starr_location_id');
+  _SESSION_LOC_ID='';
+  _SESSION_LOC_NAME='';
   _supabaseClients=null;
   document.getElementById('portal').classList.remove('visible');
   showLocationSelector();
@@ -2177,7 +2182,8 @@ function renderBookings(){
       <td class="bk-col-dep">${dep}</td>
       <td class="bk-col-status"><span class="bk-status-pill" style="${style}">${b.status}</span></td>
       <td class="bk-col-forms" onclick="event.stopPropagation()">
-        <button class="form-icon-btn" title="View Forms" onclick="openFormsDrawer('${b.id}','${(b.clientName||'').replace(/'/g,'&apos;')}')">📋</button>
+        <button class="form-icon-btn ${b.hasMedical?'has-form':''}" title="${b.hasMedical?'Medical form on file':'No medical form'}" onclick="openFormsDrawer('${b.id}','${(b.clientName||'').replace(/'/g,'&apos;')}')">📋</button>
+        <button class="form-icon-btn ${b.hasConsent?'has-form':''}" title="${b.hasConsent?'Consent signed':'Consent not signed'}" onclick="openFormsDrawer('${b.id}','${(b.clientName||'').replace(/'/g,'&apos;')}')">✍️</button>
       </td>
     </tr>`;
   }).join('');
@@ -2269,23 +2275,80 @@ function changeMonth(dir){
   buildCalendar();
 }
 
+let _lastSelectedDay='';
 function selectDay(dateStr){
+  _lastSelectedDay=dateStr;
   document.querySelectorAll('.cal-cell').forEach(c=>c.classList.remove('selected'));
   if(event&&event.currentTarget)event.currentTarget.classList.add('selected');
+  renderDayTimeline(dateStr);
+}
+function renderDayTimeline(dateStr){
   const bookings=getBookings().filter(b=>b.date===dateStr&&b.status!=='Cancelled').sort((a,b)=>a.time.localeCompare(b.time));
   document.getElementById('day-panel-title').textContent=formatDate(dateStr);
   document.getElementById('day-panel-body').innerHTML=bookings.length?bookings.map(b=>`
-    <div class="timeline-item" onclick="openBookingModal('${b.id}')" style="cursor:pointer" title="Click to edit">
+    <div class="timeline-item" onclick="openBookingDetailPanel('${b.id}')" style="cursor:pointer" title="Click to view details">
       <div class="timeline-time">${b.time}</div>
       <div class="timeline-body">
         <div class="timeline-name">${b.clientName}</div>
         <div class="timeline-treat">${b.treatment} · ${gbp(b.price)}</div>
-        ${b.clientPhone?`<div style="color:var(--color-secondary);font-size:11px;margin-top:6px">📞 ${b.clientPhone}</div>`:''}
-        ${b.notes?`<div style="color:var(--color-secondary);font-size:11px;margin-top:6px">${b.notes}</div>`:''}
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <span title="${b.hasMedical?'Medical form on file':'No medical form'}" style="font-size:13px;opacity:${b.hasMedical?1:0.3}">📋</span>
+          <span title="${b.hasConsent?'Consent signed':'No consent form'}" style="font-size:13px;opacity:${b.hasConsent?1:0.3}">✍️</span>
+        </div>
       </div>
       <div class="timeline-status">${statusPill(b.status)}</div>
     </div>
   `).join(''):`<p class="cal-empty-state">No bookings for this date</p>`;
+}
+function openBookingDetailPanel(bookingId){
+  const b=getBookings().find(x=>x.id===bookingId);
+  if(!b)return;
+  const locName=_SESSION_LOC_NAME||sessionStorage.getItem('starr_location')||'Clinic';
+  const medColor=b.hasMedical?'#2D6A4F':'#aaa';
+  const conColor=b.hasConsent?'#2D6A4F':'#aaa';
+  document.getElementById('day-panel-body').innerHTML=`
+    <div style="margin-bottom:14px">
+      <button onclick="renderDayTimeline(_lastSelectedDay)" style="border:none;background:none;cursor:pointer;font-size:11px;color:var(--color-primary);letter-spacing:1.5px;text-transform:uppercase;padding:0;font-family:var(--font-sans)">← Back</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      ${statusPill(b.status)}
+      <button onclick="openBookingModal('${b.id}')" style="font-size:11px;padding:5px 14px;border:1px solid var(--color-primary);background:transparent;color:var(--color-primary);cursor:pointer;border-radius:var(--radius);font-family:var(--font-sans);letter-spacing:0.5px">Edit</button>
+    </div>
+    <div style="font-size:13px;font-family:var(--font-sans);line-height:1.8">
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Client</div>
+        <div style="font-weight:500">${escPortal(b.clientName)}</div>
+      </div>
+      ${b.clientEmail?`<div style="margin-bottom:10px"><div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Email</div><div><a href="mailto:${escPortal(b.clientEmail)}" style="color:var(--color-primary)">${escPortal(b.clientEmail)}</a></div></div>`:''}
+      ${b.clientPhone?`<div style="margin-bottom:10px"><div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Phone</div><div><a href="tel:${escPortal(b.clientPhone)}" style="color:var(--color-primary)">${escPortal(b.clientPhone)}</a></div></div>`:''}
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Treatment</div>
+        <div style="color:var(--color-secondary)">${escPortal(b.treatment||'—')}</div>
+      </div>
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Date &amp; Time</div>
+        <div>${escPortal(formatDate(b.date))} at ${escPortal(b.time)}</div>
+      </div>
+      ${b.durationMinutes?`<div style="margin-bottom:10px"><div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Duration</div><div>${b.durationMinutes} mins</div></div>`:''}
+      <div style="margin-bottom:10px">
+        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Location</div>
+        <div>${escPortal(locName)}</div>
+      </div>
+      <div style="border-top:1px solid var(--color-border-subtle);padding-top:12px;margin-top:4px;margin-bottom:10px">
+        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Payment</div>
+        <div>Deposit: ${gbp(b.deposit)} <span style="color:${b.depositPaid?'#2D6A4F':'#aaa'}">${b.depositPaid?'✓ Paid':'Unpaid'}</span></div>
+        <div>Total: ${gbp(b.price)}${b.balancePaid?' <span style="color:#2D6A4F">✓ Balance Paid</span>':''}</div>
+      </div>
+      <div style="border-top:1px solid var(--color-border-subtle);padding-top:12px;margin-bottom:10px">
+        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Forms</div>
+        <div style="display:flex;gap:16px">
+          <span onclick="openFormsDrawer('${b.id}')" style="cursor:pointer;font-size:13px;color:${medColor}" title="${b.hasMedical?'Medical form on file — click to view':'No medical form submitted'}">📋 ${b.hasMedical?'Medical ✓':'Medical'}</span>
+          <span onclick="openFormsDrawer('${b.id}')" style="cursor:pointer;font-size:13px;color:${conColor}" title="${b.hasConsent?'Consent signed — click to view':'Consent not signed'}">✍️ ${b.hasConsent?'Consent ✓':'Consent'}</span>
+        </div>
+      </div>
+      ${b.notes?`<div style="border-top:1px solid var(--color-border-subtle);padding-top:12px"><div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Notes</div><div style="font-size:12px;line-height:1.6;color:#555">${escPortal(b.notes)}</div></div>`:''}
+    </div>
+  `;
 }
 
 // ═══════════════════════════════════════════════════
@@ -2834,10 +2897,17 @@ function openBookingModal(prefill){
       bal.innerHTML=`<span style="color:var(--color-muted-fg);font-size:13px">Outstanding: ${gbp(remaining)}</span>
         <button style="padding:5px 14px;border:none;background:var(--color-secondary);color:#fff;border-radius:var(--radius);font-family:var(--font-sans);font-size:12px;font-weight:600;cursor:pointer" onclick="markBalancePaidFromModal()">Mark Paid</button>`;
     }
-    // Set treatment
+    // Set treatment — if not in select options, insert a recoverable option
     const sel=document.getElementById('bm-treatment');
-    const opt=[...sel.options].find(o=>o.value===booking.treatment);
-    if(opt)sel.value=booking.treatment; else sel.selectedIndex=0;
+    const treatVal=booking.treatment||'';
+    const opt=treatVal?[...sel.options].find(o=>o.value===treatVal):null;
+    if(opt){sel.value=treatVal;}
+    else if(treatVal){
+      const dynOpt=document.createElement('option');
+      dynOpt.value=treatVal;dynOpt.textContent=treatVal+' (legacy)';
+      sel.insertBefore(dynOpt,sel.options[1]||null);
+      sel.value=treatVal;
+    } else {sel.selectedIndex=0;}
     // Show cancel booking button in edit mode
     document.getElementById('bm-cancel-booking-btn').style.display='';
     // Set time
@@ -3344,15 +3414,33 @@ function openAddTreat(catKey,catLabel){
   setTimeout(()=>document.getElementById('atm-name').focus(),50);
 }
 function closeAddTreatModal(){document.getElementById('add-treat-modal').classList.remove('open')}
-function saveNewTreatment(){
+async function saveNewTreatment(){
   const name=document.getElementById('atm-name').value.trim();
   const price=Number(document.getElementById('atm-price').value)||0;
   const dur=Number(document.getElementById('atm-dur').value)||30;
   const cat=document.getElementById('atm-cat').value;
   if(!name){alert('Please enter a treatment name');return}
-  const treats=getCustomTreatments();
-  treats.push({id:'ct-'+Date.now(),cat,name,price,duration:dur});
-  saveCustomTreatments(treats);
+
+  // If Supabase treats are active, persist to API
+  const sbTreats=JSON.parse(localStorage.getItem('fbn_supabase_treats')||'[]');
+  if(sbTreats.length){
+    try{
+      const locId=getSessionLocId();
+      const r=await fetch('/api/treatments',{method:'POST',headers:{...authHdr(),'Content-Type':'application/json'},body:JSON.stringify({name,price,deposit_amount:0,duration_minutes:dur,category:cat,active:true,location_id:locId})});
+      if(r.ok){
+        const newTreat=await r.json();
+        sbTreats.push(newTreat);
+        localStorage.setItem('fbn_supabase_treats',JSON.stringify(sbTreats));
+        showTreatSaveStatus('✓ Saved');
+      } else {
+        showTreatSaveStatus('✕ Save failed');
+      }
+    }catch(e){showTreatSaveStatus('✕ Save failed');console.error(e);}
+  } else {
+    const treats=getCustomTreatments();
+    treats.push({id:'ct-'+Date.now(),cat,name,price,duration:dur});
+    saveCustomTreatments(treats);
+  }
   closeAddTreatModal();
   renderTreatments();
   buildTreatmentSelect();
@@ -3360,35 +3448,61 @@ function saveNewTreatment(){
 
 // ── Edit Treatment ──
 function openEditTreat(safeId,isCustom){
-  const overrides=getTreatOverrides();
   isCustom=isCustom==='true';
-  let t,currentPrice,currentDur,currentName;
-  if(isCustom){
-    t=getCustomTreatments().find(x=>x.id===safeId);
+  let currentName,currentPrice,currentDur,treatType;
+
+  // 1. Check Supabase treats first (safeId may be a UUID)
+  const sbTreats=JSON.parse(localStorage.getItem('fbn_supabase_treats')||'[]');
+  const sbTreat=sbTreats.find(x=>x.id===safeId);
+  if(sbTreat){
+    currentName=sbTreat.name;
+    currentPrice=sbTreat.price;
+    currentDur=sbTreat.duration_minutes||sbTreat.duration||30;
+    treatType='supabase';
+  } else if(isCustom){
+    const t=getCustomTreatments().find(x=>x.id===safeId);
     if(!t)return;
     currentName=t.name;currentPrice=t.price;currentDur=t.duration;
+    treatType='custom';
   } else {
     const name=decodeURIComponent(safeId);
-    t=TREATMENTS.find(x=>x.name===name);
+    const t=TREATMENTS.find(x=>x.name===name);
     if(!t)return;
-    const ov=overrides[t.name]||{};
-    currentName=t.name;currentPrice=ov.price||t.price;currentDur=ov.duration||t.duration;
+    const ov=getTreatOverrides();
+    const ovt=ov[t.name]||{};
+    currentName=t.name;currentPrice=ovt.price||t.price;currentDur=ovt.duration||t.duration;
+    treatType='built-in';
   }
-  document.getElementById('etm-id').value=safeId+'|'+isCustom;
+
+  document.getElementById('etm-id').value=safeId+'|'+treatType;
   document.getElementById('etm-name').value=currentName;
   document.getElementById('etm-price').value=currentPrice;
   document.getElementById('etm-dur').value=currentDur;
   document.getElementById('edit-treat-modal').classList.add('open');
 }
 function closeEditTreatModal(){document.getElementById('edit-treat-modal').classList.remove('open')}
-function saveEditTreatment(){
-  const [safeId,isCustomStr]=document.getElementById('etm-id').value.split('|');
-  const isCustom=isCustomStr==='true';
+async function saveEditTreatment(){
+  const raw=document.getElementById('etm-id').value;
+  const lastPipe=raw.lastIndexOf('|');
+  const safeId=raw.slice(0,lastPipe);
+  const treatType=raw.slice(lastPipe+1);
   const newName=document.getElementById('etm-name').value.trim();
   const newPrice=Number(document.getElementById('etm-price').value)||0;
   const newDur=Number(document.getElementById('etm-dur').value)||30;
   if(!newName){alert('Name cannot be empty');return}
-  if(isCustom){
+
+  if(treatType==='supabase'){
+    // PUT to API
+    try{
+      const r=await fetch('/api/treatments/'+safeId,{method:'PUT',headers:{...authHdr(),'Content-Type':'application/json'},body:JSON.stringify({name:newName,price:newPrice,duration_minutes:newDur})});
+      if(!r.ok)throw new Error('API error '+r.status);
+      // Update local cache
+      const sb=JSON.parse(localStorage.getItem('fbn_supabase_treats')||'[]');
+      const idx=sb.findIndex(x=>x.id===safeId);
+      if(idx>-1){sb[idx].name=newName;sb[idx].price=newPrice;sb[idx].duration_minutes=newDur;localStorage.setItem('fbn_supabase_treats',JSON.stringify(sb));}
+      showTreatSaveStatus('✓ Saved');
+    }catch(e){showTreatSaveStatus('✕ Save failed');console.error(e);}
+  } else if(treatType==='custom'){
     const treats=getCustomTreatments();
     const i=treats.findIndex(x=>x.id===safeId);
     if(i>-1){treats[i].name=newName;treats[i].price=newPrice;treats[i].duration=newDur;saveCustomTreatments(treats);}

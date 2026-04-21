@@ -3,7 +3,6 @@ import { useLocation } from "wouter";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import BookingModal from "@/components/BookingModal";
-import { SERVICES, findTreatment, type Treatment } from "@/lib/treatments";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -11,6 +10,21 @@ const LOCATION_IDS: Record<string, string> = {
   hornchurch: "ccb325d5-6b17-4218-b97d-1a1a0383410a",
   marylebone: "5b3d890a-bf6f-4e87-af43-5db0726a46ce",
 };
+
+interface ApiTreatment {
+  id: string;
+  name: string;
+  duration_minutes: number;
+  price: number;
+  deposit_amount: number;
+  category: string;
+  active: boolean;
+}
+
+interface TreatmentGroup {
+  category: string;
+  items: ApiTreatment[];
+}
 
 function LocationSelector() {
   const [, navigate] = useLocation();
@@ -67,28 +81,48 @@ function LocationSelector() {
 
 function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: string; initialTreatmentId?: string }) {
   const [, navigate] = useLocation();
-  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set(["SIGNATURE TREATMENTS"]));
-  const [activeTreatment, setActiveTreatment] = useState<Treatment | null>(null);
+  const [groups, setGroups] = useState<TreatmentGroup[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+  const [activeTreatment, setActiveTreatment] = useState<ApiTreatment | null>(null);
 
-  const loc = locationSlug as "hornchurch" | "marylebone";
-  const groups = SERVICES[loc] ?? SERVICES["hornchurch"];
-  const locationLabel = loc === "hornchurch" ? "Hornchurch" : "Marylebone";
+  const locationId = LOCATION_IDS[locationSlug];
+  const locationLabel = locationSlug === "hornchurch" ? "Hornchurch" : "Marylebone";
 
   useEffect(() => {
-    if (initialTreatmentId) {
-      const t = findTreatment(locationSlug, initialTreatmentId);
-      if (t) setActiveTreatment(t);
-    }
-  }, [initialTreatmentId, locationSlug]);
+    if (!locationId) { setLoading(false); return; }
+    fetch(`/api/treatments?locationId=${locationId}`)
+      .then((r) => r.json())
+      .then((data: ApiTreatment[]) => {
+        const groupMap = new Map<string, ApiTreatment[]>();
+        for (const t of data) {
+          const cat = t.category || "Other";
+          if (!groupMap.has(cat)) groupMap.set(cat, []);
+          groupMap.get(cat)!.push(t);
+        }
+        const gs: TreatmentGroup[] = Array.from(groupMap.entries()).map(([category, items]) => ({ category, items }));
+        setGroups(gs);
+        if (gs.length > 0) setOpenGroups(new Set([gs[0].category]));
+        if (initialTreatmentId) {
+          const found = data.find((t) => t.id === initialTreatmentId || t.name === initialTreatmentId);
+          if (found) setActiveTreatment(found);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [locationId, initialTreatmentId]);
 
-  const toggleGroup = (g: string) => {
+  const toggleGroup = (cat: string) => {
     setOpenGroups((prev) => {
       const next = new Set(prev);
-      if (next.has(g)) next.delete(g);
-      else next.add(g);
+      if (next.has(cat)) next.delete(cat);
+      else next.add(cat);
       return next;
     });
   };
+
+  const fmtPrice = (p: number) => `£${p}`;
+  const fmtDuration = (m: number) => m >= 60 ? `${Math.floor(m / 60)}hr${m % 60 ? ` ${m % 60}m` : ""}` : `${m} mins`;
 
   return (
     <div style={{ minHeight: "100vh", background: "#F5F0EB" }}>
@@ -116,10 +150,23 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
             Choose a Treatment
           </h1>
 
+          {loading && (
+            <div style={{ textAlign: "center", padding: "60px 0" }}>
+              <div style={{ width: 28, height: 28, border: "2px solid #F0EAE2", borderTopColor: "#5C1A1A", borderRadius: "50%", animation: "spin .8s linear infinite", margin: "0 auto 12px" }} />
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373" }}>Loading treatments…</p>
+            </div>
+          )}
+
+          {!loading && groups.length === 0 && (
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", textAlign: "center", padding: "40px 0" }}>
+              No treatments available for this location yet.
+            </p>
+          )}
+
           {groups.map((group) => (
-            <div key={group.group} style={{ marginBottom: 4 }}>
+            <div key={group.category} style={{ marginBottom: 4 }}>
               <button
-                onClick={() => toggleGroup(group.group)}
+                onClick={() => toggleGroup(group.category)}
                 style={{
                   width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
                   padding: "18px 20px", background: "#fff", border: "none", cursor: "pointer",
@@ -127,12 +174,12 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
                   color: "#3D3D3D",
                 }}
               >
-                {group.group}
-                {openGroups.has(group.group) ? <ChevronUp size={14} color="#C9A96E" /> : <ChevronDown size={14} color="#C9A96E" />}
+                {group.category.toUpperCase()}
+                {openGroups.has(group.category) ? <ChevronUp size={14} color="#C9A96E" /> : <ChevronDown size={14} color="#C9A96E" />}
               </button>
 
               <AnimatePresence initial={false}>
-                {openGroups.has(group.group) && (
+                {openGroups.has(group.category) && (
                   <motion.div
                     initial={{ height: 0, opacity: 0 }}
                     animate={{ height: "auto", opacity: 1 }}
@@ -140,40 +187,33 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
                     transition={{ duration: 0.3 }}
                     style={{ overflow: "hidden" }}
                   >
-                    {group.items.map((sub) => (
-                      <div key={sub.subname} style={{ marginBottom: 8 }}>
-                        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1rem", color: "#5C1A1A", padding: "12px 20px 8px", background: "#F9F5F0" }}>
-                          {sub.subname}
+                    {group.items.map((t) => (
+                      <div
+                        key={t.id}
+                        style={{
+                          display: "flex", alignItems: "center", justifyContent: "space-between",
+                          padding: "14px 20px", background: "#F5F0EB", marginBottom: 2, gap: 8,
+                        }}
+                      >
+                        <div>
+                          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#3D3D3D" }}>{t.name}</span>
+                          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "#737373", marginLeft: 8 }}>{fmtDuration(t.duration_minutes)}</span>
                         </div>
-                        {sub.treatments.map((t) => (
-                          <div
-                            key={t.id}
+                        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C9A96E" }}>{fmtPrice(t.price)}</span>
+                          <button
+                            onClick={() => setActiveTreatment(t)}
                             style={{
-                              display: "flex", alignItems: "center", justifyContent: "space-between",
-                              padding: "14px 20px", background: "#F5F0EB", marginBottom: 2, gap: 8,
+                              fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "1.5px", textTransform: "uppercase",
+                              border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                              padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
                             }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
                           >
-                            <div>
-                              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#3D3D3D" }}>{t.display}</span>
-                              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "#737373", marginLeft: 8 }}>{t.duration}</span>
-                            </div>
-                            <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-                              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C9A96E" }}>{t.price}</span>
-                              <button
-                                onClick={() => setActiveTreatment(t)}
-                                style={{
-                                  fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "1.5px", textTransform: "uppercase",
-                                  border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
-                                  padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
-                                }}
-                                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
-                              >
-                                BOOK
-                              </button>
-                            </div>
-                          </div>
-                        ))}
+                            BOOK
+                          </button>
+                        </div>
                       </div>
                     ))}
                   </motion.div>
@@ -186,7 +226,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
 
       {activeTreatment && (
         <BookingModal
-          treatment={{ name: activeTreatment.name, price: activeTreatment.price }}
+          treatment={{ name: activeTreatment.name, price: `£${activeTreatment.price}` }}
           onClose={() => setActiveTreatment(null)}
           locationId={LOCATION_IDS[locationSlug]}
           locationSlug={locationSlug}

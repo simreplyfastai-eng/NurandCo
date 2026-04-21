@@ -269,7 +269,25 @@ router.get("/bookings", async (req, res) => {
 
     const { data, error } = await query;
     if (error) throw error;
-    return res.json((data ?? []).map(supabaseRowToBooking));
+    const rows = data ?? [];
+    if (!rows.length) return res.json([]);
+
+    // Batch-fetch form status for all bookings in this response
+    const ids = rows.map((r) => String(r.id));
+    const [medRes, conRes] = await Promise.all([
+      supabaseAdmin.from("medical_forms").select("booking_id").in("booking_id", ids),
+      supabaseAdmin.from("consent_forms").select("booking_id").in("booking_id", ids),
+    ]);
+    const medSet = new Set((medRes.data ?? []).map((r) => String(r.booking_id)));
+    const conSet = new Set((conRes.data ?? []).map((r) => String(r.booking_id)));
+
+    return res.json(
+      rows.map((r) => ({
+        ...supabaseRowToBooking(r as Record<string, unknown>),
+        hasMedical: medSet.has(String(r.id)),
+        hasConsent: conSet.has(String(r.id)),
+      })),
+    );
   } catch (err) {
     console.error("GET /api/bookings", err);
     return res.status(500).json({ error: "db error" });
