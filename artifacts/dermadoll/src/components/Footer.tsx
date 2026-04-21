@@ -140,29 +140,41 @@ export default function Footer() {
         <div style={{ height: 1, background: "#E2DDD5", marginBottom: 28 }} />
 
         <div style={{ fontFamily: "'Inter', sans-serif", marginBottom: 32 }}>
-          <SectionLabel>Instagram</SectionLabel>
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
-            {igAccounts.map((a) => (
-              <SocialPill key={a.handle} handle={a.handle} label={a.label} url={a.url} icon="ig" />
-            ))}
+          {/* Two-column social grid */}
+          <div style={{ display: "flex", justifyContent: "center", gap: 48, flexWrap: "wrap", textAlign: "left" }}>
+            {/* Instagram column */}
+            <div>
+              <SectionLabel>Instagram</SectionLabel>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {igAccounts.map((a) => (
+                  <SocialPill key={a.handle} handle={a.handle} label={a.label} url={a.url} icon="ig" />
+                ))}
+              </div>
+            </div>
+
+            {/* TikTok column */}
+            <div>
+              <SectionLabel>TikTok</SectionLabel>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                {ttAccounts.map((a) => (
+                  <SocialPill key={a.handle} handle={a.handle} label={a.label} url={a.url} icon="tt" />
+                ))}
+              </div>
+            </div>
           </div>
 
-          <SectionLabel>TikTok</SectionLabel>
-          <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center" }}>
-            {ttAccounts.map((a) => (
-              <SocialPill key={a.handle} handle={a.handle} label={a.label} url={a.url} icon="tt" />
-            ))}
+          {/* Email centred below */}
+          <div style={{ marginTop: 28, textAlign: "center" }}>
+            <SectionLabel>Email</SectionLabel>
+            <a
+              href="mailto:starrbeautyyltd@gmail.com"
+              style={{ color: "#5C1A1A", fontSize: 13, textDecoration: "none", transition: "color 150ms ease" }}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#C9A96E")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#5C1A1A")}
+            >
+              starrbeautyyltd@gmail.com
+            </a>
           </div>
-
-          <SectionLabel>Email</SectionLabel>
-          <a
-            href="mailto:starrbeautyyltd@gmail.com"
-            style={{ color: "#5C1A1A", fontSize: 13, textDecoration: "none", transition: "color 150ms ease" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#C9A96E")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "#5C1A1A")}
-          >
-            starrbeautyyltd@gmail.com
-          </a>
         </div>
 
         <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#B0A898", margin: 0 }}>
