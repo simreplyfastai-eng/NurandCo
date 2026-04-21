@@ -1502,7 +1502,7 @@ const CloudStore = {
   BASE: '/api/portal/store',
   // fbn_bookings and fbn_clients are managed by the REST API, not the KV store
   KEYS: ['fbn_settings','fbn_custom_treats',
-         'fbn_custom_cats','fbn_cat_states','fbn_treatment_overrides','fbn_video_labels','fbn_availability','fbn_initialized','fbn_media'],
+         'fbn_custom_cats','fbn_cat_states','fbn_treatment_overrides','fbn_video_labels','fbn_initialized','fbn_media'],
 
   async init() {
     try {
@@ -1899,7 +1899,7 @@ function showPortal(loc){
     const _locId=sessionStorage.getItem('starr_location_id');
     if(_locId){
       try{
-        const _ar=await fetch('/api/availability',{headers:authHdr()});
+        const _ar=await fetch('/api/availability',{headers:authHdr(),cache:'no-store'});
         if(_ar.ok){const _av=await _ar.json();localStorage.setItem('fbn_availability',JSON.stringify(_av));}
       }catch(_e){console.warn('Could not load availability from Supabase',_e);}
       // Load Supabase treatments (all, including inactive) for admin portal
@@ -2439,8 +2439,6 @@ async function saveAvailability(){
       const errBody=await res.json().catch(()=>({}));
       throw new Error(errBody.error||'HTTP '+res.status);
     }
-    // Also keep CloudStore in sync
-    CloudStore.set('fbn_availability',avail);
     if(btn){btn.disabled=false;btn.textContent='Saved ✓';btn.style.background='#4CAF50';}
     setTimeout(()=>{if(btn){btn.textContent=origText;btn.style.background='';}},2000);
     showToast('Availability saved');
@@ -2479,7 +2477,7 @@ async function renderAvailability(){
   const locId=sessionStorage.getItem('starr_location_id');
   if(locId){
     try{
-      const r=await fetch('/api/admin/availability',{headers:authHdr()});
+      const r=await fetch('/api/admin/availability',{headers:authHdr(),cache:'no-store'});
       if(r.ok){
         const rows=await r.json(); // [{day_of_week, is_open, start_time, end_time}]
         if(Array.isArray(rows)&&rows.length){
@@ -2559,7 +2557,7 @@ async function loadBlockedDates(){
   const locId=sessionStorage.getItem('starr_location_id');
   if(!locId)return;
   try{
-    const res=await fetch('/api/admin/blocked-dates',{headers:authHdr()});
+    const res=await fetch('/api/admin/blocked-dates',{headers:authHdr(),cache:'no-store'});
     if(!res.ok)throw new Error('HTTP '+res.status);
     const dates=await res.json();
     _blockedDates=new Set(dates||[]);

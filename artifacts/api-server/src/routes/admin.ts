@@ -18,6 +18,8 @@ router.get("/admin/availability", async (req, res) => {
   const locationId = getLocationId(req);
   if (!locationId) return res.status(400).json({ error: "locationId required" });
 
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+
   try {
     const { data, error } = await supabaseAdmin
       .from("availability_settings")
@@ -135,6 +137,8 @@ router.get("/admin/blocked-dates", async (req, res) => {
   if (!requireAuth(req, res)) return;
   const locationId = getLocationId(req);
   if (!locationId) return res.status(400).json({ error: "locationId required" });
+
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate");
 
   const from = req.query.from as string | undefined;
   const to = req.query.to as string | undefined;

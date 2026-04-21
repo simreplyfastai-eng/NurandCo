@@ -57,25 +57,18 @@ async function resolveLocationId(param: string): Promise<string | null> {
   return loc ? (loc.id as string) : null;
 }
 
-/** Get availability for a day_of_week from the DB row or hardcoded defaults */
+/** Get availability for a day_of_week from the DB row only — no hardcoded fallbacks */
 function resolveAvail(
   dbRow: { is_open: boolean; start_time: string | null; end_time: string | null } | null,
-  dayOfWeek: number,
 ): { isOpen: boolean; startTime: string; endTime: string } {
-  if (dbRow) {
+  if (dbRow && dbRow.is_open) {
     return {
-      isOpen: !!dbRow.is_open,
+      isOpen: true,
       startTime: (dbRow.start_time as string | null)?.substring(0, 5) ?? "09:00",
       endTime: (dbRow.end_time as string | null)?.substring(0, 5) ?? "17:00",
     };
   }
-  const dayName = DAY_NAMES[dayOfWeek];
-  const def = dayName ? AVAIL_DEFAULT.defaults[dayName as keyof typeof AVAIL_DEFAULT.defaults] : undefined;
-  return {
-    isOpen: def?.on ?? false,
-    startTime: (def && "start" in def ? def.start : null) ?? "09:00",
-    endTime: (def && "end" in def ? def.end : null) ?? "17:00",
-  };
+  return { isOpen: false, startTime: "", endTime: "" };
 }
 
 /** Generate time slots using string arithmetic — no Date objects, no timezone issues */
@@ -138,7 +131,6 @@ router.get("/availability/check", async (req, res) => {
 
     const { isOpen, startTime, endTime } = resolveAvail(
       availRow as { is_open: boolean; start_time: string | null; end_time: string | null } | null,
-      dayOfWeek,
     );
 
     if (!isOpen) return res.json({ available: false, reason: "CLINIC_CLOSED" });
@@ -174,6 +166,7 @@ router.get("/availability/check", async (req, res) => {
 // GET /api/availability — legacy {defaults, overrides} for booking widget
 // ─────────────────────────────────────────────────────────────────────────────
 router.get("/availability", async (req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate");
   const locationId = getLocationId(req);
   if (!locationId) return res.json(AVAIL_DEFAULT);
 
@@ -224,6 +217,7 @@ router.get("/availability", async (req, res) => {
 // Comprehensive: returns 7-day schedule + blocked dates (next 90 days) + blocked slots
 // ─────────────────────────────────────────────────────────────────────────────
 router.get("/availability/settings", async (req, res) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate");
   const locationParam = (req.query.location as string | undefined) ?? getLocationId(req);
   if (!locationParam) return res.status(400).json({ error: "location required" });
 
@@ -576,7 +570,6 @@ router.get("/availability/slots", async (req, res) => {
 
     const { isOpen, startTime, endTime } = resolveAvail(
       availRow as { is_open: boolean; start_time: string | null; end_time: string | null } | null,
-      dayOfWeek,
     );
 
     if (!isOpen) {
