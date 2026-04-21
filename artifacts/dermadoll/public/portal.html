@@ -255,6 +255,7 @@ tr:hover td{background:rgba(92,26,26,.02)}
 .avail-mini-cell.off{background:var(--color-muted);color:#BBBBBB}
 .avail-mini-cell.overridden{border-color:var(--color-secondary)}
 .avail-mini-cell.selected{border-color:var(--color-primary);box-shadow:0 0 0 1px var(--color-primary)}
+.avail-mini-cell.blocked-date{background:#f8d7da;color:#c0392b;border-color:#c0392b;font-weight:600}
 .avail-mini-cell.empty{cursor:default}
 .avail-override-editor{margin-top:12px;background:var(--color-muted);border:1px solid var(--color-border);border-radius:var(--radius);padding:14px;box-sizing:border-box}
 .avail-override-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
@@ -872,9 +873,10 @@ select.form-input{background:var(--color-card)}
               <div class="avail-section-label">Default Weekly Schedule</div>
               <div id="avail-days-list"></div>
             </div>
-            <!-- Right: date override mini calendar -->
+            <!-- Right: blocked dates mini calendar (Supabase-native) -->
             <div>
-              <div class="avail-section-label">Date Overrides</div>
+              <div class="avail-section-label">Blocked Dates</div>
+              <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Click a date to block or unblock it for the whole day.</div>
               <div class="avail-mini-hdr">
                 <button class="avail-mini-nav" onclick="changeAvailMonth(-1)">‹</button>
                 <span class="avail-mini-title" id="avail-mini-title"></span>
@@ -882,64 +884,81 @@ select.form-input{background:var(--color-card)}
               </div>
               <div class="avail-mini-grid" id="avail-mini-day-hdrs"></div>
               <div class="avail-mini-grid" id="avail-mini-grid" style="margin-top:2px"></div>
-              <div id="avail-override-editor" style="display:none"></div>
               <p style="font-size:11px;color:var(--muted);margin-top:10px;line-height:1.5">
                 <span style="display:inline-block;width:10px;height:10px;background:rgba(201,169,110,.2);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Working &nbsp;
-                <span style="display:inline-block;width:10px;height:10px;background:var(--color-muted);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Off &nbsp;
-                <span style="display:inline-block;width:10px;height:10px;background:rgba(201,169,110,.12);border:2px solid var(--gold);border-radius:2px;vertical-align:middle;margin-right:4px"></span>Overridden
+                <span style="display:inline-block;width:10px;height:10px;background:#e0d0d0;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Day off &nbsp;
+                <span style="display:inline-block;width:10px;height:10px;background:#f8d7da;border:2px solid #c0392b;border-radius:2px;vertical-align:middle;margin-right:4px"></span>Blocked
               </p>
             </div>
           </div>
         </div>
 
-        <!-- ── WORKING HOURS CARD ── -->
-        <div class="avail-card" style="margin-top:20px">
-          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
-            <div>
-              <div class="avail-card-title">Working Hours</div>
-              <div class="avail-card-sub">Set your opening and closing hours for each day at this location.</div>
-            </div>
-            <button class="btn-gold" onclick="saveWorkingHours()">Save Working Hours</button>
-          </div>
-          <div id="wh-loading" style="padding:16px 0;font-family:var(--font-sans);font-size:13px;font-style:italic;color:var(--color-muted-fg)">Loading…</div>
-          <div id="wh-days-list" style="display:none"></div>
-        </div>
-
         <!-- ── BLOCKED TIME SLOTS CARD ── -->
         <div class="avail-card" style="margin-top:20px">
-          <div style="margin-bottom:20px">
+          <div style="margin-bottom:16px">
             <div class="avail-card-title">Blocked Time Slots</div>
-            <div class="avail-card-sub">Block specific hours every week — perfect for lunch breaks or personal commitments. Clients cannot book during these times.</div>
+            <div class="avail-card-sub">Block specific time windows so clients cannot book during them.</div>
           </div>
-          <div class="bs-form-row" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
-            <div>
-              <div class="avail-section-label" style="margin-bottom:5px">Day</div>
-              <select id="bs-day" class="bs-select">
-                <option value="">Select day…</option>
-                <option value="all">Every Working Day</option>
-                <option value="1">Monday</option>
-                <option value="2">Tuesday</option>
-                <option value="3">Wednesday</option>
-                <option value="4">Thursday</option>
-                <option value="5">Friday</option>
-                <option value="6">Saturday</option>
-                <option value="0">Sunday</option>
-              </select>
-            </div>
-            <div>
-              <div class="avail-section-label" style="margin-bottom:5px">From</div>
-              <input type="time" id="bs-from" class="avail-time-input">
-            </div>
-            <div>
-              <div class="avail-section-label" style="margin-bottom:5px">To</div>
-              <input type="time" id="bs-to" class="avail-time-input">
-            </div>
-            <button class="btn-gold" style="white-space:nowrap" onclick="addBlockedSlot()">Add Block</button>
+          <!-- Tabs -->
+          <div style="display:flex;gap:0;border-bottom:1px solid var(--color-border-subtle);margin-bottom:16px">
+            <button id="bs-tab-recurring" onclick="switchBsTab('recurring')" style="padding:8px 16px;font-family:var(--font-sans);font-size:13px;border:none;background:none;cursor:pointer;border-bottom:2px solid var(--gold);color:var(--gold);font-weight:600">Recurring Weekly</button>
+            <button id="bs-tab-oneoff" onclick="switchBsTab('oneoff')" style="padding:8px 16px;font-family:var(--font-sans);font-size:13px;border:none;background:none;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted);font-weight:500">One-Off Date</button>
           </div>
-          <div id="bs-error" style="display:none;font-family:var(--font-sans);font-size:12px;color:var(--color-destructive);margin-bottom:10px"></div>
-          <div style="border-top:1px solid var(--color-border-subtle);padding-top:16px">
-            <div id="bs-empty" style="text-align:center;padding:20px 0;font-family:var(--font-sans);font-size:13px;font-style:italic;color:var(--color-muted-fg)">No time slots blocked yet.</div>
-            <div id="bs-tags" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+          <!-- Tab A: Recurring Weekly -->
+          <div id="bs-panel-recurring">
+            <div class="bs-form-row" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+              <div>
+                <div class="avail-section-label" style="margin-bottom:5px">Day</div>
+                <select id="bs-day" class="bs-select">
+                  <option value="">Select day…</option>
+                  <option value="all">Every Working Day</option>
+                  <option value="1">Monday</option>
+                  <option value="2">Tuesday</option>
+                  <option value="3">Wednesday</option>
+                  <option value="4">Thursday</option>
+                  <option value="5">Friday</option>
+                  <option value="6">Saturday</option>
+                  <option value="0">Sunday</option>
+                </select>
+              </div>
+              <div>
+                <div class="avail-section-label" style="margin-bottom:5px">From</div>
+                <input type="time" id="bs-from" class="avail-time-input">
+              </div>
+              <div>
+                <div class="avail-section-label" style="margin-bottom:5px">To</div>
+                <input type="time" id="bs-to" class="avail-time-input">
+              </div>
+              <button class="btn-gold" style="white-space:nowrap" onclick="addBlockedSlot()">Add Block</button>
+            </div>
+            <div id="bs-error" style="display:none;font-family:var(--font-sans);font-size:12px;color:var(--color-destructive);margin-bottom:10px"></div>
+            <div style="border-top:1px solid var(--color-border-subtle);padding-top:16px">
+              <div id="bs-empty" style="text-align:center;padding:20px 0;font-family:var(--font-sans);font-size:13px;font-style:italic;color:var(--color-muted-fg)">No recurring blocks yet.</div>
+              <div id="bs-tags" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+            </div>
+          </div>
+          <!-- Tab B: One-Off Date -->
+          <div id="bs-panel-oneoff" style="display:none">
+            <div class="bs-form-row" style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px">
+              <div>
+                <div class="avail-section-label" style="margin-bottom:5px">Date</div>
+                <input type="date" id="bso-date" class="avail-time-input" style="width:150px;padding:8px 10px">
+              </div>
+              <div>
+                <div class="avail-section-label" style="margin-bottom:5px">From (optional)</div>
+                <input type="time" id="bso-from" class="avail-time-input" placeholder="whole day">
+              </div>
+              <div>
+                <div class="avail-section-label" style="margin-bottom:5px">To (optional)</div>
+                <input type="time" id="bso-to" class="avail-time-input" placeholder="whole day">
+              </div>
+              <button class="btn-gold" style="white-space:nowrap" onclick="addOneOffBlock()">Add Block</button>
+            </div>
+            <div id="bso-error" style="display:none;font-family:var(--font-sans);font-size:12px;color:var(--color-destructive);margin-bottom:10px"></div>
+            <div style="border-top:1px solid var(--color-border-subtle);padding-top:16px">
+              <div id="bso-empty" style="text-align:center;padding:20px 0;font-family:var(--font-sans);font-size:13px;font-style:italic;color:var(--color-muted-fg)">No one-off blocks yet.</div>
+              <div id="bso-tags" style="display:flex;flex-wrap:wrap;gap:8px"></div>
+            </div>
           </div>
         </div>
 
@@ -2352,8 +2371,7 @@ function collectAvailabilityForm(){
 function renderAvailability(){
   const avail=getAvailability();
   renderAvailDays(avail);
-  renderAvailMiniCal(avail);
-  loadWorkingHours();
+  loadBlockedDates().then(()=>renderAvailMiniCal(avail));
   loadBlockedSlots();
 }
 
@@ -2399,92 +2417,38 @@ function onToggleAvailDay(dow,checked){
 }
 
 // ═══════════════════════════════════════════════════
-// WORKING HOURS (Supabase-native)
+// BLOCKED DATES (Supabase-native mini-calendar)
 // ═══════════════════════════════════════════════════
-const WH_DAYS=[
-  {dow:1,name:'Monday'},{dow:2,name:'Tuesday'},{dow:3,name:'Wednesday'},
-  {dow:4,name:'Thursday'},{dow:5,name:'Friday'},{dow:6,name:'Saturday'},{dow:0,name:'Sunday'}
-];
+let _blockedDates=new Set(); // Set of YYYY-MM-DD strings
 
-async function loadWorkingHours(){
-  const listEl=document.getElementById('wh-days-list');
-  const loadEl=document.getElementById('wh-loading');
-  if(!listEl||!loadEl)return;
-  loadEl.style.display='block';
-  listEl.style.display='none';
+async function loadBlockedDates(){
   const locId=sessionStorage.getItem('starr_location_id');
-  if(!locId){loadEl.textContent='No location selected.';return;}
+  if(!locId)return;
   try{
-    const res=await fetch('/api/admin/availability',{headers:authHdr()});
+    const res=await fetch('/api/admin/blocked-dates',{headers:authHdr()});
     if(!res.ok)throw new Error('HTTP '+res.status);
-    const rows=await res.json();
-    const byDow={};
-    (rows||[]).forEach(r=>{byDow[r.day_of_week]=r;});
-    let html='';
-    WH_DAYS.forEach(({dow,name})=>{
-      const r=byDow[dow]||{is_open:false,start_time:'09:00',end_time:'17:00'};
-      const isOn=!!r.is_open;
-      const open=(r.start_time||'09:00').substring(0,5);
-      const close=(r.end_time||'17:00').substring(0,5);
-      html+=`<div class="avail-day-row" id="wh-row-${dow}">
-        <span class="avail-day-name">${name}</span>
-        <label class="avail-toggle">
-          <input type="checkbox" id="wh-toggle-${dow}" ${isOn?'checked':''} onchange="onToggleWH(${dow},this.checked)">
-          <span class="avail-slider"></span>
-        </label>
-        <div id="wh-times-${dow}" style="display:flex;align-items:center;gap:8px;${isOn?'':'opacity:.35;pointer-events:none'}">
-          <span class="wh-time-label">Opens</span>
-          <input type="time" class="avail-time-input" id="wh-open-${dow}" value="${open}">
-          <span style="color:var(--color-muted-fg);font-size:11px">—</span>
-          <span class="wh-time-label">Closes</span>
-          <input type="time" class="avail-time-input" id="wh-close-${dow}" value="${close}">
-        </div>
-        ${isOn?'':'<span class="avail-off-label">Day off</span>'}
-      </div>`;
-    });
-    listEl.innerHTML=html;
-    loadEl.style.display='none';
-    listEl.style.display='block';
-  }catch(e){
-    loadEl.textContent='Could not load working hours.';
-    console.error('loadWorkingHours',e);
-  }
+    const dates=await res.json();
+    _blockedDates=new Set(dates||[]);
+  }catch(e){console.error('loadBlockedDates',e);}
 }
 
-function onToggleWH(dow,checked){
-  const timesEl=document.getElementById('wh-times-'+dow);
-  const row=document.getElementById('wh-row-'+dow);
-  if(timesEl){timesEl.style.opacity=checked?'1':'.35';timesEl.style.pointerEvents=checked?'':'none';}
-  const offLabel=row&&row.querySelector('.avail-off-label');
-  if(offLabel)offLabel.remove();
-  if(!checked){
-    const span=document.createElement('span');
-    span.className='avail-off-label';
-    span.textContent='Day off';
-    row.appendChild(span);
-  }
-}
-
-async function saveWorkingHours(){
+async function toggleBlockedDate(dateStr){
   const locId=sessionStorage.getItem('starr_location_id');
   if(!locId){showToast('No location selected');return;}
-  const rows=WH_DAYS.map(({dow})=>{
-    const toggle=document.getElementById('wh-toggle-'+dow);
-    const openEl=document.getElementById('wh-open-'+dow);
-    const closeEl=document.getElementById('wh-close-'+dow);
-    return{day_of_week:dow,is_open:toggle?toggle.checked:false,open_time:openEl?openEl.value:'09:00',close_time:closeEl?closeEl.value:'17:00'};
-  });
   try{
-    const res=await fetch('/api/admin/availability',{
-      method:'PUT',
+    const res=await fetch('/api/admin/blocked-dates',{
+      method:'POST',
       headers:{...authHdr(),'Content-Type':'application/json'},
-      body:JSON.stringify(rows)
+      body:JSON.stringify({date:dateStr})
     });
     if(!res.ok)throw new Error('HTTP '+res.status);
-    showToast('\u2713 Working hours saved');
+    const data=await res.json();
+    if(data.blocked){_blockedDates.add(dateStr);}else{_blockedDates.delete(dateStr);}
+    renderAvailMiniCal(getAvailability());
+    showToast(data.blocked?'Date blocked':'Date unblocked');
   }catch(e){
-    showToast('Failed to save working hours');
-    console.error('saveWorkingHours',e);
+    showToast('Failed to update date');
+    console.error('toggleBlockedDate',e);
   }
 }
 
@@ -2607,146 +2571,129 @@ async function saveDepositSettings(){
 }
 
 let availCalDate=null;
-let selectedOverrideDate=null;
 const AVAIL_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 
+// RULE 1: use UTC methods for mini-calendar cells to avoid off-by-one at midnight
 function renderAvailMiniCal(avail){
-  if(!availCalDate)availCalDate=new Date(calDate.getFullYear(),calDate.getMonth(),1);
-  const y=availCalDate.getFullYear(),m=availCalDate.getMonth();
-  document.getElementById('avail-mini-title').textContent=AVAIL_MONTHS[m]+' '+y;
+  if(!availCalDate){
+    const now=new Date();
+    availCalDate=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),1));
+  }
+  const y=availCalDate.getUTCFullYear(),m=availCalDate.getUTCMonth();
+  const titleEl=document.getElementById('avail-mini-title');
+  if(titleEl)titleEl.textContent=AVAIL_MONTHS[m]+' '+y;
 
-  // Day headers
-  document.getElementById('avail-mini-day-hdrs').innerHTML=
-    ['M','T','W','T','F','S','S'].map(d=>`<div class="avail-mini-day-hdr">${d}</div>`).join('');
+  const hdrsEl=document.getElementById('avail-mini-day-hdrs');
+  if(hdrsEl)hdrsEl.innerHTML=['M','T','W','T','F','S','S'].map(d=>`<div class="avail-mini-day-hdr">${d}</div>`).join('');
 
-  const firstDay=new Date(y,m,1);
-  let startDow=firstDay.getDay();
-  startDow=startDow===0?6:startDow-1;
-  const daysInMonth=new Date(y,m+1,0).getDate();
+  // RULE 1: use Date.UTC for all cell calculations
+  const daysInMonth=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+  const firstDow=new Date(Date.UTC(y,m,1)).getUTCDay(); // 0=Sun
+  const startOffset=firstDow===0?6:firstDow-1; // Mon=0..Sun=6
 
   let cells='';
-  for(let i=0;i<startDow;i++) cells+=`<div class="avail-mini-cell empty"></div>`;
+  for(let i=0;i<startOffset;i++) cells+=`<div class="avail-mini-cell empty"></div>`;
 
   for(let d=1;d<=daysInMonth;d++){
-    const date=new Date(y,m,d);
-    const dow=date.getDay();
-    const dateStr=fmt(date);
-    const override=avail.overrides[dateStr];
+    // RULE 1: string arithmetic for dateStr — never new Date(str) without T00:00:00Z
+    const mm=String(m+1).padStart(2,'0'),dd=String(d).padStart(2,'0');
+    const dateStr=`${y}-${mm}-${dd}`;
+    // RULE 2: UTC-safe day-of-week
+    const dow=new Date(Date.UTC(y,m,d)).getUTCDay();
     const dayDefault=avail.defaults[dow]||{on:false};
-    const isOn=override!==undefined?override.on:dayDefault.on;
-    const isOverridden=override!==undefined;
-    const isSelected=dateStr===selectedOverrideDate;
-    let cls='avail-mini-cell '+(isOn?'working':'off');
-    if(isOverridden)cls+=' overridden';
-    if(isSelected)cls+=' selected';
-    cells+=`<div class="${cls}" onclick="selectOverrideDate('${dateStr}')">${d}</div>`;
+    const isWorking=dayDefault.on;
+    const isBlocked=_blockedDates.has(dateStr);
+    let cls='avail-mini-cell';
+    if(isBlocked) cls+=' blocked-date';
+    else if(isWorking) cls+=' working';
+    else cls+=' off';
+    cells+=`<div class="${cls}" onclick="toggleBlockedDate('${dateStr}')" title="${isBlocked?'Click to unblock':'Click to block'}">${d}</div>`;
   }
 
-  document.getElementById('avail-mini-grid').innerHTML=cells;
-
-  // Render or hide override editor
-  if(selectedOverrideDate){
-    renderOverrideEditor(avail,selectedOverrideDate);
-  } else {
-    document.getElementById('avail-override-editor').style.display='none';
-  }
+  const gridEl=document.getElementById('avail-mini-grid');
+  if(gridEl)gridEl.innerHTML=cells;
 }
 
 function changeAvailMonth(dir){
-  if(!availCalDate)availCalDate=new Date(calDate.getFullYear(),calDate.getMonth(),1);
-  availCalDate.setMonth(availCalDate.getMonth()+dir);
-  selectedOverrideDate=null;
+  if(!availCalDate){const now=new Date();availCalDate=new Date(Date.UTC(now.getUTCFullYear(),now.getUTCMonth(),1));}
+  // RULE 1: adjust month via UTC
+  const y=availCalDate.getUTCFullYear(),m=availCalDate.getUTCMonth()+dir;
+  availCalDate=new Date(Date.UTC(y,m,1));
   renderAvailMiniCal(getAvailability());
 }
 
-function selectOverrideDate(dateStr){
-  selectedOverrideDate=(selectedOverrideDate===dateStr)?null:dateStr;
-  renderAvailMiniCal(getAvailability());
-}
-
-function renderOverrideEditor(avail,dateStr){
-  const date=new Date(dateStr+'T00:00:00');
-  const dow=date.getDay();
-  const override=avail.overrides[dateStr];
-  const dayDefault=avail.defaults[dow]||{on:false};
-  const isOn=override!==undefined?override.on:dayDefault.on;
-  const start=(override&&override.start)||(dayDefault.start||'09:00');
-  const end=(override&&override.end)||(dayDefault.end||'18:00');
-  const hasOverride=override!==undefined;
-
-  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-  const [y,mo,dd]=dateStr.split('-');
-  const label=`${parseInt(dd)} ${months[parseInt(mo)-1]} ${y}`;
-
-  const edEl=document.getElementById('avail-override-editor');
-  edEl.style.display='block';
-  edEl.innerHTML=`
-    <div class="avail-override-row" style="justify-content:space-between;margin-bottom:10px">
-      <span style="font-size:13px;font-weight:600">${label}</span>
-      ${hasOverride?`<button onclick="clearOverride('${dateStr}')" style="font-size:11px;color:var(--muted);background:none;border:none;cursor:pointer;text-decoration:underline">Reset to default</button>`:''}
-    </div>
-    <div class="avail-override-row">
-      <span style="font-size:12px;color:var(--muted);width:70px">Available</span>
-      <label class="avail-toggle">
-        <input type="checkbox" id="oe-toggle" ${isOn?'checked':''} onchange="onToggleOverrideOn(this.checked)">
-        <span class="avail-slider"></span>
-      </label>
-    </div>
-    <div id="oe-hours" style="display:${isOn?'flex':'none'};align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap">
-      <input type="time" class="avail-time-input" value="${start}" id="oe-start">
-      <span style="font-size:11px;color:var(--muted)">–</span>
-      <input type="time" class="avail-time-input" value="${end}" id="oe-end">
-    </div>
-    <button onclick="applyOverride('${dateStr}')" class="btn-gold" style="margin-top:12px;width:100%;border-radius:var(--radius);padding:8px">
-      ${hasOverride?'Update Override':'Set Override'}
-    </button>
-  `;
-}
-
-function onToggleOverrideOn(checked){
-  const hoursEl=document.getElementById('oe-hours');
-  if(hoursEl) hoursEl.style.display=checked?'flex':'none';
-}
-
-function applyOverride(dateStr){
-  const avail=getAvailability();
-  const isOn=document.getElementById('oe-toggle').checked;
-  if(isOn){
-    const start=document.getElementById('oe-start').value;
-    const end=document.getElementById('oe-end').value;
-    avail.overrides[dateStr]={on:true,start,end};
-    // Also clear any Supabase block for this date (now open again)
-    const _locId=sessionStorage.getItem('starr_location_id');
-    if(_locId){fetch(`/api/availability/block/${encodeURIComponent(dateStr)}`,{method:'DELETE',headers:authHdr()}).catch(()=>{});}
+// ═══════════════════════════════════════════════════
+// BLOCKED TIME SLOTS — TAB SWITCHING + ONE-OFF BLOCKS
+// ═══════════════════════════════════════════════════
+function switchBsTab(tab){
+  const recurring=document.getElementById('bs-panel-recurring');
+  const oneoff=document.getElementById('bs-panel-oneoff');
+  const tabRec=document.getElementById('bs-tab-recurring');
+  const tabOne=document.getElementById('bs-tab-oneoff');
+  if(!recurring||!oneoff||!tabRec||!tabOne)return;
+  if(tab==='recurring'){
+    recurring.style.display='';
+    oneoff.style.display='none';
+    tabRec.style.borderBottomColor='var(--gold)';tabRec.style.color='var(--gold)';tabRec.style.fontWeight='600';
+    tabOne.style.borderBottomColor='transparent';tabOne.style.color='var(--muted)';tabOne.style.fontWeight='500';
   } else {
-    avail.overrides[dateStr]={on:false};
-    // Write block to Supabase
-    const _locId=sessionStorage.getItem('starr_location_id');
-    if(_locId){
-      fetch('/api/availability/block',{
-        method:'POST',
-        headers:{...authHdr(),'Content-Type':'application/json'},
-        body:JSON.stringify({date:dateStr})
-      }).catch(()=>{});
-    }
+    recurring.style.display='none';
+    oneoff.style.display='';
+    tabOne.style.borderBottomColor='var(--gold)';tabOne.style.color='var(--gold)';tabOne.style.fontWeight='600';
+    tabRec.style.borderBottomColor='transparent';tabRec.style.color='var(--muted)';tabRec.style.fontWeight='500';
+    renderOneOffBlocks();
   }
-  localStorage.setItem('fbn_availability',JSON.stringify(avail));
-  CloudStore.set('fbn_availability',avail);
-  buildCalendar();
-  renderAvailMiniCal(avail);
 }
 
-function clearOverride(dateStr){
-  const avail=getAvailability();
-  delete avail.overrides[dateStr];
-  localStorage.setItem('fbn_availability',JSON.stringify(avail));
-  CloudStore.set('fbn_availability',avail);
-  // Remove from Supabase blocked_dates
-  const _locId=sessionStorage.getItem('starr_location_id');
-  if(_locId){fetch(`/api/availability/block/${encodeURIComponent(dateStr)}`,{method:'DELETE',headers:authHdr()}).catch(()=>{});}
-  selectedOverrideDate=null;
-  buildCalendar();
-  renderAvailMiniCal(avail);
+let _oneOffBlocks=[]; // blocked_slots where date_only IS NOT NULL (or all_days=false and has date)
+
+function renderOneOffBlocks(){
+  const tagsEl=document.getElementById('bso-tags');
+  const emptyEl=document.getElementById('bso-empty');
+  if(!tagsEl||!emptyEl)return;
+  // Filter blocked slots that have a specific date (not recurring)
+  const oneOffs=(_blockedSlots||[]).filter(s=>s.specific_date);
+  if(!oneOffs.length){tagsEl.innerHTML='';emptyEl.style.display='block';return;}
+  emptyEl.style.display='none';
+  tagsEl.innerHTML=oneOffs.map(s=>{
+    const start=(s.start_time||'').substring(0,5);
+    const end=(s.end_time||'').substring(0,5);
+    const timeLabel=(start&&end)?` · ${start} — ${end}`:'· All day';
+    return `<span class="bs-tag"><span>${s.specific_date}${timeLabel}</span><button class="bs-tag-del" onclick="deleteBlockedSlot('${s.id}')" title="Remove">×</button></span>`;
+  }).join('');
+}
+
+async function addOneOffBlock(){
+  const dateEl=document.getElementById('bso-date');
+  const fromEl=document.getElementById('bso-from');
+  const toEl=document.getElementById('bso-to');
+  const errEl=document.getElementById('bso-error');
+  if(errEl)errEl.style.display='none';
+  const dateVal=dateEl?dateEl.value:'';
+  const fromVal=fromEl?fromEl.value:'';
+  const toVal=toEl?toEl.value:'';
+  if(!dateVal){if(errEl){errEl.textContent='Please select a date.';errEl.style.display='block';}return;}
+  if((fromVal&&!toVal)||(toVal&&!fromVal)){if(errEl){errEl.textContent='Enter both start and end times, or leave both empty for all-day.';errEl.style.display='block';}return;}
+  if(fromVal&&toVal&&fromVal>=toVal){if(errEl){errEl.textContent='Start time must be before end time.';errEl.style.display='block';}return;}
+  const body={specific_date:dateVal,start_time:fromVal||null,end_time:toVal||null,all_days:false};
+  try{
+    const res=await fetch('/api/admin/blocked-slots',{
+      method:'POST',
+      headers:{...authHdr(),'Content-Type':'application/json'},
+      body:JSON.stringify(body)
+    });
+    if(!res.ok){const d=await res.json().catch(()=>({}));if(errEl){errEl.textContent=d.error||'Save failed.';errEl.style.display='block';}return;}
+    const created=await res.json();
+    _blockedSlots.push(created);
+    renderOneOffBlocks();
+    if(dateEl)dateEl.value='';
+    if(fromEl)fromEl.value='';
+    if(toEl)toEl.value='';
+    showToast('\u2713 One-off block added');
+  }catch(e){
+    if(errEl){errEl.textContent='Save failed — please try again.';errEl.style.display='block';}
+    console.error('addOneOffBlock',e);
+  }
 }
 
 // ═══════════════════════════════════════════════════

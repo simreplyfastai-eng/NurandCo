@@ -130,6 +130,65 @@ router.post("/admin/blocked-slots", async (req, res) => {
   }
 });
 
+// GET /api/admin/blocked-dates — all blocked dates for session locationId
+router.get("/admin/blocked-dates", async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  const locationId = getLocationId(req);
+  if (!locationId) return res.status(400).json({ error: "locationId required" });
+
+  const from = req.query.from as string | undefined;
+  const to = req.query.to as string | undefined;
+
+  try {
+    let query = supabaseAdmin
+      .from("blocked_dates")
+      .select("date, reason")
+      .eq("location_id", locationId)
+      .order("date");
+    if (from) query = query.gte("date", from);
+    if (to) query = query.lte("date", to);
+    const { data, error } = await query;
+    if (error) throw error;
+    return res.json((data ?? []).map((r: { date: string }) => r.date));
+  } catch (err) {
+    console.error("GET /api/admin/blocked-dates", err);
+    return res.status(500).json({ error: "Failed to fetch blocked dates" });
+  }
+});
+
+// POST /api/admin/blocked-dates — toggle a blocked date (block if not blocked, unblock if blocked)
+router.post("/admin/blocked-dates", async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  const locationId = getLocationId(req);
+  if (!locationId) return res.status(400).json({ error: "locationId required" });
+
+  const { date, action } = req.body as { date: string; action?: "block" | "unblock" };
+  if (!date) return res.status(400).json({ error: "date required" });
+
+  try {
+    if (action === "unblock") {
+      await supabaseAdmin.from("blocked_dates").delete().eq("location_id", locationId).eq("date", date);
+      return res.json({ ok: true, blocked: false });
+    }
+    if (action === "block") {
+      await supabaseAdmin.from("blocked_dates").upsert({ location_id: locationId, date, reason: "Manual block" }, { onConflict: "location_id,date" });
+      return res.json({ ok: true, blocked: true });
+    }
+    // Toggle: check if exists
+    const { data: existing } = await supabaseAdmin.from("blocked_dates").select("id").eq("location_id", locationId).eq("date", date).maybeSingle();
+    if (existing) {
+      await supabaseAdmin.from("blocked_dates").delete().eq("location_id", locationId).eq("date", date);
+      return res.json({ ok: true, blocked: false });
+    } else {
+      await supabaseAdmin.from("blocked_dates").upsert({ location_id: locationId, date, reason: "Manual block" }, { onConflict: "location_id,date" });
+      return res.json({ ok: true, blocked: true });
+    }
+  } catch (err) {
+    console.error("POST /api/admin/blocked-dates", err);
+    return res.status(500).json({ error: "Failed to toggle blocked date" });
+  }
+});
+
 // DELETE /api/admin/blocked-slots/:id — delete slot (verifies location match)
 router.delete("/admin/blocked-slots/:id", async (req, res) => {
   if (!requireAuth(req, res)) return;

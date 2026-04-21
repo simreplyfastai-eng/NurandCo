@@ -46,11 +46,9 @@ const TREATMENT_OPTIONS = [
   "Not sure yet / General enquiry",
 ];
 
+// RULE 1: always use UTC methods — Date objects are created with Date.UTC
 function fmtDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 }
 
 function timeToMins(t: string): number {
@@ -62,11 +60,15 @@ function minsToTime(m: number): string {
   return `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`;
 }
 
+// RULE 2: use UTC-safe dateStr, never date.getDay() which uses local timezone
 function getAvailForDate(avail: Availability, date: Date): DayAvail | null {
   const dateStr = fmtDate(date);
   const override = avail.overrides?.[dateStr];
   if (override !== undefined) return override.on ? override : { on: false };
-  const dayKey = DAY_KEYS[date.getDay()];
+  // Parse dateStr to get UTC day-of-week (avoids local-timezone off-by-one)
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  const dayKey = DAY_KEYS[dow];
   return avail.defaults?.[dayKey] ?? { on: false };
 }
 
@@ -88,12 +90,13 @@ function generateAvailableSlots(
   const openMins = timeToMins(day.start ?? "09:00");
   const closeMins = timeToMins(day.end ?? "18:00");
 
-  const todayStr = fmtDate(new Date());
-  const isToday = fmtDate(date) === todayStr;
+  // RULE 7: use London timezone for past-slot filtering (with 30-min buffer)
+  const londonNow = new Date(new Date().toLocaleString("en-GB", { timeZone: "Europe/London" }));
+  const londonDateStr = `${londonNow.getFullYear()}-${String(londonNow.getMonth() + 1).padStart(2, "0")}-${String(londonNow.getDate()).padStart(2, "0")}`;
+  const isToday = fmtDate(date) === londonDateStr;
   let nowBuffer = 0;
   if (isToday) {
-    const now = new Date();
-    nowBuffer = now.getHours() * 60 + now.getMinutes() + 15;
+    nowBuffer = londonNow.getHours() * 60 + londonNow.getMinutes() + 30;
   }
 
   const slots: string[] = [];
@@ -155,12 +158,13 @@ function Calendar({
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
-  const firstDay = new Date(viewYear, viewMonth, 1);
-  const lastDay = new Date(viewYear, viewMonth + 1, 0);
-  const startOffset = (firstDay.getDay() + 6) % 7;
+  // RULE 1: use Date.UTC for all cell dates to avoid midnight local-timezone off-by-one
+  const daysInMonth = new Date(Date.UTC(viewYear, viewMonth + 1, 0)).getUTCDate();
+  const firstDow = new Date(Date.UTC(viewYear, viewMonth, 1)).getUTCDay(); // 0=Sun
+  const startOffset = firstDow === 0 ? 6 : firstDow - 1; // Mon=0..Sun=6
   const cells: (Date | null)[] = [];
   for (let i = 0; i < startOffset; i++) cells.push(null);
-  for (let d = 1; d <= lastDay.getDate(); d++) cells.push(new Date(viewYear, viewMonth, d));
+  for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(Date.UTC(viewYear, viewMonth, d)));
 
   const prevMonth = () => { if (viewMonth === 0) { setViewYear((y) => y - 1); setViewMonth(11); } else setViewMonth((m) => m - 1); };
   const nextMonth = () => { if (viewMonth === 11) { setViewYear((y) => y + 1); setViewMonth(0); } else setViewMonth((m) => m + 1); };
@@ -180,11 +184,14 @@ function Calendar({
       <div className="grid grid-cols-7">
         {cells.map((date, i) => {
           if (!date) return <div key={`e-${i}`} />;
+          // Use UTC methods since cells are created with Date.UTC
+          const dateStr = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
           const disabled = isDateDisabled(avail, date, today);
-          const isSelected = selected !== null && fmtDate(date) === fmtDate(selected);
+          const selStr = selected ? `${selected.getUTCFullYear()}-${String(selected.getUTCMonth() + 1).padStart(2, "0")}-${String(selected.getUTCDate()).padStart(2, "0")}` : "";
+          const isSelected = selStr === dateStr;
           return (
             <button
-              key={fmtDate(date)}
+              key={dateStr}
               disabled={disabled}
               onClick={() => !disabled && onSelect(date)}
               className="flex items-center justify-center transition-all duration-150"
@@ -198,7 +205,7 @@ function Calendar({
               onMouseEnter={(e) => { if (!disabled && !isSelected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.12)"; }}
               onMouseLeave={(e) => { if (!disabled && !isSelected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
             >
-              {date.getDate()}
+              {date.getUTCDate()}
             </button>
           );
         })}

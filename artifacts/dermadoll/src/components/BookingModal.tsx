@@ -28,12 +28,6 @@ interface Availability {
   overrides: Record<string, { on: boolean; start?: string; end?: string }>;
 }
 
-interface DateBooking {
-  time: string;
-  durationMinutes: number;
-  status: string;
-}
-
 const DAY_KEYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 const AVAIL_DEFAULT: Availability = {
@@ -51,11 +45,9 @@ const AVAIL_DEFAULT: Availability = {
 
 // ── Date helpers ─────────────────────────────────────────────────────────────
 
+// RULE 1: always use UTC methods — Date objects in this component are created with Date.UTC
 function fmtDate(d: Date): string {
-  const y = d.getFullYear();
-  const m = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
-  return `${y}-${m}-${day}`;
+  return `${d.getUTCFullYear()}-${String(d.getUTCMonth() + 1).padStart(2, "0")}-${String(d.getUTCDate()).padStart(2, "0")}`;
 }
 
 function timeToMins(t: string): number {
@@ -69,55 +61,24 @@ function minsToTime(m: number): string {
 
 // ── Availability helpers ──────────────────────────────────────────────────────
 
-function getAvailForDate(avail: Availability, date: Date): DayAvail | null {
-  const dateStr = fmtDate(date);
+// RULE 2: use UTC-safe date string, never date.getDay() which uses local timezone
+function getAvailForDate(avail: Availability, dateStr: string): DayAvail | null {
   const override = avail.overrides?.[dateStr];
   if (override !== undefined) return override.on ? override : { on: false };
-  const dayKey = DAY_KEYS[date.getDay()];
+  // Parse dateStr safely to get UTC day-of-week
+  const [y, m, d] = dateStr.split("-").map(Number);
+  const dow = new Date(Date.UTC(y, m - 1, d)).getUTCDay();
+  const dayKey = DAY_KEYS[dow];
   return avail.defaults?.[dayKey] ?? { on: false };
 }
 
 function isDateDisabled(avail: Availability, date: Date, today: Date): boolean {
   if (date < today) return true;
-  const day = getAvailForDate(avail, date);
+  // RULE 1: use Date.UTC to ensure month/day are in UTC — avoids off-by-one at midnight local time
+  const utcDate = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dateStr = `${utcDate.getUTCFullYear()}-${String(utcDate.getUTCMonth() + 1).padStart(2, "0")}-${String(utcDate.getUTCDate()).padStart(2, "0")}`;
+  const day = getAvailForDate(avail, dateStr);
   return !day || !day.on;
-}
-
-// ── Slot generation — 15-min intervals, back-to-back, duration-aware ─────────
-
-function generateAvailableSlots(
-  avail: Availability,
-  date: Date,
-  durationMins: number,
-  existingBookings: DateBooking[],
-): string[] {
-  const day = getAvailForDate(avail, date);
-  if (!day || !day.on) return [];
-  const openMins = timeToMins(day.start ?? "09:00");
-  const closeMins = timeToMins(day.end ?? "18:00");
-
-  // Today: skip slots that start within the next 15 minutes
-  const todayStr = fmtDate(new Date());
-  const isToday = fmtDate(date) === todayStr;
-  let nowBuffer = 0;
-  if (isToday) {
-    const now = new Date();
-    nowBuffer = now.getHours() * 60 + now.getMinutes() + 15;
-  }
-
-  const slots: string[] = [];
-  for (let t = openMins; t + durationMins <= closeMins; t += 15) {
-    if (isToday && t < nowBuffer) continue;
-    // Check for overlap with existing bookings (back-to-back OK — no buffer)
-    const conflict = existingBookings.some((b) => {
-      if (!b.time || b.status === "Cancelled") return false;
-      const bStart = timeToMins(b.time);
-      const bEnd = bStart + b.durationMinutes;
-      return t < bEnd && t + durationMins > bStart;
-    });
-    if (!conflict) slots.push(minsToTime(t));
-  }
-  return slots;
 }
 
 // ── Validation ────────────────────────────────────────────────────────────────
@@ -148,26 +109,39 @@ const MONTH_NAMES = ["January","February","March","April","May","June","July","A
 const DAY_NAMES = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
 
 function Calendar({
-  onSelect, selected, avail,
+  onSelect, selected, avail, onMonthChange,
 }: {
   onSelect: (d: Date) => void;
   selected: Date | null;
   avail: Availability;
+  onMonthChange?: (year: number, month: number) => void;
 }) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   const [viewYear, setViewYear] = useState(today.getFullYear());
   const [viewMonth, setViewMonth] = useState(today.getMonth());
 
-  const firstDay = new Date(viewYear, viewMonth, 1);
-  const lastDay = new Date(viewYear, viewMonth + 1, 0);
-  const startOffset = (firstDay.getDay() + 6) % 7;
+  // RULE 1: build cells using Date.UTC so months/days are UTC-unambiguous
+  const daysInMonth = new Date(Date.UTC(viewYear, viewMonth + 1, 0)).getUTCDate();
+  // Day offset: Mon=0 … Sun=6 (start calendar on Monday)
+  const firstDow = new Date(Date.UTC(viewYear, viewMonth, 1)).getUTCDay(); // 0=Sun
+  const startOffset = firstDow === 0 ? 6 : firstDow - 1;
   const cells: (Date | null)[] = [];
   for (let i = 0; i < startOffset; i++) cells.push(null);
-  for (let d = 1; d <= lastDay.getDate(); d++) cells.push(new Date(viewYear, viewMonth, d));
+  for (let d = 1; d <= daysInMonth; d++) cells.push(new Date(Date.UTC(viewYear, viewMonth, d)));
 
-  const prevMonth = () => { if (viewMonth === 0) { setViewYear((y) => y - 1); setViewMonth(11); } else setViewMonth((m) => m - 1); };
-  const nextMonth = () => { if (viewMonth === 11) { setViewYear((y) => y + 1); setViewMonth(0); } else setViewMonth((m) => m + 1); };
+  const prevMonth = () => {
+    const ny = viewMonth === 0 ? viewYear - 1 : viewYear;
+    const nm = viewMonth === 0 ? 11 : viewMonth - 1;
+    setViewYear(ny); setViewMonth(nm);
+    onMonthChange?.(ny, nm);
+  };
+  const nextMonth = () => {
+    const ny = viewMonth === 11 ? viewYear + 1 : viewYear;
+    const nm = viewMonth === 11 ? 0 : viewMonth + 1;
+    setViewYear(ny); setViewMonth(nm);
+    onMonthChange?.(ny, nm);
+  };
 
   return (
     <div>
@@ -184,11 +158,13 @@ function Calendar({
       <div className="grid grid-cols-7">
         {cells.map((date, i) => {
           if (!date) return <div key={`e-${i}`} />;
+          // Use UTC methods since cells are created with Date.UTC
+          const dateStr = `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
           const disabled = isDateDisabled(avail, date, today);
-          const isSelected = selected !== null && fmtDate(date) === fmtDate(selected);
+          const isSelected = selected !== null && dateStr === `${selected.getUTCFullYear()}-${String(selected.getUTCMonth() + 1).padStart(2, "0")}-${String(selected.getUTCDate()).padStart(2, "0")}`;
           return (
             <button
-              key={fmtDate(date)}
+              key={dateStr}
               disabled={disabled}
               onClick={() => !disabled && onSelect(date)}
               className="flex items-center justify-center transition-all duration-150"
@@ -202,7 +178,7 @@ function Calendar({
               onMouseEnter={(e) => { if (!disabled && !isSelected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.12)"; }}
               onMouseLeave={(e) => { if (!disabled && !isSelected) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
             >
-              {date.getDate()}
+              {date.getUTCDate()}
             </button>
           );
         })}
@@ -257,7 +233,8 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
 
   const [submitting, setSubmitting] = useState(false);
   const [avail, setAvail] = useState<Availability>(AVAIL_DEFAULT);
-  const [dateBookings, setDateBookings] = useState<DateBooking[]>([]);
+  // API slot data from GET /api/availability/slots — richer than local generation
+  const [apiSlots, setApiSlots] = useState<{ time: string; available: boolean; reason?: string }[]>([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
 
   // Stripe payment state
@@ -316,19 +293,40 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
     return () => window.removeEventListener("keydown", handler);
   }, [onClose, step]);
 
-  // Fetch bookings for a date (never cached)
-  const fetchDateBookings = useCallback(async (date: Date) => {
+  // Fetch rich slot data from API — no local generation, no timezone bugs
+  // RULE 4: server generates slots with string arithmetic; RULE 7: server filters past slots with London time
+  const fetchSlots = useCallback(async (date: Date) => {
     setLoadingSlots(true);
     try {
-      const qs = locationId ? `?locationId=${locationId}` : "";
-      const r = await fetch(`/api/bookings/date/${fmtDate(date)}${qs}`, { cache: "no-store" });
-      if (r.ok) setDateBookings(await r.json());
-      else setDateBookings([]);
+      const dateStr = fmtDate(date);
+      // Prefer locationSlug for resolution; fall back to locationId UUID
+      const locParam = locationSlug
+        ? `location=${encodeURIComponent(locationSlug)}`
+        : locationId
+        ? `location=${encodeURIComponent(locationId)}`
+        : "";
+      const r = await fetch(`/api/availability/slots?${locParam}&date=${dateStr}`, { cache: "no-store" });
+      if (r.ok) {
+        const data = await r.json() as { available?: boolean; slots?: { time: string; available: boolean; reason?: string }[] };
+        setApiSlots(data.slots ?? []);
+      } else {
+        setApiSlots([]);
+      }
     } catch {
-      setDateBookings([]);
+      setApiSlots([]);
     } finally {
       setLoadingSlots(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locationId, locationSlug]);
+
+  // Refresh availability data (called on month change to get fresh Supabase data)
+  const refreshAvail = useCallback(async () => {
+    const availHeaders: HeadersInit = locationId ? { "x-location-id": locationId } : {};
+    try {
+      const r = await fetch("/api/availability", { headers: availHeaders, cache: "no-store" });
+      if (r.ok) { const data = await r.json(); if (data) setAvail(data); }
+    } catch { /* stay on cached avail */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locationId]);
 
@@ -337,38 +335,36 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
     setSelectedTime(null);
     setSlotError("");
     setStep(2);
-    await fetchDateBookings(date);
+    await fetchSlots(date);
   };
 
   const handleTimeSelect = async (time: string) => {
     setSelectedTime(time);
     setSlotError("");
 
-    // Real-time availability check before moving to details form
-    if (locationId && selectedDate) {
+    // Confirm slot is still available via the check endpoint before proceeding
+    const locParam = locationSlug ?? locationId;
+    if (locParam && selectedDate) {
       try {
-        const date = fmtDate(selectedDate);
+        const dateStr = fmtDate(selectedDate);
         const r = await fetch(
-          `/api/availability/check?location=${encodeURIComponent(locationId)}&date=${date}&time=${encodeURIComponent(time)}`,
+          `/api/availability/check?location=${encodeURIComponent(locParam)}&date=${dateStr}&time=${encodeURIComponent(time)}`,
           { cache: "no-store" },
         );
         if (r.ok) {
           const data = await r.json() as { available: boolean; reason?: string };
           if (!data.available) {
             const msg = data.reason === "SLOT_TAKEN"
-              ? "This time slot has just been booked by someone else. Please choose another time."
+              ? "This time slot has just been booked. Please choose another time."
               : data.reason === "CLINIC_CLOSED"
               ? "The clinic is closed on this day. Please select another date."
-              : "This date is not available. Please select another date.";
+              : "This time is not available. Please choose another.";
             setSlotError(msg);
-            // Refresh slots so calendar shows current reality
-            if (selectedDate) await fetchDateBookings(selectedDate);
-            return; // Stay on step 2
+            if (selectedDate) await fetchSlots(selectedDate);
+            return;
           }
         }
-      } catch {
-        // Network error — fail open, let server validate
-      }
+      } catch { /* fail open */ }
     }
 
     setStep(3);
@@ -452,7 +448,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
               // Go back to time selection and refresh slots
               setSlotError("This time slot has just been booked by someone else. Please choose another time.");
               setSelectedTime(null);
-              if (selectedDate) await fetchDateBookings(selectedDate);
+              if (selectedDate) await fetchSlots(selectedDate);
               setStep(2);
               setPaymentLoading(false);
             } else {
@@ -644,10 +640,8 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
   const deposit = serverDepositPence !== null ? Math.round(serverDepositPence / 100) : estimatedDeposit;
   const balance = price - deposit;
 
-  // Compute available slots — 15-min grid, duration-aware, back-to-back
-  const availableSlots = selectedDate
-    ? generateAvailableSlots(avail, selectedDate, bookingDuration, dateBookings)
-    : [];
+  // Use API-provided slots (server handles all timezone + availability logic)
+  // apiSlots = [{ time, available, reason }] from GET /api/availability/slots
 
   // ── Full-page success overlay ─────────────────────────────────────────────
   if (step === "success") {
@@ -910,7 +904,12 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
             <p className="mb-5" style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", color: "#C9A96E", fontStyle: "italic" }}>
               Next available: {getNextAvailableSlot()}
             </p>
-            <Calendar onSelect={handleDateSelect} selected={selectedDate} avail={avail} />
+            <Calendar
+              onSelect={handleDateSelect}
+              selected={selectedDate}
+              avail={avail}
+              onMonthChange={refreshAvail}
+            />
           </motion.div>
         )}
 
@@ -931,29 +930,39 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
 
             {loadingSlots ? (
               <p className="text-sm text-center py-8" style={{ color: "#aaa" }}>Loading availability…</p>
-            ) : availableSlots.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: "#aaa" }}>No available slots for this date. Please select another day.</p>
+            ) : apiSlots.length === 0 ? (
+              <p className="text-sm text-center py-8" style={{ color: "#aaa" }}>No slots available for this date. Please select another day.</p>
             ) : (
               <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                {availableSlots.map((slot) => {
-                  const isActive = selectedTime === slot;
+                {apiSlots.map((slot) => {
+                  const isActive = selectedTime === slot.time;
+                  const unavailable = !slot.available;
+                  const label = unavailable ? (slot.reason === "PAST" ? "passed" : "taken") : undefined;
                   return (
                     <button
-                      key={slot}
-                      onClick={() => handleTimeSelect(slot)}
+                      key={slot.time}
+                      disabled={unavailable}
+                      onClick={() => !unavailable && handleTimeSelect(slot.time)}
+                      title={unavailable ? (label === "passed" ? "This time has passed" : "This slot is taken") : undefined}
                       style={{
-                        border: "1px solid #C9A96E",
+                        border: `1px solid ${unavailable ? "#ddd" : isActive ? "#C9A96E" : "#C9A96E"}`,
                         borderRadius: "20px", padding: "8px 4px", fontSize: "13px",
                         fontFamily: "Inter, sans-serif",
-                        color: isActive ? "#fff" : "#C9A96E",
-                        backgroundColor: isActive ? "#C9A96E" : "transparent",
-                        cursor: "pointer",
+                        color: isActive ? "#fff" : unavailable ? "#ccc" : "#C9A96E",
+                        backgroundColor: isActive ? "#C9A96E" : unavailable ? "#f8f8f8" : "transparent",
+                        cursor: unavailable ? "not-allowed" : "pointer",
                         transition: "all 0.15s",
+                        position: "relative",
                       }}
-                      onMouseEnter={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.08)"; }}
-                      onMouseLeave={(e) => { if (!isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
+                      onMouseEnter={(e) => { if (!unavailable && !isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "rgba(201,169,110,0.08)"; }}
+                      onMouseLeave={(e) => { if (!unavailable && !isActive) (e.currentTarget as HTMLButtonElement).style.backgroundColor = "transparent"; }}
                     >
-                      {slot}
+                      <span style={{ display: "block" }}>{slot.time}</span>
+                      {unavailable && (
+                        <span style={{ display: "block", fontSize: "9px", letterSpacing: "0.5px", textTransform: "uppercase", color: "#ccc", marginTop: 1 }}>
+                          {label}
+                        </span>
+                      )}
                     </button>
                   );
                 })}
