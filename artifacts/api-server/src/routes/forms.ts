@@ -10,8 +10,97 @@ function getIp(req: import("express").Request): string {
   return req.ip ?? "unknown";
 }
 
+// ── Column availability cache ──────────────────────────────────────────────
+// On startup we probe which columns exist and cache the result.
+// When columns are missing we fall back to packing extra data into existing
+// text columns (medications for medical forms, signature_data for consent).
+// Once the Supabase schema is patched the cache refreshes on next restart.
+let medicalCols: Set<string> | null = null;
+let consentCols: Set<string> | null = null;
+
+async function getMedicalCols(): Promise<Set<string>> {
+  if (medicalCols) return medicalCols;
+  const candidates = [
+    "id","booking_id","client_email","client_name","submitted_at",
+    "address","gp_name","medications","allergies","ip_address",
+    "dob","gp_practice","gp_phone","conditions","previous_treatments","skin_concerns",
+  ];
+  const present = new Set<string>();
+  for (const col of candidates) {
+    const { error } = await supabaseAdmin.from("medical_forms").select(col).limit(0);
+    if (!error) present.add(col);
+  }
+  medicalCols = present;
+  console.log("medical_forms columns present:", [...present].join(", "));
+  return present;
+}
+
+async function getConsentCols(): Promise<Set<string>> {
+  if (consentCols) return consentCols;
+  const candidates = [
+    "id","booking_id","client_email","client_name","signature_data","ip_address",
+    "treatment","consents","additional_notes","signed_at",
+  ];
+  const present = new Set<string>();
+  for (const col of candidates) {
+    const { error } = await supabaseAdmin.from("consent_forms").select(col).limit(0);
+    if (!error) present.add(col);
+  }
+  consentCols = present;
+  console.log("consent_forms columns present:", [...present].join(", "));
+  return present;
+}
+
+// Warm the column caches at startup
+getMedicalCols().catch(() => {});
+getConsentCols().catch(() => {});
+
+// ── Helpers to unpack packed data ──────────────────────────────────────────
+
+/** Expand a medical_forms row — unpack any extra data from the medications field */
+function expandMedical(row: Record<string, unknown>): Record<string, unknown> {
+  const meds = String(row.medications ?? "");
+  if (meds.startsWith("{")) {
+    try {
+      const packed = JSON.parse(meds) as Record<string, unknown>;
+      return {
+        ...row,
+        dob: row.dob ?? packed.dob ?? null,
+        gp_practice: row.gp_practice ?? packed.gp_practice ?? null,
+        gp_phone: row.gp_phone ?? packed.gp_phone ?? null,
+        conditions: row.conditions ?? packed.conditions ?? [],
+        previous_treatments: row.previous_treatments ?? packed.previous_treatments ?? null,
+        skin_concerns: row.skin_concerns ?? packed.skin_concerns ?? null,
+        medications: packed.medications ?? null,
+      };
+    } catch { /* fall through */ }
+  }
+  return row;
+}
+
+/** Expand a consent_forms row — unpack any extra data from the signature_data prefix */
+function expandConsent(row: Record<string, unknown>): Record<string, unknown> {
+  const sig = String(row.signature_data ?? "");
+  if (sig.includes("|||")) {
+    const idx = sig.indexOf("|||");
+    const jsonPart = sig.slice(0, idx);
+    const imgPart = sig.slice(idx + 3);
+    try {
+      const packed = JSON.parse(jsonPart) as Record<string, unknown>;
+      return {
+        ...row,
+        treatment: row.treatment ?? packed.treatment ?? null,
+        consents: row.consents ?? packed.consents ?? {},
+        additional_notes: row.additional_notes ?? packed.additionalNotes ?? null,
+        signed_at: row.signed_at ?? packed.signed_at ?? null,
+        signature_data: imgPart,
+      };
+    } catch { /* fall through */ }
+  }
+  return row;
+}
+
 // GET /api/forms/status?booking=[id]
-// Public — returns booking summary + whether forms have been submitted
 router.get("/forms/status", async (req, res) => {
   const bookingId = req.query.booking as string | undefined;
   if (!bookingId) return res.status(400).json({ error: "booking id required" });
@@ -19,16 +108,18 @@ router.get("/forms/status", async (req, res) => {
   if (!UUID_RE.test(bookingId)) return res.status(404).json({ error: "Booking not found" });
 
   try {
+    const cols = await getConsentCols();
+    const consentSelect = cols.has("signed_at") ? "id,signed_at" : "id";
+
     const [bkRow, medRow, conRow] = await Promise.all([
       supabaseAdmin.from("bookings").select("id,client_name,client_email,client_phone,treatment_id,treatments(name),booking_date,time_slot,status,location_id").eq("id", bookingId).maybeSingle(),
       supabaseAdmin.from("medical_forms").select("id,submitted_at").eq("booking_id", bookingId).maybeSingle(),
-      supabaseAdmin.from("consent_forms").select("id,signed_at").eq("booking_id", bookingId).maybeSingle(),
+      supabaseAdmin.from("consent_forms").select(consentSelect).eq("booking_id", bookingId).maybeSingle(),
     ]);
 
     if (bkRow.error) throw bkRow.error;
     if (!bkRow.data) return res.status(404).json({ error: "Booking not found" });
 
-    // Check if this client's email already has a medical form on file (from ANY booking)
     const emailMedRow = bkRow.data.client_email
       ? await supabaseAdmin.from("medical_forms").select("id,submitted_at").eq("client_email", bkRow.data.client_email).order("submitted_at", { ascending: false }).limit(1).maybeSingle()
       : { data: null };
@@ -48,7 +139,6 @@ router.get("/forms/status", async (req, res) => {
 });
 
 // POST /api/forms/medical
-// Public — saves medical form linked to a booking
 router.post("/forms/medical", async (req, res) => {
   const {
     bookingId, clientEmail, clientName, dob, address,
@@ -61,23 +151,46 @@ router.post("/forms/medical", async (req, res) => {
   }
 
   try {
-    const { data, error } = await supabaseAdmin.from("medical_forms").insert({
+    const cols = await getMedicalCols();
+
+    // Base insert — always-present columns
+    const insertData: Record<string, unknown> = {
       booking_id: bookingId,
       client_email: clientEmail,
       client_name: clientName,
-      dob: dob ?? null,
-      address: address ?? null,
-      gp_name: gpName ?? null,
-      gp_practice: gpPractice ?? null,
-      gp_phone: gpPhone ?? null,
-      conditions: conditions ?? [],
-      medications: medications ?? null,
-      allergies: allergies ?? null,
-      previous_treatments: previousTreatments ?? null,
-      skin_concerns: skinConcerns ?? null,
       ip_address: getIp(req),
-    }).select("id").single();
+    };
 
+    if (cols.has("address"))        insertData.address = address ?? null;
+    if (cols.has("gp_name"))        insertData.gp_name = gpName ?? null;
+    if (cols.has("medications"))    insertData.medications = medications ?? null;
+    if (cols.has("allergies"))      insertData.allergies = allergies ?? null;
+
+    // Extra columns — use proper columns if available, otherwise pack into medications
+    const hasFull = cols.has("dob") && cols.has("conditions") && cols.has("gp_practice");
+
+    if (hasFull) {
+      insertData.dob = dob ?? null;
+      insertData.gp_practice = gpPractice ?? null;
+      insertData.gp_phone = gpPhone ?? null;
+      insertData.conditions = conditions ?? [];
+      insertData.previous_treatments = previousTreatments ?? null;
+      insertData.skin_concerns = skinConcerns ?? null;
+    } else {
+      // Pack all extra data as JSON into the medications field
+      const packed = JSON.stringify({
+        medications: medications ?? null,
+        dob: dob ?? null,
+        gp_practice: gpPractice ?? null,
+        gp_phone: gpPhone ?? null,
+        conditions: conditions ?? [],
+        previous_treatments: previousTreatments ?? null,
+        skin_concerns: skinConcerns ?? null,
+      });
+      if (cols.has("medications")) insertData.medications = packed;
+    }
+
+    const { data, error } = await supabaseAdmin.from("medical_forms").insert(insertData).select("id").single();
     if (error) throw error;
     return res.json({ id: data.id });
   } catch (err) {
@@ -87,7 +200,6 @@ router.post("/forms/medical", async (req, res) => {
 });
 
 // POST /api/forms/consent
-// Public — saves consent form + signature
 router.post("/forms/consent", async (req, res) => {
   const {
     bookingId, clientEmail, clientName, treatment,
@@ -102,17 +214,35 @@ router.post("/forms/consent", async (req, res) => {
   }
 
   try {
-    const { data, error } = await supabaseAdmin.from("consent_forms").insert({
+    const cols = await getConsentCols();
+
+    const insertData: Record<string, unknown> = {
       booking_id: bookingId,
       client_email: clientEmail,
       client_name: clientName,
-      treatment: treatment ?? null,
-      consents: consents ?? {},
-      additional_notes: additionalNotes ?? null,
-      signature_data: signatureData,
       ip_address: getIp(req),
-    }).select("id").single();
+    };
 
+    const hasFull = cols.has("treatment") && cols.has("consents") && cols.has("signed_at");
+
+    if (hasFull) {
+      insertData.treatment = treatment ?? null;
+      insertData.consents = consents ?? {};
+      insertData.additional_notes = additionalNotes ?? null;
+      insertData.signed_at = new Date().toISOString();
+      insertData.signature_data = signatureData;
+    } else {
+      // Pack metadata into signature_data prefix: {JSON}|||{actual data URL}
+      const metadata = JSON.stringify({
+        treatment: treatment ?? null,
+        consents: consents ?? {},
+        additionalNotes: additionalNotes ?? null,
+        signed_at: new Date().toISOString(),
+      });
+      insertData.signature_data = `${metadata}|||${signatureData}`;
+    }
+
+    const { data, error } = await supabaseAdmin.from("consent_forms").insert(insertData).select("id").single();
     if (error) throw error;
     return res.json({ id: data.id });
   } catch (err) {
@@ -122,19 +252,16 @@ router.post("/forms/consent", async (req, res) => {
 });
 
 // GET /api/admin/forms/:bookingId — auth required, full form data for admin drawer
-router.get("/admin/forms/:bookingId", async (req, res) => {
-  if (!requireAuth(req, res)) return;
+router.get("/admin/forms/:bookingId", requireAuth, async (req, res) => {
   const { bookingId } = req.params;
-
   try {
     const [medRow, conRow] = await Promise.all([
       supabaseAdmin.from("medical_forms").select("*").eq("booking_id", bookingId).maybeSingle(),
       supabaseAdmin.from("consent_forms").select("*").eq("booking_id", bookingId).maybeSingle(),
     ]);
-
     return res.json({
-      medical: medRow.data ?? null,
-      consent: conRow.data ?? null,
+      medical: medRow.data ? expandMedical(medRow.data as Record<string, unknown>) : null,
+      consent: conRow.data ? expandConsent(conRow.data as Record<string, unknown>) : null,
     });
   } catch (err) {
     console.error("GET /api/admin/forms", err);
