@@ -14,18 +14,18 @@ export default function TreatmentMarquee() {
         .mq-ltr:hover, .mq-rtl:hover { animation-play-state: paused; }
       `}</style>
 
-      <div style={{ background: "#5C1A1A", overflow: "hidden" }}>
-        <div style={{ borderBottom: "1px solid rgba(201,169,110,0.25)", padding: "16px 0", overflow: "hidden" }}>
+      <div style={{ background: "#F5F0EB", overflow: "hidden" }}>
+        <div style={{ borderTop: "1px solid #E2DDD5", borderBottom: "1px solid #E2DDD5", padding: "14px 0", overflow: "hidden", marginBottom: 1 }}>
           <div className="mq-ltr" style={{ whiteSpace: "nowrap" }}>
             {[...row1, ...row1].map((item, i) => (
               <span key={i} style={{ display: "inline-flex", alignItems: "center" }}>
-                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, letterSpacing: "2px", textTransform: "uppercase", color: "#F5F0EB" }}>{item}</span>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, fontWeight: 400, letterSpacing: "2px", textTransform: "uppercase", color: "#3D3D3D" }}>{item}</span>
                 {sep}
               </span>
             ))}
           </div>
         </div>
-        <div style={{ padding: "16px 0", overflow: "hidden" }}>
+        <div style={{ borderBottom: "1px solid #E2DDD5", padding: "14px 0", overflow: "hidden" }}>
           <div className="mq-rtl" style={{ whiteSpace: "nowrap" }}>
             {[...row2, ...row2].map((item, i) => (
               <span key={i} style={{ display: "inline-flex", alignItems: "center" }}>
