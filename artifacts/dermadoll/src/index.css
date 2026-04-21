@@ -391,3 +391,70 @@ video::-webkit-media-controls-overlay-play-button {
     inset: -1px;
   }
 }
+/* ── Footer social section ─────────────────────────────────── */
+.footer-social-block {
+  max-width: 480px;
+  margin: 0 auto 32px;
+  padding: 0 8px;
+}
+
+.footer-social-headers {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 32px;
+  margin-bottom: 10px;
+}
+
+.footer-social-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 32px;
+  justify-items: start;   /* pills don't stretch to fill the cell */
+}
+
+.footer-social-pill {
+  width: fit-content !important;
+  display: inline-flex !important;
+  white-space: nowrap !important;
+}
+
+/* Mobile: keep 2 columns but tighten and allow wrapping */
+@media (max-width: 480px) {
+  .footer-social-block {
+    padding: 0 16px;
+  }
+
+  .footer-social-headers {
+    gap: 0 24px;
+  }
+
+  .footer-social-grid {
+    gap: 8px 24px;
+    /* Use auto columns so each column is only as wide as its widest pill */
+    grid-template-columns: auto auto;
+    justify-content: center;
+  }
+
+  .footer-social-pill {
+    font-size: 11px !important;
+    padding: 4px 10px !important;
+  }
+}
+
+@media (max-width: 360px) {
+  /* Very small screens: stack IG above TT by switching grid to 1 col
+     and using nth-child ordering via row placement */
+  .footer-social-headers {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .footer-social-headers > span:last-child {
+    margin-top: 16px;
+  }
+  .footer-social-grid {
+    grid-template-columns: 1fr;
+  }
+  /* Re-order: all IG pills (odd positions) before all TT (even) */
+  .footer-social-grid > *:nth-child(odd)  { order: 1; }
+  .footer-social-grid > *:nth-child(even) { order: 2; }
+}
