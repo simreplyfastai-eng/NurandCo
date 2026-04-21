@@ -125,6 +125,7 @@ export async function sendClientConfirmationEmail(params: {
   whatsapp: string;
   locationName?: string;
   locationAddress?: string;
+  formsUrl?: string;
 }): Promise<void> {
   const resend = getResend();
   if (!resend || !params.clientEmail) return;
@@ -156,6 +157,11 @@ export async function sendClientConfirmationEmail(params: {
            <p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#555;">Balance due on arrival: <strong style="color:#3D3D3D;">£${params.balance}</strong></p>`
         : `<p style="margin:0;font-family:Arial,sans-serif;font-size:13px;color:#555;">Balance due on arrival: <strong style="color:#3D3D3D;">£${params.balance}</strong></p>`
     )}
+    ${params.formsUrl ? `<div style="margin:24px 0;text-align:center;background:#FDF8F3;border-radius:8px;padding:20px 24px;border:1px solid #e8d9c4;">
+      <p style="margin:0 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#5C1A1A;font-weight:700;">Action Required — Complete Your Pre-Appointment Forms</p>
+      <p style="margin:0 0 14px;font-family:Arial,sans-serif;font-size:13px;color:#666;">Please complete your medical questionnaire and consent form before your appointment. This only takes 2–3 minutes.</p>
+      <a href="${params.formsUrl}" style="display:inline-block;background:#5C1A1A;color:#fff;text-decoration:none;font-family:Arial,sans-serif;font-size:13px;font-weight:700;padding:12px 28px;border-radius:6px;letter-spacing:0.03em;">Complete Forms &rarr;</a>
+    </div>` : ""}
     <p style="margin:20px 0 6px;font-family:Arial,sans-serif;font-size:13px;color:#888;text-align:center;">Please arrive 5 minutes early. To reschedule, contact us at least 24 hours in advance.</p>
     <p style="margin:6px 0;font-family:Arial,sans-serif;font-size:13px;color:#888;text-align:center;">WhatsApp: <a href="https://wa.me/${wa.replace(/\s/g,"")}" style="color:#C9A96E;text-decoration:none;">${wa}</a></p>
     ${smallPrint("Free cancellation 48 hours before your appointment.")}

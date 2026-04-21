@@ -209,6 +209,11 @@ router.post("/stripe/webhook", async (req, res) => {
           const totalAmount = Number(updated.total_amount ?? depositFromStripe);
 
           if (clientEmail) {
+            const publicDomain = process.env.REPLIT_DOMAINS?.split(",")[0]?.trim()
+              ?? process.env.REPLIT_DEV_DOMAIN?.trim();
+            const formsUrl = publicDomain && bookingId
+              ? `https://${publicDomain}/forms.html?booking=${bookingId}`
+              : undefined;
             sendClientConfirmationEmail({
               clientEmail,
               clientName: clientName ?? "",
@@ -222,6 +227,7 @@ router.post("/stripe/webhook", async (req, res) => {
               whatsapp,
               locationName: locationInfo?.name,
               locationAddress: locationInfo?.address,
+              formsUrl,
             }).catch(() => {});
           }
           if (adminEmail) {

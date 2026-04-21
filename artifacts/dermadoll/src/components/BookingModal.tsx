@@ -508,7 +508,10 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
     setSubmitting(true);
     setPaymentError("");
 
-    const returnUrl = `${window.location.origin}${window.location.pathname}?booking=confirmed`;
+    const bookingId = pendingBookingIdRef.current ?? "";
+    const base = import.meta.env.BASE_URL ?? "/";
+    const formsPath = base.endsWith("/") ? `${base}forms.html` : `${base}/forms.html`;
+    const returnUrl = `${window.location.origin}${formsPath}?booking=${encodeURIComponent(bookingId)}`;
 
     const { error } = await stripe.confirmPayment({
       elements,
@@ -526,8 +529,9 @@ export default function BookingModal({ treatment, onClose }: BookingModalProps) 
 
     // Payment succeeded — booking was already saved before payment was taken.
     // Stripe webhook will update status from "awaiting_payment" to "Confirmed".
+    // Redirect to pre-appointment forms page.
     setSubmitting(false);
-    setStep("success");
+    window.location.href = `${formsPath}?booking=${encodeURIComponent(bookingId)}`;
   };
 
   const formatDate = (d: Date) =>

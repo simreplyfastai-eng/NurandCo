@@ -68,6 +68,53 @@ INSERT INTO locations (id, slug, name, address)
 SELECT gen_random_uuid(), 'marylebone', 'Marylebone', 'Marylebone, London W1G'
 WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = 'marylebone');
 
+-- ── 4b. Medical forms table ────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS medical_forms (
+  id               UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  booking_id       TEXT NOT NULL,
+  client_email     TEXT NOT NULL,
+  client_name      TEXT NOT NULL,
+  dob              TEXT,
+  address          TEXT,
+  gp_name          TEXT,
+  gp_practice      TEXT,
+  gp_phone         TEXT,
+  conditions       JSONB DEFAULT '[]',
+  medications      TEXT,
+  allergies        TEXT,
+  previous_treatments TEXT,
+  skin_concerns    TEXT,
+  ip_address       TEXT,
+  submitted_at     TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_medical_forms_booking ON medical_forms(booking_id);
+CREATE INDEX IF NOT EXISTS idx_medical_forms_email   ON medical_forms(client_email);
+
+ALTER TABLE medical_forms ENABLE ROW LEVEL SECURITY;
+-- anon INSERT (customer submits); service_role bypasses RLS for admin reads
+CREATE POLICY IF NOT EXISTS "medical_forms_anon_insert"
+  ON medical_forms FOR INSERT TO anon WITH CHECK (true);
+
+-- ── 4c. Consent forms table ─────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS consent_forms (
+  id               UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  booking_id       TEXT NOT NULL,
+  client_email     TEXT NOT NULL,
+  client_name      TEXT NOT NULL,
+  treatment        TEXT,
+  consents         JSONB DEFAULT '{}',
+  additional_notes TEXT,
+  signature_data   TEXT,
+  ip_address       TEXT,
+  signed_at        TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_consent_forms_booking ON consent_forms(booking_id);
+CREATE INDEX IF NOT EXISTS idx_consent_forms_email   ON consent_forms(client_email);
+
+ALTER TABLE consent_forms ENABLE ROW LEVEL SECURITY;
+CREATE POLICY IF NOT EXISTS "consent_forms_anon_insert"
+  ON consent_forms FOR INSERT TO anon WITH CHECK (true);
+
 -- ── 5. Seed default availability for both locations ────────────────
 -- (0=Sun, 1=Mon, 2=Tue, 3=Wed, 4=Thu, 5=Fri, 6=Sat)
 DO $$

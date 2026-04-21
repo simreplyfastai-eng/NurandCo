@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<title>Pre-Appointment Forms — Starr Aesthetics</title>
+<style>
+:root{
+  --burgundy:#5C1A1A;
+  --burgundy-light:#7a2525;
+  --gold:#C9A96E;
+  --gold-light:#dfc090;
+  --cream:#F5F0EB;
+  --cream-dark:#ede5da;
+  --text:#1a1a1a;
+  --text-muted:#666;
+  --border:#e0d4c4;
+  --radius:10px;
+  --shadow:0 2px 16px rgba(92,26,26,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Helvetica Neue',Arial,sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+a{color:var(--burgundy)}
+
+/* Header */
+.hdr{background:var(--burgundy);padding:18px 20px;text-align:center}
+.hdr-logo{font-family:Georgia,serif;font-size:22px;color:var(--gold);letter-spacing:.08em;font-weight:400}
+.hdr-sub{font-size:11px;color:rgba(255,255,255,.65);letter-spacing:.15em;text-transform:uppercase;margin-top:3px}
+
+/* Progress */
+.progress-wrap{background:#fff;border-bottom:1px solid var(--border);padding:16px 20px}
+.progress-steps{display:flex;align-items:center;max-width:480px;margin:0 auto}
+.step-dot{display:flex;flex-direction:column;align-items:center;flex:1;position:relative}
+.step-dot:not(:last-child)::after{content:'';position:absolute;top:14px;left:50%;width:100%;height:2px;background:var(--border);z-index:0}
+.step-dot.done::after,.step-dot.active::after{background:var(--gold)}
+.dot-circle{width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--text-muted);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:1;position:relative}
+.step-dot.active .dot-circle{background:var(--burgundy);color:#fff}
+.step-dot.done .dot-circle{background:var(--gold);color:#fff}
+.step-label{font-size:10px;color:var(--text-muted);margin-top:5px;text-align:center;letter-spacing:.04em}
+.step-dot.active .step-label{color:var(--burgundy);font-weight:600}
+.step-dot.done .step-label{color:var(--gold)}
+
+/* Main layout */
+.main{max-width:540px;margin:0 auto;padding:20px 16px 60px}
+
+/* Booking summary */
+.booking-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin-bottom:20px;box-shadow:var(--shadow)}
+.booking-card-label{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px}
+.booking-card-name{font-size:16px;font-weight:700;color:var(--burgundy);margin-bottom:2px}
+.booking-card-detail{font-size:13px;color:var(--text-muted);line-height:1.6}
+
+/* Form card */
+.form-card{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px 20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.form-title{font-family:Georgia,serif;font-size:20px;color:var(--burgundy);margin-bottom:4px}
+.form-subtitle{font-size:13px;color:var(--text-muted);margin-bottom:20px;line-height:1.5}
+
+/* Returning client notice */
+.returning-notice{background:#f0faf0;border:1px solid #b3dab3;border-radius:var(--radius);padding:14px 16px;margin-bottom:16px;font-size:13px;color:#2a6a2a;line-height:1.5}
+.returning-notice strong{display:block;margin-bottom:3px}
+
+/* Section heading */
+.section-heading{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:600;margin:20px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--cream-dark)}
+.section-heading:first-of-type{margin-top:0}
+
+/* Fields */
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.field-row.single{grid-template-columns:1fr}
+.field{margin-bottom:14px}
+label{display:block;font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:5px;letter-spacing:.02em}
+input[type=text],input[type=email],input[type=tel],input[type=date],textarea,select{
+  width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;
+  font-size:14px;color:var(--text);background:#fff;
+  font-family:inherit;transition:border-color .15s;outline:none;
+}
+input:focus,textarea:focus,select:focus{border-color:var(--gold)}
+textarea{min-height:80px;resize:vertical;line-height:1.5}
+
+/* Checkbox list */
+.check-list{display:flex;flex-direction:column;gap:8px}
+.check-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;cursor:pointer;transition:border-color .15s,background .15s}
+.check-item:hover{border-color:var(--gold-light);background:rgba(201,169,110,.05)}
+.check-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--burgundy);flex-shrink:0;margin-top:1px;cursor:pointer}
+.check-item label{font-size:13px;color:var(--text);font-weight:400;cursor:pointer;line-height:1.4;margin:0}
+.check-item.checked{border-color:var(--burgundy);background:rgba(92,26,26,.04)}
+.check-item.none-apply{border-style:dashed}
+.check-item.none-apply.checked{border-color:var(--gold);background:rgba(201,169,110,.06)}
+
+/* Required consent items */
+.consent-required .check-item{border-color:var(--border)}
+.consent-required .check-item.checked{border-color:#2a6a2a;background:#f0faf0}
+
+/* Signature pad */
+.sig-wrap{border:2px dashed var(--border);border-radius:var(--radius);overflow:hidden;background:#fff;position:relative}
+.sig-wrap canvas{display:block;touch-action:none;width:100%;height:180px}
+.sig-actions{display:flex;gap:8px;margin-top:8px;justify-content:flex-end}
+.sig-clear{background:none;border:1px solid var(--border);border-radius:6px;padding:6px 14px;font-size:12px;color:var(--text-muted);cursor:pointer;font-family:inherit}
+.sig-clear:hover{border-color:var(--burgundy);color:var(--burgundy)}
+.sig-hint{font-size:11px;color:var(--text-muted);text-align:center;padding:8px;background:var(--cream);border-top:1px solid var(--border)}
+
+/* Declaration */
+.declaration{background:var(--cream);border-radius:var(--radius);padding:14px 16px;font-size:12px;color:var(--text-muted);line-height:1.6;margin-top:4px}
+
+/* Buttons */
+.btn-primary{
+  width:100%;padding:14px;background:var(--burgundy);color:#fff;
+  border:none;border-radius:var(--radius);font-size:15px;font-weight:700;
+  font-family:inherit;cursor:pointer;letter-spacing:.03em;transition:background .15s;
+  margin-top:8px;
+}
+.btn-primary:hover{background:var(--burgundy-light)}
+.btn-primary:disabled{background:#ccc;cursor:not-allowed}
+.btn-secondary{
+  width:100%;padding:12px;background:#fff;color:var(--burgundy);
+  border:1.5px solid var(--burgundy);border-radius:var(--radius);font-size:14px;font-weight:600;
+  font-family:inherit;cursor:pointer;margin-top:8px;transition:background .15s;
+}
+.btn-secondary:hover{background:var(--cream)}
+
+/* Error / info */
+.error-msg{background:#fff0f0;border:1px solid #ffb3b3;border-radius:8px;padding:12px 14px;font-size:13px;color:#b30000;margin-top:8px;line-height:1.5}
+.info-msg{background:#fffbf0;border:1px solid #f0d48a;border-radius:8px;padding:12px 14px;font-size:13px;color:#7a5900;margin-top:8px;line-height:1.5}
+
+/* Loading state */
+.loading-wrap{text-align:center;padding:60px 20px}
+.spinner{width:32px;height:32px;border:3px solid var(--cream-dark);border-top-color:var(--burgundy);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-wrap p{color:var(--text-muted);font-size:14px}
+
+/* Error page */
+.error-page{text-align:center;padding:60px 20px}
+.error-page h2{font-family:Georgia,serif;color:var(--burgundy);margin-bottom:10px}
+.error-page p{color:var(--text-muted);font-size:14px;line-height:1.6}
+
+/* GDPR footer */
+.gdpr-footer{text-align:center;font-size:11px;color:var(--text-muted);margin-top:20px;line-height:1.6;padding:0 4px}
+
+@media(max-width:420px){
+  .field-row{grid-template-columns:1fr}
+  .hdr-logo{font-size:19px}
+  .form-title{font-size:18px}
+}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-logo">Starr Aesthetics</div>
+  <div class="hdr-sub">Pre-Appointment Forms</div>
+</div>
+
+<div class="progress-wrap">
+  <div class="progress-steps">
+    <div class="step-dot" id="p-step1">
+      <div class="dot-circle">1</div>
+      <div class="step-label">Medical</div>
+    </div>
+    <div class="step-dot" id="p-step2">
+      <div class="dot-circle">2</div>
+      <div class="step-label">Consent</div>
+    </div>
+    <div class="step-dot" id="p-step3">
+      <div class="dot-circle">✓</div>
+      <div class="step-label">Complete</div>
+    </div>
+  </div>
+</div>
+
+<div class="main" id="main-content">
+  <div class="loading-wrap">
+    <div class="spinner"></div>
+    <p>Loading your appointment details…</p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+<script>
+const params = new URLSearchParams(location.search);
+const BOOKING_ID = params.get('booking') || '';
+let bookingData = null;
+let signaturePad = null;
+let isReturningClient = false;
+
+// ── Progress dots ──────────────────────────────────────────────
+function setProgress(active) {
+  const steps = ['p-step1','p-step2','p-step3'];
+  steps.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = 'step-dot';
+    if (i + 1 < active) el.classList.add('done');
+    else if (i + 1 === active) el.classList.add('active');
+  });
+}
+
+// ── Render helpers ─────────────────────────────────────────────
+function field(id, label, inputHtml, required=false) {
+  return `<div class="field">
+    <label for="${id}">${label}${required?' <span style="color:var(--burgundy)">*</span>':''}</label>
+    ${inputHtml}
+  </div>`;
+}
+function text(id, placeholder='', value='', required=false) {
+  return `<input type="text" id="${id}" placeholder="${placeholder}" value="${escHtml(value)}"${required?' required':''}>`;
+}
+function email(id, value='') {
+  return `<input type="email" id="${id}" value="${escHtml(value)}" required>`;
+}
+function tel(id, value='') {
+  return `<input type="tel" id="${id}" value="${escHtml(value)}">`;
+}
+function dateInput(id, value='') {
+  return `<input type="date" id="${id}" value="${escHtml(value)}">`;
+}
+function textarea(id, placeholder='', value='') {
+  return `<textarea id="${id}" placeholder="${placeholder}">${escHtml(value)}</textarea>`;
+}
+function escHtml(s) {
+  if (!s) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Medical conditions list ─────────────────────────────────────
+const CONDITIONS = [
+  { id:'heart',       label:'Heart condition or pacemaker' },
+  { id:'clotting',    label:'Blood clotting disorder or DVT / previous stroke' },
+  { id:'autoimmune',  label:'Autoimmune condition (lupus, rheumatoid arthritis, etc.)' },
+  { id:'diabetes',    label:'Diabetes (Type 1 or Type 2)' },
+  { id:'epilepsy',    label:'Epilepsy or seizures' },
+  { id:'herpes',      label:'Herpes / cold sores (especially relevant for lip treatments)' },
+  { id:'hiv',         label:'HIV, Hepatitis B or Hepatitis C' },
+  { id:'cancer',      label:'Current or recent cancer / undergoing chemotherapy' },
+  { id:'pregnant',    label:'Pregnant or breastfeeding' },
+  { id:'thinners',    label:'Taking blood-thinning medication (warfarin, aspirin, ibuprofen)' },
+  { id:'steroids',    label:'Taking steroids or immunosuppressant medication' },
+  { id:'surgery',     label:'Recent surgery or scarring in the treatment area' },
+  { id:'skin',        label:'Skin condition in treatment area (eczema, psoriasis, rosacea, active acne)' },
+  { id:'keloid',      label:'History of keloid or raised scarring' },
+];
+
+function renderConditionList() {
+  let html = CONDITIONS.map(c => `
+    <div class="check-item" id="cond-wrap-${c.id}" onclick="toggleCond('${c.id}')">
+      <input type="checkbox" id="cond-${c.id}" name="conditions" value="${c.id}" onclick="event.stopPropagation();toggleCond('${c.id}')">
+      <label for="cond-${c.id}">${c.label}</label>
+    </div>`).join('');
+  html += `<div class="check-item none-apply" id="cond-wrap-none" onclick="toggleCond('none')">
+      <input type="checkbox" id="cond-none" name="conditions" value="none" onclick="event.stopPropagation();toggleCond('none')">
+      <label for="cond-none" style="font-weight:600;color:var(--text-muted)">None of the above apply to me</label>
+    </div>`;
+  return html;
+}
+function toggleCond(id) {
+  const cb = document.getElementById('cond-' + id);
+  cb.checked = !cb.checked;
+  document.getElementById('cond-wrap-' + id).classList.toggle('checked', cb.checked);
+  if (id === 'none' && cb.checked) {
+    CONDITIONS.forEach(c => {
+      const el = document.getElementById('cond-' + c.id);
+      if (el) { el.checked = false; document.getElementById('cond-wrap-' + c.id).classList.remove('checked'); }
+    });
+  } else if (id !== 'none') {
+    const none = document.getElementById('cond-none');
+    if (none && none.checked) { none.checked = false; document.getElementById('cond-wrap-none').classList.remove('checked'); }
+  }
+}
+
+// ── Consent items ──────────────────────────────────────────────
+const CONSENT_REQUIRED = [
+  { id:'informed',    label:'I have been fully informed about my treatment, including the procedure, expected results, and recovery.' },
+  { id:'risks',       label:'I understand that aesthetic treatments carry risks including bruising, swelling, temporary asymmetry, and rare complications.' },
+  { id:'not_pregnant',label:'I confirm I am not currently pregnant or breastfeeding (unless declared in my medical form).' },
+  { id:'no_alcohol',  label:'I have not consumed alcohol in the 24 hours prior to my appointment.' },
+  { id:'no_thinners', label:'I have not taken ibuprofen, aspirin, or blood-thinning medication in the 24 hours before my appointment unless medically required.' },
+  { id:'results',     label:'I understand that results are not guaranteed and a top-up or follow-up treatment may be required.' },
+  { id:'accurate',    label:'I confirm that all health information provided in this form is true, complete, and accurate.' },
+  { id:'consent',     label:'I consent to receive the treatment discussed and agree to the outlined treatment plan.' },
+];
+const CONSENT_OPTIONAL = [
+  { id:'photo_clinical', label:'I consent to before-and-after photographs being taken for clinical records purposes.' },
+  { id:'photo_marketing',label:'I consent to anonymous photographs being used for marketing and social media purposes (optional).' },
+];
+
+function renderConsentList() {
+  let html = '<div class="consent-required check-list">';
+  html += CONSENT_REQUIRED.map(c => `
+    <div class="check-item" id="cst-wrap-${c.id}" onclick="toggleCst('${c.id}')">
+      <input type="checkbox" id="cst-${c.id}" onclick="event.stopPropagation();toggleCst('${c.id}')">
+      <label for="cst-${c.id}">${c.label}</label>
+    </div>`).join('');
+  html += '</div>';
+  html += '<div class="section-heading" style="margin-top:16px">Photography &amp; Optional</div>';
+  html += '<div class="check-list">';
+  html += CONSENT_OPTIONAL.map(c => `
+    <div class="check-item" id="cst-wrap-${c.id}" onclick="toggleCst('${c.id}')">
+      <input type="checkbox" id="cst-${c.id}" onclick="event.stopPropagation();toggleCst('${c.id}')">
+      <label for="cst-${c.id}">${c.label}</label>
+    </div>`).join('');
+  html += '</div>';
+  return html;
+}
+function toggleCst(id) {
+  const cb = document.getElementById('cst-' + id);
+  cb.checked = !cb.checked;
+  document.getElementById('cst-wrap-' + id).classList.toggle('checked', cb.checked);
+}
+
+// ── Signature pad ──────────────────────────────────────────────
+function initSignaturePad() {
+  const canvas = document.getElementById('sig-canvas');
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  // Set canvas resolution
+  function resizeCanvas() {
+    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const w = wrap.offsetWidth;
+    canvas.width = w * ratio;
+    canvas.height = 180 * ratio;
+    canvas.style.width = w + 'px';
+    canvas.style.height = '180px';
+    canvas.getContext('2d').scale(ratio, ratio);
+    if (signaturePad) signaturePad.clear();
+  }
+  signaturePad = new SignaturePad(canvas, {
+    penColor: '#1a1a1a',
+    backgroundColor: 'rgba(255,255,255,1)',
+    minWidth: 1,
+    maxWidth: 2.5,
+  });
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+}
+
+// ── Step 1: Medical form ────────────────────────────────────────
+function renderMedical() {
+  setProgress(1);
+  const bk = bookingData.booking;
+  const main = document.getElementById('main-content');
+
+  let returningHtml = '';
+  if (isReturningClient) {
+    returningHtml = `<div class="returning-notice">
+      <strong>Welcome back!</strong>
+      We already have your health information on file from a previous appointment. You can go straight to the consent form — or scroll down to update any details before continuing.
+    </div>`;
+  }
+
+  main.innerHTML = `
+    ${isReturningClient ? `<div class="returning-notice">
+      <strong>Welcome back!</strong>
+      We already have your health information on file. Please complete the consent form for your upcoming appointment.
+      <br><button class="btn-primary" style="margin-top:12px" onclick="renderConsent()">Continue to Consent Form &rarr;</button>
+    </div>
+    <div class="form-card" style="opacity:.7">
+      <div class="form-title">Update Health Information</div>
+      <div class="form-subtitle">Optionally update your details below, then continue.</div>
+    </div>` : ''}
+    <div class="form-card" ${isReturningClient ? 'id="medical-form-card" style="display:none"' : ''}>
+      <div class="form-title">Health &amp; Medical Form</div>
+      <div class="form-subtitle">Please complete this form honestly. All information is stored securely and is only used to ensure your treatment is safe and appropriate for you.</div>
+
+      <div class="section-heading">Personal Details</div>
+      <div class="field-row">
+        ${field('f-name','Full Name',text('f-name','',bk.client_name,true),true)}
+        ${field('f-dob','Date of Birth',dateInput('f-dob',''))}
+      </div>
+      ${field('f-address','Address',text('f-address','Your home address'))}
+      <div class="field-row">
+        ${field('f-email','Email',email('f-email',bk.client_email))}
+        ${field('f-phone','Phone',tel('f-phone',bk.client_phone||''))}
+      </div>
+
+      <div class="section-heading">GP Details</div>
+      <div class="field-row">
+        ${field('f-gp-name','GP Name',text('f-gp-name','Dr...'))}
+        ${field('f-gp-practice','GP Practice',text('f-gp-practice','Surgery / practice name'))}
+      </div>
+      ${field('f-gp-phone','GP Phone / Address',text('f-gp-phone','Practice contact number'))}
+
+      <div class="section-heading">Medical History — Please tick all that apply</div>
+      <div class="check-list" id="conditions-list">
+        ${renderConditionList()}
+      </div>
+
+      <div class="section-heading">Additional Information</div>
+      ${field('f-meds','Current Medications',textarea('f-meds','List any prescription or over-the-counter medications you are currently taking, or write "None"'))}
+      ${field('f-allergies','Known Allergies',textarea('f-allergies','Include allergies to medications, anaesthetics, latex, metals, or skincare ingredients, or write "None"'))}
+      ${field('f-prev','Previous Aesthetic Treatments',textarea('f-prev','Have you had any fillers, botox, peels, or other aesthetic treatments before?'))}
+      ${field('f-concerns','Skin Concerns / Goals',textarea('f-concerns','What are your main concerns or goals for today\'s treatment?'))}
+
+      <div id="med-error"></div>
+      <button class="btn-primary" onclick="submitMedical()">Save &amp; Continue to Consent Form &rarr;</button>
+    </div>
+    <div class="gdpr-footer">Your information is stored securely and encrypted. We process your data in accordance with UK GDPR. <a href="#">Privacy Policy</a></div>
+  `;
+}
+
+// ── Submit medical form ─────────────────────────────────────────
+async function submitMedical() {
+  const bk = bookingData.booking;
+  const name = document.getElementById('f-name')?.value?.trim();
+  const email = document.getElementById('f-email')?.value?.trim();
+  if (!name || !email) {
+    showError('med-error','Please enter your full name and email address.');
+    return;
+  }
+  const checkedConditions = [...document.querySelectorAll('#conditions-list input[type=checkbox]:checked')].map(el=>el.value);
+  const btn = document.querySelector('button.btn-primary[onclick="submitMedical()"]');
+  btn.disabled = true;
+  btn.textContent = 'Saving…';
+  try {
+    const res = await fetch('/api/forms/medical', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        bookingId: BOOKING_ID,
+        clientEmail: email,
+        clientName: name,
+        dob: document.getElementById('f-dob')?.value || null,
+        address: document.getElementById('f-address')?.value?.trim() || null,
+        gpName: document.getElementById('f-gp-name')?.value?.trim() || null,
+        gpPractice: document.getElementById('f-gp-practice')?.value?.trim() || null,
+        gpPhone: document.getElementById('f-gp-phone')?.value?.trim() || null,
+        conditions: checkedConditions,
+        medications: document.getElementById('f-meds')?.value?.trim() || null,
+        allergies: document.getElementById('f-allergies')?.value?.trim() || null,
+        previousTreatments: document.getElementById('f-prev')?.value?.trim() || null,
+        skinConcerns: document.getElementById('f-concerns')?.value?.trim() || null,
+      }),
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to save');
+    renderConsent();
+  } catch(e) {
+    showError('med-error', e.message || 'Something went wrong. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Save & Continue to Consent Form →';
+  }
+}
+
+// ── Step 2: Consent form ────────────────────────────────────────
+function renderConsent() {
+  setProgress(2);
+  const bk = bookingData.booking;
+  const treatment = bk.treatment || 'your treatment';
+
+  const mainEl = document.getElementById('main-content');
+  mainEl.innerHTML = `
+    <div class="form-card">
+      <div class="form-title">Consent &amp; Declaration</div>
+      <div class="form-subtitle">Please read each statement carefully and tick to confirm your understanding and agreement before signing.</div>
+
+      <div class="section-heading">Informed Consent — All Required</div>
+      <div id="consent-list">${renderConsentList()}</div>
+
+      <div class="section-heading" style="margin-top:20px">Additional Notes</div>
+      ${field('c-notes','Anything else you\'d like us to know',textarea('c-notes','Any questions, concerns, or information you\'d like to share before your appointment…'))}
+
+      <div class="section-heading" style="margin-top:20px">Signature</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:10px;line-height:1.5">By signing below, I confirm that I have read, understood, and agreed to all of the above statements, and that the information I have provided is truthful and complete.</p>
+      <div class="sig-wrap">
+        <canvas id="sig-canvas"></canvas>
+        <div class="sig-hint">Sign here using your finger or mouse</div>
+      </div>
+      <div class="sig-actions">
+        <button class="sig-clear" onclick="clearSig()">Clear Signature</button>
+      </div>
+
+      <div class="declaration">
+        I, <strong>${escHtml(bk.client_name || '')}</strong>, consent to receive <strong>${escHtml(treatment)}</strong> at Starr Aesthetics on ${escHtml(formatDate(bk.date))}. I confirm I have read and agreed to the above statements.
+      </div>
+
+      <div id="consent-error"></div>
+      <button class="btn-primary" onclick="submitConsent()">Sign &amp; Submit Forms</button>
+      <button class="btn-secondary" onclick="goBack()">← Back to Medical Form</button>
+    </div>
+    <div class="gdpr-footer">Your signature is stored as an encrypted image. All data is held in accordance with UK GDPR and retained for 7 years as required for medical/aesthetic records.</div>
+  `;
+
+  setTimeout(() => initSignaturePad(), 100);
+}
+
+function clearSig() {
+  if (signaturePad) signaturePad.clear();
+}
+
+function goBack() {
+  if (isReturningClient) {
+    renderConsent(); // returning clients only do consent, no going further back
+  } else {
+    renderMedical();
+  }
+}
+
+// ── Submit consent form ─────────────────────────────────────────
+async function submitConsent() {
+  const bk = bookingData.booking;
+  // Validate all required consents are checked
+  const missing = CONSENT_REQUIRED.filter(c => !document.getElementById('cst-' + c.id)?.checked);
+  if (missing.length > 0) {
+    showError('consent-error', 'Please read and tick all required consent statements before signing.');
+    return;
+  }
+  if (!signaturePad || signaturePad.isEmpty()) {
+    showError('consent-error', 'Please sign the form before submitting.');
+    return;
+  }
+
+  const consentsObj = {};
+  [...CONSENT_REQUIRED, ...CONSENT_OPTIONAL].forEach(c => {
+    consentsObj[c.id] = !!document.getElementById('cst-' + c.id)?.checked;
+  });
+
+  const btn = document.querySelector('button.btn-primary[onclick="submitConsent()"]');
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+
+  try {
+    const res = await fetch('/api/forms/consent', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        bookingId: BOOKING_ID,
+        clientEmail: bk.client_email,
+        clientName: bk.client_name,
+        treatment: bk.treatment,
+        consents: consentsObj,
+        additionalNotes: document.getElementById('c-notes')?.value?.trim() || null,
+        signatureData: signaturePad.toDataURL('image/png'),
+      }),
+    });
+    if (!res.ok) throw new Error((await res.json()).error || 'Failed to submit');
+    // Success — go to confirmed page
+    window.location.href = 'confirmed.html?booking=' + encodeURIComponent(BOOKING_ID);
+  } catch(e) {
+    showError('consent-error', e.message || 'Something went wrong. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Sign & Submit Forms';
+  }
+}
+
+// ── Helpers ─────────────────────────────────────────────────────
+function showError(containerId, msg) {
+  const el = document.getElementById(containerId);
+  if (el) el.innerHTML = `<div class="error-msg">${escHtml(msg)}</div>`;
+  el?.scrollIntoView({ behavior:'smooth', block:'nearest' });
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return 'your appointment';
+  try {
+    const d = new Date(dateStr + 'T12:00:00');
+    return d.toLocaleDateString('en-GB', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
+  } catch { return dateStr; }
+}
+
+// ── Init ────────────────────────────────────────────────────────
+async function init() {
+  if (!BOOKING_ID) {
+    document.getElementById('main-content').innerHTML = `
+      <div class="error-page">
+        <h2>No booking found</h2>
+        <p>This link doesn't appear to have a valid booking reference.<br>Please check your confirmation email and try again.</p>
+      </div>`;
+    return;
+  }
+
+  try {
+    const res = await fetch('/api/forms/status?booking=' + encodeURIComponent(BOOKING_ID));
+    if (!res.ok) throw new Error('Booking not found');
+    const data = await res.json();
+    bookingData = data;
+
+    // If both forms already done → go to confirmed
+    if (data.hasConsent) {
+      window.location.href = 'confirmed.html?booking=' + encodeURIComponent(BOOKING_ID);
+      return;
+    }
+
+    // If client already has a medical form from a previous booking → skip medical
+    isReturningClient = data.medicalOnFileForEmail && !data.hasMedical;
+
+    if (data.hasMedical || isReturningClient) {
+      // Show consent form directly (or offer choice)
+      if (isReturningClient) {
+        renderMedical(); // renders with returning notice + skip button
+      } else {
+        renderConsent();
+      }
+    } else {
+      renderMedical();
+    }
+  } catch(e) {
+    document.getElementById('main-content').innerHTML = `
+      <div class="error-page">
+        <h2>Booking not found</h2>
+        <p>We couldn't find your appointment details.<br>If you believe this is an error, please contact us on WhatsApp or email.</p>
+      </div>`;
+  }
+}
+
+init();
+</script>
+</body>
+</html>

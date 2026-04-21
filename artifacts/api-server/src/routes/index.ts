@@ -13,6 +13,7 @@ import stripeRouter from "./stripe";
 import locationsRouter from "./locations";
 import treatmentsRouter from "./treatments-route";
 import adminRouter from "./admin";
+import formsRouter from "./forms";
 
 const router: IRouter = Router();
 
@@ -30,5 +31,6 @@ router.use(financeRouter);
 router.use(clientsRouter);
 router.use(enquiriesRouter);
 router.use(stripeRouter);
+router.use(formsRouter);
 
 export default router;

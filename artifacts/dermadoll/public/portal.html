@@ -90,6 +90,7 @@ h1,h2,h3,h4,.serif{font-family:var(--font-serif);font-style:italic;font-weight:4
 .login-btn:disabled{opacity:.4;cursor:not-allowed}
 .login-error{font-family:var(--font-sans);font-size:12px;color:var(--color-destructive);text-align:center;margin-top:12px;min-height:18px}
 @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .shake{animation:shake .4s ease}
 
 /* ── PORTAL LAYOUT ──────────────────────────────── */
@@ -448,21 +449,46 @@ tr:hover td{background:rgba(92,26,26,.02)}
 .bk-date-day{font-size:12px;font-weight:500;color:var(--color-foreground)}
 .bk-date-time{font-size:11px;font-weight:300;color:var(--color-muted-fg)}
 .bk-status-pill{font-family:var(--font-sans);font-size:11px;font-weight:400;padding:3px 10px;border-radius:var(--radius-pill);display:inline-block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
-#bk-all-table .bk-col-date{width:18%}
-#bk-all-table .bk-col-client{width:20%}
-#bk-all-table .bk-col-treat{width:28%}
-#bk-all-table .bk-col-price{width:12%;text-align:right}
-#bk-all-table .bk-col-dep{width:12%;text-align:center}
+#bk-all-table .bk-col-date{width:16%}
+#bk-all-table .bk-col-client{width:18%}
+#bk-all-table .bk-col-treat{width:26%}
+#bk-all-table .bk-col-price{width:11%;text-align:right}
+#bk-all-table .bk-col-dep{width:11%;text-align:center}
 #bk-all-table .bk-col-status{width:10%;text-align:center}
+#bk-all-table .bk-col-forms{width:8%;text-align:center}
 #bk-all-table tbody tr:hover td{background:rgba(92,26,26,.02)}
+.form-icon-btn{background:none;border:none;cursor:pointer;font-size:15px;padding:3px 4px;border-radius:4px;opacity:.4;transition:opacity .15s}
+.form-icon-btn:hover{opacity:1;background:rgba(92,26,26,.07)}
+.form-icon-btn.has-form{opacity:.85}
 @media(max-width:650px){
-  #bk-all-table .bk-col-treat,#bk-all-table .bk-col-dep{display:none}
-  #bk-all-table .bk-col-date{width:28%}
+  #bk-all-table .bk-col-treat,#bk-all-table .bk-col-dep,#bk-all-table .bk-col-forms{display:none}
+  #bk-all-table .bk-col-date{width:26%}
   #bk-all-table .bk-col-client{width:38%}
   #bk-all-table .bk-col-price{width:20%}
-  #bk-all-table .bk-col-status{width:14%}
+  #bk-all-table .bk-col-status{width:16%}
   .bk-status-pill{max-width:70px;font-size:9px;padding:3px 6px}
 }
+/* Forms drawer */
+#forms-drawer{position:fixed;top:0;right:0;height:100%;width:420px;max-width:100vw;background:#fff;box-shadow:-4px 0 32px rgba(0,0,0,.18);z-index:600;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
+#forms-drawer.open{transform:translateX(0)}
+.fd-hdr{padding:18px 20px;border-bottom:1px solid #e8e0d8;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--color-primary)}
+.fd-hdr-title{font-family:var(--font-serif);font-size:16px;color:#fff;font-weight:400}
+.fd-close{background:none;border:none;cursor:pointer;color:rgba(255,255,255,.8);font-size:20px;line-height:1;padding:4px}
+.fd-body{flex:1;overflow-y:auto;padding:20px}
+.fd-section{margin-bottom:20px}
+.fd-section-title{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#C9A96E;font-weight:600;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #f0e8dc}
+.fd-row{display:flex;gap:8px;margin-bottom:8px;font-size:13px}
+.fd-label{width:38%;color:#888;font-weight:500;flex-shrink:0;font-size:12px}
+.fd-val{flex:1;color:#222;line-height:1.45;word-break:break-word}
+.fd-tag-list{display:flex;flex-wrap:wrap;gap:4px;margin-top:2px}
+.fd-tag{background:#fff0f0;color:var(--color-primary);border-radius:4px;padding:2px 8px;font-size:11px;font-weight:600}
+.fd-sig{max-width:100%;border:1px solid #e8e0d8;border-radius:6px;margin-top:6px}
+.fd-empty{color:#aaa;font-size:13px;font-style:italic;text-align:center;padding:20px 0}
+.fd-tabs{display:flex;border-bottom:2px solid #e8e0d8;margin-bottom:16px}
+.fd-tab{flex:1;text-align:center;padding:10px;font-size:13px;cursor:pointer;font-family:var(--font-sans);background:none;border:none;color:#888;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s,border-color .15s}
+.fd-tab.active{color:var(--color-primary);border-bottom-color:var(--color-primary);font-weight:700}
+#forms-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.3);z-index:599}
+#forms-overlay.open{display:block}
 .fin-export-btn{width:100%;border:1px solid var(--color-border);color:var(--color-muted-fg);background:transparent;border-radius:var(--radius);padding:12px;font-family:var(--font-sans);font-size:13px;font-weight:300;cursor:pointer;margin-top:16px;transition:border-color var(--transition-base),color var(--transition-base);display:block}
 .fin-export-btn:hover{border-color:var(--color-primary);color:var(--color-primary)}
 
@@ -801,6 +827,7 @@ select.form-input{background:var(--color-card)}
                 <th class="bk-col-price">Price</th>
                 <th class="bk-col-dep">Deposit</th>
                 <th class="bk-col-status">Status</th>
+                <th class="bk-col-forms">Forms</th>
               </tr>
             </thead>
             <tbody id="bk-all-body"></tbody>
@@ -2043,6 +2070,9 @@ function renderBookings(){
       <td class="bk-col-price" style="font-weight:700;color:var(--color-secondary)">${gbp(b.price)}</td>
       <td class="bk-col-dep">${dep}</td>
       <td class="bk-col-status"><span class="bk-status-pill" style="${style}">${b.status}</span></td>
+      <td class="bk-col-forms" onclick="event.stopPropagation()">
+        <button class="form-icon-btn" title="View Forms" onclick="openFormsDrawer('${b.id}','${(b.clientName||'').replace(/'/g,'&apos;')}')">📋</button>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -4455,6 +4485,156 @@ async function loadLaunchChecklist(){
     setStripeBadge(false);
   }
 }
+
+// ═══════════════════════════════════════════════════
+// FORMS DRAWER
+// ═══════════════════════════════════════════════════
+let formsDrawerBookingId = null;
+let formsDrawerTab = 'medical';
+
+function openFormsDrawer(bookingId, clientName) {
+  formsDrawerBookingId = bookingId;
+  formsDrawerTab = 'medical';
+  const drawer = document.getElementById('forms-drawer');
+  const overlay = document.getElementById('forms-overlay');
+  if (!drawer) return;
+  document.getElementById('fd-title').textContent = (clientName || 'Booking') + ' — Forms';
+  document.getElementById('fd-body-content').innerHTML = '<div style="text-align:center;padding:40px 0"><div style="width:28px;height:28px;border:3px solid #f0e8dc;border-top-color:#5C1A1A;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 12px"></div><p style="color:#aaa;font-size:13px">Loading…</p></div>';
+  drawer.classList.add('open');
+  if (overlay) { overlay.style.display = 'block'; setTimeout(()=>overlay.classList.add('open'), 10); }
+  loadFormsData(bookingId);
+}
+
+function closeFormsDrawer() {
+  const drawer = document.getElementById('forms-drawer');
+  const overlay = document.getElementById('forms-overlay');
+  if (drawer) drawer.classList.remove('open');
+  if (overlay) { overlay.classList.remove('open'); setTimeout(()=>{overlay.style.display='none';},300); }
+  formsDrawerBookingId = null;
+}
+
+async function loadFormsData(bookingId) {
+  try {
+    const res = await fetch('/api/admin/forms/' + encodeURIComponent(bookingId), {
+      headers: authHdr()
+    });
+    if (!res.ok) throw new Error('Failed to load');
+    const data = await res.json();
+    renderFormsDrawer(data);
+  } catch(e) {
+    document.getElementById('fd-body-content').innerHTML = '<p style="color:#c00;font-size:13px;text-align:center;padding:20px">Failed to load form data. Please try again.</p>';
+  }
+}
+
+function setFormsTab(tab) {
+  formsDrawerTab = tab;
+  document.querySelectorAll('.fd-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+  document.querySelectorAll('.fd-panel').forEach(p => p.style.display = p.dataset.panel === tab ? '' : 'none');
+}
+
+function renderFormsDrawer(data) {
+  const { medical, consent } = data;
+  const hasMed = !!medical;
+  const hasCon = !!consent;
+
+  function row(label, value) {
+    if (!value) return '';
+    return `<div class="fd-row"><div class="fd-label">${label}</div><div class="fd-val">${escPortal(String(value))}</div></div>`;
+  }
+  function escPortal(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  function fmtDate(s) {
+    if (!s) return '—';
+    try { return new Date(s).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); } catch { return s; }
+  }
+
+  // Medical panel
+  let medHtml = '';
+  if (!hasMed) {
+    medHtml = '<div class="fd-empty">Medical form not yet submitted</div>';
+  } else {
+    const conds = Array.isArray(medical.conditions) ? medical.conditions : [];
+    const condLabels = conds.map(c => c === 'none' ? 'None of the above' : c).filter(Boolean);
+    medHtml = `
+      <div class="fd-section">
+        <div class="fd-section-title">Personal Details</div>
+        ${row('Full Name', medical.client_name)}
+        ${row('Date of Birth', medical.dob)}
+        ${row('Address', medical.address)}
+        ${row('Email', medical.client_email)}
+        ${row('Submitted', fmtDate(medical.submitted_at))}
+        ${row('IP Address', medical.ip_address)}
+      </div>
+      <div class="fd-section">
+        <div class="fd-section-title">GP Details</div>
+        ${row('GP Name', medical.gp_name)}
+        ${row('GP Practice', medical.gp_practice)}
+        ${row('GP Phone', medical.gp_phone)}
+      </div>
+      <div class="fd-section">
+        <div class="fd-section-title">Medical History</div>
+        ${condLabels.length ? `<div class="fd-tag-list">${condLabels.map(c=>`<span class="fd-tag">${escPortal(c)}</span>`).join('')}</div>` : '<div class="fd-val" style="color:#aaa;font-size:13px">None declared</div>'}
+      </div>
+      <div class="fd-section">
+        <div class="fd-section-title">Additional Information</div>
+        ${row('Medications', medical.medications)}
+        ${row('Allergies', medical.allergies)}
+        ${row('Prev. Treatments', medical.previous_treatments)}
+        ${row('Skin Concerns', medical.skin_concerns)}
+      </div>`;
+  }
+
+  // Consent panel
+  let conHtml = '';
+  if (!hasCon) {
+    conHtml = '<div class="fd-empty">Consent form not yet submitted</div>';
+  } else {
+    const consents = consent.consents || {};
+    const consentLabels = {
+      informed:'Informed about treatment',risks:'Understands risks',
+      not_pregnant:'Not pregnant/breastfeeding',no_alcohol:'No alcohol 24hrs',
+      no_thinners:'No blood thinners 24hrs',results:'Understands results not guaranteed',
+      accurate:'Information is accurate',consent:'Consents to treatment',
+      photo_clinical:'Photo consent (clinical)',photo_marketing:'Photo consent (marketing)',
+    };
+    const agreedItems = Object.entries(consents).filter(([,v])=>v).map(([k])=>consentLabels[k]||k);
+    conHtml = `
+      <div class="fd-section">
+        <div class="fd-section-title">Consent Declaration</div>
+        ${row('Signed', fmtDate(consent.signed_at))}
+        ${row('IP Address', consent.ip_address)}
+        ${row('Treatment', consent.treatment)}
+      </div>
+      <div class="fd-section">
+        <div class="fd-section-title">Consented Items</div>
+        ${agreedItems.length ? `<div class="fd-tag-list">${agreedItems.map(c=>`<span class="fd-tag" style="background:#f0faf0;color:#2a6a2a">✓ ${escPortal(c)}</span>`).join('')}</div>` : '<div class="fd-val" style="color:#aaa;font-size:13px">None recorded</div>'}
+      </div>
+      ${consent.additional_notes ? `<div class="fd-section"><div class="fd-section-title">Additional Notes</div><div class="fd-val" style="font-size:13px;line-height:1.5">${escPortal(consent.additional_notes)}</div></div>` : ''}
+      ${consent.signature_data ? `<div class="fd-section"><div class="fd-section-title">Signature</div><img class="fd-sig" src="${consent.signature_data}" alt="Signature"/></div>` : ''}`;
+  }
+
+  const body = document.getElementById('fd-body-content');
+  body.innerHTML = `
+    <div class="fd-tabs">
+      <button class="fd-tab active" data-tab="medical" onclick="setFormsTab('medical')">📋 Medical ${hasMed ? '✓' : ''}</button>
+      <button class="fd-tab" data-tab="consent" onclick="setFormsTab('consent')">✍️ Consent ${hasCon ? '✓' : ''}</button>
+    </div>
+    <div class="fd-panel" data-panel="medical">${medHtml}</div>
+    <div class="fd-panel" data-panel="consent" style="display:none">${conHtml}</div>
+  `;
+}
+
 </script>
+<!-- Forms drawer overlay -->
+<div id="forms-overlay" onclick="closeFormsDrawer()"></div>
+<!-- Forms drawer panel -->
+<div id="forms-drawer">
+  <div class="fd-hdr">
+    <span class="fd-hdr-title" id="fd-title">Client Forms</span>
+    <button class="fd-close" onclick="closeFormsDrawer()">✕</button>
+  </div>
+  <div class="fd-body" id="fd-body-content"></div>
+</div>
 </body>
 </html>

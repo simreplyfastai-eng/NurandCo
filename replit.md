@@ -90,6 +90,12 @@ Express 5 REST API on port 8080. All routes prefixed `/api/`.
 - `GET /api/cron/autocomplete` — Mark past Confirmed bookings Complete [CRON_SECRET]
 - `GET /api/cron/reminders` — Send 24h reminder emails [CRON_SECRET]
 
+**Forms routes (medical + consent capture — post-payment flow):**
+- `GET /api/forms/status?booking=[id]` — Returns booking info + hasMedical + hasConsent + medicalOnFileForEmail [public]
+- `POST /api/forms/medical` — Save medical questionnaire for a booking [public, GDPR IP logged]
+- `POST /api/forms/consent` — Save consent form + base64 signature PNG [public, GDPR IP logged]
+- `GET /api/admin/forms/:bookingId` — Full form data for admin drawer [JWT]
+
 **Shared auth middleware:** `artifacts/api-server/src/lib/auth.ts` — `requireAuth()` verifies JWT with admin role. Used by ALL protected routes (bookings, clients, finance, portal, enquiries).
 
 **Security hardening:**
