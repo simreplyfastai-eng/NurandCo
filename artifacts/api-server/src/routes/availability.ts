@@ -27,18 +27,31 @@ function getLocationId(req: import("express").Request): string | null {
   );
 }
 
-// GET /api/availability/check?location=<id>&date=YYYY-MM-DD&time=HH:MM
+// GET /api/availability/check?location=<slug>&date=YYYY-MM-DD&time=HH:MM
 // Real-time slot check for the booking widget
 router.get("/availability/check", async (req, res) => {
-  const locationId = (req.query.location as string | undefined) ?? getLocationId(req);
+  const locationSlug = (req.query.location as string | undefined) ?? getLocationId(req);
   const date = req.query.date as string | undefined;
   const time = req.query.time as string | undefined;
 
-  if (!locationId || !date || !time) {
+  if (!locationSlug || !date || !time) {
     return res.status(400).json({ error: "location, date and time required" });
   }
 
   try {
+    // Resolve slug → UUID (location param may be a slug like "hornchurch")
+    let locationId = locationSlug;
+    if (!locationSlug.includes("-") || locationSlug.length < 32) {
+      // Looks like a slug, not a UUID — resolve it
+      const { data: loc } = await supabaseAdmin
+        .from("locations")
+        .select("id")
+        .eq("slug", locationSlug)
+        .maybeSingle();
+      if (!loc) return res.status(404).json({ error: "Location not found" });
+      locationId = loc.id as string;
+    }
+
     // 1. Date blocked?
     const { data: blocked } = await supabaseAdmin
       .from("blocked_dates")
@@ -50,17 +63,42 @@ router.get("/availability/check", async (req, res) => {
       return res.json({ available: false, reason: "DATE_BLOCKED" });
     }
 
-    // 2. Clinic open?
-    const [y, mo, d] = date.split("-").map(Number);
-    const jsDay = new Date(y, mo - 1, d).getDay();
+    // 2. Clinic open? Use UTC to avoid timezone-induced day-of-week off-by-one
+    const dayOfWeek = new Date(date + "T00:00:00Z").getUTCDay(); // 0=Sun, 1=Mon … 6=Sat
     const { data: avail } = await supabaseAdmin
       .from("availability_settings")
-      .select("is_open")
+      .select("is_open, start_time, end_time")
       .eq("location_id", locationId)
-      .eq("day_of_week", jsDay)
+      .eq("day_of_week", dayOfWeek)
       .maybeSingle();
-    if (!avail?.is_open) {
+
+    // If no DB row, fall back to hardcoded defaults (same as GET /api/availability)
+    let isOpen: boolean;
+    let startTime: string | null;
+    let endTime: string | null;
+    if (avail) {
+      isOpen = !!avail.is_open;
+      startTime = avail.start_time as string | null;
+      endTime = avail.end_time as string | null;
+    } else {
+      const dayName = DAY_NAMES[dayOfWeek];
+      const def = dayName ? AVAIL_DEFAULT.defaults[dayName as keyof typeof AVAIL_DEFAULT.defaults] : undefined;
+      isOpen = def?.on ?? false;
+      startTime = def && "start" in def ? def.start ?? null : null;
+      endTime = def && "end" in def ? def.end ?? null : null;
+    }
+
+    if (!isOpen) {
       return res.json({ available: false, reason: "CLINIC_CLOSED" });
+    }
+
+    // 2a. Time within open hours?
+    if (startTime && endTime) {
+      const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+      const slotMins = toMins(time);
+      if (slotMins < toMins(startTime) || slotMins >= toMins(endTime)) {
+        return res.json({ available: false, reason: "OUTSIDE_HOURS" });
+      }
     }
 
     // 3. Slot taken?
@@ -215,9 +253,8 @@ router.get("/availability/slots", async (req, res) => {
   if (!locationId) return res.status(400).json({ error: "locationId required" });
 
   try {
-    // day_of_week: 0=Sun, 1=Mon, ..., 6=Sat (matches availability_settings seed)
-    const [y, mo, d] = date.split("-").map(Number);
-    const jsDay = new Date(y, mo - 1, d).getDay();
+    // Use UTC to avoid timezone-induced day-of-week off-by-one errors
+    const jsDay = new Date(date + "T00:00:00Z").getUTCDay(); // 0=Sun, 1=Mon … 6=Sat
 
     // 1. Check for full-day override (blocked date)
     const { data: blocked } = await supabaseAdmin
@@ -229,7 +266,7 @@ router.get("/availability/slots", async (req, res) => {
 
     if (blocked) return res.json([]);
 
-    // 2. Get working hours for this day
+    // 2. Get working hours for this day (fall back to defaults if no DB row)
     const { data: avail } = await supabaseAdmin
       .from("availability_settings")
       .select("is_open, start_time, end_time")
@@ -237,14 +274,25 @@ router.get("/availability/slots", async (req, res) => {
       .eq("day_of_week", jsDay)
       .maybeSingle();
 
-    if (!avail || !avail.is_open) return res.json([]);
+    let slotIsOpen: boolean;
+    let slotStart: string;
+    let slotEnd: string;
+    if (avail) {
+      slotIsOpen = !!avail.is_open;
+      slotStart = (avail.start_time as string | null) ?? "09:00";
+      slotEnd = (avail.end_time as string | null) ?? "17:00";
+    } else {
+      const dayName = DAY_NAMES[jsDay];
+      const def = dayName ? AVAIL_DEFAULT.defaults[dayName as keyof typeof AVAIL_DEFAULT.defaults] : undefined;
+      slotIsOpen = def?.on ?? false;
+      slotStart = (def && "start" in def ? def.start : null) ?? "09:00";
+      slotEnd = (def && "end" in def ? def.end : null) ?? "17:00";
+    }
+
+    if (!slotIsOpen) return res.json([]);
 
     // 3. Generate 30-min slots
-    const allSlots = generateTimeSlots(
-      avail.start_time ?? "09:00",
-      avail.end_time ?? "17:00",
-      30,
-    );
+    const allSlots = generateTimeSlots(slotStart, slotEnd, 30);
 
     // 4. Get intra-day blocked slots for this day (or all_days)
     const { data: blockedSlots } = await supabaseAdmin
