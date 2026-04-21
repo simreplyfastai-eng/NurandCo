@@ -3758,67 +3758,133 @@ function renderMedia(){
     +'</div>';
 
   /* ── TRANSFORMATIONS CARD ── */
-  const transformations=Array.isArray(data.transformations)?data.transformations:[];
+  const DEFAULT_TX=[
+    {key:'r1a',type:'image',src:'result-1.jpg',  label:'NaturalèLips™',           category:'LIP FILLER'},
+    {key:'r1b',type:'video',src:'video1.mp4',    label:'HD Sculpt Lips',           category:'LIP FILLER'},
+    {key:'r1c',type:'image',src:'result-4.jpg',  label:'Facial Contouring',        category:'ADVANCED FILLER'},
+    {key:'r1d',type:'video',src:'video2.mp4',    label:'Filler Dissolve & Refill', category:'FLAT LIPS CORRECTED'},
+    {key:'r2a',type:'image',src:'result-2.jpg',  label:'NaturalèLips™',            category:'LIP FILLER'},
+    {key:'r2b',type:'video',src:'video3.mp4',    label:'Anti-Wrinkle',             category:'NEW PRODUCT SHOWCASE'},
+    {key:'r2c',type:'image',src:'result-3.jpg',  label:'NaturalèLips™',            category:'HD SCULPT LIPS'},
+    {key:'r2d',type:'video',src:'video1.mp4',    label:'NaturalèLips™',            category:'SUBTLE YET CONFIDENT'},
+  ];
+  const txItems=(Array.isArray(data.transformations)&&data.transformations.length>0)?data.transformations:DEFAULT_TX;
 
-  let txList='';
-  if(transformations.length===0){
-    txList='<div class="mc-dashed" style="margin-bottom:14px">'
-      +'<p style="font-family:var(--font-sans);font-size:12px;color:var(--color-muted-fg);margin:0">No items yet. Add images or videos below to populate the Transformations section.</p>'
-      +'</div>';
-  }else{
-    txList='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:14px">'
-      +transformations.map(function(item,i){
-        const src=cloudSrc(item.src)||item.src||'';
-        const isVideo=item.type==='video';
-        const preview=src
-          ?(isVideo
-            ?'<video src="'+src+'" muted preload="metadata" style="width:52px;height:52px;object-fit:cover;border-radius:6px;flex-shrink:0;background:#111"></video>'
-            :'<img src="'+src+'" alt="" style="width:52px;height:52px;object-fit:cover;border-radius:6px;flex-shrink:0;background:#E8E2D9"/>')
-          :'<div style="width:52px;height:52px;border-radius:6px;flex-shrink:0;background:#E8E2D9;display:flex;align-items:center;justify-content:center;font-size:18px">'+(isVideo?'▶':'🖼')+'</div>';
-        const typeBadge='<span style="font-family:var(--font-sans);font-size:9px;text-transform:uppercase;letter-spacing:.1em;padding:2px 7px;border-radius:10px;background:'+(isVideo?'#5C1A1A':'#C9A96E')+';color:#fff;white-space:nowrap;flex-shrink:0">'+(isVideo?'Video':'Image')+'</span>';
-        return'<div style="display:flex;align-items:center;gap:10px;background:#F9F5F0;border-radius:8px;padding:10px">'
-          +preview
-          +'<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">'
-          +'<div style="display:flex;gap:6px;align-items:center">'
-          +typeBadge
-          +'<input type="text" value="'+escHtml(item.label||'')+'" placeholder="Label…" class="mc-input" style="flex:1;font-size:11px;padding:5px 8px" onchange="updateTransformItem('+i+',\'label\',this.value)"/>'
-          +'</div>'
-          +'<input type="text" value="'+escHtml(item.category||'')+'" placeholder="Category (e.g. LIP FILLER)…" class="mc-input" style="font-size:11px;padding:5px 8px;text-transform:uppercase" onchange="updateTransformItem('+i+',\'category\',this.value)"/>'
-          +'</div>'
-          +'<button class="mc-btn-ghost" onclick="deleteTransformItem('+i+')" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'" style="flex-shrink:0">×</button>'
-          +'</div>';
-      }).join('')
-      +'</div>';
-  }
+  const txCards=txItems.map(function(item,i){
+    const rawSrc=item.src||'';
+    const resolved=cloudSrc(rawSrc)||rawSrc;
+    const isVideo=item.type==='video';
+    const isExternal=resolved.startsWith('http')||resolved.startsWith('/api/');
+    const isLocal=!isExternal&&rawSrc!=='';
+    const hasSrc=resolved!=='';
 
-  const txAddRow='<div style="background:#F9F5F0;border-radius:8px;padding:14px">'
-    +'<div style="font-family:var(--font-sans);font-size:11px;font-weight:600;color:#111;margin-bottom:10px;text-transform:uppercase;letter-spacing:.08em">Add Item</div>'
-    +'<div style="display:flex;gap:8px;margin-bottom:8px;align-items:center">'
-    +'<select id="tx-type" class="mc-input" style="width:90px;flex-shrink:0">'
-    +'<option value="image">Image</option>'
-    +'<option value="video">Video</option>'
-    +'</select>'
-    +'<input type="text" id="tx-url" class="mc-input" placeholder="Paste URL…" style="flex:1"/>'
-    +'<button class="mc-btn-outline" onclick="document.getElementById(\'tx-file\').click()">Upload</button>'
-    +'</div>'
-    +'<div style="display:flex;gap:8px;margin-bottom:8px">'
-    +'<input type="text" id="tx-label" class="mc-input" placeholder="Label (e.g. HD Sculpt Lips)" style="flex:1"/>'
-    +'<input type="text" id="tx-category" class="mc-input" placeholder="Category (e.g. LIP FILLER)" style="flex:1;text-transform:uppercase"/>'
-    +'</div>'
-    +'<button class="mc-btn-primary" onclick="addTransformItem()" style="width:100%">Add to Transformations</button>'
-    +'<input type="file" id="tx-file" accept="image/*,video/mp4,video/*" style="display:none" onchange="handleTransformUpload(this)"/>'
+    let mediaEl='';
+    if(hasSrc){
+      if(isVideo){
+        mediaEl='<video src="'+resolved+'" muted preload="metadata" loop playsinline'
+          +' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none"></video>';
+      }else{
+        mediaEl='<img src="'+resolved+'" alt="'+escHtml(item.label)+'"'
+          +' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block"/>';
+      }
+    }else{
+      mediaEl='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">'
+        +'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.2">'
+        +(isVideo?'<rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-4v12l-6-4"/>'
+          :'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>')
+        +'</svg>'
+        +'<span style="font-family:var(--font-sans);font-size:9px;color:#666;letter-spacing:.05em">'+(isVideo?'VIDEO SLOT':'IMAGE SLOT')+'</span>'
+        +'</div>';
+    }
+
+    const videoBadge=isVideo
+      ?'<div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.55);border-radius:3px;padding:2px 6px;display:flex;align-items:center;gap:4px">'
+        +'<svg width="9" height="9" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
+        +'<span style="font-family:var(--font-sans);font-size:8px;color:#fff;letter-spacing:.08em">VIDEO</span>'
+        +'</div>'
+      :'';
+
+    const slotNum=(i+1);
+
+    return'<div style="position:relative;aspect-ratio:240/340;background:#1E1E1E;overflow:hidden;border-radius:4px;cursor:pointer" onclick="triggerTxReplace('+i+')" title="Click to replace">'
+      +mediaEl
+      +'<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.12) 45%,transparent 70%);pointer-events:none"></div>'
+      +videoBadge
+      +'<button class="tx-replace-btn" onclick="event.stopPropagation();triggerTxReplace('+i+')" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.92);border:none;border-radius:20px;padding:4px 10px;font-family:var(--font-sans);font-size:9px;font-weight:700;color:#111;cursor:pointer;letter-spacing:.05em">REPLACE</button>'
+      +'<div style="position:absolute;bottom:12px;left:12px;right:12px;pointer-events:none">'
+      +'<div style="font-family:\'Inter\',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#C9A96E;margin-bottom:4px">'+escHtml(item.category||'')+'</div>'
+      +'<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-size:.9rem;color:#F5F0EB;line-height:1.2">'+escHtml(item.label||'')+'</div>'
+      +'</div>'
+      +'<div id="tx-loading-'+i+'" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,.7);z-index:10;align-items:center;justify-content:center;flex-direction:column;gap:8px">'
+      +'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>'
+      +'<span style="font-family:var(--font-sans);font-size:10px;color:#F5F0EB">Uploading…</span>'
+      +'</div>'
+      +'<input type="file" id="tx-file-'+i+'" accept="image/*,video/mp4,video/*" style="display:none" onchange="handleTxReplace(this,'+i+')"/>'
+      +'</div>';
+  }).join('');
+
+  const txSaveBar='<div style="display:flex;justify-content:flex-end;align-items:center;padding:16px 0 4px;margin-top:8px;border-top:1px solid #F0EAE2;gap:12px">'
+    +'<span id="tx-save-status" style="font-family:var(--font-sans);font-size:11px;color:#4CAF50;opacity:0;transition:opacity .3s"></span>'
+    +'<button onclick="saveTransformations()" style="background:#5C1A1A;color:#fff;border:none;border-radius:var(--radius-pill);padding:9px 24px;font-family:var(--font-sans);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.05em">Save Changes</button>'
     +'</div>';
 
   const txCard='<div class="mc-card">'
+    +'<style>@keyframes spin{to{transform:rotate(360deg)}}</style>'
     +'<div class="mc-section-label"><span class="mc-section-tag">Transformations</span><div class="mc-section-line"></div></div>'
-    +'<div class="mc-slot-hint" style="margin-bottom:14px">Images and videos shown in the scrolling Transformations &amp; Treatments section. Each item can be an image or a video.</div>'
-    +txList+txAddRow
+    +'<div class="mc-slot-hint" style="margin-bottom:16px">Click any card to replace it with your own image or video. Changes save automatically and go live for all visitors.</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+txCards+'</div>'
+    +txSaveBar
     +'</div>';
 
   document.getElementById('media-root').innerHTML=css+'<div style="max-width:780px">'+heroCard+aboutCard+txCard+'</div>';
 }
 
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function triggerTxReplace(i){
+  const el=document.getElementById('tx-file-'+i);
+  if(el)el.click();
+}
+
+function saveTransformations(){
+  const d=getMediaData();
+  saveMediaData(d);
+  const st=document.getElementById('tx-save-status');
+  if(st){st.textContent='✓ Saved to cloud';st.style.opacity='1';setTimeout(function(){st.style.opacity='0';},3000);}
+}
+
+async function handleTxReplace(input,i){
+  const file=input.files&&input.files[0];
+  if(!file)return;
+  const isVideo=file.type.startsWith('video');
+  const loadEl=document.getElementById('tx-loading-'+i);
+  if(loadEl){loadEl.style.display='flex';}
+  try{
+    const objectPath=await uploadToCloud(file);
+    const d=getMediaData();
+    const DEFAULT_TX=[
+      {key:'r1a',type:'image',src:'result-1.jpg',  label:'NaturalèLips™',           category:'LIP FILLER'},
+      {key:'r1b',type:'video',src:'video1.mp4',    label:'HD Sculpt Lips',           category:'LIP FILLER'},
+      {key:'r1c',type:'image',src:'result-4.jpg',  label:'Facial Contouring',        category:'ADVANCED FILLER'},
+      {key:'r1d',type:'video',src:'video2.mp4',    label:'Filler Dissolve & Refill', category:'FLAT LIPS CORRECTED'},
+      {key:'r2a',type:'image',src:'result-2.jpg',  label:'NaturalèLips™',            category:'LIP FILLER'},
+      {key:'r2b',type:'video',src:'video3.mp4',    label:'Anti-Wrinkle',             category:'NEW PRODUCT SHOWCASE'},
+      {key:'r2c',type:'image',src:'result-3.jpg',  label:'NaturalèLips™',            category:'HD SCULPT LIPS'},
+      {key:'r2d',type:'video',src:'video1.mp4',    label:'NaturalèLips™',            category:'SUBTLE YET CONFIDENT'},
+    ];
+    const base=(Array.isArray(d.transformations)&&d.transformations.length>0)?d.transformations:DEFAULT_TX.map(function(x){return Object.assign({},x);});
+    if(!base[i])base.push({key:'t'+i,type:isVideo?'video':'image',src:'',label:'',category:''});
+    base[i]=Object.assign({},base[i],{type:isVideo?'video':'image',src:objectPath});
+    d.transformations=base;
+    saveMediaData(d);
+    renderMedia();
+    showToast('Replaced & saved!');
+  }catch(e){
+    if(loadEl){loadEl.style.display='none';}
+    showToast('Upload failed: '+e.message);
+  }
+  input.value='';
+}
 
 function deleteTransformItem(i){
   const d=getMediaData();
@@ -3834,40 +3900,6 @@ function updateTransformItem(i,field,value){
   if(arr[i])arr[i][field]=value;
   d.transformations=arr;
   saveMediaData(d);
-}
-
-function addTransformItem(src,type){
-  const url=src||document.getElementById('tx-url').value.trim();
-  const t=type||document.getElementById('tx-type').value;
-  const label=document.getElementById('tx-label').value.trim();
-  const category=document.getElementById('tx-category').value.trim().toUpperCase();
-  if(!url){showToast('Please enter a URL or upload a file');return;}
-  const d=getMediaData();
-  const arr=Array.isArray(d.transformations)?d.transformations:[];
-  arr.push({key:'t'+(Date.now()),type:t,src:url,label:label||'',category:category||''});
-  d.transformations=arr;
-  saveMediaData(d);renderMedia();
-}
-
-async function handleTransformUpload(input){
-  const file=input.files&&input.files[0];
-  if(!file)return;
-  const type=file.type.startsWith('video')?'video':'image';
-  showToast('Uploading…');
-  try{
-    const objectPath=await uploadToCloud(file);
-    const label=document.getElementById('tx-label').value.trim();
-    const category=document.getElementById('tx-category').value.trim().toUpperCase();
-    const d=getMediaData();
-    const arr=Array.isArray(d.transformations)?d.transformations:[];
-    arr.push({key:'t'+(Date.now()),type:type,src:objectPath,label:label||'',category:category||''});
-    d.transformations=arr;
-    saveMediaData(d);renderMedia();
-    showToast('Uploaded and added!');
-  }catch(e){
-    showToast('Upload failed: '+e.message);
-  }
-  input.value='';
 }
 
 /* ── Cloud upload helper ── */
