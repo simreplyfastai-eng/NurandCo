@@ -213,7 +213,7 @@ tr:hover td{background:rgba(92,26,26,.02)}
 .cal-date{font-family:var(--font-sans);font-size:11px;font-weight:400;margin-bottom:4px}
 .cal-cell.today .cal-date{color:var(--color-primary)}
 .cal-dot{width:6px;height:6px;border-radius:var(--radius-pill);background:var(--color-secondary);position:absolute;bottom:6px;left:50%;transform:translateX(-50%)}
-.cal-cell.selected .cal-dot{background:#fff;opacity:0.85}
+.cal-cell.selected .cal-dot{background:#fff;opacity:1}
 .cal-overflow-pill{background:var(--color-muted);color:var(--color-muted-fg);font-size:9px;border-radius:var(--radius);padding:1px 5px;margin-bottom:2px;display:block}
 .cal-new-mobile{display:none}
 .day-panel{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius);padding:20px;min-height:300px;overflow-y:auto;box-sizing:border-box}
@@ -2215,6 +2215,8 @@ function buildCalendar(){
   const daysInMonth=new Date(y,m+1,0).getDate();
   const daysInPrev=new Date(y,m,0).getDate();
   const todayStr=fmt(new Date());
+  // normalise any date value to plain YYYY-MM-DD (strips time/timezone suffixes)
+  function normDate(d){return(d||'').toString().slice(0,10);}
   const bookings=getBookings();
 
   const avail=getAvailability();
@@ -2234,7 +2236,7 @@ function buildCalendar(){
     const override=avail.overrides[dateStr];
     const dayDefault=avail.defaults[dow]||{on:false};
     const isWork=override!==undefined?override.on:dayDefault.on;
-    const dayBookings=bookings.filter(b=>b.date===dateStr&&b.status!=='Cancelled');
+    const dayBookings=bookings.filter(b=>normDate(b.date)===dateStr&&(b.status||'').toLowerCase()!=='cancelled');
     const dot=dayBookings.length>0?'<div class="cal-dot"></div>':'';
     const clickAttr=isSun?'':` onclick="selectDay('${dateStr}')"`;
     const classes=`cal-cell${isSun?' sunday':''}${isToday?' today':''}${isWork&&!isSun?' available':''}`;
@@ -2246,12 +2248,12 @@ function buildCalendar(){
   }
   document.getElementById('cal-grid').innerHTML=cells.join('');
   // Reset day panel to reflect whether this month has any bookings
-  const monthBookings=bookings.filter(b=>{const d=new Date(b.date);return d.getFullYear()===y&&d.getMonth()===m&&b.status!=='Cancelled';});
+  const monthBookings=bookings.filter(b=>{const ds=normDate(b.date);return ds.startsWith(String(y)+'-'+String(m+1).padStart(2,'0'))&&(b.status||'').toLowerCase()!=='cancelled';});
   const dpBody=document.getElementById('day-panel-body');
   const dpTitle=document.getElementById('day-panel-title');
   const calMonthPrefix=String(y)+'-'+String(m+1).padStart(2,'0');
   const todayIsThisMonth=todayStr.startsWith(calMonthPrefix);
-  const hasTodayBookings=bookings.some(b=>b.date===todayStr&&b.status!=='Cancelled');
+  const hasTodayBookings=bookings.some(b=>normDate(b.date)===todayStr&&(b.status||'').toLowerCase()!=='cancelled');
 
   function applyCalSelection(dateStr){
     document.querySelectorAll('.cal-cell').forEach(c=>{
@@ -2294,7 +2296,8 @@ function selectDay(dateStr){
   renderDayTimeline(dateStr);
 }
 function renderDayTimeline(dateStr){
-  const bookings=getBookings().filter(b=>b.date===dateStr&&b.status!=='Cancelled').sort((a,b)=>a.time.localeCompare(b.time));
+  function _nd(d){return(d||'').toString().slice(0,10);}
+  const bookings=getBookings().filter(b=>_nd(b.date)===dateStr&&(b.status||'').toLowerCase()!=='cancelled').sort((a,b)=>(a.time||'').localeCompare(b.time||''));
   document.getElementById('day-panel-body').innerHTML=bookings.length?bookings.map(b=>{
     const t=(b.time||'').slice(0,5); // strip seconds → HH:MM
     return`<div class="timeline-item" onclick="openBookingDetailPanel('${b.id}')" style="cursor:pointer;display:block;padding:10px 0;border-bottom:1px solid var(--color-border-subtle)" title="Click to view details">
