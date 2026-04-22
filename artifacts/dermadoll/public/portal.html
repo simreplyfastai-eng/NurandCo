@@ -595,14 +595,31 @@ select.form-input{background:var(--color-card)}
 .bm-btns button{min-height:34px}
 
 /* ── SETTINGS ────────────────────────────────────── */
-.settings-section{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden}
-.settings-section-header{padding:16px 20px;border-bottom:1px solid var(--color-border);font-family:var(--font-serif);font-style:italic;font-size:18px;font-weight:400;color:var(--color-primary)}
-.settings-body{padding:20px}
-.settings-row{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.settings-section{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
+.settings-section-header{padding:14px 20px;border-bottom:1px solid var(--color-border);font-family:var(--font-serif);font-style:italic;font-size:17px;font-weight:400;color:var(--color-primary)}
+.settings-body{padding:18px 20px}
+.settings-row{display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .settings-row:last-child{margin-bottom:0}
-.settings-row label{font-family:var(--font-sans);font-size:11px;font-weight:400;letter-spacing:.08em;text-transform:uppercase;color:var(--color-muted-fg);width:140px;flex-shrink:0}
-.settings-row input,.settings-row textarea{flex:1;padding:10px 14px;border:1px solid var(--color-border);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;font-weight:300;color:var(--color-foreground);background:transparent;outline:none}
+.settings-row label{font-family:var(--font-sans);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--color-muted-fg);width:130px;flex-shrink:0}
+.settings-row input,.settings-row textarea{flex:1;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;font-weight:300;color:var(--color-foreground);background:transparent;outline:none}
 .settings-row input:focus,.settings-row textarea:focus{border-color:var(--color-primary)}
+.settings-field{margin-bottom:14px}
+.settings-field:last-child{margin-bottom:0}
+.settings-field>label{display:block;font-family:var(--font-sans);font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--color-muted-fg);margin-bottom:6px}
+.settings-field input,.settings-field textarea,.settings-field select{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;font-weight:300;color:var(--color-foreground);background:transparent;outline:none}
+.settings-field input:focus,.settings-field textarea:focus{border-color:var(--color-primary)}
+.settings-hint{font-size:11px;color:var(--color-muted-fg);margin-top:4px;line-height:1.5}
+.deposit-row{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.deposit-row .deposit-symbol{font-size:14px;color:var(--color-foreground);font-weight:400}
+.deposit-row input{width:80px;flex:unset;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;font-weight:300;color:var(--color-foreground);background:transparent;outline:none}
+.deposit-row input:focus{border-color:var(--color-primary)}
+.stripe-toggle{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--color-secondary);cursor:pointer;margin-top:8px;user-select:none;background:none;border:none;padding:0;font-family:var(--font-sans)}
+.stripe-toggle:hover{opacity:.8}
+.stripe-instructions{margin-top:10px;font-size:12px;color:var(--color-muted-fg);line-height:1.9;background:var(--color-muted);border:1px solid var(--color-border);border-radius:var(--radius);padding:14px 16px}
+.pw-field{margin-bottom:10px}
+.pw-field input{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;font-weight:300;color:var(--color-foreground);background:transparent;outline:none}
+.pw-field input:focus{border-color:var(--color-primary)}
+.pw-err{font-size:11px;color:#C62828;margin-top:3px;display:none}
 .checklist-item{display:flex;align-items:flex-start;gap:10px;padding:8px 10px;border-radius:var(--radius);background:var(--color-muted);border:1px solid var(--color-border)}
 .checklist-item.done{background:#F0FBF4;border-color:#B7E4C7}
 .chk-icon{font-size:15px;margin-top:1px;flex-shrink:0;width:18px;text-align:center}
@@ -1235,8 +1252,9 @@ select.form-input{background:var(--color-card)}
     <!-- ── SETTINGS ── -->
     <div id="page-settings" class="page">
       <div class="topbar"><span class="topbar-title serif">Settings</span></div>
-      <div style="padding:28px;max-width:700px">
+      <div style="padding:20px;max-width:640px">
 
+        <!-- ── Business Info ── -->
         <div class="settings-section">
           <div class="settings-section-header">Business Info</div>
           <div class="settings-body">
@@ -1244,98 +1262,126 @@ select.form-input{background:var(--color-card)}
             <div class="settings-row"><label>Practitioner</label><input type="text" id="s-practitioner" value="Starr"/></div>
             <div class="settings-row"><label>Instagram</label><input type="text" id="s-instagram" value="@StarrAestheticss"/></div>
             <div class="settings-row"><label>WhatsApp</label><input type="text" id="s-whatsapp" placeholder="+44 7…"/></div>
-            <div class="settings-row" style="align-items:flex-start"><label>Working hours</label><div style="font-size:12px;color:var(--muted);line-height:1.8">Mon: OFF<br/>Tue–Thu: 10:00–19:00<br/>Fri: 09:00–16:00<br/>Sat: 09:00–14:00<br/>Sun: OFF<br/><em style="font-size:11px">Edit in Availability page</em></div></div>
-            <button class="btn-gold" onclick="saveSettings()">Save Changes</button>
+            <div class="settings-row" style="align-items:center">
+              <label>Working hours</label>
+              <button class="btn-outline" style="font-size:11px;padding:5px 12px" onclick="showPage('availability',null)">Edit in Availability</button>
+            </div>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--color-border)">
+              <button class="btn-gold" onclick="saveSettings()">Save Changes</button>
+            </div>
           </div>
         </div>
 
+        <!-- ── Booking Settings ── -->
+        <div class="settings-section">
+          <div class="settings-section-header">Booking Settings</div>
+          <div class="settings-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">
+              <div class="settings-field">
+                <label>Injectable Deposit</label>
+                <div class="deposit-row">
+                  <span class="deposit-symbol">£</span>
+                  <input type="number" id="s-deposit-injectables" value="1" min="1" max="999"/>
+                </div>
+                <div class="settings-hint">Fillers, lips, rhinoplasty, etc.</div>
+              </div>
+              <div class="settings-field">
+                <label>Other Treatments</label>
+                <div class="deposit-row">
+                  <span class="deposit-symbol">£</span>
+                  <input type="number" id="s-deposit-other" value="1" min="1" max="999"/>
+                </div>
+                <div class="settings-hint">Anti-wrinkle, facials, etc.</div>
+              </div>
+            </div>
+            <div class="settings-field">
+              <label>Confirmation Message</label>
+              <textarea id="s-confirm-msg" rows="3" style="resize:vertical">Thank you for booking with StarrBeauty. We'll be in touch to confirm your appointment shortly.</textarea>
+            </div>
+            <div class="settings-field">
+              <label>Notify Email</label>
+              <input type="email" id="s-notify-email" placeholder="admin@starrbeautyy.co.uk"/>
+            </div>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--color-border)">
+              <button class="btn-gold" onclick="saveBookingSettings()">Save Booking Settings</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Change Password ── -->
         <div class="settings-section">
           <div class="settings-section-header">Change Password</div>
           <div class="settings-body">
-            <div style="margin-bottom:12px">
-              <input type="password" id="s-pw-current" placeholder="Current password" autocomplete="current-password" class="form-input" style="display:block"/>
-              <div id="pw-err-current" style="font-size:12px;color:#C62828;margin-top:4px;display:none"></div>
+            <div style="background:var(--color-muted);border:1px solid var(--color-border);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--color-muted-fg);line-height:1.6">
+              Password changes are saved securely and take effect immediately — no restart required.
             </div>
-            <div style="margin-bottom:12px">
-              <input type="password" id="s-pw-new" placeholder="New password (min. 8 characters)" autocomplete="new-password" class="form-input" style="display:block"/>
-              <div id="pw-err-new" style="font-size:12px;color:#C62828;margin-top:4px;display:none"></div>
+            <div class="pw-field">
+              <input type="password" id="s-pw-current" placeholder="Current password" autocomplete="current-password"/>
+              <div id="pw-err-current" class="pw-err"></div>
             </div>
-            <div style="margin-bottom:12px">
-              <input type="password" id="s-pw-confirm" placeholder="Confirm new password" autocomplete="new-password" class="form-input" style="display:block"/>
-              <div id="pw-err-confirm" style="font-size:12px;color:#C62828;margin-top:4px;display:none"></div>
+            <div class="pw-field">
+              <input type="password" id="s-pw-new" placeholder="New password (min. 8 characters)" autocomplete="new-password"/>
+              <div id="pw-err-new" class="pw-err"></div>
+            </div>
+            <div class="pw-field">
+              <input type="password" id="s-pw-confirm" placeholder="Confirm new password" autocomplete="new-password"/>
+              <div id="pw-err-confirm" class="pw-err"></div>
             </div>
             <button onclick="changePassword()" class="btn-gold">Update Password</button>
           </div>
         </div>
 
+        <!-- ── Stripe Setup ── -->
         <div class="settings-section">
-          <div class="settings-section-header">Booking Settings</div>
+          <div class="settings-section-header">Payment — Stripe</div>
           <div class="settings-body">
-            <div class="settings-row">
-              <label>Injectable deposit</label>
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:14px;color:var(--color-foreground)">£</span>
-                <input type="number" id="s-deposit-injectables" value="1" min="1" max="999" style="width:70px;flex:unset"/>
-              </div>
-              <span style="font-size:12px;color:var(--muted)">Fixed deposit for injectables (fillers, lips, rhinoplasty, etc.)</span>
-            </div>
-            <div class="settings-row">
-              <label>Other treatments deposit</label>
-              <div style="display:flex;align-items:center;gap:8px">
-                <span style="font-size:14px;color:var(--color-foreground)">£</span>
-                <input type="number" id="s-deposit-other" value="1" min="1" max="999" style="width:70px;flex:unset"/>
-              </div>
-              <span style="font-size:12px;color:var(--muted)">Fixed deposit for all other treatments (anti-wrinkle, facials, etc.)</span>
-            </div>
-            <div class="settings-row" style="align-items:flex-start"><label>Confirmation msg</label><textarea id="s-confirm-msg" rows="3" style="flex:1;padding:8px 12px;border:1px solid var(--color-border);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;resize:vertical;background:transparent;color:var(--color-foreground);outline:none">Thank you for booking with StarrBeauty. We'll be in touch to confirm your appointment shortly.</textarea></div>
-            <div class="settings-row"><label>Notify email</label><input type="email" id="s-notify-email" placeholder="admin@starrbeautyy.co.uk"/></div>
-          </div>
-        </div>
-
-        <div class="settings-section">
-          <div class="settings-section-header">Payment — Stripe Setup</div>
-          <div class="settings-body">
-            <div class="settings-row">
-              <label>Stripe Status</label>
-              <span id="stripe-status-badge" style="display:inline-flex;align-items:center;gap:8px">
-                <span style="display:inline-block;background:#FFEBEE;color:#C62828;font-size:11px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);font-family:var(--font-sans);letter-spacing:.3px">CHECKING…</span>
+            <div class="settings-row" style="margin-bottom:14px">
+              <label>Status</label>
+              <span id="stripe-status-badge">
+                <span style="display:inline-block;background:#FFEBEE;color:#C62828;font-size:11px;font-weight:700;padding:3px 10px;border-radius:4px;font-family:var(--font-sans);letter-spacing:.3px">CHECKING…</span>
               </span>
             </div>
-            <div class="settings-row" style="align-items:flex-start">
+            <div class="settings-field">
               <label>Webhook URL</label>
-              <div style="flex:1">
-                <input type="text" readonly id="stripe-webhook-url" value="/api/stripe/webhook" style="background:var(--color-muted);font-family:monospace;font-size:12px;color:var(--color-muted-fg);margin-bottom:6px;border:1px solid var(--color-border);border-radius:var(--radius);width:100%;padding:8px 12px;box-sizing:border-box"/>
-                <button class="btn-outline" style="font-size:11px;padding:4px 12px" onclick="navigator.clipboard.writeText(document.getElementById('stripe-webhook-url').value).then(()=>showToast('Copied!'))">Copy</button>
+              <div style="display:flex;gap:8px;align-items:center">
+                <input type="text" readonly id="stripe-webhook-url" style="font-family:monospace;font-size:12px;background:var(--color-muted);color:var(--color-muted-fg);flex:1"/>
+                <button class="btn-outline" style="font-size:11px;padding:5px 12px;white-space:nowrap;flex-shrink:0" onclick="navigator.clipboard.writeText(document.getElementById('stripe-webhook-url').value).then(()=>showToast('Copied!'))">Copy</button>
               </div>
             </div>
-            <div class="settings-row" style="align-items:flex-start">
-              <label style="padding-top:4px">How to activate</label>
-              <div style="flex:1;font-size:12px;color:var(--muted);line-height:1.9;background:var(--color-muted);border:1px solid var(--color-border);border-radius:var(--radius);padding:14px 16px">
-                <strong style="color:var(--text);display:block;margin-bottom:8px">To activate online payments:</strong>
-                <ol style="padding-left:18px;margin:0;list-style:decimal">
-                  <li>Go to <a href="https://stripe.com" target="_blank" style="color:var(--color-secondary)">stripe.com</a> and create an account</li>
-                  <li>Copy your <strong>Secret Key</strong> and <strong>Publishable Key</strong> from the Stripe dashboard</li>
-                  <li>Add both to Replit Secrets as <code style="background:var(--color-muted);padding:1px 5px;border-radius:var(--radius)">STRIPE_SECRET_KEY</code> and <code style="background:var(--color-muted);padding:1px 5px;border-radius:var(--radius)">STRIPE_PUBLISHABLE_KEY</code></li>
-                  <li>In Stripe, go to <strong>Developers → Webhooks → Add endpoint</strong></li>
-                  <li>Set the endpoint URL to: <code style="background:var(--color-muted);padding:1px 5px;border-radius:var(--radius)">[your-site-url]/api/stripe/webhook</code></li>
-                  <li>Select event: <strong>payment_intent.succeeded</strong></li>
-                  <li>Copy the <strong>Webhook Secret</strong> and add it as <code style="background:var(--color-muted);padding:1px 5px;border-radius:var(--radius)">STRIPE_WEBHOOK_SECRET</code></li>
-                  <li>Restart the server — Stripe is now live. No code changes needed.</li>
-                </ol>
-              </div>
+            <button class="stripe-toggle" onclick="toggleStripeInstructions(this)" type="button">
+              <span style="font-size:14px">▸</span> Show setup instructions
+            </button>
+            <div class="stripe-instructions" id="stripe-instructions-panel" style="display:none">
+              <strong style="color:var(--color-foreground);display:block;margin-bottom:8px">To activate online payments:</strong>
+              <ol style="padding-left:18px;margin:0;list-style:decimal">
+                <li>Go to <a href="https://stripe.com" target="_blank" style="color:var(--color-secondary)">stripe.com</a> and create an account</li>
+                <li>Copy your <strong>Secret Key</strong> and <strong>Publishable Key</strong> from the Stripe dashboard</li>
+                <li>Add both as server environment secrets: <code style="background:#e8e0d8;padding:1px 5px;border-radius:3px">STRIPE_SECRET_KEY</code> and <code style="background:#e8e0d8;padding:1px 5px;border-radius:3px">STRIPE_PUBLISHABLE_KEY</code></li>
+                <li>In Stripe, go to <strong>Developers → Webhooks → Add endpoint</strong></li>
+                <li>Paste the Webhook URL above as the endpoint</li>
+                <li>Select event: <strong>payment_intent.succeeded</strong></li>
+                <li>Copy the <strong>Webhook Secret</strong> and add it as <code style="background:#e8e0d8;padding:1px 5px;border-radius:3px">STRIPE_WEBHOOK_SECRET</code></li>
+                <li>Redeploy — Stripe is now live.</li>
+              </ol>
             </div>
           </div>
         </div>
 
+        <!-- ── Developer ── -->
         <div class="settings-section">
           <div class="settings-section-header">Developer</div>
           <div class="settings-body">
-            <div class="settings-row"><label>Built by</label><span style="font-size:13px;font-weight:500;color:var(--color-foreground)">Aesthetix Systems</span></div>
-            <div class="settings-row"><label>Email</label><a href="mailto:info@aesthetix-systems.co.uk" style="font-size:13px;color:var(--color-secondary);text-decoration:none">info@aesthetix-systems.co.uk</a></div>
-            <div class="settings-row"><label>Phone</label><a href="tel:+447495963388" style="font-size:13px;color:var(--color-secondary);text-decoration:none">+44 7495 963388</a></div>
-            <div class="settings-row"><label>Instagram</label><a href="https://instagram.com/aesthetix_systems" target="_blank" style="font-size:13px;color:var(--color-secondary);text-decoration:none">@aesthetix_systems</a></div>
-            <div class="settings-row"><label>Admin portal</label><span style="font-size:13px;color:var(--color-muted-fg)">starrbeautyy.co.uk/portal.html</span></div>
-            <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+            <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 16px;align-items:center;font-size:13px;margin-bottom:14px">
+              <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted-fg);font-weight:500">Built by</span>
+              <span style="font-weight:500;color:var(--color-foreground)">Aesthetix Systems</span>
+              <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted-fg);font-weight:500">Email</span>
+              <a href="mailto:info@aesthetix-systems.co.uk" style="color:var(--color-secondary);text-decoration:none">info@aesthetix-systems.co.uk</a>
+              <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted-fg);font-weight:500">Phone</span>
+              <a href="tel:+447495963388" style="color:var(--color-secondary);text-decoration:none">+44 7495 963388</a>
+              <span style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted-fg);font-weight:500">Instagram</span>
+              <a href="https://instagram.com/aesthetix_systems" target="_blank" style="color:var(--color-secondary);text-decoration:none">@aesthetix_systems</a>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
               <button class="btn-gold" onclick="window.open('mailto:info@aesthetix-systems.co.uk','_blank')">Contact Developer</button>
               <button class="btn-outline" onclick="window.open('/','_blank')">View Site</button>
               <button class="btn-outline" onclick="triggerCron('reminders')">Run Reminders</button>
@@ -1344,15 +1390,19 @@ select.form-input{background:var(--color-card)}
           </div>
         </div>
 
+        <!-- ── Danger Zone ── -->
         <div class="settings-section" style="border-color:#ffcdd2">
           <div class="settings-section-header" style="color:#c62828">Danger Zone</div>
           <div class="settings-body">
-            <p style="font-size:13px;color:var(--muted);margin-bottom:14px">These actions cannot be undone. You will be asked to confirm before anything is deleted.</p>
-            <button class="danger-btn" onclick="clearSampleData()">Remove Test Data</button>
-            <button class="danger-btn" onclick="clearBookings()">Clear All Bookings</button>
-            <button class="danger-btn" onclick="resetPortal()">Reset Portal Data</button>
+            <p style="font-size:12px;color:var(--color-muted-fg);margin:0 0 12px">These actions cannot be undone. You will be asked to confirm before anything is deleted.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button class="danger-btn" onclick="clearSampleData()">Remove Test Data</button>
+              <button class="danger-btn" onclick="clearBookings()">Clear All Bookings</button>
+              <button class="danger-btn" onclick="resetPortal()">Reset Portal Data</button>
+            </div>
           </div>
         </div>
+
       </div>
     </div>
 
@@ -4970,23 +5020,51 @@ function populateSettingsForm(){
   set('s-deposit-other',s.depositOther??10);
   set('s-confirm-msg',s.confirmMsg);
   set('s-notify-email',s.notifyEmail);
+  // Populate full webhook URL
+  const whu=document.getElementById('stripe-webhook-url');
+  if(whu)whu.value=window.location.origin+'/api/stripe/webhook';
+}
+
+function toggleStripeInstructions(btn){
+  const panel=document.getElementById('stripe-instructions-panel');
+  if(!panel)return;
+  const open=panel.style.display!=='none';
+  panel.style.display=open?'none':'block';
+  const arrow=btn.querySelector('span');
+  if(arrow)arrow.textContent=open?'▸':'▾';
+  const txt=Array.from(btn.childNodes).find(n=>n.nodeType===3&&n.textContent.trim());
+  if(txt)txt.textContent=open?' Show setup instructions':' Hide setup instructions';
 }
 
 async function saveSettings(){
-  const s={
+  const existing=getSettings();
+  const s=Object.assign({},existing,{
     clinic:document.getElementById('s-clinic').value,
     practitioner:document.getElementById('s-practitioner').value,
     instagram:document.getElementById('s-instagram').value,
     whatsapp:document.getElementById('s-whatsapp').value,
+  });
+  localStorage.setItem('fbn_settings',JSON.stringify(s));
+  try{
+    await CloudStore.set('fbn_settings',s);
+    showToast('\u2713 Business info saved');
+  }catch(e){
+    showToast('Save failed \u2014 please try again');
+  }
+}
+
+async function saveBookingSettings(){
+  const existing=getSettings();
+  const s=Object.assign({},existing,{
     depositInjectables:Number(document.getElementById('s-deposit-injectables').value)||20,
     depositOther:Number(document.getElementById('s-deposit-other').value)||10,
     confirmMsg:document.getElementById('s-confirm-msg').value,
     notifyEmail:document.getElementById('s-notify-email').value,
-  };
+  });
   localStorage.setItem('fbn_settings',JSON.stringify(s));
   try{
     await CloudStore.set('fbn_settings',s);
-    showToast('\u2713 Settings saved \u2014 changes are live');
+    showToast('\u2713 Booking settings saved');
   }catch(e){
     showToast('Save failed \u2014 please try again');
   }
