@@ -68,17 +68,57 @@ export async function createCalendarEvent(
   const startISO = new Date(`${booking.date}T${time}`).toISOString();
   const endISO = new Date(new Date(startISO).getTime() + 2 * 60 * 60 * 1000).toISOString();
 
+  // ── Build rich event title + description from location row ──────────────────
+  let summary: string;
+  let description: string;
+
+  try {
+    const { data: loc, error: locErr } = await supabase
+      .from('locations')
+      .select('name, address')
+      .eq('id', locationId)
+      .single();
+
+    if (locErr || !loc) throw new Error(locErr?.message ?? 'No location row');
+
+    const locNameUpper = loc.name.toUpperCase();
+    const treatUpper   = booking.treatment_name.toUpperCase();
+    const displayTime  = booking.time.slice(0, 5); // HH:MM
+
+    // "April 26, 2026" — parse date parts explicitly to stay UTC-safe
+    const [y, mo, d] = booking.date.split('-').map(Number);
+    const dateLabel = new Intl.DateTimeFormat('en-US', {
+      month: 'long', day: 'numeric', year: 'numeric',
+    }).format(new Date(Date.UTC(y, mo - 1, d)));
+
+    summary = `${booking.customer_name}: ${treatUpper} (${locNameUpper} CLINIC)`;
+    description = [
+      `${dateLabel} ${displayTime} BST`,
+      `Calendar: ${locNameUpper} CLINIC`,
+      `Name: ${booking.customer_name}`,
+      `Phone: ${booking.customer_phone ?? ''}`,
+      `Email: ${booking.customer_email ?? ''}`,
+      ``,
+      `Location`,
+      `============`,
+      `${loc.address}`,
+      ``,
+      `Booked via: StarrBeauty website`,
+    ].join('\n');
+
+  } catch (err) {
+    console.warn('Google Calendar: could not fetch location, using minimal format:', err);
+    summary     = `${booking.treatment_name} — ${booking.customer_name}`;
+    description = `Phone: ${booking.customer_phone ?? ''}\nEmail: ${booking.customer_email ?? ''}`;
+  }
+
   const event = await calendar.events.insert({
     calendarId: conn.calendarId,
     requestBody: {
-      summary: `${booking.treatment_name} — ${booking.customer_name}`,
-      description: [
-        `Phone: ${booking.customer_phone || 'N/A'}`,
-        `Email: ${booking.customer_email || 'N/A'}`,
-        `Notes: ${booking.notes || 'None'}`,
-      ].join('\n'),
+      summary,
+      description,
       start: { dateTime: startISO, timeZone: 'Europe/London' },
-      end: { dateTime: endISO, timeZone: 'Europe/London' },
+      end:   { dateTime: endISO,   timeZone: 'Europe/London' },
     },
   });
 
