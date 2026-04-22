@@ -1845,20 +1845,26 @@ const BookingAPI = {
   },
 
   async create(booking) {
-    const r = await fetch(this.BASE, {
-      method: 'POST',
-      headers: {...authHdr(), 'Content-Type':'application/json'},
-      body: JSON.stringify(booking)
-    });
-    if (!r.ok) {
-      const body = await r.json().catch(()=>({}));
-      throw new Error(body.error || `Server error ${r.status}`);
+    try {
+      const r = await fetch(this.BASE, {
+        method: 'POST',
+        headers: {...authHdr(), 'Content-Type':'application/json'},
+        body: JSON.stringify(booking)
+      });
+      if (!r.ok) {
+        const body = await r.json().catch(()=>({}));
+        throw new Error(body.error || `Server error ${r.status}`);
+      }
+      const saved = await r.json();
+      const all = getBookings();
+      all.push(saved);
+      saveBookings(all);
+      return saved;
+    } catch(e) {
+      console.error('BookingAPI.create failed:', e?.message, e);
+      showToast('Failed to save booking: '+(e?.message||'unknown error'), 'error');
+      throw e;
     }
-    const saved = await r.json();
-    const all = getBookings();
-    all.push(saved);
-    saveBookings(all);
-    return saved;
   },
 
   async update(id, changes) {
