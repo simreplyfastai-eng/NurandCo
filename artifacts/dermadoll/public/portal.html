@@ -521,6 +521,7 @@ select.form-input{background:var(--color-card)}
 .bm-info-val{font-family:var(--font-sans);font-size:13px;color:var(--color-foreground);line-height:1.6}
 .bm-btns{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center}
 .bm-btns-right{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.modal-box button{border-radius:6px!important}
 
 /* ── SETTINGS ────────────────────────────────────── */
 .settings-section{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden}
@@ -3183,9 +3184,15 @@ async function openBookingModal(prefill){
     document.getElementById('bm-consultation-fields').style.display='none';
     if(prefill&&typeof prefill==='string'){autofillClientContact(prefill);}
   }
+  const mt=document.getElementById('mobile-toggle');
+  if(mt)mt.style.display='none';
   document.getElementById('booking-modal').classList.add('open');
 }
-function closeBookingModal(){document.getElementById('booking-modal').classList.remove('open')}
+function closeBookingModal(){
+  document.getElementById('booking-modal').classList.remove('open');
+  const mt=document.getElementById('mobile-toggle');
+  if(mt)mt.style.display='';
+}
 
 async function cancelBookingFromModal(){
   if(!editingBookingId)return;
