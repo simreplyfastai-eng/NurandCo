@@ -2530,6 +2530,8 @@ function openBookingDetailPanel(bookingId){
   const locName=_SESSION_LOC_NAME||sessionStorage.getItem('starr_location')||'Clinic';
   const medColor=b.hasMedical?'#2D6A4F':'#aaa';
   const conColor=b.hasConsent?'#2D6A4F':'#aaa';
+  const _lbl='font-size:10px;color:var(--color-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;font-weight:600';
+  const _val='color:var(--color-primary);font-weight:600;font-size:13px';
   document.getElementById('day-panel-body').innerHTML=`
     <div style="margin-bottom:14px">
       <button onclick="renderDayTimeline(_lastSelectedDay)" style="border:none;background:none;cursor:pointer;font-size:11px;color:var(--color-primary);letter-spacing:1.5px;text-transform:uppercase;padding:0;font-family:var(--font-sans)">← Back</button>
@@ -2538,39 +2540,39 @@ function openBookingDetailPanel(bookingId){
       ${statusPill(b.status)}
       <button onclick="openBookingModal('${b.id}')" style="font-size:11px;padding:5px 14px;border:1px solid var(--color-primary);background:transparent;color:var(--color-primary);cursor:pointer;border-radius:var(--radius);font-family:var(--font-sans);letter-spacing:0.5px">Edit</button>
     </div>
-    <div style="font-size:13px;font-family:var(--font-sans);line-height:1.8">
+    <div style="font-family:var(--font-sans);line-height:1.7">
       <div style="margin-bottom:10px">
-        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Client</div>
-        <div style="font-weight:500">${escPortal(b.clientName)}</div>
+        <div style="${_lbl}">Client</div>
+        <div style="${_val}">${escPortal(b.clientName)}</div>
       </div>
-      ${b.clientEmail?`<div style="margin-bottom:10px"><div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Email</div><div><a href="mailto:${escPortal(b.clientEmail)}" style="color:var(--color-primary)">${escPortal(b.clientEmail)}</a></div></div>`:''}
-      ${b.clientPhone?`<div style="margin-bottom:10px"><div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Phone</div><div><a href="tel:${escPortal(b.clientPhone)}" style="color:var(--color-primary)">${escPortal(b.clientPhone)}</a></div></div>`:''}
+      ${b.clientEmail?`<div style="margin-bottom:10px"><div style="${_lbl}">Email</div><div><a href="mailto:${escPortal(b.clientEmail)}" style="${_val}">${escPortal(b.clientEmail)}</a></div></div>`:''}
+      ${b.clientPhone?`<div style="margin-bottom:10px"><div style="${_lbl}">Phone</div><div><a href="tel:${escPortal(b.clientPhone)}" style="${_val}">${escPortal(b.clientPhone)}</a></div></div>`:''}
       <div style="margin-bottom:10px">
-        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Treatment</div>
-        <div style="color:var(--color-secondary)">${escPortal(b.treatment||'Not specified')}</div>
+        <div style="${_lbl}">Treatment</div>
+        <div style="${_val}">${escPortal(b.treatment||'Not specified')}</div>
       </div>
       <div style="margin-bottom:10px">
-        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Date &amp; Time</div>
-        <div>${escPortal(formatDate(b.date))} at ${escPortal((b.time||'').slice(0,5))}</div>
+        <div style="${_lbl}">Date &amp; Time</div>
+        <div style="${_val}">${escPortal(formatDate(b.date))} at ${escPortal((b.time||'').slice(0,5))}</div>
       </div>
-      ${b.durationMinutes?`<div style="margin-bottom:10px"><div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Duration</div><div>${b.durationMinutes} mins</div></div>`:''}
+      ${b.durationMinutes?`<div style="margin-bottom:10px"><div style="${_lbl}">Duration</div><div style="${_val}">${b.durationMinutes} mins</div></div>`:''}
       <div style="margin-bottom:10px">
-        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px">Location</div>
-        <div>${escPortal(locName)}</div>
+        <div style="${_lbl}">Location</div>
+        <div style="${_val}">${escPortal(locName)}</div>
       </div>
       <div style="border-top:1px solid var(--color-border-subtle);padding-top:12px;margin-top:4px;margin-bottom:10px">
-        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Payment</div>
-        <div>Deposit: ${gbp(b.deposit)} <span style="color:${b.depositPaid?'#2D6A4F':'#aaa'}">${b.depositPaid?'✓ Paid':'Unpaid'}</span></div>
-        <div>Total: ${gbp(b.price)}${b.balancePaid?' <span style="color:#2D6A4F">✓ Balance Paid</span>':''}</div>
+        <div style="${_lbl};margin-bottom:6px">Payment</div>
+        <div style="${_val}">Deposit: ${gbp(b.deposit)} <span style="color:${b.depositPaid?'#1B7A4A':'#aaa'};font-weight:600">${b.depositPaid?'✓ Paid':'Unpaid'}</span></div>
+        <div style="${_val}">Total: ${gbp(b.price)}${b.balancePaid?' <span style="color:#1B7A4A">✓ Balance Paid</span>':''}</div>
       </div>
       <div style="border-top:1px solid var(--color-border-subtle);padding-top:12px;margin-bottom:10px">
-        <div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Forms</div>
-        <div style="display:flex;gap:16px">
-          <span onclick="openFormsDrawer('${b.id}')" style="cursor:pointer;font-size:13px;color:${medColor}" title="${b.hasMedical?'Medical form on file — click to view':'No medical form submitted'}">📋 ${b.hasMedical?'Medical ✓':'Medical'}</span>
-          <span onclick="openFormsDrawer('${b.id}')" style="cursor:pointer;font-size:13px;color:${conColor}" title="${b.hasConsent?'Consent signed — click to view':'Consent not signed'}">✍️ ${b.hasConsent?'Consent ✓':'Consent'}</span>
+        <div style="${_lbl};margin-bottom:6px">Forms</div>
+        <div style="display:flex;gap:8px">
+          <span onclick="openFormsDrawer('${b.id}')" style="cursor:pointer" title="${b.hasMedical?'Medical form on file — click to view':'No medical form submitted'}"><span class="tl-badge${b.hasMedical?' done':''}" style="font-size:10px;padding:3px 8px">Medical${b.hasMedical?' ✓':''}</span></span>
+          <span onclick="openFormsDrawer('${b.id}')" style="cursor:pointer" title="${b.hasConsent?'Consent signed — click to view':'Consent not signed'}"><span class="tl-badge${b.hasConsent?' done':''}" style="font-size:10px;padding:3px 8px">Consent${b.hasConsent?' ✓':''}</span></span>
         </div>
       </div>
-      ${b.notes?`<div style="border-top:1px solid var(--color-border-subtle);padding-top:12px"><div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Notes</div><div style="font-size:12px;line-height:1.6;color:#555">${escPortal(b.notes)}</div></div>`:''}
+      ${b.notes?`<div style="border-top:1px solid var(--color-border-subtle);padding-top:12px"><div style="${_lbl};margin-bottom:4px">Notes</div><div style="${_val};font-size:12px;line-height:1.6">${escPortal(b.notes)}</div></div>`:''}
     </div>
     ${b.status!=='Cancelled'&&b.status!=='cancelled'?`
     <div style="display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--color-border-subtle)">
