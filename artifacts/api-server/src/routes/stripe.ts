@@ -181,24 +181,20 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
 
   let treatmentPrice = 0;
   let durationMinutes = 30;
-  let dbDepositAmount = 0;
   if (locationId) {
     const info = await getTreatmentInfo(treatment, locationId);
     treatmentPrice = info.price;
     durationMinutes = info.durationMinutes;
-    dbDepositAmount = info.depositAmount;
   }
 
   if (!treatmentPrice && treatment !== "In-Person Consultation" && treatment !== "Virtual Consultation") {
     return res.status(400).json({ error: "Unknown treatment. Please refresh and try again." });
   }
 
-  // Use per-treatment deposit_amount from DB when available; fall back to category-based setting
-  const depositAmountPence = dbDepositAmount > 0
-    ? Math.round(dbDepositAmount * 100)
-    : Math.round(getDepositAmount(treatment,
-        locationId ? await getDepositSettings(locationId) : { depositInjectables: 20, depositOther: 10 }
-      ) * 100);
+  const depSettings = locationId
+    ? await getDepositSettings(locationId)
+    : { depositInjectables: 0.10, depositOther: 0.10 };
+  const depositAmountPence = Math.round(getDepositAmount(treatment, depSettings) * 100);
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
