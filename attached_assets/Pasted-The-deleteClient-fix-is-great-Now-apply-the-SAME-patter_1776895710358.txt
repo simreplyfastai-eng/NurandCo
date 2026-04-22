@@ -1,0 +1,30 @@
+The deleteClient fix is great. Now apply the SAME pattern (inline two-step confirm, 5-second auto-revert, matching the portal's styling) to ALL 25 other confirm/alert/prompt calls you audited. Group them by type:
+
+TYPE 1 — Destructive confirmations (13 items): 
+Lines 3001, 3472, 4171, 4198, 4916, 4944, 4972, 5005, 5073, 5171, 5474, 5585.
+Apply the same inline two-button pattern as deleteClient (Yes/Cancel with 5s auto-revert).
+
+TYPE 2 — Validation alerts (8 items): 
+Lines 3555, 3616, 3629, 4070, 4140, 4187.
+Replace with inline error banners/toasts that appear next to the field or at the top of the form. Red border, auto-dismiss after 4 seconds OR dismiss when user corrects the input. Use the existing showToast() function if there's one, or create a small inline error helper.
+
+TYPE 3 — Success alerts (2 items): 
+Lines 5188, 5199.
+Replace with showToast() success notifications (green).
+
+TYPE 4 — Error alerts (1 item): 
+Line 5190.
+Replace with showToast() error notification (red).
+
+TYPE 5 — Prompt dialogs (3 items):
+- Line 3507 (Share booking link — copy URL): replace with a "Copy link" button that copies to clipboard and shows a "Copied!" toast. Much better UX anyway.
+- Lines 5195 and 5203 (Type CONFIRM to clear bookings / reset portal): replace with an inline text input + Confirm button. User types CONFIRM, clicks button, action runs. Same destructive red styling.
+
+Constraints:
+1. Check if a showToast() helper already exists in portal.html — if yes, use it. If not, create a simple one that slides in from top-right, auto-dismisses after 4s, colour-coded by type (success/error/info).
+2. Do NOT change any of the underlying delete/API logic — only swap the popup UX.
+3. Preserve the exact same "what happens after confirmation" behaviour (e.g. API calls, page refreshes).
+4. Test by eye that each replacement still produces a clear Yes/No decision path.
+5. Show me a summary diff (not full diff) before applying — just "line X: replaced confirm with inline confirm" per item. I don't need to see all 25 full diffs.
+
+After applying, confirm all 25 are fixed.
