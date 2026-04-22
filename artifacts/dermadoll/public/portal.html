@@ -470,8 +470,8 @@ tr:hover td{background:rgba(92,26,26,.02)}
 .fin-tab.active{background:var(--color-primary);color:var(--color-primary-fg)}
 #revenue-canvas{width:100%!important;max-width:100%!important;height:220px;display:block}
 .fin-table{width:100%;table-layout:fixed;border-collapse:collapse}
-.fin-table thead th{font-family:var(--font-sans);font-size:9px;font-weight:400;color:var(--color-muted-fg);letter-spacing:.2em;text-transform:uppercase;padding:10px 12px;text-align:left;background:var(--color-muted);border-bottom:1px solid var(--color-border);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fin-table tbody td{padding:0 12px;height:52px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-bottom:1px solid var(--color-border-subtle);font-family:var(--font-sans);font-weight:300;font-size:13px}
+.fin-table thead th{font-family:var(--font-sans);font-size:9px;font-weight:400;color:var(--color-muted-fg);letter-spacing:.18em;text-transform:uppercase;padding:10px 16px;text-align:left;border-bottom:1px solid var(--color-border);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fin-table tbody td{padding:0 16px;height:58px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-bottom:1px solid var(--color-border-subtle);font-family:var(--font-sans);font-size:13px}
 .fin-table tbody tr:last-child td{border-bottom:none}
 .fin-table tbody tr:hover td{background:rgba(92,26,26,.02)}
 .fin-pill{font-family:var(--font-sans);font-size:11px;font-weight:400;padding:3px 10px;border-radius:var(--radius-pill);display:inline-block}
@@ -698,14 +698,13 @@ select.form-input{background:var(--color-card)}
   .fin-col-treat{display:none}
   .fin-export-btn{display:none}
   .fin-table{table-layout:fixed;min-width:unset}
-  .fin-table thead th{font-size:9px;padding:8px 6px;white-space:nowrap;overflow:hidden;text-overflow:clip}
-  .fin-table tbody td{padding:0 6px;font-size:12px}
-  .fin-table thead th:nth-child(1){width:22%}
-  .fin-table thead th:nth-child(2){width:30%}
-  .fin-table thead th:nth-child(3){display:none}
-  .fin-table thead th:nth-child(4){width:18%}
-  .fin-table thead th:nth-child(5){width:18%}
-  .fin-table thead th:nth-child(6){width:12%}
+  .fin-table thead th{font-size:9px;padding:8px 10px;white-space:nowrap;overflow:hidden;text-overflow:clip}
+  .fin-table tbody td{padding:0 10px;font-size:12px}
+  .fin-table thead th:nth-child(1){width:20%}
+  .fin-table thead th:nth-child(2){width:32%}
+  .fin-table thead th:nth-child(3){width:18%}
+  .fin-table thead th:nth-child(4){width:20%}
+  .fin-table thead th:nth-child(5){width:10%}
   .fin-pill{font-size:9px;padding:2px 6px}
   /* ── Mobile accessibility ── */
   input,select,textarea{font-size:16px!important}
@@ -1175,8 +1174,17 @@ select.form-input{background:var(--color-card)}
               <button class="fin-tab" id="f-pending" onclick="setFilter('Pending',this)">Pending</button>
             </div>
           </div>
-          <div id="finance-table-wrap">
-            <div id="finance-tbody" class="txn-list"></div>
+          <div id="finance-table-wrap" style="overflow-x:auto">
+            <table class="fin-table">
+              <thead><tr>
+                <th style="width:18%">Date</th>
+                <th style="width:30%">Client</th>
+                <th style="width:18%">Total</th>
+                <th style="width:22%">Status</th>
+                <th style="width:12%"></th>
+              </tr></thead>
+              <tbody id="finance-tbody"></tbody>
+            </table>
           </div>
         </div>
         <button class="fin-export-btn" id="finance-export-btn" onclick="exportFinance()">↓ Export Transactions</button>
@@ -4167,34 +4175,27 @@ function initChartTooltip(){
 }
 
 function buildTxnCards(bookings){
-  if(!bookings.length)return`<div style="text-align:center;padding:40px 0"><div style="font-family:var(--font-serif);font-size:20px;font-style:italic;color:#111;margin-bottom:8px">No transactions yet</div><div style="font-family:var(--font-sans);font-size:13px;color:var(--color-muted-fg)">Bookings will appear here automatically</div></div>`;
+  if(!bookings.length)return`<tr><td colspan="5" style="text-align:center;padding:40px 0"><div style="font-family:var(--font-serif);font-size:18px;font-style:italic;color:#111;margin-bottom:6px">No transactions yet</div><div style="font-family:var(--font-sans);font-size:12px;color:var(--color-muted-fg)">Bookings will appear here automatically</div></td></tr>`;
+  const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  function shortDate(d){const p=d?d.split('-'):[];return p.length===3?`${parseInt(p[2])} ${months[parseInt(p[1])-1]||''}`:d;}
   return bookings.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(b=>{
-    const dep=Number(b.deposit||0);
     const total=Number(b.price||0);
-    const bal=Math.max(total-dep,0);
     const isCancelled=b.status==='Cancelled';
-    const depPaid=!isCancelled&&(b.depositPaid||b.status==='Complete');
-    const balPaid=!isCancelled&&(b.balancePaid||b.status==='Complete');
-    const depStatusHtml=isCancelled
-      ?`<span class="txn-status cancelled">Cancelled</span>`
-      :depPaid
-        ?`<span class="txn-status paid">✓ Paid</span>`
-        :`<span class="txn-status unpaid">Unpaid</span>`;
-    const balStatusHtml=isCancelled
-      ?`<span class="txn-status cancelled">N/A</span>`
-      :balPaid
-        ?`<span class="txn-status paid">✓ Paid</span>`
-        :`<span class="txn-status outstanding">Outstanding</span>`;
-    const markBtn=(!balPaid&&!isCancelled)
-      ?`<button class="txn-mark-btn" onclick="markPaid('${b.id}')">Mark Paid</button>`
-      :'';
-    return`<div class="txn-card">
-      <div class="txn-head"><div><div class="txn-client">${b.clientName||'Unknown'}</div><div class="txn-treat">${b.treatment||''}</div></div><div class="txn-date">${formatDate(b.date)}</div></div>
-      <div class="txn-ledger">
-        <div class="txn-row"><span class="txn-lbl">Deposit</span><span class="txn-amt">${gbp(dep)}</span>${depStatusHtml}</div>
-        <div class="txn-row"><span class="txn-lbl">Balance</span><span class="txn-amt">${gbp(bal)}</span>${balStatusHtml}${markBtn}</div>
-      </div>
-    </div>`;
+    const isComplete=b.balancePaid||b.status==='Complete';
+    const statusLabel=isCancelled?'Cancelled':b.status||'Pending';
+    const pillCls=isCancelled?'cancelled':isComplete?'complete':(b.status==='Confirmed'?'confirmed':'pending');
+    const action=isCancelled
+      ?''
+      :isComplete
+        ?`<span style="color:var(--color-muted-fg);font-size:15px;display:block;text-align:center">✓</span>`
+        :`<button class="fin-mark-circle" onclick="markPaid('${b.id}')" title="Mark Paid">✓</button>`;
+    return`<tr>
+      <td style="font-size:13px;font-weight:500;color:var(--color-foreground)">${shortDate(b.date)}</td>
+      <td style="font-weight:700;color:var(--color-foreground);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0">${b.clientName||'Unknown'}</td>
+      <td style="font-weight:600;color:var(--color-secondary)">${gbp(total)}</td>
+      <td><span class="fin-pill ${pillCls}">${statusLabel}</span></td>
+      <td style="text-align:center">${action}</td>
+    </tr>`;
   }).join('');
 }
 async function renderFinance(){
