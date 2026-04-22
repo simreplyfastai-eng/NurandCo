@@ -1,18 +1,18 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useRef } from "react";
 
-const masterclasses = [
+const courses = [
   {
-    title: "Essex Masterclass",
-    location: "Hornchurch Clinic",
-    locationShort: "Hornchurch",
-    badge: "CPD ACCREDITED",
+    name: "Lash Extensions",
+    course: "Lash Mission Course",
   },
   {
-    title: "London Masterclass",
-    location: "Marylebone Clinic",
-    locationShort: "Marylebone",
-    badge: "CPD ACCREDITED",
+    name: "Acrylic Nails",
+    course: "Nail Mission Course",
+  },
+  {
+    name: "LVL & Brow Lamination",
+    course: "Ultimate LVL & Brow Lami Course",
   },
 ];
 
@@ -66,7 +66,6 @@ const inputStyle: React.CSSProperties = {
 
 export default function Training() {
   const [enquireOpen, setEnquireOpen] = useState(false);
-  const [selectedClass, setSelectedClass] = useState({ title: "", location: "", locationShort: "" });
   const [formState, setFormState] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
   const [submittedName, setSubmittedName] = useState("");
@@ -77,8 +76,7 @@ export default function Training() {
   const expRef = useRef<HTMLSelectElement>(null);
   const msgRef = useRef<HTMLTextAreaElement>(null);
 
-  const handleEnquire = (mc: typeof masterclasses[number]) => {
-    setSelectedClass({ title: mc.title, location: mc.location, locationShort: mc.locationShort });
+  const handleEnquire = () => {
     setFormState("idle");
     setErrorMsg("");
     setEnquireOpen(true);
@@ -112,7 +110,7 @@ export default function Training() {
           name,
           email,
           phone,
-          course_name: selectedClass.title,
+          course_name: "Training Enquiry — Hornchurch",
           experience_level: experience_level || undefined,
           message: message || undefined,
         }),
@@ -137,6 +135,7 @@ export default function Training() {
         <div className="training-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "start" }}>
           <style>{`@media (max-width: 768px) { .training-grid { grid-template-columns: 1fr !important; gap: 40px !important; } }`}</style>
 
+          {/* Left: copy */}
           <motion.div
             initial={{ opacity: 0, x: -24 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -153,59 +152,122 @@ export default function Training() {
               Train With Eva
             </h2>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#C9A96E", margin: "0 0 28px" }}>
-              CPD accredited aesthetics training
+              Training based in Hornchurch, Essex
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
-              Eva's background in education meets her clinical expertise, delivering world-class aesthetics training through Starr Academy.
+              Eva's background in education meets her clinical expertise, delivering world-class training through Starr Academy.
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
-              All courses are CPD accredited and open to candidates with no prior background required.
+              All courses are open to candidates with no prior background required.
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#5C1A1A", lineHeight: 1.8, margin: 0 }}>
               Small groups. Real models. Real confidence.
             </p>
           </motion.div>
 
+          {/* Right: course list + enquiry */}
           <motion.div
             initial={{ opacity: 0, x: 24 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            style={{ display: "flex", flexDirection: "column", gap: 16 }}
+            style={{ display: "flex", flexDirection: "column", gap: 12 }}
           >
-            {masterclasses.map((mc) => (
-              <div
-                key={mc.title}
-                style={{ background: "#F5F0EB", border: "1px solid #E2DDD5", padding: "28px 28px 24px" }}
+            {/* Individual course rows */}
+            {courses.map((c, i) => (
+              <motion.div
+                key={c.name}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: 0.15 + i * 0.08 }}
+                style={{
+                  background: "#F5F0EB",
+                  border: "1px solid #E2DDD5",
+                  padding: "20px 24px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: 16,
+                }}
               >
-                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
-                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.3rem", fontWeight: 400, color: "#5C1A1A", margin: 0 }}>
-                    {mc.title}
-                  </h3>
-                  <span style={{
-                    fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "1.5px", textTransform: "uppercase",
-                    border: "1px solid #C9A96E", color: "#C9A96E", padding: "4px 8px", flexShrink: 0, marginLeft: 12,
-                  }}>
-                    {mc.badge}
-                  </span>
+                <div>
+                  <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.15rem", fontWeight: 400, color: "#5C1A1A", margin: "0 0 4px" }}>
+                    {c.name}
+                  </p>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#737373", margin: 0 }}>
+                    {c.course}
+                  </p>
                 </div>
-                <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#C9A96E", margin: "0 0 20px" }}>
-                  {mc.location}
-                </p>
-                <button
-                  onClick={() => handleEnquire(mc)}
-                  style={{
-                    width: "100%", fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
-                    border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
-                    padding: "12px 0", cursor: "pointer", transition: "all 0.2s",
-                  }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
-                >
-                  ENQUIRE NOW
-                </button>
-              </div>
+              </motion.div>
             ))}
+
+            {/* CPD coming soon */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.15 + courses.length * 0.08 }}
+              style={{
+                background: "#FAF7F4",
+                border: "1px dashed #C9A96E",
+                padding: "16px 24px",
+                display: "flex",
+                alignItems: "center",
+                gap: 14,
+              }}
+            >
+              <span style={{
+                fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "1.5px", textTransform: "uppercase",
+                border: "1px solid #C9A96E", color: "#C9A96E", padding: "4px 8px", flexShrink: 0,
+              }}>
+                COMING SOON
+              </span>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", margin: 0, lineHeight: 1.5 }}>
+                CPD Accredited Aesthetic Courses
+              </p>
+            </motion.div>
+
+            {/* Single enquiry box */}
+            <motion.div
+              initial={{ opacity: 0, y: 12 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.15 + (courses.length + 1) * 0.08 }}
+              style={{
+                background: "#F5F0EB",
+                border: "1px solid #E2DDD5",
+                padding: "28px 28px 24px",
+                marginTop: 4,
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
+                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.3rem", fontWeight: 400, color: "#5C1A1A", margin: 0 }}>
+                  Training Enquiries
+                </h3>
+                <span style={{
+                  fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "1.5px", textTransform: "uppercase",
+                  border: "1px solid #C9A96E", color: "#C9A96E", padding: "4px 8px", flexShrink: 0, marginLeft: 12,
+                }}>
+                  HORNCHURCH
+                </span>
+              </div>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#C9A96E", margin: "0 0 20px" }}>
+                Hornchurch Clinic, Essex
+              </p>
+              <button
+                onClick={handleEnquire}
+                style={{
+                  width: "100%", fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
+                  border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                  padding: "12px 0", cursor: "pointer", transition: "all 0.2s",
+                }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+              >
+                ENQUIRE NOW
+              </button>
+            </motion.div>
           </motion.div>
         </div>
       </div>
@@ -240,7 +302,6 @@ export default function Training() {
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Close button */}
               <button
                 onClick={closeModal}
                 style={{
@@ -290,31 +351,20 @@ export default function Training() {
                 </div>
               ) : (
                 <>
-                  {/* Header */}
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                     <div style={{ height: 1, width: 20, background: "#C9A96E" }} />
                     <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
                       Starr Academy
                     </span>
                   </div>
-                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.8rem", color: "#5C1A1A", margin: "0 0 10px" }}>
-                    Course Enquiry
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.8rem", color: "#5C1A1A", margin: "0 0 6px" }}>
+                    Training Enquiry
                   </h3>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 28 }}>
-                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373" }}>
-                      {selectedClass.title} — {selectedClass.locationShort}
-                    </span>
-                    <span style={{
-                      fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px",
-                      textTransform: "uppercase", background: "#C9A96E", color: "#FFFFFF",
-                      padding: "4px 9px", borderRadius: 99, flexShrink: 0,
-                    }}>
-                      {selectedClass.title}
-                    </span>
-                  </div>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", margin: "0 0 28px" }}>
+                    Hornchurch Clinic, Essex
+                  </p>
 
                   <form onSubmit={handleSubmit} noValidate>
-                    {/* Full Name */}
                     <div style={{ marginBottom: 14 }}>
                       <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "#5C1A1A", marginBottom: 6 }}>
                         Full Name <span style={{ color: "#C9A96E" }}>*</span>
@@ -322,7 +372,6 @@ export default function Training() {
                       <input ref={nameRef} type="text" placeholder="Your full name" required style={inputStyle} />
                     </div>
 
-                    {/* Email */}
                     <div style={{ marginBottom: 14 }}>
                       <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "#5C1A1A", marginBottom: 6 }}>
                         Email Address <span style={{ color: "#C9A96E" }}>*</span>
@@ -330,7 +379,6 @@ export default function Training() {
                       <input ref={emailRef} type="email" placeholder="your@email.com" required style={inputStyle} />
                     </div>
 
-                    {/* Phone */}
                     <div style={{ marginBottom: 14 }}>
                       <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "#5C1A1A", marginBottom: 6 }}>
                         Phone Number <span style={{ color: "#C9A96E" }}>*</span>
@@ -338,20 +386,20 @@ export default function Training() {
                       <input ref={phoneRef} type="tel" placeholder="+44 7700 000000" required style={inputStyle} />
                     </div>
 
-                    {/* Experience Level */}
                     <div style={{ marginBottom: 14 }}>
                       <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "#5C1A1A", marginBottom: 6 }}>
-                        Experience Level
+                        Course of Interest
                       </label>
                       <select ref={expRef} style={{ ...inputStyle, appearance: "none", WebkitAppearance: "none" }}>
-                        <option value="">Select your background...</option>
-                        {EXPERIENCE_OPTIONS.map((o) => (
-                          <option key={o} value={o}>{o}</option>
-                        ))}
+                        <option value="">Select a course...</option>
+                        <option value="Lash Extensions — Lash Mission Course">Lash Extensions — Lash Mission Course</option>
+                        <option value="Acrylic Nails — Nail Mission Course">Acrylic Nails — Nail Mission Course</option>
+                        <option value="LVL & Brow Lamination — Ultimate LVL & Brow Lami Course">LVL & Brow Lamination — Ultimate LVL & Brow Lami Course</option>
+                        <option value="CPD Aesthetic Courses (coming soon)">CPD Aesthetic Courses (coming soon)</option>
+                        <option value="General enquiry">General enquiry</option>
                       </select>
                     </div>
 
-                    {/* Message */}
                     <div style={{ marginBottom: 24 }}>
                       <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "#5C1A1A", marginBottom: 6 }}>
                         Message <span style={{ fontWeight: 300, textTransform: "none", letterSpacing: 0 }}>(optional)</span>
@@ -364,14 +412,12 @@ export default function Training() {
                       />
                     </div>
 
-                    {/* Error */}
                     {formState === "error" && errorMsg && (
                       <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#C62828", margin: "0 0 16px" }}>
                         {errorMsg}
                       </p>
                     )}
 
-                    {/* Submit */}
                     <button
                       type="submit"
                       disabled={formState === "loading"}
