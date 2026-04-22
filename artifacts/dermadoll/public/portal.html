@@ -640,7 +640,7 @@ select.form-input{background:var(--color-card)}
 .dot-menu-wrap{position:relative;display:inline-block}
 .dot-menu-btn{background:none;border:1px solid transparent;border-radius:6px;cursor:pointer;font-size:16px;line-height:1;padding:2px 7px;color:#888;transition:background .15s}
 .dot-menu-btn:hover{background:#F3EDE6;border-color:#E8DDD3;color:#5C1A1A}
-.dot-menu-drop{position:absolute;right:0;top:calc(100% + 4px);z-index:9999;background:#fff;border:1px solid #E8DDD3;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:160px;display:none;overflow:hidden}
+.dot-menu-drop{position:fixed;z-index:99999;background:#fff;border:1px solid #E8DDD3;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.15);min-width:172px;display:none;overflow:hidden}
 .dot-menu-drop button{display:block;width:100%;text-align:left;padding:10px 16px;background:none;border:none;font-family:var(--font-sans);font-size:13px;cursor:pointer;color:#333;border-bottom:1px solid #F3EDE6}
 .dot-menu-drop button:last-child{border-bottom:none}
 .dot-menu-drop button:hover{background:#FAF0F0;color:#5C1A1A}
@@ -3158,8 +3158,30 @@ function toggleDotMenu(id,event){
   if(!el)return;
   if(_openDotMenu&&_openDotMenu!==el){_openDotMenu.style.display='none';}
   const opening=el.style.display==='none'||!el.style.display;
-  el.style.display=opening?'block':'none';
-  _openDotMenu=opening?el:null;
+  if(opening){
+    const btn=event.currentTarget;
+    const rect=btn.getBoundingClientRect();
+    el.style.display='block';
+    // Position: align right edge with button right edge
+    const menuW=el.offsetWidth||172;
+    let left=rect.right-menuW;
+    if(left<8)left=8;
+    el.style.left=left+'px';
+    el.style.right='auto';
+    // Position below button; flip above if near bottom
+    let top=rect.bottom+4;
+    el.style.top=top+'px';
+    requestAnimationFrame(()=>{
+      const mh=el.offsetHeight;
+      if(top+mh>window.innerHeight-8){
+        el.style.top=(rect.top-mh-4)+'px';
+      }
+    });
+    _openDotMenu=el;
+  } else {
+    el.style.display='none';
+    _openDotMenu=null;
+  }
 }
 function closeDotMenus(){if(_openDotMenu){_openDotMenu.style.display='none';_openDotMenu=null;}}
 document.addEventListener('click',()=>closeDotMenus());
