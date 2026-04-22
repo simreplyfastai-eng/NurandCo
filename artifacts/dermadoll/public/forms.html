@@ -599,6 +599,8 @@ function formatDate(dateStr) {
 }
 
 // ── Init ────────────────────────────────────────────────────────
+// Poll for up to 90 seconds — the Stripe webhook can take up to ~45s to fire after payment.
+// Customers are redirected here immediately after paying, so we must NOT fail on first 404.
 async function init() {
   if (!BOOKING_ID) {
     document.getElementById('main-content').innerHTML = `
@@ -609,40 +611,82 @@ async function init() {
     return;
   }
 
-  try {
-    const res = await fetch('/api/forms/status?booking=' + encodeURIComponent(BOOKING_ID));
-    if (!res.ok) throw new Error('Booking not found');
-    const data = await res.json();
-    bookingData = data;
+  const MAX_WAIT_MS  = 90000; // 90 seconds total
+  const POLL_MS      = 4000;  // check every 4 seconds
+  const started      = Date.now();
+  const loadingEl    = document.querySelector('.loading-wrap p');
+  if (loadingEl) loadingEl.textContent = 'Confirming your payment…';
 
-    // If both forms already done → go to confirmed
-    if (data.hasConsent) {
-      window.location.href = 'confirmed.html?booking=' + encodeURIComponent(BOOKING_ID);
+  while (true) {
+    try {
+      const res = await fetch('/api/forms/status?booking=' + encodeURIComponent(BOOKING_ID));
+
+      if (res.ok) {
+        // ── SUCCESS ─────────────────────────────────────────────
+        const data = await res.json();
+        bookingData = data;
+
+        // If both forms already done → go to confirmed
+        if (data.hasConsent) {
+          window.location.href = 'confirmed.html?booking=' + encodeURIComponent(BOOKING_ID);
+          return;
+        }
+
+        // If client has medical on file within 90 days → skip medical step
+        isReturningClient = data.medicalOnFileForEmail && !data.hasMedical;
+        if (data.medicalLastSubmitted) {
+          window._medLastSubmitted = new Date(data.medicalLastSubmitted).toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+        }
+
+        if (data.hasMedical || isReturningClient) {
+          if (isReturningClient) {
+            renderMedical();
+          } else {
+            renderConsent();
+          }
+        } else {
+          renderMedical();
+        }
+        return; // done
+      }
+
+      // Non-404 errors (500, etc.) — fail immediately, no point retrying
+      if (res.status !== 404) {
+        throw new Error('Server error loading your booking. Please try again.');
+      }
+
+      // 404 — booking not in DB yet (webhook in transit). Keep polling unless timeout.
+      if (Date.now() - started >= MAX_WAIT_MS) {
+        throw new Error('TIMEOUT');
+      }
+
+    } catch (e) {
+      if (e && e.message !== 'TIMEOUT' && !String(e).includes('fetch')) {
+        // A real unexpected error — show it and stop
+        document.getElementById('main-content').innerHTML = `
+          <div class="error-page">
+            <h2>Something went wrong</h2>
+            <p>${escHtml(e.message || 'Unknown error')}<br><br>
+            Your payment was taken. Please contact us on WhatsApp or email and we will sort this out immediately.</p>
+          </div>`;
+        return;
+      }
+      // Timeout or network error — show final error
+      document.getElementById('main-content').innerHTML = `
+        <div class="error-page">
+          <h2>Booking not found</h2>
+          <p>We couldn't find your appointment details yet.<br><br>
+          <strong>Your payment was received</strong> — please contact us on WhatsApp or email and we will confirm your booking manually right away.</p>
+        </div>`;
       return;
     }
 
-    // If client already has a medical form from a previous booking (within 90 days) → skip medical
-    isReturningClient = data.medicalOnFileForEmail && !data.hasMedical;
-    if (data.medicalLastSubmitted) {
-      window._medLastSubmitted = new Date(data.medicalLastSubmitted).toLocaleDateString('en-GB', {day:'numeric',month:'long',year:'numeric'});
+    // Wait then update the loading message with elapsed time
+    await new Promise(r => setTimeout(r, POLL_MS));
+    if (loadingEl) {
+      const secs = Math.round((Date.now() - started) / 1000);
+      loadingEl.textContent = `Confirming your payment… (${secs}s)`;
     }
-
-    if (data.hasMedical || isReturningClient) {
-      // Show consent form directly (or offer choice)
-      if (isReturningClient) {
-        renderMedical(); // renders with returning notice + skip button
-      } else {
-        renderConsent();
-      }
-    } else {
-      renderMedical();
-    }
-  } catch(e) {
-    document.getElementById('main-content').innerHTML = `
-      <div class="error-page">
-        <h2>Booking not found</h2>
-        <p>We couldn't find your appointment details.<br>If you believe this is an error, please contact us on WhatsApp or email.</p>
-      </div>`;
   }
 }
 
