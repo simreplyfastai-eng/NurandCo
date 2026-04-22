@@ -24,13 +24,27 @@ export default function Hero() {
   }, []);
 
   useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-    const tryPlay = () => { video.muted = true; video.playsInline = true; const p = video.play(); if (p) p.catch(() => {}); };
-    tryPlay();
-    video.addEventListener("loadedmetadata", tryPlay);
-    video.addEventListener("canplay", tryPlay);
-    return () => { video.removeEventListener("loadedmetadata", tryPlay); video.removeEventListener("canplay", tryPlay); };
+    const v = videoRef.current;
+    if (!v) return;
+    let dead = false;
+    const tryPlay = () => {
+      if (dead) return;
+      v.muted = true; v.volume = 0;
+      (v as HTMLVideoElement & { playsInline: boolean }).playsInline = true;
+      v.play().catch(() => {});
+    };
+    v.addEventListener("canplay", tryPlay);
+    v.addEventListener("canplaythrough", tryPlay);
+    v.addEventListener("loadeddata", tryPlay);
+    const t1 = setTimeout(tryPlay, 50);
+    const t2 = setTimeout(tryPlay, 400);
+    return () => {
+      dead = true;
+      clearTimeout(t1); clearTimeout(t2);
+      v.removeEventListener("canplay", tryPlay);
+      v.removeEventListener("canplaythrough", tryPlay);
+      v.removeEventListener("loadeddata", tryPlay);
+    };
   }, [heroSrc]);
 
   const scrollToServices = () => document.getElementById("services")?.scrollIntoView({ behavior: "smooth" });

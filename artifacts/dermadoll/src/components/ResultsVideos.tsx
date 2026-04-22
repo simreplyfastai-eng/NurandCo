@@ -14,56 +14,68 @@ function AutoPlayVideo({ src }: { src: string }) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
-    const video = ref.current;
-    if (!video) return;
+    const v = ref.current;
+    if (!v) return;
+
+    let dead = false;
 
     const tryPlay = () => {
-      video.muted = true;
-      video.playsInline = true;
-      const p = video.play();
-      if (p) p.catch(() => {});
+      if (dead) return;
+      v.muted = true;
+      v.volume = 0;
+      (v as HTMLVideoElement & { playsInline: boolean }).playsInline = true;
+      v.play().catch(() => {});
     };
 
-    // Explicitly reload so the browser picks up the new src, then play immediately
-    video.load();
-    tryPlay();
+    // DO NOT call v.load() — it resets the element, making play() fail immediately.
+    // The browser starts loading from src automatically on mount.
 
-    video.addEventListener("loadeddata", tryPlay);
-    video.addEventListener("canplay", tryPlay);
+    v.addEventListener("canplay", tryPlay);
+    v.addEventListener("canplaythrough", tryPlay);
+    v.addEventListener("loadeddata", tryPlay);
+
+    // Timers catch cached/already-loaded videos that won't fire readiness events
+    const t1 = setTimeout(tryPlay, 50);
+    const t2 = setTimeout(tryPlay, 400);
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) { tryPlay(); } else { video.pause(); }
-      },
+      ([entry]) => { entry.isIntersecting ? tryPlay() : v.pause(); },
       { threshold: 0.25 },
     );
-    observer.observe(video);
+    observer.observe(v);
 
-    const userGesture = () => { tryPlay(); window.removeEventListener("touchstart", userGesture); };
-    window.addEventListener("touchstart", userGesture, { once: true, passive: true });
+    const onTouch = () => tryPlay();
+    window.addEventListener("touchstart", onTouch, { once: true, passive: true });
 
     return () => {
-      video.removeEventListener("loadeddata", tryPlay);
-      video.removeEventListener("canplay", tryPlay);
+      dead = true;
+      clearTimeout(t1);
+      clearTimeout(t2);
+      v.removeEventListener("canplay", tryPlay);
+      v.removeEventListener("canplaythrough", tryPlay);
+      v.removeEventListener("loadeddata", tryPlay);
       observer.disconnect();
+      window.removeEventListener("touchstart", onTouch);
     };
   }, [src]);
 
-  // src directly on <video> (not in a <source> child) — prevents content-type rejections from CDN URLs
-  // key={src} forces a full DOM remount whenever the URL changes
   return (
-    <video
-      ref={ref}
-      key={src}
-      src={src}
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="auto"
-      {...{ "webkit-playsinline": "true" } as any}
-      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}
-    />
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <video
+        ref={ref}
+        src={src}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        disablePictureInPicture
+        disableRemotePlayback
+        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+      />
+      {/* Overlay blocks browser-injected play button UI from receiving clicks */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 1 }} aria-hidden="true" />
+    </div>
   );
 }
 

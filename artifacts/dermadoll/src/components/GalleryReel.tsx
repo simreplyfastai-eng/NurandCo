@@ -19,33 +19,74 @@ const DEFAULT_CARDS: Card[] = [
 
 function VideoCard({ src }: { src: string }) {
   const ref = useRef<HTMLVideoElement>(null);
+
   useEffect(() => {
     const v = ref.current;
     if (!v) return;
-    const tryPlay = () => { v.muted = true; v.playsInline = true; v.play().catch(() => {}); };
-    // Reload to pick up new src, then play immediately — don't wait for events only
-    v.load();
-    tryPlay();
-    v.addEventListener("loadeddata", tryPlay);
+
+    let dead = false;
+
+    const tryPlay = () => {
+      if (dead) return;
+      v.muted = true;
+      v.volume = 0;
+      // playsInline must be set via JS too for iOS Safari
+      (v as HTMLVideoElement & { playsInline: boolean }).playsInline = true;
+      v.play().catch(() => {});
+    };
+
+    // DO NOT call v.load() — it resets the element and makes play() fail immediately.
+    // The browser loads from the src attribute on mount automatically.
+
+    // Fire on every readiness event (belt-and-suspenders)
     v.addEventListener("canplay", tryPlay);
-    const obs = new IntersectionObserver(([e]) => e.isIntersecting ? tryPlay() : v.pause(), { threshold: 0.1 });
+    v.addEventListener("canplaythrough", tryPlay);
+    v.addEventListener("loadeddata", tryPlay);
+
+    // If already have enough data (cached), none of the above fire — use a timer
+    const t1 = setTimeout(tryPlay, 50);
+    const t2 = setTimeout(tryPlay, 400);
+
+    // IntersectionObserver: play when visible, pause when off-screen
+    const obs = new IntersectionObserver(
+      ([entry]) => { entry.isIntersecting ? tryPlay() : v.pause(); },
+      { threshold: 0.1 },
+    );
     obs.observe(v);
-    return () => { v.removeEventListener("loadeddata", tryPlay); v.removeEventListener("canplay", tryPlay); obs.disconnect(); };
+
+    // First user touch unlocks autoplay on iOS
+    const onTouch = () => tryPlay();
+    window.addEventListener("touchstart", onTouch, { once: true, passive: true });
+
+    return () => {
+      dead = true;
+      clearTimeout(t1);
+      clearTimeout(t2);
+      v.removeEventListener("canplay", tryPlay);
+      v.removeEventListener("canplaythrough", tryPlay);
+      v.removeEventListener("loadeddata", tryPlay);
+      obs.disconnect();
+      window.removeEventListener("touchstart", onTouch);
+    };
   }, [src]);
-  // src directly on <video> (not <source>) — avoids content-type mismatch rejections from CDN URLs
-  // key={src} forces a full DOM remount when the URL changes
+
   return (
-    <video
-      ref={ref}
-      key={src}
-      src={src}
-      autoPlay
-      muted
-      loop
-      playsInline
-      preload="auto"
-      style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", pointerEvents: "none" }}
-    />
+    <div style={{ position: "relative", width: "100%", height: "100%" }}>
+      <video
+        ref={ref}
+        src={src}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="auto"
+        disablePictureInPicture
+        disableRemotePlayback
+        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+      />
+      {/* Transparent overlay blocks browser-injected play buttons from receiving clicks */}
+      <div style={{ position: "absolute", inset: 0, zIndex: 1 }} aria-hidden="true" />
+    </div>
   );
 }
 
