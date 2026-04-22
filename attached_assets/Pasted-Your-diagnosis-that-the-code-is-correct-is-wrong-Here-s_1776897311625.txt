@@ -1,0 +1,23 @@
+Your diagnosis that the code is correct is wrong. Here's evidence:
+
+I'm looking at the live admin portal RIGHT NOW. 22 April 2026 (today, which IS a Wednesday) is being rendered in the Sun column of the calendar. I've hard-refreshed, opened Incognito, same result. This is happening on the "new booking" date picker I can see visually.
+
+Your simulation was correct in isolation but does NOT match what's rendering on screen. One of these must be true:
+- The code you simulated is not the code being served
+- There's another calendar component rendering this that you didn't find
+- The grid placement is offset by an empty/padding element at the start
+- Flatpickr's locale setting is being overridden somewhere
+
+Please do the following and report back:
+
+1. curl the live portal.html from the server and grep for EVERY function that renders a calendar grid — not just the three you already found. Include Flatpickr config blocks, inline onclick handlers, and any HTML table/div with a class containing "cal", "date", "picker", or "month". Paste the function names and line numbers.
+
+2. For the calendar visible on the "new booking" form (the one shown in my screenshot), tell me EXACTLY which function renders it. Don't assume — trace from the "Add Booking" button to the actual render call.
+
+3. Check whether there's a `firstDay` or similar config on any Flatpickr instance that might be set to 0 (Sunday) instead of 1 (Monday). If there's a DIFFERENT Flatpickr config for the new-booking date picker vs the schedule calendar, that'd explain why one is correct and the other isn't.
+
+4. Check for CSS grid offsets — is there any empty cell or spacer element being rendered BEFORE the date cells that would visually shift all dates one column? Inspect the DOM for the April calendar and tell me what elements appear in the first row before the number "1".
+
+5. Open the live served portal.html in Chrome from the same URL I'm hitting and screenshot the April 2026 calendar YOURSELF. Confirm you can reproduce the bug I'm seeing. If you can't reproduce it, the issue is environmental and we need to figure out why.
+
+Do NOT claim the code is correct again unless you've done all 5 steps and can screenshot the calendar showing 22 under Wed.
