@@ -1,0 +1,53 @@
+Update the Google Calendar event format in artifacts/api-server/src/googleCalendar.ts to match Eva's existing pre-system event format. Her previous booking system used a specific format and we want ours to look identical so her calendar stays visually consistent.
+
+Note: The locations table already has `name` (text) and `address` (text) columns — both populated for Hornchurch and Marylebone. Use them directly. No Supabase migration needed.
+
+TARGET FORMAT
+
+Title:
+`{Client Name}: {TREATMENT NAME UPPERCASE} ({LOCATION NAME UPPERCASE} CLINIC)`
+
+Example: "Ines Muhadri: NATURAL LIPS (MARYLEBONE CLINIC)"
+
+Description (plain text, real line breaks):
+
+{Month DD, YYYY} {HH:MM} BST
+Calendar: {LOCATION UPPERCASE} CLINIC
+Name: {Client Name}
+Phone: {phone or blank}
+Email: {email}
+
+Location
+============
+{full address from locations.address}
+
+Booked via: StarrBeauty website
+
+IMPLEMENTATION
+
+1. Inside createCalendarEvent in googleCalendar.ts, before google.calendar.events.insert, fetch the location row via supabaseAdmin:
+   SELECT name, address FROM locations WHERE id = locationId
+
+2. Build title string:
+   `${customer_name}: ${treatment_name.toUpperCase()} (${location.name.toUpperCase()} CLINIC)`
+
+3. Build description using a template literal with actual line breaks (not \n literals). Format date using Intl.DateTimeFormat('en-GB', { month: 'long', day: 'numeric', year: 'numeric' }) so it reads "April 26, 2026". Format time as HH:MM.
+
+4. If phone is empty/null, render "Phone: " with an empty value (do not print "undefined" or "null").
+
+5. Keep existing timezone handling (Europe/London, 2-hour duration).
+
+6. Graceful fallback — if the locations fetch fails or returns no row, fall back to the previous minimal format and console.warn so we can see when fallback triggers:
+   Title: `${treatment_name} — ${customer_name}`
+   Description: `Phone: ${phone}\nEmail: ${email}`
+
+7. Do NOT modify existing Google Calendar events. This change applies only to new events going forward.
+
+VERIFY BEFORE APPLYING
+
+Show:
+  a) The diff for googleCalendar.ts
+  b) Confirmation the existing call sites in stripe.ts (both webhook paths — update pending→confirmed AND fallback create-from-metadata) and bookings.ts (manual admin booking path) don't need changes — the public interface should stay the same
+  c) A sample of what the generated title and description would look like for a fake booking at Hornchurch and one at Marylebone so I can eyeball the format
+
+Apply only after I approve the diff.
