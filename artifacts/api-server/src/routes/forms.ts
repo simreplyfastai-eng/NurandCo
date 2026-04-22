@@ -125,7 +125,7 @@ router.get("/forms/status", async (req, res) => {
 
   try {
     const [bkRow, medRow, conRow] = await Promise.all([
-      supabaseAdmin.from("bookings").select("id,client_name,client_email,client_phone,treatment_name,treatment_id,treatments(name),booking_date,time_slot,status,location_id,forms_completed").eq("id", bookingId).maybeSingle(),
+      supabaseAdmin.from("bookings").select("id,client_name,client_email,client_phone,treatment_name,treatment_id,treatments(name),booking_date,time_slot,status,location_id,forms_completed,deposit_amount,total_amount,deposit_paid").eq("id", bookingId).maybeSingle(),
       supabaseAdmin.from("medical_forms").select("id,submitted_at").eq("booking_id", bookingId).maybeSingle(),
       supabaseAdmin.from("consent_forms").select("id").eq("booking_id", bookingId).maybeSingle(),
     ]);
