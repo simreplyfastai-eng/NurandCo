@@ -3906,6 +3906,8 @@ async function doDeleteClient(id){
     showToast('Could not delete client: '+(err?.message||'unknown error'),'error');
     return;
   }
+  // Remove from the in-memory Supabase cache so the list updates instantly
+  if(_supabaseClients) _supabaseClients=_supabaseClients.filter(c=>String(c.id)!==String(id));
   closeClientPanel();
   updateSidebarBadges();
   renderClients();
