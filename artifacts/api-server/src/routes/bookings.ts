@@ -232,7 +232,7 @@ export async function runAutoComplete(): Promise<number> {
 
 export async function cleanupGhostBookings(): Promise<number> {
   try {
-    const cutoff = new Date(Date.now() - 30 * 60 * 1000).toISOString();
+    const cutoff = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
     const { data, error } = await supabaseAdmin
       .from("bookings")
       .delete()
@@ -379,13 +379,6 @@ router.post("/bookings", async (req, res) => {
       if (!avail.ok) {
         return res.status(avail.status ?? 409).json({ error: avail.error, code: avail.code });
       }
-    }
-
-    // Website bookings: slot is verified — return ID now.
-    // The booking record is created by the Stripe webhook ONLY after payment succeeds.
-    // This prevents ghost "pending" bookings appearing in the admin portal.
-    if (b.source === "Website") {
-      return res.status(201).json({ id: b.id ?? crypto.randomUUID() });
     }
 
     const clientId = await findOrCreateClient({
