@@ -96,6 +96,20 @@ export function buildICSContent(booking: CalBooking, location: CalLocation): str
   ].join("\r\n");
 }
 
+// ── Plain-text footer (required for deliverability + legal compliance) ─────────
+
+const PLAIN_FOOTER = `
+--
+StarrBeauty
+Hornchurch, Essex · Marylebone, London
+hello@starrbeautyy.co.uk | starrbeautyy.co.uk | WhatsApp: +44 7701 298985
+
+You received this email because you have an appointment booked with StarrBeauty.
+To stop receiving appointment emails, reply to this message or email hello@starrbeautyy.co.uk with the subject "Unsubscribe".
+
+© 2026 StarrBeauty. All rights reserved.
+`.trim();
+
 // ── Base email template ───────────────────────────────────────────────────────
 
 function buildEmail(content: string, subject: string): string {
@@ -132,14 +146,22 @@ function buildEmail(content: string, subject: string): string {
 
     <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
-      <td style="padding:24px 40px;border-top:1px solid #E8DDD3;text-align:center;">
-        <p style="margin:0 0 8px;font-size:11px;color:#8C7B6B;letter-spacing:0.08em;">STARR BEAUTY &middot; ESSEX &amp; LONDON</p>
-        <p style="margin:0 0 4px;font-size:11px;color:#8C7B6B;">
-          <a href="mailto:info@starrbeautyy.co.uk" style="color:#C9A96E;text-decoration:none;">info@starrbeautyy.co.uk</a>
+      <td style="padding:20px 40px 24px;border-top:1px solid #E8DDD3;text-align:center;">
+        <p style="margin:0 0 6px;font-size:11px;color:#8C7B6B;letter-spacing:0.08em;">STARR BEAUTY &middot; ESSEX &amp; LONDON</p>
+        <p style="margin:0 0 2px;font-size:10px;color:#B5A89A;">Hornchurch, Essex &middot; Marylebone, London</p>
+        <p style="margin:0 0 8px;font-size:10px;color:#B5A89A;">
+          <a href="mailto:hello@starrbeautyy.co.uk" style="color:#C9A96E;text-decoration:none;">hello@starrbeautyy.co.uk</a>
           &nbsp;&middot;&nbsp;
-          <a href="https://wa.me/447701298985" style="color:#C9A96E;text-decoration:none;">WhatsApp Us</a>
+          <a href="https://wa.me/447701298985" style="color:#C9A96E;text-decoration:none;">WhatsApp</a>
+          &nbsp;&middot;&nbsp;
+          <a href="https://starrbeautyy.co.uk" style="color:#C9A96E;text-decoration:none;">starrbeautyy.co.uk</a>
         </p>
-        <p style="margin:8px 0 0;font-size:10px;color:#B5A89A;">&copy; 2026 StarrBeauty. All rights reserved.</p>
+        <p style="margin:0 0 6px;font-size:10px;color:#B5A89A;line-height:1.5;">
+          You received this email because you have an appointment booked with StarrBeauty.<br>
+          <a href="mailto:hello@starrbeautyy.co.uk?subject=Unsubscribe" style="color:#B5A89A;text-decoration:underline;">Unsubscribe</a>
+          from appointment emails.
+        </p>
+        <p style="margin:0;font-size:10px;color:#B5A89A;">&copy; 2026 StarrBeauty. All rights reserved.</p>
       </td>
     </tr>
     </table>
@@ -192,6 +214,18 @@ function buildBookingBox(booking: CalBooking, location: CalLocation): string {
   </table>`;
 }
 
+function buildBookingBoxText(booking: CalBooking, location: CalLocation): string {
+  const deposit = booking.deposit_amount ?? 0;
+  const balance = Math.max(0, (booking.total_price ?? 0) - deposit);
+  return [
+    `Treatment:  ${booking.treatment_name}`,
+    `Date & Time: ${formatDate(booking.booking_date)} at ${booking.time_slot}`,
+    `Location:   ${location.name}, ${location.address_full}`,
+    `Deposit paid:    £${deposit}`,
+    `Balance due on day: £${balance}`,
+  ].join("\n");
+}
+
 // Helper: log HTML to console when Resend is not configured
 function logEmailPreview(subject: string, to: string, html: string): void {
   console.log(`\n[EMAIL PREVIEW — no RESEND_API_KEY]\nTo: ${to}\nSubject: ${subject}\n${"─".repeat(60)}\n${html}\n${"─".repeat(60)}\n`);
@@ -235,16 +269,16 @@ export async function sendClientConfirmationEmail(params: {
     : "#";
 
   const content = `
-    <p style="font-size:24px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">You're booked in! &#10024;</p>
-    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment is confirmed. We can't wait to see you.</p>
+    <p style="font-size:24px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">You're booked in ✨</p>
+    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment is confirmed. We look forward to seeing you.</p>
 
     ${buildBookingBox(bk, loc)}
 
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:24px 0;">
     <tr><td style="text-align:center;">
       <p style="font-size:12px;color:#8C7B6B;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.1em;">Add to your calendar</p>
-      <a href="${googleUrl}" target="_blank" style="display:inline-block;margin:4px;padding:10px 18px;background:#C9A96E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:12px;letter-spacing:0.08em;">+ GOOGLE CALENDAR</a>
-      <a href="${icsUrl}" style="display:inline-block;margin:4px;padding:10px 18px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:12px;letter-spacing:0.08em;">+ APPLE CALENDAR</a>
+      <a href="${googleUrl}" target="_blank" style="display:inline-block;margin:4px;padding:10px 18px;background:#C9A96E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:12px;letter-spacing:0.08em;">+ Google Calendar</a>
+      <a href="${icsUrl}" style="display:inline-block;margin:4px;padding:10px 18px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:12px;letter-spacing:0.08em;">+ Apple Calendar</a>
     </td></tr>
     </table>
 
@@ -271,7 +305,29 @@ export async function sendClientConfirmationEmail(params: {
     </td></tr>
     </table>`;
 
-  const subject = `✨ Confirmed: ${params.treatment} at StarrBeauty`;
+  const subject = `Appointment confirmed: ${params.treatment} — StarrBeauty`;
+  const text = [
+    `You're booked in, ${firstName}`,
+    "",
+    buildBookingBoxText(bk, loc),
+    "",
+    "Add to Google Calendar: " + googleUrl,
+    "Add to Apple Calendar: " + icsUrl,
+    "",
+    "Before your appointment:",
+    "- Arrive 5 minutes before your slot",
+    "- Clean face — no makeup on the treatment area",
+    "- Avoid alcohol for 24 hours beforehand",
+    "- Avoid blood thinners (aspirin, fish oil) 24hrs before injectables",
+    "- Contact us if any medical details change",
+    "",
+    "Cancellation policy: Please give at least 48 hours notice to cancel or reschedule.",
+    "Deposits are non-refundable for cancellations under 48 hours or no-shows.",
+    "To reschedule: WhatsApp +44 7701 298985",
+    "",
+    PLAIN_FOOTER,
+  ].join("\n");
+
   const html = buildEmail(content, subject);
   const resend = getResend();
   if (!resend || !params.clientEmail) {
@@ -279,7 +335,7 @@ export async function sendClientConfirmationEmail(params: {
     return;
   }
   try {
-    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html });
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html, text });
   } catch (err) {
     console.error("sendClientConfirmationEmail error", err);
   }
@@ -339,11 +395,28 @@ export async function sendAdminNotificationEmail(params: {
 
     <table width="100%" cellpadding="0" cellspacing="0">
     <tr><td align="center">
-      <a href="${portalUrl}" style="display:inline-block;padding:12px 28px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">VIEW IN ADMIN PORTAL &rarr;</a>
+      <a href="${portalUrl}" style="display:inline-block;padding:12px 28px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">View in admin portal &rarr;</a>
     </td></tr>
     </table>`;
 
-  const subject = `💅 New Booking: ${params.clientName} — ${params.treatment}`;
+  const subject = `New booking: ${params.clientName} — ${params.treatment}`;
+  const text = [
+    "New Booking Received",
+    "",
+    buildBookingBoxText(bk, loc),
+    "",
+    "Client Details:",
+    `Name:   ${params.clientName}`,
+    `Email:  ${params.clientEmail || "—"}`,
+    `Phone:  ${params.clientPhone || "—"}`,
+    `Deposit: £${params.deposit} ${params.depositPaid ? "(paid)" : "(pending)"}`,
+    `Source: ${params.source}`,
+    "",
+    `Admin portal: ${portalUrl}`,
+    "",
+    PLAIN_FOOTER,
+  ].join("\n");
+
   const html = buildEmail(content, subject);
   const resend = getResend();
   if (!resend || !params.adminEmail) {
@@ -351,7 +424,7 @@ export async function sendAdminNotificationEmail(params: {
     return;
   }
   try {
-    await resend.emails.send({ from: FROM, to: params.adminEmail, subject, html });
+    await resend.emails.send({ from: FROM, to: params.adminEmail, subject, html, text });
   } catch (err) {
     console.error("sendAdminNotificationEmail error", err);
   }
@@ -385,7 +458,7 @@ export async function sendReminderEmail(params: {
   };
 
   const content = `
-    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Your appointment is tomorrow &#10024;</p>
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Your appointment is tomorrow ✨</p>
     <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, just a friendly reminder about your upcoming appointment.</p>
 
     ${buildBookingBox(bk, loc)}
@@ -400,9 +473,27 @@ export async function sendReminderEmail(params: {
     </td></tr>
     </table>
 
-    <p style="font-size:13px;color:#8C7B6B;margin:0 0 16px;line-height:1.6;">Need to cancel or reschedule? Please let us know as soon as possible. <a href="https://wa.me/447701298985" style="color:#C9A96E;text-decoration:none;">WhatsApp us here &rarr;</a></p>`;
+    <p style="font-size:13px;color:#8C7B6B;margin:0 0 16px;line-height:1.6;">Need to cancel or reschedule? Please let us know as soon as possible. <a href="https://wa.me/447701298985" style="color:#C9A96E;text-decoration:none;">WhatsApp us &rarr;</a></p>`;
 
-  const subject = `⏰ Tomorrow: ${params.treatment} at ${params.time}`;
+  const subject = `Reminder: your ${params.treatment} appointment is tomorrow`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    "Just a friendly reminder about your appointment tomorrow.",
+    "",
+    buildBookingBoxText(bk, loc),
+    "",
+    "Pre-appointment checklist:",
+    "- Clean face, no makeup on treatment area",
+    "- Avoid alcohol tonight",
+    "- Arrive 5 minutes early",
+    "- Bring a valid ID",
+    "",
+    "Need to cancel or reschedule? WhatsApp us: https://wa.me/447701298985",
+    "",
+    PLAIN_FOOTER,
+  ].join("\n");
+
   const html = buildEmail(content, subject);
   const resend = getResend();
   if (!resend || !params.clientEmail) {
@@ -410,7 +501,7 @@ export async function sendReminderEmail(params: {
     return;
   }
   try {
-    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html });
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html, text });
   } catch (err) {
     console.error("sendReminderEmail error", err);
   }
@@ -431,12 +522,12 @@ export async function sendCancellationEmail(params: {
   const locationName = params.locationName ?? "StarrBeauty";
 
   const content = `
-    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Appointment Cancelled</p>
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Appointment cancelled</p>
     <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment has been cancelled. We hope to see you again soon.</p>
 
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 20px;">
     <tr><td style="padding:16px 24px;">
-      <p style="font-size:12px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px;">Cancelled Appointment</p>
+      <p style="font-size:12px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px;">Cancelled appointment</p>
       <p style="font-size:15px;color:#5C1E1E;font-family:Georgia,serif;margin:0 0 4px;text-decoration:line-through;">${params.treatment}</p>
       <p style="font-size:13px;color:#8C7B6B;margin:0;">${formatDate(params.date)} at ${params.time} &middot; ${locationName}</p>
     </td></tr>
@@ -444,11 +535,25 @@ export async function sendCancellationEmail(params: {
 
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
     <tr><td align="center">
-      <a href="https://wa.me/447701298985" style="display:inline-block;padding:12px 28px;background:#C9A96E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">REBOOK VIA WHATSAPP &rarr;</a>
+      <a href="https://wa.me/447701298985" style="display:inline-block;padding:12px 28px;background:#C9A96E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">Rebook via WhatsApp &rarr;</a>
     </td></tr>
     </table>`;
 
   const subject = `Your StarrBeauty appointment has been cancelled`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    "Your appointment has been cancelled.",
+    "",
+    `Treatment: ${params.treatment}`,
+    `Date & Time: ${formatDate(params.date)} at ${params.time}`,
+    `Location: ${locationName}`,
+    "",
+    "To rebook, WhatsApp us: https://wa.me/447701298985",
+    "",
+    PLAIN_FOOTER,
+  ].join("\n");
+
   const html = buildEmail(content, subject);
   const resend = getResend();
   if (!resend || !params.clientEmail) {
@@ -456,7 +561,7 @@ export async function sendCancellationEmail(params: {
     return;
   }
   try {
-    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html });
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html, text });
   } catch (err) {
     console.error("sendCancellationEmail error", err);
   }
@@ -490,19 +595,31 @@ export async function sendFormsReminderEmail(params: {
   const formsUrl = `${SITE_URL}/forms.html?booking=${params.bookingId}`;
 
   const content = `
-    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Please complete your forms</p>
-    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment is coming up but we still need your forms. It only takes 2 minutes.</p>
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Your forms are still needed</p>
+    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment is coming up but we still need your forms. It only takes a couple of minutes.</p>
 
     ${buildBookingBox(bk, loc)}
 
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
     <tr><td align="center">
-      <a href="${formsUrl}" style="display:inline-block;padding:14px 32px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:14px;letter-spacing:0.1em;">COMPLETE YOUR FORMS &rarr;</a>
-      <p style="font-size:11px;color:#8C7B6B;margin:8px 0 0;">Medical intake + consent form</p>
+      <a href="${formsUrl}" style="display:inline-block;padding:14px 32px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:14px;letter-spacing:0.1em;">Complete your forms &rarr;</a>
+      <p style="font-size:11px;color:#8C7B6B;margin:8px 0 0;">Medical intake and consent form</p>
     </td></tr>
     </table>`;
 
-  const subject = `⚡ Action needed before your appointment`;
+  const subject = `Forms still needed for your appointment`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    "Your appointment is coming up but we still need your forms. It only takes a couple of minutes.",
+    "",
+    buildBookingBoxText(bk, loc),
+    "",
+    "Complete your forms here: " + formsUrl,
+    "",
+    PLAIN_FOOTER,
+  ].join("\n");
+
   const html = buildEmail(content, subject);
   const resend = getResend();
   if (!resend || !params.clientEmail) {
@@ -510,7 +627,7 @@ export async function sendFormsReminderEmail(params: {
     return;
   }
   try {
-    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html });
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html, text });
   } catch (err) {
     console.error("sendFormsReminderEmail error", err);
   }
@@ -534,7 +651,7 @@ export async function sendConsultationConfirmationEmail(params: {
   const locationAddress = params.locationAddress ?? "StarrBeauty Clinic";
 
   const content = `
-    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">We're excited to meet you, ${firstName}</p>
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Looking forward to meeting you, ${firstName}</p>
     <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Your consultation is booked. This is your first step towards your aesthetic goals.</p>
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:20px 0;">
     <tr><td style="padding:20px 24px;">
@@ -548,6 +665,21 @@ export async function sendConsultationConfirmationEmail(params: {
     <p style="font-size:12px;color:#8C7B6B;margin:0;font-style:italic;">Please arrive 5 minutes early. We look forward to seeing you.</p>`;
 
   const subject = `Consultation confirmed — StarrBeauty ${locationName}`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    "Your consultation is confirmed.",
+    "",
+    `Date & Time: ${dateStr} at ${params.time}`,
+    `Location: ${locationName}, ${locationAddress}`,
+    `Consultation fee: £25`,
+    "",
+    `Questions? WhatsApp us: https://wa.me/${wa.replace(/\s/g, "")}`,
+    "Please arrive 5 minutes early.",
+    "",
+    PLAIN_FOOTER,
+  ].join("\n");
+
   const html = buildEmail(content, subject);
   const resend = getResend();
   if (!resend || !params.clientEmail) {
@@ -555,7 +687,7 @@ export async function sendConsultationConfirmationEmail(params: {
     return;
   }
   try {
-    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html });
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html, text });
   } catch (err) {
     console.error("sendConsultationConfirmationEmail error", err);
   }
@@ -595,7 +727,23 @@ export async function sendConsultationAdminEmail(params: {
     </td></tr>
     </table>`;
 
-  const subject = `New Consultation — ${params.clientName} — ${dateDisp} at ${params.time} [${locationName}]`;
+  const subject = `New consultation — ${params.clientName} — ${dateDisp} at ${params.time} [${locationName}]`;
+  const text = [
+    "New Consultation Booked",
+    "",
+    `Name:               ${params.clientName}`,
+    `Email:              ${params.clientEmail || "—"}`,
+    `Phone:              ${params.clientPhone || "—"}`,
+    `DOB:                ${params.clientDOB || "—"}`,
+    `Treatment interest: ${params.treatmentInterest || "—"}`,
+    `Skin concerns:      ${params.clientNotes || "—"}`,
+    `Date:               ${dateDisp} at ${params.time}`,
+    `Location:           ${locationName}`,
+    `Fee: £25 paid`,
+    "",
+    PLAIN_FOOTER,
+  ].join("\n");
+
   const html = buildEmail(content, subject);
   const resend = getResend();
   if (!resend || !params.adminEmail) {
@@ -603,7 +751,7 @@ export async function sendConsultationAdminEmail(params: {
     return;
   }
   try {
-    await resend.emails.send({ from: FROM, to: params.adminEmail, subject, html });
+    await resend.emails.send({ from: FROM, to: params.adminEmail, subject, html, text });
   } catch (err) {
     console.error("sendConsultationAdminEmail error", err);
   }
@@ -638,7 +786,7 @@ export async function sendEnquiryEmails(params: {
 
   // EMAIL A — Admin alert
   if (params.adminEmail) {
-    const adminSubject = `📚 New Training Enquiry: ${params.name} — ${params.courseName}`;
+    const adminSubject = `New training enquiry: ${params.name} — ${params.courseName}`;
     const adminContent = `
       <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 16px;">New Training Enquiry Received</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 24px;">
@@ -655,20 +803,33 @@ export async function sendEnquiryEmails(params: {
       <table cellpadding="0" cellspacing="0" style="margin:0 auto 8px;">
         <tr>
           <td style="padding-right:8px;">
-            <a href="https://wa.me/${params.phone.replace(/\D/g, "")}" style="display:inline-block;background:#C9A96E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:12px 24px;text-decoration:none;border-radius:4px;">Reply via WhatsApp</a>
+            <a href="https://wa.me/${params.phone.replace(/\D/g, "")}" style="display:inline-block;background:#C9A96E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;padding:12px 24px;text-decoration:none;border-radius:4px;">Reply via WhatsApp</a>
           </td>
           <td>
-            <a href="/portal.html" style="display:inline-block;background:#5C1E1E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:12px 24px;text-decoration:none;border-radius:4px;">View in Portal</a>
+            <a href="/portal.html" style="display:inline-block;background:#5C1E1E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;padding:12px 24px;text-decoration:none;border-radius:4px;">View in portal</a>
           </td>
         </tr>
       </table>`;
+    const adminText = [
+      "New Training Enquiry",
+      "",
+      `Name:       ${params.name}`,
+      `Email:      ${params.email}`,
+      `Phone:      ${params.phone}`,
+      `Course:     ${params.courseName}`,
+      `Experience: ${params.experienceLevel || "—"}`,
+      params.message ? `Message:    ${params.message}` : "",
+      `Submitted:  ${submittedAt}`,
+      "",
+      PLAIN_FOOTER,
+    ].filter(Boolean).join("\n");
     const adminHtml = buildEmail(adminContent, adminSubject);
     if (!resend) {
       logEmailPreview(adminSubject, params.adminEmail, adminHtml);
     } else {
       promises.push(
         resend.emails
-          .send({ from: FROM, to: params.adminEmail, subject: adminSubject, html: adminHtml })
+          .send({ from: FROM, to: params.adminEmail, subject: adminSubject, html: adminHtml, text: adminText })
           .catch((e: unknown) => console.error("sendEnquiryEmails admin error", e)),
       );
     }
@@ -676,7 +837,7 @@ export async function sendEnquiryEmails(params: {
 
   // EMAIL B — Auto-reply to enquirer
   if (params.email) {
-    const clientSubject = `Thanks for your enquiry — Starr Academy`;
+    const clientSubject = `Your enquiry has been received — Starr Academy`;
     const clientContent = `
       <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 16px;">We've received your enquiry ✨</p>
       <p style="font-size:15px;color:#2C2420;margin:0 0 8px;">Hi ${firstName},</p>
@@ -692,20 +853,33 @@ export async function sendEnquiryEmails(params: {
       <table cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
         <tr>
           <td>
-            <a href="https://wa.me/447701298985" style="display:inline-block;background:#C9A96E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;padding:12px 28px;text-decoration:none;border-radius:4px;">WhatsApp Us</a>
+            <a href="https://wa.me/447701298985" style="display:inline-block;background:#C9A96E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;padding:12px 28px;text-decoration:none;border-radius:4px;">WhatsApp us</a>
           </td>
         </tr>
       </table>
       <p style="font-size:13px;color:#8C7B6B;margin:0;">
         Instagram: <a href="https://instagram.com/StarrAestheticss" style="color:#C9A96E;">@StarrAestheticss</a> &nbsp;·&nbsp; <a href="https://instagram.com/StarrFacess" style="color:#C9A96E;">@StarrFacess</a>
       </p>`;
+    const clientText = [
+      `Hi ${firstName},`,
+      "",
+      `Thank you for your interest in the ${params.courseName}. Eva will be in touch within 24 hours.`,
+      "",
+      `Course:    ${params.courseName}`,
+      `Location:  ${params.locationLabel}`,
+      `Reference: ${refCode}`,
+      "",
+      "Questions? WhatsApp us: https://wa.me/447701298985",
+      "",
+      PLAIN_FOOTER,
+    ].join("\n");
     const clientHtml = buildEmail(clientContent, clientSubject);
     if (!resend) {
       logEmailPreview(clientSubject, params.email, clientHtml);
     } else {
       promises.push(
         resend.emails
-          .send({ from: FROM, to: params.email, subject: clientSubject, html: clientHtml })
+          .send({ from: FROM, to: params.email, subject: clientSubject, html: clientHtml, text: clientText })
           .catch((e: unknown) => console.error("sendEnquiryEmails client error", e)),
       );
     }
