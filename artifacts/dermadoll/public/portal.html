@@ -499,15 +499,28 @@ tr:hover td{background:rgba(92,26,26,.02)}
 /* ── MODAL ───────────────────────────────────────── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center}
 .modal-overlay.open{display:flex}
-.modal-box{background:var(--color-background);border:1px solid var(--color-border);border-radius:var(--radius);padding:32px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-2xl)}
-.modal-title{font-family:var(--font-serif);font-style:italic;font-size:24px;font-weight:400;color:var(--color-primary);margin-bottom:20px}
-.form-group{margin-bottom:16px}
+.modal-box{background:var(--color-background);border:1px solid var(--color-border);border-radius:var(--radius);padding:28px;width:100%;max-width:480px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-2xl)}
+.modal-title{font-family:var(--font-serif);font-style:italic;font-size:22px;font-weight:400;color:var(--color-primary);margin-bottom:0}
+.form-group{margin-bottom:14px}
 .form-label{font-family:var(--font-sans);font-size:9px;font-weight:400;color:var(--color-muted-fg);letter-spacing:.2em;text-transform:uppercase;display:block;margin-bottom:6px}
-.form-input{width:100%;padding:12px 16px;border:1px solid var(--color-border);border-radius:var(--radius);background:transparent;font-family:var(--font-sans);font-size:13px;font-weight:300;color:var(--color-foreground);outline:none;transition:border-color var(--transition-base)}
+.form-input{width:100%;padding:11px 14px;border:1px solid var(--color-border);border-radius:var(--radius);background:transparent;font-family:var(--font-sans);font-size:13px;font-weight:300;color:var(--color-foreground);outline:none;transition:border-color var(--transition-base);box-sizing:border-box}
 .form-input::placeholder{color:rgba(61,61,61,.4)}
 .form-input:focus{border-color:var(--color-primary)}
 select.form-input{background:var(--color-card)}
 .form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.bm-section{background:#F8F4EF;border:1px solid rgba(201,169,110,0.2);border-radius:8px;padding:14px 16px;margin-bottom:14px}
+.bm-section-title{font-family:var(--font-sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--color-secondary);font-weight:600;margin-bottom:10px}
+.bm-pay-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(201,169,110,0.15)}
+.bm-pay-row:first-of-type{border-top:none}
+.bm-pay-lbl{font-family:var(--font-sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-muted-fg);width:60px;flex-shrink:0}
+.bm-pay-val{flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;font-family:var(--font-sans)}
+.bm-info-row{display:flex;gap:0;margin-bottom:14px}
+.bm-info-col{flex:1;min-width:0}
+.bm-info-col+.bm-info-col{border-left:1px solid rgba(201,169,110,0.2);padding-left:14px;margin-left:14px}
+.bm-info-lbl{font-family:var(--font-sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--color-secondary);font-weight:600;margin-bottom:6px}
+.bm-info-val{font-family:var(--font-sans);font-size:13px;color:var(--color-foreground);line-height:1.6}
+.bm-btns{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center}
+.bm-btns-right{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
 
 /* ── SETTINGS ────────────────────────────────────── */
 .settings-section{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius);margin-bottom:20px;overflow:hidden}
@@ -585,7 +598,13 @@ select.form-input{background:var(--color-card)}
   table{font-size:11px}
   th{padding:8px 10px;font-size:9px}
   td{padding:8px 10px}
-  .modal-box{padding:20px;margin:12px}
+  .modal-box{padding:18px 16px;margin:8px}
+  .bm-btns{flex-direction:column-reverse;align-items:stretch}
+  .bm-btns-right{margin-left:0;justify-content:stretch}
+  .bm-btns-right .btn-outline,.bm-btns-right .btn-gold{flex:1;text-align:center}
+  #bm-cancel-booking-btn,#bm-reschedule-btn{width:100%;text-align:center}
+  .bm-info-row{flex-direction:column;gap:10px}
+  .bm-info-col+.bm-info-col{border-left:none;padding-left:0;margin-left:0;border-top:1px solid rgba(201,169,110,0.2);padding-top:10px;margin-top:0}
   .bar-label{width:80px;font-size:10px}
   .bar-val{font-size:10px}
   .bar-label-full{display:none}
@@ -1262,10 +1281,14 @@ select.form-input{background:var(--color-card)}
 <!-- BOOKING MODAL -->
 <div class="modal-overlay" id="booking-modal">
   <div class="modal-box">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px">
-      <div class="modal-title" id="bm-title" style="margin-bottom:0">New Booking</div>
-      <button onclick="closeBookingModal()" style="background:none;border:none;cursor:pointer;color:var(--color-muted-fg);font-size:22px;line-height:1;padding:0 2px" title="Close">&times;</button>
+
+    <!-- Header -->
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;padding-bottom:14px;border-bottom:1px solid var(--color-border-subtle)">
+      <div class="modal-title" id="bm-title">New Booking</div>
+      <button onclick="closeBookingModal()" style="background:none;border:none;cursor:pointer;color:var(--color-muted-fg);font-size:22px;line-height:1;padding:2px 4px;border-radius:4px" title="Close">&times;</button>
     </div>
+
+    <!-- Client + Treatment -->
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Client Name</label>
@@ -1277,6 +1300,8 @@ select.form-input{background:var(--color-card)}
         <select class="form-input" id="bm-treatment" onchange="updateDeposit()"></select>
       </div>
     </div>
+
+    <!-- Email + Phone -->
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Email</label>
@@ -1287,6 +1312,8 @@ select.form-input{background:var(--color-card)}
         <input class="form-input" id="bm-phone" type="tel" placeholder="07700 900000"/>
       </div>
     </div>
+
+    <!-- Date + Time -->
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Date</label>
@@ -1297,6 +1324,8 @@ select.form-input{background:var(--color-card)}
         <select class="form-input" id="bm-time"></select>
       </div>
     </div>
+
+    <!-- Price + Deposit -->
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Price (£)</label>
@@ -1304,65 +1333,80 @@ select.form-input{background:var(--color-card)}
       </div>
       <div class="form-group">
         <label class="form-label">Deposit (£)</label>
-        <input class="form-input" id="bm-deposit" type="number" placeholder="100"/>
+        <input class="form-input" id="bm-deposit" type="number" placeholder="20"/>
       </div>
     </div>
+
+    <!-- Status — full width -->
     <div class="form-group">
       <label class="form-label">Status</label>
       <select class="form-input" id="bm-status">
         <option>Confirmed</option><option>Pending</option><option>Complete</option><option>Cancelled</option>
       </select>
     </div>
-    <div id="bm-payment-card" style="display:none;background:#F8F4EF;border-radius:8px;padding:14px 16px;border:1px solid rgba(201,169,110,0.2);margin-bottom:16px">
-      <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--color-secondary);font-weight:600;margin-bottom:12px">Payment</div>
-      <div id="bm-deposit-group" style="display:none;margin-bottom:8px">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-family:var(--font-sans);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:54px">Deposit</span>
-          <div id="bm-deposit-status" style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap"></div>
+
+    <!-- Payment card — edit mode only -->
+    <div id="bm-payment-card" class="bm-section" style="display:none">
+      <div class="bm-section-title">Payment</div>
+      <div id="bm-deposit-group" style="display:none">
+        <div class="bm-pay-row">
+          <span class="bm-pay-lbl">Deposit</span>
+          <div class="bm-pay-val" id="bm-deposit-status"></div>
         </div>
       </div>
       <div id="bm-balance-group" style="display:none">
-        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-          <span style="font-family:var(--font-sans);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:54px">Balance</span>
-          <div id="bm-balance-status" style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap"></div>
+        <div class="bm-pay-row">
+          <span class="bm-pay-lbl">Balance</span>
+          <div class="bm-pay-val" id="bm-balance-status"></div>
         </div>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group" id="bm-forms-group" style="display:none">
-        <label class="form-label">Forms</label>
-        <div id="bm-forms-status" style="display:flex;align-items:center;gap:10px;padding-top:8px;font-size:12px"></div>
-      </div>
-      <div class="form-group" id="bm-location-group" style="display:none">
-        <label class="form-label">Location</label>
-        <div id="bm-location-display" style="padding-top:8px;font-size:13px;color:var(--color-foreground);font-weight:500"></div>
+
+    <!-- Forms + Location — edit mode only, inside a shared info card -->
+    <div id="bm-forms-location-card" class="bm-section" style="display:none">
+      <div class="bm-info-row">
+        <div class="bm-info-col" id="bm-forms-group" style="display:none">
+          <div class="bm-info-lbl">Forms</div>
+          <div class="bm-info-val" id="bm-forms-status"></div>
+        </div>
+        <div class="bm-info-col" id="bm-location-group" style="display:none">
+          <div class="bm-info-lbl">Location</div>
+          <div class="bm-info-val" id="bm-location-display"></div>
+        </div>
       </div>
     </div>
+
+    <!-- Notes -->
     <div class="form-group">
       <label class="form-label">Notes</label>
       <textarea class="form-input" id="bm-notes" rows="2" placeholder="Any notes…"></textarea>
     </div>
-    <div id="bm-consultation-fields" style="display:none;background:#F8F4EF;border-radius:10px;padding:14px 16px;border:1px solid rgba(201,169,110,0.25);margin-top:4px">
-      <p style="font-family:var(--font-sans);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--color-secondary);margin:0 0 12px;font-weight:700">Consultation Details</p>
+
+    <!-- Consultation extra fields -->
+    <div id="bm-consultation-fields" style="display:none" class="bm-section">
+      <div class="bm-section-title">Consultation Details</div>
       <div class="form-row">
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:0">
           <label class="form-label">Date of Birth</label>
           <input class="form-input" id="bm-client-dob" type="text" placeholder="DD/MM/YYYY"/>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom:0">
           <label class="form-label">Skin Concerns / Goals</label>
           <textarea class="form-input" id="bm-client-notes" rows="3" placeholder="Any skin concerns or goals…" style="resize:none"></textarea>
         </div>
       </div>
     </div>
-    <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px;flex-wrap:wrap">
-      <button id="bm-cancel-booking-btn" onclick="cancelBookingFromModal()" style="display:none;padding:10px 18px;border:1px solid #c62828;background:#fff;color:#c62828;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px">Cancel Booking</button>
-      <button id="bm-reschedule-btn" onclick="rescheduleFromModal()" style="display:none;padding:10px 18px;border:1px solid var(--color-primary);background:#fff;color:var(--color-primary);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px">Reschedule</button>
-      <div style="display:flex;gap:10px;margin-left:auto">
-        <button class="btn-outline" onclick="closeBookingModal()">Close</button>
-        <button class="btn-gold" onclick="saveBooking()">Save Booking</button>
+
+    <!-- Action buttons -->
+    <div class="bm-btns">
+      <button id="bm-cancel-booking-btn" onclick="cancelBookingFromModal()" style="display:none;padding:10px 16px;border:1px solid #c62828;background:#fff;color:#c62828;border-radius:var(--radius);font-family:var(--font-sans);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.5px;min-height:40px">Cancel Booking</button>
+      <button id="bm-reschedule-btn" onclick="rescheduleFromModal()" style="display:none;padding:10px 16px;border:1px solid var(--color-primary);background:#fff;color:var(--color-primary);border-radius:var(--radius);font-family:var(--font-sans);font-size:12px;font-weight:600;cursor:pointer;letter-spacing:.5px;min-height:40px">Reschedule</button>
+      <div class="bm-btns-right">
+        <button class="btn-outline" onclick="closeBookingModal()" style="min-height:40px">Close</button>
+        <button class="btn-gold" onclick="saveBooking()" style="min-height:40px">Save Booking</button>
       </div>
     </div>
+
   </div>
 </div>
 
@@ -3099,6 +3143,7 @@ async function openBookingModal(prefill){
     document.getElementById('bm-location-display').textContent=_SESSION_LOC_NAME||sessionStorage.getItem('starr_location')||'Clinic';
     // Show forms status
     document.getElementById('bm-forms-group').style.display='';
+    document.getElementById('bm-forms-location-card').style.display='';
     const medC=booking.hasMedical?'#2D6A4F':'#999';
     const conC=booking.hasConsent?'#2D6A4F':'#999';
     document.getElementById('bm-forms-status').innerHTML=
@@ -3131,6 +3176,7 @@ async function openBookingModal(prefill){
     document.getElementById('bm-reschedule-btn').style.display='none';
     document.getElementById('bm-forms-group').style.display='none';
     document.getElementById('bm-location-group').style.display='none';
+    document.getElementById('bm-forms-location-card').style.display='none';
     document.getElementById('bm-payment-card').style.display='none';
     document.getElementById('bm-deposit-group').style.display='none';
     document.getElementById('bm-balance-group').style.display='none';

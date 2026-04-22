@@ -1,0 +1,196 @@
+BUG FIX — Adding a new client manually in 
+the Clients tab does not persist. After 
+logging out and back in the client is gone.
+
+Read portal.html and all client API files 
+fully before touching anything.
+
+CONFIRMED ROOT CAUSE:
+  The + ADD CLIENT button opens a modal.
+  Filling in the form and clicking Save 
+  either:
+  a) Only saves to memory/JS array and 
+     not to Supabase
+  b) Sends a POST to /api/clients but 
+     the request has no auth token so 
+     returns 401 and silently fails
+  c) The POST endpoint doesn't write 
+     to Supabase at all
+
+CONFIRMED FROM INSPECTION:
+  GET /api/clients without token = 401
+  The fbn_token is the localStorage key
+  All requests must include:
+    Authorization: Bearer [fbn_token]
+    X-Location-Id: [portal_location_id]
+
+===============================================================
+FIX 1 — ADD CLIENT MODAL SUBMIT
+===============================================================
+
+Find the Add Client form submit handler 
+in portal.html.
+
+It currently does something like:
+  _supabaseClients.push(newClient)
+  renderClients()
+  closeModal()
+
+Change it to ALWAYS save to Supabase first:
+
+  async function saveNewClient(formData) {
+    const res = await authFetch('/api/clients', {
+      method: 'POST',
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone || null,
+        notes: formData.notes || null,
+        location_id: window._SESSION_LOC_ID || 
+          localStorage.getItem('portal_location_id')
+      })
+    })
+    
+    if (!res.ok) {
+      const err = await res.json()
+      console.error('Save client error:', err)
+      showToast('Failed to save client', 'error')
+      return
+    }
+    
+    const saved = await res.json()
+    showToast('Client added ✓', 'success')
+    closeModal()
+    loadClients() // re-fetch from Supabase
+  }
+
+Make sure authFetch() is used not 
+plain fetch() — authFetch adds the 
+Authorization and X-Location-Id headers.
+
+===============================================================
+FIX 2 — POST /api/clients ENDPOINT
+===============================================================
+
+Find or create POST /api/clients endpoint 
+in the server code.
+
+It must:
+  1. Require JWT auth
+  2. Get location_id from body OR from 
+     the session header X-Location-Id
+  3. Write to Supabase clients table:
+
+  const { data, error } = await supabaseAdmin
+    .from('clients')
+    .insert({
+      location_id: locationId,
+      name: req.body.name,
+      email: req.body.email,
+      phone: req.body.phone || null,
+      notes: req.body.notes || null,
+      created_at: new Date().toISOString()
+    })
+    .select()
+    .single()
+  
+  if (error) {
+    console.error('Insert client error:', error)
+    return res.status(500).json({ error: error.message })
+  }
+  
+  return res.json(data)
+
+===============================================================
+FIX 3 — CLIENTS TABLE IN SUPABASE
+===============================================================
+
+Check clients table has these columns.
+If any are missing add them:
+
+  SELECT column_name FROM 
+  information_schema.columns 
+  WHERE table_name = 'clients';
+
+Required columns:
+  id (uuid, default gen_random_uuid())
+  location_id (uuid NOT NULL)
+  name (text NOT NULL)
+  email (text NOT NULL)
+  phone (text nullable)
+  notes (text nullable)
+  created_at (timestamptz default now())
+
+If the table doesn't exist create it:
+  CREATE TABLE IF NOT EXISTS clients (
+    id uuid PRIMARY KEY 
+       DEFAULT gen_random_uuid(),
+    location_id uuid NOT NULL 
+       REFERENCES locations(id),
+    name text NOT NULL,
+    email text NOT NULL,
+    phone text,
+    notes text,
+    created_at timestamptz 
+       DEFAULT now()
+  );
+
+===============================================================
+FIX 4 — GET /api/clients READS FROM 
+SUPABASE (not memory)
+===============================================================
+
+Find GET /api/clients endpoint.
+It must read fresh from Supabase every time:
+
+  const { data, error } = await supabaseAdmin
+    .from('clients')
+    .select('*, bookings(count)')
+    .eq('location_id', locationId)
+    .order('created_at', { ascending: false })
+  
+  return res.json(data || [])
+
+If it's reading from an in-memory array 
+like _clientsCache or similar — replace 
+it with a fresh Supabase query every time.
+
+===============================================================
+FIX 5 — LOAD CLIENTS ON TAB OPEN
+===============================================================
+
+When Eva clicks the Clients tab in the 
+portal sidebar, it must always call 
+GET /api/clients fresh from Supabase.
+
+Find the clients tab click handler.
+Make sure it calls loadClients() which 
+hits the API — not a cached copy.
+
+===============================================================
+VERIFY
+===============================================================
+
+Test 1 — Add client persists:
+  Click + ADD CLIENT
+  Fill: Name, Email, Phone
+  Click Save
+  Toast shows "Client added ✓" ✓
+  Client appears in list ✓
+  Check Supabase clients table → 
+    new row exists ✓
+
+Test 2 — Survives logout:
+  Sign out of portal
+  Sign back in
+  Go to Clients tab
+  New client still shows ✓
+  (confirms it's in Supabase not memory)
+
+Test 3 — Correct location:
+  Add client while on Hornchurch
+  Switch to Marylebone
+  Client does NOT show ✓
+  Switch back to Hornchurch
+  Client shows ✓
+  (confirms location_id filtering works)
