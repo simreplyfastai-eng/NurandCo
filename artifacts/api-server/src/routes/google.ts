@@ -23,7 +23,7 @@ router.get('/auth', async (req: Request, res: Response) => {
     scope: SCOPES,
     state: String(location_id),
   });
-  res.redirect(url);
+  return res.redirect(url);
 });
 
 router.get('/callback', async (req: Request, res: Response) => {
@@ -62,10 +62,10 @@ router.get('/callback', async (req: Request, res: Response) => {
 
     if (upsertError) throw upsertError;
 
-    res.redirect('/admin/settings?google=connected');
+    return res.redirect('/admin/settings?google=connected');
   } catch (err) {
     console.error('Google OAuth callback error:', err);
-    res.redirect('/admin/settings?google=error');
+    return res.redirect('/admin/settings?google=error');
   }
 });
 
@@ -80,7 +80,7 @@ router.get('/status', async (req: Request, res: Response) => {
     .eq('location_id', location_id)
     .single();
 
-  res.json({
+  return res.json({
     connected: !!data,
     connected_at: data?.updated_at || null,
   });
@@ -96,7 +96,7 @@ router.post('/disconnect', async (req: Request, res: Response) => {
     .delete()
     .eq('location_id', location_id);
 
-  res.json({ success: true });
+  return res.json({ success: true });
 });
 
 export default router;
