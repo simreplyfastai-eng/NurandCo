@@ -205,10 +205,10 @@ export function getDepositAmount(
   treatmentName: string,
   settings: { depositInjectables?: number; depositOther?: number },
 ): number {
-  // TEST MODE — all deposits £1. Revert to: injectables ?? 20, other ?? 10
+  if (treatmentName === 'Facial Contouring 3ml') return 1;
   return isInjectableTreatment(treatmentName)
-    ? (settings.depositInjectables ?? 1)
-    : (settings.depositOther ?? 1);
+    ? (settings.depositInjectables ?? 20)
+    : (settings.depositOther ?? 10);
 }
 
 /** Returns minutes since midnight for a "HH:MM" string */
