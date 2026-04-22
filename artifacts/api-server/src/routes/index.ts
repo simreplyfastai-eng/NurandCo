@@ -15,6 +15,7 @@ import treatmentsRouter from "./treatments-route";
 import adminRouter from "./admin";
 import formsRouter from "./forms";
 import calendarRouter from "./calendar";
+import googleRoutes from "./google";
 
 const router: IRouter = Router();
 
@@ -34,5 +35,6 @@ router.use(enquiriesRouter);
 router.use(stripeRouter);
 router.use(formsRouter);
 router.use(calendarRouter);
+router.use('/google', googleRoutes);
 
 export default router;
