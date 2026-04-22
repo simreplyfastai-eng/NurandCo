@@ -1,0 +1,455 @@
+ABSOLUTE GODMODE FULL AUDIT + BUG FIX.
+TOP TO BOTTOM. EVERY SINGLE THING.
+Read ALL files before starting.
+Test EVERYTHING. Fix EVERYTHING found.
+Do not stop until 100% passes.
+
+===============================================================
+SECTION 1 — HOMEPAGE
+===============================================================
+
+1. Browser tab title = "StarrBeauty — ..." ✓
+2. Nav logo = STARR / BEAUTY ✓
+3. Nav links work: SERVICES LOCATIONS 
+   TRAINING BOOK NOW ✓
+4. Hero photo of Eva loads ✓
+5. Hero text = "Welcome to StarrBeauty" ✓
+6. Hero BOOK NOW → /book ✓
+7. Zero instances of "Starr Aesthetics" 
+   on entire page ✓
+8. Marquee ticker scrolls ✓
+9. About section: "Eva founded StarrBeauty" ✓
+10. Our Services HORNCHURCH tab: 
+    loads 66 treatments from Supabase ✓
+11. Our Services MARYLEBONE tab: 
+    switches and shows 11 treatments ✓
+12. Fat Dissolving: "Ask for pricing" + 
+    BOOK → WhatsApp ✓
+13. ALL treatment row buttons say "BOOK" 
+    not "BOOK NOW" ✓
+14. Locations section shows both clinics ✓
+15. ALL videos autoplay silently ✓
+16. ZERO visible play buttons on any video ✓
+17. WhatsApp bubble → wa.me/447701298985 ✓
+18. Footer: STARR BEAUTY logo ✓
+19. Footer: © 2026 STARRBEAUTY ✓
+20. Footer socials: plain text no pills ✓
+21. Footer email correct ✓
+22. POWERED BY AESTHETIX ✓
+
+===============================================================
+SECTION 2 — BOOKING FLOW
+===============================================================
+
+23. /book shows location picker ✓
+24. BOOK HERE Hornchurch → 
+    /book?location=hornchurch ✓
+25. Treatments load from Supabase ✓
+26. All 6 categories show ✓
+27. All prices correct ✓
+28. Click BOOK → calendar modal opens ✓
+29. Mon/Sun not selectable ✓
+30. Thursday slots: 10:00 12:00 14:00 
+    16:00 18:00 (2hr from Supabase) ✓
+31. Friday slots start 09:00 ✓
+32. Saturday slots start 09:00 close 14:00 ✓
+33. Slots update when Eva changes 
+    hours in portal ✓
+34. Select time → details form shows ✓
+35. Form shows treatment, date, time, 
+    price, deposit, balance ✓
+36. CONTINUE TO PAYMENT works ✓
+37. ← Change Location → location picker ✓
+38. All above works for Marylebone ✓
+
+===============================================================
+SECTION 3 — STRIPE PAYMENT
+===============================================================
+
+39. Stripe checkout opens ✓
+40. Amount minimum 30p ✓
+41. Test card 4242 4242 4242 4242 ✓
+42. Payment succeeds ✓
+43. Webhook fires ✓
+44. No DB error in logs ✓
+45. Booking created in Supabase ✓
+46. Payment record in Supabase ✓
+47. Redirect to /forms?booking=[id] ✓
+
+===============================================================
+SECTION 4 — FORMS
+===============================================================
+
+48. /forms?booking=[id] loads ✓
+49. Client details pre-filled ✓
+50. Treatment name pre-filled ✓
+51. Medical form submits → saves to 
+    Supabase medical_forms ✓
+52. location_id saved ✓
+53. booking_id linked ✓
+54. Consent form submits → saves to 
+    Supabase consent_forms ✓
+55. Redirect to /confirmed ✓
+56. bookings.forms_completed = true ✓
+57. /confirmed shows booking summary ✓
+58. /confirmed shows "Please check your 
+    spam folder if you don't see a 
+    confirmation email in your inbox." ✓
+
+===============================================================
+SECTION 5 — EMAILS
+===============================================================
+
+59. Confirmation email sent to client ✓
+60. Notification email sent to Eva ✓
+61. From: hello@starrbeautyy.co.uk ✓
+62. Not going to spam ✓
+63. Cancel email sends correctly ✓
+64. Reschedule email sends correctly ✓
+
+===============================================================
+SECTION 6 — ADMIN PORTAL LOGIN
+===============================================================
+
+65. /portal.html loads clean login ✓
+66. Login form shows ONCE only ✓
+67. Correct credentials → 200 not 401 ✓
+68. After login: localStorage.portal_token 
+    = JWT string ✓
+69. Location selector shows after login ✓
+70. Login NEVER shows again after login ✓
+71. Select location → dashboard ✓
+72. localStorage.portal_location_id 
+    = UUID ✓
+73. Refresh → dashboard loads directly ✓
+74. SIGN OUT → login + localStorage 
+    cleared ✓
+75. SWITCH LOCATION → location picker ✓
+
+===============================================================
+SECTION 7 — PORTAL DASHBOARD
+===============================================================
+
+76. Stats load: revenue, appointments, 
+    clients, avg spend ✓
+77. Recent bookings show treatment 
+    name (NOT blank/—) ✓
+78. Time shows HH:MM not HH:MM:SS ✓
+79. Status badges correct colours ✓
+80. Today's schedule shows bookings ✓
+81. Recent activity feed shows ✓
+82. Revenue chart renders ✓
+83. "..." action on each booking row ✓
+84. "..." → View Details / Reschedule / 
+    Cancel Booking ✓
+
+===============================================================
+SECTION 8 — PORTAL SCHEDULE
+===============================================================
+
+85. Calendar loads April 2026 ✓
+86. Dot on booked dates ✓
+87. Click date → booking shows in panel ✓
+88. Panel shows: treatment, date, time, 
+    client, status ✓
+89. RESCHEDULE button visible ✓
+90. CANCEL BOOKING button visible ✓
+91. Dot stays after clicking date ✓
+92. Month navigation works ✓
+
+===============================================================
+SECTION 9 — PORTAL NEW BOOKINGS
+===============================================================
+
+93. All bookings listed ✓
+94. Treatment name shows (not blank) ✓
+95. ALL/PENDING/CONFIRMED/COMPLETE/
+    CANCELLED filters work ✓
+96. Click booking → detail panel ✓
+97. Detail shows: client, email, phone, 
+    treatment, date, time, location, 
+    status, deposit, balance, forms ✓
+98. RESCHEDULE button at bottom ✓
+99. CANCEL BOOKING button at bottom ✓
+100. Cancel → confirmation modal → 
+     confirm → status = cancelled ✓
+101. Cancel → client gets email ✓
+102. Reschedule → calendar modal ✓
+103. Reschedule → pick date/time → 
+     updates Supabase ✓
+104. Reschedule → client gets email ✓
+105. Both update list immediately 
+     without page refresh ✓
+
+===============================================================
+SECTION 10 — PORTAL AVAILABILITY
+===============================================================
+
+106. Loads hours from Supabase ✓
+107. Correct hours on open:
+     Tue-Thu 10:00-19:00
+     Fri 09:00-16:00
+     Sat 09:00-14:00
+     Mon/Sun OFF ✓
+108. Toggle day on/off works ✓
+109. Change close time → SAVE CHANGES ✓
+110. No "Failed to save" error ✓
+111. Refresh → new hours persist ✓
+112. /book slots update immediately ✓
+113. Block date → saves to Supabase ✓
+114. Refresh → blocked date persists ✓
+115. Customer /book → blocked date 
+     greyed out ✓
+116. Unblock → works ✓
+117. Recurring time block works ✓
+118. All above for BOTH locations ✓
+
+===============================================================
+SECTION 11 — PORTAL CLIENTS
+===============================================================
+
+119. Client list loads ✓
+120. Search works ✓
+121. Click client → profile opens ✓
+122. Profile shows booking history with 
+     treatment name, date, time 
+     for EACH booking ✓
+123. Each booking has "..." → 
+     Reschedule / Cancel ✓
+124. + ADD CLIENT saves to Supabase ✓
+
+===============================================================
+SECTION 12 — PORTAL TREATMENTS
+===============================================================
+
+125. 66 Hornchurch (no dupes) ✓
+126. 11 Marylebone (no dupes) ✓
+127. Edit price → saves to Supabase ✓
+128. Change reflects in /book ✓
+129. + ADD treatment works ✓
+130. Lash infills £20 less than full sets ✓
+
+===============================================================
+SECTION 13 — PORTAL FINANCE
+===============================================================
+
+131. Finance tab loads ✓
+132. Revenue, deposits, balance show ✓
+133. Chart renders ✓
+134. Transactions table shows ✓
+135. Month selector works ✓
+136. Export works ✓
+
+===============================================================
+SECTION 14 — PORTAL MEDIA
+===============================================================
+
+137. Media tab loads from Supabase ✓
+138. Paste URL → Set → saves immediately ✓
+139. Refresh → URL persists ✓
+140. Upload file → saves to Supabase 
+     Storage ✓
+141. Homepage reflects changes ✓
+142. SAVE CHANGES saves all at once ✓
+
+===============================================================
+SECTION 15 — PORTAL SETTINGS
+===============================================================
+
+143. Clinic Name = StarrBeauty ✓
+144. All fields save to Supabase ✓
+145. Deposit settings save ✓
+146. Developer: AESTHETIX SYSTEMS ✓
+
+===============================================================
+SECTION 16 — SUPABASE INTEGRITY
+===============================================================
+
+147. Treatments: exactly 77 total ✓
+148. Hornchurch: exactly 66 ✓
+149. Marylebone: exactly 11 ✓
+150. Zero duplicate treatments ✓
+151. availability_settings: 14 rows ✓
+152. locations: exactly 2 ✓
+153. portal_kv dd_settings correct ✓
+154. portal_kv dd_media exists ✓
+
+===============================================================
+SECTION 17 — API HEALTH
+===============================================================
+
+155. GET /api/locations → 2 ✓
+156. GET /api/treatments → correct counts ✓
+157. GET /api/availability/slots → 
+     2hr slots from Supabase ✓
+158. POST /api/auth/login → 200 + token ✓
+159. Protected endpoints → 401 without 
+     token ✓
+160. POST /api/availability/settings → 
+     saves to Supabase ✓
+
+===============================================================
+SECTION 18 — MOBILE RESPONSIVE
+===============================================================
+
+CUSTOMER SITE (homepage + booking):
+
+161. viewport meta tag on ALL pages:
+     <meta name="viewport" content=
+     "width=device-width, initial-scale=1.0">
+     NO maximum-scale, NO user-scalable=no
+     (these break accessibility) ✓
+
+162. Homepage no horizontal scroll 
+     on 375px width ✓
+
+163. Nav collapses to hamburger menu 
+     on mobile ✓
+
+164. Hero text readable on mobile ✓
+
+165. Treatment list readable on mobile ✓
+
+166. Booking modal fits on 375px screen — 
+     no content cut off ✓
+
+167. Calendar fits mobile screen ✓
+
+168. Time slot buttons fit mobile ✓
+
+169. Form fields full width on mobile ✓
+
+170. Stripe checkout works on mobile ✓
+
+171. Forms page works on mobile ✓
+
+172. /confirmed page works on mobile ✓
+
+ADMIN PORTAL (portal.html):
+
+173. Portal viewport meta:
+     <meta name="viewport" content=
+     "width=device-width, initial-scale=1.0">
+     This MUST be present ✓
+
+174. Portal auto-scales on phone — 
+     no need to zoom in or out ✓
+
+175. Login form centered and readable 
+     on 375px ✓
+
+176. Location selector cards stack 
+     vertically on mobile ✓
+
+177. Sidebar collapses on mobile — 
+     becomes a hamburger/bottom nav 
+     or slide-out drawer ✓
+
+178. Dashboard stats stack in 2x2 grid 
+     on mobile (not 4 across) ✓
+
+179. New Bookings table scrolls 
+     horizontally on mobile ✓
+
+180. Booking detail panel fits mobile — 
+     full width overlay ✓
+
+181. Cancel/Reschedule buttons 
+     visible on mobile ✓
+
+182. Availability tab time inputs 
+     usable on mobile ✓
+
+183. Treatments tab readable on mobile ✓
+
+184. All modal popups fit mobile 
+     screen — no content cut off ✓
+
+185. Touch targets minimum 44px height 
+     (buttons, links, toggles) ✓
+
+186. Font size minimum 16px on inputs 
+     (prevents iOS zoom on focus) ✓
+
+187. Sidebar nav items tappable on 
+     mobile with correct spacing ✓
+
+188. SAVE CHANGES buttons always 
+     visible and tappable ✓
+
+189. Forms (medical/consent) work 
+     on mobile ✓
+
+190. Portal works on both iOS Safari 
+     and Android Chrome ✓
+
+SPECIFIC MOBILE CSS FIXES REQUIRED:
+
+Find portal.html CSS. Add or fix:
+
+  /* Mobile sidebar */
+  @media (max-width: 768px) {
+    #sidebar, .sidebar {
+      position: fixed;
+      left: -260px;
+      top: 0;
+      height: 100vh;
+      z-index: 1000;
+      transition: left 0.3s ease;
+    }
+    #sidebar.open, .sidebar.open {
+      left: 0;
+    }
+    #portal-main, .main-content {
+      margin-left: 0 !important;
+      width: 100% !important;
+    }
+    /* Hamburger button */
+    #mobile-menu-btn {
+      display: block;
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      z-index: 1001;
+    }
+    /* Stats grid */
+    .stats-grid {
+      grid-template-columns: 1fr 1fr !important;
+    }
+    /* Full width panels */
+    .detail-panel, .booking-detail {
+      width: 100% !important;
+      position: fixed !important;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 999;
+      overflow-y: auto;
+    }
+    /* Table scroll */
+    .bookings-table-wrapper {
+      overflow-x: auto;
+    }
+    /* Input font size — prevents iOS zoom */
+    input, select, textarea {
+      font-size: 16px !important;
+    }
+    /* Touch targets */
+    button, a, .nav-item {
+      min-height: 44px;
+    }
+  }
+
+===============================================================
+HOW TO REPORT & FIX
+===============================================================
+
+Output a table after checking:
+  PASS ✓ | # | item
+  FAIL ✗ | # | item | error/reason
+
+Fix ALL FAIL items immediately.
+Re-test each fixed item.
+Repeat until every item = PASS.
+
+Target: 190/190 PASS.
+Do not finish until achieved.
