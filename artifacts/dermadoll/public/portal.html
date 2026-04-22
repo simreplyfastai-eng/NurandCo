@@ -462,12 +462,15 @@ tr:hover td{background:rgba(92,26,26,.02)}
 .form-icon-btn:hover{opacity:1;background:rgba(92,26,26,.07)}
 .form-icon-btn.has-form{opacity:.85}
 @media(max-width:650px){
-  #bk-all-table .bk-col-treat,#bk-all-table .bk-col-dep,#bk-all-table .bk-col-forms{display:none}
-  #bk-all-table .bk-col-date{width:26%}
-  #bk-all-table .bk-col-client{width:38%}
-  #bk-all-table .bk-col-price{width:20%}
-  #bk-all-table .bk-col-status{width:16%}
-  .bk-status-pill{max-width:70px;font-size:9px;padding:3px 6px}
+  #bk-all-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  #bk-all-table{min-width:460px;table-layout:auto}
+  #bk-all-table .bk-col-dep,#bk-all-table .bk-col-forms{display:none}
+  #bk-all-table .bk-col-date{width:90px}
+  #bk-all-table .bk-col-client{width:100px}
+  #bk-all-table .bk-col-treat{width:160px;font-size:11px}
+  #bk-all-table .bk-col-price{width:60px;text-align:right}
+  #bk-all-table .bk-col-status{width:80px;text-align:center}
+  .bk-status-pill{font-size:9px;padding:3px 8px;max-width:none;white-space:nowrap}
 }
 /* Forms drawer */
 #forms-drawer{position:fixed;top:0;right:0;height:100%;width:420px;max-width:100vw;background:#fff;box-shadow:-4px 0 32px rgba(0,0,0,.18);z-index:600;transform:translateX(100%);transition:transform .28s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column}
@@ -3288,24 +3291,29 @@ function openClientPanel(id){
 
     <div class="cp-section-label">Booking History</div>
     ${bookings.length?`
-    <table style="width:100%;border-collapse:collapse;font-size:13px">
+    <div style="overflow-x:auto;-webkit-overflow-scrolling:touch;margin:0 -2px">
+    <table style="width:100%;min-width:340px;border-collapse:collapse;font-size:13px">
       <thead>
         <tr style="border-bottom:1px solid #F0EDE8">
-          <th style="text-align:left;padding:6px 0;color:#AAAAAA;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px">Date</th>
-          <th style="text-align:left;padding:6px 0;color:#AAAAAA;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px">Treatment</th>
-          <th style="text-align:right;padding:6px 0;color:#AAAAAA;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px">Status</th>
-          <th style="text-align:right;padding:6px 0;color:#AAAAAA;font-weight:600;font-size:11px;text-transform:uppercase;letter-spacing:1px">Deposit</th>
+          <th style="text-align:left;padding:6px 4px 6px 0;color:#AAAAAA;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap">Date</th>
+          <th style="text-align:left;padding:6px 4px;color:#AAAAAA;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px">Treatment</th>
+          <th style="text-align:center;padding:6px 4px;color:#AAAAAA;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap">Status</th>
+          <th style="text-align:center;padding:6px 0 6px 4px;color:#AAAAAA;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap">Forms</th>
         </tr>
       </thead>
       <tbody>
-        ${bookings.map(b=>`<tr style="border-bottom:1px solid #F8F6F2">
-          <td style="padding:8px 0;color:#555;white-space:nowrap">${formatDate(b.date)}</td>
-          <td style="padding:8px 4px;color:#333;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${b.treatment||'—'}">${b.treatment||'—'}</td>
-          <td style="padding:8px 0;text-align:right">${visitPill(b.status)}</td>
-          <td style="padding:8px 0;text-align:right;color:#C9A96E;font-weight:600">${gbp(b.depositAmount||b.price)}</td>
-        </tr>`).join('')}
+        ${bookings.map(b=>{const safeName=c.name.replace(/'/g,"\\'");return`<tr style="border-bottom:1px solid #F8F6F2">
+          <td style="padding:8px 4px 8px 0;color:#555;white-space:nowrap;font-size:12px">${formatDate(b.date)}</td>
+          <td style="padding:8px 4px;color:#333;font-size:12px;word-break:break-word;min-width:100px">${b.treatment||'—'}</td>
+          <td style="padding:8px 4px;text-align:center">${visitPill(b.status)}</td>
+          <td style="padding:8px 0 8px 4px;text-align:center;white-space:nowrap">
+            <button class="form-icon-btn ${b.hasMedical?'has-form':''}" title="${b.hasMedical?'Medical form on file':'No medical form'}" onclick="openFormsDrawer('${b.id}','${safeName}')">📋</button>
+            <button class="form-icon-btn ${b.hasConsent?'has-form':''}" title="${b.hasConsent?'Consent signed':'No consent form'}" onclick="openFormsDrawer('${b.id}','${safeName}')">✍️</button>
+          </td>
+        </tr>`}).join('')}
       </tbody>
-    </table>`:'<p style="color:var(--muted);font-size:13px;margin-top:4px">No visits yet</p>'}
+    </table>
+    </div>`:'<p style="color:var(--muted);font-size:13px;margin-top:4px">No visits yet</p>'}
     <div class="cp-section-label">Notes</div>
     <textarea id="cp-notes" rows="3" style="width:100%;padding:12px;border:1px solid #E8E8E8;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;resize:vertical;min-height:80px;box-sizing:border-box;outline:none">${c.notes||''}</textarea>
     <div style="display:flex;gap:8px;margin-top:10px">
