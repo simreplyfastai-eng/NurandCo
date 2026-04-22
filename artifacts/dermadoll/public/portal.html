@@ -2658,8 +2658,17 @@ function openBookingDetailPanel(bookingId){
       </div>
       ${b.notes?`<div style="border-top:1px solid var(--color-border-subtle);padding-top:12px"><div style="${_lbl};margin-bottom:4px">Notes</div><div style="${_val};font-size:12px;line-height:1.6">${escPortal(b.notes)}</div></div>`:''}
     </div>
+    ${!b.hasConsent?`
+    <div style="border-top:1px solid var(--color-border-subtle);padding-top:12px;margin-top:4px">
+      <div style="${_lbl};margin-bottom:8px">Forms Link</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button onclick="sendFormsLink('${b.id}','${escPortal(b.clientEmail||'')}')" style="flex:1;min-width:110px;font-size:11px;padding:7px 10px;border:1px solid var(--color-primary);background:var(--color-primary);color:#fff;cursor:pointer;border-radius:var(--radius);font-family:var(--font-sans);letter-spacing:0.5px">&#128231; Send to Client</button>
+        <button onclick="copyFormsLink('${b.id}')" style="flex:1;min-width:110px;font-size:11px;padding:7px 10px;border:1px solid var(--color-primary);background:transparent;color:var(--color-primary);cursor:pointer;border-radius:var(--radius);font-family:var(--font-sans);letter-spacing:0.5px">&#128279; Copy Link</button>
+      </div>
+      <div id="forms-link-fb-${b.id}" style="font-size:11px;color:#2D6A4F;margin-top:5px;min-height:16px"></div>
+    </div>`:''}
     ${b.status!=='Cancelled'&&b.status!=='cancelled'?`
-    <div style="display:flex;gap:8px;margin-top:20px;padding-top:16px;border-top:1px solid var(--color-border-subtle)">
+    <div style="display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--color-border-subtle)">
       <button class="btn-outline" onclick="openRescheduleModal('${b.id}')" style="flex:1;text-align:center">Reschedule</button>
       <button class="btn-danger" onclick="cancelBookingById('${b.id}')" style="flex:1;text-align:center">Cancel Booking</button>
     </div>`:''}
@@ -3439,6 +3448,32 @@ async function cancelBookingById(bookingId){
   }catch(e){
     showToast('Cancel failed — please try again');
   }
+}
+
+// ── Send / Copy Forms Link ────────────────────────────────────────────────────
+async function sendFormsLink(bookingId, clientEmail){
+  const fb=document.getElementById(`forms-link-fb-${bookingId}`);
+  if(fb) fb.textContent='Sending…';
+  try{
+    const r=await fetch(`/api/admin/bookings/${bookingId}/send-forms`,{method:'POST',headers:authHdr()});
+    const d=await r.json();
+    if(!r.ok) throw new Error(d.error||'Failed');
+    if(fb) fb.textContent=`✓ Sent to ${d.email}`;
+    showToast(`Forms link sent to ${d.email} ✓`);
+  }catch(e){
+    if(fb) fb.textContent=`Error: ${e.message}`;
+    showToast(`Failed to send: ${e.message}`);
+  }
+}
+function copyFormsLink(bookingId){
+  const url=`${location.origin}/forms.html?booking=${bookingId}`;
+  navigator.clipboard.writeText(url).then(()=>{
+    const fb=document.getElementById(`forms-link-fb-${bookingId}`);
+    if(fb) fb.textContent='✓ Link copied to clipboard';
+    showToast('Forms link copied ✓');
+  }).catch(()=>{
+    prompt('Copy this link:',url);
+  });
 }
 
 // ── Reschedule modal ─────────────────────────────────────────────────────────

@@ -1,0 +1,262 @@
+CRITICAL — REAL CUSTOMER PAID AND GOT 
+NOTHING. FIX IMMEDIATELY.
+
+CONFIRMED FROM SUPABASE:
+  Booking EXISTS in database:
+    client: Eva, evanikolla6@gmail.com
+    treatment: NATURALE LIPS 0.5ml
+    date: 2026-04-23
+    status: confirmed
+    stripe_session_id: NULL ← problem
+    booking_time: NULL ← problem
+    forms_completed: false ← problem
+  
+  Payment taken by Stripe but:
+    - stripe_session_id not saved to booking
+    - booking_time not saved
+    - /forms page showed "booking not found"
+    - No medical/consent forms sent
+    - No confirmation email sent
+
+THREE THINGS BROKE THIS:
+
+PROBLEM 1 — WEBHOOK NOT SAVING 
+stripe_session_id OR booking_time
+
+In the Stripe webhook handler for 
+checkout.session.completed:
+
+Find where the booking is created or updated.
+The booking INSERT/UPDATE must include:
+  stripe_session_id: session.id
+  booking_time: session.metadata.bookingTime
+
+If creating a NEW booking in the webhook:
+  await supabaseAdmin.from('bookings').insert({
+    location_id: session.metadata.locationId,
+    client_name: session.metadata.clientName,
+    client_email: session.customer_email || 
+                  session.metadata.clientEmail,
+    client_phone: session.metadata.clientPhone,
+    treatment_id: session.metadata.treatmentId || null,
+    treatment_name: session.metadata.treatmentName,
+    booking_date: session.metadata.bookingDate,
+    booking_time: session.metadata.bookingTime,
+    status: 'confirmed',
+    stripe_session_id: session.id,
+    deposit_paid: session.amount_total / 100,
+    balance_due: parseFloat(
+      session.metadata.totalPrice || 0
+    ) - session.amount_total / 100,
+    total_price: parseFloat(
+      session.metadata.totalPrice || 0
+    ),
+    forms_completed: false
+  })
+
+If UPDATING an existing booking (created before 
+payment), find by stripe_session_id and update:
+  await supabaseAdmin.from('bookings')
+    .update({ 
+      status: 'confirmed',
+      stripe_session_id: session.id,
+      booking_time: session.metadata.bookingTime
+    })
+    .eq('id', session.metadata.bookingId)
+
+PROBLEM 2 — RLS BLOCKING FORMS PAGE
+
+We just enabled Row Level Security on the 
+bookings table with deny_anon policy.
+
+This means the /forms page can't read the 
+booking to pre-fill the form — it gets 
+"booking not found".
+
+The /forms page must use the SERVICE ROLE 
+key to fetch the booking, NOT the anon key.
+
+In the forms API endpoint or forms page 
+fetch, make sure it uses supabaseAdmin 
+(service role) not supabase (anon):
+
+  // WRONG — anon key, blocked by RLS:
+  const { data } = await supabase
+    .from('bookings')
+    .select('*')
+    .eq('id', bookingId)
+  
+  // CORRECT — service role, bypasses RLS:
+  const { data } = await supabaseAdmin
+    .from('bookings')
+    .select('*')
+    .eq('id', bookingId)
+
+Also the /confirmed page fetch must use 
+supabaseAdmin for the same reason.
+
+PROBLEM 3 — STRIPE METADATA NOT BEING 
+PASSED TO CHECKOUT SESSION
+
+When creating the Stripe checkout session, 
+ALL booking details must be in metadata:
+
+  const session = await stripe.checkout
+    .sessions.create({
+      payment_method_types: ['card'],
+      mode: 'payment',
+      line_items: [{
+        price_data: {
+          currency: 'gbp',
+          product_data: {
+            name: treatmentName,
+            description: 'Deposit for ' + 
+                         treatmentName
+          },
+          unit_amount: depositAmountPence
+        },
+        quantity: 1
+      }],
+      customer_email: clientEmail,
+      metadata: {
+        locationId: locationId,
+        locationSlug: locationSlug,
+        locationName: locationName,
+        clientName: clientName,
+        clientEmail: clientEmail,
+        clientPhone: clientPhone || '',
+        treatmentId: treatmentId || '',
+        treatmentName: treatmentName,
+        bookingDate: bookingDate,
+        bookingTime: bookingTime,
+        totalPrice: totalPrice.toString(),
+        depositAmount: depositAmount.toString()
+      },
+      success_url: 
+        process.env.SITE_URL + 
+        '/forms?session={CHECKOUT_SESSION_ID}',
+      cancel_url: 
+        process.env.SITE_URL + '/book'
+    })
+
+Note: success_url uses 
+?session={CHECKOUT_SESSION_ID} not 
+?booking=[id] — this way the forms page 
+looks up the booking by stripe_session_id.
+
+PROBLEM 4 — FORMS PAGE LOOKUP BY 
+STRIPE SESSION ID
+
+The forms page currently looks up by 
+booking_id in the URL but the booking 
+might not have an ID yet (created by webhook).
+
+Change the forms page to look up by 
+stripe session_id from the URL:
+
+  // URL: /forms?session=cs_xxx...
+  const sessionId = urlParams.get('session')
+  
+  // Look up booking by stripe_session_id
+  const { data: booking } = await fetch(
+    '/api/bookings/by-session/' + sessionId
+  )
+
+  // Server endpoint:
+  GET /api/bookings/by-session/:sessionId
+    const { data } = await supabaseAdmin
+      .from('bookings')
+      .select('*')
+      .eq('stripe_session_id', sessionId)
+      .single()
+    
+    if (!data) {
+      // Try waiting — webhook might be 
+      // processing, retry after 2 seconds
+      await new Promise(r => setTimeout(r, 2000))
+      const retry = await supabaseAdmin
+        .from('bookings')
+        .select('*')
+        .eq('stripe_session_id', sessionId)
+        .single()
+      if (!retry.data) {
+        return res.status(404)
+          .json({ error: 'Booking not found' })
+      }
+      return res.json(retry.data)
+    }
+    return res.json(data)
+
+PROBLEM 5 — SEND EMAILS AFTER WEBHOOK
+
+After webhook creates booking, send:
+
+  1. Confirmation email to client:
+    to: clientEmail
+    from: hello@starrbeautyy.co.uk  
+    subject: Booking Confirmed — [treatmentName]
+    body: 
+      Hi [clientName],
+      Your deposit has been received and 
+      your booking is confirmed.
+      
+      Treatment: [treatmentName]
+      Date: [bookingDate]
+      Time: [bookingTime]
+      Location: [locationName]
+      Deposit paid: £[depositAmount]
+      Balance due on arrival: £[balanceDue]
+      
+      Please complete your medical and 
+      consent forms:
+      [formsLink]
+      
+      Please check your spam folder if 
+      you don't see this email.
+      
+      StarrBeauty
+
+  2. Alert email to Eva:
+    to: ADMIN_EMAIL (from Replit Secrets)
+    subject: New Booking — [clientName] 
+             — [treatmentName]
+    body: All booking details
+
+ALSO — IMMEDIATE MANUAL FIX FOR EVA'S 
+CUSTOMER RIGHT NOW:
+
+Eva's customer already paid but never got 
+forms or confirmation. Run this to manually 
+send them to the forms:
+
+  The booking ID is: 
+  45fee17c-e283-4647-b59e-5334780beea8
+  
+  Manually update the booking:
+    UPDATE bookings 
+    SET booking_time = '14:00:00'
+    WHERE id = 
+    '45fee17c-e283-4647-b59e-5334780beea8';
+  
+  Then email evanikolla6@gmail.com manually 
+  with the forms link:
+    [your-site]/forms?booking=
+    45fee17c-e283-4647-b59e-5334780beea8
+  
+  Or add a "Send Forms Link" button in the 
+  portal booking detail view that manually 
+  emails the client their forms link.
+
+VERIFY AFTER FIX:
+  Complete a full test booking:
+  Pay with card 4242 4242 4242 4242 ✓
+  Webhook fires ✓
+  Booking created with stripe_session_id ✓
+  Booking has correct booking_time ✓
+  Redirect to /forms?session=cs_xxx ✓
+  Forms page loads with pre-filled data ✓
+  No "booking not found" error ✓
+  Medical + consent forms submit ✓
+  Redirect to /confirmed ✓
+  Client gets confirmation email ✓
+  Eva gets alert email ✓

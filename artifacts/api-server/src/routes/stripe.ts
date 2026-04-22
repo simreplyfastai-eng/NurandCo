@@ -369,6 +369,7 @@ router.post("/stripe/webhook", async (req, res) => {
           updateStats: { depositAmount: depositFromStripe, bookingDate: bDate },
         }).catch(() => null);
 
+        const balanceDue3 = Math.max(0, price - depositFromStripe);
         await supabaseAdmin.from("bookings").upsert({
           id,
           location_id: locationId,
@@ -383,8 +384,11 @@ router.post("/stripe/webhook", async (req, res) => {
           status: "confirmed",
           deposit_amount: depositFromStripe,
           total_amount: price,
+          balance_due: balanceDue3,
           deposit_paid: true,
           stripe_payment_intent_id: paymentIntentId,
+          stripe_session_id: paymentIntentId,
+          forms_completed: false,
           reminder_sent: false,
           notes: slotFree ? "" : "⚠️ Slot conflict — review required",
         }, { onConflict: "id" });

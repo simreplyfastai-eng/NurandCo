@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../lib/auth";
 import { supabaseAdmin } from "../lib/supabase";
+import { sendFormsLinkEmail } from "../lib/email";
 
 const router = Router();
 
@@ -415,6 +416,54 @@ router.get("/admin/forms/:bookingId", async (req, res) => {
   } catch (err) {
     console.error("GET /api/admin/forms", err);
     return res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ── POST /api/admin/bookings/:id/send-forms — auth required ────────────────
+// Manually send the forms link email to the client for a specific booking.
+// Used by the admin portal "Send Forms Link" button.
+router.post("/admin/bookings/:id/send-forms", async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  const { id: bookingId } = req.params;
+  const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  if (!UUID_RE.test(bookingId)) return res.status(400).json({ error: "Invalid booking id" });
+
+  try {
+    const { data: bk, error: bkErr } = await supabaseAdmin
+      .from("bookings")
+      .select("id, client_name, client_email, treatment_name, booking_date, time_slot, location_id, forms_completed")
+      .eq("id", bookingId)
+      .single();
+
+    if (bkErr || !bk) return res.status(404).json({ error: "Booking not found" });
+    if (!bk.client_email) return res.status(400).json({ error: "Booking has no client email" });
+
+    // Resolve location name
+    let locationName: string | undefined;
+    if (bk.location_id) {
+      const { data: loc } = await supabaseAdmin
+        .from("locations")
+        .select("name")
+        .eq("id", bk.location_id)
+        .maybeSingle();
+      locationName = loc?.name as string | undefined;
+    }
+
+    await sendFormsLinkEmail({
+      clientEmail: String(bk.client_email),
+      clientName: String(bk.client_name ?? ""),
+      treatment: String(bk.treatment_name ?? "your treatment"),
+      date: String(bk.booking_date ?? ""),
+      time: String(bk.time_slot ?? ""),
+      bookingId,
+      locationName,
+    });
+
+    console.log(`Forms link email sent for booking ${bookingId} to ${bk.client_email}`);
+    return res.json({ success: true, email: bk.client_email });
+  } catch (err) {
+    console.error("POST /api/admin/bookings/:id/send-forms", err);
+    return res.status(500).json({ error: "Failed to send forms email" });
   }
 });
 

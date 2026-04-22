@@ -1,0 +1,198 @@
+BULLETPROOF ADDITIONS — make this 
+payment flow unbreakable permanently.
+
+BULLETPROOF 1 — WEBHOOK RETRY SAFETY
+
+The webhook can fire before the forms page 
+loads. Add a retry mechanism:
+
+In GET /api/bookings/by-session/:sessionId:
+  Let retries = 0
+  While retries < 5:
+    Check Supabase for booking with 
+    stripe_session_id = sessionId
+    If found → return it
+    If not found → wait 1 second, retry
+    retries++
+  If still not found after 5 retries:
+    Return 404 with message:
+    "Booking is being processed, 
+     please refresh in a few seconds"
+
+This handles the race condition where 
+Stripe redirects faster than the webhook 
+processes.
+
+BULLETPROOF 2 — IDEMPOTENT WEBHOOK
+
+The webhook can fire MORE THAN ONCE for 
+the same payment (Stripe retries on failure).
+
+Add a duplicate check at the TOP of the 
+webhook handler:
+
+  const existingBooking = await supabaseAdmin
+    .from('bookings')
+    .select('id')
+    .eq('stripe_session_id', session.id)
+    .single()
+  
+  if (existingBooking.data) {
+    console.log('Webhook already processed:', 
+      session.id)
+    return res.json({ received: true })
+  }
+  
+  // Only proceed if not already processed
+
+This prevents double-bookings from 
+webhook retries.
+
+BULLETPROOF 3 — WEBHOOK SIGNATURE 
+VERIFICATION
+
+Always verify the Stripe webhook signature:
+
+  const sig = req.headers['stripe-signature']
+  let event
+  
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    )
+  } catch(err) {
+    console.error('Webhook sig error:', err)
+    return res.status(400).send('Bad signature')
+  }
+
+This prevents fake webhook calls from 
+anyone who knows your URL.
+
+IMPORTANT: The webhook route must use 
+express.raw() not express.json():
+  app.post('/api/stripe/webhook', 
+    express.raw({type: 'application/json'}),
+    webhookHandler
+  )
+
+BULLETPROOF 4 — WEBHOOK ERROR LOGGING
+
+Wrap the entire webhook handler in 
+try/catch and log every error:
+
+  try {
+    // all booking creation code here
+    console.log('Webhook success:', session.id)
+    return res.json({ received: true })
+  } catch(err) {
+    console.error('WEBHOOK FAILED:', {
+      sessionId: session.id,
+      error: err.message,
+      stack: err.stack
+    })
+    // Still return 200 to Stripe so it 
+    // doesn't keep retrying
+    return res.status(200).json({ 
+      received: true, 
+      warning: 'Processing error logged' 
+    })
+  }
+
+BULLETPROOF 5 — FORMS FALLBACK
+
+If /forms?session=xxx still shows 
+"booking not found" after retries:
+
+Show a friendly message NOT an error:
+  "Your payment was successful! 
+   Your booking is being confirmed.
+   You will receive an email shortly 
+   with a link to complete your forms.
+   
+   If you don't receive an email within 
+   10 minutes, please WhatsApp us:
+   +44 7701 298985"
+
+And trigger a fallback email to Eva:
+  Subject: "ACTION NEEDED — Payment received 
+            but booking not confirmed"
+  Body: All session details so Eva can 
+  manually create the booking.
+
+BULLETPROOF 6 — MANUAL FORMS RESEND
+
+Add a "Resend Forms Link" button in the 
+portal booking detail view.
+
+When Eva clicks it:
+  Send email to client:
+    Subject: "Complete your StarrBeauty 
+              booking forms"
+    Body: Link to /forms?booking=[id]
+  
+  Show toast: "Forms link sent ✓"
+
+This means if anything goes wrong Eva 
+can always manually fix it in 2 clicks.
+
+BULLETPROOF 7 — PORTAL WEBHOOK LOG TAB
+
+Add a "System" or "Logs" section in 
+Settings tab showing last 20 webhook 
+events:
+  - Timestamp
+  - Event type
+  - Session ID
+  - Status (success/failed)
+  - Client name if available
+
+This way Eva can always see if a payment 
+was received but booking wasn't created.
+
+BULLETPROOF 8 — MISSING BOOKING_TIME FIX
+
+The booking_time was NULL on the real booking.
+This means the Stripe metadata didn't 
+include bookingTime when checkout was created.
+
+Find the checkout session creation code.
+Confirm bookingTime is in the metadata.
+If it's undefined or empty — throw an 
+error BEFORE creating the Stripe session:
+
+  if (!bookingTime) {
+    return res.status(400).json({ 
+      error: 'Booking time is required' 
+    })
+  }
+
+This fails fast before taking payment 
+rather than taking payment and losing the time.
+
+VERIFY BULLETPROOF:
+  
+  Test 1 — Normal flow:
+    Book → pay → forms show → submit → 
+    confirmed ✓
+  
+  Test 2 — Duplicate webhook:
+    Replay webhook twice — only one booking 
+    created ✓
+  
+  Test 3 — Fake webhook:
+    Send POST to webhook without Stripe 
+    signature — rejected 400 ✓
+  
+  Test 4 — Slow webhook:
+    Forms page loads before webhook fires — 
+    retries and eventually shows forms ✓
+  
+  Test 5 — Webhook crash:
+    If booking insert fails — Eva gets 
+    alert email with session details ✓
+  
+  Test 6 — Manual fix:
+    Portal booking detail has "Resend 
+    Forms Link" button that works ✓

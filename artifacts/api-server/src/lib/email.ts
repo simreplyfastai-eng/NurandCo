@@ -948,3 +948,79 @@ export async function sendEnquiryEmails(params: {
 
   await Promise.all(promises);
 }
+
+// ── Email: Manual "Send Forms Link" (trigger: admin clicks button in portal) ──
+
+export async function sendFormsLinkEmail(params: {
+  clientEmail: string;
+  clientName: string;
+  treatment: string;
+  date: string;
+  time: string;
+  bookingId: string;
+  locationName?: string;
+  locationAddress?: string;
+}): Promise<void> {
+  const firstName = params.clientName.split(" ")[0] ?? params.clientName;
+  const formsUrl = `${SITE_URL}/forms.html?booking=${params.bookingId}`;
+  const dateDisp = params.date ? formatDate(params.date) : "your upcoming appointment";
+  const timeDisp = params.time ? ` at ${params.time.slice(0, 5)}` : "";
+
+  const content = `
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">Your pre-appointment forms</p>
+    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, please complete your health and consent forms before your appointment. This only takes a few minutes.</p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 24px;">
+    <tr><td style="padding:20px 24px;">
+      <p style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px;">Your appointment</p>
+      <p style="font-size:16px;color:#5C1A1A;font-family:Georgia,serif;margin:0 0 4px;">${params.treatment}</p>
+      <p style="font-size:14px;color:#2C2420;font-weight:600;margin:0;">${dateDisp}${timeDisp}</p>
+      ${params.locationName ? `<p style="font-size:13px;color:#8C7B6B;margin:4px 0 0;">${params.locationName}</p>` : ""}
+    </td></tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+    <tr><td align="center">
+      <a href="${formsUrl}" style="display:inline-block;padding:14px 36px;background:#5C1A1A;color:#FFFFFF;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;letter-spacing:0.06em;">Complete Your Forms &rarr;</a>
+    </td></tr>
+    </table>
+
+    <p style="font-size:12px;color:#8C7B6B;line-height:1.6;margin:0 0 8px;">
+      If the button doesn't work, copy and paste this link into your browser:<br>
+      <a href="${formsUrl}" style="color:#C9A96E;word-break:break-all;">${formsUrl}</a>
+    </p>
+    <p style="font-size:12px;color:#8C7B6B;line-height:1.6;margin:0;">
+      If you have any questions, please WhatsApp us at <a href="https://wa.me/447701298985" style="color:#C9A96E;">+44 7701 298985</a>
+    </p>`;
+
+  const subject = `Action required: complete your forms — ${params.treatment} at StarrBeauty`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    "Please complete your pre-appointment health and consent forms before your appointment.",
+    "",
+    `Treatment: ${params.treatment}`,
+    `Date: ${dateDisp}${timeDisp}`,
+    params.locationName ? `Location: ${params.locationName}` : "",
+    "",
+    "Complete your forms here:",
+    formsUrl,
+    "",
+    "If you have any questions, WhatsApp us: https://wa.me/447701298985",
+    "",
+    PLAIN_FOOTER,
+  ].filter(Boolean).join("\n");
+
+  const html = buildEmail(content, subject);
+  const resend = getResend();
+  if (!resend || !params.clientEmail) {
+    logEmailPreview(subject, params.clientEmail, html);
+    return;
+  }
+  try {
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html, text });
+  } catch (err) {
+    console.error("sendFormsLinkEmail error", err);
+    throw err;
+  }
+}
