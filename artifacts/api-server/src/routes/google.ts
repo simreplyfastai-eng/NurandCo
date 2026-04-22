@@ -31,7 +31,7 @@ router.get('/callback', async (req: Request, res: Response) => {
 
   if (error) {
     console.error('Google OAuth denied:', error);
-    return res.redirect('/admin/settings?google=denied');
+    return res.redirect('/portal.html?google=denied#settings');
   }
 
   if (!code || !locationId) {
@@ -62,10 +62,10 @@ router.get('/callback', async (req: Request, res: Response) => {
 
     if (upsertError) throw upsertError;
 
-    return res.redirect('/admin/settings?google=connected');
+    return res.redirect('/portal.html?google=connected#settings');
   } catch (err) {
     console.error('Google OAuth callback error:', err);
-    return res.redirect('/admin/settings?google=error');
+    return res.redirect('/portal.html?google=error#settings');
   }
 });
 
