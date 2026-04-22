@@ -420,7 +420,10 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
 
         const bookingRes = await fetch("/api/bookings", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...(locationId ? { "x-location-id": locationId } : {}),
+          },
           body: JSON.stringify({
             id: pendingBookingId,
             clientName: name.trim(),
@@ -438,6 +441,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
             notes: "",
             createdAt: Date.now(),
             source: "Website",
+            locationId: locationId ?? null,
           }),
         });
 
