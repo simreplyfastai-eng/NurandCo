@@ -341,11 +341,15 @@ router.post("/bookings", async (req, res) => {
   const notes = sanitize(b.notes) ?? "";
   const { date, time, treatment } = b;
 
+  const isPortal = b.source === "Portal";
+
   if (!name || name.length < 2) return res.status(400).json({ error: "Please enter your name." });
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-    return res.status(400).json({ error: "Please enter a valid email address." });
-  if (!phone || phone.replace(/\s/g, "").length < 7)
-    return res.status(400).json({ error: "Please enter your phone number." });
+  if (!isPortal) {
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      return res.status(400).json({ error: "Please enter a valid email address." });
+    if (!phone || phone.replace(/\s/g, "").length < 7)
+      return res.status(400).json({ error: "Please enter your phone number." });
+  }
   if (!date || !time || !treatment)
     return res.status(400).json({ error: "Missing required booking fields." });
 
