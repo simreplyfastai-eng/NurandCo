@@ -3850,14 +3850,31 @@ function openClientPanel(id){
       <button style="flex:1;background:var(--color-secondary);color:#fff;border:none;border-radius:var(--radius);padding:10px 20px;font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer" onclick="saveClientNote('${c.id}')">Save Notes</button>
       <button style="flex:1;background:#fff;color:var(--color-secondary);border:1px solid #C9A96E;border-radius:var(--radius);padding:10px 20px;font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer" onclick="openBookingModal('${c.name}')">Book Again</button>
     </div>
-    <button style="width:100%;margin-top:8px;background:#fff;color:#c62828;border:1px solid #c62828;border-radius:var(--radius);padding:10px 20px;font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer" onclick="deleteClient('${c.id}','${c.name.replace(/'/g,"\\'")}')">Delete Client</button>
+    <div id="dcc-${c.id}" style="margin-top:8px"><button style="width:100%;background:#fff;color:#c62828;border:1px solid #c62828;border-radius:var(--radius);padding:10px 20px;font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer" onclick="confirmDeleteClient('${c.id}','${c.name.replace(/'/g,"\\'")}')">Delete Client</button></div>
   `;
   document.getElementById('client-panel').classList.add('open');
 }
 function closeClientPanel(){document.getElementById('client-panel').classList.remove('open')}
 
-async function deleteClient(id,name){
-  if(!confirm(`Delete ${name}? This will permanently remove their client record. Their bookings will remain.`))return;
+function confirmDeleteClient(id,name){
+  const wrap=document.getElementById(`dcc-${id}`);
+  if(!wrap)return;
+  const t=setTimeout(()=>resetDeleteClient(id),5000);
+  wrap.setAttribute('data-timer',String(t));
+  wrap.setAttribute('data-name',name);
+  wrap.innerHTML=`<div style="display:flex;gap:8px;align-items:center"><span style="flex:1;font-size:12px;color:#c62828;font-weight:600;font-family:var(--font-sans)">Really delete?</span><button style="background:#c62828;color:#fff;border:none;border-radius:var(--radius);padding:8px 14px;font-family:var(--font-sans);font-size:12px;font-weight:700;cursor:pointer" onclick="doDeleteClient('${id}')">Yes, delete</button><button style="background:#fff;color:#5C1A1A;border:1px solid #E8E8E8;border-radius:var(--radius);padding:8px 14px;font-family:var(--font-sans);font-size:12px;font-weight:700;cursor:pointer" onclick="resetDeleteClient('${id}')">Cancel</button></div>`;
+}
+function resetDeleteClient(id){
+  const wrap=document.getElementById(`dcc-${id}`);
+  if(!wrap)return;
+  const t=wrap.getAttribute('data-timer');
+  if(t)clearTimeout(Number(t));
+  const name=wrap.getAttribute('data-name')||'';
+  wrap.innerHTML=`<button style="width:100%;background:#fff;color:#c62828;border:1px solid #c62828;border-radius:var(--radius);padding:10px 20px;font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer" onclick="confirmDeleteClient('${id}','${name.replace(/'/g,"\\\\'")}')">Delete Client</button>`;
+}
+async function doDeleteClient(id){
+  const wrap=document.getElementById(`dcc-${id}`);
+  if(wrap){const t=wrap.getAttribute('data-timer');if(t)clearTimeout(Number(t));}
   await ClientAPI.delete(id);
   closeClientPanel();
   updateSidebarBadges();
