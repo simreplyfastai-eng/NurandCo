@@ -68,8 +68,17 @@ router.post("/auth/login", async (req, res) => {
 
   const adminEmail = (process.env.ADMIN_EMAIL ?? "").trim();
   if (inputEmail === adminEmail.toLowerCase()) {
+    // Check DB override first, then always fall back to the ADMIN_PASSWORD env var
+    // so a stale or corrupted DB override can never permanently lock out the account owner
     const activePassword = await getActivePassword();
-    if (activePassword && await checkPassword(inputPassword, activePassword)) {
+    let matched = activePassword ? await checkPassword(inputPassword, activePassword) : false;
+
+    if (!matched) {
+      const envPassword = process.env.ADMIN_PASSWORD ?? "";
+      if (envPassword) matched = await checkPassword(inputPassword, envPassword);
+    }
+
+    if (matched) {
       const expiresAt = Date.now() + SESSION_HOURS * 60 * 60 * 1000;
       const token = jwt.sign({ role: "admin", expiresAt }, secret, { expiresIn: `${SESSION_HOURS}h` });
       return res.json({ token, expiresAt });
