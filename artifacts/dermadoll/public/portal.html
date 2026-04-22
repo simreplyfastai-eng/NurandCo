@@ -2183,13 +2183,11 @@ window.addEventListener('DOMContentLoaded',async()=>{
   if(typeof flatpickr!=='undefined'){
     _fpBmDate=flatpickr('#bm-date',{
       dateFormat:'Y-m-d',
-      disableMobile:true,
       locale:{firstDayOfWeek:1},
       onChange(sel,dateStr){if(dateStr)populateBmTimeSlots(dateStr);}
     });
     _fpRsDate=flatpickr('#rs-date',{
       dateFormat:'Y-m-d',
-      disableMobile:true,
       locale:{firstDayOfWeek:1},
       onChange(sel,dateStr){if(dateStr)populateRsTimeSlots(dateStr);}
     });
