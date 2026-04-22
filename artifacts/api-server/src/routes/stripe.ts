@@ -111,7 +111,7 @@ async function getDepositSettings(locationId: string): Promise<{ depositInjectab
       return { depositInjectables: inj || 20, depositOther: other || 10 };
     }
   } catch { /* fall through */ }
-  return { depositInjectables: 20, depositOther: 10 };
+  return { depositInjectables: 0.10, depositOther: 0.10 };
 }
 
 const IG_ACCOUNTS_DEFAULT = [
@@ -181,8 +181,8 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
 
   const depSettings = locationId
     ? await getDepositSettings(locationId)
-    : { depositInjectables: 20, depositOther: 10 };
-  const depositAmountPence = Math.max(100, Math.round(getDepositAmount(treatment, depSettings) * 100));
+    : { depositInjectables: 0.10, depositOther: 0.10 };
+  const depositAmountPence = Math.round(getDepositAmount(treatment, depSettings) * 100);
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({

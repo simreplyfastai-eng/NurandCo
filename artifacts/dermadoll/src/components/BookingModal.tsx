@@ -212,7 +212,7 @@ function inputStyle(hasError: boolean): React.CSSProperties {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+function uid() { return crypto.randomUUID(); }
 function parsePrice(priceStr: string): number { return parseInt(priceStr.replace(/[^0-9]/g, ""), 10) || 0; }
 
 // ── Main Component ────────────────────────────────────────────────────────────
@@ -414,7 +414,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
         // Reserve the booking slot FIRST — never take payment for an unsaved booking
         const price = parsePrice(treatment?.price ?? "0");
         const INJECTABLES = ['filler','lips','rhinoplasty','jaw','cheek','smile line','tear trough','polynucleotides','dissolve','hydration','naturale','hd sculpt','contouring','consultation','refill'];
-        const depositAmount = INJECTABLES.some(kw => (treatment?.name ?? "").toLowerCase().includes(kw)) ? 20 : 10;
+        const depositAmount = INJECTABLES.some(kw => (treatment?.name ?? "").toLowerCase().includes(kw)) ? 0.10 : 0.10;
         const pendingBookingId = uid();
         pendingBookingIdRef.current = pendingBookingId;
 
