@@ -560,13 +560,13 @@ select.form-input{background:var(--color-card)}
 .bm-section-title{font-family:var(--font-sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--color-secondary);font-weight:600;margin-bottom:10px}
 .bm-pay-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-top:1px solid rgba(201,169,110,0.15)}
 .bm-pay-row:first-of-type{border-top:none}
-.bm-pay-lbl{font-family:var(--font-sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-muted-fg);width:60px;flex-shrink:0}
+.bm-pay-lbl{font-family:var(--font-sans);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--color-secondary);font-weight:600;width:60px;flex-shrink:0}
 .bm-pay-val{flex:1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:13px;font-family:var(--font-sans)}
 .bm-info-row{display:flex;gap:0;margin-bottom:14px}
 .bm-info-col{flex:1;min-width:0}
 .bm-info-col+.bm-info-col{border-left:1px solid rgba(201,169,110,0.2);padding-left:14px;margin-left:14px}
 .bm-info-lbl{font-family:var(--font-sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--color-secondary);font-weight:600;margin-bottom:6px}
-.bm-info-val{font-family:var(--font-sans);font-size:13px;color:var(--color-foreground);line-height:1.6}
+.bm-info-val{font-family:var(--font-sans);font-size:13px;color:var(--color-primary);font-weight:600;line-height:1.6}
 .bm-btns{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center}
 .bm-btns-right{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
 .bm-btns button{min-height:34px}
@@ -3197,7 +3197,7 @@ async function openBookingModal(prefill){
       depStatus.innerHTML=`<span style="color:#2D6A4F;font-weight:700;font-size:13px">✓ Paid</span>`;
     } else {
       const depAmt=Number(booking.deposit||0);
-      depStatus.innerHTML=`<span style="color:var(--color-muted-fg);font-size:12px">${gbp(depAmt)} unpaid</span>
+      depStatus.innerHTML=`<span style="color:var(--color-primary);font-size:13px;font-weight:600">${gbp(depAmt)} unpaid</span>
         <button class="btn-pay" onclick="markDepositPaidFromModal()">Mark Received</button>`;
     }
     const balGrp=document.getElementById('bm-balance-group');
@@ -3207,7 +3207,7 @@ async function openBookingModal(prefill){
       bal.innerHTML=`<span style="color:#2D6A4F;font-weight:700;font-size:13px">✓ Cleared</span>`;
     } else {
       const remaining=Math.max(0,Number(booking.price||0)-Number(booking.deposit||0));
-      bal.innerHTML=`<span style="color:var(--color-muted-fg);font-size:12px">${gbp(remaining)} outstanding</span>
+      bal.innerHTML=`<span style="color:var(--color-primary);font-size:13px;font-weight:600">${gbp(remaining)} outstanding</span>
         <button class="btn-pay" onclick="markBalancePaidFromModal()">Mark Paid</button>`;
     }
     // Set treatment — if not in select options, insert a recoverable option
