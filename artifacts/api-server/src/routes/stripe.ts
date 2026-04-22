@@ -248,7 +248,7 @@ router.post("/stripe/webhook", async (req, res) => {
       const locationInfo = locationId ? await getLocationInfo(locationId) : null;
       const adminEmail = process.env.ADMIN_EMAIL ?? "";
 
-      // 1. Update pre-saved "awaiting_payment" booking
+      // 1. Update pre-saved "pending" booking
       if (bookingId) {
         const { data: updated } = await supabaseAdmin
           .from("bookings")
@@ -260,7 +260,7 @@ router.post("/stripe/webhook", async (req, res) => {
             deposit_amount: depositFromStripe,
           })
           .eq("id", bookingId)
-          .eq("status", "awaiting_payment")
+          .in("status", ["pending", "awaiting_payment"])
           .select("*, treatments(name, duration_minutes)")
           .maybeSingle();
 
@@ -286,6 +286,7 @@ router.post("/stripe/webhook", async (req, res) => {
           }
 
           // 1b. Create payments record
+          const paymentLocationId = (updated.location_id as string | null) ?? (locationId || null);
           supabaseAdmin.from("payments").insert({
             booking_id: bookingId,
             client_id: supabaseClientId ?? String(updated.client_id ?? ""),
@@ -293,7 +294,7 @@ router.post("/stripe/webhook", async (req, res) => {
             payment_type: "deposit",
             stripe_payment_id: paymentIntentId,
             status: "succeeded",
-            location_id: locationId ?? null,
+            location_id: paymentLocationId,
           }).then(() => {}).catch((e: unknown) => console.error("payments insert", e));
 
           // 1c. Update booking balance_due + client_id if we resolved it

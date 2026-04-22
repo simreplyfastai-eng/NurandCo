@@ -1,0 +1,128 @@
+FIX STRIPE PAYMENT DB ERROR — read all 
+payment/webhook/stripe files first.
+
+CONFIRMED FROM SUPABASE:
+
+payments table schema:
+  id - uuid NOT NULL
+  location_id - uuid NOT NULL  
+  booking_id - uuid nullable
+  client_email - text NOT NULL
+  amount - numeric NOT NULL
+  type - text nullable
+  stripe_payment_intent_id - text nullable
+  stripe_charge_id - text nullable
+  (+ more columns)
+
+bookings table has:
+  stripe_session_id - text
+  balance_due - numeric
+  total_price - numeric
+  deposit_amount - numeric (on treatments)
+
+THREE THINGS TO FIX:
+
+FIX 1 — DEPOSIT AMOUNT FOR TESTING
+Change ALL deposits to 1 (1 penny) for testing.
+Run this in Supabase AND in the code:
+
+In Supabase SQL:
+  UPDATE treatments SET deposit_amount = 1;
+  UPDATE portal_kv 
+  SET value = jsonb_set(
+    jsonb_set(value, '{depositInjectables}', '1'),
+    '{depositOther}', '1'
+  ) WHERE key = 'dd_settings';
+
+In the booking flow code — find where deposit 
+is calculated and hardcode 1 for now:
+  const depositAmount = 1 // 1 penny for testing
+
+FIX 2 — STRIPE AMOUNT MUST BE IN PENCE
+Find the Stripe checkout session creation.
+The line that creates the Stripe session has:
+  unit_amount: depositAmount (WRONG - this is pounds)
+
+Change to:
+  unit_amount: Math.round(depositAmount * 100)
+
+So £0.01 = 1 pence = passes Stripe minimum.
+Stripe minimum for GBP is 30 pence (30).
+Set deposit to 30p minimum:
+  const depositAmount = 0.30 // 30 pence
+
+So unit_amount = Math.round(0.30 * 100) = 30 ✓
+
+FIX 3 — WEBHOOK DB INSERT ERROR
+Find the Stripe webhook handler.
+When checkout.session.completed fires,
+it tries to insert into the payments table.
+
+The insert MUST include these NOT NULL fields:
+  location_id — get from session.metadata.locationId
+  client_email — get from session.customer_email 
+    or session.metadata.clientEmail
+  amount — the amount paid in pence / 100
+
+The current insert is probably missing 
+location_id which is NOT NULL and causes 
+the DB error.
+
+Fix the insert:
+  await supabaseAdmin.from('payments').insert({
+    location_id: session.metadata.locationId,
+    booking_id: session.metadata.bookingId || null,
+    client_email: session.customer_email || 
+                  session.metadata.clientEmail,
+    amount: session.amount_total / 100,
+    type: 'deposit',
+    stripe_payment_intent_id: session.payment_intent,
+    stripe_charge_id: null
+  })
+
+Also make sure the Stripe checkout session 
+creation passes metadata:
+  metadata: {
+    locationId: locationId,
+    locationSlug: locationSlug,
+    clientEmail: clientEmail,
+    clientName: clientName,
+    clientPhone: clientPhone,
+    treatmentId: treatmentId,
+    treatmentName: treatmentName,
+    bookingDate: bookingDate,
+    bookingTime: bookingTime,
+    depositAmount: depositAmount.toString()
+  }
+
+After webhook creates payment record,
+it must also create the booking:
+  await supabaseAdmin.from('bookings').insert({
+    location_id: locationId,
+    client_name: clientName,
+    client_email: clientEmail,
+    client_phone: clientPhone,
+    treatment_id: treatmentId,
+    treatment_name: treatmentName,
+    booking_date: bookingDate,
+    booking_time: bookingTime,
+    status: 'confirmed',
+    deposit_paid: depositAmount,
+    balance_due: totalPrice - depositAmount,
+    total_price: totalPrice,
+    stripe_session_id: session.id,
+    payment_source: 'stripe'
+  })
+
+Then redirect client to:
+  /forms?booking=[newBookingId]
+
+VERIFY:
+  Go to /book → pick treatment → pick date/time
+  → fill details → click pay deposit
+  Stripe checkout opens with 30p ✓
+  Pay with test card 4242 4242 4242 4242 ✓
+  Webhook fires ✓
+  No DB error in Replit logs ✓
+  Booking created in Supabase ✓
+  Client redirected to /forms ✓

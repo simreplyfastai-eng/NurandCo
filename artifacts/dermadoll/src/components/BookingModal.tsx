@@ -414,7 +414,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
         // Reserve the booking slot FIRST — never take payment for an unsaved booking
         const price = parsePrice(treatment?.price ?? "0");
         const INJECTABLES = ['filler','lips','rhinoplasty','jaw','cheek','smile line','tear trough','polynucleotides','dissolve','hydration','naturale','hd sculpt','contouring','consultation','refill'];
-        const depositAmount = INJECTABLES.some(kw => (treatment?.name ?? "").toLowerCase().includes(kw)) ? 0.10 : 0.10;
+        const depositAmount = INJECTABLES.some(kw => (treatment?.name ?? "").toLowerCase().includes(kw)) ? 1 : 1;
         const pendingBookingId = uid();
         pendingBookingIdRef.current = pendingBookingId;
 
@@ -436,7 +436,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
             balancePaid: false,
             date: selectedDate ? fmtDate(selectedDate) : "",
             time: selectedTime ?? "",
-            status: "awaiting_payment",
+            status: "pending",
             paymentMethod: "Stripe",
             notes: "",
             createdAt: Date.now(),

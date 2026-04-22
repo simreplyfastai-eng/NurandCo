@@ -235,7 +235,7 @@ export async function cleanupGhostBookings(): Promise<number> {
     const { data, error } = await supabaseAdmin
       .from("bookings")
       .delete()
-      .eq("status", "awaiting_payment")
+      .in("status", ["pending", "awaiting_payment"])
       .lt("created_at", cutoff)
       .select("id");
     if (error) throw error;
@@ -417,7 +417,7 @@ router.post("/bookings", async (req, res) => {
       client_phone: b.clientPhone ?? "",
       booking_date: date,
       time_slot: time ?? "",
-      status: (b.status ?? "pending").toLowerCase(),
+      status: (b.status ?? "pending").toLowerCase().replace("awaiting_payment", "pending"),
       deposit_amount: deposit,
       total_amount: price,
       deposit_paid: depositPaid,
