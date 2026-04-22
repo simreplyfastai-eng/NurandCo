@@ -8,6 +8,30 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"/>
+<style>
+/* ── FLATPICKR BRAND THEME ────────────────────────────── */
+.flatpickr-calendar{font-family:var(--font-sans);border:1px solid rgba(92,26,26,.15);box-shadow:0 8px 30px rgba(92,26,26,.12);border-radius:10px;background:#FAF7F4;overflow:hidden}
+.flatpickr-months{background:#5C1A1A;padding:4px 0}
+.flatpickr-month,.flatpickr-current-month,.flatpickr-year{color:#FAF7F4;fill:#FAF7F4}
+.flatpickr-current-month{font-family:var(--font-serif);font-style:italic;font-size:15px;padding:5px 0}
+.flatpickr-current-month input.cur-year,.numInputWrapper input{color:#FAF7F4!important;font-family:var(--font-sans)}
+.numInputWrapper span.arrowUp,.numInputWrapper span.arrowDown{border-bottom-color:#FAF7F4;border-top-color:#FAF7F4;opacity:.6}
+.flatpickr-prev-month,.flatpickr-next-month{color:#FAF7F4!important;fill:#FAF7F4!important;padding:8px 12px;border-radius:0}
+.flatpickr-prev-month:hover svg,.flatpickr-next-month:hover svg{fill:#C9A96E!important}
+.flatpickr-weekdays{background:rgba(92,26,26,.06);padding:4px 0}
+span.flatpickr-weekday{color:#5C1A1A;font-size:10px;font-weight:600;letter-spacing:.06em;font-family:var(--font-sans)}
+.flatpickr-days{border:none}
+.flatpickr-day{border-radius:6px;font-family:var(--font-sans);font-size:12px;color:#3D3D3D;border:1px solid transparent;margin:2px 1px;height:34px;line-height:34px;max-width:34px}
+.flatpickr-day:hover,.flatpickr-day:focus{background:rgba(201,169,110,.18);border-color:transparent;color:#5C1A1A}
+.flatpickr-day.selected,.flatpickr-day.selected:hover,.flatpickr-day.selected:focus{background:#5C1A1A;border-color:#5C1A1A;color:#FAF7F4;font-weight:500}
+.flatpickr-day.today{border-color:#C9A96E;color:#5C1A1A;font-weight:600}
+.flatpickr-day.today:hover{background:rgba(201,169,110,.2)}
+.flatpickr-day.today.selected,.flatpickr-day.today.selected:hover{background:#5C1A1A;border-color:#5C1A1A;color:#FAF7F4}
+.flatpickr-day.prevMonthDay,.flatpickr-day.nextMonthDay,.flatpickr-day.flatpickr-disabled{color:rgba(61,61,61,.25)!important}
+.flatpickr-day.prevMonthDay:hover,.flatpickr-day.nextMonthDay:hover{background:rgba(201,169,110,.1);color:rgba(61,61,61,.4)!important}
+.flatpickr-innerContainer{padding:4px}
+</style>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;max-width:100%}
 :root{
@@ -672,11 +696,12 @@ select.form-input{background:var(--color-card)}
 #rs-box .rs-sub{font-size:12px;color:var(--color-muted-fg);margin:0 0 18px}
 #rs-box .rs-info-row{font-size:13px;padding:10px 14px;background:#F8F5F0;border-radius:8px;margin-bottom:18px;line-height:1.7}
 #rs-box label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--color-muted-fg);display:block;margin-bottom:5px}
-#rs-box input[type=date],#rs-box select{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;margin-bottom:16px;background:#fff;outline:none}
-#rs-box input[type=date]:focus,#rs-box select:focus{border-color:var(--color-primary)}
+#rs-box input[type=text],#rs-box select{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;margin-bottom:16px;background:var(--color-card);outline:none;cursor:pointer}
+#rs-box input[type=text]:focus,#rs-box select:focus{border-color:var(--color-primary)}
 #rs-box .rs-actions{display:flex;gap:12px;margin-top:8px}
 #rs-box .rs-actions button{flex:1;padding:11px;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 </head>
 <body>
 
@@ -1317,7 +1342,7 @@ select.form-input{background:var(--color-card)}
     <div class="form-row">
       <div class="form-group">
         <label class="form-label">Date</label>
-        <input class="form-input" id="bm-date" type="date" onchange="populateBmTimeSlots(this.value)"/>
+        <input class="form-input" id="bm-date" type="text" placeholder="Select date" readonly/>
       </div>
       <div class="form-group">
         <label class="form-label">Time</label>
@@ -1417,7 +1442,7 @@ select.form-input{background:var(--color-card)}
     <p class="rs-sub">Select a new date and time for this appointment.</p>
     <div class="rs-info-row" id="rs-info"></div>
     <label>New Date</label>
-    <input type="date" id="rs-date" onchange="populateRsTimeSlots(this.value)">
+    <input type="text" id="rs-date" placeholder="Select date" readonly>
     <label>Available Times</label>
     <select id="rs-time"><option>— select date first —</option></select>
     <div class="rs-actions">
@@ -1592,6 +1617,7 @@ let _SESSION_LOC_ID='';
 let _SESSION_LOC_NAME='';
 let _loginJustSucceeded=false;
 let _loginDone=false; // set true on successful login — prevents DOMContentLoaded from wiping state
+let _fpBmDate=null, _fpRsDate=null; // Flatpickr instances
 
 function authHdr(){
   const t=localStorage.getItem('fbn_token');
@@ -2043,6 +2069,19 @@ function showPortal(loc){
 }
 
 window.addEventListener('DOMContentLoaded',async()=>{
+  // ── Flatpickr date pickers ──────────────────────────
+  if(typeof flatpickr!=='undefined'){
+    _fpBmDate=flatpickr('#bm-date',{
+      dateFormat:'Y-m-d',
+      disableMobile:true,
+      onChange(sel,dateStr){if(dateStr)populateBmTimeSlots(dateStr);}
+    });
+    _fpRsDate=flatpickr('#rs-date',{
+      dateFormat:'Y-m-d',
+      disableMobile:true,
+      onChange(sel,dateStr){if(dateStr)populateRsTimeSlots(dateStr);}
+    });
+  }
   if(_loginDone)return; // login already completed in this page session — do nothing
   const token=localStorage.getItem('fbn_token');
   if(token&&localStorage.getItem('fbn_session')==='1'){
@@ -3016,7 +3055,8 @@ function buildTreatmentSelect(){
   }).join('');
 
   // Today as default date
-  document.getElementById('bm-date').value=fmt(new Date());
+  if(_fpBmDate)_fpBmDate.setDate(fmt(new Date()),false);
+  else document.getElementById('bm-date').value=fmt(new Date());
 }
 function pad(n){return n<10?'0'+n:n}
 
@@ -3092,7 +3132,8 @@ async function openBookingModal(prefill){
     document.getElementById('bm-client').value=booking.clientName||'';
     document.getElementById('bm-email').value=booking.clientEmail||'';
     document.getElementById('bm-phone').value=booking.clientPhone||'';
-    document.getElementById('bm-date').value=booking.date||'';
+    if(_fpBmDate)_fpBmDate.setDate(booking.date||'',false);
+    else document.getElementById('bm-date').value=booking.date||'';
     populateBmTimeSlots(booking.date||'', booking.time||'');
     document.getElementById('bm-notes').value=booking.notes||'';
     document.getElementById('bm-price').value=booking.price||'';
@@ -3166,7 +3207,8 @@ async function openBookingModal(prefill){
     document.getElementById('bm-deposit').value='';
     document.getElementById('bm-notes').value='';
     document.getElementById('bm-status').value='Confirmed';
-    document.getElementById('bm-date').value=fmt(new Date());
+    if(_fpBmDate)_fpBmDate.setDate(fmt(new Date()),false);
+    else document.getElementById('bm-date').value=fmt(new Date());
     populateBmTimeSlots(fmt(new Date()));
     document.getElementById('bm-cancel-booking-btn').style.display='none';
     document.getElementById('bm-reschedule-btn').style.display='none';
@@ -3270,7 +3312,8 @@ async function openRescheduleModal(bookingId){
     `<strong>${escPortal(b.clientName||'—')}</strong><br>`+
     `${escPortal(b.treatment||'Not specified')}<br>`+
     `<span style="color:var(--color-muted-fg)">Currently: ${formatDate(b.date)} at ${(b.time||'').slice(0,5)}</span>`;
-  document.getElementById('rs-date').value=b.date||'';
+  if(_fpRsDate)_fpRsDate.setDate(b.date||'',false);
+  else document.getElementById('rs-date').value=b.date||'';
   await populateRsTimeSlots(b.date||'',b.time||'');
   const ov=document.getElementById('rs-overlay');
   ov.style.display='flex';
