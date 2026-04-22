@@ -13,23 +13,15 @@ function getIp(req: import("express").Request): string {
 // ── Helpers to unpack packed data ──────────────────────────────────────────
 
 function expandMedical(row: Record<string, unknown>): Record<string, unknown> {
-  const meds = String(row.medications ?? "");
-  if (meds.startsWith("{")) {
-    try {
-      const packed = JSON.parse(meds) as Record<string, unknown>;
-      return {
-        ...row,
-        dob: row.dob ?? packed.dob ?? null,
-        gp_practice: row.gp_practice ?? packed.gp_practice ?? null,
-        gp_phone: row.gp_phone ?? packed.gp_phone ?? null,
-        conditions: row.conditions ?? packed.conditions ?? [],
-        previous_treatments: row.previous_treatments ?? packed.previous_treatments ?? null,
-        skin_concerns: row.skin_concerns ?? packed.skin_concerns ?? null,
-        medications: packed.medications ?? null,
-      };
-    } catch { /* fall through */ }
-  }
-  return row;
+  // Normalise to consistent field names for the admin portal
+  return {
+    ...row,
+    dob: row.date_of_birth ?? row.dob ?? null,
+    gp_practice: row.gp_address ?? row.gp_practice ?? null,
+    conditions: row.medical_conditions ?? row.conditions ?? [],
+    previous_treatments: row.previous_aesthetics ?? row.previous_treatments ?? null,
+    skin_concerns: row.skin_conditions ?? row.skin_concerns ?? null,
+  };
 }
 
 function expandConsent(row: Record<string, unknown>): Record<string, unknown> {
@@ -214,21 +206,22 @@ router.post("/forms/medical", async (req, res) => {
       .eq("location_id", locationId)
       .maybeSingle();
 
+    const gpAddress = [gpPractice, gpPhone].filter(Boolean).join(" | ") || null;
     const formData: Record<string, unknown> = {
       client_email: clientEmail,
       client_name: clientName,
       location_id: locationId,
       booking_id: bookingId,
+      date_of_birth: dob ?? null,
       address: address ?? null,
       gp_name: gpName ?? null,
-      gp_practice: gpPractice ?? null,
-      gp_phone: gpPhone ?? null,
+      gp_address: gpAddress,
       medications: medications ?? null,
       allergies: allergies ?? null,
-      dob: dob ?? null,
-      conditions: conditions ?? [],
-      previous_treatments: previousTreatments ?? null,
-      skin_concerns: skinConcerns ?? null,
+      medical_conditions: Array.isArray(conditions) ? (conditions as string[]).join(", ") : (conditions ?? null),
+      previous_aesthetics: previousTreatments ?? null,
+      skin_conditions: skinConcerns ?? null,
+      submitted_at: new Date().toISOString(),
       ip_address: getIp(req),
     };
 
