@@ -19,6 +19,7 @@ const DEFAULT_CARDS: Card[] = [
 
 function VideoCard({ src }: { src: string }) {
   const ref = useRef<HTMLVideoElement>(null);
+  const loaded = useRef(false);
 
   useEffect(() => {
     const v = ref.current;
@@ -26,47 +27,51 @@ function VideoCard({ src }: { src: string }) {
 
     let dead = false;
 
-    const tryPlay = () => {
+    const loadAndPlay = () => {
       if (dead) return;
       v.muted = true;
       v.volume = 0;
-      // playsInline must be set via JS too for iOS Safari
       (v as HTMLVideoElement & { playsInline: boolean }).playsInline = true;
+      // With preload="none" we must call load() before play() or the browser
+      // has no data to play. Only do this once per element lifecycle.
+      if (!loaded.current) {
+        loaded.current = true;
+        v.load();
+      }
       v.play().catch(() => {});
     };
 
-    // DO NOT call v.load() — it resets the element and makes play() fail immediately.
-    // The browser loads from the src attribute on mount automatically.
+    v.addEventListener("canplay", loadAndPlay);
+    v.addEventListener("canplaythrough", loadAndPlay);
+    v.addEventListener("loadeddata", loadAndPlay);
 
-    // Fire on every readiness event (belt-and-suspenders)
-    v.addEventListener("canplay", tryPlay);
-    v.addEventListener("canplaythrough", tryPlay);
-    v.addEventListener("loadeddata", tryPlay);
-
-    // If already have enough data (cached), none of the above fire — use a timer
-    const t1 = setTimeout(tryPlay, 50);
-    const t2 = setTimeout(tryPlay, 400);
-
-    // IntersectionObserver: play when visible, pause when off-screen
+    // IntersectionObserver: load+play when visible, pause when off-screen.
+    // Using preload="none" means only visible videos pull data from the network,
+    // preventing 24 simultaneous video downloads that overwhelm the browser.
     const obs = new IntersectionObserver(
-      ([entry]) => { entry.isIntersecting ? tryPlay() : v.pause(); },
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          loadAndPlay();
+        } else {
+          v.pause();
+        }
+      },
       { threshold: 0.1 },
     );
     obs.observe(v);
 
     // First user touch unlocks autoplay on iOS
-    const onTouch = () => tryPlay();
+    const onTouch = () => loadAndPlay();
     window.addEventListener("touchstart", onTouch, { once: true, passive: true });
 
     return () => {
       dead = true;
-      clearTimeout(t1);
-      clearTimeout(t2);
-      v.removeEventListener("canplay", tryPlay);
-      v.removeEventListener("canplaythrough", tryPlay);
-      v.removeEventListener("loadeddata", tryPlay);
+      v.removeEventListener("canplay", loadAndPlay);
+      v.removeEventListener("canplaythrough", loadAndPlay);
+      v.removeEventListener("loadeddata", loadAndPlay);
       obs.disconnect();
       window.removeEventListener("touchstart", onTouch);
+      loaded.current = false;
     };
   }, [src]);
 
@@ -79,12 +84,11 @@ function VideoCard({ src }: { src: string }) {
         muted
         loop
         playsInline
-        preload="auto"
+        preload="none"
         disablePictureInPicture
         disableRemotePlayback
         style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
       />
-      {/* Transparent overlay blocks browser-injected play buttons from receiving clicks */}
       <div style={{ position: "absolute", inset: 0, zIndex: 1 }} aria-hidden="true" />
     </div>
   );
