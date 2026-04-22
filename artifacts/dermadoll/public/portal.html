@@ -2184,11 +2184,13 @@ window.addEventListener('DOMContentLoaded',async()=>{
     _fpBmDate=flatpickr('#bm-date',{
       dateFormat:'Y-m-d',
       disableMobile:true,
+      locale:{firstDayOfWeek:1},
       onChange(sel,dateStr){if(dateStr)populateBmTimeSlots(dateStr);}
     });
     _fpRsDate=flatpickr('#rs-date',{
       dateFormat:'Y-m-d',
       disableMobile:true,
+      locale:{firstDayOfWeek:1},
       onChange(sel,dateStr){if(dateStr)populateRsTimeSlots(dateStr);}
     });
   }
@@ -2485,11 +2487,11 @@ function renderBookings(){
 // ═══════════════════════════════════════════════════
 // SCHEDULE / CALENDAR
 // ═══════════════════════════════════════════════════
-let calDate=new Date();
-calDate.setDate(1);
+const _calNow=new Date();
+let calDate=new Date(Date.UTC(_calNow.getUTCFullYear(),_calNow.getUTCMonth(),1));
 
 function buildCalendar(){
-  const y=calDate.getFullYear(),m=calDate.getMonth();
+  const y=calDate.getUTCFullYear(),m=calDate.getUTCMonth();
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   document.getElementById('cal-title').textContent=months[m]+' '+y;
 
@@ -2500,13 +2502,14 @@ function buildCalendar(){
   // Last entry is Sunday — add grey class on mobile
   document.getElementById('cal-day-names').innerHTML=names.map((d,i)=>`<div class="cal-day-name${i===6?' sunday-hdr':''}">${d}</div>`).join('');
 
-  const firstDay=new Date(y,m,1);
-  let startDow=firstDay.getDay();
-  startDow=startDow===0?6:startDow-1; // Monday start
+  // Use UTC throughout so the grid is timezone-safe (matches mini-calendars)
+  const firstDow=new Date(Date.UTC(y,m,1)).getUTCDay(); // 0=Sun
+  let startDow=firstDow===0?6:firstDow-1; // Mon=0 … Sun=6
 
-  const daysInMonth=new Date(y,m+1,0).getDate();
-  const daysInPrev=new Date(y,m,0).getDate();
-  const todayStr=fmt(new Date());
+  const daysInMonth=new Date(Date.UTC(y,m+1,0)).getUTCDate();
+  const daysInPrev=new Date(Date.UTC(y,m,0)).getUTCDate();
+  const _tn=new Date();
+  const todayStr=`${_tn.getUTCFullYear()}-${String(_tn.getUTCMonth()+1).padStart(2,'0')}-${String(_tn.getUTCDate()).padStart(2,'0')}`;
   // normalise any date value to plain YYYY-MM-DD (strips time/timezone suffixes)
   function normDate(d){return(d||'').toString().slice(0,10);}
   const bookings=getBookings();
@@ -2519,9 +2522,9 @@ function buildCalendar(){
     cells.push(`<div class="cal-cell other-month"><div class="cal-date">${d}</div></div>`);
   }
   for(let d=1;d<=daysInMonth;d++){
-    const date=new Date(y,m,d);
-    const dow=date.getDay();
-    const dateStr=fmt(date);
+    const mm=String(m+1).padStart(2,'0'),dd=String(d).padStart(2,'0');
+    const dateStr=`${y}-${mm}-${dd}`;
+    const dow=new Date(Date.UTC(y,m,d)).getUTCDay();
     const isSun=dow===0;
     const isToday=dateStr===todayStr;
     // Use availability data: check date override first, then day default
@@ -2572,7 +2575,8 @@ function buildCalendar(){
 }
 
 function changeMonth(dir){
-  calDate.setMonth(calDate.getMonth()+dir);
+  const _cy=calDate.getUTCFullYear(),_cm=calDate.getUTCMonth()+dir;
+  calDate=new Date(Date.UTC(_cy,_cm,1));
   buildCalendar();
 }
 
@@ -3176,9 +3180,8 @@ function buildTreatmentSelect(){
   const all=allTreatments?allTreatments():TREATMENTS;
   const overrides=getTreatOverrides?getTreatOverrides():{};
   const sets=getSettings()||{};
-  // TEST MODE — £1 deposits. Revert: ||20 / ||10
-  const depInj=Number(sets.depositInjectables||1);
-  const depOther=Number(sets.depositOther||1);
+  const depInj=Number(sets.depositInjectables||20);
+  const depOther=Number(sets.depositOther||10);
   const INJECTABLE_CATS=new Set(['FILLER','BOTOX','SKINBOOST','VITAMIN','Aesthetics','SPMU']);
   sel.innerHTML='<option value="">Select treatment</option>'+all.map(t=>{
     const ov=overrides[t.name]||{};
@@ -3227,7 +3230,7 @@ function updateDeposit(){
   const sel=document.getElementById('bm-treatment');
   const opt=sel.options[sel.selectedIndex];
   const price=opt&&opt.dataset.price?Number(opt.dataset.price):0;
-  const deposit=opt&&opt.dataset.deposit?Number(opt.dataset.deposit):1; // TEST MODE: revert to 10
+  const deposit=opt&&opt.dataset.deposit?Number(opt.dataset.deposit):10;
   const pInput=document.getElementById('bm-price');
   if(price)pInput.value=price;
   document.getElementById('bm-deposit').value=deposit;
