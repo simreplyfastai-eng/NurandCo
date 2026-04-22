@@ -52,6 +52,8 @@ app.use(
 const allowedOrigins: (string | RegExp)[] = [
   "https://starrbeautyy.co.uk",
   "https://www.starrbeautyy.co.uk",
+  "http://localhost:3000",
+  "http://localhost:5173",
 ];
 // Allow Replit dev-domain proxy in development so the portal preview works
 if (process.env.REPLIT_DEV_DOMAIN) {
@@ -60,26 +62,39 @@ if (process.env.REPLIT_DEV_DOMAIN) {
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 // Raw body needed for Stripe webhook signature verification
 app.use("/api/stripe/webhook", express.raw({ type: "application/json" }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "2mb" }));
+app.use(express.urlencoded({ extended: true, limit: "2mb" }));
 
-// Rate limiting for sensitive POST endpoints only
-const bookingLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 3,
+// ── Rate limiting ───────────────────────────────────────────────────────────
+
+// General catch-all: 200 requests per minute per IP
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 200,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many booking attempts. Please try again in a few minutes." },
+  message: { error: "Too many requests. Please slow down." },
 });
 
+// Login: 10 attempts per 15 min
 const loginLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
+  windowMs: 15 * 60 * 1000,
   max: 10,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many login attempts. Please try again in a few minutes." },
+  message: { error: "Too many login attempts. Please try again in 15 minutes." },
 });
 
+// Booking creation: 5 per hour
+const bookingLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many booking attempts. Please try again later." },
+});
+
+// Enquiries: 5 per 10 min
 const enquiryLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
   max: 5,
@@ -88,16 +103,18 @@ const enquiryLimiter = rateLimit({
   message: { error: "Too many enquiry attempts. Please try again in a few minutes." },
 });
 
+// Payment intent: 5 per 10 min
 const piLimiter = rateLimit({
   windowMs: 10 * 60 * 1000,
-  max: 3,
+  max: 5,
   standardHeaders: true,
   legacyHeaders: false,
   message: { error: "Too many requests. Please try again in a few minutes." },
 });
 
-app.post("/api/bookings", bookingLimiter);
+app.use("/api", apiLimiter);
 app.post("/api/auth/login", loginLimiter);
+app.post("/api/bookings", bookingLimiter);
 app.post("/api/enquiries", enquiryLimiter);
 app.post("/api/stripe/create-payment-intent", piLimiter);
 

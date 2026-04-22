@@ -1,0 +1,527 @@
+ABSOLUTE GODMODE MASTER AUDIT.
+SECURITY + BUGS + PERFORMANCE + DESIGN.
+Read EVERY file before starting.
+Fix EVERY issue found.
+Do not stop until 100% complete.
+
+===============================================================
+PART 1 — CRITICAL SECURITY (DO THIS FIRST)
+===============================================================
+
+STEP 1 — SCAN FOR EXPOSED SECRETS
+
+Search every single file for hardcoded:
+  - API keys (sk_live_, pk_live_, sk_test_)
+  - Supabase service role keys (eyJ...)
+  - Supabase anon keys
+  - JWT secrets
+  - Resend API keys (re_...)
+  - TextMagic credentials
+  - Any password strings
+  - ADMIN_EMAIL or ADMIN_PASSWORD values
+
+grep -r "sk_live\|sk_test\|pk_live\|pk_test\|eyJhbGci\|re_\|service_role" . \
+  --include="*.ts" --include="*.js" \
+  --include="*.tsx" --include="*.jsx" \
+  --include="*.html" --include="*.json" \
+  --exclude-dir=node_modules \
+  --exclude-dir=.git
+
+If ANY key/secret is hardcoded in code:
+  1. Remove it immediately
+  2. Move to Replit Secrets / env vars
+  3. Access via process.env.KEY_NAME only
+
+STEP 2 — API ENDPOINT SECURITY
+
+Check EVERY API endpoint. Categorise as:
+  PUBLIC (no auth needed): 
+    GET /api/locations
+    GET /api/treatments
+    GET /api/availability/slots
+    GET /api/config (MUST NOT expose keys)
+    POST /api/auth/login
+    POST /api/bookings/create (Stripe flow)
+    POST /api/stripe/webhook
+    GET /api/forms/:bookingId
+
+  PROTECTED (require JWT):
+    ALL /api/availability/settings POST
+    ALL /api/bookings GET/PUT/DELETE
+    ALL /api/clients GET/POST/PUT/DELETE
+    ALL /api/treatments POST/PUT/DELETE
+    ALL /api/settings POST
+    ALL /api/media POST
+    ALL /api/enquiries GET
+
+For EVERY protected endpoint verify:
+  const token = req.headers.authorization
+    ?.replace('Bearer ', '')
+  if (!token) return res.status(401)
+    .json({ error: 'Unauthorised' })
+  
+  try {
+    const decoded = jwt.verify(token, 
+      process.env.JWT_SECRET)
+    req.admin = decoded
+  } catch(e) {
+    return res.status(401)
+      .json({ error: 'Invalid token' })
+  }
+
+STEP 3 — GET /api/config MUST NOT 
+EXPOSE SENSITIVE DATA
+
+This endpoint is PUBLIC (no auth).
+It MUST NOT return:
+  - Stripe secret key
+  - Supabase service role key
+  - JWT secret
+  - Admin email/password
+  - Resend API key
+  - Any internal credentials
+
+It MUST ONLY return:
+  - Stripe publishable key (pk_live_...)
+  - WhatsApp number
+  - Instagram handles
+  - depositPercent
+  - hasStripeSecretKey: true/false (bool only)
+  - hasResendKey: true/false (bool only)
+
+Remove ANY secrets from the config 
+response immediately.
+
+STEP 4 — STRIPE WEBHOOK SECURITY
+
+The webhook endpoint MUST verify the 
+Stripe signature on every request:
+
+  const sig = req.headers['stripe-signature']
+  let event
+  try {
+    event = stripe.webhooks.constructEvent(
+      req.rawBody,  // must be raw buffer
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET
+    )
+  } catch(err) {
+    console.error('Webhook sig failed:', err)
+    return res.status(400).json({ 
+      error: 'Invalid signature' 
+    })
+  }
+
+The webhook route MUST use raw body parser:
+  app.post('/api/stripe/webhook',
+    express.raw({ type: 'application/json' }),
+    webhookHandler
+  )
+  NOT express.json() for this route.
+
+STEP 5 — SQL INJECTION PREVENTION
+
+Every Supabase query uses the JS client 
+which parameterises automatically.
+But check for any raw SQL or string 
+interpolation in queries:
+  
+  UNSAFE: .from('t').select(`* WHERE 
+    id = ${userId}`)
+  SAFE: .from('t').select('*')
+    .eq('id', userId)
+
+Find and fix any unsafe patterns.
+
+STEP 6 — CORS CONFIGURATION
+
+Find the CORS setup in server.ts/server.js.
+It must ONLY allow known origins:
+
+  const allowedOrigins = [
+    'https://starrbeautyy.co.uk',
+    'https://www.starrbeautyy.co.uk',
+    process.env.REPLIT_DEV_DOMAIN 
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}` 
+      : null,
+    'http://localhost:3000',
+    'http://localhost:5173'
+  ].filter(Boolean)
+
+  app.use(cors({
+    origin: (origin, cb) => {
+      if (!origin || allowedOrigins
+        .includes(origin)) {
+        cb(null, true)
+      } else {
+        cb(new Error('Not allowed by CORS'))
+      }
+    },
+    credentials: true
+  }))
+
+STEP 7 — RATE LIMITING
+
+Add rate limiting to prevent brute force 
+and abuse. Install if not present:
+  npm install express-rate-limit
+
+Apply limits:
+
+  import rateLimit from 'express-rate-limit'
+
+  // Login: 10 attempts per 15 mins
+  const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { error: 'Too many login 
+      attempts, try again in 15 minutes' }
+  })
+  app.use('/api/auth/login', loginLimiter)
+
+  // General API: 100 req per minute
+  const apiLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 100
+  })
+  app.use('/api/', apiLimiter)
+
+  // Booking creation: 5 per hour per IP
+  const bookingLimiter = rateLimit({
+    windowMs: 60 * 60 * 1000,
+    max: 5
+  })
+  app.use('/api/bookings/create', 
+    bookingLimiter)
+
+STEP 8 — SECURITY HEADERS
+
+Add helmet.js for security headers:
+  npm install helmet
+
+  import helmet from 'helmet'
+  app.use(helmet({
+    contentSecurityPolicy: false,
+    crossOriginEmbedderPolicy: false
+  }))
+
+This adds:
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  X-XSS-Protection: 1; mode=block
+  Strict-Transport-Security
+  Referrer-Policy
+
+STEP 9 — INPUT SANITISATION
+
+All user inputs that get saved to 
+Supabase must be sanitised:
+
+  npm install xss
+
+  import xss from 'xss'
+
+  function sanitise(str) {
+    if (!str) return null
+    return xss(String(str).trim())
+  }
+
+Apply to: client name, email, phone, 
+notes, treatment names, all form fields.
+
+STEP 10 — JWT SECURITY
+
+JWT_SECRET must be in Replit Secrets.
+It must be a strong random string:
+  At least 64 characters
+  Random alphanumeric + symbols
+
+Check process.env.JWT_SECRET is set.
+If not, generate one:
+  node -e "console.log(require('crypto')
+    .randomBytes(64).toString('hex'))"
+
+Add to Replit Secrets as JWT_SECRET.
+
+Token expiry must be set:
+  jwt.sign(payload, process.env.JWT_SECRET, 
+    { expiresIn: '7d' })
+
+STEP 11 — SUPABASE ROW LEVEL SECURITY
+
+Check RLS is enabled on sensitive tables.
+Run in Supabase SQL:
+
+  -- Check RLS status
+  SELECT tablename, rowsecurity 
+  FROM pg_tables 
+  WHERE schemaname = 'public'
+  ORDER BY tablename;
+
+  -- Enable RLS on all tables
+  ALTER TABLE bookings ENABLE ROW 
+    LEVEL SECURITY;
+  ALTER TABLE clients ENABLE ROW 
+    LEVEL SECURITY;
+  ALTER TABLE medical_forms ENABLE ROW 
+    LEVEL SECURITY;
+  ALTER TABLE consent_forms ENABLE ROW 
+    LEVEL SECURITY;
+  ALTER TABLE payments ENABLE ROW 
+    LEVEL SECURITY;
+
+  -- Service role bypasses RLS 
+  -- (server always uses service role)
+  -- Anon role gets nothing:
+  CREATE POLICY "deny_anon" ON bookings
+    FOR ALL TO anon USING (false);
+  CREATE POLICY "deny_anon" ON clients
+    FOR ALL TO anon USING (false);
+  CREATE POLICY "deny_anon" ON medical_forms
+    FOR ALL TO anon USING (false);
+  CREATE POLICY "deny_anon" ON consent_forms
+    FOR ALL TO anon USING (false);
+  CREATE POLICY "deny_anon" ON payments
+    FOR ALL TO anon USING (false);
+
+This means even if someone gets the anon 
+key they can read zero data.
+
+STEP 12 — ENVIRONMENT VARIABLES AUDIT
+
+List ALL env vars the app needs.
+Confirm each is in Replit Secrets:
+
+  Required secrets:
+  ADMIN_EMAIL — portal login email
+  ADMIN_PASSWORD — portal login password
+  JWT_SECRET — 64+ char random string
+  SUPABASE_URL — project URL
+  SUPABASE_SERVICE_ROLE_KEY — server only
+  STRIPE_SECRET_KEY — sk_live_...
+  STRIPE_PUBLISHABLE_KEY — pk_live_...
+  STRIPE_WEBHOOK_SECRET — whsec_...
+  RESEND_API_KEY — re_...
+
+  Check NONE of these appear in any 
+  committed file or API response.
+
+STEP 13 — NO SENSITIVE DATA IN 
+CLIENT-SIDE CODE
+
+Search the React/JSX frontend files 
+and portal.html for any:
+  - Supabase service role key
+  - Stripe secret key
+  - JWT secret
+  - Admin credentials
+
+Frontend must ONLY use:
+  - VITE_STRIPE_PUBLISHABLE_KEY (pk_live_)
+  - VITE_SUPABASE_URL
+  - VITE_SUPABASE_ANON_KEY (read-only)
+
+Never expose service role key to frontend.
+
+STEP 14 — BOOKING ID VALIDATION
+
+The /forms?booking=[id] page loads a 
+booking by UUID from the URL. Must validate:
+
+  // Validate UUID format
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]
+    {4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]
+    {12}$/i
+  if (!uuidRegex.test(bookingId)) {
+    return res.status(400)
+      .json({ error: 'Invalid booking ID' })
+  }
+
+  // Check booking exists and isn't 
+  // already completed
+  const { data } = await supabaseAdmin
+    .from('bookings').select('id, 
+      forms_completed, client_email')
+    .eq('id', bookingId).single()
+  
+  if (!data) return res.status(404)
+    .json({ error: 'Booking not found' })
+  
+  if (data.forms_completed) {
+    return res.status(400)
+      .json({ error: 'Forms already 
+        submitted' })
+  }
+
+STEP 15 — ERROR HANDLING
+
+All API endpoints must catch errors 
+and never expose internal details:
+
+  try {
+    // ... logic
+  } catch(error) {
+    console.error('[endpoint name]:', error)
+    return res.status(500).json({ 
+      error: 'Something went wrong' 
+      // NEVER: error: error.message 
+      // (leaks internal info)
+    })
+  }
+
+===============================================================
+PART 2 — FULL BUG AUDIT
+===============================================================
+
+HOMEPAGE:
+B1. Title = "StarrBeauty — ..." ✓
+B2. Zero "Starr Aesthetics" anywhere ✓
+B3. STARR / BEAUTY logo ✓
+B4. Our Services Marylebone tab switches ✓
+B5. All videos autoplay silently ✓
+B6. Zero play buttons on videos ✓
+B7. All treatment buttons = "BOOK" ✓
+B8. Fat Dissolving: "Ask for pricing" + 
+    BOOK → WhatsApp ✓
+B9. Footer correct ✓
+
+BOOKING FLOW:
+B10. Location picker loads ✓
+B11. 66 Hornchurch treatments ✓
+B12. 11 Marylebone treatments ✓
+B13. 2-hour slots from Supabase ✓
+B14. Slots update when hours change ✓
+B15. Booking form all fields shown ✓
+B16. Deposit correct amount ✓
+B17. ← Change Location works ✓
+
+STRIPE:
+B18. Checkout opens ✓
+B19. Amount minimum 30p ✓
+B20. Webhook verified with signature ✓
+B21. Booking created in Supabase ✓
+B22. Payment record saved ✓
+B23. Redirect to /forms ✓
+
+FORMS:
+B24. Pre-filled from booking ✓
+B25. Medical form saves to Supabase ✓
+B26. Consent form saves to Supabase ✓
+B27. /confirmed loads ✓
+B28. Spam folder note shown ✓
+B29. Emails sent via Resend ✓
+
+PORTAL LOGIN:
+B30. Login once only ✓
+B31. fbn_token in localStorage ✓
+B32. Token persists on refresh ✓
+B33. Sign out clears localStorage ✓
+
+PORTAL DASHBOARD:
+B34. Stats load ✓
+B35. Treatment name shows ✓
+B36. Time HH:MM ✓
+B37. Status badges correct ✓
+
+PORTAL SCHEDULE:
+B38. Dot on booked dates ✓
+B39. Click date → shows booking ✓
+B40. Treatment + date + time shown ✓
+B41. Cancel/Reschedule buttons ✓
+
+PORTAL NEW BOOKINGS:
+B42. All fields in detail panel ✓
+B43. Cancel → updates Supabase + 
+     sends email ✓
+B44. Reschedule → updates Supabase + 
+     sends email ✓
+
+PORTAL AVAILABILITY:
+B45. Loads from Supabase ✓
+B46. SAVE CHANGES works ✓
+B47. No "Failed to save" ✓
+B48. Refresh → persists ✓
+B49. /book slots update after save ✓
+B50. Block date → saves + persists ✓
+
+PORTAL CLIENTS:
+B51. + ADD CLIENT saves to Supabase ✓
+B52. Client persists after logout ✓
+B53. Client shows in correct location ✓
+B54. Booking history shows treatment,
+     date, time ✓
+
+PORTAL TREATMENTS:
+B55. 77 total (66+11) no dupes ✓
+B56. Edit saves to Supabase ✓
+
+PORTAL MEDIA:
+B57. Saves to Supabase ✓
+B58. Persists after refresh ✓
+
+PORTAL SETTINGS:
+B59. All saves to Supabase ✓
+
+===============================================================
+PART 3 — MOBILE OPTIMISATION
+===============================================================
+
+M1. Viewport meta on all pages:
+    width=device-width, initial-scale=1.0
+    No maximum-scale, no user-scalable=no ✓
+M2. Homepage no horizontal scroll ✓
+M3. Booking modal fits 375px ✓
+M4. Portal auto-scales on phone ✓
+M5. Portal sidebar collapses to 
+    hamburger on mobile ✓
+M6. All inputs font-size 16px ✓
+M7. All touch targets 44px min ✓
+M8. Modals full screen on mobile ✓
+M9. Stats grid 2x2 on mobile ✓
+M10. Tables scroll horizontally ✓
+
+===============================================================
+PART 4 — DESIGN POLISH
+===============================================================
+
+D1. Zero sharp corners — all buttons 
+    border-radius: 8px ✓
+D2. All cards border-radius: 12px ✓
+D3. All inputs border-radius: 8px ✓
+D4. All modals border-radius: 16px ✓
+D5. All badges border-radius: 100px ✓
+D6. Consistent spacing throughout ✓
+D7. Hover states on all interactive 
+    elements ✓
+D8. Loading states on async actions ✓
+D9. Empty states with friendly messages 
+    and icons ✓
+D10. Toast confirms every save ✓
+D11. No overlapping elements ✓
+D12. No overflowing containers ✓
+D13. Portal feels premium ✓
+D14. Site feels luxury aesthetics ✓
+D15. Consistent colour palette used 
+     everywhere ✓
+
+===============================================================
+REPORT FORMAT
+===============================================================
+
+Output three sections:
+
+SECURITY ISSUES FOUND:
+  CRITICAL | # | description | fix applied
+  WARNING  | # | description | fix applied
+  INFO     | # | description | fix applied
+
+BUGS FOUND:
+  FAIL ✗ | # | description | fix applied
+
+DESIGN ISSUES FOUND:
+  FAIL ✗ | # | description | fix applied
+
+Then: FINAL SCORE: [x]/100 items passing
+
+Fix everything before finishing.
+Final score must be 100/100.

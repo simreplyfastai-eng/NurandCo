@@ -236,7 +236,7 @@ router.post("/forms/medical", async (req, res) => {
         .single();
       if (error) {
         console.error("Medical form update error:", error);
-        return res.status(500).json({ error: "Failed to update medical form", details: error.message });
+        return res.status(500).json({ error: "Failed to update medical form" });
       }
       resultId = data.id;
     } else {
@@ -247,7 +247,7 @@ router.post("/forms/medical", async (req, res) => {
         .single();
       if (error) {
         console.error("Medical form insert error:", error);
-        return res.status(500).json({ error: "Failed to save medical form", details: error.message });
+        return res.status(500).json({ error: "Failed to save medical form" });
       }
       resultId = data.id;
     }
@@ -336,7 +336,7 @@ router.post("/forms/consent", async (req, res) => {
 
     if (error) {
       console.error("Consent form insert error:", error);
-      return res.status(500).json({ error: "Failed to save consent form", details: error.message });
+      return res.status(500).json({ error: "Failed to save consent form" });
     }
 
     // Mark booking as forms completed and confirmed

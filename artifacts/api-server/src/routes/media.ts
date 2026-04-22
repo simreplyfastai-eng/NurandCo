@@ -195,13 +195,13 @@ router.post("/media/config", async (req, res) => {
 
     if (writeError) {
       console.error("POST /api/media/config write error:", writeError);
-      return res.status(500).json({ error: writeError.message });
+      return res.status(500).json({ error: "Failed to save media config" });
     }
 
     return res.json({ success: true, field });
   } catch (err: any) {
     console.error("POST /api/media/config", err);
-    return res.status(500).json({ error: err?.message ?? "Unknown error" });
+    return res.status(500).json({ error: "Failed to save media config" });
   }
 });
 
@@ -264,12 +264,13 @@ router.post("/media/upload", upload.single("file"), async (req, res) => {
     return res.json({ success: true, url: publicUrl });
   } catch (err: any) {
     console.error("POST /api/media/upload", err);
-    return res.status(500).json({ error: "Upload failed", detail: err?.message });
+    return res.status(500).json({ error: "Upload failed" });
   }
 });
 
 // POST /api/media/upload-url (legacy — kept for any existing callers)
 router.post("/media/upload-url", async (req, res) => {
+  if (!requireAuth(req, res)) return;
   const { contentType } = req.body as { contentType?: string };
   if (!contentType) {
     return res.status(400).json({ error: "contentType required" });

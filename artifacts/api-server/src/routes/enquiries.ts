@@ -2,6 +2,7 @@ import { Router } from "express";
 import { supabaseAdmin } from "../lib/supabase";
 import { sendEnquiryEmails } from "../lib/email";
 import { requireAuth } from "../lib/auth";
+import { sanitize } from "../lib/sanitize";
 
 const router = Router();
 
@@ -91,12 +92,12 @@ router.post("/enquiries", async (req, res) => {
       .from("enquiries")
       .insert({
         location_id: locationId,
-        course_name: course_name.trim(),
-        name: name.trim(),
+        course_name: sanitize(course_name) ?? course_name.trim(),
+        name: sanitize(name) ?? name.trim(),
         email: email.trim().toLowerCase(),
-        phone: phone.trim(),
-        experience_level: experience_level?.trim() || null,
-        message: message?.trim() || null,
+        phone: sanitize(phone) ?? phone.trim(),
+        experience_level: sanitize(experience_level) || null,
+        message: sanitize(message) || null,
         status: "new",
       })
       .select()

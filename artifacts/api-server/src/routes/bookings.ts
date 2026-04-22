@@ -11,6 +11,7 @@ import {
 } from "../lib/email";
 import { requireAuth } from "../lib/auth";
 import { ukDateStr, ukDayOfWeek } from "../lib/tz";
+import { sanitize } from "../lib/sanitize";
 
 const router = Router();
 
@@ -333,9 +334,10 @@ router.post("/bookings", async (req, res) => {
   const b = req.body;
   const locationId = getLocationId(req) ?? b.locationId ?? null;
 
-  const name = (b.clientName ?? "").trim();
-  const email = (b.clientEmail ?? "").trim();
-  const phone = (b.clientPhone ?? "").trim();
+  const name = sanitize(b.clientName) ?? "";
+  const email = (b.clientEmail ?? "").trim().toLowerCase();
+  const phone = sanitize(b.clientPhone) ?? "";
+  const notes = sanitize(b.notes) ?? "";
   const { date, time, treatment } = b;
 
   if (!name || name.length < 2) return res.status(400).json({ error: "Please enter your name." });
@@ -383,12 +385,12 @@ router.post("/bookings", async (req, res) => {
 
     const clientId = await findOrCreateClient({
       locationId: locationId ?? "",
-      name: b.clientName,
-      email: b.clientEmail ?? "",
-      phone: b.clientPhone ?? "",
+      name,
+      email,
+      phone,
       source: b.source ?? "Website",
       dob: b.clientDOB ?? "",
-      notes: isConsultation ? (b.clientNotes ?? "") : "",
+      notes: isConsultation ? (sanitize(b.clientNotes) ?? "") : "",
       // no updateStats — payment not yet confirmed at this point
     }).catch(() => null);
 
@@ -413,9 +415,9 @@ router.post("/bookings", async (req, res) => {
       location_id: locationId,
       treatment_id: treatInfo.id,
       treatment_name: b.treatment ?? treatInfo.name ?? "",
-      client_name: b.clientName,
-      client_email: b.clientEmail ?? "",
-      client_phone: b.clientPhone ?? "",
+      client_name: name,
+      client_email: email,
+      client_phone: phone,
       booking_date: date,
       time_slot: time ?? "",
       status: (b.status ?? "pending").toLowerCase().replace("awaiting_payment", "pending"),
@@ -423,7 +425,7 @@ router.post("/bookings", async (req, res) => {
       total_amount: price,
       deposit_paid: depositPaid,
       stripe_payment_intent_id: b.stripePaymentId ?? null,
-      notes: b.notes ?? "",
+      notes,
       client_id: clientId ?? null,
       created_at: b.createdAt ? new Date(Number(b.createdAt)).toISOString() : new Date().toISOString(),
       reminder_sent: false,
