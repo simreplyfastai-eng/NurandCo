@@ -1,0 +1,132 @@
+ROOT CAUSE FOUND — fix this immediately.
+
+After login the JWT token is NOT being stored 
+in localStorage. This causes every single 
+authenticated API call to fail with 
+"Unauthorised" — availability save, clients, 
+schedule, everything.
+
+CONFIRMED:
+  After login: localStorage.getItem('portal_token') 
+  returns null
+  localStorage.getItem('portal_location_id') 
+  returns null
+  
+  This means either:
+  a) The login response doesn't include a token
+  b) The token IS received but stored under a 
+     different key
+  c) The token is stored then immediately cleared
+
+STEP 1 — Find the login submit handler.
+Add console.log at every step:
+
+  async function submitLogin(email, password) {
+    console.log('1. Login attempt', email);
+    
+    const res = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({email, password})
+    });
+    
+    console.log('2. Login response status', res.status);
+    
+    const data = await res.json();
+    console.log('3. Login response data', data);
+    
+    if (!res.ok) {
+      showError('Incorrect email or password');
+      return;
+    }
+    
+    // token might be data.token or data.jwt or 
+    // data.access_token — check what it actually is
+    const token = data.token || data.jwt || 
+                  data.access_token || data.sessionToken;
+    
+    console.log('4. Token extracted', !!token);
+    
+    if (!token) {
+      console.error('No token in response!', data);
+      showError('Login failed — no token received');
+      return;
+    }
+    
+    localStorage.setItem('portal_token', token);
+    console.log('5. Token stored', 
+      localStorage.getItem('portal_token')?.substring(0,20));
+    
+    window._loginDone = true;
+    showLocationSelector();
+  }
+
+STEP 2 — When location is selected, store it:
+
+  function selectLocation(id, name, slug) {
+    localStorage.setItem('portal_location_id', id);
+    localStorage.setItem('portal_location_name', name);
+    localStorage.setItem('portal_location_slug', slug);
+    window._SESSION_LOC_ID = id;
+    window._SESSION_LOC_NAME = name;
+    window._SESSION_LOC_SLUG = slug;
+    console.log('Location stored', id, name);
+    showPortal();
+  }
+
+STEP 3 — Every authenticated API call must 
+send the token:
+
+  async function authFetch(url, options = {}) {
+    const token = localStorage.getItem('portal_token');
+    const locId = localStorage.getItem('portal_location_id');
+    
+    return fetch(url, {
+      ...options,
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + token,
+        'X-Location-Id': locId,
+        ...(options.headers || {})
+      }
+    });
+  }
+
+Make sure ALL portal API calls use authFetch 
+not plain fetch — check availability settings 
+save, clients, bookings, schedule.
+
+STEP 4 — Fix clearSession to ONLY run on 
+explicit sign out:
+
+  function clearSession() {
+    localStorage.removeItem('portal_token');
+    localStorage.removeItem('portal_location_id');
+    localStorage.removeItem('portal_location_name');
+    localStorage.removeItem('portal_location_slug');
+    window._loginDone = false;
+    window._SESSION_LOC_ID = null;
+  }
+
+This function must ONLY be called when the 
+SIGN OUT button is clicked — nowhere else.
+
+STEP 5 — Update Replit Secrets:
+  ADMIN_EMAIL = starr@starr.com
+  ADMIN_PASSWORD = Starr12!
+
+VERIFY:
+  Login with starr@starr.com / Starr12!
+  Open browser console
+  Should see logs 1-5 with token stored ✓
+  
+  Select Hornchurch
+  Check: localStorage.getItem('portal_token') 
+  → returns a JWT string ✓
+  
+  Go to Availability tab
+  Change Tuesday close to 21:00
+  Click SAVE CHANGES
+  → Success toast (not "Unauthorised") ✓
+  
+  Refresh page → Tuesday still shows 21:00 ✓
