@@ -6,14 +6,39 @@ import { supabaseAdmin } from "../lib/supabase";
 const router = Router();
 const SESSION_HOURS = 8;
 
+// portal_kv.location_id is NOT NULL + has a FK to locations.
+// We store global (cross-location) settings under the first location in the DB,
+// using a prefixed key "__global__<key>" to avoid clashing with per-location settings.
+
+let _cachedGlobalLocId: string | null | undefined = undefined;
+
+async function getGlobalLocationId(): Promise<string | null> {
+  if (_cachedGlobalLocId !== undefined) return _cachedGlobalLocId;
+  try {
+    const { data } = await supabaseAdmin
+      .from("locations")
+      .select("id")
+      .order("name")
+      .limit(1)
+      .maybeSingle();
+    _cachedGlobalLocId = data?.id ? String(data.id) : null;
+  } catch {
+    _cachedGlobalLocId = null;
+  }
+  return _cachedGlobalLocId;
+}
+
 /** Read a global (location-agnostic) portal_kv entry */
 async function getGlobalKv(key: string): Promise<unknown> {
   try {
+    const locId = await getGlobalLocationId();
+    if (!locId) return null;
+
     const { data } = await supabaseAdmin
       .from("portal_kv")
       .select("value")
-      .is("location_id", null)
-      .eq("key", key)
+      .eq("location_id", locId)
+      .eq("key", `__global__${key}`)
       .maybeSingle();
     return data?.value ?? null;
   } catch {
@@ -23,21 +48,40 @@ async function getGlobalKv(key: string): Promise<unknown> {
 
 /** Write a global (location-agnostic) portal_kv entry */
 async function setGlobalKv(key: string, value: unknown): Promise<void> {
-  const { data: existing } = await supabaseAdmin
+  const locId = await getGlobalLocationId();
+  if (!locId) throw new Error("No locations found — cannot store global setting");
+
+  const prefixedKey = `__global__${key}`;
+
+  const { data: existing, error: selectErr } = await supabaseAdmin
     .from("portal_kv")
     .select("id")
-    .is("location_id", null)
-    .eq("key", key)
+    .eq("location_id", locId)
+    .eq("key", prefixedKey)
     .maybeSingle();
+
+  if (selectErr) {
+    console.error(`setGlobalKv select error [${key}]:`, selectErr);
+    throw selectErr;
+  }
+
   if (existing?.id) {
-    await supabaseAdmin
+    const { error } = await supabaseAdmin
       .from("portal_kv")
-      .update({ value, updated_at: new Date().toISOString() })
+      .update({ value })
       .eq("id", String(existing.id));
+    if (error) {
+      console.error(`setGlobalKv update error [${key}]:`, error);
+      throw error;
+    }
   } else {
-    await supabaseAdmin
+    const { error } = await supabaseAdmin
       .from("portal_kv")
-      .insert({ location_id: null, key, value, updated_at: new Date().toISOString() });
+      .insert({ location_id: locId, key: prefixedKey, value });
+    if (error) {
+      console.error(`setGlobalKv insert error [${key}]:`, error);
+      throw error;
+    }
   }
 }
 
