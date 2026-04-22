@@ -1,0 +1,51 @@
+Yes, do the full pass on all 24. Apply the same patterns you outlined. Extra instructions:
+
+1. USE EXISTING HELPERS FIRST
+Before writing anything new, search portal.html for:
+- showToast( definitions or usages — if it already exists, use it for validation/success/error alerts
+- Any existing inline-confirm pattern beyond the deleteClient one you just wrote
+Only build new helpers if nothing exists. Report back what you found.
+
+2. DESTRUCTIVE CONFIRMS (13 items, not 12 — you missed one)
+Lines 3001, 3472, 4171, 4198, 4916, 4944, 4972, 5005, 5073, 5171, 5474, 5585, PLUS line 3860's pattern reused.
+Apply the exact same two-button inline confirm + 5s auto-revert + data-timer pattern as deleteClient. Each call site gets its own unique container ID.
+
+3. VALIDATION + SUCCESS + ERROR ALERTS (9 items)
+Lines 3555, 3616, 3629, 4070, 4140, 4187, 5188, 5190, 5199.
+Use showToast() if it exists. Types:
+- Red/error toast for validation failures and errors (3555, 3616, 3629, 4070, 4140, 4187, 5190)
+- Green/success toast for success alerts (5188, 5199)
+Duration: 4 seconds, dismissable.
+
+4. SHARE LINK PROMPT (line 3507)
+Replace window.prompt() with navigator.clipboard.writeText(url) + success toast "Link copied!". Fall back to a readonly text input + select if clipboard API fails (rare, but covers older browser-in-iframe edge cases).
+
+5. "TYPE CONFIRM" PROMPTS (lines 5195, 5203 — DANGEROUS ACTIONS)
+These protect "Clear all bookings" and "Reset portal data". They MUST preserve the friction — don't replace with a single-click confirm. Replace with:
+- Inline area that appears below the button
+- Text input with placeholder "Type CONFIRM to proceed"  
+- A "Proceed" button that's disabled until the input value === "CONFIRM" (case-sensitive, exact match)
+- A "Cancel" button
+- 10-second auto-revert
+- Make the styling clearly dangerous (red border, warning icon if easy)
+
+6. CRITICAL: DO NOT BREAK ANY UNDERLYING LOGIC
+For every replacement, the resulting Yes/Confirm path must call the EXACT SAME downstream code (API calls, refresh triggers, state updates) as the original. Only the UX layer changes.
+
+7. CANCEL BOOKING (line 3472) SPECIAL CASE
+This confirm mentioned an email notice ("the customer will be notified" or similar). Preserve that messaging in the inline confirm UI so Eva still knows an email will be sent.
+
+8. REPORT FORMAT
+After applying, give me a concise summary, one line per item:
+  Line X → [pattern used] → [container/helper name]
+Not full diffs. 25 lines total (incl. deleteClient already done).
+
+9. TEST IN HEAD
+Before you finish, mentally walk through each replacement to confirm:
+- First click shows inline UI
+- Confirm click triggers the same action as old confirm()
+- Cancel click safely reverts with no side effects
+- Auto-revert clears properly
+- Multiple instances on the same page don't conflict (e.g. two treatments deleted in sequence)
+
+Apply now.

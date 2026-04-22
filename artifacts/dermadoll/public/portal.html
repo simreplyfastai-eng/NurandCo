@@ -1423,9 +1423,9 @@ select.form-input{background:var(--color-card)}
           <div class="settings-body">
             <p style="font-size:12px;color:var(--color-muted-fg);margin:0 0 12px">These actions cannot be undone. You will be asked to confirm before anything is deleted.</p>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
-              <button class="danger-btn" onclick="clearSampleData()">Remove Test Data</button>
-              <button class="danger-btn" onclick="clearBookings()">Clear All Bookings</button>
-              <button class="danger-btn" onclick="resetPortal()">Reset Portal Data</button>
+              <button class="danger-btn" onclick="clearSampleData(this)">Remove Test Data</button>
+              <button class="danger-btn" onclick="clearBookings(this)">Clear All Bookings</button>
+              <button class="danger-btn" onclick="resetPortal(this)">Reset Portal Data</button>
             </div>
           </div>
         </div>
@@ -2702,7 +2702,7 @@ function openBookingDetailPanel(bookingId){
     ${b.status!=='Cancelled'&&b.status!=='cancelled'?`
     <div style="display:flex;gap:8px;margin-top:16px;padding-top:16px;border-top:1px solid var(--color-border-subtle)">
       <button class="btn-outline" onclick="openRescheduleModal('${b.id}')" style="flex:1;text-align:center">Reschedule</button>
-      <button class="btn-danger" onclick="cancelBookingById('${b.id}')" style="flex:1;text-align:center">Cancel Booking</button>
+      <button class="btn-danger" onclick="cancelBookingById(this,'${b.id}')" style="flex:1;text-align:center">Cancel Booking</button>
     </div>`:''}
   `;
 }
@@ -2955,7 +2955,7 @@ function renderBlockedSlots(){
     const dayLabel=s.all_days?'Every Day':(BS_DAY_NAMES[s.day_of_week]||'?');
     const start=(s.start_time||'').substring(0,5);
     const end=(s.end_time||'').substring(0,5);
-    return `<span class="bs-tag"><span>${dayLabel} · ${start} — ${end}</span><button class="bs-tag-del" onclick="deleteBlockedSlot('${s.id}')" title="Remove this slot">×</button></span>`;
+    return `<span class="bs-tag"><span>${dayLabel} · ${start} — ${end}</span><button class="bs-tag-del" onclick="deleteBlockedSlot(this,'${s.id}')" title="Remove this slot">×</button></span>`;
   }).join('');
 }
 
@@ -2997,18 +2997,19 @@ function _showBsError(msg){
   errEl.style.display='block';
 }
 
-async function deleteBlockedSlot(id){
-  if(!confirm('Remove this blocked slot?'))return;
-  try{
-    const res=await fetch('/api/admin/blocked-slots/'+id,{method:'DELETE',headers:authHdr()});
-    if(!res.ok)throw new Error('HTTP '+res.status);
-    _blockedSlots=_blockedSlots.filter(s=>s.id!==id);
-    renderBlockedSlots();
-    showToast('\u2713 Slot removed');
-  }catch(e){
-    showToast('Failed to remove slot');
-    console.error('deleteBlockedSlot',e);
-  }
+async function deleteBlockedSlot(btn,id){
+  inlineConfirm(btn,'Remove this blocked slot?',async()=>{
+    try{
+      const res=await fetch('/api/admin/blocked-slots/'+id,{method:'DELETE',headers:authHdr()});
+      if(!res.ok)throw new Error('HTTP '+res.status);
+      _blockedSlots=_blockedSlots.filter(s=>s.id!==id);
+      renderBlockedSlots();
+      showToast('\u2713 Slot removed');
+    }catch(e){
+      showToast('Failed to remove slot');
+      console.error('deleteBlockedSlot',e);
+    }
+  });
 }
 
 // ─── Deposit Settings ───────────────────────────────────────────────────────
@@ -3463,22 +3464,39 @@ function closeDotMenus(){if(_openDotMenu){_openDotMenu.style.display='none';_ope
 document.addEventListener('click',()=>closeDotMenus());
 
 // ── Cancel booking (works from anywhere) ─────────────────────────────────────
-async function cancelBookingById(bookingId){
+async function cancelBookingById(btn,bookingId){
+  // Support legacy calls from dot menus where only one arg is passed
+  if(typeof btn==='string'){bookingId=btn;btn=null;}
   let bk=getBookings().find(b=>b.id===bookingId);
   if(!bk){
     try{const r=await fetch(`/api/bookings/${bookingId}`,{headers:authHdr()});if(r.ok)bk=await r.json();}catch(e){}
   }
   const label=bk?`${bk.clientName||'this client'}'s ${bk.treatment||'booking'} on ${formatDate(bk.date)}`:'this booking';
-  if(!confirm(`Cancel ${label}?\n\nAn email will be sent to the client notifying them of the cancellation.`))return;
-  try{
-    await BookingAPI.update(bookingId,{status:'Cancelled'});
-    const all=getBookings();
-    const idx=all.findIndex(b=>b.id===bookingId);
-    if(idx>-1){all[idx].status='Cancelled';saveBookings(all);}
-    updateSidebarBadges();renderDashboard();buildCalendar();renderBookings();
-    showToast('Booking cancelled and client notified ✓');
-  }catch(e){
-    showToast('Cancel failed — please try again');
+  const doCancel=async()=>{
+    try{
+      await BookingAPI.update(bookingId,{status:'Cancelled'});
+      const all=getBookings();
+      const idx=all.findIndex(b=>b.id===bookingId);
+      if(idx>-1){all[idx].status='Cancelled';saveBookings(all);}
+      updateSidebarBadges();renderDashboard();buildCalendar();renderBookings();
+      showToast('Booking cancelled and client notified ✓');
+    }catch(e){
+      showToast('Cancel failed — please try again');
+    }
+  };
+  if(btn&&btn.isConnected){
+    inlineConfirm(btn,`Cancel ${label}? An email will be sent to the client.`,doCancel);
+  }else{
+    // Dot menu / no persistent button — show floating confirm bar
+    const bar=document.createElement('div');
+    bar.style.cssText='position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:9999;background:#fff;border:1px solid #c62828;border-radius:8px;padding:12px 16px;box-shadow:0 4px 16px rgba(0,0,0,.18);display:flex;gap:10px;align-items:center;max-width:90vw;font-family:var(--font-sans)';
+    bar.innerHTML=`<span style="font-size:13px;font-weight:600;color:#c62828;flex:1;min-width:160px">Cancel ${label.replace(/</g,'&lt;')}? An email will be sent to the client.</span><button style="background:#c62828;color:#fff;border:none;border-radius:var(--radius);padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-sans)">Yes, cancel</button><button style="background:#fff;color:#5C1A1A;border:1px solid #E8E8E8;border-radius:var(--radius);padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-sans)">Keep</button>`;
+    const[yBtn,nBtn]=bar.querySelectorAll('button');
+    const close=()=>{clearTimeout(t);bar.remove();};
+    const t=setTimeout(close,8000);
+    yBtn.onclick=()=>{close();doCancel();};
+    nBtn.onclick=close;
+    document.body.appendChild(bar);
   }
 }
 
@@ -3504,7 +3522,12 @@ function copyFormsLink(bookingId){
     if(fb) fb.textContent='✓ Link copied to clipboard';
     showToast('Forms link copied ✓');
   }).catch(()=>{
-    prompt('Copy this link:',url);
+    const ta=document.createElement('textarea');
+    ta.value=url;ta.readOnly=true;
+    ta.style.cssText='position:fixed;top:20px;left:50%;transform:translateX(-50%);width:420px;max-width:90vw;padding:8px;font-size:13px;z-index:9999;border:1px solid #C9A96E;border-radius:4px;outline:none';
+    document.body.appendChild(ta);ta.select();
+    setTimeout(()=>ta.remove(),8000);
+    showToast('Could not auto-copy — select the link above');
   });
 }
 
@@ -3552,7 +3575,7 @@ async function confirmReschedule(){
   if(!_reschBookingId)return;
   const newDate=document.getElementById('rs-date').value;
   const newTime=document.getElementById('rs-time').value;
-  if(!newDate||!newTime){alert('Please select both a date and a time.');return;}
+  if(!newDate||!newTime){showToast('Please select both a date and a time.');return;}
   const btn=document.querySelector('#rs-box .rs-actions button:last-child');
   if(btn){btn.textContent='Saving…';btn.disabled=true;}
   try{
@@ -3613,7 +3636,7 @@ async function saveBooking(){
   const deposit=Number(document.getElementById('bm-deposit').value)||Math.round(price*0.5);
   const status=document.getElementById('bm-status').value;
   const notes=document.getElementById('bm-notes').value;
-  if(!clientName||!treatment||!date){alert('Please fill in client, treatment and date');return}
+  if(!clientName||!treatment||!date){showToast('Please fill in client, treatment and date');return}
 
   const sel=document.getElementById('bm-treatment');
   const opt=sel.options[sel.selectedIndex];
@@ -3626,7 +3649,7 @@ async function saveBooking(){
       b.treatment===treatment&&b.date===date&&b.time===time
     );
     if(existing){
-      alert('A booking for this client at this time already exists.');
+      showToast('A booking for this client at this time already exists.');
       return;
     }
   }
@@ -4012,7 +4035,7 @@ function renderTreatments(filter){
         <span class="cat-name">${cat.label}</span>
         <span class="cat-count">${rows.length}</span>
         <button class="cat-add-btn" onclick="event.stopPropagation();openAddTreat('${cat.key}','${cat.label}')">+ Add</button>
-        ${!cat.builtIn?`<button class="cat-delete-btn" onclick="event.stopPropagation();deleteCat('${cat.key}')" title="Delete category">🗑</button>`:''}
+        ${!cat.builtIn?`<button class="cat-delete-btn" onclick="event.stopPropagation();deleteCat(this,'${cat.key}')" title="Delete category">🗑</button>`:''}
       </div>
       <div class="cat-accordion-body">
         ${rows.length?`<table class="treats-table">
@@ -4038,7 +4061,7 @@ function renderTreatments(filter){
               <td class="treat-rev-cell col-rev">${gbp(rev)}</td>
               <td style="text-align:center;display:flex;gap:2px;justify-content:center">
                 <button class="edit-btn" onclick="openEditTreat('${safeId}','${isCustom}')" title="Edit">✏</button>
-                ${isCustom?`<button class="del-treat-btn" onclick="deleteCustomTreat('${t.id}')" title="Remove">✕</button>`:''}
+                ${isCustom?`<button class="del-treat-btn" onclick="deleteCustomTreat(this,'${t.id}')" title="Remove">✕</button>`:''}
               </td>
             </tr>`;
           }).join('')}</tbody>
@@ -4084,7 +4107,7 @@ async function saveNewTreatment(){
   const price=Number(document.getElementById('atm-price').value)||0;
   const dur=Number(document.getElementById('atm-dur').value)||30;
   const cat=document.getElementById('atm-cat').value;
-  if(!name){alert('Please enter a treatment name');return}
+  if(!name){showToast('Please enter a treatment name');return}
 
   // If Supabase treats are active, persist to API
   const sbTreats=JSON.parse(localStorage.getItem('fbn_supabase_treats')||'[]');
@@ -4154,7 +4177,7 @@ async function saveEditTreatment(){
   const newName=document.getElementById('etm-name').value.trim();
   const newPrice=Number(document.getElementById('etm-price').value)||0;
   const newDur=Number(document.getElementById('etm-dur').value)||30;
-  if(!newName){alert('Name cannot be empty');return}
+  if(!newName){showToast('Name cannot be empty');return}
 
   if(treatType==='supabase'){
     // PUT to API
@@ -4184,12 +4207,13 @@ async function saveEditTreatment(){
 }
 
 // ── Delete custom treatment ──
-function deleteCustomTreat(id){
-  if(!confirm('Remove this treatment?'))return;
-  const treats=getCustomTreatments().filter(x=>x.id!==id);
-  saveCustomTreatments(treats);
-  renderTreatments();
-  buildTreatmentSelect();
+function deleteCustomTreat(btn,id){
+  inlineConfirm(btn,'Remove this treatment?',()=>{
+    const treats=getCustomTreatments().filter(x=>x.id!==id);
+    saveCustomTreatments(treats);
+    renderTreatments();
+    buildTreatmentSelect();
+  });
 }
 
 // ── Add Category ──
@@ -4201,7 +4225,7 @@ function openAddCat(){
 function closeAddCatModal(){document.getElementById('add-cat-modal').classList.remove('open')}
 function saveNewCategory(){
   const label=document.getElementById('acm-name').value.trim();
-  if(!label){alert('Please enter a category name');return}
+  if(!label){showToast('Please enter a category name');return}
   const key='cat-'+label.toLowerCase().replace(/\s+/g,'-')+'-'+Date.now();
   const cats=getCustomCats();
   cats.push({key,label});
@@ -4211,13 +4235,14 @@ function saveNewCategory(){
 }
 
 // ── Delete custom category ──
-function deleteCat(key){
-  if(!confirm('Delete this category and all its custom treatments?'))return;
-  const cats=getCustomCats().filter(c=>c.key!==key);
-  saveCustomCats(cats);
-  const treats=getCustomTreatments().filter(t=>t.cat!==key);
-  saveCustomTreatments(treats);
-  renderTreatments();
+function deleteCat(btn,key){
+  inlineConfirm(btn,'Delete category + all its treatments?',()=>{
+    const cats=getCustomCats().filter(c=>c.key!==key);
+    saveCustomCats(cats);
+    const treats=getCustomTreatments().filter(t=>t.cat!==key);
+    saveCustomTreatments(treats);
+    renderTreatments();
+  });
 }
 
 // Legacy alias kept for any old references
@@ -4611,7 +4636,7 @@ function renderMedia(){
       +'<span class="mc-url-pill">'+shortUrl+'</span>'
       +'<div style="display:flex;gap:8px;margin-top:6px;align-items:center">'
       +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-hero-vid-file\').click()">Replace</button>'
-      +'<button class="mc-btn-ghost" onclick="clearHeroVideo()" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">Remove</button>'
+      +'<button class="mc-btn-ghost" onclick="clearHeroVideo(this)" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">Remove</button>'
       +'</div>'
       +'<input type="file" id="mc-hero-vid-file" accept="video/mp4,video/*" style="display:none" onchange="handleMcHeroVideoUpload(this)"/>';
   }else{
@@ -4635,7 +4660,7 @@ function renderMedia(){
       +'</div>'
       +'<div style="display:flex;gap:8px;align-items:center">'
       +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-hero-img-file\').click()">Replace</button>'
-      +'<button class="mc-btn-ghost" onclick="clearHeroImage()" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">Remove</button>'
+      +'<button class="mc-btn-ghost" onclick="clearHeroImage(this)" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">Remove</button>'
       +'</div>'
       +'<input type="file" id="mc-hero-img-file" accept="image/*" style="display:none" onchange="handleMcHeroImageUpload(this)"/>';
   }else{
@@ -4679,7 +4704,7 @@ function renderMedia(){
       +'<div style="font-family:var(--font-sans);font-size:12px;color:#555;margin-bottom:10px">Your photo is live on the website.</div>'
       +'<div style="display:flex;gap:8px;align-items:center">'
       +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-about-img-file\').click()">Replace</button>'
-      +'<button class="mc-btn-ghost" onclick="clearAboutImage()" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">Remove</button>'
+      +'<button class="mc-btn-ghost" onclick="clearAboutImage(this)" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">Remove</button>'
       +'</div>'
       +'</div>'
       +'<input type="file" id="mc-about-img-file" accept="image/*" style="display:none" onchange="handleMcAboutImageUpload(this)"/>'
@@ -4782,7 +4807,7 @@ function renderMedia(){
     const src=cloudSrc(url)||url;
     return'<div style="position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:#E8E2D9">'
       +'<img src="'+src+'" alt="Gallery '+i+'" style="width:100%;height:100%;object-fit:cover;display:block"/>'
-      +'<button onclick="deleteGalleryImage('+i+')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:20px;height:20px;font-size:11px;color:#fff;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center" title="Remove">&times;</button>'
+      +'<button onclick="deleteGalleryImage(this,'+i+')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:20px;height:20px;font-size:11px;color:#fff;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center" title="Remove">&times;</button>'
       +'</div>';
   }).join('');
 
@@ -4806,7 +4831,7 @@ function renderMedia(){
     return'<div style="position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:#1E1E1E">'
       +'<video src="'+src+'" muted preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block"></video>'
       +'<div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.55);border-radius:3px;padding:1px 5px;font-family:var(--font-sans);font-size:8px;color:#fff">Video '+(i+1)+'</div>'
-      +'<button onclick="deleteResultsVideo('+i+')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:20px;height:20px;font-size:11px;color:#fff;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center" title="Remove">&times;</button>'
+      +'<button onclick="deleteResultsVideo(this,'+i+')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:20px;height:20px;font-size:11px;color:#fff;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center" title="Remove">&times;</button>'
       +'</div>';
   }).join('');
 
@@ -4929,10 +4954,11 @@ async function setHeroVideo(){
   renderMedia();
 }
 
-async function clearHeroVideo(){
-  if(!confirm('Remove the hero video?'))return;
-  await saveMediaField('heroVideo',null);
-  renderMedia();
+async function clearHeroVideo(btn){
+  inlineConfirm(btn,'Remove the hero video?',async()=>{
+    await saveMediaField('heroVideo',null);
+    renderMedia();
+  });
 }
 
 async function handleMcHeroVideoUpload(input){
@@ -4957,10 +4983,11 @@ async function setHeroImage(){
   renderMedia();
 }
 
-async function clearHeroImage(){
-  if(!confirm('Remove the hero image?'))return;
-  await saveMediaField('heroImage',null);
-  renderMedia();
+async function clearHeroImage(btn){
+  inlineConfirm(btn,'Remove the hero image?',async()=>{
+    await saveMediaField('heroImage',null);
+    renderMedia();
+  });
 }
 
 async function handleMcHeroImageUpload(input){
@@ -4985,10 +5012,11 @@ async function setAboutImage(){
   renderMedia();
 }
 
-async function clearAboutImage(){
-  if(!confirm('Remove the practitioner photo?'))return;
-  await saveMediaField('aboutImage',null);
-  renderMedia();
+async function clearAboutImage(btn){
+  inlineConfirm(btn,'Remove the practitioner photo?',async()=>{
+    await saveMediaField('aboutImage',null);
+    renderMedia();
+  });
 }
 
 async function handleMcAboutImageUpload(input){
@@ -5018,13 +5046,14 @@ async function addGalleryImage(){
   renderMedia();
 }
 
-async function deleteGalleryImage(index){
-  if(!confirm('Remove this image?'))return;
-  const d=getMediaData();
-  if(!Array.isArray(d.galleryImages))return;
-  d.galleryImages.splice(index,1);
-  await saveMediaField('galleryImages',d.galleryImages);
-  renderMedia();
+async function deleteGalleryImage(btn,index){
+  inlineConfirm(btn,'Remove this image?',async()=>{
+    const d=getMediaData();
+    if(!Array.isArray(d.galleryImages))return;
+    d.galleryImages.splice(index,1);
+    await saveMediaField('galleryImages',d.galleryImages);
+    renderMedia();
+  });
 }
 
 async function handleGalleryUpload(input){
@@ -5086,13 +5115,14 @@ async function addResultsVideo(){
   renderMedia();
 }
 
-async function deleteResultsVideo(index){
-  if(!confirm('Remove this video?'))return;
-  const d=getMediaData();
-  if(!Array.isArray(d.resultsVideos))return;
-  d.resultsVideos.splice(index,1);
-  await saveMediaField('resultsVideos',d.resultsVideos);
-  renderMedia();
+async function deleteResultsVideo(btn,index){
+  inlineConfirm(btn,'Remove this video?',async()=>{
+    const d=getMediaData();
+    if(!Array.isArray(d.resultsVideos))return;
+    d.resultsVideos.splice(index,1);
+    await saveMediaField('resultsVideos',d.resultsVideos);
+    renderMedia();
+  });
 }
 
 // ═══════════════════════════════════════════════════
@@ -5183,47 +5213,45 @@ async function changePassword(){
   }catch(e){showErr('pw-err-current','Network error — please try again');}
 }
 
-async function clearSampleData(){
+async function clearSampleData(btn){
   const SAMPLE_NAMES=['Ellisha W.','Donna S.','Sophie M.','Chloe R.','Amara J.','Priya K.','Zara T.'];
-  if(!confirm('This will permanently delete the sample clients and their bookings from the database. Your real data, treatments and settings will not be affected.\n\nContinue?'))return;
-  try{
-    const [bRes,cRes]=await Promise.all([
-      fetch('/api/bookings/sample',{method:'DELETE'}),
-      fetch('/api/clients/sample',{method:'DELETE'})
-    ]);
-    const bData=await bRes.json();
-    const cData=await cRes.json();
-    // Remove from local cache
-    const bookings=getBookings().filter(b=>!SAMPLE_NAMES.includes(b.clientName));
-    saveBookings(bookings);
-    const clients=getClients().filter(c=>!SAMPLE_NAMES.includes(c.name));
-    saveClients(clients);
-    localStorage.removeItem('fbn_initialized');
-    CloudStore.set('fbn_initialized',null);
-    renderDashboard();updateSidebarBadges();
-    if(document.getElementById('page-clients').classList.contains('active'))renderClients();
-    alert(`Done! Removed ${bData.deleted||0} sample bookings and ${cData.deleted||0} sample clients.`);
-  }catch(e){
-    alert('Error removing sample data — please try again.');
-  }
+  inlineConfirm(btn,'Delete all sample data? Your real data is unaffected.',async()=>{
+    try{
+      const [bRes,cRes]=await Promise.all([
+        fetch('/api/bookings/sample',{method:'DELETE'}),
+        fetch('/api/clients/sample',{method:'DELETE'})
+      ]);
+      const bData=await bRes.json();
+      const cData=await cRes.json();
+      const bookings=getBookings().filter(b=>!SAMPLE_NAMES.includes(b.clientName));
+      saveBookings(bookings);
+      const clients=getClients().filter(c=>!SAMPLE_NAMES.includes(c.name));
+      saveClients(clients);
+      localStorage.removeItem('fbn_initialized');
+      CloudStore.set('fbn_initialized',null);
+      renderDashboard();updateSidebarBadges();
+      if(document.getElementById('page-clients').classList.contains('active'))renderClients();
+      showToast(`Removed ${bData.deleted||0} sample bookings and ${cData.deleted||0} sample clients ✓`);
+    }catch(e){
+      showToast('Error removing sample data — please try again.');
+    }
+  });
 }
 
-async function clearBookings(){
-  const conf=prompt('Type CONFIRM to clear all bookings:');
-  if(conf==='CONFIRM'){
+async function clearBookings(btn){
+  inlineTypeConfirm(btn,async()=>{
     await BookingAPI.clearAll();
     renderDashboard();updateSidebarBadges();
-    alert('All bookings cleared.');
-  }
+    showToast('All bookings cleared ✓');
+  });
 }
-async function resetPortal(){
-  const conf=prompt('Type CONFIRM to reset all portal data:');
-  if(conf==='CONFIRM'){
+async function resetPortal(btn){
+  inlineTypeConfirm(btn,async()=>{
     await BookingAPI.clearAll();
     await ClientAPI.clearAll();
     ['fbn_bookings','fbn_clients','fbn_settings','fbn_treatment_overrides','fbn_video_labels'].forEach(k=>localStorage.removeItem(k));
     location.reload();
-  }
+  });
 }
 
 // ═══════════════════════════════════════════════════
@@ -5248,6 +5276,31 @@ function exportData(){
 // ═══════════════════════════════════════════════════
 // TOAST NOTIFICATIONS
 // ═══════════════════════════════════════════════════
+function inlineConfirm(btn,message,onConfirm,timeout=5000){
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;max-width:100%;';
+  wrap.innerHTML=`<span style="flex:1;min-width:80px;font-size:12px;font-weight:600;color:#c62828;font-family:var(--font-sans)">${message}</span><button style="background:#c62828;color:#fff;border:none;border-radius:var(--radius);padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-sans)">Yes</button><button style="background:#fff;color:#5C1A1A;border:1px solid #E8E8E8;border-radius:var(--radius);padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-sans)">Cancel</button>`;
+  const[yesBtn,noBtn]=wrap.querySelectorAll('button');
+  const revert=()=>{clearTimeout(timer);if(wrap.parentNode)wrap.replaceWith(btn);};
+  const timer=setTimeout(revert,timeout);
+  yesBtn.onclick=()=>{revert();onConfirm();};
+  noBtn.onclick=revert;
+  btn.replaceWith(wrap);
+}
+function inlineTypeConfirm(btn,onConfirm,timeout=10000){
+  const wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;flex-direction:column;gap:8px;padding:12px;background:#fff5f5;border:1px solid #c62828;border-radius:var(--radius);';
+  wrap.innerHTML=`<div style="font-size:12px;color:#c62828;font-weight:600;font-family:var(--font-sans)">⚠️ This action cannot be undone.</div><input placeholder="Type CONFIRM to proceed" style="padding:8px 10px;border:1px solid #c62828;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;outline:none;width:100%;box-sizing:border-box"/><div style="display:flex;gap:8px"><button disabled style="flex:1;background:#c62828;color:#fff;border:none;border-radius:var(--radius);padding:8px 14px;font-size:12px;font-weight:700;cursor:not-allowed;opacity:0.5;font-family:var(--font-sans)">Proceed</button><button style="background:#fff;color:#5C1A1A;border:1px solid #E8E8E8;border-radius:var(--radius);padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-sans)">Cancel</button></div>`;
+  const[proceedBtn,cancelBtn]=wrap.querySelectorAll('button');
+  const input=wrap.querySelector('input');
+  const revert=()=>{clearTimeout(timer);if(wrap.parentNode)wrap.replaceWith(btn);};
+  const timer=setTimeout(revert,timeout);
+  input.oninput=()=>{const ok=input.value==='CONFIRM';proceedBtn.disabled=!ok;proceedBtn.style.opacity=ok?'1':'0.5';proceedBtn.style.cursor=ok?'pointer':'not-allowed';};
+  proceedBtn.onclick=()=>{if(input.value==='CONFIRM'){revert();onConfirm();}};
+  cancelBtn.onclick=revert;
+  btn.replaceWith(wrap);
+  setTimeout(()=>input.focus(),50);
+}
 function showToast(msg,duration=3500){
   const c=document.getElementById('toast-container');
   const t=document.createElement('div');
@@ -5462,7 +5515,7 @@ function enqOpenMenu(event,id){
     <button onclick="enqSetStatus('${id}','enrolled');enqCloseMenu()">Mark as Enrolled</button>
     <button onclick="enqSetStatus('${id}','closed');enqCloseMenu()">Mark as Closed</button>
     <button onclick="enqSetStatus('${id}','new');enqCloseMenu()">Mark as New</button>
-    <button class="danger" onclick="deleteEnquiry('${id}');enqCloseMenu()">Delete</button>`;
+    <button class="danger" onclick="deleteEnquiry(this,'${id}')">Delete</button>`;
   btn.parentElement.style.position='relative';
   btn.parentElement.appendChild(menu);
   _enqOpenMenuId=id;
@@ -5487,14 +5540,15 @@ async function saveEnquiryNotes(id){
   }catch(e){showToast('Failed to save notes');}
 }
 
-async function deleteEnquiry(id){
-  if(!confirm('Delete this enquiry?'))return;
-  try{
-    const h=authHdr();
-    await fetch(`/api/enquiries/${id}`,{method:'DELETE',headers:h});
-    showToast('Enquiry deleted');
-    await renderEnquiries();
-  }catch(e){showToast('Failed to delete enquiry');}
+async function deleteEnquiry(btn,id){
+  inlineConfirm(btn,'Delete this enquiry?',async()=>{
+    try{
+      const h=authHdr();
+      await fetch(`/api/enquiries/${id}`,{method:'DELETE',headers:h});
+      showToast('Enquiry deleted');
+      await renderEnquiries();
+    }catch(e){showToast('Failed to delete enquiry');}
+  });
 }
 
 async function updateEnquiryBadge(){
@@ -5580,7 +5634,7 @@ async function loadGoogleCalendarStatus(){
       const connDate=d.connected_at?`<p style="font-size:11px;color:var(--color-muted-fg);margin:6px 0 0">Connected ${new Date(d.connected_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</p>`:'';
       el.innerHTML=`<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
         <span style="font-size:13px;color:#2e7d32;font-weight:500">✅ Google Calendar connected</span>
-        <button class="btn-outline" style="font-size:11px;padding:5px 12px;color:#c62828;border-color:#c62828" onclick="disconnectGoogleCalendar()">Disconnect</button>
+        <button class="btn-outline" style="font-size:11px;padding:5px 12px;color:#c62828;border-color:#c62828" onclick="disconnectGoogleCalendar(this)">Disconnect</button>
       </div>${connDate}`;
     }else{
       el.innerHTML=`<button class="btn-gold" onclick="connectGoogleCalendar()">Connect Google Calendar</button>`;
@@ -5596,20 +5650,21 @@ function connectGoogleCalendar(){
   window.location.href=`/api/google/auth?location_id=${encodeURIComponent(locId)}`;
 }
 
-async function disconnectGoogleCalendar(){
+async function disconnectGoogleCalendar(btn){
   const locId=getSessionLocId();
   if(!locId){showToast('No location selected');return;}
-  if(!confirm('Disconnect Google Calendar for this location?'))return;
-  try{
-    const r=await fetch('/api/google/disconnect',{
-      method:'POST',
-      headers:{...authHdr(),'Content-Type':'application/json'},
-      body:JSON.stringify({location_id:locId}),
-    });
-    const d=await r.json();
-    if(d.success){showToast('Google Calendar disconnected');loadGoogleCalendarStatus();}
-    else showToast('Disconnect failed');
-  }catch(e){showToast('Disconnect failed');}
+  inlineConfirm(btn,'Disconnect Google Calendar for this location?',async()=>{
+    try{
+      const r=await fetch('/api/google/disconnect',{
+        method:'POST',
+        headers:{...authHdr(),'Content-Type':'application/json'},
+        body:JSON.stringify({location_id:locId}),
+      });
+      const d=await r.json();
+      if(d.success){showToast('Google Calendar disconnected');loadGoogleCalendarStatus();}
+      else showToast('Disconnect failed');
+    }catch(e){showToast('Disconnect failed');}
+  });
 }
 
 async function loadLaunchChecklist(){
