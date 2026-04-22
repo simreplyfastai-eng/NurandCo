@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const RESEND_KEY = process.env.RESEND_API_KEY ?? "";
-const FROM = "StarrBeauty <info@starrbeautyy.co.uk>";
+const FROM = "StarrBeauty <hello@starrbeautyy.co.uk>";
 const SITE_URL = (process.env.PUBLIC_URL ?? "").replace(/\/$/, "");
 
 let _resend: Resend | null = null;
