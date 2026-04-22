@@ -91,8 +91,8 @@ router.post("/clients", async (req, res) => {
     if (!locationId) return res.status(400).json({ error: "locationId required" });
     const payload: Record<string, unknown> = {
       name: c.name,
-      email: email || null,
-      phone: phone || null,
+      email: email || "",
+      phone: phone || "",
       notes: c.notes ?? "",
       created_at: now,
       location_id: locationId,
