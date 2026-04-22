@@ -2292,8 +2292,12 @@ function renderDashboard(){
   if(gdEl)gdEl.textContent=dateStr;
   if(glEl){const ln=getSessionLocName();glEl.textContent=ln?ln:'';}
   // ────────────────────────────────────────────────
-  const thisMonth=bookings.filter(b=>{const d=new Date(b.date);return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear()});
-  const lastMonth=bookings.filter(b=>{const d=new Date(b.date);const lm=new Date(now.getFullYear(),now.getMonth()-1);return d.getMonth()===lm.getMonth()&&d.getFullYear()===lm.getFullYear()});
+  // Safe month prefix comparison — avoids UTC-midnight timezone shifts from new Date(string)
+  const thisMonthPfx=String(now.getFullYear())+'-'+String(now.getMonth()+1).padStart(2,'0');
+  const lmDate=new Date(now.getFullYear(),now.getMonth()-1);
+  const lastMonthPfx=String(lmDate.getFullYear())+'-'+String(lmDate.getMonth()+1).padStart(2,'0');
+  const thisMonth=bookings.filter(b=>(b.date||'').slice(0,7)===thisMonthPfx);
+  const lastMonth=bookings.filter(b=>(b.date||'').slice(0,7)===lastMonthPfx);
 
   const rev=thisMonth.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+Number(b.deposit||b.price),0);
   const revLast=lastMonth.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+Number(b.deposit||b.price),0);
@@ -2304,7 +2308,7 @@ function renderDashboard(){
 
   const clients=getClients();
   const activeClients=[...new Set(thisMonth.map(b=>b.clientName))].length;
-  const newClients=clients.filter(c=>c.joinDate&&new Date(c.joinDate).getMonth()===now.getMonth()).length;
+  const newClients=clients.filter(c=>c.joinDate&&(c.joinDate||'').slice(0,7)===thisMonthPfx).length;
 
   const avgSpend=appts?Math.round(rev/appts):0;
   const avgLast=lastMonth.length?Math.round(revLast/lastMonth.length):0;
@@ -2437,7 +2441,7 @@ function bkTabExpired(b){
 function renderBookings(){
   // Only show bookings whose slot + 2 hrs hasn't passed yet
   const active=getBookings().filter(b=>!bkTabExpired(b));
-  const all=active.sort((a,b)=>new Date(b.date)-new Date(a.date)||b.createdAt-a.createdAt);
+  const all=active.sort((a,b)=>(b.date||'').localeCompare(a.date||'')||b.createdAt-a.createdAt);
   const list=bookingsFilter==='all'?all:all.filter(b=>b.status===bookingsFilter);
   const body=document.getElementById('bk-all-body');
   const empty=document.getElementById('bk-all-empty');
@@ -3654,7 +3658,7 @@ function renderClients(filter){
       const cBookings=getBookings().filter(b=>(c.id&&b.clientId?b.clientId===c.id:b.clientName.trim().toLowerCase()===c.name.trim().toLowerCase())&&b.status!=='Cancelled');
       visitCount=cBookings.length;
       spend=cBookings.reduce((s,b)=>s+Number(b.price),0);
-      const lastB=[...cBookings].sort((a,b)=>new Date(b.date)-new Date(a.date))[0];
+      const lastB=[...cBookings].sort((a,b)=>(b.date||'').localeCompare(a.date||''))[0];
       lastDate=lastB?lastB.date:null;
       active=visitCount>0;
     }
@@ -3697,7 +3701,7 @@ function openClientPanel(id){
     const clients=getClients();
     c=clients.find(x=>x.id===id);
     if(!c)return;
-    bookings=getBookings().filter(b=>c.id&&b.clientId?b.clientId===c.id:b.clientName.trim().toLowerCase()===c.name.trim().toLowerCase()).sort((a,b)=>new Date(b.date)-new Date(a.date));
+    bookings=getBookings().filter(b=>c.id&&b.clientId?b.clientId===c.id:b.clientName.trim().toLowerCase()===c.name.trim().toLowerCase()).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
     spend=bookings.filter(b=>b.status!=='Cancelled').reduce((s,b)=>s+Number(b.price),0);
   }
   const initials=c.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
@@ -4243,7 +4247,7 @@ function buildTxnCards(bookings){
   if(!bookings.length)return`<tr><td colspan="5" style="text-align:center;padding:40px 0"><div style="font-family:var(--font-serif);font-size:18px;font-style:italic;color:#111;margin-bottom:6px">No transactions yet</div><div style="font-family:var(--font-sans);font-size:12px;color:var(--color-muted-fg)">Bookings will appear here automatically</div></td></tr>`;
   const months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   function shortDate(d){const p=d?d.split('-'):[];return p.length===3?`${parseInt(p[2])} ${months[parseInt(p[1])-1]||''}`:d;}
-  return bookings.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(b=>{
+  return bookings.sort((a,b)=>(b.date||'').localeCompare(a.date||'')).map(b=>{
     const total=Number(b.price||0);
     const isCancelled=b.status==='Cancelled';
     const isComplete=b.balancePaid||b.status==='Complete';
@@ -4330,8 +4334,8 @@ async function renderFinance(){
     console.error('renderFinance API error', err);
     // Fallback to local data
     const allMonthBookings=getBookings().filter(b=>{
-      const d=new Date(b.date);
-      return d.getFullYear()===y&&d.getMonth()+1===m&&b.status!=='Cancelled';
+      const pfx=String(y)+'-'+String(m).padStart(2,'0');
+      return (b.date||'').slice(0,7)===pfx&&b.status!=='Cancelled';
     });
     const totalRev=allMonthBookings.reduce((s,b)=>s+Number(b.price),0);
     const deposits=allMonthBookings.reduce((s,b)=>s+Number(b.deposit||0),0);

@@ -1,0 +1,110 @@
+Let me verify today’s date and check what the calendar is actually showing:​​​​​​​​​​​​​​​​
+
+Today is Wednesday 22nd April 2026 — confirmed. The calendar is showing April 22 as Sunday which means it’s offset by 4 days. Classic UTC vs local timezone bug. Here’s the prompt:
+
+BUG FIX — Calendar days of week are wrong.
+
+April 22 2026 is a WEDNESDAY but the 
+calendar is showing it as Sunday.
+The days are shifted/misaligned.
+
+This is a UTC timezone bug.
+Read the calendar component and booking 
+date picker code fully before fixing.
+
+ROOT CAUSE:
+JavaScript's new Date() uses local timezone
+but getDay() may be returning UTC day instead
+of local day, or the calendar is building 
+its grid using UTC dates which shifts 
+everything when the timezone offset 
+causes the date to roll back a day.
+
+Example of the bug:
+  new Date('2026-04-22').getDay() 
+  → returns 0 (Sunday) in UTC
+  
+  But April 22 2026 is actually 
+  day 3 (Wednesday) in local time
+
+THE FIX:
+
+Find every place a Date object is created 
+from a date string in the calendar/booking 
+components. There will be code like:
+
+  new Date('2026-04-22')
+  new Date(dateString)
+  new Date(year, month, day)
+
+WRONG (causes UTC offset bug):
+  const date = new Date('2026-04-22')
+  const dayOfWeek = date.getDay() // returns 0 = Sunday ✗
+
+CORRECT — always use local date:
+  const [year, month, day] = '2026-04-22'
+    .split('-').map(Number)
+  const date = new Date(year, month - 1, day)
+  const dayOfWeek = date.getDay() // returns 3 = Wednesday ✓
+
+OR use UTC consistently throughout:
+  const date = new Date('2026-04-22T12:00:00')
+  const dayOfWeek = date.getDay() // midday UTC avoids rollback ✓
+
+APPLY THIS FIX EVERYWHERE:
+
+1. The booking calendar date picker —
+   where days of week headers are rendered
+   (MON TUE WED THU FRI SAT SUN)
+   
+2. The first day of month calculation —
+   where the calendar works out which 
+   column to start the 1st of the month on
+
+3. The availability slots API call —
+   GET /api/availability/slots uses 
+   date.getUTCDay() to get day of week
+   This must match what the calendar shows
+   Keep using getUTCDay() here if the 
+   date string is always YYYY-MM-DD
+
+4. The admin portal schedule calendar —
+   same fix needed there too
+
+5. The blocked dates display — 
+   any blocked date must show on the 
+   correct day column
+
+THE CONSISTENT RULE:
+Pick ONE approach and use it everywhere:
+
+OPTION A (recommended) — Local date:
+  Always create dates as:
+  new Date(year, month-1, day)
+  Never new Date('YYYY-MM-DD') 
+  Use date.getDay() for day of week
+
+OPTION B — UTC midday trick:
+  new Date('YYYY-MM-DDT12:00:00')
+  Use date.getDay() for day of week
+  The T12:00:00 prevents UTC rollback
+
+Whichever option you choose — apply it 
+consistently to EVERY date created in 
+the calendar, booking picker, schedule 
+tab and availability system.
+
+VERIFY AFTER FIX:
+  Open /book → pick a treatment → 
+  calendar opens for April 2026
+  April 1 = Wednesday ✓ (correct)
+  April 22 = Wednesday ✓ (correct)
+  April 30 = Thursday ✓ (correct)
+  Days of week align correctly ✓
+  
+  Open admin portal → Schedule tab
+  April 22 shows in Wednesday column ✓
+  All dates in correct day columns ✓
+  
+  Booking dot on April 22 in 
+  Wednesday column ✓
