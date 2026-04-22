@@ -1,13 +1,9 @@
 import { Router, Request, Response } from 'express';
-import { createClient } from '@supabase/supabase-js';
+import { supabaseAdmin as supabase } from '../lib/supabase';
 import { getOAuthClient } from '../googleCalendar';
 import { requireAuth } from '../lib/auth';
 
 const router = Router();
-const supabase = createClient(
-  process.env.SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
 
 const SCOPES = [
   'https://www.googleapis.com/auth/calendar',

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { supabaseAdmin } from "../lib/supabase";
+import { createCalendarEvent } from '../googleCalendar';
 import { findOrCreateClient } from "./clients";
 import {
   sendCancellationEmail,
@@ -439,6 +440,26 @@ router.post("/bookings", async (req, res) => {
 
     if (upsertErr) throw upsertErr;
     const booking = supabaseRowToBooking(upserted as Record<string, unknown>);
+
+    try {
+      const googleEventId = await createCalendarEvent(booking.locationId ?? locationId, {
+        date: booking.date,
+        time: booking.time,
+        treatment_name: booking.treatment,
+        customer_name: booking.clientName as string,
+        customer_phone: booking.clientPhone as string,
+        customer_email: booking.clientEmail as string,
+        notes: booking.notes,
+      });
+      if (googleEventId) {
+        await supabaseAdmin
+          .from('bookings')
+          .update({ google_event_id: googleEventId })
+          .eq('id', booking.id);
+      }
+    } catch (err) {
+      console.error('Google Calendar sync failed (non-fatal):', err);
+    }
 
     const whatsapp = await getWhatsApp(locationId);
     const locationInfo = locationId ? await getLocationInfo(locationId) : null;
