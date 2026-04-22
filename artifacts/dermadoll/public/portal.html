@@ -15,8 +15,10 @@
 .flatpickr-months{background:#5C1A1A;padding:4px 0}
 .flatpickr-month,.flatpickr-current-month,.flatpickr-year{color:#FAF7F4;fill:#FAF7F4}
 .flatpickr-current-month{font-family:var(--font-serif);font-style:italic;font-size:15px;padding:5px 0}
-.flatpickr-current-month input.cur-year,.numInputWrapper input{color:#FAF7F4!important;font-family:var(--font-sans)}
-.numInputWrapper span.arrowUp,.numInputWrapper span.arrowDown{border-bottom-color:#FAF7F4;border-top-color:#FAF7F4;opacity:.6}
+.flatpickr-current-month input.cur-year,.numInputWrapper input{color:#FAF7F4!important;font-family:var(--font-sans);border:none!important;outline:none!important;box-shadow:none!important;text-decoration:none!important;background:transparent!important;border-bottom:none!important}
+.numInputWrapper{position:relative;overflow:visible}
+.numInputWrapper:hover{background:transparent!important}
+.numInputWrapper span.arrowUp,.numInputWrapper span.arrowDown{border-bottom-color:#FAF7F4;border-top-color:#FAF7F4;opacity:.7}
 .flatpickr-prev-month,.flatpickr-next-month{color:#FAF7F4!important;fill:#FAF7F4!important;padding:8px 12px;border-radius:0}
 .flatpickr-prev-month:hover svg,.flatpickr-next-month:hover svg{fill:#C9A96E!important}
 .flatpickr-weekdays{background:rgba(92,26,26,.06);padding:4px 0}
