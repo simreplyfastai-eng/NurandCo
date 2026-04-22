@@ -289,11 +289,11 @@ router.post("/stripe/webhook", async (req, res) => {
           const paymentLocationId = (updated.location_id as string | null) ?? (locationId || null);
           supabaseAdmin.from("payments").insert({
             booking_id: bookingId,
-            client_id: supabaseClientId ?? String(updated.client_id ?? ""),
+            client_email: clientEmail ?? String(updated.client_email ?? ""),
             amount: depositFromStripe,
-            payment_type: "deposit",
-            stripe_payment_id: paymentIntentId,
-            status: "succeeded",
+            type: "deposit",
+            stripe_payment_intent_id: paymentIntentId,
+            stripe_charge_id: null,
             location_id: paymentLocationId,
           }).then(() => {}).catch((e: unknown) => console.error("payments insert", e));
 
@@ -388,6 +388,17 @@ router.post("/stripe/webhook", async (req, res) => {
           reminder_sent: false,
           notes: slotFree ? "" : "⚠️ Slot conflict — review required",
         }, { onConflict: "id" });
+
+        // Fallback payments record
+        supabaseAdmin.from("payments").insert({
+          booking_id: id,
+          client_email: clientEmail ?? "",
+          amount: depositFromStripe,
+          type: "deposit",
+          stripe_payment_intent_id: paymentIntentId,
+          stripe_charge_id: null,
+          location_id: locationId,
+        }).then(() => {}).catch((e: unknown) => console.error("fallback payments insert", e));
 
         if (adminEmail) {
           sendAdminNotificationEmail({
