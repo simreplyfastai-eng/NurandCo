@@ -706,6 +706,8 @@ select.form-input{background:var(--color-card)}
   .fin-table thead th:nth-child(4){width:20%}
   .fin-table thead th:nth-child(5){width:10%}
   .fin-pill{font-size:9px;padding:2px 6px}
+  /* ── Enquiries table: hide secondary columns on mobile ── */
+  .enq-col-phone,.enq-col-email{display:none}
   /* ── Mobile accessibility ── */
   input,select,textarea{font-size:16px!important}
   .login-input{font-size:16px!important}
@@ -1194,18 +1196,27 @@ select.form-input{background:var(--color-card)}
     <!-- ── ENQUIRIES ── -->
     <div id="page-enquiries" class="page">
       <div class="topbar"><span class="topbar-title serif">Training Enquiries</span></div>
-      <div style="padding:20px 24px;box-sizing:border-box;overflow-x:auto">
+      <div style="padding:20px 24px;box-sizing:border-box">
         <div class="card" style="padding:0;overflow:hidden">
-          <table id="enq-table" style="width:100%;border-collapse:collapse;min-width:640px">
+          <table id="enq-table" style="width:100%;border-collapse:collapse;table-layout:fixed">
+            <colgroup>
+              <col style="width:14%">
+              <col style="width:22%">
+              <col style="width:22%">
+              <col class="enq-col-phone" style="width:16%">
+              <col class="enq-col-email" style="width:18%">
+              <col style="width:14%">
+              <col style="width:48px">
+            </colgroup>
             <thead>
               <tr style="background:var(--color-muted)">
                 <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Date</th>
                 <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Name</th>
                 <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Course</th>
-                <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Phone</th>
-                <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Email</th>
+                <th class="enq-col-phone" style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Phone</th>
+                <th class="enq-col-email" style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Email</th>
                 <th style="text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Status</th>
-                <th style="width:48px;border-bottom:1px solid var(--color-border)"></th>
+                <th style="border-bottom:1px solid var(--color-border)"></th>
               </tr>
             </thead>
             <tbody id="enq-body"></tbody>
@@ -5206,8 +5217,8 @@ async function renderEnquiries(){
           <div style="font-weight:500;font-family:var(--font-sans)">${e.name}</div>
         </td>
         <td><span class="enq-course-badge">${e.courseName||'—'}</span></td>
-        <td><a href="tel:${e.phone}" onclick="event.stopPropagation()" style="color:var(--color-foreground);text-decoration:none">${e.phone||'—'}</a></td>
-        <td><a href="mailto:${e.email}" onclick="event.stopPropagation()" style="color:var(--color-gold,#C9A96E);text-decoration:none">${e.email}</a></td>
+        <td class="enq-col-phone"><a href="tel:${e.phone}" onclick="event.stopPropagation()" style="color:var(--color-foreground);text-decoration:none">${e.phone||'—'}</a></td>
+        <td class="enq-col-email"><a href="mailto:${e.email}" onclick="event.stopPropagation()" style="color:var(--color-gold,#C9A96E);text-decoration:none">${e.email}</a></td>
         <td>${enqStatusPill(e.status)}</td>
         <td style="position:relative" onclick="event.stopPropagation()">
           <button class="enq-action-btn" onclick="enqOpenMenu(event,'${e.id}')">···</button>
