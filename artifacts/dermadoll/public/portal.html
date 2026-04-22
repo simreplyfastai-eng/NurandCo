@@ -1874,7 +1874,10 @@ const BookingAPI = {
         headers: {...authHdr(), 'Content-Type':'application/json'},
         body: JSON.stringify(changes)
       });
-      if (!r.ok) throw new Error('API error');
+      if (!r.ok) {
+        const body = await r.json().catch(()=>({}));
+        throw new Error(body.error || `Server error ${r.status}`);
+      }
       const updated = await r.json();
       const all = getBookings();
       const i = all.findIndex(b => b.id === id);
@@ -1882,11 +1885,9 @@ const BookingAPI = {
       saveBookings(all);
       return updated;
     } catch(e) {
-      console.warn('BookingAPI.update failed', e);
-      const all = getBookings();
-      const i = all.findIndex(b => b.id === id);
-      if (i > -1) { all[i] = {...all[i], ...changes}; saveBookings(all); }
-      return changes;
+      console.error('BookingAPI.update failed:', e?.message, e);
+      showToast('Failed to update booking: '+(e?.message||'unknown error'), 'error');
+      throw e;
     }
   },
 
@@ -3671,19 +3672,23 @@ async function saveBooking(){
     status,notes,clientDOB,clientNotes,createdAt:Date.now(),source:'Portal',paymentMethod:'Stripe'
   };
 
-  if(editingBookingId){
-    await BookingAPI.update(editingBookingId, booking);
-  } else {
-    await BookingAPI.create(booking);
-    // Client upsert now happens server-side in POST /api/bookings
-    // But also update local cache
-    const clients=getClients();
-    const existing=clients.find(c=>c.name.toLowerCase()===clientName.toLowerCase());
-    if(!existing){
-      await ClientAPI.upsert({id:uid(),name:clientName,email:clientEmail,phone:clientPhone,joinDate:date,notes:'',source:'Portal'});
-    } else if(clientEmail&&!existing.email||clientPhone&&!existing.phone){
-      await ClientAPI.update(existing.id,{email:clientEmail||existing.email,phone:clientPhone||existing.phone});
+  try {
+    if(editingBookingId){
+      await BookingAPI.update(editingBookingId, booking);
+    } else {
+      await BookingAPI.create(booking);
+      // Also update local client cache
+      const clients=getClients();
+      const existing=clients.find(c=>c.name.toLowerCase()===clientName.toLowerCase());
+      if(!existing){
+        await ClientAPI.upsert({id:uid(),name:clientName,email:clientEmail,phone:clientPhone,joinDate:date,notes:'',source:'Portal'}).catch(()=>{});
+      } else if(clientEmail&&!existing.email||clientPhone&&!existing.phone){
+        await ClientAPI.update(existing.id,{email:clientEmail||existing.email,phone:clientPhone||existing.phone}).catch(()=>{});
+      }
     }
+  } catch(e) {
+    // Toast already shown by BookingAPI.create / BookingAPI.update — keep modal open
+    return;
   }
   closeBookingModal();
   updateSidebarBadges();
