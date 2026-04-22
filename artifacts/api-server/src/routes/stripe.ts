@@ -83,18 +83,18 @@ async function getLocationInfo(locationId: string): Promise<{ name: string; addr
 async function getTreatmentInfo(
   name: string,
   locationId: string,
-): Promise<{ id: string | null; durationMinutes: number; price: number }> {
-  if (!name || !locationId) return { id: null, durationMinutes: 30, price: 0 };
+): Promise<{ id: string | null; durationMinutes: number; price: number; depositAmount: number }> {
+  if (!name || !locationId) return { id: null, durationMinutes: 30, price: 0, depositAmount: 0 };
   try {
     const { data } = await supabaseAdmin
       .from("treatments")
-      .select("id, duration_minutes, price")
+      .select("id, duration_minutes, price, deposit_amount")
       .eq("location_id", locationId)
       .eq("name", name)
       .single();
-    if (data) return { id: data.id, durationMinutes: Number(data.duration_minutes ?? 30), price: Number(data.price ?? 0) };
+    if (data) return { id: data.id, durationMinutes: Number(data.duration_minutes ?? 30), price: Number(data.price ?? 0), depositAmount: Number(data.deposit_amount ?? 0) };
   } catch { /* fall through */ }
-  return { id: null, durationMinutes: 30, price: 0 };
+  return { id: null, durationMinutes: 30, price: 0, depositAmount: 0 };
 }
 
 // ── helpers ─────────────────────────────────────────────────────────────────
