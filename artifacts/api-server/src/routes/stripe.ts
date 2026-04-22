@@ -181,10 +181,12 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
 
   let treatmentPrice = 0;
   let durationMinutes = 30;
+  let dbDepositAmount = 0;
   if (locationId) {
     const info = await getTreatmentInfo(treatment, locationId);
     treatmentPrice = info.price;
     durationMinutes = info.durationMinutes;
+    dbDepositAmount = info.depositAmount;
   }
 
   if (!treatmentPrice && treatment !== "In-Person Consultation" && treatment !== "Virtual Consultation") {
@@ -193,8 +195,10 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
 
   const depSettings = locationId
     ? await getDepositSettings(locationId)
-    : { depositInjectables: 0.10, depositOther: 0.10 };
-  const depositAmountPence = Math.round(getDepositAmount(treatment, depSettings) * 100);
+    : { depositInjectables: 20, depositOther: 10 };
+  const depositAmountPence = dbDepositAmount > 0
+    ? Math.round(dbDepositAmount * 100)
+    : Math.round(getDepositAmount(treatment, depSettings) * 100);
 
   try {
     const paymentIntent = await stripe.paymentIntents.create({
