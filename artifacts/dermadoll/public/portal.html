@@ -3139,6 +3139,8 @@ function pad(n){return n<10?'0'+n:n}
 async function populateBmTimeSlots(dateVal, keepTime){
   const sel=document.getElementById('bm-time');
   if(!dateVal){sel.innerHTML='<option value="">— select date first —</option>';return;}
+  // Normalise keepTime to HH:MM (strip seconds if present)
+  const kt=keepTime?(keepTime+'').slice(0,5):null;
   try{
     const r=await fetch(`/api/availability/slots?location=${encodeURIComponent(locId)}&date=${dateVal}`,{headers:authHdr()});
     const data=await r.json();
@@ -3147,14 +3149,20 @@ async function populateBmTimeSlots(dateVal, keepTime){
       sel.innerHTML='<option value="">Clinic closed this day</option>';
       return;
     }
-    sel.innerHTML=slots.map(s=>`<option value="${s.time}"${!s.available?' style="color:#aaa"':''}>${s.time}${s.available?'':' (taken)'}</option>`).join('');
-    if(keepTime&&[...sel.options].some(o=>o.value===keepTime))sel.value=keepTime;
-    else sel.value=slots[0].time;
+    // If existing booking time isn't in the slot list, add it so the select never shows blank
+    const slotTimes=slots.map(s=>s.time);
+    if(kt&&!slotTimes.includes(kt)){
+      slots.unshift({time:kt,available:false});
+    }
+    sel.innerHTML=slots.map(s=>`<option value="${s.time}"${!s.available?' style="color:#aaa"':''}>${s.time}${s.available?'':' (booked)'}</option>`).join('');
+    sel.value=kt&&[...sel.options].some(o=>o.value===kt)?kt:slots[0].time;
   }catch(e){
-    // Fallback: static 2-hour slots 09:00–19:00
-    const fb=['09:00','11:00','13:00','15:00','17:00','19:00'];
+    // Fallback: static 1-hour slots 09:00–19:00
+    const fb=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00'];
+    // Ensure existing time is in fallback list
+    if(kt&&!fb.includes(kt))fb.unshift(kt);
     sel.innerHTML=fb.map(t=>`<option value="${t}">${t}</option>`).join('');
-    if(keepTime)sel.value=keepTime;
+    if(kt)sel.value=kt;
   }
 }
 
@@ -3210,7 +3218,7 @@ async function openBookingModal(prefill){
     document.getElementById('bm-phone').value=booking.clientPhone||'';
     if(_fpBmDate)_fpBmDate.setDate(booking.date||'',false);
     else document.getElementById('bm-date').value=booking.date||'';
-    populateBmTimeSlots(booking.date||'', booking.time||'');
+    populateBmTimeSlots(booking.date||'', (booking.time||'').slice(0,5));
     document.getElementById('bm-notes').value=booking.notes||'';
     document.getElementById('bm-price').value=booking.price||'';
     document.getElementById('bm-deposit').value=booking.deposit||'';
