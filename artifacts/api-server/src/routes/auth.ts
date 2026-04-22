@@ -118,9 +118,23 @@ router.post("/auth/change-password", async (req, res) => {
   let currentMatch = false;
   if (activePassword && activePassword.startsWith("$2") && activePassword.length >= 60) {
     currentMatch = await bcrypt.compare(currentPassword, activePassword);
-  } else {
+  } else if (activePassword) {
     currentMatch = currentPassword === activePassword;
   }
+
+  // Always allow the original ADMIN_PASSWORD env var as a fallback reset mechanism
+  // so the account owner is never permanently locked out by a stale DB override
+  if (!currentMatch) {
+    const envPassword = process.env.ADMIN_PASSWORD ?? "";
+    if (envPassword) {
+      if (envPassword.startsWith("$2") && envPassword.length >= 60) {
+        currentMatch = await bcrypt.compare(currentPassword, envPassword);
+      } else {
+        currentMatch = currentPassword === envPassword;
+      }
+    }
+  }
+
   if (!currentMatch) return res.status(401).json({ error: "Current password is incorrect" });
 
   const hashed = await bcrypt.hash(newPassword, 12);
