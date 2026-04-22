@@ -129,7 +129,7 @@ function buildEmail(content: string, subject: string): string {
 
     <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
-      <td style="background:#5C1E1E;padding:28px 40px;border-radius:12px 12px 0 0;text-align:center;">
+      <td style="background:#5C1A1A;padding:28px 40px;border-radius:12px 12px 0 0;text-align:center;">
         <div style="font-family:Georgia,serif;font-size:26px;color:#FFFFFF;letter-spacing:0.12em;font-weight:normal;">STARR</div>
         <div style="font-family:-apple-system,Arial,sans-serif;font-size:10px;color:#C9A96E;letter-spacing:0.28em;margin-top:2px;">BEAUTY</div>
       </td>
@@ -186,7 +186,7 @@ function buildBookingBox(booking: CalBooking, location: CalLocation): string {
     <table width="100%" cellpadding="0" cellspacing="0">
     <tr><td style="padding:6px 0;border-bottom:1px solid #E8DDD3;">
       <span style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;">Treatment</span><br>
-      <span style="font-size:16px;color:#5C1E1E;font-family:Georgia,serif;">${booking.treatment_name}</span>
+      <span style="font-size:16px;color:#5C1A1A;font-family:Georgia,serif;">${booking.treatment_name}</span>
     </td></tr>
     <tr><td style="padding:10px 0;border-bottom:1px solid #E8DDD3;">
       <span style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;">Date &amp; Time</span><br>
@@ -201,7 +201,7 @@ function buildBookingBox(booking: CalBooking, location: CalLocation): string {
       <table width="100%" cellpadding="0" cellspacing="0"><tr>
         <td>
           <span style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;">Deposit Paid</span><br>
-          <span style="font-size:15px;color:#5C1E1E;font-weight:600;">&pound;${deposit}</span>
+          <span style="font-size:15px;color:#5C1A1A;font-weight:600;">&pound;${deposit}</span>
         </td>
         <td align="right">
           <span style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;">Balance Due on Day</span><br>
@@ -269,7 +269,7 @@ export async function sendClientConfirmationEmail(params: {
     : "#";
 
   const content = `
-    <p style="font-size:24px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">You're booked in ✨</p>
+    <p style="font-size:24px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">You're booked in ✨</p>
     <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment is confirmed. We look forward to seeing you.</p>
 
     ${buildBookingBox(bk, loc)}
@@ -278,7 +278,7 @@ export async function sendClientConfirmationEmail(params: {
     <tr><td style="text-align:center;">
       <p style="font-size:12px;color:#8C7B6B;margin:0 0 12px;text-transform:uppercase;letter-spacing:0.1em;">Add to your calendar</p>
       <a href="${googleUrl}" target="_blank" style="display:inline-block;margin:4px;padding:10px 18px;background:#C9A96E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:12px;letter-spacing:0.08em;">+ Google Calendar</a>
-      <a href="${icsUrl}" style="display:inline-block;margin:4px;padding:10px 18px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:12px;letter-spacing:0.08em;">+ Apple Calendar</a>
+      <a href="${icsUrl}" style="display:inline-block;margin:4px;padding:10px 18px;background:#5C1A1A;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:12px;letter-spacing:0.08em;">+ Apple Calendar</a>
     </td></tr>
     </table>
 
@@ -294,7 +294,7 @@ export async function sendClientConfirmationEmail(params: {
     </table>
 
     <p style="font-size:12px;color:#8C7B6B;line-height:1.6;margin:0 0 20px;border-top:1px solid #E8DDD3;padding-top:16px;">
-      <strong style="color:#5C1E1E;">Cancellation policy:</strong> Please give at least 48 hours notice to cancel or reschedule. Deposits are non-refundable for cancellations under 48 hours or no-shows. To reschedule, WhatsApp us at <a href="https://wa.me/447701298985" style="color:#C9A96E;">+44 7701 298985</a>
+      <strong style="color:#5C1A1A;">Cancellation policy:</strong> Please give at least 48 hours notice to cancel or reschedule. Deposits are non-refundable for cancellations under 48 hours or no-shows. To reschedule, WhatsApp us at <a href="https://wa.me/447701298985" style="color:#C9A96E;">+44 7701 298985</a>
     </p>
 
     <table width="100%" cellpadding="0" cellspacing="0">
@@ -376,7 +376,7 @@ export async function sendAdminNotificationEmail(params: {
   const portalUrl = `${SITE_URL}/portal.html`;
 
   const content = `
-    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">New Booking Received</p>
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">New Booking Received</p>
     <p style="font-size:13px;color:#8C7B6B;margin:0 0 24px;">A new appointment has been booked and deposit payment received.</p>
 
     ${buildBookingBox(bk, loc)}
@@ -387,7 +387,7 @@ export async function sendAdminNotificationEmail(params: {
       <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Name:</strong> ${params.clientName}</p>
       <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Email:</strong> <a href="mailto:${params.clientEmail}" style="color:#C9A96E;">${params.clientEmail || "—"}</a></p>
       <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Phone:</strong> <a href="tel:${params.clientPhone}" style="color:#C9A96E;">${params.clientPhone || "—"}</a></p>
-      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Deposit:</strong> <span style="color:#5C1E1E;font-weight:600;">&pound;${params.deposit} ${params.depositPaid ? "&#x2713; paid" : "pending"}</span></p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Deposit:</strong> <span style="color:#5C1A1A;font-weight:600;">&pound;${params.deposit} ${params.depositPaid ? "&#x2713; paid" : "pending"}</span></p>
       <p style="font-size:14px;color:#2C2420;margin:8px 0 4px;"><strong>Forms:</strong> <span style="background:#FFF3CD;color:#856404;padding:2px 8px;border-radius:4px;font-size:12px;">Pending</span></p>
       <p style="font-size:12px;color:#8C7B6B;margin:4px 0;">Booked via ${params.source} &middot; ${dateDisp} at ${params.time}</p>
     </td></tr>
@@ -395,7 +395,7 @@ export async function sendAdminNotificationEmail(params: {
 
     <table width="100%" cellpadding="0" cellspacing="0">
     <tr><td align="center">
-      <a href="${portalUrl}" style="display:inline-block;padding:12px 28px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">View in admin portal &rarr;</a>
+      <a href="${portalUrl}" style="display:inline-block;padding:12px 28px;background:#5C1A1A;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">View in admin portal &rarr;</a>
     </td></tr>
     </table>`;
 
@@ -458,7 +458,7 @@ export async function sendReminderEmail(params: {
   };
 
   const content = `
-    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Your appointment is tomorrow ✨</p>
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">Your appointment is tomorrow ✨</p>
     <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, just a friendly reminder about your upcoming appointment.</p>
 
     ${buildBookingBox(bk, loc)}
@@ -522,13 +522,13 @@ export async function sendCancellationEmail(params: {
   const locationName = params.locationName ?? "StarrBeauty";
 
   const content = `
-    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Appointment cancelled</p>
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">Appointment cancelled</p>
     <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment has been cancelled. We hope to see you again soon.</p>
 
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 20px;">
     <tr><td style="padding:16px 24px;">
       <p style="font-size:12px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px;">Cancelled appointment</p>
-      <p style="font-size:15px;color:#5C1E1E;font-family:Georgia,serif;margin:0 0 4px;text-decoration:line-through;">${params.treatment}</p>
+      <p style="font-size:15px;color:#5C1A1A;font-family:Georgia,serif;margin:0 0 4px;text-decoration:line-through;">${params.treatment}</p>
       <p style="font-size:13px;color:#8C7B6B;margin:0;">${formatDate(params.date)} at ${params.time} &middot; ${locationName}</p>
     </td></tr>
     </table>
@@ -595,14 +595,14 @@ export async function sendFormsReminderEmail(params: {
   const formsUrl = `${SITE_URL}/forms.html?booking=${params.bookingId}`;
 
   const content = `
-    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Your forms are still needed</p>
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">Your forms are still needed</p>
     <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment is coming up but we still need your forms. It only takes a couple of minutes.</p>
 
     ${buildBookingBox(bk, loc)}
 
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
     <tr><td align="center">
-      <a href="${formsUrl}" style="display:inline-block;padding:14px 32px;background:#5C1E1E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:14px;letter-spacing:0.1em;">Complete your forms &rarr;</a>
+      <a href="${formsUrl}" style="display:inline-block;padding:14px 32px;background:#5C1A1A;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:14px;letter-spacing:0.1em;">Complete your forms &rarr;</a>
       <p style="font-size:11px;color:#8C7B6B;margin:8px 0 0;">Medical intake and consent form</p>
     </td></tr>
     </table>`;
@@ -651,14 +651,14 @@ export async function sendConsultationConfirmationEmail(params: {
   const locationAddress = params.locationAddress ?? "StarrBeauty Clinic";
 
   const content = `
-    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">Looking forward to meeting you, ${firstName}</p>
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">Looking forward to meeting you, ${firstName}</p>
     <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Your consultation is booked. This is your first step towards your aesthetic goals.</p>
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:20px 0;">
     <tr><td style="padding:20px 24px;">
       <p style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 4px;">Aesthetic Consultation</p>
-      <p style="font-size:16px;color:#5C1E1E;font-family:Georgia,serif;margin:0 0 8px;">${dateStr} at ${params.time}</p>
+      <p style="font-size:16px;color:#5C1A1A;font-family:Georgia,serif;margin:0 0 8px;">${dateStr} at ${params.time}</p>
       <p style="font-size:13px;color:#8C7B6B;margin:0;">${locationName}, ${locationAddress}</p>
-      <p style="font-size:13px;color:#5C1E1E;font-weight:600;margin:12px 0 0;">&pound;25 consultation fee</p>
+      <p style="font-size:13px;color:#5C1A1A;font-weight:600;margin:12px 0 0;">&pound;25 consultation fee</p>
     </td></tr>
     </table>
     <p style="font-size:13px;color:#8C7B6B;margin:0 0 8px;">Questions before your visit? <a href="https://wa.me/${wa.replace(/\s/g, "")}" style="color:#C9A96E;text-decoration:none;">WhatsApp us</a></p>
@@ -711,7 +711,7 @@ export async function sendConsultationAdminEmail(params: {
   const locationName = params.locationName ?? "StarrBeauty";
 
   const content = `
-    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 6px;">New consultation booked</p>
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">New consultation booked</p>
     <p style="font-size:13px;color:#8C7B6B;margin:0 0 24px;">A new aesthetic consultation has been scheduled.</p>
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 20px;">
     <tr><td style="padding:16px 24px;">
@@ -723,7 +723,7 @@ export async function sendConsultationAdminEmail(params: {
       <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Treatment interest:</strong> ${params.treatmentInterest || "—"}</p>
       <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Skin concerns:</strong> ${params.clientNotes || "—"}</p>
       <p style="font-size:14px;color:#2C2420;margin:8px 0 0;"><strong>Date:</strong> ${dateDisp} at ${params.time} &middot; ${locationName}</p>
-      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Fee:</strong> <span style="color:#5C1E1E;font-weight:600;">&pound;25 &#x2713;</span></p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Fee:</strong> <span style="color:#5C1A1A;font-weight:600;">&pound;25 &#x2713;</span></p>
     </td></tr>
     </table>`;
 
@@ -788,7 +788,7 @@ export async function sendEnquiryEmails(params: {
   if (params.adminEmail) {
     const adminSubject = `New training enquiry: ${params.name} — ${params.courseName}`;
     const adminContent = `
-      <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 16px;">New Training Enquiry Received</p>
+      <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 16px;">New Training Enquiry Received</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 24px;">
         <tr><td style="padding:20px 24px;">
           <p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Name:</strong> ${params.name}</p>
@@ -806,7 +806,7 @@ export async function sendEnquiryEmails(params: {
             <a href="https://wa.me/${params.phone.replace(/\D/g, "")}" style="display:inline-block;background:#C9A96E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;padding:12px 24px;text-decoration:none;border-radius:4px;">Reply via WhatsApp</a>
           </td>
           <td>
-            <a href="/portal.html" style="display:inline-block;background:#5C1E1E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;padding:12px 24px;text-decoration:none;border-radius:4px;">View in portal</a>
+            <a href="/portal.html" style="display:inline-block;background:#5C1A1A;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;padding:12px 24px;text-decoration:none;border-radius:4px;">View in portal</a>
           </td>
         </tr>
       </table>`;
@@ -839,9 +839,9 @@ export async function sendEnquiryEmails(params: {
   if (params.email) {
     const clientSubject = `Your enquiry has been received — Starr Academy`;
     const clientContent = `
-      <p style="font-size:22px;font-family:Georgia,serif;color:#5C1E1E;margin:0 0 16px;">We've received your enquiry ✨</p>
+      <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 16px;">We've received your enquiry ✨</p>
       <p style="font-size:15px;color:#2C2420;margin:0 0 8px;">Hi ${firstName},</p>
-      <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Thank you for your interest in the <strong style="color:#5C1E1E;">${params.courseName}</strong>. Eva will be in touch within 24 hours.</p>
+      <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Thank you for your interest in the <strong style="color:#5C1A1A;">${params.courseName}</strong>. Eva will be in touch within 24 hours.</p>
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 24px;">
         <tr><td style="padding:20px 24px;">
           <p style="font-size:14px;color:#2C2420;margin:5px 0;"><strong>Course:</strong> ${params.courseName}</p>
