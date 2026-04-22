@@ -6,7 +6,7 @@
 import { Router } from "express";
 import Stripe from "stripe";
 import { supabaseAdmin } from "../lib/supabase";
-import { sendAdminNotificationEmail } from "../lib/email";
+import { sendAdminNotificationEmail, sendWebhookAlertEmail } from "../lib/email";
 import { findOrCreateClient } from "./clients";
 import { getDepositAmount } from "../lib/treatments";
 import { ukDateStr } from "../lib/tz";
@@ -167,6 +167,17 @@ router.post("/stripe/create-payment-intent", async (req, res) => {
 
   if (!treatment) return res.status(400).json({ error: "treatment required" });
 
+  // BULLETPROOF 8 — fail fast before taking payment if essential booking fields are missing
+  if (!bookingDate?.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return res.status(400).json({ error: "Booking date is required — please go back and select a date." });
+  }
+  if (!bookingTime?.match(/^\d{2}:\d{2}$/)) {
+    return res.status(400).json({ error: "Booking time is required — please go back and select a time slot." });
+  }
+  if (!locationId) {
+    return res.status(400).json({ error: "Location is required." });
+  }
+
   let treatmentPrice = 0;
   let durationMinutes = 30;
   if (locationId) {
@@ -243,6 +254,21 @@ router.post("/stripe/webhook", async (req, res) => {
     const paymentIntentId = pi.id;
 
     try {
+      // BULLETPROOF 2 — Idempotency: check at the very top before doing any work.
+      // Stripe can fire the same webhook more than once. If we already created/confirmed
+      // a booking for this payment intent, return immediately.
+      const { data: alreadyConfirmed } = await supabaseAdmin
+        .from("bookings")
+        .select("id")
+        .eq("stripe_payment_intent_id", paymentIntentId)
+        .eq("deposit_paid", true)
+        .maybeSingle();
+
+      if (alreadyConfirmed) {
+        console.log(`Webhook idempotency: booking ${alreadyConfirmed.id} already confirmed for PI ${paymentIntentId} — skipping duplicate`);
+        return res.status(200).json({ received: true });
+      }
+
       const depositFromStripe = Math.round(pi.amount / 100);
       const whatsapp = await getWhatsApp(locationId || null);
       const locationInfo = locationId ? await getLocationInfo(locationId) : null;
@@ -424,10 +450,37 @@ router.post("/stripe/webhook", async (req, res) => {
         }
       }
     } catch (err) {
-      console.error("Stripe webhook booking upsert error", err);
+      // BULLETPROOF 4 — Log full context and alert admin by email
+      const errMsg = err instanceof Error ? err.message : String(err);
+      const errStack = err instanceof Error ? (err.stack ?? "") : "";
+      console.error("WEBHOOK FAILED", JSON.stringify({
+        paymentIntentId,
+        treatment, clientName, clientEmail,
+        bookingDate, bookingTime, bookingId, locationId,
+        error: errMsg,
+        stack: errStack.slice(0, 500),
+      }));
+
+      const adminEmail = process.env.ADMIN_EMAIL ?? "";
+      if (adminEmail) {
+        sendWebhookAlertEmail({
+          adminEmail,
+          paymentIntentId,
+          clientName: clientName ?? "",
+          clientEmail: clientEmail ?? "",
+          clientPhone: clientPhone ?? "",
+          treatment: treatment ?? "",
+          bookingDate: bookingDate ?? "",
+          bookingTime: bookingTime ?? "",
+          bookingId: bookingId ?? "",
+          locationId: locationId ?? "",
+          error: errMsg,
+        }).catch(() => {});
+      }
     }
   }
 
+  // Always return 200 so Stripe does not keep retrying
   return res.status(200).json({ received: true });
 });
 

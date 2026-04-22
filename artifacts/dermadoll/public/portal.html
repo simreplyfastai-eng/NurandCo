@@ -1390,6 +1390,22 @@ select.form-input{background:var(--color-card)}
           </div>
         </div>
 
+        <!-- ── System / Webhook Log ── -->
+        <div class="settings-section" id="system-log-section">
+          <div class="settings-section-header">System — Payment Events</div>
+          <div class="settings-body">
+            <p style="font-size:12px;color:var(--color-muted-fg);margin:0 0 12px;line-height:1.6">
+              Shows the last 20 successful payment events received from Stripe. Each row = one successful deposit. Use this to verify that webhooks are firing correctly.
+            </p>
+            <div style="display:flex;gap:8px;margin-bottom:12px">
+              <button class="btn-outline" style="font-size:11px;padding:5px 12px" onclick="loadWebhookEvents()">&#8635; Refresh</button>
+            </div>
+            <div id="webhook-events-table">
+              <p style="font-size:12px;color:var(--color-muted-fg)">Loading…</p>
+            </div>
+          </div>
+        </div>
+
         <!-- ── Danger Zone ── -->
         <div class="settings-section" style="border-color:#ffcdd2">
           <div class="settings-section-header" style="color:#c62828">Danger Zone</div>
@@ -2243,7 +2259,7 @@ function showPage(id,el,fromKpi){
   if(id==='finance')renderFinance();
   if(id==='enquiries')renderEnquiries();
   if(id==='media')renderMedia();
-  if(id==='settings'){populateSettingsForm();loadLaunchChecklist();}
+  if(id==='settings'){populateSettingsForm();loadLaunchChecklist();loadWebhookEvents();}
   // manage back button visibility
   document.querySelectorAll('.back-to-dash').forEach(b=>b.classList.remove('visible'));
   if(fromKpi){
@@ -5465,6 +5481,55 @@ async function updateEnquiryBadge(){
 // ═══════════════════════════════════════════════════
 // PRE-LAUNCH CHECKLIST
 // ═══════════════════════════════════════════════════
+// ── BULLETPROOF 7 — System / Webhook Events Log ──────────────────────────────
+async function loadWebhookEvents(){
+  const el=document.getElementById('webhook-events-table');
+  if(!el)return;
+  el.innerHTML='<p style="font-size:12px;color:var(--color-muted-fg)">Loading…</p>';
+  try{
+    const r=await fetch('/api/admin/webhook-events',{headers:authHdr()});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const {events=[]}=await r.json();
+    if(!events.length){
+      el.innerHTML='<p style="font-size:12px;color:var(--color-muted-fg)">No payment events recorded yet. Events appear here after the first successful booking payment.</p>';
+      return;
+    }
+    const rows=events.map(e=>{
+      const d=e.date&&e.date!=='—'?e.date.replace(/(\d{4})-(\d{2})-(\d{2})/,'$3/$2/$1'):e.date||'—';
+      const t=e.time&&e.time!=='—'?e.time.slice(0,5):'—';
+      const amt=e.amount?`£${e.amount}`:'—';
+      const statusColor=e.status==='confirmed'||e.status==='completed'?'#2D6A4F':e.status==='cancelled'?'#c62828':'#856404';
+      const piShort=e.paymentIntentId?e.paymentIntentId.slice(-8):'—';
+      const ts=e.timestamp?new Date(e.timestamp).toLocaleString('en-GB',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):'—';
+      return`<tr style="border-top:1px solid var(--color-border-subtle)">
+        <td style="padding:7px 8px;font-size:11px;color:var(--color-muted-fg);white-space:nowrap">${ts}</td>
+        <td style="padding:7px 8px;font-size:12px;font-weight:600;color:var(--color-foreground)">${escPortal(String(e.clientName||'—'))}</td>
+        <td style="padding:7px 8px;font-size:11px;color:var(--color-muted-fg)">${escPortal(String(e.treatment||'—'))}</td>
+        <td style="padding:7px 8px;font-size:11px;color:var(--color-muted-fg);white-space:nowrap">${d} ${t}</td>
+        <td style="padding:7px 8px;font-size:12px;font-weight:600;color:var(--color-primary)">${amt}</td>
+        <td style="padding:7px 8px;font-size:11px;color:${statusColor};font-weight:600;text-transform:capitalize">${e.status||'—'}</td>
+        <td style="padding:7px 8px;font-size:10px;color:var(--color-muted-fg);font-family:monospace" title="${e.paymentIntentId||''}">${piShort}</td>
+      </tr>`;
+    }).join('');
+    el.innerHTML=`<div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-family:var(--font-sans)">
+        <thead><tr style="background:var(--color-muted)">
+          <th style="padding:6px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted-fg);text-align:left;font-weight:600;white-space:nowrap">Time</th>
+          <th style="padding:6px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted-fg);text-align:left;font-weight:600">Client</th>
+          <th style="padding:6px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted-fg);text-align:left;font-weight:600">Treatment</th>
+          <th style="padding:6px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted-fg);text-align:left;font-weight:600;white-space:nowrap">Appt.</th>
+          <th style="padding:6px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted-fg);text-align:left;font-weight:600">Deposit</th>
+          <th style="padding:6px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted-fg);text-align:left;font-weight:600">Status</th>
+          <th style="padding:6px 8px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--color-muted-fg);text-align:left;font-weight:600">PI</th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>`;
+  }catch(e){
+    el.innerHTML=`<p style="font-size:12px;color:#c62828">Failed to load events: ${e.message}</p>`;
+  }
+}
+
 async function loadLaunchChecklist(){
   function setChk(id,done,extra){
     const el=document.getElementById(id);

@@ -125,14 +125,32 @@ router.get("/forms/status", async (req, res) => {
   if (!UUID_RE.test(bookingId)) return res.status(404).json({ error: "Booking not found" });
 
   try {
-    const [bkRow, medRow, conRow] = await Promise.all([
-      supabaseAdmin.from("bookings").select("id,client_name,client_email,client_phone,treatment_name,treatment_id,treatments(name),booking_date,time_slot,status,location_id,forms_completed,deposit_amount,total_amount,deposit_paid").eq("id", bookingId).maybeSingle(),
+    // BULLETPROOF 1 — Server-side retry: Stripe webhook may fire after the client
+    // redirects to this endpoint. Retry up to 5 times with a 1s gap before giving up.
+    let bkRow: Awaited<ReturnType<typeof supabaseAdmin.from>> extends never ? never : { data: Record<string, unknown> | null; error: unknown } = { data: null, error: null };
+    for (let attempt = 0; attempt < 5; attempt++) {
+      const result = await supabaseAdmin
+        .from("bookings")
+        .select("id,client_name,client_email,client_phone,treatment_name,treatment_id,treatments(name),booking_date,time_slot,status,location_id,forms_completed,deposit_amount,total_amount,deposit_paid")
+        .eq("id", bookingId)
+        .maybeSingle() as { data: Record<string, unknown> | null; error: unknown };
+      if (result.error) throw result.error;
+      if (result.data) { bkRow = result; break; }
+      if (attempt < 4) await new Promise(r => setTimeout(r, 1000));
+      else bkRow = result;
+    }
+
+    const [medRow, conRow] = await Promise.all([
       supabaseAdmin.from("medical_forms").select("id,submitted_at").eq("booking_id", bookingId).maybeSingle(),
       supabaseAdmin.from("consent_forms").select("id").eq("booking_id", bookingId).maybeSingle(),
     ]);
 
-    if (bkRow.error) throw bkRow.error;
-    if (!bkRow.data) return res.status(404).json({ error: "Booking not found" });
+    if (!bkRow.data) {
+      return res.status(404).json({
+        error: "Booking is being processed, please refresh in a few seconds",
+        retrying: true,
+      });
+    }
 
     const emailMedRow = bkRow.data.client_email
       ? await supabaseAdmin.from("medical_forms").select("id,submitted_at,created_at").eq("client_email", String(bkRow.data.client_email)).order("submitted_at", { ascending: false }).limit(1).maybeSingle()
@@ -416,6 +434,49 @@ router.get("/admin/forms/:bookingId", async (req, res) => {
   } catch (err) {
     console.error("GET /api/admin/forms", err);
     return res.status(500).json({ error: "Server error" });
+  }
+});
+
+// ── GET /api/admin/webhook-events — auth required ──────────────────────────
+// Returns last 20 payments as a proxy for webhook events (each payment = webhook fired).
+router.get("/admin/webhook-events", async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  const locationId = (req.headers["x-location-id"] as string | undefined) ?? null;
+  try {
+    let query = supabaseAdmin
+      .from("payments")
+      .select("id, booking_id, client_email, amount, type, stripe_payment_intent_id, location_id, created_at, bookings(client_name, treatment_name, booking_date, time_slot, status)")
+      .order("created_at", { ascending: false })
+      .limit(20);
+
+    if (locationId) query = query.eq("location_id", locationId);
+
+    const { data, error } = await query;
+    if (error) throw error;
+
+    const events = (data ?? []).map((p: Record<string, unknown>) => {
+      const bk = p.bookings as Record<string, unknown> | null;
+      return {
+        id: p.id,
+        bookingId: p.booking_id,
+        timestamp: p.created_at,
+        eventType: "payment_intent.succeeded",
+        paymentIntentId: p.stripe_payment_intent_id,
+        clientName: bk?.client_name ?? p.client_email ?? "—",
+        clientEmail: p.client_email,
+        treatment: bk?.treatment_name ?? "—",
+        date: bk?.booking_date ?? "—",
+        time: bk?.time_slot ?? "—",
+        amount: p.amount,
+        status: bk?.status ?? "—",
+        outcome: "success",
+      };
+    });
+
+    return res.json({ events });
+  } catch (err) {
+    console.error("GET /api/admin/webhook-events", err);
+    return res.status(500).json({ error: "Server error", events: [] });
   }
 });
 

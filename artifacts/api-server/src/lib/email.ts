@@ -949,6 +949,98 @@ export async function sendEnquiryEmails(params: {
   await Promise.all(promises);
 }
 
+// ── Email: Webhook failure alert (trigger: catch in payment_intent.succeeded) ──
+
+export async function sendWebhookAlertEmail(params: {
+  adminEmail: string;
+  paymentIntentId: string;
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  treatment: string;
+  bookingDate: string;
+  bookingTime: string;
+  bookingId: string;
+  locationId: string;
+  error: string;
+}): Promise<void> {
+  const formsLink = params.bookingId
+    ? `${SITE_URL}/forms.html?booking=${params.bookingId}`
+    : "— booking ID missing —";
+
+  const content = `
+    <p style="font-size:22px;font-family:Georgia,serif;color:#C62828;margin:0 0 6px;">&#9888; Action Required — Webhook Error</p>
+    <p style="font-size:14px;color:#8C7B6B;margin:0 0 20px;">A payment was received from Stripe but the booking creation failed. <strong>Manual action needed.</strong></p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#FFF3CD;border-radius:8px;border-left:4px solid #C9A96E;margin:0 0 20px;">
+    <tr><td style="padding:16px 20px;">
+      <p style="font-size:12px;color:#856404;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 8px;font-weight:700;">Error Detail</p>
+      <p style="font-size:13px;color:#2C2420;font-family:monospace;margin:0;word-break:break-all;">${params.error}</p>
+    </td></tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 20px;">
+    <tr><td style="padding:20px 24px;">
+      <p style="font-size:12px;color:#C9A96E;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 12px;">Payment Details</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Payment Intent:</strong> <code style="font-size:12px;background:#e8e0d8;padding:2px 6px;border-radius:3px;">${params.paymentIntentId}</code></p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Client:</strong> ${params.clientName || "—"}</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Email:</strong> <a href="mailto:${params.clientEmail}" style="color:#C9A96E;">${params.clientEmail || "—"}</a></p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Phone:</strong> ${params.clientPhone || "—"}</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Treatment:</strong> ${params.treatment || "—"}</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Date:</strong> ${params.bookingDate || "—"}</p>
+      <p style="font-size:14px;color:#2C2420;margin:4px 0;"><strong>Time:</strong> ${params.bookingTime || "—"}</p>
+      <p style="font-size:14px;color:#2C2420;margin:8px 0 0;"><strong>Forms Link:</strong> <a href="${formsLink}" style="color:#C9A96E;word-break:break-all;">${formsLink}</a></p>
+    </td></tr>
+    </table>
+
+    <p style="font-size:13px;color:#5C1A1A;font-weight:600;margin:0 0 8px;">What to do:</p>
+    <ol style="font-size:13px;color:#2C2420;padding-left:20px;margin:0 0 20px;line-height:1.8;">
+      <li>Check the Stripe dashboard — the payment <strong>was</strong> received</li>
+      <li>Open the admin portal and manually create a booking for this client</li>
+      <li>Use the "Send to Client" button to send the forms link</li>
+      <li>WhatsApp the client if needed: <a href="https://wa.me/${params.clientPhone?.replace(/[^0-9]/g, '')}" style="color:#C9A96E;">+${params.clientPhone || "unknown"}</a></li>
+    </ol>
+
+    <table width="100%" cellpadding="0" cellspacing="0">
+    <tr><td align="center">
+      <a href="${SITE_URL}/portal.html" style="display:inline-block;padding:12px 28px;background:#5C1A1A;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">Open Admin Portal &rarr;</a>
+    </td></tr>
+    </table>`;
+
+  const subject = `ACTION NEEDED — Payment received but booking failed (${params.clientName || params.paymentIntentId})`;
+  const text = [
+    "ACTION REQUIRED — Webhook Error",
+    "",
+    `Error: ${params.error}`,
+    "",
+    `Payment Intent: ${params.paymentIntentId}`,
+    `Client: ${params.clientName || "—"}`,
+    `Email: ${params.clientEmail || "—"}`,
+    `Phone: ${params.clientPhone || "—"}`,
+    `Treatment: ${params.treatment || "—"}`,
+    `Date: ${params.bookingDate || "—"}`,
+    `Time: ${params.bookingTime || "—"}`,
+    "",
+    `Forms link: ${formsLink}`,
+    "",
+    "Action: Manually create this booking in the admin portal and send the client their forms link.",
+    "",
+    `Portal: ${SITE_URL}/portal.html`,
+  ].join("\n");
+
+  const html = buildEmail(content, subject);
+  const resend = getResend();
+  if (!resend) {
+    logEmailPreview(subject, params.adminEmail, html);
+    return;
+  }
+  try {
+    await resend.emails.send({ from: FROM, to: params.adminEmail, subject, html, text });
+  } catch (err) {
+    console.error("sendWebhookAlertEmail error", err);
+  }
+}
+
 // ── Email: Manual "Send Forms Link" (trigger: admin clicks button in portal) ──
 
 export async function sendFormsLinkEmail(params: {
