@@ -1,0 +1,40 @@
+Delete Client is silently failing. Diagnosis from live testing:
+
+1. Clicking "Delete Client" correctly shows the inline "Really delete?" confirm UI ✅
+2. Clicking "Yes, delete" does NOT fire a DELETE network request ❌
+3. The inline confirm UI reverts back to the default button (5s auto-revert or silent JS error)
+4. Network tab confirms only GET /api/clients requests, never DELETE
+
+The doDeleteClient(id) function is broken. It either (a) can't find the id, (b) throws an unhandled error on await ClientAPI.delete(id), or (c) ClientAPI.delete is hitting the wrong endpoint / missing auth.
+
+Please:
+
+1. Find doDeleteClient in portal.html. Add console.log('doDeleteClient called with id:', id) at the start.
+
+2. Wrap the await ClientAPI.delete(id) in try/catch. Log the full error and any response body. Example:
+   try {
+     console.log('Calling ClientAPI.delete with id:', id);
+     const result = await ClientAPI.delete(id);
+     console.log('Delete result:', result);
+   } catch (err) {
+     console.error('Delete failed:', err?.message, err);
+     showToast('Delete failed: ' + (err?.message || 'unknown error'), 'error');
+     return;
+   }
+
+3. Find ClientAPI.delete. Confirm:
+   - It hits DELETE /api/clients/:id (correct method, correct URL)
+   - It sends the Authorization: Bearer ${fbn_token} header
+   - It checks response.ok before resolving
+
+4. On the backend, find the DELETE /api/clients/:id route. Confirm it exists, is registered, and actually deletes the row (not just returns 200).
+
+5. Check the Yes button onclick in the inline confirm. The handler is probably doDeleteClient('${id}'). Verify the ${id} is interpolated at render time — NOT left as a literal template string that Yes click passes the string "${id}" to doDeleteClient.
+
+Report back with:
+  a) Exact doDeleteClient code after your fix
+  b) Exact ClientAPI.delete code
+  c) Confirmation the backend DELETE route exists + where
+  d) What the most likely root cause was (a/b/c/d above)
+
+Do not change the inline confirm UI — it works. Only debug and fix the delete action.
