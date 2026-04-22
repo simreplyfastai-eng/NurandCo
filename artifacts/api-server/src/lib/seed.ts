@@ -35,7 +35,7 @@ const HORNCHURCH_TREATMENTS: TreatmentRow[] = [
   // Aesthetics — more fillers (deposit £20)
   { name: "Chin Filler 0.5ml",                                        duration_minutes: 30,  price: 130,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
   { name: "Chin Filler 1.1ml",                                        duration_minutes: 30,  price: 150,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Filler Dissolve Only",                                     duration_minutes: 60,  price: 20,   deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
+  { name: "Filler Dissolve Only",                                     duration_minutes: 60,  price: 200,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
   { name: "Lip Filler Dissolve and Refill Package",                   duration_minutes: 60,  price: 350,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
   { name: "Tear Trough Filler",                                       duration_minutes: 30,  price: 230,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
   { name: "Non-Surgical Rhinoplasty",                                 duration_minutes: 30,  price: 180,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
