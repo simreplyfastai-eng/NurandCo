@@ -3864,7 +3864,7 @@ function renderTreatments(filter){
   cats.forEach(cat=>{
     const rows=treats.filter(t=>t.cat===cat.key&&(!filter||t.name.toLowerCase().includes(filter.toLowerCase())));
     if(!rows.length&&filter)return;
-    const isOpen=catStates[cat.key]!==false; // default open
+    const isOpen=catStates[cat.key]===true; // default closed
     html+=`<div class="cat-accordion${isOpen?' open':''}" id="acc-${cat.key}">
       <div class="cat-accordion-header" onclick="toggleCat('${cat.key}')">
         <span class="cat-chevron">${isOpen?'−':'+'}</span>
