@@ -1,0 +1,26 @@
+Your diagnosis is wrong on two critical points:
+
+1. google_event_id column ALREADY EXISTS on bookings — I just queried SELECT google_event_id FROM bookings and got NULL values (which means the column exists, it's just empty). If it didn't exist, Postgres would throw "column does not exist".
+
+2. google_calendar_tokens table ALREADY EXISTS with data. I ran SELECT * FROM google_calendar_tokens earlier and got one populated row: location_id=ccb325d5-... calendar_id=primary, real access_token ya29.a0Aa7MYiqBPkQpV..., refresh_token 1//06TZwfjNijEXjCgYI..., expiry_date, and updated_at 2026-04-22 20:... . It's fully there.
+
+Do NOT run your proposed SQL migration. CREATE TABLE IF NOT EXISTS is safe but your CREATE POLICY statement will conflict with the existing "Service role full access" policy.
+
+Re-diagnose properly:
+
+a) Open Replit console/logs and find logs from the most recent booking creation (around 2026-04-22 21:32:18 — booking id c568e7c8-1e97-46f5-9a13-4f2a4c397c05 for Luxe Microneedling Facial on 2026-05-05). Tell me exactly what log lines were printed during and after that booking's creation. Was "Google Calendar sync failed..." logged? Was nothing logged? Is the createCalendarEvent function even being reached?
+
+b) Confirm where the booking creation code path actually lives. Is it in routes/bookings.ts? Or is the real creation happening in a Stripe webhook handler (because bookings only get created after Stripe confirms payment)? The Stripe webhook might be a separate file where your Google sync hook was NOT added.
+
+c) If the hook was added to the wrong endpoint (added to a direct /bookings POST but real bookings come from the Stripe webhook), move it to the Stripe webhook handler.
+
+d) Apply the improved error logging in the catch block regardless:
+-    } catch (err) {
+-      console.error('Google Calendar sync failed (non-fatal):', err);
+-    }
++    } catch (err: any) {
++      console.error('Google Calendar sync failed (non-fatal):', err?.message ?? err);
++      if (err?.errors) console.error('Google API errors:', JSON.stringify(err.errors));
++    }
+
+Report back with (a), (b) before making any database changes.

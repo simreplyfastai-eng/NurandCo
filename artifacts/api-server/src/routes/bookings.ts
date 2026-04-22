@@ -457,8 +457,9 @@ router.post("/bookings", async (req, res) => {
           .update({ google_event_id: googleEventId })
           .eq('id', booking.id);
       }
-    } catch (err) {
-      console.error('Google Calendar sync failed (non-fatal):', err);
+    } catch (err: any) {
+      console.error('Google Calendar sync failed (non-fatal):', err?.message ?? err);
+      if (err?.errors) console.error('Google API errors:', JSON.stringify(err.errors));
     }
 
     const whatsapp = await getWhatsApp(locationId);

@@ -10,6 +10,7 @@ import { sendAdminNotificationEmail, sendWebhookAlertEmail } from "../lib/email"
 import { findOrCreateClient } from "./clients";
 import { getDepositAmount } from "../lib/treatments";
 import { ukDateStr } from "../lib/tz";
+import { createCalendarEvent } from "../googleCalendar";
 
 const router = Router();
 
@@ -347,6 +348,28 @@ router.post("/stripe/webhook", async (req, res) => {
               bookingId: bookingId ?? undefined,
             }).catch(() => {});
           }
+
+          // 1d. Google Calendar sync (non-blocking)
+          const gcalLocationId = String((updated.location_id as string | null) ?? locationId ?? "");
+          createCalendarEvent(gcalLocationId, {
+            date: bDate,
+            time: bTime,
+            treatment_name: treatment ?? "",
+            customer_name: clientName ?? "",
+            customer_phone: clientPhone ?? "",
+            customer_email: clientEmail ?? "",
+          }).then((eventId) => {
+            if (eventId) {
+              supabaseAdmin.from("bookings").update({ google_event_id: eventId }).eq("id", bookingId)
+                .then(() => console.log(`Google Calendar: event ${eventId} created for booking ${bookingId}`))
+                .catch((e: unknown) => console.error("Google Calendar: failed to save event ID", e));
+            } else {
+              console.warn("Google Calendar: no event created for booking", bookingId, "— not connected or no token for location", gcalLocationId);
+            }
+          }).catch((err: any) => {
+            console.error("Google Calendar sync failed (non-fatal):", err?.message ?? err);
+            if (err?.errors) console.error("Google API errors:", JSON.stringify(err.errors));
+          });
         }
       }
 
@@ -448,6 +471,27 @@ router.post("/stripe/webhook", async (req, res) => {
             bookingId: id,
           }).catch(() => {});
         }
+
+        // Fallback path: Google Calendar sync (non-blocking)
+        createCalendarEvent(locationId, {
+          date: bDate,
+          time: bTime,
+          treatment_name: treatment,
+          customer_name: clientName,
+          customer_phone: clientPhone ?? "",
+          customer_email: clientEmail ?? "",
+        }).then((eventId) => {
+          if (eventId) {
+            supabaseAdmin.from("bookings").update({ google_event_id: eventId }).eq("id", id)
+              .then(() => console.log(`Google Calendar: event ${eventId} created for booking ${id}`))
+              .catch((e: unknown) => console.error("Google Calendar: failed to save event ID (fallback)", e));
+          } else {
+            console.warn("Google Calendar: no event created for fallback booking", id, "— not connected or no token for location", locationId);
+          }
+        }).catch((err: any) => {
+          console.error("Google Calendar sync failed (fallback, non-fatal):", err?.message ?? err);
+          if (err?.errors) console.error("Google API errors:", JSON.stringify(err.errors));
+        });
       }
     } catch (err) {
       // BULLETPROOF 4 — Log full context and alert admin by email
