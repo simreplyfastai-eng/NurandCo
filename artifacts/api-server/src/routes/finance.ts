@@ -27,7 +27,7 @@ router.get("/finance/summary", async (req, res) => {
 
     let query = supabaseAdmin
       .from("bookings")
-      .select("booking_date, total_amount, deposit_amount, balance_due, status, deposit_paid")
+      .select("booking_date, total_amount, deposit_amount, status, deposit_paid")
       .gte("booking_date", startDate)
       .lte("booking_date", endDate);
 

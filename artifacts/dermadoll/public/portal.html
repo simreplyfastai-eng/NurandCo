@@ -2415,9 +2415,8 @@ function renderBookings(){
     const dep=b.depositPaid
       ?`<span style="color:#2D6A4F;font-size:12px;font-weight:600">✓ Paid</span>`
       :`<span style="color:var(--color-secondary);font-size:12px;font-weight:600">Pending</span>`;
-    const d=new Date(b.date);
-    const dateDay=isNaN(d)?b.date:d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
-    const dateYear=isNaN(d)?'':d.getFullYear();
+    const d=new Date((b.date||'').slice(0,10));
+    const dateDay=isNaN(d.getTime())?'—':d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
     return`<tr style="cursor:pointer" onclick="openBookingModal('${b.id}')">
       <td class="bk-col-date bk-date-cell">
         <div class="bk-date-day">${dateDay}</div>
