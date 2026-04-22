@@ -51,17 +51,23 @@ router.put("/admin/availability", async (req, res) => {
     return res.status(400).json({ error: "rows array required" });
 
   try {
-    const upserts = rows.map((r) => ({
+    const inserts = rows.map((r) => ({
       location_id: locationId,
       day_of_week: r.day_of_week,
       is_open: r.is_open,
       start_time: r.open_time ?? null,
       end_time: r.close_time ?? null,
     }));
-    const { error } = await supabaseAdmin
+    // Delete-then-insert avoids needing a unique constraint on (location_id, day_of_week)
+    const { error: delErr } = await supabaseAdmin
       .from("availability_settings")
-      .upsert(upserts, { onConflict: "location_id,day_of_week" });
-    if (error) throw error;
+      .delete()
+      .eq("location_id", locationId);
+    if (delErr) throw delErr;
+    const { error: insErr } = await supabaseAdmin
+      .from("availability_settings")
+      .insert(inserts);
+    if (insErr) throw insErr;
     return res.json({ ok: true });
   } catch (err) {
     console.error("PUT /api/admin/availability", err);

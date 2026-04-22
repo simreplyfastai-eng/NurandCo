@@ -288,17 +288,23 @@ router.put("/availability/settings", async (req, res) => {
   if (!days || !days.length) return res.status(400).json({ error: "days array required" });
 
   try {
-    const upserts = days.map((d) => ({
+    const inserts = days.map((d) => ({
       location_id: locationId,
       day_of_week: d.day_of_week,
       is_open: d.is_open,
       start_time: d.open_time ?? null,
       end_time: d.close_time ?? null,
     }));
-    const { error } = await supabaseAdmin
+    // Delete-then-insert avoids needing a unique constraint on (location_id, day_of_week)
+    const { error: delErr } = await supabaseAdmin
       .from("availability_settings")
-      .upsert(upserts, { onConflict: "location_id,day_of_week" });
-    if (error) throw error;
+      .delete()
+      .eq("location_id", locationId);
+    if (delErr) throw delErr;
+    const { error: insErr } = await supabaseAdmin
+      .from("availability_settings")
+      .insert(inserts);
+    if (insErr) throw insErr;
     return res.json({ ok: true });
   } catch (err) {
     console.error("PUT /api/availability/settings", err);
@@ -320,19 +326,22 @@ router.post("/availability/settings", async (req, res) => {
   if (!defaults) return res.status(400).json({ error: "defaults required" });
 
   try {
-    for (const [dayName, cfg] of Object.entries(defaults)) {
+    const inserts = Object.entries(defaults).flatMap(([dayName, cfg]) => {
       const dayIndex = DAY_NAMES.indexOf(dayName as typeof DAY_NAMES[number]);
-      if (dayIndex === -1) continue;
-      await supabaseAdmin
-        .from("availability_settings")
-        .upsert({
-          location_id: locationId,
-          day_of_week: dayIndex,
-          is_open: cfg.on,
-          start_time: cfg.start ?? null,
-          end_time: cfg.end ?? null,
-        }, { onConflict: "location_id,day_of_week" });
-    }
+      if (dayIndex === -1) return [];
+      return [{ location_id: locationId, day_of_week: dayIndex, is_open: cfg.on, start_time: cfg.start ?? null, end_time: cfg.end ?? null }];
+    });
+    if (inserts.length === 0) return res.json({ ok: true });
+    // Delete-then-insert avoids needing a unique constraint on (location_id, day_of_week)
+    const { error: delErr } = await supabaseAdmin
+      .from("availability_settings")
+      .delete()
+      .eq("location_id", locationId);
+    if (delErr) throw delErr;
+    const { error: insErr } = await supabaseAdmin
+      .from("availability_settings")
+      .insert(inserts);
+    if (insErr) throw insErr;
     return res.json({ ok: true });
   } catch (err) {
     console.error("POST /api/availability/settings", err);
