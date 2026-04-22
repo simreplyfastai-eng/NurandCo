@@ -2948,7 +2948,8 @@ function openBookingModal(prefill){
   const clients=getClients();
   document.getElementById('client-list').innerHTML=clients.map(c=>`<option value="${c.name}"/>`).join('');
 
-  const isId=prefill&&typeof prefill==='string'&&!clients.find(c=>c.name===prefill)&&prefill.length<20;
+  const UUID_RE_BM=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  const isId=prefill&&typeof prefill==='string'&&UUID_RE_BM.test(prefill);
   const booking=isId?getBookings().find(b=>b.id===prefill):null;
 
   if(booking){
@@ -5086,7 +5087,7 @@ function renderFormsDrawer(data) {
     conHtml = `
       <div class="fd-section">
         <div class="fd-section-title">Consent Declaration</div>
-        ${row('Signed', fmtDate(consent.signed_at))}
+        ${row('Signed', consent.client_name || '—')}
         ${row('IP Address', consent.ip_address)}
         ${row('Treatment', consent.treatment)}
       </div>
