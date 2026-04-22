@@ -245,7 +245,7 @@ tr:hover td{background:rgba(92,26,26,.02)}
 .cal-cell.selected .cal-dot{background:#fff;opacity:1}
 .cal-overflow-pill{background:var(--color-muted);color:var(--color-muted-fg);font-size:9px;border-radius:var(--radius);padding:1px 5px;margin-bottom:2px;display:block}
 .cal-new-mobile{display:none}
-.day-panel{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius);padding:20px;min-height:300px;overflow-y:auto;box-sizing:border-box}
+.day-panel{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius);padding:20px;min-height:300px;overflow-y:auto;overflow-x:hidden;box-sizing:border-box}
 
 /* ── TIMELINE ITEMS (schedule + today panel) ─── */
 .tl-item{display:flex;align-items:flex-start;gap:12px;padding:10px 8px;border-radius:var(--radius);cursor:pointer;transition:background .15s;border-bottom:1px solid var(--color-border-subtle);margin:0 -8px}
@@ -255,7 +255,7 @@ tr:hover td{background:rgba(92,26,26,.02)}
 .tl-body{flex:1;min-width:0}
 .tl-client{font-family:var(--font-sans);font-size:13px;font-weight:500;color:var(--color-foreground);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tl-treat{font-family:var(--font-sans);font-size:11px;color:var(--color-secondary);letter-spacing:.01em}
-.tl-pill-col{flex-shrink:0;padding-top:2px}
+.tl-pill-col{flex-shrink:0;padding-top:2px;max-width:80px;overflow:hidden}
 .tl-forms{display:flex;gap:5px;margin-top:6px;align-items:center}
 .tl-badge{font-family:var(--font-sans);font-size:9px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;padding:2px 6px;border-radius:3px;color:var(--color-muted-fg);background:rgba(0,0,0,.05)}
 .tl-badge.done{color:#1B7A4A;background:rgba(27,122,74,.1)}
