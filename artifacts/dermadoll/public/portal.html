@@ -630,6 +630,27 @@ select.form-input{background:var(--color-card)}
   .fin-kpi-label{font-size:9px}
   .fin-kpi-card{padding:12px 6px}
 }
+/* ── Dot-menu (…) ── */
+.dot-menu-wrap{position:relative;display:inline-block}
+.dot-menu-btn{background:none;border:1px solid transparent;border-radius:6px;cursor:pointer;font-size:16px;line-height:1;padding:2px 7px;color:#888;transition:background .15s}
+.dot-menu-btn:hover{background:#F3EDE6;border-color:#E8DDD3;color:#5C1A1A}
+.dot-menu-drop{position:absolute;right:0;top:calc(100% + 4px);z-index:9999;background:#fff;border:1px solid #E8DDD3;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.12);min-width:160px;display:none;overflow:hidden}
+.dot-menu-drop button{display:block;width:100%;text-align:left;padding:10px 16px;background:none;border:none;font-family:var(--font-sans);font-size:13px;cursor:pointer;color:#333;border-bottom:1px solid #F3EDE6}
+.dot-menu-drop button:last-child{border-bottom:none}
+.dot-menu-drop button:hover{background:#FAF0F0;color:#5C1A1A}
+.dot-menu-drop button.danger{color:#c62828}
+.dot-menu-drop button.danger:hover{background:#FFF0F0}
+/* ── Reschedule modal ── */
+#rs-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;display:none;align-items:center;justify-content:center}
+#rs-box{background:#fff;border-radius:14px;box-shadow:0 8px 40px rgba(0,0,0,.2);padding:28px 28px 22px;width:90%;max-width:420px;max-height:90vh;overflow-y:auto;position:relative}
+#rs-box .rs-title{font-size:17px;font-family:var(--font-serif);color:var(--color-primary);margin:0 0 4px}
+#rs-box .rs-sub{font-size:12px;color:var(--color-muted-fg);margin:0 0 18px}
+#rs-box .rs-info-row{font-size:13px;padding:10px 14px;background:#F8F5F0;border-radius:8px;margin-bottom:18px;line-height:1.7}
+#rs-box label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--color-muted-fg);display:block;margin-bottom:5px}
+#rs-box input[type=date],#rs-box select{width:100%;box-sizing:border-box;padding:9px 12px;border:1px solid var(--color-border);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;margin-bottom:16px;background:#fff;outline:none}
+#rs-box input[type=date]:focus,#rs-box select:focus{border-color:var(--color-primary)}
+#rs-box .rs-actions{display:flex;gap:12px;margin-top:8px}
+#rs-box .rs-actions button{flex:1;padding:11px;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1317,10 +1338,28 @@ select.form-input{background:var(--color-card)}
     </div>
     <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:4px;flex-wrap:wrap">
       <button id="bm-cancel-booking-btn" onclick="cancelBookingFromModal()" style="display:none;padding:10px 18px;border:1px solid #c62828;background:#fff;color:#c62828;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px">Cancel Booking</button>
+      <button id="bm-reschedule-btn" onclick="rescheduleFromModal()" style="display:none;padding:10px 18px;border:1px solid var(--color-primary);background:#fff;color:var(--color-primary);border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.5px">Reschedule</button>
       <div style="display:flex;gap:10px;margin-left:auto">
         <button class="btn-outline" onclick="closeBookingModal()">Close</button>
         <button class="btn-gold" onclick="saveBooking()">Save Booking</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESCHEDULE MODAL -->
+<div id="rs-overlay" onclick="if(event.target===this)closeRescheduleModal()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:2000;align-items:center;justify-content:center">
+  <div id="rs-box">
+    <p class="rs-title">Reschedule Booking</p>
+    <p class="rs-sub">Select a new date and time for this appointment.</p>
+    <div class="rs-info-row" id="rs-info"></div>
+    <label>New Date</label>
+    <input type="date" id="rs-date" onchange="populateRsTimeSlots(this.value)">
+    <label>Available Times</label>
+    <select id="rs-time"><option>— select date first —</option></select>
+    <div class="rs-actions">
+      <button onclick="closeRescheduleModal()" style="border:1px solid var(--color-border);background:#fff;color:#555">Cancel</button>
+      <button onclick="confirmReschedule()" style="background:var(--color-primary);color:#fff;border:none">Confirm Reschedule</button>
     </div>
   </div>
 </div>
@@ -2059,14 +2098,26 @@ function renderDashboard(){
   if(recent.length){
     if(recentTable)recentTable.style.display='';
     if(recentEmpty)recentEmpty.style.display='none';
-    document.getElementById('recent-bookings-body').innerHTML=recent.map(b=>`
-      <tr style="cursor:pointer" onclick="openBookingModal('${b.id}')" title="Click for full details">
-        <td><strong>${b.clientName}</strong></td>
-        <td>${b.treatment||'Not specified'}</td>
-        <td><span class="date-full">${formatDate(b.date)}</span><span class="date-mob">${formatDateShort(b.date)}</span></td>
-        <td>${statusPill(b.status)}</td>
-      </tr>
-    `).join('');
+    document.getElementById('recent-bookings-body').innerHTML=recent.map(b=>{
+      const dmId=`dm-dash-${b.id}`;
+      const canAct=b.status!=='Cancelled'&&b.status!=='cancelled';
+      return`<tr>
+        <td style="cursor:pointer" onclick="openBookingModal('${b.id}')"><strong>${b.clientName}</strong></td>
+        <td style="cursor:pointer" onclick="openBookingModal('${b.id}')">${b.treatment||'Not specified'}</td>
+        <td style="cursor:pointer" onclick="openBookingModal('${b.id}')"><span class="date-full">${formatDate(b.date)}</span><span class="date-mob">${formatDateShort(b.date)}</span></td>
+        <td style="cursor:pointer" onclick="openBookingModal('${b.id}')">${statusPill(b.status)}</td>
+        <td style="white-space:nowrap" onclick="event.stopPropagation()">
+          <div class="dot-menu-wrap">
+            <button class="dot-menu-btn" onclick="toggleDotMenu('${dmId}',event)" title="Actions">⋯</button>
+            <div class="dot-menu-drop" id="${dmId}">
+              <button onclick="closeDotMenus();openBookingModal('${b.id}')">View / Edit</button>
+              ${canAct?`<button onclick="closeDotMenus();openRescheduleModal('${b.id}')">Reschedule</button>`:''}
+              ${canAct?`<button class="danger" onclick="closeDotMenus();cancelBookingById('${b.id}')">Cancel Booking</button>`:''}
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    }).join('');
   }else{
     if(recentTable)recentTable.style.display='none';
     if(recentEmpty)recentEmpty.style.display='';
@@ -2376,6 +2427,11 @@ function openBookingDetailPanel(bookingId){
       </div>
       ${b.notes?`<div style="border-top:1px solid var(--color-border-subtle);padding-top:12px"><div style="font-size:10px;color:var(--color-muted-fg);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Notes</div><div style="font-size:12px;line-height:1.6;color:#555">${escPortal(b.notes)}</div></div>`:''}
     </div>
+    ${b.status!=='Cancelled'&&b.status!=='cancelled'?`
+    <div style="display:flex;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--color-border-subtle)">
+      <button onclick="openRescheduleModal('${b.id}')" style="flex:1;padding:10px 8px;border:1px solid var(--color-primary);background:#fff;color:var(--color-primary);cursor:pointer;border-radius:var(--radius);font-family:var(--font-sans);font-size:12px;font-weight:700;letter-spacing:.4px">Reschedule</button>
+      <button onclick="cancelBookingById('${b.id}')" style="flex:1;padding:10px 8px;border:1px solid #c62828;background:#fff;color:#c62828;cursor:pointer;border-radius:var(--radius);font-family:var(--font-sans);font-size:12px;font-weight:700;letter-spacing:.4px">Cancel Booking</button>
+    </div>`:''}
   `;
 }
 
@@ -3017,8 +3073,9 @@ async function openBookingModal(prefill){
       sel.insertBefore(dynOpt,sel.options[1]||null);
       sel.value=treatVal;
     } else {sel.selectedIndex=0;}
-    // Show cancel booking button in edit mode
+    // Show cancel & reschedule buttons in edit mode
     document.getElementById('bm-cancel-booking-btn').style.display='';
+    document.getElementById('bm-reschedule-btn').style.display='';
     // Show consultation extra fields
     const consultFields=document.getElementById('bm-consultation-fields');
     if(booking.category==='Consultation'||booking.treatment==='Consultation'){
@@ -3043,6 +3100,7 @@ async function openBookingModal(prefill){
     document.getElementById('bm-date').value=fmt(new Date());
     populateBmTimeSlots(fmt(new Date()));
     document.getElementById('bm-cancel-booking-btn').style.display='none';
+    document.getElementById('bm-reschedule-btn').style.display='none';
     document.getElementById('bm-deposit-group').style.display='none';
     document.getElementById('bm-balance-group').style.display='none';
     document.getElementById('bm-consultation-fields').style.display='none';
@@ -3054,15 +3112,108 @@ function closeBookingModal(){document.getElementById('booking-modal').classList.
 
 async function cancelBookingFromModal(){
   if(!editingBookingId)return;
-  const bk=getBookings().find(b=>b.id===editingBookingId);
-  const label=bk?`${bk.clientName}'s ${bk.treatment} on ${formatDate(bk.date)}`:'this booking';
-  if(!confirm(`Cancel ${label}?\n\nThis will mark it as Cancelled. You can still view it in the bookings list.`))return;
-  await BookingAPI.update(editingBookingId,{status:'Cancelled'});
   closeBookingModal();
-  updateSidebarBadges();
-  renderDashboard();
-  buildCalendar();
-  if(document.getElementById('page-bookings').classList.contains('active'))renderBookings();
+  await cancelBookingById(editingBookingId);
+}
+
+function rescheduleFromModal(){
+  if(!editingBookingId)return;
+  closeBookingModal();
+  openRescheduleModal(editingBookingId);
+}
+
+// ── Dot-menu helpers ─────────────────────────────────────────────────────────
+let _openDotMenu=null;
+function toggleDotMenu(id,event){
+  event.stopPropagation();
+  const el=document.getElementById(id);
+  if(!el)return;
+  if(_openDotMenu&&_openDotMenu!==el){_openDotMenu.style.display='none';}
+  const opening=el.style.display==='none'||!el.style.display;
+  el.style.display=opening?'block':'none';
+  _openDotMenu=opening?el:null;
+}
+function closeDotMenus(){if(_openDotMenu){_openDotMenu.style.display='none';_openDotMenu=null;}}
+document.addEventListener('click',()=>closeDotMenus());
+
+// ── Cancel booking (works from anywhere) ─────────────────────────────────────
+async function cancelBookingById(bookingId){
+  let bk=getBookings().find(b=>b.id===bookingId);
+  if(!bk){
+    try{const r=await fetch(`/api/bookings/${bookingId}`,{headers:authHdr()});if(r.ok)bk=await r.json();}catch(e){}
+  }
+  const label=bk?`${bk.clientName||'this client'}'s ${bk.treatment||'booking'} on ${formatDate(bk.date)}`:'this booking';
+  if(!confirm(`Cancel ${label}?\n\nAn email will be sent to the client notifying them of the cancellation.`))return;
+  try{
+    await BookingAPI.update(bookingId,{status:'Cancelled'});
+    const all=getBookings();
+    const idx=all.findIndex(b=>b.id===bookingId);
+    if(idx>-1){all[idx].status='Cancelled';saveBookings(all);}
+    updateSidebarBadges();renderDashboard();buildCalendar();renderBookings();
+    showToast('Booking cancelled and client notified ✓');
+  }catch(e){
+    showToast('Cancel failed — please try again');
+  }
+}
+
+// ── Reschedule modal ─────────────────────────────────────────────────────────
+let _reschBookingId=null;
+async function openRescheduleModal(bookingId){
+  let b=getBookings().find(x=>x.id===bookingId);
+  if(!b){
+    try{const r=await fetch(`/api/bookings/${bookingId}`,{headers:authHdr()});if(r.ok)b=await r.json();}catch(e){}
+  }
+  if(!b){showToast('Booking not found');return;}
+  _reschBookingId=bookingId;
+  document.getElementById('rs-info').innerHTML=
+    `<strong>${escPortal(b.clientName||'—')}</strong><br>`+
+    `${escPortal(b.treatment||'Not specified')}<br>`+
+    `<span style="color:var(--color-muted-fg)">Currently: ${formatDate(b.date)} at ${(b.time||'').slice(0,5)}</span>`;
+  document.getElementById('rs-date').value=b.date||'';
+  await populateRsTimeSlots(b.date||'',b.time||'');
+  const ov=document.getElementById('rs-overlay');
+  ov.style.display='flex';
+}
+function closeRescheduleModal(){
+  document.getElementById('rs-overlay').style.display='none';
+  _reschBookingId=null;
+}
+async function populateRsTimeSlots(dateVal,keepTime){
+  const sel=document.getElementById('rs-time');
+  if(!dateVal){sel.innerHTML='<option value="">— select date first —</option>';return;}
+  try{
+    const r=await fetch(`/api/availability/slots?location=${encodeURIComponent(locId)}&date=${dateVal}`,{headers:authHdr()});
+    const data=await r.json();
+    const slots=data.slots||[];
+    if(!slots.length){sel.innerHTML='<option value="">Clinic closed this day</option>';return;}
+    sel.innerHTML=slots.map(s=>`<option value="${s.time}"${!s.available?' style="color:#aaa"':''}>${s.time}${s.available?'':' (taken)'}</option>`).join('');
+    if(keepTime&&[...sel.options].some(o=>o.value===keepTime))sel.value=keepTime;
+    else{const first=slots.find(s=>s.available);if(first)sel.value=first.time;}
+  }catch(e){
+    const fb=['09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00'];
+    sel.innerHTML=fb.map(t=>`<option value="${t}">${t}</option>`).join('');
+    if(keepTime)sel.value=keepTime;
+  }
+}
+async function confirmReschedule(){
+  if(!_reschBookingId)return;
+  const newDate=document.getElementById('rs-date').value;
+  const newTime=document.getElementById('rs-time').value;
+  if(!newDate||!newTime){alert('Please select both a date and a time.');return;}
+  const btn=document.querySelector('#rs-box .rs-actions button:last-child');
+  if(btn){btn.textContent='Saving…';btn.disabled=true;}
+  try{
+    await BookingAPI.update(_reschBookingId,{date:newDate,time:newTime,status:'Confirmed'});
+    const all=getBookings();
+    const idx=all.findIndex(b=>b.id===_reschBookingId);
+    if(idx>-1){all[idx].date=newDate;all[idx].time=newTime;all[idx].status='Confirmed';saveBookings(all);}
+    closeRescheduleModal();
+    updateSidebarBadges();renderDashboard();buildCalendar();renderBookings();
+    showToast('Booking rescheduled and client notified ✓');
+  }catch(e){
+    if(btn){btn.textContent='Confirm Reschedule';btn.disabled=false;}
+    showToast('Reschedule failed — please try again');
+  }
 }
 
 async function markBalancePaidFromModal(){
@@ -3313,17 +3464,28 @@ function openClientPanel(id){
           <th style="text-align:left;padding:6px 4px 6px 0;color:#AAAAAA;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap">Date</th>
           <th style="text-align:left;padding:6px 4px;color:#AAAAAA;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px">Treatment</th>
           <th style="text-align:center;padding:6px 4px;color:#AAAAAA;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap">Status</th>
-          <th style="text-align:center;padding:6px 0 6px 4px;color:#AAAAAA;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap">Forms</th>
+          <th style="text-align:center;padding:6px 4px;color:#AAAAAA;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap">Forms</th>
+          <th style="text-align:center;padding:6px 0 6px 4px;color:#AAAAAA;font-weight:600;font-size:10px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap">Act.</th>
         </tr>
       </thead>
       <tbody>
-        ${bookings.map(b=>{const safeName=c.name.replace(/'/g,"\\'");return`<tr style="border-bottom:1px solid #F8F6F2">
-          <td style="padding:8px 4px 8px 0;color:#555;white-space:nowrap;font-size:12px">${formatDate(b.date)}</td>
+        ${bookings.map(b=>{const safeName=c.name.replace(/'/g,"\\'");const dmId2=`dm-cp-${b.id}`;const canAct2=b.status!=='Cancelled'&&b.status!=='cancelled';return`<tr style="border-bottom:1px solid #F8F6F2">
+          <td style="padding:8px 4px 8px 0;color:#555;white-space:nowrap;font-size:12px">${formatDate(b.date)}${b.time?`<br><span style="font-size:11px;color:#999">${(b.time||'').slice(0,5)}</span>`:''}</td>
           <td style="padding:8px 4px;color:#333;font-size:12px;word-break:break-word;min-width:100px">${b.treatment||'—'}</td>
           <td style="padding:8px 4px;text-align:center">${visitPill(b.status)}</td>
-          <td style="padding:8px 0 8px 4px;text-align:center;white-space:nowrap">
+          <td style="padding:8px 4px;text-align:center;white-space:nowrap">
             <button class="form-icon-btn ${b.hasMedical?'has-form':''}" title="${b.hasMedical?'Medical form on file':'No medical form'}" onclick="openFormsDrawer('${b.id}','${safeName}')">📋</button>
             <button class="form-icon-btn ${b.hasConsent?'has-form':''}" title="${b.hasConsent?'Consent signed':'No consent form'}" onclick="openFormsDrawer('${b.id}','${safeName}')">✍️</button>
+          </td>
+          <td style="padding:8px 0 8px 4px;text-align:center">
+            <div class="dot-menu-wrap">
+              <button class="dot-menu-btn" onclick="toggleDotMenu('${dmId2}',event)" title="Actions">⋯</button>
+              <div class="dot-menu-drop" id="${dmId2}">
+                <button onclick="closeDotMenus();openBookingModal('${b.id}')">View / Edit</button>
+                ${canAct2?`<button onclick="closeDotMenus();openRescheduleModal('${b.id}')">Reschedule</button>`:''}
+                ${canAct2?`<button class="danger" onclick="closeDotMenus();cancelBookingById('${b.id}')">Cancel Booking</button>`:''}
+              </div>
+            </div>
           </td>
         </tr>`}).join('')}
       </tbody>

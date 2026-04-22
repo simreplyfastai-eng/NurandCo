@@ -567,6 +567,67 @@ export async function sendCancellationEmail(params: {
   }
 }
 
+// ── Email 5a — Reschedule notification ──────────────────────────────────────
+
+export async function sendRescheduleEmail(params: {
+  clientEmail: string;
+  clientName: string;
+  treatment: string;
+  newDate: string;
+  newTime: string;
+  whatsapp?: string;
+  locationName?: string;
+}): Promise<void> {
+  const firstName = params.clientName.split(" ")[0] ?? params.clientName;
+  const locationName = params.locationName ?? "StarrBeauty";
+  const whatsapp = params.whatsapp ?? "447701298985";
+
+  const content = `
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">Appointment rescheduled</p>
+    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">Hi ${firstName}, your appointment has been rescheduled. Here are your new details.</p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 20px;">
+    <tr><td style="padding:16px 24px;">
+      <p style="font-size:12px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 8px;">New appointment details</p>
+      <p style="font-size:15px;color:#5C1A1A;font-family:Georgia,serif;margin:0 0 4px;">${params.treatment}</p>
+      <p style="font-size:13px;color:#8C7B6B;margin:0;">${formatDate(params.newDate)} at ${params.newTime} &middot; ${locationName}</p>
+    </td></tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+    <tr><td align="center">
+      <a href="https://wa.me/${whatsapp}" style="display:inline-block;padding:12px 28px;background:#C9A96E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">Questions? WhatsApp us &rarr;</a>
+    </td></tr>
+    </table>`;
+
+  const subject = `Your StarrBeauty appointment has been rescheduled`;
+  const text = [
+    `Hi ${firstName},`,
+    "",
+    "Your appointment has been rescheduled.",
+    "",
+    `Treatment: ${params.treatment}`,
+    `New date & time: ${formatDate(params.newDate)} at ${params.newTime}`,
+    `Location: ${locationName}`,
+    "",
+    `Questions? WhatsApp us: https://wa.me/${whatsapp}`,
+    "",
+    PLAIN_FOOTER,
+  ].join("\n");
+
+  const html = buildEmail(content, subject);
+  const resend = getResend();
+  if (!resend || !params.clientEmail) {
+    logEmailPreview(subject, params.clientEmail, html);
+    return;
+  }
+  try {
+    await resend.emails.send({ from: FROM, to: params.clientEmail, subject, html, text });
+  } catch (err) {
+    console.error("sendRescheduleEmail error", err);
+  }
+}
+
 // ── Email 5 — Forms reminder (trigger: cron — forms pending + appt within 48h) ─
 
 export async function sendFormsReminderEmail(params: {

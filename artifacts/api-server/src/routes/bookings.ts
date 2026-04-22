@@ -3,6 +3,7 @@ import { supabaseAdmin } from "../lib/supabase";
 import { findOrCreateClient } from "./clients";
 import {
   sendCancellationEmail,
+  sendRescheduleEmail,
   sendAdminNotificationEmail,
   sendClientConfirmationEmail,
   sendConsultationConfirmationEmail,
@@ -593,6 +594,8 @@ router.put("/bookings/:id", async (req, res) => {
 
     const prevStatus = String(existing.status ?? "");
     const prevDepositPaid = Boolean(existing.deposit_paid);
+    const prevDate = String(existing.booking_date ?? "");
+    const prevTime = String(existing.time_slot ?? "");
 
     const updates: Record<string, unknown> = {};
     if (b.clientName != null) updates.client_name = b.clientName;
@@ -633,6 +636,27 @@ router.put("/bookings/:id", async (req, res) => {
         treatment: booking.treatment as string,
         date: booking.date as string,
         time: booking.time as string,
+        whatsapp,
+        locationName: locationInfo?.name,
+      }).catch(() => {});
+    }
+
+    // When date or time changes on an active booking, send reschedule email
+    const newDate = b.date != null ? String(b.date) : null;
+    const newTime = b.time != null ? String(b.time) : null;
+    const dateChanged = newDate !== null && newDate !== prevDate;
+    const timeChanged = newTime !== null && newTime !== prevTime;
+    if (
+      (dateChanged || timeChanged) &&
+      String(b.status ?? "").toLowerCase() !== "cancelled" &&
+      booking.clientEmail
+    ) {
+      sendRescheduleEmail({
+        clientEmail: booking.clientEmail as string,
+        clientName: booking.clientName as string,
+        treatment: booking.treatment as string,
+        newDate: booking.date as string,
+        newTime: booking.time as string,
         whatsapp,
         locationName: locationInfo?.name,
       }).catch(() => {});
