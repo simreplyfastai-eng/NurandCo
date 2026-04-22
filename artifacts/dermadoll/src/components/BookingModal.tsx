@@ -411,57 +411,11 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
           return;
         }
 
-        // Reserve the booking slot FIRST — never take payment for an unsaved booking
-        const price = parsePrice(treatment?.price ?? "0");
-        const INJECTABLES = ['filler','lips','rhinoplasty','jaw','cheek','smile line','tear trough','polynucleotides','dissolve','hydration','naturale','hd sculpt','contouring','consultation','refill'];
-        const depositAmount = INJECTABLES.some(kw => (treatment?.name ?? "").toLowerCase().includes(kw)) ? 20 : 10;
+        // Generate a booking ID to pass in Stripe metadata — the booking record
+        // is only created by the webhook once payment is confirmed, so no ghost
+        // bookings can block slots if a user abandons checkout.
         const pendingBookingId = uid();
         pendingBookingIdRef.current = pendingBookingId;
-
-        const bookingRes = await fetch("/api/bookings", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            ...(locationId ? { "x-location-id": locationId } : {}),
-          },
-          body: JSON.stringify({
-            id: pendingBookingId,
-            clientName: name.trim(),
-            clientEmail: email.trim(),
-            clientPhone: phone.replace(/\s/g, ""),
-            treatment: treatment?.name ?? "",
-            price,
-            deposit: depositAmount,
-            depositPaid: false,
-            balancePaid: false,
-            date: selectedDate ? fmtDate(selectedDate) : "",
-            time: selectedTime ?? "",
-            status: "pending",
-            paymentMethod: "Stripe",
-            notes: "",
-            createdAt: Date.now(),
-            source: "Website",
-            locationId: locationId ?? null,
-          }),
-        });
-
-        if (!bookingRes.ok) {
-          const bookingErr = await bookingRes.json() as { error?: string; code?: string };
-          if (!cancelled) {
-            if (bookingErr.code === "SLOT_TAKEN") {
-              // Go back to time selection and refresh slots
-              setSlotError("This time slot has just been booked by someone else. Please choose another time.");
-              setSelectedTime(null);
-              if (selectedDate) await fetchSlots(selectedDate);
-              setStep(2);
-              setPaymentLoading(false);
-            } else {
-              setPaymentError(bookingErr.error ?? "Failed to reserve your slot. Please try again.");
-              setPaymentLoading(false);
-            }
-          }
-          return;
-        }
 
         // Create payment intent — server computes the authoritative deposit amount
         const piRes = await fetch("/api/stripe/create-payment-intent", {

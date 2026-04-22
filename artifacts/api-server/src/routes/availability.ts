@@ -142,14 +142,14 @@ router.get("/availability/check", async (req, res) => {
       return res.json({ available: false, reason: "OUTSIDE_HOURS" });
     }
 
-    // 4. Slot taken?
+    // 4. Slot taken? Only confirmed/completed bookings (paid) block a slot.
     const { data: existing } = await supabaseAdmin
       .from("bookings")
       .select("id")
       .eq("location_id", locationId)
       .eq("booking_date", date)
       .eq("time_slot", time)
-      .not("status", "eq", "cancelled")
+      .in("status", ["confirmed", "completed"])
       .limit(1);
     if (existing && existing.length > 0) {
       return res.json({ available: false, reason: "SLOT_TAKEN" });
@@ -587,13 +587,13 @@ router.get("/availability/slots", async (req, res) => {
     // 4. No intra-day recurring blocks (blocked_slots table not in schema)
     const blockedSlots: { start_time: string; end_time: string }[] = [];
 
-    // 5. Get existing bookings
+    // 5. Get existing bookings — only paid/confirmed bookings block slots
     const { data: bookings } = await supabaseAdmin
       .from("bookings")
       .select("time_slot")
       .eq("location_id", locationId)
       .eq("booking_date", date)
-      .not("status", "eq", "cancelled");
+      .in("status", ["confirmed", "completed"]);
 
     const bookedSet = new Set((bookings ?? []).map((b: { time_slot: string }) => b.time_slot?.substring(0, 5)));
 
