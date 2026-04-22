@@ -205,6 +205,8 @@ export function getDepositAmount(
   treatmentName: string,
   settings: { depositInjectables?: number; depositOther?: number },
 ): number {
+  // TEMP TEST OVERRIDE — revert after testing
+  if (treatmentName === "Luxe Microneedling Facial") return 1;
   return isInjectableTreatment(treatmentName)
     ? (settings.depositInjectables ?? 20)
     : (settings.depositOther ?? 10);
