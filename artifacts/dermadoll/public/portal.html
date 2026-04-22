@@ -190,7 +190,7 @@ tr:hover td{background:rgba(92,26,26,.02)}
 
 /* ── CHART ───────────────────────────────────────── */
 .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:10px;font-size:12px}
-.bar-label{width:110px;text-align:right;color:var(--color-muted-fg);font-family:var(--font-sans);font-size:11px;flex-shrink:0}
+.bar-label{width:150px;text-align:right;color:var(--color-muted-fg);font-family:var(--font-sans);font-size:11px;flex-shrink:0;white-space:normal;line-height:1.35;word-break:break-word}
 .bar-track{flex:1;background:rgba(92,26,26,.06);border-radius:var(--radius);height:20px;overflow:hidden}
 .bar-fill{height:100%;border-radius:var(--radius);background:linear-gradient(90deg,var(--color-primary),#8B2A2A);transition:width .6s ease}
 .bar-val{width:50px;font-family:var(--font-sans);font-size:11px;font-weight:400;color:var(--color-foreground)}
@@ -606,7 +606,7 @@ select.form-input{background:var(--color-card)}
   #bm-cancel-booking-btn,#bm-reschedule-btn{width:100%;text-align:center}
   .bm-info-row{flex-direction:column;gap:10px}
   .bm-info-col+.bm-info-col{border-left:none;padding-left:0;margin-left:0;border-top:1px solid rgba(201,169,110,0.2);padding-top:10px;margin-top:0}
-  .bar-label{width:80px;font-size:10px}
+  .bar-label{width:110px;font-size:10px}
   .bar-val{font-size:10px}
   .bar-label-full{display:none}
   .bar-label-short{display:inline}
@@ -2187,21 +2187,17 @@ function renderDashboard(){
     if(recentEmpty)recentEmpty.style.display='';
   }
 
-  // Revenue by treatment
-  const catRevenue={};
+  // Revenue by treatment — group by actual treatment name
+  const treatRevenue={};
   bookings.filter(b=>b.status!=='Cancelled').forEach(b=>{
-    const cat=b.category||'Other';
-    catRevenue[cat]=(catRevenue[cat]||0)+Number(b.price);
+    const name=(b.treatment||'Unknown').trim();
+    treatRevenue[name]=(treatRevenue[name]||0)+Number(b.price||0);
   });
-  const maxR=Math.max(...Object.values(catRevenue),1);
-  const _builtInCatLabels={BOTOX:'Botox',FILLER:'Dermal Filler',FACIALS:'Facials',SKINBOOST:'Skin Boosters',FATDISSOLVE:'Fat Dissolving',INJECTABLES:'Injectables',BUNDLES:'Treatment Bundles',CONSULT:'Consultation','Botox':'Botox','Dermal Filler':'Dermal Filler','Facials':'Facials','Skin Boosters':'Skin Boosters','Fat Dissolving':'Fat Dissolving','Injectables':'Injectables','Treatment Bundles':'Treatment Bundles'};
-  const catLabels={..._builtInCatLabels};
-  getCustomCats().forEach(c=>{if(c.key&&c.label)catLabels[c.key]=c.label;});
-  const catColors={CONSULT:'background:#4A90D9',Consultation:'background:#4A90D9'};
-  document.getElementById('revenue-by-treatment').innerHTML=Object.entries(catRevenue).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`
+  const maxR=Math.max(...Object.values(treatRevenue),1);
+  document.getElementById('revenue-by-treatment').innerHTML=Object.entries(treatRevenue).sort((a,b)=>b[1]-a[1]).map(([name,v])=>`
     <div class="bar-row">
-      <div class="bar-label"><span class="bar-label-full">${catLabels[k]||k}</span><span class="bar-label-short">${catLabels[k]||k}</span></div>
-      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/maxR*100)}%;${catColors[k]||''}"></div></div>
+      <div class="bar-label" style="white-space:normal;line-height:1.3;word-break:break-word"><span class="bar-label-full">${escHtml(name)}</span><span class="bar-label-short">${escHtml(name)}</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(v/maxR*100)}%"></div></div>
       <div class="bar-val">${gbp(v)}</div>
     </div>
   `).join('') || '<p style="color:var(--muted);font-size:13px">No revenue data yet</p>';
