@@ -3675,18 +3675,39 @@ function closeClientModal(){document.getElementById('client-modal').classList.re
 
 async function saveClient(){
   const name=document.getElementById('cm-name').value.trim();
-  if(!name){alert('Please enter a client name');return}
-  const client={
-    id:uid(),name,
-    email:document.getElementById('cm-email').value.trim(),
-    phone:document.getElementById('cm-phone').value.trim(),
-    joinDate:fmt(new Date()),
-    notes:document.getElementById('cm-notes').value,
-    source:document.getElementById('cm-source').value
-  };
-  await ClientAPI.upsert(client);
-  closeClientModal();
-  renderClients();
+  if(!name){showToast('Please enter a client name');return;}
+  const saveBtn=document.querySelector('#client-modal .btn-gold');
+  if(saveBtn){saveBtn.disabled=true;saveBtn.textContent='Saving…';}
+  try{
+    const payload={
+      name,
+      email:document.getElementById('cm-email').value.trim(),
+      phone:document.getElementById('cm-phone').value.trim(),
+      notes:document.getElementById('cm-notes').value.trim(),
+      source:document.getElementById('cm-source').value
+    };
+    const r=await fetch('/api/clients',{
+      method:'POST',
+      headers:{...authHdr(),'Content-Type':'application/json'},
+      body:JSON.stringify(payload)
+    });
+    if(!r.ok){
+      const err=await r.json().catch(()=>({}));
+      console.error('saveClient failed',r.status,err);
+      showToast('Failed to save client — '+(err.error||'please try again'));
+      return;
+    }
+    showToast('Client added ✓');
+    closeClientModal();
+    // Force fresh reload from Supabase so new client appears immediately
+    _supabaseClients=null;
+    await loadSupabaseClients();
+  }catch(e){
+    console.error('saveClient error',e);
+    showToast('Network error — client not saved');
+  }finally{
+    if(saveBtn){saveBtn.disabled=false;saveBtn.textContent='Add Client';}
+  }
 }
 
 // ═══════════════════════════════════════════════════
