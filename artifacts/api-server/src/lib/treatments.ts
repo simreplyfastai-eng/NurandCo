@@ -205,7 +205,6 @@ export function getDepositAmount(
   treatmentName: string,
   settings: { depositInjectables?: number; depositOther?: number },
 ): number {
-  if (treatmentName === 'Facial Contouring 3ml') return 1;
   return isInjectableTreatment(treatmentName)
     ? (settings.depositInjectables ?? 20)
     : (settings.depositOther ?? 10);
