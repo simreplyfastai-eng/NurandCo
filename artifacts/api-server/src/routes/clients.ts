@@ -188,8 +188,19 @@ router.put("/clients/:id", async (req, res) => {
 // DELETE /api/clients/:id — requires admin JWT
 router.delete("/clients/:id", async (req, res) => {
   if (!requireAuth(req, res)) return;
+  const { id } = req.params;
   try {
-    await supabaseAdmin.from("clients").delete().eq("id", req.params.id);
+    // Remove bookings referencing this client first (foreign key constraint)
+    const { error: bErr } = await supabaseAdmin.from("bookings").delete().eq("client_id", id);
+    if (bErr) {
+      console.error("DELETE /api/clients/:id — bookings delete error", bErr);
+      return res.status(500).json({ error: "Failed to remove client bookings" });
+    }
+    const { error: cErr } = await supabaseAdmin.from("clients").delete().eq("id", id);
+    if (cErr) {
+      console.error("DELETE /api/clients/:id — client delete error", cErr);
+      return res.status(500).json({ error: "Failed to delete client" });
+    }
     return res.json({ ok: true });
   } catch (err) {
     console.error("DELETE /api/clients/:id", err);
