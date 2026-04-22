@@ -108,10 +108,12 @@ async function getDepositSettings(locationId: string): Promise<{ depositInjectab
     const inj = Number(settings.depositInjectables ?? 0);
     const other = Number(settings.depositOther ?? 0);
     if (inj > 0 || other > 0) {
-      return { depositInjectables: inj || 20, depositOther: other || 10 };
+      // TEST MODE — cap at £1. Revert: inj || 20, other || 10
+      return { depositInjectables: Math.min(inj || 1, 1), depositOther: Math.min(other || 1, 1) };
     }
   } catch { /* fall through */ }
-  return { depositInjectables: 0.10, depositOther: 0.10 };
+  // TEST MODE fallback — £1. Revert to: 0.10 → 20/10
+  return { depositInjectables: 1, depositOther: 1 };
 }
 
 const IG_ACCOUNTS_DEFAULT = [

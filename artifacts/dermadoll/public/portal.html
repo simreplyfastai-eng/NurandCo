@@ -1101,12 +1101,12 @@ select.form-input{background:var(--color-card)}
           <div style="display:flex;gap:24px;align-items:flex-end;flex-wrap:wrap">
             <div>
               <div class="avail-section-label" style="margin-bottom:5px">Injectables deposit (£)</div>
-              <input type="number" id="dep-injectables" class="avail-time-input" style="width:100px;padding:8px 10px" min="1" max="999" value="20">
+              <input type="number" id="dep-injectables" class="avail-time-input" style="width:100px;padding:8px 10px" min="1" max="999" value="1">
               <div style="font-size:11px;color:var(--muted);margin-top:4px">Fillers, lips, rhinoplasty, etc.</div>
             </div>
             <div>
               <div class="avail-section-label" style="margin-bottom:5px">Other treatments deposit (£)</div>
-              <input type="number" id="dep-other" class="avail-time-input" style="width:100px;padding:8px 10px" min="1" max="999" value="10">
+              <input type="number" id="dep-other" class="avail-time-input" style="width:100px;padding:8px 10px" min="1" max="999" value="1">
               <div style="font-size:11px;color:var(--muted);margin-top:4px">Anti-wrinkle, facials, etc.</div>
             </div>
           </div>
@@ -1264,7 +1264,7 @@ select.form-input{background:var(--color-card)}
               <label>Injectable deposit</label>
               <div style="display:flex;align-items:center;gap:8px">
                 <span style="font-size:14px;color:var(--color-foreground)">£</span>
-                <input type="number" id="s-deposit-injectables" value="20" min="1" max="999" style="width:70px;flex:unset"/>
+                <input type="number" id="s-deposit-injectables" value="1" min="1" max="999" style="width:70px;flex:unset"/>
               </div>
               <span style="font-size:12px;color:var(--muted)">Fixed deposit for injectables (fillers, lips, rhinoplasty, etc.)</span>
             </div>
@@ -1272,7 +1272,7 @@ select.form-input{background:var(--color-card)}
               <label>Other treatments deposit</label>
               <div style="display:flex;align-items:center;gap:8px">
                 <span style="font-size:14px;color:var(--color-foreground)">£</span>
-                <input type="number" id="s-deposit-other" value="10" min="1" max="999" style="width:70px;flex:unset"/>
+                <input type="number" id="s-deposit-other" value="1" min="1" max="999" style="width:70px;flex:unset"/>
               </div>
               <span style="font-size:12px;color:var(--muted)">Fixed deposit for all other treatments (anti-wrinkle, facials, etc.)</span>
             </div>
@@ -2907,8 +2907,9 @@ async function loadDepositSettings(){
     const s=await CloudStore.get('fbn_settings')||{};
     const injEl=document.getElementById('dep-injectables');
     const otherEl=document.getElementById('dep-other');
-    if(injEl)injEl.value=String(s.depositInjectables??20);
-    if(otherEl)otherEl.value=String(s.depositOther??10);
+    // TEST MODE — show £1. Revert: ??20 / ??10
+    if(injEl)injEl.value=String(s.depositInjectables??1);
+    if(otherEl)otherEl.value=String(s.depositOther??1);
   }catch(e){console.error('loadDepositSettings',e);}
 }
 async function saveDepositSettings(){
@@ -3106,8 +3107,9 @@ function buildTreatmentSelect(){
   const all=allTreatments?allTreatments():TREATMENTS;
   const overrides=getTreatOverrides?getTreatOverrides():{};
   const sets=getSettings()||{};
-  const depInj=Number(sets.depositInjectables||20);
-  const depOther=Number(sets.depositOther||10);
+  // TEST MODE — £1 deposits. Revert: ||20 / ||10
+  const depInj=Number(sets.depositInjectables||1);
+  const depOther=Number(sets.depositOther||1);
   const INJECTABLE_CATS=new Set(['FILLER','BOTOX','SKINBOOST','VITAMIN','Aesthetics','SPMU']);
   sel.innerHTML='<option value="">Select treatment</option>'+all.map(t=>{
     const ov=overrides[t.name]||{};
@@ -3148,7 +3150,7 @@ function updateDeposit(){
   const sel=document.getElementById('bm-treatment');
   const opt=sel.options[sel.selectedIndex];
   const price=opt&&opt.dataset.price?Number(opt.dataset.price):0;
-  const deposit=opt&&opt.dataset.deposit?Number(opt.dataset.deposit):10;
+  const deposit=opt&&opt.dataset.deposit?Number(opt.dataset.deposit):1; // TEST MODE: revert to 10
   const pInput=document.getElementById('bm-price');
   if(price)pInput.value=price;
   document.getElementById('bm-deposit').value=deposit;
