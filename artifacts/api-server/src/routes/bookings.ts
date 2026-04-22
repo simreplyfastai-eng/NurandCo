@@ -546,6 +546,33 @@ router.post("/bookings/bulk", async (req, res) => {
   }
 });
 
+// GET /api/bookings/:id — fetch single booking — admin only
+router.get("/bookings/:id", async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  const { id } = req.params;
+  try {
+    const { data, error } = await supabaseAdmin
+      .from("bookings")
+      .select("*, treatments(name, duration_minutes)")
+      .eq("id", id)
+      .maybeSingle();
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: "not found" });
+    const [medRes, conRes] = await Promise.all([
+      supabaseAdmin.from("medical_forms").select("booking_id").eq("booking_id", id),
+      supabaseAdmin.from("consent_forms").select("booking_id").eq("booking_id", id),
+    ]);
+    return res.json({
+      ...supabaseRowToBooking(data as Record<string, unknown>),
+      hasMedical: !!(medRes.data?.length),
+      hasConsent: !!(conRes.data?.length),
+    });
+  } catch (err) {
+    console.error("GET /api/bookings/:id", err);
+    return res.status(500).json({ error: "db error" });
+  }
+});
+
 // PUT /api/bookings/:id — update booking — admin only
 router.put("/bookings/:id", async (req, res) => {
   if (!requireAuth(req, res)) return;

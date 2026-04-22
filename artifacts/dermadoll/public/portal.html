@@ -2946,14 +2946,29 @@ function autofillClientContact(name){
   }
 }
 
-function openBookingModal(prefill){
+async function openBookingModal(prefill){
   // prefill can be a string (client name) or a booking ID to edit
   const clients=getClients();
   document.getElementById('client-list').innerHTML=clients.map(c=>`<option value="${c.name}"/>`).join('');
 
   const UUID_RE_BM=/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   const isId=prefill&&typeof prefill==='string'&&UUID_RE_BM.test(prefill);
-  const booking=isId?getBookings().find(b=>b.id===prefill):null;
+  let booking=isId?getBookings().find(b=>b.id===prefill):null;
+
+  // Not in local cache — fetch directly from API (handles cache staleness after live poll)
+  if(isId&&!booking){
+    try{
+      const r=await fetch(`/api/bookings/${prefill}`,{headers:authHdr()});
+      if(r.ok){
+        booking=await r.json();
+        // Merge into local cache so subsequent lookups work
+        const all=getBookings();
+        const idx=all.findIndex(b=>b.id===booking.id);
+        if(idx>-1)all[idx]=booking;else all.unshift(booking);
+        saveBookings(all);
+      }
+    }catch(e){console.warn('openBookingModal: API fallback failed',e);}
+  }
 
   if(booking){
     // Edit mode

@@ -1,0 +1,243 @@
+ADD CANCEL/RESCHEDULE BUTTONS + FIX BOOKING 
+DETAIL VIEWS ACROSS THE ENTIRE PORTAL.
+
+Read portal.html and all booking-related 
+API files fully before touching anything.
+
+===============================================================
+PART 1 — CANCEL & RESCHEDULE BUTTONS
+===============================================================
+
+Add CANCEL BOOKING and RESCHEDULE buttons 
+to EVERY place a booking is shown in detail.
+
+These four places:
+
+A) NEW BOOKINGS TAB — booking detail panel
+   When a booking row is clicked and the 
+   detail panel opens on the right, add 
+   two buttons at the bottom:
+   
+   [RESCHEDULE]  [CANCEL BOOKING]
+   
+   RESCHEDULE button style: burgundy outline
+   CANCEL BOOKING button style: red/danger
+
+B) SCHEDULE TAB — day timeline detail panel
+   When a booking item is clicked in the 
+   schedule timeline, same two buttons at 
+   the bottom of the detail panel.
+
+C) DASHBOARD — Recent Bookings table
+   Each row in the Recent Bookings table 
+   gets a "..." action menu on the right.
+   Clicking it shows:
+     - View Details
+     - Reschedule
+     - Cancel Booking
+
+D) CLIENTS TAB — booking history
+   When clicking a client name and viewing 
+   their booking history, each booking row 
+   gets the same "..." action menu.
+
+===============================================================
+PART 2 — CANCEL BOOKING FLOW
+===============================================================
+
+When CANCEL BOOKING is clicked:
+
+1. Show confirmation modal:
+   "Are you sure you want to cancel this 
+   booking for [client_name] on [date]?
+   An email will be sent to the client."
+   
+   [Keep Booking]  [Yes, Cancel]
+
+2. On confirm:
+   UPDATE bookings SET status = 'cancelled'
+   WHERE id = bookingId
+   
+3. Send cancellation email to client via Resend:
+   TO: client email
+   FROM: hello@starrbeautyy.co.uk
+   SUBJECT: Your StarrBeauty booking has 
+            been cancelled
+   BODY:
+   Hi [client_name],
+   
+   Your booking has been cancelled.
+   
+   Booking details:
+   Treatment: [treatment_name]
+   Date: [booking_date]
+   Time: [booking_time]
+   Location: [location_name]
+   
+   If you'd like to rebook, please visit:
+   starrbeautyy.co.uk/book
+   
+   If you have any questions please 
+   WhatsApp us: +44 7701 298985
+   
+   StarrBeauty
+
+4. Update the booking list in real time — 
+   show status as "Cancelled" immediately
+   without page refresh.
+
+5. Show success toast: "Booking cancelled 
+   and client notified ✓"
+
+===============================================================
+PART 3 — RESCHEDULE BOOKING FLOW
+===============================================================
+
+When RESCHEDULE is clicked:
+
+1. Open a reschedule modal with:
+   - Current booking details shown at top
+   - Date picker (same calendar component 
+     used in booking flow)
+   - Time picker showing available 2-hour 
+     slots for the NEW date
+   - [Cancel]  [Confirm Reschedule] buttons
+
+2. On confirm:
+   UPDATE bookings SET 
+     booking_date = newDate,
+     booking_time = newTime,
+     status = 'confirmed'
+   WHERE id = bookingId
+
+3. Send reschedule email to client via Resend:
+   TO: client email
+   FROM: hello@starrbeautyy.co.uk
+   SUBJECT: Your StarrBeauty booking has 
+            been rescheduled
+   BODY:
+   Hi [client_name],
+   
+   Your booking has been rescheduled.
+   
+   New booking details:
+   Treatment: [treatment_name]
+   New Date: [new_booking_date]
+   New Time: [new_booking_time]
+   Location: [location_name]
+   
+   If you have any questions please 
+   WhatsApp us: +44 7701 298985
+   
+   StarrBeauty
+
+4. Update booking in list immediately.
+5. Show toast: "Booking rescheduled and 
+   client notified ✓"
+
+===============================================================
+PART 4 — FIX BOOKING DETAIL TO SHOW 
+TREATMENT, DATE AND TIME
+===============================================================
+
+EVERYWHERE a booking is shown in detail, 
+it must show ALL of these fields:
+
+  Client Name
+  Email
+  Phone
+  Treatment — [treatment_name] (NOT blank)
+  Date — [booking_date formatted as 
+          "Wednesday, 22 April 2026"]
+  Time — [booking_time as HH:MM]
+  Location — Hornchurch / Marylebone
+  Status — [coloured badge]
+  Deposit Paid — £[amount]
+  Balance Due — £[amount]
+  Forms — Completed / Pending
+
+Currently treatment shows as "—" in most 
+places and date/time is missing from some.
+
+Fix the detail panel to always show all 
+fields. Use COALESCE:
+  treatment_name = COALESCE(
+    b.treatment_name,
+    t.name, 
+    'Not specified'
+  )
+
+===============================================================
+PART 5 — FIX CLIENTS TAB BOOKING HISTORY
+===============================================================
+
+When clicking a client name in the Clients 
+tab, the profile must show their full 
+booking history with for each booking:
+
+  [Treatment Name]
+  [Date — formatted "22 Apr 2026"]
+  [Time — HH:MM]
+  [Status badge]
+  [Deposit paid]
+  [...] action menu → Reschedule / Cancel
+
+Currently the booking history either doesn't 
+show or shows incomplete info.
+
+Fix by fetching:
+  SELECT b.*, t.name as treatment_name_joined
+  FROM bookings b
+  LEFT JOIN treatments t ON t.id = b.treatment_id
+  WHERE b.client_email = clientEmail
+  OR b.client_id = clientId
+  ORDER BY b.booking_date DESC
+
+Show each booking as a row with all 
+the fields listed above.
+
+===============================================================
+PART 6 — DASHBOARD RECENT BOOKINGS
+===============================================================
+
+The Recent Bookings table on the dashboard 
+must show:
+  CLIENT | TREATMENT | DATE | STATUS
+
+Currently TREATMENT column is often blank.
+
+Fix to always show treatment name.
+Each row clickable → opens full detail 
+panel with cancel/reschedule buttons.
+
+===============================================================
+VERIFY AFTER ALL FIXES
+===============================================================
+
+1. New Bookings → click booking → 
+   detail shows treatment + date + time ✓
+   CANCEL and RESCHEDULE buttons visible ✓
+
+2. Click CANCEL → confirmation modal ✓
+   Confirm → status = cancelled ✓
+   Client receives cancellation email ✓
+   List updates immediately ✓
+
+3. Click RESCHEDULE → modal with calendar ✓
+   Pick new date/time → confirm ✓
+   Booking updated in Supabase ✓
+   Client receives reschedule email ✓
+
+4. Schedule tab → click date → click booking
+   → same detail + buttons ✓
+
+5. Dashboard Recent Bookings → shows 
+   treatment name ✓
+   "..." menu → cancel/reschedule work ✓
+
+6. Clients → click name → booking history 
+   shows treatment + date + time ✓
+   Cancel/reschedule on each booking ✓
+
+7. All emails send successfully via Resend ✓
+   From: hello@starrbeautyy.co.uk ✓
