@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { supabaseAdmin } from "../lib/supabase";
-import { createCalendarEvent } from '../googleCalendar';
+import { createCalendarEvent, deleteCalendarEvent } from '../googleCalendar';
 import { findOrCreateClient } from "./clients";
 import {
   sendCancellationEmail,
@@ -652,16 +652,27 @@ router.put("/bookings/:id", async (req, res) => {
     const whatsapp = await getWhatsApp(locationId);
     const locationInfo = locationId ? await getLocationInfo(locationId) : null;
 
-    if (String(b.status ?? "").toLowerCase() === "cancelled" && prevStatus !== "cancelled" && booking.clientEmail) {
-      sendCancellationEmail({
-        clientEmail: booking.clientEmail as string,
-        clientName: booking.clientName as string,
-        treatment: booking.treatment as string,
-        date: booking.date as string,
-        time: booking.time as string,
-        whatsapp,
-        locationName: locationInfo?.name,
-      }).catch(() => {});
+    if (String(b.status ?? "").toLowerCase() === "cancelled" && prevStatus !== "cancelled") {
+      if (booking.clientEmail) {
+        sendCancellationEmail({
+          clientEmail: booking.clientEmail as string,
+          clientName: booking.clientName as string,
+          treatment: booking.treatment as string,
+          date: booking.date as string,
+          time: booking.time as string,
+          whatsapp,
+          locationName: locationInfo?.name,
+        }).catch(() => {});
+      }
+      const gEventId = String(existing.google_event_id ?? "");
+      const gLocId = String(existing.location_id ?? "");
+      if (gEventId && gLocId) {
+        try {
+          await deleteCalendarEvent(gLocId, gEventId);
+        } catch (err) {
+          console.error('Google Calendar delete failed (non-fatal):', err);
+        }
+      }
     }
 
     // When date or time changes on an active booking, send reschedule email
@@ -743,10 +754,28 @@ router.delete("/bookings/:id", async (req, res) => {
   if (!requireAuth(req, res)) return;
   const locationId = getLocationId(req);
   try {
+    // Fetch google_event_id before deleting so we can clean up Calendar
+    const { data: existing } = await supabaseAdmin
+      .from("bookings")
+      .select("google_event_id, location_id")
+      .eq("id", req.params.id)
+      .maybeSingle();
+
     let query = supabaseAdmin.from("bookings").delete().eq("id", req.params.id);
     if (locationId) query = query.eq("location_id", locationId);
     const { error } = await query;
     if (error) throw error;
+
+    const gEventId = String(existing?.google_event_id ?? "");
+    const gLocId = String(existing?.location_id ?? "");
+    if (gEventId && gLocId) {
+      try {
+        await deleteCalendarEvent(gLocId, gEventId);
+      } catch (err) {
+        console.error('Google Calendar delete failed (non-fatal):', err);
+      }
+    }
+
     return res.json({ ok: true });
   } catch (err) {
     console.error("DELETE /api/bookings/:id", err);
