@@ -59,13 +59,13 @@ async function resolveLocationId(param: string): Promise<string | null> {
 
 /** Get availability for a day_of_week from the DB row only — no hardcoded fallbacks */
 function resolveAvail(
-  dbRow: { is_open: boolean; start_time: string | null; end_time: string | null } | null,
+  dbRow: { is_open: boolean; open_time: string | null; close_time: string | null } | null,
 ): { isOpen: boolean; startTime: string; endTime: string } {
   if (dbRow && dbRow.is_open) {
     return {
       isOpen: true,
-      startTime: (dbRow.start_time as string | null)?.substring(0, 5) ?? "09:00",
-      endTime: (dbRow.end_time as string | null)?.substring(0, 5) ?? "17:00",
+      startTime: (dbRow.open_time as string | null)?.substring(0, 5) ?? "09:00",
+      endTime: (dbRow.close_time as string | null)?.substring(0, 5) ?? "17:00",
     };
   }
   return { isOpen: false, startTime: "", endTime: "" };
@@ -124,13 +124,13 @@ router.get("/availability/check", async (req, res) => {
     const dayOfWeek = parseDayOfWeek(date);
     const { data: availRow } = await supabaseAdmin
       .from("availability_settings")
-      .select("is_open, start_time, end_time")
+      .select("is_open, open_time, close_time")
       .eq("location_id", locationId)
       .eq("day_of_week", dayOfWeek)
       .maybeSingle();
 
     const { isOpen, startTime, endTime } = resolveAvail(
-      availRow as { is_open: boolean; start_time: string | null; end_time: string | null } | null,
+      availRow as { is_open: boolean; open_time: string | null; close_time: string | null } | null,
     );
 
     if (!isOpen) return res.json({ available: false, reason: "CLINIC_CLOSED" });
@@ -174,7 +174,7 @@ router.get("/availability", async (req, res) => {
     const [settingsRes, blockedRes] = await Promise.all([
       supabaseAdmin
         .from("availability_settings")
-        .select("day_of_week, is_open, start_time, end_time")
+        .select("day_of_week, is_open, open_time, close_time")
         .eq("location_id", locationId)
         .order("day_of_week"),
       supabaseAdmin
@@ -192,7 +192,7 @@ router.get("/availability", async (req, res) => {
         const dayName = DAY_NAMES[row.day_of_week as number];
         if (dayName) {
           defaults[dayName] = row.is_open
-            ? { on: true, start: (row.start_time ?? "09:00").substring(0, 5), end: (row.end_time ?? "17:00").substring(0, 5) }
+            ? { on: true, start: (row.open_time ?? "09:00").substring(0, 5), end: (row.close_time ?? "17:00").substring(0, 5) }
             : { on: false };
         }
       }
@@ -230,10 +230,10 @@ router.get("/availability/settings", async (req, res) => {
     ninetyDays.setUTCDate(ninetyDays.getUTCDate() + 90);
     const future = ninetyDays.toISOString().slice(0, 10);
 
-    const [settingsRes, blockedDatesRes, blockedSlotsRes] = await Promise.all([
+    const [settingsRes, blockedDatesRes] = await Promise.all([
       supabaseAdmin
         .from("availability_settings")
-        .select("day_of_week, is_open, start_time, end_time")
+        .select("day_of_week, is_open, open_time, close_time")
         .eq("location_id", locationId)
         .order("day_of_week"),
       supabaseAdmin
@@ -242,10 +242,6 @@ router.get("/availability/settings", async (req, res) => {
         .eq("location_id", locationId)
         .gte("date", today)
         .lte("date", future),
-      supabaseAdmin
-        .from("blocked_slots")
-        .select("id, day_of_week, all_days, start_time, end_time, label")
-        .eq("location_id", locationId),
     ]);
 
     const days: Record<number, { is_open: boolean; open_time: string; close_time: string }> = {};
@@ -257,15 +253,15 @@ router.get("/availability/settings", async (req, res) => {
     for (const row of settingsRes.data ?? []) {
       days[row.day_of_week as number] = {
         is_open: !!row.is_open,
-        open_time: (row.start_time ?? "09:00").substring(0, 5),
-        close_time: (row.end_time ?? "17:00").substring(0, 5),
+        open_time: (row.open_time ?? "09:00").substring(0, 5),
+        close_time: (row.close_time ?? "17:00").substring(0, 5),
       };
     }
 
     return res.json({
       days: Object.entries(days).map(([dow, v]) => ({ day_of_week: Number(dow), ...v })),
       blocked_dates: (blockedDatesRes.data ?? []).map((r: { date: string; reason?: string | null }) => ({ date: r.date, reason: r.reason ?? null })),
-      blocked_slots: blockedSlotsRes.data ?? [],
+      blocked_slots: [],
     });
   } catch (err) {
     console.error("GET /api/availability/settings", err);
@@ -292,8 +288,8 @@ router.put("/availability/settings", async (req, res) => {
       location_id: locationId,
       day_of_week: d.day_of_week,
       is_open: d.is_open,
-      start_time: d.open_time ?? null,
-      end_time: d.close_time ?? null,
+      open_time: d.open_time ?? "09:00",
+      close_time: d.close_time ?? "17:00",
     }));
     // Delete-then-insert avoids needing a unique constraint on (location_id, day_of_week)
     const { error: delErr } = await supabaseAdmin
@@ -329,7 +325,7 @@ router.post("/availability/settings", async (req, res) => {
     const inserts = Object.entries(defaults).flatMap(([dayName, cfg]) => {
       const dayIndex = DAY_NAMES.indexOf(dayName as typeof DAY_NAMES[number]);
       if (dayIndex === -1) return [];
-      return [{ location_id: locationId, day_of_week: dayIndex, is_open: cfg.on, start_time: cfg.start ?? null, end_time: cfg.end ?? null }];
+      return [{ location_id: locationId, day_of_week: dayIndex, is_open: cfg.on, open_time: cfg.start ?? "09:00", close_time: cfg.end ?? "17:00" }];
     });
     if (inserts.length === 0) return res.json({ ok: true });
     // Delete-then-insert avoids needing a unique constraint on (location_id, day_of_week)
@@ -572,13 +568,13 @@ router.get("/availability/slots", async (req, res) => {
     // 2. Clinic open this day?
     const { data: availRow } = await supabaseAdmin
       .from("availability_settings")
-      .select("is_open, start_time, end_time")
+      .select("is_open, open_time, close_time")
       .eq("location_id", locationId)
       .eq("day_of_week", dayOfWeek)
       .maybeSingle();
 
     const { isOpen, startTime, endTime } = resolveAvail(
-      availRow as { is_open: boolean; start_time: string | null; end_time: string | null } | null,
+      availRow as { is_open: boolean; open_time: string | null; close_time: string | null } | null,
     );
 
     if (!isOpen) {
@@ -588,12 +584,8 @@ router.get("/availability/slots", async (req, res) => {
     // 3. Generate 2-hour slots (RULE 4: string arithmetic, no Date objects)
     const allSlots = generateTimeSlots(startTime, endTime, 120);
 
-    // 4. Get intra-day recurring blocks
-    const { data: blockedSlots } = await supabaseAdmin
-      .from("blocked_slots")
-      .select("start_time, end_time")
-      .eq("location_id", locationId)
-      .or(`day_of_week.eq.${dayOfWeek},all_days.eq.true`);
+    // 4. No intra-day recurring blocks (blocked_slots table not in schema)
+    const blockedSlots: { start_time: string; end_time: string }[] = [];
 
     // 5. Get existing bookings
     const { data: bookings } = await supabaseAdmin

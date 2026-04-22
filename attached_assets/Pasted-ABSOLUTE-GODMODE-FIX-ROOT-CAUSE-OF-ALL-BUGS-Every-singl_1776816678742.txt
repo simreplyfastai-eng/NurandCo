@@ -1,0 +1,273 @@
+ABSOLUTE GODMODE FIX — ROOT CAUSE OF ALL BUGS.
+
+Every single portal bug (double login, saves 
+failing, availability not saving, bookings 
+not saving, settings not saving) has ONE 
+root cause:
+
+THE TOKEN IS NOT BEING STORED IN localStorage.
+
+After login, localStorage is completely empty.
+portal_token = null
+portal_location_id = null
+
+This means:
+  - Every page refresh shows login again
+  - Every authFetch() call sends no token
+  - Every POST/PUT returns 401 Unauthorized
+  - Nothing saves to Supabase
+
+READ portal.html FULLY before touching 
+anything. Then make ONLY these changes.
+
+===============================================================
+FIX 1 — STORE TOKEN IN localStorage ON LOGIN
+===============================================================
+
+Search portal.html for:
+  fetch('/api/auth/login'
+
+Find the response handler. It will look 
+something like this:
+
+  const data = await res.json()
+  _SESSION_TOKEN = data.token
+  showLocationSelector()
+
+ADD these two lines immediately after 
+receiving the token:
+
+  localStorage.setItem('portal_token', data.token)
+
+That's it for this step. One line added.
+
+===============================================================
+FIX 2 — STORE LOCATION IN localStorage
+===============================================================
+
+Search portal.html for where the location 
+card is clicked and the session location 
+is set. It will look like:
+
+  _SESSION_LOC_ID = locationId
+  _SESSION_LOC_NAME = locationName
+  showPortal()
+
+ADD these lines right there:
+
+  localStorage.setItem('portal_location_id', locationId)
+  localStorage.setItem('portal_location_name', locationName)
+
+===============================================================
+FIX 3 — READ FROM localStorage ON PAGE LOAD
+===============================================================
+
+Find the init function or DOMContentLoaded 
+handler. Replace its entire contents with:
+
+  async function bootPortal() {
+    // Read from localStorage first
+    const token = localStorage.getItem('portal_token')
+    const locId = localStorage.getItem('portal_location_id')
+    const locName = localStorage.getItem('portal_location_name')
+    
+    if (!token) {
+      // No token — show login, stop here
+      showPage('login-page')
+      return
+    }
+    
+    // Verify token is still valid
+    try {
+      const r = await fetch('/api/auth/verify', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      if (!r.ok) throw new Error('invalid')
+    } catch(e) {
+      // Token invalid — clear and show login
+      localStorage.clear()
+      showPage('login-page')
+      return
+    }
+    
+    // Token valid — restore session
+    window._SESSION_TOKEN = token
+    
+    if (locId) {
+      // Location already chosen — go to dashboard
+      window._SESSION_LOC_ID = locId
+      window._SESSION_LOC_NAME = locName
+      showPage('portal')
+      loadDashboard()
+    } else {
+      // No location chosen yet
+      showPage('location-selector')
+    }
+  }
+
+  // Replace whatever calls init on load with:
+  document.addEventListener('DOMContentLoaded', bootPortal)
+  // OR if it already uses DOMContentLoaded:
+  // just replace the function body
+
+Note: showPage() hides all pages and shows 
+the specified one. Find how pages are shown 
+in the existing code and use the same method.
+The pages are: 'login-page', 
+'location-selector', 'portal'
+
+===============================================================
+FIX 4 — authFetch READS FROM localStorage
+===============================================================
+
+Find the authFetch function. Change it to:
+
+  function authFetch(url, opts = {}) {
+    const token = window._SESSION_TOKEN || 
+                  localStorage.getItem('portal_token')
+    const locId = window._SESSION_LOC_ID || 
+                  localStorage.getItem('portal_location_id')
+    
+    return fetch(url, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        ...opts.headers,
+        'Authorization': 'Bearer ' + (token || ''),
+        'X-Location-Id': locId || ''
+      }
+    })
+  }
+
+===============================================================
+FIX 5 — LOGIN FLOW: NO DOUBLE SHOW
+===============================================================
+
+Find the login form submit handler.
+Replace entirely with:
+
+  async function handleLogin(email, password) {
+    try {
+      const r = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      })
+      
+      if (!r.ok) {
+        showLoginError('Incorrect email or password')
+        return
+      }
+      
+      const { token } = await r.json()
+      
+      // Store FIRST before doing anything else
+      localStorage.setItem('portal_token', token)
+      window._SESSION_TOKEN = token
+      
+      // Then show location selector — ONCE
+      // NEVER call bootPortal() or init() here
+      showPage('location-selector')
+      loadLocations()
+      
+    } catch(e) {
+      showLoginError('Login failed, please try again')
+    }
+  }
+
+===============================================================
+FIX 6 — LOCATION SELECT
+===============================================================
+
+Find where location card is clicked.
+Replace with:
+
+  function selectLocation(locId, locName) {
+    window._SESSION_LOC_ID = locId
+    window._SESSION_LOC_NAME = locName
+    localStorage.setItem('portal_location_id', locId)
+    localStorage.setItem('portal_location_name', locName)
+    showPage('portal')
+    loadDashboard()
+  }
+
+===============================================================
+FIX 7 — SIGN OUT CLEARS localStorage
+===============================================================
+
+Find the sign out button handler.
+Replace with:
+
+  function signOut() {
+    localStorage.clear()
+    sessionStorage.clear()
+    window._SESSION_TOKEN = null
+    window._SESSION_LOC_ID = null
+    window._SESSION_LOC_NAME = null
+    showPage('login-page')
+  }
+
+===============================================================
+FIX 8 — UPDATE CREDENTIALS IN REPLIT SECRETS
+===============================================================
+
+Update these Replit Secrets:
+  ADMIN_EMAIL = starr@starr.com
+  ADMIN_PASSWORD = Starr12!
+
+===============================================================
+FIX 9 — SWITCH LOCATION
+===============================================================
+
+Find the SWITCH LOCATION button handler.
+Replace with:
+
+  function switchLocation() {
+    // Keep token, just clear location
+    localStorage.removeItem('portal_location_id')
+    localStorage.removeItem('portal_location_name')
+    window._SESSION_LOC_ID = null
+    window._SESSION_LOC_NAME = null
+    showPage('location-selector')
+    loadLocations()
+  }
+
+===============================================================
+VERIFY — DO NOT FINISH UNTIL ALL PASS
+===============================================================
+
+TEST 1 — Login:
+  Clear localStorage manually
+  Visit /portal.html → login form shows ✓
+  Enter starr@starr.com / Starr12!
+  Click SIGN IN
+  Check: localStorage.getItem('portal_token') 
+  → returns JWT string (not null) ✓
+  Location selector shows (NOT login again) ✓
+  Select Hornchurch → dashboard loads ✓
+  Check: localStorage.getItem('portal_location_id')
+  → returns UUID (not null) ✓
+
+TEST 2 — Persistence:
+  Refresh page → dashboard loads directly ✓
+  No login form shown ✓
+
+TEST 3 — Availability save:
+  Change Thursday close to 21:00
+  Click SAVE CHANGES → success toast ✓
+  Refresh → still shows 21:00 ✓
+
+TEST 4 — All actions work:
+  Add new booking → saves ✓
+  Edit treatment → saves ✓
+  Change settings → saves ✓
+  Block a date → saves ✓
+
+TEST 5 — Sign out:
+  Click SIGN OUT → login form shows ✓
+  Check localStorage → empty ✓
+  Refresh → login form shows ✓
+
+Report each test PASS or FAIL.
+Fix any FAILs before stopping.
+Do not finish until all 5 tests pass.

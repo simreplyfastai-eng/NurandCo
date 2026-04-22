@@ -1,0 +1,289 @@
+ABSOLUTE GODMODE FIX — ONE ROOT CAUSE, 
+ALL BUGS.
+
+The token is not being stored in localStorage 
+after login. This breaks everything:
+  - Double login on every refresh
+  - All saves failing (401 Unauthorized)
+  - Availability not saving
+  - New bookings not saving
+  - Settings not saving
+  - Clients not saving
+
+READ portal.html FULLY before touching 
+anything. Do not skip any section.
+
+===============================================================
+FIX 1 — STORE TOKEN IN localStorage ON LOGIN
+===============================================================
+
+Search portal.html for:
+  fetch('/api/auth/login'
+
+Find the .then() or await that handles 
+the response. You will see something like:
+
+  const data = await res.json()
+  _SESSION_TOKEN = data.token
+  showLocationSelector()
+
+ADD this line immediately after getting token:
+  localStorage.setItem('portal_token', data.token)
+
+Also set the window variable:
+  window._SESSION_TOKEN = data.token
+
+===============================================================
+FIX 2 — STORE LOCATION IN localStorage
+===============================================================
+
+Search for where location card is clicked 
+and _SESSION_LOC_ID is set. Add:
+
+  localStorage.setItem('portal_location_id', locId)
+  localStorage.setItem('portal_location_name', locName)
+
+===============================================================
+FIX 3 — bootPortal ON PAGE LOAD
+===============================================================
+
+Find the init / DOMContentLoaded function.
+Replace its body entirely with:
+
+  async function bootPortal() {
+    const token = localStorage.getItem('portal_token')
+    const locId = localStorage.getItem('portal_location_id')
+    const locName = localStorage.getItem('portal_location_name')
+
+    if (!token) {
+      showPage('login-page')
+      return
+    }
+
+    try {
+      const r = await fetch('/api/auth/verify', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+      if (!r.ok) throw new Error('invalid')
+    } catch(e) {
+      localStorage.clear()
+      showPage('login-page')
+      return
+    }
+
+    window._SESSION_TOKEN = token
+
+    if (locId) {
+      window._SESSION_LOC_ID = locId
+      window._SESSION_LOC_NAME = locName
+      showPage('portal')
+      loadDashboard()
+    } else {
+      showPage('location-selector')
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', bootPortal)
+
+Note: use whatever showPage() equivalent 
+already exists in the code — the function 
+that hides all sections and shows one.
+
+===============================================================
+FIX 4 — authFetch READS FROM localStorage
+===============================================================
+
+Find the authFetch function. Replace with:
+
+  function authFetch(url, opts = {}) {
+    const token = window._SESSION_TOKEN ||
+                  localStorage.getItem('portal_token')
+    const locId = window._SESSION_LOC_ID ||
+                  localStorage.getItem('portal_location_id')
+    return fetch(url, {
+      ...opts,
+      headers: {
+        'Content-Type': 'application/json',
+        ...opts.headers,
+        'Authorization': 'Bearer ' + (token || ''),
+        'X-Location-Id': locId || ''
+      }
+    })
+  }
+
+===============================================================
+FIX 5 — LOGIN HANDLER: NO DOUBLE SHOW
+===============================================================
+
+Find the login form submit handler.
+Replace entirely with:
+
+  async function handleLogin(email, password) {
+    try {
+      const r = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ email, password })
+      })
+      if (!r.ok) {
+        showLoginError('Incorrect email or password')
+        return
+      }
+      const { token } = await r.json()
+      localStorage.setItem('portal_token', token)
+      window._SESSION_TOKEN = token
+      showPage('location-selector')
+      loadLocations()
+    } catch(e) {
+      showLoginError('Login failed, please try again')
+    }
+  }
+
+CRITICAL: After login succeeds NEVER call
+bootPortal(), init(), or showPage('login-page')
+again until the user clicks SIGN OUT.
+
+===============================================================
+FIX 6 — LOCATION SELECT
+===============================================================
+
+Find location card click handler. Replace:
+
+  function selectLocation(locId, locName) {
+    window._SESSION_LOC_ID = locId
+    window._SESSION_LOC_NAME = locName
+    localStorage.setItem('portal_location_id', locId)
+    localStorage.setItem('portal_location_name', locName)
+    showPage('portal')
+    loadDashboard()
+  }
+
+===============================================================
+FIX 7 — SIGN OUT
+===============================================================
+
+Find sign out handler. Replace:
+
+  function signOut() {
+    localStorage.clear()
+    sessionStorage.clear()
+    window._SESSION_TOKEN = null
+    window._SESSION_LOC_ID = null
+    window._SESSION_LOC_NAME = null
+    showPage('login-page')
+  }
+
+===============================================================
+FIX 8 — SWITCH LOCATION
+===============================================================
+
+Find SWITCH LOCATION handler. Replace:
+
+  function switchLocation() {
+    localStorage.removeItem('portal_location_id')
+    localStorage.removeItem('portal_location_name')
+    window._SESSION_LOC_ID = null
+    window._SESSION_LOC_NAME = null
+    showPage('location-selector')
+    loadLocations()
+  }
+
+===============================================================
+FIX 9 — ALL SAVES MUST USE authFetch
+===============================================================
+
+Search portal.html for every fetch() call 
+that is NOT inside authFetch.
+
+Any fetch() that calls a protected endpoint:
+  /api/availability/settings
+  /api/treatments
+  /api/bookings
+  /api/clients
+  /api/settings
+  /api/media
+  /api/enquiries
+
+Must use authFetch() not plain fetch().
+
+If any of these use plain fetch() without 
+an Authorization header — change to authFetch().
+
+This is why saves fail — they send no token.
+
+===============================================================
+FIX 10 — AVAILABILITY SPECIFICALLY
+===============================================================
+
+The availability SAVE CHANGES fails with 
+"Failed to save". Two reasons:
+
+A) The POST uses plain fetch() not authFetch()
+   Fix: change to authFetch()
+
+B) The response handler checks for error 
+   but the Supabase upsert returns an error 
+   due to missing unique constraint.
+
+Add this to Supabase (run in SQL editor):
+  ALTER TABLE availability_settings 
+  ADD CONSTRAINT IF NOT EXISTS 
+  avail_loc_day_unique 
+  UNIQUE (location_id, day_of_week);
+
+And fix the upsert in the POST handler:
+  const { error } = await supabaseAdmin
+    .from('availability_settings')
+    .upsert({
+      location_id: locationId,
+      day_of_week: day.day_of_week,
+      is_open: day.is_open,
+      open_time: day.open_time,
+      close_time: day.close_time
+    }, { onConflict: 'location_id,day_of_week' })
+
+  if (error) {
+    console.error('availability save error:', error)
+    return res.status(500).json({ error: error.message })
+  }
+
+Also fix time format — Supabase returns 
+"09:00:00" but portal expects "09:00":
+  open_time: row.open_time?.slice(0,5)
+  close_time: row.close_time?.slice(0,5)
+
+===============================================================
+VERIFY — DO NOT FINISH UNTIL ALL PASS
+===============================================================
+
+TEST 1 — Login works:
+  Clear localStorage
+  Enter correct credentials → SIGN IN
+  Check: localStorage.getItem('portal_token')
+  → JWT string not null ✓
+  Location selector shows (not login again) ✓
+  Select location → dashboard loads ✓
+
+TEST 2 — Refresh persists:
+  Refresh page → dashboard loads directly ✓
+  No login form shown ✓
+
+TEST 3 — Availability saves:
+  Change any day hours → SAVE CHANGES ✓
+  No "Failed to save" error ✓
+  Refresh → new hours still showing ✓
+  Booking page shows updated slots ✓
+
+TEST 4 — All portal actions work:
+  Add new booking → saves ✓
+  Edit treatment price → saves ✓
+  Change settings → saves ✓
+  Block a date → saves ✓
+
+TEST 5 — Sign out:
+  Click SIGN OUT → login form ✓
+  localStorage empty ✓
+  Refresh → still shows login ✓
+
+Report each PASS or FAIL.
+Fix all FAILs before stopping.

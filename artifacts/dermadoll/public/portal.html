@@ -2484,12 +2484,12 @@ async function renderAvailability(){
     try{
       const r=await fetch('/api/admin/availability',{headers:authHdr(),cache:'no-store'});
       if(r.ok){
-        const rows=await r.json(); // [{day_of_week, is_open, start_time, end_time}]
+        const rows=await r.json(); // [{day_of_week, is_open, open_time, close_time}]
         if(Array.isArray(rows)&&rows.length){
           const freshDefaults={};
           rows.forEach(row=>{
             freshDefaults[row.day_of_week]=row.is_open
-              ?{on:true,start:(row.start_time||'09:00').substring(0,5),end:(row.end_time||'17:00').substring(0,5)}
+              ?{on:true,start:(row.open_time||'09:00').substring(0,5),end:(row.close_time||'17:00').substring(0,5)}
               :{on:false};
           });
           // Merge fresh rows over the defaults (keeps any days not yet in DB as defaults)

@@ -1,0 +1,118 @@
+FINAL DEFINITIVE FIX — TOKEN NOT PERSISTING.
+
+This is the root cause of every portal bug:
+  - Double login
+  - All saves failing  
+  - Availability not saving
+  - New bookings failing
+  - Client updates failing
+  - Settings not saving
+
+CONFIRMED: localStorage is completely empty.
+Token is stored nowhere after login.
+Every API call sends no auth header = 401.
+
+DO THIS EXACT CHANGE — nothing more:
+
+STEP 1: Find where login response is handled.
+Search portal.html for:
+  fetch('/api/auth/login'
+  
+Find the .then() or await response handler.
+Find where the token from the response is used.
+
+It currently does something like:
+  _SESSION_TOKEN = data.token
+  OR
+  window._token = data.token  
+  OR
+  const token = data.token (local variable only)
+
+Change it to ALSO store in localStorage:
+  localStorage.setItem('portal_token', data.token)
+  localStorage.setItem('portal_location_id', '')
+  localStorage.setItem('portal_location_name', '')
+
+STEP 2: Find where location is selected.
+Search portal.html for where location cards 
+are clicked and location ID is stored.
+
+Add:
+  localStorage.setItem('portal_location_id', locId)
+  localStorage.setItem('portal_location_name', locName)
+
+STEP 3: Find the authFetch function.
+Search for: function authFetch or authFetch =
+
+It fetches with an Authorization header.
+It currently reads the token from a variable.
+Make it ALSO check localStorage as fallback:
+
+  function authFetch(url, options = {}) {
+    const token = window._SESSION_TOKEN || 
+                  localStorage.getItem('portal_token');
+    return fetch(url, {
+      ...options,
+      headers: {
+        ...options.headers,
+        'Authorization': 'Bearer ' + token,
+        'X-Location-Id': window._SESSION_LOC_ID || 
+          localStorage.getItem('portal_location_id') || ''
+      }
+    });
+  }
+
+STEP 4: Find page init / boot function.
+Search for DOMContentLoaded or the function 
+that runs on page load.
+
+It must read from localStorage on load:
+  const token = localStorage.getItem('portal_token')
+  const locId = localStorage.getItem('portal_location_id')
+  
+  if (token) {
+    window._SESSION_TOKEN = token
+    // verify it
+    fetch('/api/auth/verify', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).then(r => {
+      if (r.ok) {
+        if (locId) {
+          window._SESSION_LOC_ID = locId
+          window._SESSION_LOC_NAME = 
+            localStorage.getItem('portal_location_name')
+          showPortal() // go straight to dashboard
+        } else {
+          showLocationSelector()
+        }
+      } else {
+        localStorage.clear()
+        showLoginPage()
+      }
+    })
+  } else {
+    showLoginPage()
+  }
+
+STEP 5: Sign out must clear localStorage:
+  function signOut() {
+    localStorage.clear()
+    sessionStorage.clear()
+    window._SESSION_TOKEN = null
+    window._SESSION_LOC_ID = null
+    showLoginPage()
+  }
+
+STEP 6: Update ADMIN_EMAIL and ADMIN_PASSWORD 
+Replit Secrets:
+  ADMIN_EMAIL = starr@starr.com
+  ADMIN_PASSWORD = Starr12!
+
+VERIFY:
+  Login → check localStorage:
+    portal_token = [JWT string] ✓
+  Refresh page → dashboard loads directly ✓
+  No double login ✓
+  Change availability → saves ✓
+  Add booking → saves ✓
+  All portal actions work ✓

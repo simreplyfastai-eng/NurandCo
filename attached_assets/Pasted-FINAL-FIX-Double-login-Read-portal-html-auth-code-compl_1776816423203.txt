@@ -1,0 +1,81 @@
+FINAL FIX — Double login. Read portal.html 
+auth code completely before touching anything.
+
+CONFIRMED ROOT CAUSE:
+  After login the portal_token is NOT being 
+  stored in localStorage.
+  
+  localStorage.getItem('portal_token') = null
+  localStorage.getItem('portal_location_id') = null
+  
+  This means every page refresh shows login 
+  form because there is no token to verify.
+  
+  The token is being stored somewhere else 
+  (sessionStorage or a JS variable) which 
+  gets wiped on refresh.
+
+THE ONE AND ONLY FIX NEEDED:
+
+Find the login success handler — where the 
+JWT token is received after POST /api/auth/login.
+
+Change every instance of:
+  sessionStorage.setItem('portal_token', token)
+  window._token = token
+  _SESSION_TOKEN = token
+  let token = ...
+  const token = ... (without localStorage)
+
+To:
+  localStorage.setItem('portal_token', token)
+
+Find where location is stored after selection:
+Change every instance of:
+  sessionStorage.setItem('portal_location_id', id)
+  sessionStorage.setItem('portal_location_name', name)
+  window._locationId = id
+
+To:
+  localStorage.setItem('portal_location_id', id)
+  localStorage.setItem('portal_location_name', name)
+
+Find the init/boot function that runs on 
+page load. It must read from localStorage:
+
+  const token = localStorage.getItem('portal_token')
+  const locId = localStorage.getItem('portal_location_id')
+  
+  if (!token) { show login form; return }
+  
+  verify token → if valid:
+    if locId: show portal dashboard directly
+    else: show location selector
+  
+  if invalid: clear localStorage, show login
+
+ALSO — find and remove any code that 
+calls clearSession() or clears localStorage 
+except when the user clicks SIGN OUT.
+
+Search for:
+  localStorage.removeItem('portal_token')
+  localStorage.clear()
+  sessionStorage.clear()
+  
+These must ONLY appear in the sign out handler.
+Delete them from everywhere else.
+
+VERIFY:
+  Login with starr@starr.com / Starr12!
+  After login check:
+    localStorage.getItem('portal_token') 
+    → must return a JWT string ✓
+    localStorage.getItem('portal_location_id')
+    → must return location UUID after selection ✓
+  
+  Refresh the page → goes straight to 
+  dashboard, NO login form ✓
+  
+  Login form shows maximum ONE time 
+  per fresh session ✓

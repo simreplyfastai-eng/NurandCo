@@ -23,7 +23,7 @@ router.get("/admin/availability", async (req, res) => {
   try {
     const { data, error } = await supabaseAdmin
       .from("availability_settings")
-      .select("day_of_week, is_open, start_time, end_time")
+      .select("day_of_week, is_open, open_time, close_time")
       .eq("location_id", locationId)
       .order("day_of_week");
     if (error) throw error;
@@ -55,8 +55,8 @@ router.put("/admin/availability", async (req, res) => {
       location_id: locationId,
       day_of_week: r.day_of_week,
       is_open: r.is_open,
-      start_time: r.open_time ?? null,
-      end_time: r.close_time ?? null,
+      open_time: r.open_time ?? "09:00",
+      close_time: r.close_time ?? "17:00",
     }));
     // Delete-then-insert avoids needing a unique constraint on (location_id, day_of_week)
     const { error: delErr } = await supabaseAdmin
@@ -75,67 +75,16 @@ router.put("/admin/availability", async (req, res) => {
   }
 });
 
-// GET /api/admin/blocked-slots — all blocked_slots for session locationId
-router.get("/admin/blocked-slots", async (req, res) => {
+// GET /api/admin/blocked-slots — stub (blocked_slots table not in schema)
+router.get("/admin/blocked-slots", (req, res) => {
   if (!requireAuth(req, res)) return;
-  const locationId = getLocationId(req);
-  if (!locationId) return res.status(400).json({ error: "locationId required" });
-
-  try {
-    const { data, error } = await supabaseAdmin
-      .from("blocked_slots")
-      .select("id, day_of_week, all_days, start_time, end_time, label")
-      .eq("location_id", locationId)
-      .order("created_at");
-    if (error) throw error;
-    return res.json(data ?? []);
-  } catch (err) {
-    console.error("GET /api/admin/blocked-slots", err);
-    return res.status(500).json({ error: "Failed to fetch blocked slots" });
-  }
+  return res.json([]);
 });
 
-// POST /api/admin/blocked-slots — insert new blocked slot
-// Body: { day_of_week?, all_days?, start_time, end_time, label? }
-router.post("/admin/blocked-slots", async (req, res) => {
+// POST /api/admin/blocked-slots — stub (blocked_slots table not in schema)
+router.post("/admin/blocked-slots", (req, res) => {
   if (!requireAuth(req, res)) return;
-  const locationId = getLocationId(req);
-  if (!locationId) return res.status(400).json({ error: "locationId required" });
-
-  const { day_of_week, all_days, start_time, end_time, label } = req.body as {
-    day_of_week?: number;
-    all_days?: boolean;
-    start_time: string;
-    end_time: string;
-    label?: string;
-  };
-
-  if (!start_time || !end_time)
-    return res.status(400).json({ error: "start_time and end_time required" });
-  if (start_time >= end_time)
-    return res.status(400).json({ error: "start_time must be before end_time" });
-  if (!all_days && (day_of_week === undefined || day_of_week === null))
-    return res.status(400).json({ error: "day_of_week or all_days required" });
-
-  try {
-    const { data, error } = await supabaseAdmin
-      .from("blocked_slots")
-      .insert({
-        location_id: locationId,
-        day_of_week: all_days ? null : day_of_week,
-        all_days: all_days ?? false,
-        start_time,
-        end_time,
-        label: label ?? null,
-      })
-      .select()
-      .single();
-    if (error) throw error;
-    return res.status(201).json(data);
-  } catch (err) {
-    console.error("POST /api/admin/blocked-slots", err);
-    return res.status(500).json({ error: "Failed to create blocked slot" });
-  }
+  return res.status(501).json({ error: "Blocked slots not supported" });
 });
 
 // GET /api/admin/blocked-dates — all blocked dates for session locationId
@@ -199,24 +148,10 @@ router.post("/admin/blocked-dates", async (req, res) => {
   }
 });
 
-// DELETE /api/admin/blocked-slots/:id — delete slot (verifies location match)
-router.delete("/admin/blocked-slots/:id", async (req, res) => {
+// DELETE /api/admin/blocked-slots/:id — stub (blocked_slots table not in schema)
+router.delete("/admin/blocked-slots/:id", (req, res) => {
   if (!requireAuth(req, res)) return;
-  const locationId = getLocationId(req);
-  if (!locationId) return res.status(400).json({ error: "locationId required" });
-
-  try {
-    const { error } = await supabaseAdmin
-      .from("blocked_slots")
-      .delete()
-      .eq("id", req.params.id)
-      .eq("location_id", locationId);
-    if (error) throw error;
-    return res.json({ ok: true });
-  } catch (err) {
-    console.error("DELETE /api/admin/blocked-slots", err);
-    return res.status(500).json({ error: "Failed to delete blocked slot" });
-  }
+  return res.status(501).json({ error: "Blocked slots not supported" });
 });
 
 // GET /api/admin/deposit-settings — deposit config for the current location
