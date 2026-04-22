@@ -269,9 +269,11 @@
   }
 }
 
+/* ── Nuke ALL browser video controls/overlays ─────────────────────────── */
 video::-webkit-media-controls,
 video::-webkit-media-controls-enclosure,
 video::-webkit-media-controls-panel,
+video::-webkit-media-controls-overlay-enclosure,
 video::-webkit-media-controls-start-playback-button,
 video::-webkit-media-controls-play-button,
 video::-webkit-media-controls-overlay-play-button,
@@ -280,20 +282,24 @@ video::-webkit-media-controls-current-time-display,
 video::-webkit-media-controls-time-remaining-display,
 video::-webkit-media-controls-mute-button,
 video::-webkit-media-controls-volume-slider,
-video::-webkit-media-controls-fullscreen-button {
+video::-webkit-media-controls-fullscreen-button,
+video::-webkit-media-controls-picture-in-picture-button,
+video::-webkit-media-controls-wireless-playback-status,
+video::--internal-media-controls-download-button {
   display: none !important;
   -webkit-appearance: none !important;
   opacity: 0 !important;
   pointer-events: none !important;
 }
 
-/* iOS Safari: suppress native play button overlay */
-video::-webkit-media-controls-start-playback-button {
-  display: none !important;
-  -webkit-appearance: none !important;
+/* Shadow host rule — eliminates the controls container entirely */
+video::-webkit-media-controls-enclosure {
+  overflow: hidden !important;
+  max-height: 0 !important;
+  max-width: 0 !important;
 }
 
-/* Hide any custom play overlays (belt-and-suspenders) */
+/* Hide class-based play overlays */
 [class*="play-overlay"],
 [class*="play-button"],
 [class*="video-overlay"],

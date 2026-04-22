@@ -159,6 +159,7 @@ export default function Hero() {
         <div className="hero-right">
           {heroSrc ? (
             <video ref={videoRef} src={heroSrc} autoPlay loop muted playsInline preload="auto"
+              disablePictureInPicture disableRemotePlayback
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
           ) : heroImage ? (
             <img src={heroImage} alt="Eva — StarrBeauty"
