@@ -1,0 +1,102 @@
+import { google } from 'googleapis';
+import { createClient } from '@supabase/supabase-js';const supabase = createClient(
+process.env.SUPABASE_URL!,
+process.env.SUPABASE_SERVICE_ROLE_KEY!
+);interface BookingData {
+date: string;
+time: string;
+treatment_name: string;
+customer_name: string;
+customer_phone?: string;
+customer_email?: string;
+notes?: string;
+}export function getOAuthClient() {
+return new google.auth.OAuth2(
+process.env.GOOGLE_CLIENT_ID!,
+process.env.GOOGLE_CLIENT_SECRET!,
+process.env.GOOGLE_REDIRECT_URI!
+);
+}async function getClientForLocation(locationId: string) {
+const { data: tokenRow, error } = await supabase
+.from('google_calendar_tokens')
+.select('*')
+.eq('location_id', locationId)
+.single();if (error || !tokenRow) return null;const oauth2Client = getOAuthClient();
+oauth2Client.setCredentials({
+access_token: tokenRow.access_token,
+refresh_token: tokenRow.refresh_token,
+expiry_date: Number(tokenRow.expiry_date),
+});if (Date.now() >= Number(tokenRow.expiry_date) - 60000) {
+try {
+const { credentials } = await oauth2Client.refreshAccessToken();
+await supabase
+.from('google_calendar_tokens')
+.update({
+access_token: credentials.access_token,
+expiry_date: credentials.expiry_date,
+updated_at: new Date().toISOString(),
+})
+.eq('location_id', locationId);
+oauth2Client.setCredentials(credentials);
+} catch (err) {
+console.error('Token refresh failed for location', locationId, err);
+return null;
+}
+}return { oauth2Client, calendarId: tokenRow.calendar_id };
+}export async function createCalendarEvent(
+locationId: string,
+booking: BookingData
+): Promise<string | null> {
+const conn = await getClientForLocation(locationId);
+if (!conn) return null;const calendar = google.calendar({ version: 'v3', auth: conn.oauth2Client });
+const time = booking.time.length === 5 ? ${booking.time}:00 : booking.time;
+const startISO = new Date(${booking.date}T${time}).toISOString();
+const endISO = new Date(new Date(startISO).getTime() + 2 * 60 * 60 * 1000).toISOString();const event = await calendar.events.insert({
+calendarId: conn.calendarId,
+requestBody: {
+summary: ${booking.treatment_name} — ${booking.customer_name},
+description: [
+Phone: ${booking.customer_phone || 'N/A'},
+Email: ${booking.customer_email || 'N/A'},
+Notes: ${booking.notes || 'None'},
+].join('\n'),
+start: { dateTime: startISO, timeZone: 'Europe/London' },
+end: { dateTime: endISO, timeZone: 'Europe/London' },
+},
+});return event.data.id || null;
+}export async function deleteCalendarEvent(
+locationId: string,
+googleEventId: string
+): Promise<void> {
+if (!googleEventId) return;
+const conn = await getClientForLocation(locationId);
+if (!conn) return;const calendar = google.calendar({ version: 'v3', auth: conn.oauth2Client });
+try {
+await calendar.events.delete({
+calendarId: conn.calendarId,
+eventId: googleEventId,
+});
+} catch (err: any) {
+if (err.code !== 404 && err.code !== 410) throw err;
+}
+}export async function getBusyTimesForDate(
+locationId: string,
+dateStr: string
+): Promise<Array<{ start: string; end: string }>> {
+const conn = await getClientForLocation(locationId);
+if (!conn) return [];const calendar = google.calendar({ version: 'v3', auth: conn.oauth2Client });
+const timeMin = new Date(${dateStr}T00:00:00).toISOString();
+const timeMax = new Date(${dateStr}T23:59:59).toISOString();const res = await calendar.freebusy.query({
+requestBody: {
+timeMin,
+timeMax,
+timeZone: 'Europe/London',
+items: [{ id: conn.calendarId }],
+},
+});const busy = res.data.calendars?.[conn.calendarId]?.busy || [];
+return busy
+.filter((b): b is { start: string; end: string } => !!b.start && !!b.end)
+.map((b) => ({ start: b.start, end: b.end }));
+}
+
+Only create this one file. Do not touch anything else.
