@@ -2114,9 +2114,13 @@ function showPortal(loc){
     buildTreatmentSelect();
     renderMedia();
     updateSidebarBadges();
-    const sidebarEl=document.querySelector(`.sb-item[onclick*="'dashboard'"]`);
-    showPage('dashboard',sidebarEl,false);
-    sessionStorage.setItem('fbn_page','dashboard');
+    // Restore last active tab (URL hash > sessionStorage > dashboard)
+    const validPages=['dashboard','schedule','bookings','availability','clients','treatments','finance','enquiries','media','settings'];
+    const hashPage=(location.hash||'').replace('#','');
+    const storedPage=sessionStorage.getItem('fbn_page');
+    const startPage=validPages.includes(hashPage)?hashPage:(validPages.includes(storedPage)?storedPage:'dashboard');
+    const sidebarEl=document.querySelector(`.sb-item[onclick*="'${startPage}'"]`);
+    showPage(startPage,sidebarEl,false);
     // Auto-refresh dashboard every 60s
     setInterval(()=>{
       if(document.getElementById('page-dashboard').classList.contains('active')){
@@ -2183,6 +2187,7 @@ window.addEventListener('resize',()=>{
 // ═══════════════════════════════════════════════════
 function showPage(id,el,fromKpi){
   sessionStorage.setItem('fbn_page',id);
+  history.replaceState(null,'','#'+id);
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.querySelectorAll('.sb-item').forEach(i=>i.classList.remove('active'));
