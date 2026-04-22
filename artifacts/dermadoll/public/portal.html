@@ -626,6 +626,8 @@ select.form-input{background:var(--color-card)}
 
 /* ── ENQUIRIES TABLE ── */
 #enq-table thead th{background:var(--color-muted)}
+#enq-table thead th:first-child{border-top-left-radius:calc(var(--radius) - 1px)}
+#enq-table thead th:last-child{border-top-right-radius:calc(var(--radius) - 1px)}
 #enq-body td{padding:11px 14px;font-family:var(--font-sans);font-size:13px;font-weight:300;border-bottom:1px solid var(--color-border-subtle);vertical-align:middle}
 #enq-body tr:last-child td{border-bottom:none}
 #enq-body tr.enq-detail-row td{padding:0;background:#faf7f4}
@@ -705,7 +707,7 @@ select.form-input{background:var(--color-card)}
   .fin-table tbody td:last-child{padding-right:6px}
   .fin-pill{font-size:9px;padding:2px 6px}
   /* ── Enquiries table: hide secondary columns on mobile ── */
-  .enq-col-phone,.enq-col-email{display:none!important}
+  .enq-col-phone,.enq-col-email,.enq-col-action{display:none!important}
   #enq-table{table-layout:auto}
   /* ── Mobile accessibility ── */
   input,select,textarea{font-size:16px!important}
@@ -1206,7 +1208,7 @@ select.form-input{background:var(--color-card)}
                 <th class="enq-col-phone" style="width:14%;text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Phone</th>
                 <th class="enq-col-email" style="width:17%;text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Email</th>
                 <th style="width:14%;text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Status</th>
-                <th style="width:44px;background:#F7F4F1;border-bottom:1px solid var(--color-border)"></th>
+                <th class="enq-col-action" style="width:44px;background:#F7F4F1;border-bottom:1px solid var(--color-border)"></th>
               </tr>
             </thead>
             <tbody id="enq-body"></tbody>
@@ -5222,7 +5224,7 @@ async function renderEnquiries(){
         <td class="enq-col-phone"><a href="tel:${e.phone}" onclick="event.stopPropagation()" style="color:var(--color-foreground);text-decoration:none">${e.phone||'—'}</a></td>
         <td class="enq-col-email"><a href="mailto:${e.email}" onclick="event.stopPropagation()" style="color:var(--color-gold,#C9A96E);text-decoration:none">${e.email}</a></td>
         <td>${enqStatusPill(e.status)}</td>
-        <td style="position:relative" onclick="event.stopPropagation()">
+        <td class="enq-col-action" style="position:relative" onclick="event.stopPropagation()">
           <button class="enq-action-btn" onclick="enqOpenMenu(event,'${e.id}')">···</button>
         </td>
       </tr>
