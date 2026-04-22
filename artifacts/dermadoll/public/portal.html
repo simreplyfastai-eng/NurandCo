@@ -1367,6 +1367,17 @@ select.form-input{background:var(--color-card)}
           </div>
         </div>
 
+        <!-- ── Google Calendar ── -->
+        <div class="settings-section" id="google-cal-section">
+          <div class="settings-section-header">Google Calendar</div>
+          <div class="settings-body">
+            <p style="font-size:12px;color:var(--color-muted-fg);margin:0 0 12px;line-height:1.6">
+              Connect your Google Calendar to automatically create events when bookings are confirmed and remove them when cancelled.
+            </p>
+            <div id="google-cal-status"><span style="font-size:12px;color:var(--color-muted-fg)">Checking…</span></div>
+          </div>
+        </div>
+
         <!-- ── Developer ── -->
         <div class="settings-section">
           <div class="settings-section-header">Developer</div>
@@ -2231,6 +2242,11 @@ window.addEventListener('DOMContentLoaded',async()=>{
     // Token invalid — clear silently (no confusing "expired" message on fresh load)
     clearSession();
   }
+  // Check for Google OAuth result in URL
+  const _gp=new URLSearchParams(window.location.search).get('google');
+  if(_gp==='connected'){showToast('✅ Google Calendar connected!');history.replaceState(null,'',window.location.pathname+window.location.hash);}
+  else if(_gp==='error'){showToast('Google Calendar connection failed — please try again');history.replaceState(null,'',window.location.pathname+window.location.hash);}
+  else if(_gp==='denied'){showToast('Google Calendar access was denied');history.replaceState(null,'',window.location.pathname+window.location.hash);}
 });
 let _calResizeTimer;
 window.addEventListener('resize',()=>{
@@ -2259,7 +2275,7 @@ function showPage(id,el,fromKpi){
   if(id==='finance')renderFinance();
   if(id==='enquiries')renderEnquiries();
   if(id==='media')renderMedia();
-  if(id==='settings'){populateSettingsForm();loadLaunchChecklist();loadWebhookEvents();}
+  if(id==='settings'){populateSettingsForm();loadLaunchChecklist();loadWebhookEvents();loadGoogleCalendarStatus();}
   // manage back button visibility
   document.querySelectorAll('.back-to-dash').forEach(b=>b.classList.remove('visible'));
   if(fromKpi){
@@ -5528,6 +5544,55 @@ async function loadWebhookEvents(){
   }catch(e){
     el.innerHTML=`<p style="font-size:12px;color:#c62828">Failed to load events: ${e.message}</p>`;
   }
+}
+
+// ─── Google Calendar ─────────────────────────────────────────────────────────
+async function loadGoogleCalendarStatus(){
+  const el=document.getElementById('google-cal-status');
+  if(!el)return;
+  const locId=getSessionLocId();
+  if(!locId){
+    el.innerHTML='<span style="font-size:13px;color:var(--color-muted-fg)">Select a location to view Google Calendar status.</span>';
+    return;
+  }
+  el.innerHTML='<span style="font-size:12px;color:var(--color-muted-fg)">Checking…</span>';
+  try{
+    const r=await fetch(`/api/google/status?location_id=${encodeURIComponent(locId)}`,{headers:authHdr()});
+    const d=await r.json();
+    if(d.connected){
+      const connDate=d.connected_at?`<p style="font-size:11px;color:var(--color-muted-fg);margin:6px 0 0">Connected ${new Date(d.connected_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</p>`:'';
+      el.innerHTML=`<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+        <span style="font-size:13px;color:#2e7d32;font-weight:500">✅ Google Calendar connected</span>
+        <button class="btn-outline" style="font-size:11px;padding:5px 12px;color:#c62828;border-color:#c62828" onclick="disconnectGoogleCalendar()">Disconnect</button>
+      </div>${connDate}`;
+    }else{
+      el.innerHTML=`<button class="btn-gold" onclick="connectGoogleCalendar()">Connect Google Calendar</button>`;
+    }
+  }catch(e){
+    el.innerHTML='<span style="font-size:12px;color:#c62828">Failed to check status</span>';
+  }
+}
+
+function connectGoogleCalendar(){
+  const locId=getSessionLocId();
+  if(!locId){showToast('No location selected');return;}
+  window.location.href=`/api/google/auth?location_id=${encodeURIComponent(locId)}`;
+}
+
+async function disconnectGoogleCalendar(){
+  const locId=getSessionLocId();
+  if(!locId){showToast('No location selected');return;}
+  if(!confirm('Disconnect Google Calendar for this location?'))return;
+  try{
+    const r=await fetch('/api/google/disconnect',{
+      method:'POST',
+      headers:{...authHdr(),'Content-Type':'application/json'},
+      body:JSON.stringify({location_id:locId}),
+    });
+    const d=await r.json();
+    if(d.success){showToast('Google Calendar disconnected');loadGoogleCalendarStatus();}
+    else showToast('Disconnect failed');
+  }catch(e){showToast('Disconnect failed');}
 }
 
 async function loadLaunchChecklist(){
