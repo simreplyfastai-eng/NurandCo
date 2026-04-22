@@ -2006,15 +2006,9 @@ const ClientAPI = {
   },
 
   async delete(id) {
-    console.log('ClientAPI.delete: calling DELETE', `${this.BASE}/${id}`);
-    const resp = await fetch(`${this.BASE}/${id}`, {method:'DELETE', headers:authHdr()});
-    console.log('ClientAPI.delete: response status', resp.status);
-    if (!resp.ok) {
-      let body = '';
-      try { body = await resp.text(); } catch(_) {}
-      console.error('ClientAPI.delete: server returned', resp.status, body);
-      throw new Error(`Delete failed: ${resp.status} ${body}`);
-    }
+    try {
+      await fetch(`${this.BASE}/${id}`, {method:'DELETE', headers:authHdr()});
+    } catch(e) { console.warn('ClientAPI.delete failed', e); }
     const all = getClients().filter(c => c.id !== id);
     localStorage.setItem('fbn_clients', JSON.stringify(all));
   },
@@ -3902,18 +3896,9 @@ function resetDeleteClient(id){
   wrap.innerHTML=`<button style="width:100%;background:#fff;color:#c62828;border:1px solid #c62828;border-radius:var(--radius);padding:10px 20px;font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer" onclick="confirmDeleteClient('${id}','${name.replace(/'/g,"\\\\'")}')">Delete Client</button>`;
 }
 async function doDeleteClient(id){
-  console.log('doDeleteClient called with id:', id);
   const wrap=document.getElementById(`dcc-${id}`);
   if(wrap){const t=wrap.getAttribute('data-timer');if(t)clearTimeout(Number(t));}
-  try {
-    console.log('Calling ClientAPI.delete with id:', id);
-    await ClientAPI.delete(id);
-    console.log('ClientAPI.delete succeeded for id:', id);
-  } catch(err) {
-    console.error('Delete failed:', err?.message, err);
-    showToast('Delete failed: '+(err?.message||'unknown error'), 'error');
-    return;
-  }
+  await ClientAPI.delete(id);
   closeClientPanel();
   updateSidebarBadges();
   renderClients();
