@@ -1,0 +1,31 @@
+New Booking is broken — the "Save Booking" button in the admin portal's New Booking modal (portal.html) no longer saves to Supabase. This is a regression from tonight's edits (you've touched portal.html many times for: 25 popup fixes, calendar CSS, Delete Client logging, Add Client fix).
+
+My symptom: I fill in the New Booking form (name, treatment, date, time, location) and click Save Booking. Nothing happens — no new booking appears in the list.
+
+Please investigate:
+
+1. Find the Save Booking button in portal.html. Identify which function it calls (likely saveBooking, submitBooking, or similar). Paste the button HTML and the handler function.
+
+2. Trace the save flow:
+   a) What function runs on click?
+   b) Does it call a POST to /api/bookings?
+   c) Is there validation that might silently return early (e.g. "missing time slot" showToast that's too brief to see)?
+   d) Is there an unhandled error being swallowed?
+
+3. Add debug logging to the save handler:
+   - console.log at the top with all form values being read
+   - console.log before the fetch call with the full request body
+   - console.log the response status + body
+   - Wrap in try/catch that showToasts the actual error
+
+4. Also check — during tonight's 25-popup fix, did you convert any alert() calls in the booking save flow to showToast but accidentally break the save path itself (e.g. moved a return statement, forgot to await something, changed execution order)? Look specifically at any edits that touched validation alerts in the booking flow (lines 3616, 3629 from the popup audit).
+
+5. Report back with:
+   a) The current save handler function (full body)
+   b) What happens when the user clicks Save — full execution trace
+   c) Most likely root cause
+   d) Your proposed fix
+
+Do NOT push a fix yet. Diagnose first, then I'll approve.
+
+Context: Google Calendar sync is wired into bookings.ts POST /api/bookings (hook at line 444-463). If the frontend isn't reaching that endpoint, the Google sync never runs either — so fixing this also restores Google Calendar sync for manual admin bookings.
