@@ -381,6 +381,13 @@ router.post("/bookings", async (req, res) => {
       }
     }
 
+    // Website bookings: slot is verified — return ID now.
+    // The booking record is created by the Stripe webhook ONLY after payment succeeds.
+    // This prevents ghost "pending" bookings appearing in the admin portal.
+    if (b.source === "Website") {
+      return res.status(201).json({ id: b.id ?? crypto.randomUUID() });
+    }
+
     const clientId = await findOrCreateClient({
       locationId: locationId ?? "",
       name: b.clientName,

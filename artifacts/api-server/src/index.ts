@@ -18,7 +18,7 @@ import app from "./app";
 import { logger } from "./lib/logger";
 import { testSupabaseConnection } from "./lib/supabase";
 import { seedTreatments } from "./lib/seed";
-import { cleanupGhostBookings, runAutoComplete } from "./routes/bookings";
+import { runAutoComplete } from "./routes/bookings";
 
 const rawPort = process.env["PORT"];
 
@@ -54,14 +54,6 @@ for (const key of pendingVars) {
   } catch (err) {
     logger.warn({ err }, "Legacy DB not available — continuing with Supabase-only mode");
   }
-
-  // Ghost booking cleanup: runs on startup then every 30 minutes
-  cleanupGhostBookings().catch(console.error);
-  setInterval(() => {
-    cleanupGhostBookings()
-      .then((n) => { if (n > 0) logger.info(`Ghost cleanup removed ${n} stale slot(s)`); })
-      .catch((err) => { logger.error({ err }, "Ghost cleanup failed"); });
-  }, 30 * 60 * 1000);
 
   // Auto-complete past confirmed bookings every 15 minutes
   runAutoComplete().catch(console.error);

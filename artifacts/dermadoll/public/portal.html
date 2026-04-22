@@ -1307,30 +1307,33 @@ select.form-input{background:var(--color-card)}
         <input class="form-input" id="bm-deposit" type="number" placeholder="100"/>
       </div>
     </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">Status</label>
-        <select class="form-input" id="bm-status">
-          <option>Confirmed</option><option>Pending</option><option>Complete</option><option>Cancelled</option>
-        </select>
+    <div class="form-group">
+      <label class="form-label">Status</label>
+      <select class="form-input" id="bm-status">
+        <option>Confirmed</option><option>Pending</option><option>Complete</option><option>Cancelled</option>
+      </select>
+    </div>
+    <div id="bm-payment-card" style="display:none;background:#F8F4EF;border-radius:8px;padding:14px 16px;border:1px solid rgba(201,169,110,0.2);margin-bottom:16px">
+      <div style="font-size:10px;letter-spacing:1.5px;text-transform:uppercase;color:var(--color-secondary);font-weight:600;margin-bottom:12px">Payment</div>
+      <div id="bm-deposit-group" style="display:none;margin-bottom:8px">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-family:var(--font-sans);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:54px">Deposit</span>
+          <div id="bm-deposit-status" style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap"></div>
+        </div>
       </div>
-      <div class="form-group" id="bm-deposit-group" style="display:none">
-        <label class="form-label">Deposit</label>
-        <div id="bm-deposit-status" style="display:flex;align-items:center;gap:8px;padding-top:8px"></div>
+      <div id="bm-balance-group" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <span style="font-family:var(--font-sans);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);min-width:54px">Balance</span>
+          <div id="bm-balance-status" style="display:flex;align-items:center;gap:8px;flex:1;flex-wrap:wrap"></div>
+        </div>
       </div>
     </div>
     <div class="form-row">
-      <div class="form-group" id="bm-balance-group" style="display:none">
-        <label class="form-label">Balance</label>
-        <div id="bm-balance-status" style="display:flex;align-items:center;gap:8px;padding-top:8px"></div>
-      </div>
       <div class="form-group" id="bm-forms-group" style="display:none">
         <label class="form-label">Forms</label>
         <div id="bm-forms-status" style="display:flex;align-items:center;gap:10px;padding-top:8px;font-size:12px"></div>
       </div>
-    </div>
-    <div class="form-row" id="bm-location-group" style="display:none">
-      <div class="form-group">
+      <div class="form-group" id="bm-location-group" style="display:none">
         <label class="form-label">Location</label>
         <div id="bm-location-display" style="padding-top:8px;font-size:13px;color:var(--color-foreground);font-weight:500"></div>
       </div>
@@ -3055,28 +3058,27 @@ async function openBookingModal(prefill){
     document.getElementById('bm-price').value=booking.price||'';
     document.getElementById('bm-deposit').value=booking.deposit||'';
     document.getElementById('bm-status').value=booking.status||'Confirmed';
-    // Show deposit paid row in edit mode
+    // Show payment card in edit mode
+    document.getElementById('bm-payment-card').style.display='';
     const depGrp=document.getElementById('bm-deposit-group');
     depGrp.style.display='';
     const depStatus=document.getElementById('bm-deposit-status');
     if(booking.depositPaid){
-      depStatus.innerHTML=`<span style="color:#2D6A4F;font-weight:600;font-size:13px">✓ Deposit Paid</span>`;
+      depStatus.innerHTML=`<span style="color:#2D6A4F;font-weight:700;font-size:13px">✓ Paid</span>`;
     } else {
       const depAmt=Number(booking.deposit||0);
-      depStatus.innerHTML=`<span style="color:var(--color-muted-fg);font-size:13px">Pending: ${gbp(depAmt)}</span>
-        <button style="padding:5px 14px;border:none;background:var(--color-secondary);color:#fff;border-radius:var(--radius);font-family:var(--font-sans);font-size:12px;font-weight:600;cursor:pointer" onclick="markDepositPaidFromModal()">Confirm Deposit Received</button>
-        <span style="display:block;font-size:10px;color:#aaa;margin-top:4px;line-height:1.4">Only use if Stripe payment confirmed but booking shows as pending</span>`;
+      depStatus.innerHTML=`<span style="color:#888;font-size:13px">${gbp(depAmt)} unpaid</span>
+        <button class="btn-outline" style="font-size:11px;padding:4px 12px;margin-left:4px" onclick="markDepositPaidFromModal()">Mark Received</button>`;
     }
-    // Show balance paid row in edit mode
     const balGrp=document.getElementById('bm-balance-group');
     balGrp.style.display='';
     const bal=document.getElementById('bm-balance-status');
     if(booking.balancePaid){
-      bal.innerHTML=`<span style="color:#2D6A4F;font-weight:600;font-size:13px">✓ Balance Paid</span>`;
+      bal.innerHTML=`<span style="color:#2D6A4F;font-weight:700;font-size:13px">✓ Cleared</span>`;
     } else {
       const remaining=Math.max(0,Number(booking.price||0)-Number(booking.deposit||0));
-      bal.innerHTML=`<span style="color:var(--color-muted-fg);font-size:13px">Outstanding: ${gbp(remaining)}</span>
-        <button style="padding:5px 14px;border:none;background:var(--color-secondary);color:#fff;border-radius:var(--radius);font-family:var(--font-sans);font-size:12px;font-weight:600;cursor:pointer" onclick="markBalancePaidFromModal()">Mark Paid</button>`;
+      bal.innerHTML=`<span style="color:#888;font-size:13px">${gbp(remaining)} outstanding</span>
+        <button class="btn-outline" style="font-size:11px;padding:4px 12px;margin-left:4px" onclick="markBalancePaidFromModal()">Mark Paid</button>`;
     }
     // Set treatment — if not in select options, insert a recoverable option
     const sel=document.getElementById('bm-treatment');
@@ -3129,6 +3131,7 @@ async function openBookingModal(prefill){
     document.getElementById('bm-reschedule-btn').style.display='none';
     document.getElementById('bm-forms-group').style.display='none';
     document.getElementById('bm-location-group').style.display='none';
+    document.getElementById('bm-payment-card').style.display='none';
     document.getElementById('bm-deposit-group').style.display='none';
     document.getElementById('bm-balance-group').style.display='none';
     document.getElementById('bm-consultation-fields').style.display='none';
@@ -3271,7 +3274,7 @@ async function markBalancePaidFromModal(){
   await BookingAPI.update(editingBookingId,{balancePaid:true,status:'Complete'});
   // Refresh balance status display
   const bal=document.getElementById('bm-balance-status');
-  bal.innerHTML=`<span style="color:#2D6A4F;font-weight:600;font-size:13px">✓ Balance Paid</span>`;
+  bal.innerHTML=`<span style="color:#2D6A4F;font-weight:700;font-size:13px">✓ Cleared</span>`;
   // Update status dropdown
   document.getElementById('bm-status').value='Complete';
   renderFinance();updateSidebarBadges();renderBookings();
@@ -3286,7 +3289,7 @@ async function markDepositPaidFromModal(){
   await BookingAPI.update(editingBookingId,{depositPaid:true,status:'Confirmed'});
   // Refresh deposit status display
   const depStatus=document.getElementById('bm-deposit-status');
-  depStatus.innerHTML=`<span style="color:#2D6A4F;font-weight:600;font-size:13px">✓ Deposit Paid</span>`;
+  depStatus.innerHTML=`<span style="color:#2D6A4F;font-weight:700;font-size:13px">✓ Paid</span>`;
   // Update status dropdown to Confirmed
   if(document.getElementById('bm-status').value==='Pending'){
     document.getElementById('bm-status').value='Confirmed';
@@ -4469,6 +4472,7 @@ function renderMedia(){
 }
 
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function escPortal(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 
 function triggerTxReplace(i){
   const el=document.getElementById('tx-file-'+i);
