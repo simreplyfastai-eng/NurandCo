@@ -170,9 +170,7 @@ async function ensureEnquiriesTable(): Promise<void> {
     await client.rpc("exec_sql", { query: `ALTER TABLE enquiries ENABLE ROW LEVEL SECURITY;` }).catch(() => {});
     await client.rpc("exec_sql", {
       query: `DO $$ BEGIN
-        IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='enquiries' AND policyname='enquiries_public_insert') THEN
-          CREATE POLICY "enquiries_public_insert" ON enquiries FOR INSERT TO anon WITH CHECK (true);
-        END IF;
+        -- enquiries_public_insert intentionally omitted — backend uses service_role for all writes
         IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE tablename='enquiries' AND policyname='enquiries_service_all') THEN
           CREATE POLICY "enquiries_service_all" ON enquiries FOR ALL TO service_role USING (true);
         END IF;
