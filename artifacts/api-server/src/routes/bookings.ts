@@ -9,6 +9,7 @@ import {
   sendClientConfirmationEmail,
   sendConsultationConfirmationEmail,
   sendConsultationAdminEmail,
+  sendFormsLinkEmail,
 } from "../lib/email";
 import { requireAuth } from "../lib/auth";
 import { ukDateStr, ukDayOfWeek } from "../lib/tz";
@@ -529,6 +530,21 @@ router.post("/bookings", async (req, res) => {
           locationName: locationInfo?.name,
         }).catch(() => {});
       }
+    }
+
+    // Auto-send forms link for portal-created bookings that have an email
+    if (isPortal && email) {
+      sendFormsLinkEmail({
+        clientEmail: email,
+        clientName: name,
+        treatment: b.treatment ?? "",
+        date: b.date ?? "",
+        time: b.time ?? "",
+        bookingId: booking.id,
+        locationName: locationInfo?.name,
+      }).catch((err: unknown) => {
+        console.error("Auto forms email failed (non-fatal):", err);
+      });
     }
 
     return res.status(201).json(booking);
