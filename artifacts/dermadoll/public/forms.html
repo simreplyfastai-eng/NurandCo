@@ -611,13 +611,14 @@ async function init() {
     return;
   }
 
-  const MAX_WAIT_MS  = 90000; // 90 seconds total
-  const POLL_MS      = 4000;  // check every 4 seconds
-  const started      = Date.now();
-  const loadingEl    = document.querySelector('.loading-wrap p');
+  const MAX_WAIT_MS = 60000; // 60 seconds total before giving up
+  const POLL_MS     = 1000;  // retry every 1 second
+  const started     = Date.now();
+  const loadingEl   = document.querySelector('.loading-wrap p');
   if (loadingEl) loadingEl.textContent = 'Loading your forms…';
 
   while (true) {
+    const elapsed = Date.now() - started;
     try {
       const res = await fetch('/api/forms/status?booking=' + encodeURIComponent(BOOKING_ID));
 
@@ -650,42 +651,43 @@ async function init() {
         return; // done
       }
 
-      // Non-404 errors (500, etc.) — fail immediately, no point retrying
-      if (res.status !== 404) {
-        throw new Error('Server error loading your booking. Please try again.');
-      }
-
-      // 404 — booking not in DB yet (webhook in transit). Keep polling unless timeout.
-      if (Date.now() - started >= MAX_WAIT_MS) {
-        throw new Error('TIMEOUT');
-      }
-
-    } catch (e) {
-      if (e && e.message !== 'TIMEOUT' && !String(e).includes('fetch')) {
-        // A real unexpected error — show it and stop
+      // Hard server error (500+) — give up immediately
+      if (res.status >= 500) {
         document.getElementById('main-content').innerHTML = `
           <div class="error-page">
             <h2>Something went wrong</h2>
-            <p>${escHtml(e.message || 'Unknown error')}<br><br>
-            Your payment was taken. Please contact us on WhatsApp or email and we will sort this out immediately.</p>
+            <p>We had trouble loading your forms. Please refresh the page or contact us on WhatsApp and we'll help you right away.</p>
           </div>`;
         return;
       }
-      // Timeout or network error — show final error
-      document.getElementById('main-content').innerHTML = `
-        <div class="error-page">
-          <h2>Booking not found</h2>
-          <p>We couldn't find your appointment details yet.<br><br>
-          <strong>Your payment was received</strong> — please contact us on WhatsApp or email and we will confirm your booking manually right away.</p>
-        </div>`;
-      return;
+
+      // 404 or other — keep retrying until timeout
+      if (elapsed >= MAX_WAIT_MS) {
+        document.getElementById('main-content').innerHTML = `
+          <div class="error-page">
+            <h2>Booking not found</h2>
+            <p>We couldn't find your appointment details. Please check your link is correct, or contact us on WhatsApp and we'll sort it immediately.</p>
+          </div>`;
+        return;
+      }
+
+    } catch (_e) {
+      // Network/fetch error — don't give up, just retry until timeout
+      if (elapsed >= MAX_WAIT_MS) {
+        document.getElementById('main-content').innerHTML = `
+          <div class="error-page">
+            <h2>Connection error</h2>
+            <p>We couldn't reach our server. Please refresh the page or contact us on WhatsApp.</p>
+          </div>`;
+        return;
+      }
     }
 
-    // Wait then update the loading message with elapsed time
+    // Wait 1 second then retry
     await new Promise(r => setTimeout(r, POLL_MS));
     if (loadingEl) {
       const secs = Math.round((Date.now() - started) / 1000);
-      loadingEl.textContent = `Loading your forms… (${secs}s)`;
+      if (secs >= 5) loadingEl.textContent = `Loading your forms… (${secs}s)`;
     }
   }
 }
