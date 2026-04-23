@@ -1,0 +1,42 @@
+Verification only — do NOT build anything new. Just confirm what's in place.
+
+From an earlier prompt in this session, I asked for auto-email consent/medical forms when Eva creates a manual booking via the admin portal. Please verify end-to-end that ALL of the following are live right now:
+
+1. AUTO-SEND ON MANUAL BOOKING CREATE
+   - When POST /api/bookings is hit with source === "Portal" and a valid clientEmail, does the handler automatically call the send-forms logic (generate token + insert into form_tokens + send email)?
+   - Show me the exact lines in bookings.ts where this happens.
+   - Confirm the call is wrapped in try/catch so email failure doesn't fail the booking.
+
+2. TOKEN-BASED EMAIL LINK
+   - The email link points to /forms.html?token={token} (not ?booking=)
+   - Token is 32-byte hex, stored in form_tokens with 14-day expiry
+
+3. CLIENT FILLS FORM → DATA SAVED
+   - Submitting medical form via POST /api/forms/medical validates token, writes to medical_forms via supabaseAdmin, updates form_tokens.submitted_at
+   - Same for consent_forms via POST /api/forms/consent
+   - Confirm the submitted data is linked to the booking_id (so it shows up under the correct booking in Eva's admin portal) AND to the client profile
+
+4. ADMIN PORTAL VIEW
+   - Booking detail panel shows Medical ✓ / Consent ✓ badges when forms submitted
+   - Client profile also shows which bookings have completed forms
+   - openFormsDrawer() lets Eva view the submitted content
+
+5. NOTIFY EVA WHEN FORMS SUBMITTED
+   - When a client submits medical or consent form, does an email fire to starrbeautyyltd@gmail.com notifying Eva "Forms completed by [client name] for [treatment] on [date]"?
+   - If yes: show me the sender function + the trigger location in forms.ts
+   - If no: flag it as missing. Do NOT build it yet — I need to confirm.
+
+6. PUBLIC WEBSITE BOOKINGS (source !== "Portal")
+   - Confirm auto-send does NOT fire for public-site bookings (they already get their own confirmation email via Stripe webhook path)
+   - Or confirm that if it DOES fire for public bookings, it's intentional and doesn't duplicate
+
+REPORT FORMAT
+
+For each of the 6 items above, respond with one of:
+  ✅ IMPLEMENTED + file:line evidence
+  ❌ NOT IMPLEMENTED — describe gap
+  ⚠️ PARTIAL — describe what's there and what's missing
+
+Also flag any related bugs you spot during this trace (e.g. the notify-Eva email sends to the wrong address, or a race condition where the form is sent before the booking is committed).
+
+Do NOT write new code or modify anything. Pure audit response.
