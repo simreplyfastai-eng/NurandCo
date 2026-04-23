@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { randomBytes } from "crypto";
 import { supabaseAdmin } from "../lib/supabase";
 import { createCalendarEvent, deleteCalendarEvent } from '../googleCalendar';
 import { findOrCreateClient } from "./clients";
@@ -214,7 +215,8 @@ export async function runAutoComplete(): Promise<number> {
 
       const [y, m, d] = bookingDate.split("-").map(Number);
       const [h, min] = timeSlot.split(":").map(Number);
-      const apptMs = Date.UTC(y, m - 1, d, h, min) + durationMins * 60_000 + 15 * 60_000;
+      // new Date() respects process.env.TZ="Europe/London" — correctly handles BST/GMT
+      const apptMs = new Date(y, m - 1, d, h, min).getTime() + durationMins * 60_000 + 15 * 60_000;
 
       if (now > apptMs) toComplete.push(String(row.id));
     }
@@ -534,17 +536,31 @@ router.post("/bookings", async (req, res) => {
 
     // Auto-send forms link for portal-created bookings that have an email
     if (isPortal && email) {
-      sendFormsLinkEmail({
-        clientEmail: email,
-        clientName: name,
-        treatment: b.treatment ?? "",
-        date: b.date ?? "",
-        time: b.time ?? "",
-        bookingId: booking.id,
-        locationName: locationInfo?.name,
-      }).catch((err: unknown) => {
-        console.error("Auto forms email failed (non-fatal):", err);
-      });
+      // Generate a secure token for the forms link (same pattern as /api/forms/send-forms)
+      (async () => {
+        try {
+          const formToken = randomBytes(32).toString("hex");
+          const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+          const { error: tokenErr } = await supabaseAdmin
+            .from("form_tokens")
+            .insert({ token: formToken, booking_id: booking.id, expires_at: expiresAt });
+          if (tokenErr) {
+            console.warn("Auto forms: could not create form_token (table may not exist yet), sending legacy link:", tokenErr.message);
+          }
+          await sendFormsLinkEmail({
+            clientEmail: email,
+            clientName: name,
+            treatment: b.treatment ?? "",
+            date: b.date ?? "",
+            time: b.time ?? "",
+            bookingId: booking.id,
+            token: tokenErr ? undefined : formToken,
+            locationName: locationInfo?.name,
+          });
+        } catch (err: unknown) {
+          console.error("Auto forms email failed (non-fatal):", err);
+        }
+      })();
     }
 
     return res.status(201).json(booking);

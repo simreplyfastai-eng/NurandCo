@@ -168,7 +168,21 @@ router.put("/clients/:id", async (req, res) => {
   if (!requireAuth(req, res)) return;
   const { id } = req.params;
   const c = req.body;
+  const callerLocationId = getLocationId(req);
   try {
+    // IDOR guard: verify the client belongs to the caller's location before updating
+    if (callerLocationId) {
+      const { data: existing } = await supabaseAdmin
+        .from("clients")
+        .select("location_id")
+        .eq("id", id)
+        .maybeSingle();
+      if (!existing) return res.status(404).json({ error: "not found" });
+      if (String(existing.location_id) !== callerLocationId) {
+        return res.status(403).json({ error: "Forbidden" });
+      }
+    }
+
     const updates: Record<string, unknown> = {};
     if (c.name != null) updates.name = c.name;
     if (c.email != null) updates.email = c.email;

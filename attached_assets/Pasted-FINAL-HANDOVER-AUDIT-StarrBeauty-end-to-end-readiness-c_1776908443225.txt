@@ -1,0 +1,323 @@
+FINAL HANDOVER AUDIT — StarrBeauty, end-to-end readiness check before Eva goes live
+
+Do a comprehensive top-to-bottom check of the entire system from two perspectives:
+(1) A customer visiting the public booking site
+(2) Eva using the admin portal
+
+Produce ONE structured report covering every category below. For each finding, state: severity (Critical / High / Medium / Low), location (file:line or feature), what's wrong, proposed fix. DO NOT apply fixes — I review each one before approval.
+
+=== 1. PUBLIC CUSTOMER FLOW — end-to-end ===
+
+Walk through these flows mentally (tracing the code) for BOTH Hornchurch and Marylebone:
+
+a) Landing page / treatment browsing
+   - Does /book?location=hornchurch load without errors?
+   - Are all treatments + prices + deposits loaded correctly from Supabase?
+   - Any broken images, missing fields, console errors on load?
+   - Are the location's address, phone, hours displayed correctly?
+
+b) Booking flow
+   - Date picker shows correct days-of-week (the CSS fix we made tonight)
+   - Availability honours blocked_dates + availability_settings correctly
+   - Double-booking prevention: can two users book the same slot simultaneously? Is there an atomic check?
+   - Past dates are blocked from selection
+   - Outside business hours blocked
+   - Deposit amount correctly pulled from deposit_settings per location
+   - Stripe checkout session creates with correct amount, currency (GBP), treatment metadata
+   - Stripe webhook signature verification enabled (CRITICAL — check this)
+   - Treatment price on checkout is fetched SERVER-SIDE from treatments table, never trusted from client payload
+
+c) Post-payment
+   - Stripe webhook creates booking row with all fields
+   - Google Calendar event created with Eva's format
+   - Confirmation email sent via Resend
+   - "Send Forms" token email triggered (if configured)
+   - Client redirected to confirmed.html with booking ID/token
+   - Customer can view their booking confirmation without login
+
+d) Consent/medical forms
+   - Customer clicks emailed link, lands on forms.html with valid token
+   - Token-only flow works (we added this tonight)
+   - Submitting forms saves to medical_forms + consent_forms via supabaseAdmin
+   - Token marked submitted_at, can't be reused
+   - Invalid/expired/fake tokens rejected with proper error
+   - Customer sees success state after submission
+
+e) Enquiries
+   - Public enquiry form submits via backend (not direct to Supabase anon)
+   - Spam protection: rate limit active (we added this)
+   - Eva receives notification of new enquiry
+   - Enquiry visible in admin portal
+
+=== 2. ADMIN PORTAL FLOW — end-to-end ===
+
+Walk through Eva's daily workflow:
+
+a) Login
+   - /portal.html loads
+   - Login form works
+   - Invalid creds rejected with clear error
+   - Valid creds return JWT
+   - JWT stored in localStorage (fbn_token)
+   - Rate limiting active on login attempts (we added this)
+
+b) Dashboard
+   - Shows correct revenue, bookings count, client count for CURRENT location
+   - Location switcher works (switches X-Location-Id header)
+   - Recent bookings list loads
+   - Greeting shows correct time-of-day + date
+
+c) Schedule / calendar view
+   - Week/day view shows bookings at correct times
+   - Day-of-week alignment correct after tonight's CSS fix
+   - Clicking a booking opens detail panel with correct client name, treatment, forms status
+
+d) New Booking (manual)
+   - "+ New Booking" button opens form
+   - Fields: client name, email, phone, treatment dropdown, date picker, time, price, deposit, status, notes
+   - Save → POST /api/bookings (verified working tonight)
+   - Appears in list immediately
+   - Survives hard refresh (= saved to Supabase, not just localStorage)
+   - Google Calendar event created via hook in bookings.ts
+
+e) Cancel Booking
+   - Button on booking detail panel
+   - Inline confirm (no broken popup)
+   - Status → cancelled in Supabase
+   - Google Calendar event deleted
+
+f) Clients
+   - List loads, search works
+   - Click client → detail panel with bookings history, notes, contact info
+   - Add Client form works (we fixed this tonight)
+   - Delete Client with smart warning (0 vs 1+ bookings — we built this tonight)
+   - Cascade delete removes bookings + Google events + client row
+
+g) Treatments + Categories
+   - CRUD all work
+   - Active/inactive toggle respected by public booking site
+   - Deleting treatment doesn't orphan bookings
+
+h) Availability + Blocked Dates
+   - Block a day → public site can no longer book that day
+   - Set hours → public site respects slot availability
+   - Per-location blocking (Hornchurch block doesn't affect Marylebone)
+
+i) Enquiries
+   - New enquiries appear
+   - Mark as read / delete works
+   - Enquiry body not HTML-escapable (no XSS)
+
+j) Media
+   - Upload image / video works
+   - Delete removes from Supabase storage
+   - Hero / gallery / practitioner photos render on public site
+
+k) Settings
+   - Google Calendar connect/disconnect per location
+   - Password change (verified working tonight)
+   - Deposit settings per location
+   - Business info
+
+l) Send Forms
+   - From booking detail panel
+   - Email sends with token link
+   - Client can submit via token
+   - Forms ✓ badges update
+
+m) Forms drawer
+   - View submitted medical / consent forms from booking or client profile
+   - Forms not viewable without admin login
+
+=== 3. GDPR + DATA PRIVACY ===
+
+a) Sensitive data handling:
+   - Medical forms: encrypted at rest? At minimum RLS-locked (now yes)
+   - Consent signatures: immutable once submitted?
+   - Client PII: accessible only to admin, only the current admin's location
+   - Payment data: only Stripe IDs stored locally, never card numbers
+
+b) Data subject rights:
+   - Can Eva delete all data for a specific client on request? (right to erasure)
+   - Is there an export flow for "give me all my data"? (subject access request)
+   - If missing, flag as high priority for future
+
+c) Retention:
+   - Are old bookings / forms kept forever? Any auto-delete after X years?
+   - Document current retention (even if "infinite") so Eva knows
+
+d) Cookie / tracking consent:
+   - Public site: any analytics, pixels, cookies that need GDPR consent banner?
+   - If using Stripe, Google Fonts, Google Maps, etc., document required disclosures
+
+e) Privacy policy + T&Cs:
+   - Linked in footer? Forms checkbox requiring acceptance?
+   - Mention of how data is handled?
+
+=== 4. SECURITY ===
+
+a) Authentication:
+   - JWT secret: from env var, not hardcoded? Sufficient length (32+ chars)?
+   - JWT expiry: reasonable? (e.g. 24h for admin)
+   - Logout invalidates token server-side OR clears client storage at minimum
+
+b) Secrets:
+   - All keys in Replit Secrets, not committed to git
+   - No secrets in console.log anywhere
+   - Stripe webhook signature verification enabled (CONFIRM THIS — critical)
+   - Google OAuth client secret not leaked in any URL / logs
+
+c) Input validation:
+   - All POST endpoints type-check + length-limit fields
+   - Email / phone / UUID format validated where expected
+   - No SQL injection vectors (Supabase params handles most)
+   - XSS: any .innerHTML with user data? Escape properly?
+
+d) Rate limiting:
+   - Login, enquiries, forms, public booking endpoints — all limited
+   - Stripe webhook unlimited (retries expected)
+
+e) Access control:
+   - Every admin endpoint checks JWT
+   - X-Location-Id header validated against current admin's allowed locations
+   - Can admin from Location A access bookings from Location B via URL manipulation? (IDOR check)
+
+f) Dependency check:
+   - npm audit on api-server and frontend
+   - Report high + critical vulnerabilities
+
+g) File upload safety:
+   - Media bucket restricted to images + video MIME types
+   - File size limits enforced
+   - No path traversal in filenames
+
+=== 5. DEAD BUTTONS / BROKEN UI ===
+
+Click EVERY button + interactive element in the admin portal. Flag any that:
+   - Do nothing on click (silent failure)
+   - Show undefined/null/[object Object] strings
+   - Cause console errors
+   - Open broken modals
+   - Have placeholder text like "TODO" or "Not implemented"
+
+Same for public site — click through as a customer would.
+
+Also check:
+   - All form submit buttons work
+   - All cancel / back / close buttons close modals correctly
+   - Inline confirms (the 25 we fixed tonight) all swap-and-revert correctly
+   - Toast notifications dismiss after timeout
+
+=== 6. LOGIC CORRECTNESS ===
+
+a) Timezones:
+   - Everything in Europe/London?
+   - Any UTC/local mismatch between booking_date, time_slot, and Google Calendar event times?
+   - BST vs GMT transitions handled?
+
+b) Booking validation:
+   - Can't book in the past
+   - Can't book outside business hours
+   - Can't double-book the same slot
+   - 2-hour blocking of adjacent slots works correctly
+
+c) Money:
+   - Deposit + balance math correct
+   - Currency formatted correctly (£, not $)
+   - Stripe amount in pence (not pounds)
+   - Refunds not auto-triggered on cancel (Eva's policy call)
+
+d) Client matching:
+   - findOrCreateClient logic: matches on what field? Can two clients with same email be created?
+   - Does editing client name in admin portal update all their bookings?
+
+e) Cascade effects:
+   - Delete treatment → do existing bookings with that treatment break?
+   - Delete location → is this prevented or cascaded safely?
+   - Deactivate treatment → public site hides it, existing bookings remain
+
+=== 7. ERROR HANDLING ===
+
+a) Every fetch() has try/catch with user-facing error toast (we improved this tonight)
+b) Backend returns proper error codes + messages
+c) No 500 error leaks internal stack traces to client
+d) Network failures (offline) show graceful message
+e) Form validation errors shown clearly
+
+=== 8. EMAIL FLOWS ===
+
+a) Stripe webhook → booking confirmation email
+b) Admin "Send Forms" button → form link email
+c) Enquiry submitted → notification to Eva (if configured)
+d) Form submitted by customer → notification to Eva (if configured)
+
+Check:
+- Emails render correctly (HTML not showing as raw)
+- Links in emails work
+- Sender domain verified in Resend
+- SPF / DKIM / DMARC set correctly (document if not — it's a Fasthosts/domain task)
+
+=== 9. MOBILE RESPONSIVENESS ===
+
+Check public site + admin portal on mobile viewports (Eva will use her phone):
+   - Navigation usable on mobile
+   - Calendar / date picker works on mobile
+   - Forms not cut off
+   - No horizontal scroll on critical pages
+
+=== 10. PRODUCTION READINESS ===
+
+a) Replit deployment:
+   - Dev URL vs production domain — is the portal hardcoded to dev URL anywhere?
+   - If custom domain planned, note what needs updating in code / Google OAuth redirect URIs
+
+b) Environment variables:
+   - All needed secrets present in Replit
+   - No reliance on values that only exist in dev
+
+c) Database backups:
+   - Supabase free tier has backup limits — document current state
+   - Recommend plan upgrade if Eva's data matters (which it does)
+
+d) Monitoring:
+   - Any error logging to external service? (Sentry, LogRocket, etc.)
+   - If not, at minimum document where to find Replit console logs
+
+e) OAuth app publishing:
+   - Google Auth app still in Testing mode? Refresh tokens expire after 7 days.
+   - Needs publishing to Production before Eva's tokens hit 7-day mark.
+
+=== DELIVERABLE ===
+
+Single structured report:
+
+---
+CRITICAL (must fix before Eva goes live):
+1. [location] [issue] [fix]
+
+HIGH (fix within first week):
+
+MEDIUM (fix within first month):
+
+LOW (backlog):
+
+VERIFIED WORKING (no issues found):
+- Google Calendar sync
+- Token-based forms flow  
+- RLS lockdown
+- etc.
+
+SUMMARY: X Critical, Y High, Z Medium, W Low, N verified
+
+HANDOVER READINESS: [Ready / Not ready / Ready with caveats]
+Reasoning: [1-2 sentences]
+---
+
+IMPORTANT
+- Be ruthless. Don't call something "verified working" unless you traced the actual code.
+- Be specific: file:line, not "somewhere in bookings".
+- Test mental walkthroughs — don't skip edge cases.
+- If unsure, flag as "UNKNOWN — needs manual test" with instructions for how to test it.
+- Do NOT fix anything. Report only.
+
+Begin.

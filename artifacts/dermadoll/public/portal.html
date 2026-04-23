@@ -2371,8 +2371,8 @@ function renderDashboard(){
       const dmId=`dm-dash-${b.id}`;
       const canAct=b.status!=='Cancelled'&&b.status!=='cancelled';
       return`<tr>
-        <td style="cursor:pointer;color:var(--color-secondary);font-weight:700" onclick="openBookingModal('${b.id}')">${b.clientName}</td>
-        <td style="cursor:pointer;color:var(--color-primary);font-weight:600" onclick="openBookingModal('${b.id}')">${b.treatment||'Not specified'}</td>
+        <td style="cursor:pointer;color:var(--color-secondary);font-weight:700" onclick="openBookingModal('${b.id}')">${escPortal(b.clientName)}</td>
+        <td style="cursor:pointer;color:var(--color-primary);font-weight:600" onclick="openBookingModal('${b.id}')">${escPortal(b.treatment||'Not specified')}</td>
         <td style="cursor:pointer" onclick="openBookingModal('${b.id}')"><span class="date-full">${formatDate(b.date)}</span><span class="date-mob">${formatDateShort(b.date)}</span></td>
         <td style="cursor:pointer" onclick="openBookingModal('${b.id}')">${statusPill(b.status)}</td>
         <td style="white-space:nowrap" onclick="event.stopPropagation()">
@@ -2506,8 +2506,8 @@ function renderBookings(){
         <div class="bk-date-day">${dateDay}</div>
         ${b.time?`<div class="bk-date-time">${(b.time||'').slice(0,5)}</div>`:''}
       </td>
-      <td class="bk-col-client" style="font-weight:700;color:var(--color-secondary)">${b.clientName||'—'}</td>
-      <td class="bk-col-treat" style="color:var(--color-primary);font-weight:600;font-size:12px">${b.treatment||'Not specified'}</td>
+      <td class="bk-col-client" style="font-weight:700;color:var(--color-secondary)">${escPortal(b.clientName||'—')}</td>
+      <td class="bk-col-treat" style="color:var(--color-primary);font-weight:600;font-size:12px">${escPortal(b.treatment||'Not specified')}</td>
       <td class="bk-col-price" style="font-weight:700;color:var(--color-secondary)">${gbp(b.price)}</td>
       <td class="bk-col-dep">${dep}</td>
       <td class="bk-col-status"><span class="bk-status-pill" style="${style}">${b.status}</span></td>
