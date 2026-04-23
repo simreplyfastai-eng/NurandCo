@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     question: "Do you offer training?",
-    answer: "Yes, through Starr Academy, Eva offers CPD accredited aesthetics training at both the Hornchurch and Marylebone clinics. Courses are open to candidates with no prior background required. Enquire via Instagram or email.",
+    answer: "Yes, through Starr Academy, Eva offers CPD accredited training at both the Hornchurch and Marylebone clinics. Courses are open to candidates with no prior background required. Enquire via Instagram or email.",
   },
   {
     question: "How do I book?",
