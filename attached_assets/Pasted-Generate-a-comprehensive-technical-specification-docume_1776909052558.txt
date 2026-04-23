@@ -1,0 +1,203 @@
+Generate a comprehensive technical specification document for this entire project — StarrBeauty admin portal + public booking site + backend + Supabase. This will be saved and used as the master reference for forking into future client projects under the Aesthetix Systems template.
+
+OUTPUT FORMAT
+
+Write the spec as a single long markdown document. Structure it as follows. Be exhaustive — do not abbreviate. If a section is large, use code blocks, tables, lists as appropriate.
+
+=== 1. PROJECT OVERVIEW ===
+
+- Product name + purpose (1 paragraph)
+- Target user (Eva + her customers)
+- Business domain (UK aesthetics clinic, multi-location)
+- Core value proposition (what problem it solves)
+- Tech stack summary (one line per layer: frontend, backend, DB, payments, email, calendar, hosting)
+
+=== 2. FILE TREE ===
+
+Full directory tree of the project, with a 1-line comment next to every file/folder explaining its purpose. Format as:
+
+artifacts/
+├── api-server/                    # Node/Express backend
+│   ├── src/
+│   │   ├── index.ts              # Entry point, route registration
+│   │   ├── routes/
+│   │   │   ├── auth.ts           # Admin login, password change, JWT issuing
+│   │   │   ├── bookings.ts       # Booking CRUD + Google Calendar hook
+│   │   │   ├── ...
+│   │   └── lib/
+│   │       ├── supabase.ts       # Supabase clients (anon + admin)
+│   │       └── ...
+├── dermadoll/
+│   └── public/
+│       ├── portal.html            # Admin portal SPA (single-file)
+│       ├── book.html              # Public booking site entry
+│       ├── forms.html             # Client consent/medical forms
+│       ├── confirmed.html         # Post-payment confirmation
+│       └── ...
+└── ...
+
+Include EVERY file. Don't skip "obvious" ones.
+
+=== 3. TECH STACK DEEP DIVE ===
+
+For each technology, describe:
+- What it is + why chosen
+- Version/library used
+- How it integrates with the rest of the stack
+
+Cover: Node.js, Express, TypeScript, Supabase (Postgres + Auth + Storage + RLS), Stripe (Checkout + Webhook), Google Calendar API (OAuth2), Resend (transactional email), bcrypt (password hashing), JWT (session tokens), Flatpickr (date picker), Vite (dev server), Replit (hosting), Fasthosts (DNS/domain).
+
+=== 4. DATABASE SCHEMA ===
+
+For EVERY table in the public schema, provide:
+- Table name
+- Purpose (1 sentence)
+- Full column list with: column name, type, nullable, default, constraints, indexes
+- Foreign keys (to and from)
+- RLS policies (after tonight's lockdown): policy name, role, command, using/with_check
+
+Cover all tables: bookings, clients, locations, treatments, availability_settings, blocked_dates, deposit_settings, enquiries, consent_forms, medical_forms, payments, portal_kv, google_calendar_tokens, form_tokens, and any others.
+
+Also document:
+- Storage buckets (media bucket: public, 50MB limit, image+video MIME types, folder structure: starr/gallery, starr/results_video)
+- Any database functions or triggers (if present)
+
+=== 5. BACKEND API REFERENCE ===
+
+List EVERY HTTP endpoint. For each:
+- Method + path (e.g. POST /api/bookings)
+- File location (bookings.ts:line)
+- Purpose (1 sentence)
+- Auth required? (JWT / none)
+- Rate limited? (yes/no + limit)
+- Request body schema
+- Response shape (success + error)
+- Side effects (DB writes, Google Calendar calls, emails sent, webhook triggers)
+
+Group by feature: Auth, Bookings, Clients, Treatments, Availability, Forms, Google Calendar OAuth, Stripe, Enquiries, Admin, Media.
+
+=== 6. FRONTEND ARCHITECTURE ===
+
+ADMIN PORTAL (portal.html):
+- It's a single-file SPA — explain the pattern
+- Section routing (#dashboard, #bookings, #clients, #schedule, #settings, etc.)
+- Main data-loading functions: ClientAPI, BookingAPI, TreatmentAPI, etc. — what each does
+- localStorage usage (fbn_token, fbn_clients, fbn_bookings caches)
+- Helper functions: authHdr(), escPortal(), showToast(), inlineConfirm(), inlineTypeConfirm()
+- Render functions: renderDashboard, renderClients, renderBookings, renderSchedule, buildCalendar, renderAvailMiniCal, renderOneOffCal
+- Brand design tokens: colours (burgundy #5C1E1E, gold #C9A96E, cream #FAF7F4), fonts (Cormorant Garamond headlines, DM Sans / Inter body), border-radius, etc.
+
+PUBLIC BOOKING SITE (book.html, confirmed.html, forms.html):
+- Flow from /book?location=... → treatment select → date/time → Stripe checkout → confirmed.html
+- Flatpickr date picker with Monday-first week (locale firstDayOfWeek: 1) + the CSS fix (max-width: 39px on .flatpickr-day)
+- Forms.html token-based flow (reads ?token= from URL)
+
+=== 7. KEY FLOWS (END-TO-END TRACES) ===
+
+Walk through each of these as a step-by-step trace: user action → frontend code → backend endpoint → DB/API → response → frontend update.
+
+a) Customer books on public site (credit card payment)
+b) Eva manually creates a booking in admin portal
+c) Customer cancels (admin-initiated)
+d) Google Calendar sync on booking create/cancel
+e) Admin login + password change
+f) "Send Forms" email + client submits forms via token
+g) OAuth connect Google Calendar
+
+=== 8. INTEGRATIONS ===
+
+For each external service, document:
+- What it does
+- How it's configured (env vars, Replit Secrets)
+- Key files that use it
+- Webhooks or callbacks
+- Gotchas (e.g. Google OAuth Testing mode = 7-day refresh token expiry)
+
+Cover: Stripe, Google Cloud / Calendar API, Resend, Supabase, Fasthosts DNS.
+
+=== 9. ENVIRONMENT VARIABLES ===
+
+List every env var the app reads. For each:
+- Name (e.g. SUPABASE_SERVICE_KEY)
+- Where it's used (file:line)
+- What it's for
+- Example format (redacted — e.g. "eyJ...")
+- Rotatable? How?
+
+=== 10. SECURITY POSTURE ===
+
+Document the current state of security (post-tonight's lockdown):
+- Auth: JWT in localStorage, bcrypt hash in portal_kv, env-var backstop
+- RLS: all tables locked to service_role, public reads only on treatments/locations/availability/blocked_dates/deposit_settings
+- Rate limiting: which endpoints, what limits
+- Input sanitisation: sanitize() on enquiry/booking text, escPortal() on admin portal HTML rendering
+- Stripe: webhook signature verified, price fetched server-side
+- Forms: token-validated, single-use, 14-day expiry
+- Google Calendar: OAuth2 tokens in google_calendar_tokens table, service-role only
+
+=== 11. KNOWN LIMITATIONS & BACKLOG ===
+
+Document what's NOT built yet so future forks know:
+- No Outlook calendar support (only Google)
+- Double-booking race condition at DB level (low practical risk)
+- No forgot-password email flow (only env-var recovery)
+- No subject access request / data export flow (GDPR right to erasure is manual)
+- No automated cookie consent banner
+- Google OAuth in Testing mode (7-day token expiry until published)
+- Any other TODO/FIXME in the codebase — grep and list them
+
+=== 12. DEPLOYMENT ===
+
+- Where it runs (Replit project name + URL)
+- Custom domain (if connected)
+- Build/start commands
+- How to update env vars / Replit Secrets
+- How to run migrations (SQL editor in Supabase)
+- Rollback plan (Replit checkpoints, Supabase point-in-time recovery if Pro)
+
+=== 13. AESTHETIX SYSTEMS TEMPLATE NOTES ===
+
+This section is the gold for future forks. For EACH per-client thing that needs changing when forking for a new client, list:
+
+- Supabase project: create new project, run schema migration
+  - Tables to create (reference section 4)
+  - Seed data: locations (with new clinic name + address), treatments (new menu), deposit_settings, availability_settings
+  - RLS policies (reference section 10)
+- Brand customisation:
+  - Colours in portal.html + public CSS (burgundy/gold/cream → new palette)
+  - Fonts (Cormorant Garamond → new heading font)
+  - Logo + clinic name in header
+  - Hero video / gallery images uploaded to media bucket
+  - Favicon
+- Stripe:
+  - New Stripe account OR same account with metadata to separate
+  - Webhook endpoint URL updated
+  - Product / price setup (if applicable)
+- Google Cloud:
+  - New OAuth project OR reuse Aesthetix Systems project with multi-tenant config
+  - Redirect URI updated to new client's portal URL
+  - Test users + publishing state
+- Resend:
+  - Domain verified for new client
+  - Email templates updated (clinic name, branding)
+- Env vars / Replit Secrets: list each that needs new values per client
+- OAuth redirect: /admin/settings fix + /portal.html#settings
+- Content: treatment descriptions, policy page, privacy policy, terms
+
+Basically: "Everything a future me needs to fork this for Hira, Flawless, Permadoll, or any other aesthetics client."
+
+=== 14. GLOSSARY ===
+
+Define any project-specific terms: "location", "booking", "treatment", "deposit vs balance", "Portal vs Website source", "location_id", "service_role", "anon key", "RLS", "fbn_token", "authHdr", "__global__admin_password_override", "form_tokens", etc.
+
+=== DELIVERABLE ===
+
+One single markdown file, as long as it needs to be, covering all 14 sections comprehensively. Save it to the Replit filesystem as PROJECT_SPEC.md at the root of the repo so I can download it.
+
+Also:
+- Output the document inline in your response so I can paste it into Claude / my Aesthetix Systems project immediately.
+- Do NOT truncate. Be thorough.
+- Use real file paths + line numbers throughout, not hand-waved descriptions.
+- If any section is speculative (e.g. "might need to do this for future clients"), mark it as SUGGESTED vs VERIFIED.
+
+Begin.
