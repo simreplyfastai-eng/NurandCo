@@ -94,13 +94,13 @@ const bookingLimiter = rateLimit({
   message: { error: "Too many booking attempts. Please try again later." },
 });
 
-// Enquiries: 5 per 10 min
+// Enquiries: 5 per minute per IP
 const enquiryLimiter = rateLimit({
-  windowMs: 10 * 60 * 1000,
+  windowMs: 60 * 1000,
   max: 5,
   standardHeaders: true,
   legacyHeaders: false,
-  message: { error: "Too many enquiry attempts. Please try again in a few minutes." },
+  message: { error: "Too many enquiry attempts. Please try again in a minute." },
 });
 
 // Payment intent: 5 per 10 min
@@ -112,11 +112,23 @@ const piLimiter = rateLimit({
   message: { error: "Too many requests. Please try again in a few minutes." },
 });
 
+// Form submission (health data): 10 per minute per IP
+const formsLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many form submissions. Please try again in a minute." },
+});
+
 app.use("/api", apiLimiter);
 app.post("/api/auth/login", loginLimiter);
+app.post("/api/auth/change-password", loginLimiter);
 app.post("/api/bookings", bookingLimiter);
 app.post("/api/enquiries", enquiryLimiter);
 app.post("/api/stripe/create-payment-intent", piLimiter);
+app.post("/api/forms/medical", formsLimiter);
+app.post("/api/forms/consent", formsLimiter);
 
 app.use("/api", router);
 

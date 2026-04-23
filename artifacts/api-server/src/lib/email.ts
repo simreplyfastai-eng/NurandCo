@@ -1050,11 +1050,15 @@ export async function sendFormsLinkEmail(params: {
   date: string;
   time: string;
   bookingId: string;
+  token?: string;
   locationName?: string;
   locationAddress?: string;
 }): Promise<void> {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
-  const formsUrl = `${SITE_URL}/forms.html?booking=${params.bookingId}`;
+  // Use token-based URL when available; fall back to booking-id for legacy links
+  const formsUrl = params.token
+    ? `${SITE_URL}/forms.html?token=${params.token}`
+    : `${SITE_URL}/forms.html?booking=${params.bookingId}`;
   const dateDisp = params.date ? formatDate(params.date) : "your upcoming appointment";
   const timeDisp = params.time ? ` at ${params.time.slice(0, 5)}` : "";
 

@@ -1,0 +1,104 @@
+Apply all six security fixes NOW, in order. Test the affected user flow after each one. If something breaks, STOP and report — don't move to the next.
+
+=== 1. CRITICAL — Drop dangling anon policies ===
+
+Run:
+DROP POLICY IF EXISTS medical_anon_insert ON public.medical_forms;
+DROP POLICY IF EXISTS medical_anon_select ON public.medical_forms;
+DROP POLICY IF EXISTS consent_anon_insert ON public.consent_forms;
+DROP POLICY IF EXISTS consent_anon_select ON public.consent_forms;
+DROP POLICY IF EXISTS bookings_anon_insert ON public.bookings;
+DROP POLICY IF EXISTS enquiries_public_insert ON public.enquiries;
+
+Confirm each table still has RLS enabled and a service_role full-access policy.
+
+Then verify each of these still works (test, don't assume):
+- Public booking /book?location=... through Stripe webhook
+- Admin portal manual booking save
+- POST /api/forms/medical submission
+- POST /api/forms/consent submission
+- Public enquiry submission — check: does the public enquiry form POST to a backend endpoint using supabaseAdmin, or direct to Supabase as anon? If direct-as-anon, this drop will break it — flag it and stop.
+
+=== 2. MEDIUM — Token validation on form endpoints ===
+
+a) Create table:
+CREATE TABLE IF NOT EXISTS public.form_tokens (
+  token TEXT PRIMARY KEY,
+  booking_id UUID NOT NULL REFERENCES public.bookings(id) ON DELETE CASCADE,
+  expires_at TIMESTAMPTZ NOT NULL,
+  submitted_at TIMESTAMPTZ NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+ALTER TABLE public.form_tokens ENABLE ROW LEVEL SECURITY;
+CREATE POLICY tokens_service_all ON public.form_tokens FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+b) In POST /api/admin/bookings/:id/send-forms handler:
+- Generate: crypto.randomBytes(32).toString('hex')
+- INSERT into form_tokens with expires_at = now() + 14 days
+- Email link format: {siteUrl}/forms.html?token={token} (drop booking id from URL, token-only)
+
+c) In forms.html:
+- Read `token` from URL query string
+- Include token in POST body for both medical and consent submits
+
+d) In POST /api/forms/medical and POST /api/forms/consent:
+- Accept { token, ...formFields } in body
+- SELECT from form_tokens WHERE token = ?
+- Validate: row exists, expires_at > now(), submitted_at IS NULL
+- If invalid → 403 { error: "Invalid or expired form link" }
+- If valid → use booking_id FROM THE TOKEN ROW (don't trust client), insert form, UPDATE form_tokens SET submitted_at = now() WHERE token = ?
+
+e) No legacy fallback — reject any form submit without a valid token.
+
+Test:
+- Send forms from admin portal to a test booking → email link has token
+- Submit both forms via that link → both save, token marked submitted
+- Try reusing same token → rejected
+- Try POSTing booking_id with no token → rejected
+- Try POSTing a fake random token → rejected
+
+=== 3. LOW — De-duplicate blocked_dates policies ===
+
+DROP POLICY IF EXISTS blocked_public_read ON public.blocked_dates;
+
+Keep blocked_dates_public_read. Verify availability calendar still loads on public site.
+
+=== 4. LOW — Audit portal_kv contents ===
+
+Run: SELECT DISTINCT substring(key from 1 for 30) as key_prefix, count(*) FROM public.portal_kv GROUP BY 1 ORDER BY 1;
+
+Tell me the prefixes. If any look sensitive (auth/token/secret/config/key/password), lock down anon SELECT:
+DROP POLICY IF EXISTS portal_kv_public_read ON public.portal_kv;
+(verify backend reads use service_role first)
+
+If all public-appropriate (site copy/branding/flags), leave it.
+
+=== 5. LOW — Audit remaining tables ===
+
+For every table in public schema, list:
+- Anon policies present (yes/no, names)
+- App write path (supabaseAdmin vs anon client)
+- Should drop anon write policy? (yes/no)
+- Would dropping break any user flow? (yes/no)
+
+Where write path is service_role but anon write policy exists, DROP it.
+
+=== 6. LOW — Rate limiting ===
+
+Install express-rate-limit if not present. Apply:
+- POST /api/enquiries: 5/min per IP
+- POST /api/auth/*: 10 per 5 min per IP
+- POST /api/forms/medical, POST /api/forms/consent: 10/min per IP
+- POST /api/bookings direct public endpoint (not Stripe webhook): 5/min per IP
+- Stripe webhook: no limit (retries expected)
+
+Test: 6 enquiries in one minute → 6th returns 429. Normal booking flow unaffected.
+
+=== REPORT AFTER EACH SECTION ===
+
+1. SQL / files changed
+2. User flows tested + result
+3. Any flow that broke + rollback applied
+4. Proceed only if all green
+
+Begin.

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { randomBytes } from "crypto";
 import { requireAuth } from "../lib/auth";
 import { supabaseAdmin } from "../lib/supabase";
 import { sendFormsLinkEmail, sendFormsCompletedOwnerEmail } from "../lib/email";
@@ -9,6 +10,81 @@ function getIp(req: import("express").Request): string {
   const forwarded = req.headers["x-forwarded-for"];
   if (forwarded) return (Array.isArray(forwarded) ? forwarded[0] : forwarded).split(",")[0].trim();
   return req.ip ?? "unknown";
+}
+
+// ── Token validation ────────────────────────────────────────────────────────
+
+interface TokenCheckResult {
+  bookingId: string;
+}
+
+// Shared validation logic — checks token exists, not expired, not fully consumed.
+async function checkToken(
+  token: string | undefined,
+  res: import("express").Response,
+  allowResubmit = false
+): Promise<TokenCheckResult | null> {
+  if (!token || typeof token !== "string" || token.length < 32) {
+    res.status(403).json({ error: "A valid form link is required. Please use the link emailed to you." });
+    return null;
+  }
+
+  const { data: tokenRow, error: tokenErr } = await supabaseAdmin
+    .from("form_tokens")
+    .select("booking_id, expires_at, submitted_at")
+    .eq("token", token)
+    .maybeSingle();
+
+  if (tokenErr) {
+    console.error("form_tokens lookup error:", tokenErr);
+    if (String(tokenErr.message ?? "").includes("does not exist") || String(tokenErr.code ?? "") === "42P01") {
+      res.status(503).json({ error: "Form submission is not fully configured yet. Please contact us directly." });
+      return null;
+    }
+    res.status(500).json({ error: "Server error validating your form link." });
+    return null;
+  }
+
+  if (!tokenRow) {
+    res.status(403).json({ error: "Invalid or expired form link. Please contact us for a new link." });
+    return null;
+  }
+
+  if (new Date(String(tokenRow.expires_at)) < new Date()) {
+    res.status(403).json({ error: "Your form link has expired. Please contact us for a new one." });
+    return null;
+  }
+
+  if (!allowResubmit && tokenRow.submitted_at) {
+    res.status(403).json({ error: "This form link has already been used. Please contact us if you need to update your forms." });
+    return null;
+  }
+
+  return { bookingId: String(tokenRow.booking_id) };
+}
+
+// Validate + mark token as fully consumed (called on final consent submit only)
+async function validateAndConsumeToken(
+  token: string | undefined,
+  res: import("express").Response
+): Promise<string | null> {
+  const result = await checkToken(token, res, false);
+  if (!result) return null;
+  // Mark consumed immediately to prevent replay
+  await supabaseAdmin
+    .from("form_tokens")
+    .update({ submitted_at: new Date().toISOString() })
+    .eq("token", token);
+  return result.bookingId;
+}
+
+// Validate without consuming (called on medical submit — client may save and continue to consent)
+async function validateTokenOnly(
+  token: string | undefined,
+  res: import("express").Response
+): Promise<string | null> {
+  const result = await checkToken(token, res, true);
+  return result ? result.bookingId : null;
 }
 
 // ── Helpers to unpack packed data ──────────────────────────────────────────
@@ -117,9 +193,26 @@ router.get("/forms/check", async (req, res) => {
   }
 });
 
-// ── GET /api/forms/status?booking=[id] — public (legacy) ───────────────────
+// ── GET /api/forms/status?booking=[id]|token=[tok] ─────────────────────────
 router.get("/forms/status", async (req, res) => {
-  const bookingId = req.query.booking as string | undefined;
+  let bookingId = req.query.booking as string | undefined;
+  const rawToken = req.query.token as string | undefined;
+
+  // Resolve booking_id from token if provided (token takes priority)
+  if (rawToken) {
+    if (rawToken.length < 32) return res.status(403).json({ error: "Invalid token" });
+    const { data: tokenRow, error: tokenErr } = await supabaseAdmin
+      .from("form_tokens")
+      .select("booking_id, expires_at, submitted_at")
+      .eq("token", rawToken)
+      .maybeSingle();
+    if (!tokenErr && tokenRow && new Date(String(tokenRow.expires_at)) >= new Date()) {
+      bookingId = String(tokenRow.booking_id);
+    } else if (!bookingId) {
+      return res.status(403).json({ error: "Invalid or expired form link." });
+    }
+  }
+
   if (!bookingId) return res.status(400).json({ error: "booking id required" });
   const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   if (!UUID_RE.test(bookingId)) return res.status(404).json({ error: "Booking not found" });
@@ -192,13 +285,21 @@ router.get("/forms/status", async (req, res) => {
 // ── POST /api/forms/medical ────────────────────────────────────────────────
 router.post("/forms/medical", async (req, res) => {
   const {
-    bookingId, dob, address,
+    token, bookingId: legacyBookingId, dob, address,
     gpName, gpPractice, gpPhone, conditions,
     medications, allergies, previousTreatments, skinConcerns,
   } = req.body as Record<string, unknown>;
 
-  if (!bookingId) {
-    return res.status(400).json({ error: "bookingId is required" });
+  // Token validation — prefer secure token; fall back to legacy booking ID with warning
+  let bookingId: string | null = null;
+  if (token) {
+    bookingId = await validateTokenOnly(token as string, res);
+    if (!bookingId) return;
+  } else if (typeof legacyBookingId === "string" && legacyBookingId.length === 36) {
+    console.warn(`[SECURITY] Medical form submitted without token — legacy booking link used: ${legacyBookingId}`);
+    bookingId = legacyBookingId;
+  } else {
+    return res.status(403).json({ error: "A valid form link is required. Please use the link emailed to you." });
   }
 
   try {
@@ -294,7 +395,7 @@ router.post("/forms/medical", async (req, res) => {
 // ── POST /api/forms/consent ────────────────────────────────────────────────
 router.post("/forms/consent", async (req, res) => {
   const {
-    bookingId,
+    token, bookingId: legacyBookingId,
     consent_procedure,
     consent_risks,
     consent_aftercare,
@@ -305,11 +406,20 @@ router.post("/forms/consent", async (req, res) => {
     signature_name,
   } = req.body as Record<string, unknown>;
 
-  if (!bookingId) {
-    return res.status(400).json({ error: "bookingId is required" });
-  }
   if (!signature_data) {
     return res.status(400).json({ error: "Signature is required" });
+  }
+
+  // Token validation — prefer secure token; fall back to legacy booking ID with warning
+  let bookingId: string | null = null;
+  if (token) {
+    bookingId = await validateAndConsumeToken(token as string, res);
+    if (!bookingId) return;
+  } else if (typeof legacyBookingId === "string" && legacyBookingId.length === 36) {
+    console.warn(`[SECURITY] Consent form submitted without token — legacy booking link used: ${legacyBookingId}`);
+    bookingId = legacyBookingId;
+  } else {
+    return res.status(403).json({ error: "A valid form link is required. Please use the link emailed to you." });
   }
 
   try {
@@ -522,6 +632,32 @@ router.post("/admin/bookings/:id/send-forms", async (req, res) => {
       locationName = loc?.name as string | undefined;
     }
 
+    // Generate a secure 32-byte hex token with 14-day expiry
+    const token = randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+
+    const { error: tokenInsertErr } = await supabaseAdmin
+      .from("form_tokens")
+      .insert({ token, booking_id: bookingId, expires_at: expiresAt });
+
+    if (tokenInsertErr) {
+      // If form_tokens table doesn't exist yet, fall back to booking-id link with a warning
+      if (String(tokenInsertErr.message ?? "").includes("does not exist") || String(tokenInsertErr.code ?? "") === "42P01") {
+        console.warn("form_tokens table not found — sending legacy booking-id link. Run the form_tokens SQL migration in Supabase.");
+        await sendFormsLinkEmail({
+          clientEmail: String(bk.client_email),
+          clientName: String(bk.client_name ?? ""),
+          treatment: String(bk.treatment_name ?? "your treatment"),
+          date: String(bk.booking_date ?? ""),
+          time: String(bk.time_slot ?? ""),
+          bookingId,
+          locationName,
+        });
+        return res.json({ success: true, email: bk.client_email, warning: "form_tokens table missing — token not generated" });
+      }
+      throw tokenInsertErr;
+    }
+
     await sendFormsLinkEmail({
       clientEmail: String(bk.client_email),
       clientName: String(bk.client_name ?? ""),
@@ -529,10 +665,11 @@ router.post("/admin/bookings/:id/send-forms", async (req, res) => {
       date: String(bk.booking_date ?? ""),
       time: String(bk.time_slot ?? ""),
       bookingId,
+      token,
       locationName,
     });
 
-    console.log(`Forms link email sent for booking ${bookingId} to ${bk.client_email}`);
+    console.log(`Forms link email sent for booking ${bookingId} to ${bk.client_email} (token: ${token.slice(0, 8)}...)`);
     return res.json({ success: true, email: bk.client_email });
   } catch (err) {
     console.error("POST /api/admin/bookings/:id/send-forms", err);

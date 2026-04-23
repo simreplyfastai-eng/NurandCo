@@ -179,7 +179,8 @@ textarea{min-height:80px;resize:vertical;line-height:1.5}
 <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
 <script>
 const params = new URLSearchParams(location.search);
-const BOOKING_ID = params.get('booking') || '';
+const FORM_TOKEN  = params.get('token')  || '';   // secure token (new links)
+const BOOKING_ID  = params.get('booking') || '';  // legacy fallback
 let bookingData = null;
 let signaturePad = null;
 let isReturningClient = false;
@@ -445,7 +446,8 @@ async function submitMedical() {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        bookingId: BOOKING_ID,
+        token: FORM_TOKEN || undefined,
+        bookingId: FORM_TOKEN ? undefined : BOOKING_ID,
         clientEmail: email,
         clientName: name,
         dob: document.getElementById('f-dob')?.value || null,
@@ -562,7 +564,8 @@ async function submitConsent() {
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        bookingId: BOOKING_ID,
+        token: FORM_TOKEN || undefined,
+        bookingId: FORM_TOKEN ? undefined : BOOKING_ID,
         consent_procedure:       !!document.getElementById('cst-procedure')?.checked,
         consent_risks:           !!document.getElementById('cst-risks')?.checked,
         consent_aftercare:       !!document.getElementById('cst-aftercare')?.checked,
@@ -574,8 +577,11 @@ async function submitConsent() {
       }),
     });
     if (!res.ok) throw new Error((await res.json()).error || 'Failed to submit');
-    // Success — go to confirmed page
-    window.location.href = 'confirmed.html?booking=' + encodeURIComponent(BOOKING_ID);
+    // Success — go to confirmed page (token or legacy booking ID)
+    const confirmedParam = FORM_TOKEN
+      ? 'token=' + encodeURIComponent(FORM_TOKEN)
+      : 'booking=' + encodeURIComponent(BOOKING_ID);
+    window.location.href = 'confirmed.html?' + confirmedParam;
   } catch(e) {
     showError('consent-error', e.message || 'Something went wrong. Please try again.');
     btn.disabled = false;
@@ -602,7 +608,7 @@ function formatDate(dateStr) {
 // Poll for up to 90 seconds — the Stripe webhook can take up to ~45s to fire after payment.
 // Customers are redirected here immediately after paying, so we must NOT fail on first 404.
 async function init() {
-  if (!BOOKING_ID) {
+  if (!FORM_TOKEN && !BOOKING_ID) {
     document.getElementById('main-content').innerHTML = `
       <div class="error-page">
         <h2>No booking found</h2>
@@ -617,10 +623,15 @@ async function init() {
   const loadingEl   = document.querySelector('.loading-wrap p');
   if (loadingEl) loadingEl.textContent = 'Loading your forms…';
 
+  // Build the status URL — prefer token-based, fall back to legacy booking ID
+  const statusParam = FORM_TOKEN
+    ? 'token=' + encodeURIComponent(FORM_TOKEN)
+    : 'booking=' + encodeURIComponent(BOOKING_ID);
+
   while (true) {
     const elapsed = Date.now() - started;
     try {
-      const res = await fetch('/api/forms/status?booking=' + encodeURIComponent(BOOKING_ID));
+      const res = await fetch('/api/forms/status?' + statusParam);
 
       if (res.ok) {
         // ── SUCCESS ─────────────────────────────────────────────
@@ -629,7 +640,10 @@ async function init() {
 
         // If both forms already done → go to confirmed
         if (data.hasConsent) {
-          window.location.href = 'confirmed.html?booking=' + encodeURIComponent(BOOKING_ID);
+          const doneParam = FORM_TOKEN
+            ? 'token=' + encodeURIComponent(FORM_TOKEN)
+            : 'booking=' + encodeURIComponent(BOOKING_ID);
+          window.location.href = 'confirmed.html?' + doneParam;
           return;
         }
 
