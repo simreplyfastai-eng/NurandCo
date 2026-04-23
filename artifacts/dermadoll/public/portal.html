@@ -3895,7 +3895,15 @@ function confirmDeleteClient(id,name){
   const t=setTimeout(()=>resetDeleteClient(id),5000);
   wrap.setAttribute('data-timer',String(t));
   wrap.setAttribute('data-name',name);
-  wrap.innerHTML=`<div style="display:flex;gap:8px;align-items:center"><span style="flex:1;font-size:12px;color:#c62828;font-weight:600;font-family:var(--font-sans)">Really delete?</span><button style="background:#c62828;color:#fff;border:none;border-radius:var(--radius);padding:8px 14px;font-family:var(--font-sans);font-size:12px;font-weight:700;cursor:pointer" onclick="doDeleteClient('${id}')">Yes, delete</button><button style="background:#fff;color:#5C1A1A;border:1px solid #E8E8E8;border-radius:var(--radius);padding:8px 14px;font-family:var(--font-sans);font-size:12px;font-weight:700;cursor:pointer" onclick="resetDeleteClient('${id}')">Cancel</button></div>`;
+  const count=getBookings().filter(b=>
+    b.clientId===id&&
+    b.status!=='Cancelled'&&b.status!=='cancelled'&&
+    b.status!=='Completed'&&b.status!=='completed'
+  ).length;
+  const warningHtml=count>0
+    ?`<div style="flex:1;font-family:var(--font-sans)"><div style="font-size:12px;color:#c62828;font-weight:700;line-height:1.5;margin-bottom:4px">Delete ${escPortal(name)}? This will also cancel their ${count} upcoming booking${count===1?'':'s'} and remove them from any connected calendar (Google, Outlook, etc.). To keep the calendar in sync, cancel bookings individually first before deleting the client.</div><div style="font-size:11px;color:#888;line-height:1.4">Recommended: cancel bookings individually first.</div></div>`
+    :`<span style="flex:1;font-size:12px;color:#c62828;font-weight:600;font-family:var(--font-sans)">Really delete?</span>`;
+  wrap.innerHTML=`<div style="display:flex;gap:8px;align-items:center">${warningHtml}<button style="background:#c62828;color:#fff;border:none;border-radius:var(--radius);padding:8px 14px;font-family:var(--font-sans);font-size:12px;font-weight:700;cursor:pointer" onclick="doDeleteClient('${id}')">Yes, delete</button><button style="background:#fff;color:#5C1A1A;border:1px solid #E8E8E8;border-radius:var(--radius);padding:8px 14px;font-family:var(--font-sans);font-size:12px;font-weight:700;cursor:pointer" onclick="resetDeleteClient('${id}')">Cancel</button></div>`;
 }
 function resetDeleteClient(id){
   const wrap=document.getElementById(`dcc-${id}`);
