@@ -615,7 +615,7 @@ async function init() {
   const POLL_MS      = 4000;  // check every 4 seconds
   const started      = Date.now();
   const loadingEl    = document.querySelector('.loading-wrap p');
-  if (loadingEl) loadingEl.textContent = 'Confirming your payment…';
+  if (loadingEl) loadingEl.textContent = 'Loading your forms…';
 
   while (true) {
     try {
@@ -685,7 +685,7 @@ async function init() {
     await new Promise(r => setTimeout(r, POLL_MS));
     if (loadingEl) {
       const secs = Math.round((Date.now() - started) / 1000);
-      loadingEl.textContent = `Confirming your payment… (${secs}s)`;
+      loadingEl.textContent = `Loading your forms… (${secs}s)`;
     }
   }
 }
