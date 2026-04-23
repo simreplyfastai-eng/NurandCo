@@ -2708,6 +2708,9 @@ function openBookingDetailPanel(bookingId){
       <button class="btn-outline" onclick="openRescheduleModal('${b.id}')" style="flex:1;text-align:center">Reschedule</button>
       <button class="btn-danger" onclick="cancelBookingById(this,'${b.id}')" style="flex:1;text-align:center">Cancel Booking</button>
     </div>`:''}
+    <div id="delete-bk-wrap-${b.id}" style="margin-top:${b.status!=='Cancelled'&&b.status!=='cancelled'?'8':'16'}px;padding-top:${b.status!=='Cancelled'&&b.status!=='cancelled'?'0':'16'}px;${b.status!=='Cancelled'&&b.status!=='cancelled'?'':'border-top:1px solid var(--color-border-subtle)'}">
+      <button onclick="deleteBookingById(this,'${b.id}')" style="width:100%;font-size:11px;padding:7px;border:1px solid #c62828;background:transparent;color:#c62828;cursor:pointer;border-radius:var(--radius);font-family:var(--font-sans);letter-spacing:0.5px;text-align:center">🗑 Delete Booking</button>
+    </div>
   `;
   // Background refresh: pull live forms status so the panel always shows current state
   _refreshDetailPanelFormsStatus(b.id);
@@ -3524,6 +3527,29 @@ async function cancelBookingById(btn,bookingId){
     nBtn.onclick=close;
     document.body.appendChild(bar);
   }
+}
+
+// ── Delete Booking ────────────────────────────────────────────────────────────
+async function deleteBookingById(btn, bookingId){
+  const bk = getBookings().find(b=>b.id===bookingId);
+  const label = bk ? `${bk.clientName||'this client'}'s ${bk.treatment||'booking'} on ${formatDate(bk.date)}` : 'this booking';
+  const doDelete = async () => {
+    try {
+      const r = await fetch(`/api/bookings/${bookingId}`, {method:'DELETE', headers:authHdr()});
+      if (!r.ok) {
+        const d = await r.json().catch(()=>({}));
+        throw new Error(d.error || `Delete failed (${r.status})`);
+      }
+      const all = getBookings().filter(b=>b.id!==bookingId);
+      saveBookings(all);
+      renderDayTimeline(_lastSelectedDay);
+      updateSidebarBadges(); renderDashboard(); buildCalendar(); renderBookings();
+      showToast('Booking deleted ✓');
+    } catch(e) {
+      showToast(`Delete failed: ${e.message}`, 'error');
+    }
+  };
+  inlineConfirm(btn, `Permanently delete ${label}? This cannot be undone.`, doDelete);
 }
 
 // ── Send / Copy Forms Link ────────────────────────────────────────────────────
