@@ -1,0 +1,35 @@
+Add a warning message to the Delete Client confirmation flow in portal.html.
+
+CURRENT BEHAVIOUR
+When the user clicks Delete Client on a client with no bookings, the inline confirm shows "Really delete?" — that's fine for no-booking clients.
+
+NEW BEHAVIOUR
+Before showing the inline confirm, check how many bookings this client has. The warning text should change based on the count:
+
+If 0 bookings (unchanged):
+  "Really delete?"
+
+If 1+ bookings (new):
+  "Delete {ClientName}? This will also cancel all their upcoming bookings and remove them from any connected calendar (Google, Outlook, etc.). To keep the calendar in sync, cancel bookings individually first before deleting the client."
+
+IMPLEMENTATION
+
+1. In the confirmDeleteClient handler (or wherever the inline confirm is built), fetch the booking count for this client ID. You can either:
+   a) Filter the already-loaded local bookings cache: getBookings().filter(b => b.client_id === id).length
+   b) Or call a GET /api/clients/:id/bookings-count endpoint if one exists
+   Prefer (a) — simpler, no extra request.
+
+2. If count > 0, render the expanded warning message in the inline confirm area. If count === 0, render the existing short "Really delete?" message.
+
+3. Styling: the warning text for the 1+ bookings case should be multi-line (use a div with line-height and some padding), and include a secondary smaller line in grey below the main warning saying "Recommended: cancel bookings individually first". Keep it inside the inline confirm area, same width as before.
+
+4. Do NOT change the actual deletion behaviour on Yes click — the existing cascade (delete bookings + remove Google events + delete client) is correct. Just change the warning text.
+
+5. Keep the same inlineConfirm pattern: red "Yes, delete" button + "Cancel" button + 5-second auto-revert.
+
+6. Test mental walkthrough:
+   - Click Delete on a client with 0 bookings → old "Really delete?" message
+   - Click Delete on a client with 3 bookings → new warning mentioning the 3 upcoming bookings + calendar sync note
+   - Click Yes, delete → cascade works as before
+
+Show me the diff before applying.
