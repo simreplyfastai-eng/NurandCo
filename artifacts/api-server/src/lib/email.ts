@@ -1116,3 +1116,71 @@ export async function sendFormsLinkEmail(params: {
     throw err;
   }
 }
+
+// ── Email: Forms completed — owner notification ───────────────────────────────
+
+export async function sendFormsCompletedOwnerEmail(params: {
+  ownerEmail: string;
+  clientName: string;
+  clientEmail: string;
+  treatment: string;
+  date: string;
+  time: string;
+  bookingId: string;
+  locationName?: string;
+}): Promise<void> {
+  const dateDisp = params.date ? formatDate(params.date) : "—";
+  const timeDisp = params.time ? params.time.slice(0, 5) : "—";
+  const portalUrl = `${SITE_URL}/portal.html#bookings`;
+
+  const subject = `Forms completed — ${params.clientName} (${params.treatment})`;
+
+  const content = `
+    <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">Forms completed</p>
+    <p style="font-size:14px;color:#8C7B6B;margin:0 0 24px;">A client has submitted their medical history and consent form.</p>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border:1px solid #E8DDD3;margin:0 0 24px;">
+    <tr><td style="padding:20px 24px;">
+      <p style="font-size:11px;color:#8C7B6B;text-transform:uppercase;letter-spacing:0.1em;margin:0 0 12px;">Booking details</p>
+      <p style="font-size:15px;color:#5C1A1A;font-family:Georgia,serif;font-weight:bold;margin:0 0 6px;">${params.clientName}</p>
+      <p style="font-size:13px;color:#2C2420;margin:0 0 4px;">${params.treatment}</p>
+      <p style="font-size:13px;color:#2C2420;margin:0 0 4px;">${dateDisp} at ${timeDisp}${params.locationName ? ` &mdash; ${params.locationName}` : ""}</p>
+      ${params.clientEmail ? `<p style="font-size:13px;color:#8C7B6B;margin:4px 0 0;">${params.clientEmail}</p>` : ""}
+    </td></tr>
+    </table>
+
+    <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
+    <tr><td align="center">
+      <a href="${portalUrl}" style="display:inline-block;padding:14px 36px;background:#5C1A1A;color:#FFFFFF;text-decoration:none;border-radius:8px;font-size:15px;font-weight:600;letter-spacing:0.06em;">View in Portal &rarr;</a>
+    </td></tr>
+    </table>
+
+    <p style="font-size:12px;color:#8C7B6B;line-height:1.6;margin:0;">
+      Open the booking in your admin portal to review the submitted forms.
+    </p>`;
+
+  const text = [
+    `Forms completed — ${params.clientName}`,
+    "",
+    `Client: ${params.clientName} (${params.clientEmail})`,
+    `Treatment: ${params.treatment}`,
+    `Date: ${dateDisp} at ${timeDisp}`,
+    params.locationName ? `Location: ${params.locationName}` : "",
+    "",
+    `View in portal: ${portalUrl}`,
+    "",
+    PLAIN_FOOTER,
+  ].filter(Boolean).join("\n");
+
+  const html = buildEmail(content, subject);
+  const resend = getResend();
+  if (!resend) {
+    logEmailPreview(subject, params.ownerEmail, html);
+    return;
+  }
+  try {
+    await resend.emails.send({ from: FROM, to: params.ownerEmail, subject, html, text });
+  } catch (err) {
+    console.error("sendFormsCompletedOwnerEmail error", err);
+  }
+}

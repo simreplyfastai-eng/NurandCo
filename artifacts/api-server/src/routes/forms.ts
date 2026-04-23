@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { requireAuth } from "../lib/auth";
 import { supabaseAdmin } from "../lib/supabase";
-import { sendFormsLinkEmail } from "../lib/email";
+import { sendFormsLinkEmail, sendFormsCompletedOwnerEmail } from "../lib/email";
 
 const router = Router();
 
@@ -410,6 +410,18 @@ router.post("/forms/consent", async (req, res) => {
         console.error("POST /api/forms/consent — confirmation email error", emailErr);
       }
     }
+
+    // Notify owner that forms are complete
+    const ownerEmail = process.env.ADMIN_EMAIL || "starrbeautyyltd@gmail.com";
+    sendFormsCompletedOwnerEmail({
+      ownerEmail,
+      clientName: String(booking.client_name ?? "Client"),
+      clientEmail: String(booking.client_email ?? ""),
+      treatment: resolvedTreatmentName,
+      date: String(booking.booking_date ?? ""),
+      time: String(booking.time_slot ?? ""),
+      bookingId: String(bookingId),
+    }).catch((err) => console.error("sendFormsCompletedOwnerEmail error (non-fatal):", err));
 
     return res.json({ success: true });
   } catch (err) {

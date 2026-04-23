@@ -2709,6 +2709,27 @@ function openBookingDetailPanel(bookingId){
       <button class="btn-danger" onclick="cancelBookingById(this,'${b.id}')" style="flex:1;text-align:center">Cancel Booking</button>
     </div>`:''}
   `;
+  // Background refresh: pull live forms status so the panel always shows current state
+  _refreshDetailPanelFormsStatus(b.id);
+}
+
+async function _refreshDetailPanelFormsStatus(bookingId){
+  try{
+    const r=await fetch(`/api/admin/forms/${bookingId}`,{headers:authHdr()});
+    if(!r.ok)return;
+    const data=await r.json();
+    const newMed=!!(data.medical);
+    const newCon=!!(data.consent);
+    const all=getBookings();
+    const cached=all.find(x=>x.id===bookingId);
+    if(!cached)return;
+    if(cached.hasMedical===newMed&&cached.hasConsent===newCon)return;
+    // Status changed — update cache and silently re-render the detail panel
+    cached.hasMedical=newMed;
+    cached.hasConsent=newCon;
+    saveBookings(all);
+    openBookingDetailPanel(bookingId);
+  }catch(e){}
 }
 
 // ═══════════════════════════════════════════════════
