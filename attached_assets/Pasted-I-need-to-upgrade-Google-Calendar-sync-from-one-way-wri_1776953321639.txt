@@ -1,0 +1,107 @@
+I need to upgrade Google Calendar sync from one-way (write-only) to two-way (read + write) on Starr.
+
+Current state (confirmed):
+- /api/availability/check only checks blocked_dates, availability_settings, and bookings tables
+- Google Calendar is written to when bookings are created, but never read back
+- This means manual events on Google Calendar do NOT block booking slots, which creates a double-booking risk
+
+Goal: When a clinic owner adds a manual event to their Google Calendar (e.g. "Lunch" 1pm-2pm), the public booking page should hide that slot and /api/availability/check should return unavailable.
+
+IMPLEMENTATION SPECIFICATION
+
+1. New helper function in googleCalendar.ts
+
+Create getGoogleCalendarBusyRanges(locationId, date):
+
+- Query google_calendar_tokens table filtered by location_id
+- If no token row exists, return empty array []
+- If token exists:
+  - Use getOAuthClient() with the stored access and refresh tokens
+  - Call calendar.events.list() with:
+    - calendarId: 'primary'
+    - timeMin: start of requested date in Europe/London timezone, ISO 8601 format
+    - timeMax: end of requested date in Europe/London timezone, ISO 8601 format
+    - singleEvents: true (expand recurring events into individual instances)
+    - orderBy: 'startTime'
+  - For each returned event:
+    - Skip all-day events (events with only start.date and no start.dateTime) — these shouldn't block bookings
+    - Parse start.dateTime and end.dateTime into minutes-since-midnight in Europe/London timezone
+    - Push { start: number, end: number } to result array
+  - Return the array of busy ranges
+
+2. Error handling
+
+Wrap the entire function in try/catch:
+- On any error (expired token, network failure, API quota): log via console.error('Google Calendar read failed', { locationId, date, error })
+- Return empty array (fail open — don't block bookings due to API issues)
+
+3. Update /api/availability/check endpoint
+
+After the existing step 4 (bookings table check), add:
+
+const busyRanges = await getGoogleCalendarBusyRanges(locationId, date);
+const [hh, mm] = time.split(':').map(Number);
+const requestedStart = hh * 60 + mm;
+const duration = parseInt(req.query.duration_minutes as string) || 30;
+const requestedEnd = requestedStart + duration;
+const hasConflict = busyRanges.some(
+  range => requestedStart < range.end && requestedEnd > range.start
+);
+if (hasConflict) {
+  return res.json({ available: false, reason: "CALENDAR_CONFLICT" });
+}
+
+Accept duration_minutes as an optional query parameter; default to 30 minutes if not provided.
+
+4. Update the slot-list endpoint (the one powering the booking calendar UI)
+
+Find the endpoint that returns all available slots for a given date. Inside it:
+- Call getGoogleCalendarBusyRanges(locationId, date) ONCE at the start
+- For each generated slot (10:00, 10:30, 11:00...), check for overlap with any busy range using the same logic as above
+- Filter out overlapping slots from the returned list
+
+Do NOT call getGoogleCalendarBusyRanges once per slot. Call once, reuse the result across all slot checks.
+
+5. Keep existing write path unchanged
+
+The existing logic that pushes new bookings TO Google Calendar must stay exactly as it is. Only ADD the read capability, don't modify the write.
+
+6. Constraints
+
+- Do NOT add a persistent cache layer. Keep it request-scoped only.
+- Do NOT change OAuth token storage or refresh flow.
+- Do NOT change the database schema.
+- Use location timezone as 'Europe/London' (hardcoded for now — we can add a timezone column later).
+
+TESTING CHECKLIST (please run and confirm)
+
+Test 1: Busy ranges helper works
+- Add a log: when getGoogleCalendarBusyRanges is called, log the locationId, date, and resulting busy ranges
+- Trigger it by hitting /api/availability/check with a date where the linked Google Calendar has events
+- Confirm the ranges are returned correctly
+
+Test 2: Single-slot check blocks conflicts
+- Add a test event to the linked Google Calendar for a future date (e.g. tomorrow 14:00-15:30)
+- Hit /api/availability/check?location_id=ccb325d5-6b17-4218-b97d-1a1a0383410a&date=<tomorrow>&time=14:00&duration_minutes=30
+- Confirm response: { available: false, reason: "CALENDAR_CONFLICT" }
+- Hit same endpoint with time=16:00 (after the event ends)
+- Confirm response: { available: true }
+
+Test 3: Slot list hides conflicts
+- With the same test event still in the calendar
+- Load the public booking page for that date
+- Confirm 14:00 and 14:30 slots are NOT shown or are greyed out
+- Confirm 16:00, 16:30 etc. still appear
+
+Test 4: All-day events don't block
+- Add an all-day event in the calendar (e.g. "Birthday")
+- Confirm all slots that day remain available
+
+Test 5: Graceful failure
+- Temporarily break the token (corrupt the refresh_token in Supabase for one location)
+- Confirm the booking page still loads and shows slots (falls back to the old behaviour)
+- Restore the token after
+
+Please run these tests and confirm each one passes before saying the work is complete. If any test fails, debug and re-verify.
+
+Also — do NOT change the write-to-Google path, do NOT touch password or admin portal logic. Scope is strictly the read integration described above.

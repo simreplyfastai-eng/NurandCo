@@ -144,6 +144,69 @@ export async function deleteCalendarEvent(
   }
 }
 
+/** Convert a Google Calendar dateTime string to minutes-since-midnight in Europe/London */
+function dateTimeToLondonMinutes(dateTimeStr: string): number {
+  const d = new Date(dateTimeStr);
+  const londonStr = d.toLocaleString('en-GB', {
+    timeZone: 'Europe/London',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
+  // Format: "14:30" (en-GB hour12:false guarantees HH:MM)
+  const [h, m] = londonStr.split(':').map(Number);
+  return (h || 0) * 60 + (m || 0);
+}
+
+/**
+ * Fetch all timed events from the location's primary Google Calendar for a given date.
+ * Returns busy ranges as { start, end } minutes-since-midnight in Europe/London.
+ * All-day events (no dateTime) are skipped.
+ * Falls back to [] on any error so booking pages always load.
+ */
+export async function getGoogleCalendarBusyRanges(
+  locationId: string,
+  date: string,
+): Promise<Array<{ start: number; end: number }>> {
+  try {
+    const conn = await getClientForLocation(locationId);
+    if (!conn) return [];
+
+    const calendar = google.calendar({ version: 'v3', auth: conn.oauth2Client });
+
+    // TZ=Europe/London is set at server startup, so new Date('YYYY-MM-DDT00:00:00')
+    // is correctly interpreted as London midnight (handles BST/GMT automatically).
+    const timeMin = new Date(`${date}T00:00:00`).toISOString();
+    const timeMax = new Date(`${date}T23:59:59`).toISOString();
+
+    const result = await calendar.events.list({
+      calendarId: conn.calendarId,
+      timeMin,
+      timeMax,
+      singleEvents: true,
+      orderBy: 'startTime',
+    });
+
+    const events = result.data.items ?? [];
+    const ranges: Array<{ start: number; end: number }> = [];
+
+    for (const event of events) {
+      // Skip all-day events — they have only start.date, not start.dateTime
+      if (!event.start?.dateTime || !event.end?.dateTime) continue;
+
+      const start = dateTimeToLondonMinutes(event.start.dateTime);
+      const end   = dateTimeToLondonMinutes(event.end.dateTime);
+      ranges.push({ start, end });
+    }
+
+    console.log('Google Calendar busy ranges', { locationId, date, ranges });
+    return ranges;
+  } catch (err) {
+    console.error('Google Calendar read failed', { locationId, date, error: err });
+    return [];
+  }
+}
+
 export async function getBusyTimesForDate(
   locationId: string,
   dateStr: string

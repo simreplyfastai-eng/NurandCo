@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { supabaseAdmin } from "../lib/supabase";
 import { requireAuth } from "../lib/auth";
+import { getGoogleCalendarBusyRanges } from "../googleCalendar";
 
 const router = Router();
 
@@ -153,6 +154,21 @@ router.get("/availability/check", async (req, res) => {
       .limit(1);
     if (existing && existing.length > 0) {
       return res.json({ available: false, reason: "SLOT_TAKEN" });
+    }
+
+    // 5. Google Calendar conflict check (two-way sync — fail open on API errors)
+    const busyRanges = await getGoogleCalendarBusyRanges(locationId, date);
+    if (busyRanges.length > 0) {
+      const [hh, mm] = time.split(":").map(Number);
+      const requestedStart = (hh || 0) * 60 + (mm || 0);
+      const duration = parseInt(req.query.duration_minutes as string) || 30;
+      const requestedEnd = requestedStart + duration;
+      const hasConflict = busyRanges.some(
+        (range) => requestedStart < range.end && requestedEnd > range.start,
+      );
+      if (hasConflict) {
+        return res.json({ available: false, reason: "CALENDAR_CONFLICT" });
+      }
     }
 
     return res.json({ available: true });
@@ -608,6 +624,10 @@ router.get("/availability/slots", async (req, res) => {
 
     const toMins = (t: string) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
 
+    // 7. Google Calendar busy ranges — fetched ONCE, reused across all slot checks
+    const gcalBusyRanges = await getGoogleCalendarBusyRanges(locationId, date);
+    const SLOT_DURATION_MINS = 120; // 2-hour slots match the generateTimeSlots interval
+
     // Build rich slot list
     const slots = allSlots.map((slotTime) => {
       const slotMins = toMins(slotTime);
@@ -630,6 +650,17 @@ router.get("/availability/slots", async (req, res) => {
       );
       if (isBlocked) {
         return { time: slotTime, available: false, reason: "blocked" };
+      }
+
+      // Google Calendar conflict?
+      if (gcalBusyRanges.length > 0) {
+        const slotEnd = slotMins + SLOT_DURATION_MINS;
+        const hasGcalConflict = gcalBusyRanges.some(
+          (range) => slotMins < range.end && slotEnd > range.start,
+        );
+        if (hasGcalConflict) {
+          return { time: slotTime, available: false, reason: "calendar_conflict" };
+        }
       }
 
       return { time: slotTime, available: true };
