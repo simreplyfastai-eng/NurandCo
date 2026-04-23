@@ -3482,10 +3482,11 @@ async function cancelBookingById(btn,bookingId){
       const all=getBookings();
       const idx=all.findIndex(b=>b.id===bookingId);
       if(idx>-1){all[idx].status='Cancelled';saveBookings(all);}
+      renderDayTimeline(_lastSelectedDay);
       updateSidebarBadges();renderDashboard();buildCalendar();renderBookings();
-      showToast('Booking cancelled and client notified ✓');
+      showToast('Booking cancelled ✓');
     }catch(e){
-      showToast('Cancel failed — please try again');
+      // BookingAPI.update already showed the error toast — just swallow here
     }
   };
   if(btn&&btn.isConnected){
@@ -3667,7 +3668,8 @@ async function saveBooking(){
   const balancePaid=existingForEdit?existingForEdit.balancePaid:false;
 
   const booking={
-    id:editingBookingId||uid(),clientName,clientEmail,clientPhone,treatment,category,
+    ...(editingBookingId?{id:editingBookingId}:{}),
+    clientName,clientEmail,clientPhone,treatment,category,
     date,time,price,deposit,depositPaid,balancePaid,
     status,notes,clientDOB,clientNotes,createdAt:Date.now(),source:'Portal',paymentMethod:'Stripe'
   };

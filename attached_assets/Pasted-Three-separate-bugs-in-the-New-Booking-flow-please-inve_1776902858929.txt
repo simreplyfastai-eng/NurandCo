@@ -1,0 +1,61 @@
+Three separate bugs in the New Booking flow, please investigate all three:
+
+BUG 1 — POST /api/bookings returns 500
+
+The backend is now reachable (good — your portal bypass fixed the 400), but crashes with a 500 server error on save. Frontend logs: "BookingAPI.create failed Error: API error" at portal.html line 1854.
+
+Please:
+a) Pull the Replit server logs/console from around 01:04-01:05 UTC. Find the POST /api/bookings stack trace.
+b) Paste the full server-side error message + stack trace.
+c) Likely causes: findOrCreateClient threw on duplicate, getTreatmentInfo returned null, Supabase NOT NULL constraint hit, or Google Calendar hook throwing synchronously before its catch. Work out which.
+d) Fix root cause AND upgrade the route's error handler so 500s return the real error message in the response body (not the generic "API error" string the frontend sees).
+
+Test payload that caused this:
+  clientName: sim
+  clientEmail: sim6ix@icloud.com
+  clientPhone: 07495483928
+  treatment: Anti Wrinkle 3 Areas
+  date: 2026-04-23
+  time: 09:00
+  price: 300
+  deposit: 20
+  status: Confirmed
+  source: Portal
+  X-Location-Id: <Hornchurch UUID>
+
+BUG 2 — Client name not binding correctly on the saved booking
+
+When a booking is manually created and then clicked/viewed, the client name shown on the booking detail view is NOT the name the user typed — it's defaulting to a different value (possibly the wrong client, a placeholder, or a cached value).
+
+Please:
+a) Check how the booking detail view reads client name — does it read from bookings.client_name directly, or does it look up by client_id?
+b) If by client_id: the issue is probably that findOrCreateClient is resolving/creating the WRONG client row (e.g. matching a legacy "sim" client instead of creating a new one for the typed name, or vice versa).
+c) Confirm findOrCreateClient's matching logic: does it match on email only, or name + email, or phone? If a user types a new name but uses an email that matches an existing client, it'll link to the existing client's name not the typed one.
+d) The displayed name on the booking card should be whatever was typed in the form. Either store clientName on the booking row explicitly, or fix the lookup to show the typed name even when the client_id points to an existing record.
+
+BUG 3 — No Delete or Cancel Booking button on manually-added bookings
+
+When viewing a manually-created booking, there's no way to cancel or delete it from the admin portal. This is the same button that needs to exist for ALL bookings (manual + customer-made), and clicking it should:
+  - Mark booking as cancelled (or delete it, your pick — probably cancel for audit trail)
+  - Trigger the deleteCalendarEvent hook so the Google Calendar event is removed
+  - Refresh the booking list
+
+Please:
+a) Find the booking detail view in portal.html.
+b) Add a "Cancel Booking" button (red/destructive) at the bottom of the booking detail, using the same inline two-button confirm pattern you used for Delete Client (inlineConfirm helper).
+c) On confirmation, call PUT /api/bookings/:id with { status: "cancelled" } (or DELETE /api/bookings/:id — check which endpoint already has the Google sync hook wired up in bookings.ts and use that one).
+d) Ensure the button shows for ALL bookings, not just customer-made ones. Source = "Portal" should still allow cancellation.
+e) The Google Calendar event for this booking (google_event_id) must be deleted too. If bookings.ts cancel/delete path already fires deleteCalendarEvent, you don't need to change the backend — just wire the frontend button.
+
+VERIFY BEFORE APPLYING
+For each of the three bugs:
+  1) Show me the root cause identified
+  2) Show me the diff
+  3) Explain test steps I should take to confirm the fix
+
+CRITICAL: After all three fixes are applied, the manual booking flow must end-to-end:
+  1) Save booking → appears in list
+  2) Hard refresh → still there (Supabase stuck)
+  3) Event in Google Calendar with correct client name and location
+  4) Click booking → correct client name shown
+  5) Click Cancel Booking → booking removed from list AND Google event removed

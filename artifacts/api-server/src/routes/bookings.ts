@@ -532,9 +532,9 @@ router.post("/bookings", async (req, res) => {
     }
 
     return res.status(201).json(booking);
-  } catch (err) {
+  } catch (err: any) {
     console.error("POST /api/bookings", err);
-    return res.status(500).json({ error: "db error" });
+    return res.status(500).json({ error: err?.message ?? "db error" });
   }
 });
 
