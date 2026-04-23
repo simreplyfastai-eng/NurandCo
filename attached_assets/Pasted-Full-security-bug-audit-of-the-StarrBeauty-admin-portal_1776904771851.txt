@@ -1,0 +1,149 @@
+Full security + bug audit of the StarrBeauty admin portal + backend. Run this as a thorough code review. For each finding, report: (a) file/line, (b) severity (Critical / High / Medium / Low), (c) what's wrong, (d) how to fix. DO NOT apply any fixes yet — just produce the report. I'll approve fixes case-by-case.
+
+=== 1. SECRETS & KEY EXPOSURE ===
+
+a) Grep the entire codebase for hardcoded secrets — Stripe keys (sk_, pk_live, pk_test, whsec_), Supabase keys (service role, anon), Google OAuth client secrets, any other API keys. Include search patterns like:
+   - "sk_live", "sk_test", "pk_live", "whsec_"
+   - "eyJ" (common start of JWTs/Supabase keys)
+   - "service_role", "SUPABASE_SERVICE"
+   - "GOOGLE_CLIENT_SECRET", "client_secret"
+   - Any 40+ character alphanumeric strings that look like tokens
+
+b) Check ALL commits in git history — has a secret ever been committed and then removed? If yes, flag it (secrets in history = leaked even if removed).
+
+c) Confirm .env, .env.local, any secret files are in .gitignore.
+
+d) Check the frontend (portal.html, public site) for any keys that shouldn't be there. Stripe publishable key (pk_) is fine client-side; anything else is a leak.
+
+e) Confirm no secrets are logged to console.log / console.error anywhere in the backend. Grep for "console.log" near any variable holding a key/token.
+
+=== 2. AUTHENTICATION & AUTHORIZATION ===
+
+a) Review every backend route in artifacts/api-server/src/routes/. For each route, confirm:
+   - Is authentication required?
+   - If yes, is it actually enforced (middleware applied)?
+   - Can an unauthenticated request reach sensitive endpoints (POST/PUT/DELETE on bookings, clients, locations, google tokens)?
+
+b) Check the admin portal auth flow:
+   - Where is fbn_token stored? (localStorage is acceptable but flag if cookie would be better)
+   - How long are tokens valid?
+   - Is there a logout that properly invalidates the token server-side, or does it just clear localStorage?
+   - Can an expired/invalid token still be used to read/write data?
+
+c) Check RLS (Row Level Security) on every Supabase table:
+   - bookings, clients, locations, treatments, enquiries, google_calendar_tokens, availability_settings, blocked_dates, media, settings
+   - Is RLS enabled on each?
+   - Are the policies correct (service role full access only, no public read/write)?
+
+d) Check if any route uses the ANON Supabase client instead of the service-role client where elevated permissions are needed.
+
+=== 3. INPUT VALIDATION & INJECTION ===
+
+a) For every POST/PUT endpoint, confirm input validation:
+   - Are fields type-checked (string, number, etc.)?
+   - Are required fields enforced?
+   - Are max lengths enforced (prevent oversized payloads)?
+   - Are emails/phones/UUIDs validated in format?
+
+b) Check for SQL injection risks. Supabase client uses parameterised queries so should be safe, but flag any raw SQL or string concatenation into queries.
+
+c) Check for XSS in the admin portal:
+   - Any client-side rendering that uses innerHTML with user data?
+   - Is the notes field, client name, treatment name, etc sanitised before rendering?
+   - Specifically check: renderClients(), renderBookings(), renderEnquiries(), any .innerHTML = ... patterns.
+
+d) Check CSRF protection on state-changing routes. If tokens come via Authorization header (not cookie), CSRF is less of a concern, but confirm.
+
+=== 4. SENSITIVE DATA EXPOSURE ===
+
+a) What does GET /api/clients return? Confirm it doesn't expose client PII beyond what the admin needs (e.g. don't return payment method details, stored card info).
+
+b) What does GET /api/bookings return? Confirm it doesn't leak other locations' bookings when X-Location-Id is set.
+
+c) Are any errors returning stack traces to the client? The recent BookingAPI.create fix already improved this — confirm no other routes leak internal error details to 500 responses.
+
+d) Check the public booking site (/book?location=...) — does it expose any admin-only data (internal notes, other clients' info, deposit override flags)?
+
+e) Check if logs (Replit console) contain PII (client names, emails, phones). If yes, flag what's OK for debugging vs what should be redacted in production.
+
+=== 5. GOOGLE OAUTH & TOKEN HANDLING ===
+
+a) Confirm Google OAuth tokens (google_calendar_tokens) are stored encrypted or at minimum in a table with strict RLS.
+
+b) Check the OAuth callback handler: is the state parameter validated to prevent CSRF on the OAuth flow?
+
+c) When refresh tokens expire (7-day limit in Testing mode), does the app surface a clear re-auth prompt to Eva, or silently fail?
+
+d) Check that disconnect actually revokes the token with Google (calls revoke endpoint) AND deletes from Supabase, not just deletes locally.
+
+=== 6. STRIPE & PAYMENTS ===
+
+a) Confirm Stripe webhook endpoint verifies the webhook signature (whsec_). Without signature verification anyone can forge "payment succeeded" events.
+
+b) Confirm the success path doesn't trust client-provided price/treatment data for charging. Price should be looked up server-side from the treatment table, never taken from the client payload.
+
+c) Check if refund flow exists and who can trigger it — confirm only authenticated admins.
+
+=== 7. RATE LIMITING & ABUSE ===
+
+a) Are there any rate limits on: /api/bookings POST (booking spam), /api/auth/* (brute force login), /api/enquiries (spam).
+
+b) Is there any CAPTCHA/bot protection on the public booking form?
+
+c) Can an unauthenticated user discover treatment IDs, location IDs, or other internal identifiers by enumerating API endpoints?
+
+=== 8. THE CLASSIC OWASP TOP 10 ===
+
+Go through the OWASP Top 10 2021 briefly:
+1. Broken Access Control — covered above
+2. Cryptographic Failures — any plain-text password storage? MD5/SHA-1 used?
+3. Injection — SQL/XSS/command injection vectors
+4. Insecure Design — business logic flaws (e.g. can a customer book at a deposit of £0.01?)
+5. Security Misconfiguration — default credentials, verbose errors, unnecessary ports exposed
+6. Vulnerable Dependencies — run npm audit, report critical/high findings
+7. Authentication Failures — covered above
+8. Data Integrity — unsigned cookies, trusting client input
+9. Logging Failures — are security events logged (failed logins, token misuse)?
+10. SSRF — can user input trigger server-side fetches to arbitrary URLs?
+
+=== 9. BUG SWEEP ===
+
+Beyond security, flag any logic bugs you find during the audit. Focus on:
+- Race conditions in booking creation (two people booking same slot)
+- Double-booking prevention: is slot availability checked atomically?
+- Timezone handling (we're Europe/London — any UTC/local confusion anywhere?)
+- Off-by-one errors in date/time logic
+- The "source: Portal" bypass we added today — does it skip any validation that SHOULD apply to portal bookings?
+- Any TODO/FIXME/HACK comments in the code that indicate known issues
+
+=== 10. DEPENDENCY CHECK ===
+
+a) Run `npm audit` in artifacts/api-server and artifacts/dermadoll. Report any high or critical severity findings with package + CVE.
+
+b) Are any dependencies dramatically out of date (e.g. express 4 when 5 is out, supabase-js pre-2.x)?
+
+c) Are any dev dependencies installed in production?
+
+=== DELIVERABLE ===
+
+Produce a single report structured as:
+
+CRITICAL (fix before handover to Eva):
+  1. [file:line] [issue] [fix]
+  2. ...
+
+HIGH (fix this week):
+  1. ...
+
+MEDIUM (fix within a month):
+  1. ...
+
+LOW (nice-to-have hardening):
+  1. ...
+
+CLEAN (audit confirms no issues):
+  - Secrets: no hardcoded keys found
+  - RLS: all tables protected
+  - etc.
+
+Do NOT apply any fixes in this audit pass. Just the report. After I review, I'll tell you which to apply and in what order.
