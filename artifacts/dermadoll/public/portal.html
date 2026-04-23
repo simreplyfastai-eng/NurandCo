@@ -590,9 +590,11 @@ select.form-input{background:var(--color-card)}
 .bm-info-col+.bm-info-col{border-left:1px solid rgba(201,169,110,0.2);padding-left:14px;margin-left:14px}
 .bm-info-lbl{font-family:var(--font-sans);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--color-secondary);font-weight:600;margin-bottom:6px}
 .bm-info-val{font-family:var(--font-sans);font-size:13px;color:var(--color-primary);font-weight:600;line-height:1.6}
-.bm-btns{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap;align-items:center}
-.bm-btns-right{display:flex;gap:8px;margin-left:auto;flex-wrap:wrap}
+.bm-btns{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+.bm-btns-primary{display:flex;gap:8px;justify-content:flex-end}
+.bm-btns-secondary{display:none;gap:6px}
 .bm-btns button{min-height:34px}
+.bm-btns-secondary button{flex:1;text-align:center}
 
 /* ── SETTINGS ────────────────────────────────────── */
 .settings-section{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius);margin-bottom:16px;overflow:hidden}
@@ -691,10 +693,7 @@ select.form-input{background:var(--color-card)}
   th{padding:8px 10px;font-size:9px}
   td{padding:8px 10px}
   .modal-box{padding:18px 16px;margin:8px}
-  .bm-btns{flex-direction:column-reverse;align-items:stretch}
-  .bm-btns-right{margin-left:0;justify-content:stretch}
-  .bm-btns-right .btn-outline,.bm-btns-right .btn-gold,.bm-btns-right .btn-danger{flex:1;text-align:center}
-  #bm-cancel-booking-btn,#bm-reschedule-btn{width:100%;text-align:center}
+  .bm-btns-primary .btn-outline,.bm-btns-primary .btn-gold{flex:1;text-align:center}
   .bm-info-row{flex-direction:column;gap:10px}
   .bm-info-col+.bm-info-col{border-left:none;padding-left:0;margin-left:0;border-top:1px solid rgba(201,169,110,0.2);padding-top:10px;margin-top:0}
   .bar-label{width:110px;font-size:10px}
@@ -1557,11 +1556,14 @@ select.form-input{background:var(--color-card)}
 
     <!-- Action buttons -->
     <div class="bm-btns">
-      <button id="bm-cancel-booking-btn" class="btn-danger" onclick="cancelBookingFromModal()" style="display:none">Cancel Booking</button>
-      <button id="bm-reschedule-btn" class="btn-outline" onclick="rescheduleFromModal()" style="display:none">Reschedule</button>
-      <div class="bm-btns-right">
+      <div class="bm-btns-primary">
         <button class="btn-outline" onclick="closeBookingModal()">Close</button>
         <button class="btn-gold" onclick="saveBooking()">Save Booking</button>
+      </div>
+      <div id="bm-secondary-row" class="bm-btns-secondary">
+        <button id="bm-cancel-booking-btn" class="btn-danger" onclick="cancelBookingFromModal()">Cancel Booking</button>
+        <button id="bm-reschedule-btn" class="btn-outline" onclick="rescheduleFromModal()">Reschedule</button>
+        <button id="bm-delete-btn" class="btn-danger" onclick="deleteFromModal()" style="border-color:#8B0000;color:#8B0000">Delete</button>
       </div>
     </div>
 
@@ -3384,9 +3386,8 @@ async function openBookingModal(prefill){
       sel.insertBefore(dynOpt,sel.options[1]||null);
       sel.value=treatVal;
     } else {sel.selectedIndex=0;}
-    // Show cancel & reschedule buttons in edit mode
-    document.getElementById('bm-cancel-booking-btn').style.display='';
-    document.getElementById('bm-reschedule-btn').style.display='';
+    // Show cancel / reschedule / delete buttons in edit mode
+    document.getElementById('bm-secondary-row').style.display='flex';
     // Show location
     document.getElementById('bm-location-group').style.display='';
     document.getElementById('bm-location-display').textContent=_SESSION_LOC_NAME||sessionStorage.getItem('starr_location')||'Clinic';
@@ -3422,8 +3423,7 @@ async function openBookingModal(prefill){
     if(_fpBmDate)_fpBmDate.setDate(fmt(new Date()),false);
     else document.getElementById('bm-date').value=fmt(new Date());
     populateBmTimeSlots(fmt(new Date()));
-    document.getElementById('bm-cancel-booking-btn').style.display='none';
-    document.getElementById('bm-reschedule-btn').style.display='none';
+    document.getElementById('bm-secondary-row').style.display='none';
     document.getElementById('bm-forms-group').style.display='none';
     document.getElementById('bm-location-group').style.display='none';
     document.getElementById('bm-forms-location-card').style.display='none';
@@ -3453,6 +3453,13 @@ function rescheduleFromModal(){
   if(!editingBookingId)return;
   closeBookingModal();
   openRescheduleModal(editingBookingId);
+}
+
+function deleteFromModal(){
+  if(!editingBookingId)return;
+  const id=editingBookingId;
+  closeBookingModal();
+  deleteBookingById(null, id);
 }
 
 // ── Dot-menu helpers ─────────────────────────────────────────────────────────
@@ -3549,7 +3556,19 @@ async function deleteBookingById(btn, bookingId){
       showToast(`Delete failed: ${e.message}`, 'error');
     }
   };
-  inlineConfirm(btn, `Permanently delete ${label}? This cannot be undone.`, doDelete);
+  if(btn && btn.isConnected){
+    inlineConfirm(btn, `Permanently delete ${label}? This cannot be undone.`, doDelete);
+  } else {
+    const bar=document.createElement('div');
+    bar.style.cssText='position:fixed;top:64px;left:50%;transform:translateX(-50%);z-index:9999;background:#fff;border:1px solid #c62828;border-radius:8px;padding:12px 16px;box-shadow:0 4px 16px rgba(0,0,0,.18);display:flex;gap:10px;align-items:center;max-width:90vw;font-family:var(--font-sans)';
+    bar.innerHTML=`<span style="font-size:13px;font-weight:600;color:#c62828;flex:1;min-width:160px">Permanently delete ${label.replace(/</g,'&lt;')}? This cannot be undone.</span><button style="background:#c62828;color:#fff;border:none;border-radius:var(--radius);padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-sans)">Yes, delete</button><button style="background:#fff;color:#5C1A1A;border:1px solid #E8E8E8;border-radius:var(--radius);padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-sans)">Keep</button>`;
+    const[yBtn,nBtn]=bar.querySelectorAll('button');
+    const close=()=>{clearTimeout(t);bar.remove();};
+    const t=setTimeout(close,8000);
+    yBtn.onclick=()=>{close();doDelete();};
+    nBtn.onclick=close;
+    document.body.appendChild(bar);
+  }
 }
 
 // ── Send / Copy Forms Link ────────────────────────────────────────────────────
