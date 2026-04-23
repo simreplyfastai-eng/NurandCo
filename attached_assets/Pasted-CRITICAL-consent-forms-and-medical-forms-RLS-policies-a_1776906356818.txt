@@ -1,0 +1,39 @@
+CRITICAL — consent_forms and medical_forms RLS policies are wide open to anonymous users. Anyone with the anon key (publicly visible) can read all rows AND insert fabricated data for any booking ID. This is special category health data under UK GDPR.
+
+The "client fills form via emailed link" flow must work through the BACKEND using service role, NOT direct Supabase anon writes.
+
+DO THIS:
+
+1. Verify the flow — find where consent_forms and medical_forms get WRITTEN. Check:
+   a) Is there a backend endpoint (like POST /api/forms/submit) that validates the token and uses supabaseAdmin to write?
+   b) Or does confirmed.html submit directly to Supabase using the anon client?
+   
+   If (a): the RLS policies can be fully locked down to service_role only. The anon policies are leftover and dangerous.
+   
+   If (b): this is a bigger fix — we need to:
+      - Add a backend endpoint that accepts token + form data
+      - Validates the token against form_tokens table
+      - Writes to medical_forms / consent_forms using supabaseAdmin
+      - Only after which can we drop the anon policies
+
+2. REPORT FIRST. Don't touch any policies yet. Tell me:
+   - Is the write path going through the backend, or direct anon?
+   - Exact file:line where the form submission happens
+   - Whether form_tokens table exists and is being validated
+   - Full list of current policies on consent_forms and medical_forms
+
+3. After I confirm the write path, we'll plan the fix together:
+   - Drop all anon_select / anon_insert policies
+   - Keep only service_role-full-access policies
+   - If direct-anon is currently used, refactor to backend-mediated with token validation
+
+4. ALSO check: are any OTHER tables similarly exposed? Run:
+   SELECT schemaname, tablename, policyname, roles, cmd, qual, with_check 
+   FROM pg_policies 
+   WHERE schemaname = 'public' 
+     AND 'anon' = ANY(roles)
+   ORDER BY tablename, policyname;
+   
+   Any table that allows anon INSERT/UPDATE/DELETE/SELECT needs scrutiny.
+
+Do NOT drop or change policies until I review. Report first. This is priority 1 — higher than any other audit finding.
