@@ -1,0 +1,126 @@
+Apply all six security fixes NOW, in this exact order. For each one, confirm the user flow still works before moving to the next. If anything breaks, STOP and report — don't proceed to the next item.
+
+=== 1. CRITICAL — Lock down RLS on sensitive tables ===
+
+Run these SQL statements in order:
+
+DROP POLICY IF EXISTS medical_anon_insert ON public.medical_forms;
+DROP POLICY IF EXISTS medical_anon_select ON public.medical_forms;
+DROP POLICY IF EXISTS consent_anon_insert ON public.consent_forms;
+DROP POLICY IF EXISTS consent_anon_select ON public.consent_forms;
+DROP POLICY IF EXISTS bookings_anon_insert ON public.bookings;
+DROP POLICY IF EXISTS enquiries_public_insert ON public.enquiries;
+
+Confirm each table still has:
+  - RLS enabled
+  - A service_role full-access policy
+  - The deny_anon policy (now actually effective)
+
+Then verify these user flows still work — you MUST test each one, don't assume:
+  - Public booking flow at /book?location=... (creates a booking via Stripe webhook → uses service_role → should still work)
+  - Admin portal manual booking save (POST /api/bookings → uses service_role → should still work)
+  - POST /api/forms/medical submission (uses service_role → should still work)
+  - POST /api/forms/consent submission (uses service_role → should still work)
+  - Public enquiry submission (check: does the public enquiry form submit to a backend endpoint using service_role, or direct to Supabase as anon? If direct as anon, this will now break — flag it and stop before proceeding, because we need to refactor that flow first)
+
+If enquiries break, stop here and report. Otherwise continue.
+
+=== 2. MEDIUM — Add token validation to form submission endpoints ===
+
+Build:
+
+a) Create table form_tokens in Supabase:
+   CREATE TABLE IF NOT EXISTS public.form_tokens (
+     token TEXT PRIMARY KEY,
+     booking_id UUID NOT NULL REFERENCES public.bookings(id) ON DELETE CASCADE,
+     expires_at TIMESTAMPTZ NOT NULL,
+     submitted_at TIMESTAMPTZ NULL,
+     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+   );
+   ALTER TABLE public.form_tokens ENABLE ROW LEVEL SECURITY;
+   CREATE POLICY tokens_service_all ON public.form_tokens FOR ALL TO service_role USING (true) WITH CHECK (true);
+
+b) Update POST /api/admin/bookings/:id/send-forms handler (the endpoint that sends the "fill in your forms" email):
+   - Generate 32-byte random token: crypto.randomBytes(32).toString('hex')
+   - INSERT into form_tokens: token, booking_id, expires_at = now() + 14 days
+   - Email link format: {siteUrl}/forms.html?token={token} (no booking ID in URL anymore)
+
+c) Update forms.html:
+   - Read `token` from URL query string instead of / in addition to `booking`
+   - Include token in POST body for both medical and consent submits
+
+d) Update POST /api/forms/medical and POST /api/forms/consent:
+   - Accept { token, ...formFields } in body
+   - SELECT from form_tokens WHERE token = ?
+   - Validate: row exists, expires_at > now(), submitted_at IS NULL
+   - If invalid: return 403 with { error: "Invalid or expired form link" }
+   - If valid: resolve the booking_id from the token row (don't trust booking_id from client), insert the form data, then UPDATE form_tokens SET submitted_at = now() WHERE token = ?
+
+e) Backwards compatibility: if the client sends a booking_id WITHOUT a token (legacy link), log a warning and reject with 403. No legacy fallback — tokens only.
+
+Test end-to-end:
+  - Send forms from admin portal to a test booking
+  - Check the email link includes token param
+  - Open the link
+  - Submit medical form → verify form saves + token marked submitted
+  - Try resubmitting the same token → must reject
+  - Try POSTing a known booking_id with no token → must reject
+  - Try POSTing with a fake random token → must reject
+
+=== 3. LOW — De-duplicate blocked_dates policies ===
+
+Check which of these two exists and what their definitions are:
+  - blocked_dates_public_read
+  - blocked_public_read
+
+Keep blocked_dates_public_read (clearer name). Drop the other:
+  DROP POLICY IF EXISTS blocked_public_read ON public.blocked_dates;
+
+Verify availability calendar on public site still loads.
+
+=== 4. LOW — Audit portal_kv contents ===
+
+Run: SELECT DISTINCT substring(key from 1 for 30) as key_prefix, count(*) FROM public.portal_kv GROUP BY 1 ORDER BY 1;
+
+Tell me what prefixes exist. If any look sensitive (auth, token, secret, config, key, password), lock down anon SELECT:
+  DROP POLICY IF EXISTS portal_kv_public_read ON public.portal_kv;
+  (and ensure backend reads use service_role — verify in code before dropping)
+
+If all public-appropriate (site copy, branding, feature flags), leave the anon read policy alone.
+
+=== 5. LOW — Systematic table audit ===
+
+For every table in public schema, verify:
+  - Does it have any anon INSERT/UPDATE/DELETE policies?
+  - Does the app's write path use service_role or anon client?
+  - If the write path is service_role but there's an anon write policy, DROP the anon policy.
+
+Report tables audited, actions taken, and any findings that need follow-up.
+
+=== 6. LOW — Rate limiting ===
+
+Install express-rate-limit if not present. Apply these limits:
+
+  - POST /api/enquiries: 5 requests per minute per IP
+  - POST /api/auth/* (any auth endpoint): 10 requests per 5 minutes per IP
+  - POST /api/forms/medical and POST /api/forms/consent: 10 requests per minute per IP
+  - POST /api/bookings (public webhook path): leave unlimited (Stripe retries), but limit any non-webhook public insert to 5 per minute per IP
+
+After applying, verify rate limits work:
+  - Submit an enquiry 6 times in a minute → 6th should 429
+  - Normal booking flow should not hit any limit
+
+=== REPORTING ===
+
+After each of the 6 sections:
+  - State what was changed (SQL statements run, files modified)
+  - Confirm user flows verified working
+  - Show any user flow that broke and the rollback you performed
+  - Move to the next section only if everything passed
+
+Final report at the end:
+  - Summary of what was fixed
+  - Any issues that need follow-up
+  - Confirmation the app is now safe to hand over to Eva
+
+Begin with section 1. Stop only if something breaks.
