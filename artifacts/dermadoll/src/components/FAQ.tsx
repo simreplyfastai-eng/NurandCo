@@ -29,7 +29,7 @@ const faqs = [
   },
   {
     question: "How do I book?",
-    answer: "Use the 'Book Now' button to select your treatment and preferred location. You can also message us on Instagram @starraestheticss or email starrbeautyyltd@gmail.com.",
+    answer: "Use the 'Book Now' button to select your treatment and preferred location. You can also message us on Instagram @starraestheticss or @StarrFacess or email starrbeautyyltd@gmail.com.",
   },
   {
     question: "What should I do before my appointment?",
