@@ -1,0 +1,35 @@
+FEATURE: Send Medical & Consent Form Link from Booking Detail
+
+On the booking detail panel in portal.html, add a button "Send Forms to Client" that:
+
+1. Shows only if the booking has an email address attached
+2. When clicked: sends an email to the client's email (via Resend) containing a link to the medical & consent forms for THIS specific booking
+3. The link should include a secure token so the forms can be opened without login
+4. The form submission should save back to the client's profile AND attach to this booking
+
+BACKEND (new endpoint POST /api/bookings/:id/send-forms)
+- Generate a unique signed token (JWT or random 32-byte string) scoped to this booking ID
+- Store token in a new `form_tokens` table: {token, booking_id, client_id, expires_at, submitted_at}
+- Token expires in 14 days
+- Send email via Resend with subject "Please complete your consent forms - [Clinic Name]" and a link: {siteUrl}/forms/{token}
+- Use the clinic's branding in the email (logo, burgundy/gold, Cormorant Garamond tone)
+
+PUBLIC FORMS PAGE (/forms/:token)
+- Validates token, loads the booking + client context
+- Renders medical history + consent forms (use Eva's existing forms — check if she has them; if not, ask her)
+- On submit, saves to form_submissions table linked to booking_id + client_id
+- Token is marked submitted_at, can't be reused
+
+ADMIN PORTAL UPDATES
+- In booking detail panel: "Send Forms" button (sends the email)
+- After client submits: "Forms completed ✓" badge on booking + client profile
+- Link to view submitted forms from both booking and client profile
+- Track "Pending" vs "Completed" forms status
+
+VERIFICATION NEEDED BEFORE BUILDING
+- Ask Eva what her current medical/consent form content is (copy paste text)
+- Ask if she uses a specific format (PDF upload or digital signing)
+- Ask if she wants forms sent automatically on booking creation OR only manually via the button (or both)
+- Ask what the token expiry should be (my suggestion: 14 days)
+
+DO NOT BUILD UNTIL ALL FOUR QUESTIONS ABOVE ARE ANSWERED BY EVA.
