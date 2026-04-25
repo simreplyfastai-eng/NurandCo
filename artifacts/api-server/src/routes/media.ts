@@ -286,7 +286,7 @@ router.post("/media/upload-url", async (req, res) => {
   }
 });
 
-// GET /api/media/serve
+// GET /api/media/serve — streams legacy object-storage files with full range-request support
 router.get("/media/serve", async (req, res) => {
   const objectPath = req.query.path as string | undefined;
   if (!objectPath) {
@@ -294,11 +294,45 @@ router.get("/media/serve", async (req, res) => {
   }
   try {
     const file = await storage.getObjectEntityFile(objectPath);
-    const response = await storage.downloadObject(file, 86400);
-    const headers = Object.fromEntries(response.headers.entries());
-    Object.entries(headers).forEach(([k, v]) => res.setHeader(k, v as string));
-    const buffer = Buffer.from(await response.arrayBuffer());
-    return res.send(buffer);
+    const [metadata] = await file.getMetadata();
+    const contentType = (metadata.contentType as string) || "application/octet-stream";
+    const fileSize = Number(metadata.size || 0);
+
+    res.setHeader("Accept-Ranges", "bytes");
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Cache-Control", "public, max-age=31536000");
+
+    const rangeHeader = req.headers.range;
+    if (rangeHeader && fileSize) {
+      const parts = rangeHeader.replace(/bytes=/, "").split("-");
+      const start = parseInt(parts[0], 10);
+      const end = parts[1] ? Math.min(parseInt(parts[1], 10), fileSize - 1) : fileSize - 1;
+
+      if (start >= fileSize || start > end) {
+        res.setHeader("Content-Range", `bytes */${fileSize}`);
+        return res.status(416).end();
+      }
+
+      const chunkSize = end - start + 1;
+      res.setHeader("Content-Range", `bytes ${start}-${end}/${fileSize}`);
+      res.setHeader("Content-Length", chunkSize);
+      res.status(206);
+
+      const stream = file.createReadStream({ start, end });
+      stream.on("error", (err) => {
+        console.error("GET /api/media/serve stream error", err);
+        if (!res.headersSent) res.status(500).end();
+      });
+      return stream.pipe(res);
+    }
+
+    if (fileSize) res.setHeader("Content-Length", fileSize);
+    const stream = file.createReadStream();
+    stream.on("error", (err) => {
+      console.error("GET /api/media/serve stream error", err);
+      if (!res.headersSent) res.status(500).end();
+    });
+    return stream.pipe(res);
   } catch (err) {
     if (err instanceof ObjectNotFoundError) {
       return res.status(404).json({ error: "not found" });

@@ -1,0 +1,6 @@
+User-agent: *
+Allow: /
+Disallow: /portal
+Disallow: /admin
+Disallow: /api/
+Sitemap: https://starrbeautyy.co.uk/sitemap.xml

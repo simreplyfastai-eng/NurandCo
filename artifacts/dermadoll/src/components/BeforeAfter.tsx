@@ -103,6 +103,7 @@ export default function BeforeAfter() {
                   <img
                     src={resolvedSrc(item.src)}
                     alt={item.label}
+                    loading="lazy"
                     style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform 0.4s ease" }}
                     onMouseEnter={(e) => ((e.currentTarget as HTMLImageElement).style.transform = "scale(1.04)")}
                     onMouseLeave={(e) => ((e.currentTarget as HTMLImageElement).style.transform = "scale(1)")}

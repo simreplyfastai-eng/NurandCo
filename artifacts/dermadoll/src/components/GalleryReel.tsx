@@ -111,6 +111,7 @@ function ReelCard({ card, onClick }: { card: Card; onClick?: () => void }) {
     >
       {card.type === "image" ? (
         <img src={res(card.src)} alt={card.label}
+          loading="lazy"
           style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
       ) : (
         <VideoCard src={res(card.src)} />
