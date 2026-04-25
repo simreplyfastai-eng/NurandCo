@@ -511,8 +511,8 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
 
     const bookingId = pendingBookingIdRef.current ?? "";
     const base = import.meta.env.BASE_URL ?? "/";
-    const formsPath = base.endsWith("/") ? `${base}forms.html` : `${base}/forms.html`;
-    const returnUrl = `${window.location.origin}${formsPath}?booking=${encodeURIComponent(bookingId)}`;
+    const confirmedPath = base.endsWith("/") ? `${base}confirmed.html` : `${base}/confirmed.html`;
+    const returnUrl = `${window.location.origin}${confirmedPath}?booking=${encodeURIComponent(bookingId)}`;
 
     const { error } = await stripe.confirmPayment({
       elements,
@@ -530,9 +530,9 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
 
     // Payment succeeded — booking was already saved before payment was taken.
     // Stripe webhook will update status from "awaiting_payment" to "Confirmed".
-    // Redirect to pre-appointment forms page.
+    // Redirect to confirmation page.
     setSubmitting(false);
-    window.location.href = `${formsPath}?booking=${encodeURIComponent(bookingId)}`;
+    window.location.href = `${confirmedPath}?booking=${encodeURIComponent(bookingId)}`;
   };
 
   // Test mode handler — creates a confirmed booking without Stripe payment
@@ -565,8 +565,8 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
         return;
       }
       const base = import.meta.env.BASE_URL ?? "/";
-      const formsPath = base.endsWith("/") ? `${base}forms.html` : `${base}/forms.html`;
-      window.location.href = `${formsPath}?booking=${encodeURIComponent(bookingId)}`;
+      const confirmedPath = base.endsWith("/") ? `${base}confirmed.html` : `${base}/confirmed.html`;
+      window.location.href = `${confirmedPath}?booking=${encodeURIComponent(bookingId)}`;
     } catch {
       setPaymentError("Network error. Please try again.");
       setTestModeLoading(false);
