@@ -187,9 +187,29 @@ async function ensureEnquiriesTable(): Promise<void> {
   }
 }
 
+/** Keep location addresses up to date on every startup. */
+async function ensureLocationAddresses(): Promise<void> {
+  const updates = [
+    { slug: "hornchurch", address: "122B North Street, RM11 1SU" },
+    { slug: "marylebone", address: "209 Old Marylebone Rd, London NW1 5QT (entrance from Old Marylebone Road)" },
+  ];
+  for (const { slug, address } of updates) {
+    const { error } = await supabaseAdmin
+      .from("locations")
+      .update({ address })
+      .eq("slug", slug);
+    if (error) {
+      console.warn(`Seed: could not update address for ${slug}:`, error.message);
+    } else {
+      console.log(`Seed: address set for ${slug}`);
+    }
+  }
+}
+
 export async function seedTreatments(): Promise<void> {
   try {
     await ensureCategoryColumn();
+    await ensureLocationAddresses();
     ensureClientUniqueIndex().catch(() => {});
     ensureEnquiriesTable().catch(() => {});
 

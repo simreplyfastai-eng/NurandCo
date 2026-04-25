@@ -285,10 +285,10 @@ export async function sendClientConfirmationEmail(params: {
     <table width="100%" cellpadding="0" cellspacing="0" style="background:#F5EFE8;border-radius:8px;border-left:3px solid #C9A96E;margin:0 0 20px;">
     <tr><td style="padding:16px 20px;">
       <p style="font-size:12px;color:#C9A96E;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 10px;">Before your appointment</p>
-      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Arrive 5 minutes before your slot</p>
-      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Come with a clean face &mdash; no makeup on the treatment area</p>
-      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Avoid alcohol for 24 hours beforehand</p>
-      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Avoid blood thinners (aspirin, fish oil) 24hrs before injectables</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Arrive 5 minutes early</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Clean face &mdash; no makeup on treatment area</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Avoid alcohol 24 hours before</p>
+      <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; No blood thinners 24hrs before injectables</p>
       <p style="font-size:13px;color:#2C2420;margin:4px 0;line-height:1.6;">&#10022; Contact us if any medical details change</p>
     </td></tr>
     </table>
@@ -315,10 +315,10 @@ export async function sendClientConfirmationEmail(params: {
     "Add to Apple Calendar: " + icsUrl,
     "",
     "Before your appointment:",
-    "- Arrive 5 minutes before your slot",
-    "- Clean face — no makeup on the treatment area",
-    "- Avoid alcohol for 24 hours beforehand",
-    "- Avoid blood thinners (aspirin, fish oil) 24hrs before injectables",
+    "- Arrive 5 minutes early",
+    "- Clean face — no makeup on treatment area",
+    "- Avoid alcohol 24 hours before",
+    "- No blood thinners 24hrs before injectables",
     "- Contact us if any medical details change",
     "",
     "Cancellation policy: Please give at least 48 hours notice to cancel or reschedule.",
