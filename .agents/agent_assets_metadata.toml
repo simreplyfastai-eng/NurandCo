@@ -1,0 +1,8 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "T0rAMUGq1z4RCZcJxXx4E"
+uri = "file://screenshots/hornchurch-confirmation.jpg"
+type = "image"
+title = "Hornchurch — Confirmation Page"
