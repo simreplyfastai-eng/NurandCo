@@ -247,6 +247,23 @@ async function init() {
       </div>
     </div>
 
+    ${locSlug === 'hornchurch' ? `
+    <div class="checklist-card" style="margin-bottom:12px;">
+      <p class="checklist-label">From us to you</p>
+      <p class="apt-note">Hey Babe! Your appointment is officially scheduled and I can't wait to see you!</p>
+      <p class="apt-note">We have a range of treatments we offer &mdash; this is a reminder that before each treatment, an in depth consultation is carried out to make sure we are giving you exactly what you need!</p>
+      <p class="apt-subheading">How to find us</p>
+      <p class="apt-note">To locate us &mdash; look out for the <strong>'HOP INN'</strong> green micro pub. If you see this, you are in the right place. You can park your car directly in front of those shops, on the road on the right (avoid dropped curbs). From there please look out for the white door on the right of the 'HOP INN'. Walk through the corridor and it's the first door at the bottom of the black stairs.</p>
+      <div class="apt-divider"></div>
+      <p class="apt-subheading">Please Reach Out:</p>
+      <ul class="apt-list">
+        <li>If you are unwell and wish to reschedule &mdash; please do this as soon as possible to avoid any delays.</li>
+        <li>Have any pressing questions or problems &mdash; <a href="https://wa.me/447701298985" style="color:#5C1A1A;font-weight:600;">07701 298985</a></li>
+      </ul>
+      <div class="apt-divider"></div>
+      <p class="apt-policy">Our Policies can be located on our website &mdash; please familiarise yourself with these to allow for a seamless appointment!</p>
+    </div>` : ''}
+
     <div class="checklist-card">
       ${buildBeforeYourAppointment(locSlug)}
     </div>
