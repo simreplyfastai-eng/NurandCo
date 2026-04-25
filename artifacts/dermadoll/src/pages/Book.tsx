@@ -102,7 +102,6 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
         }
         const gs: TreatmentGroup[] = Array.from(groupMap.entries()).map(([category, items]) => ({ category, items }));
         setGroups(gs);
-        if (gs.length > 0) setOpenGroups(new Set([gs[0].category]));
         if (initialTreatmentId) {
           const found = data.find((t) => t.id === initialTreatmentId || t.name === initialTreatmentId);
           if (found) setActiveTreatment(found);
