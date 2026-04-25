@@ -63,11 +63,15 @@ body{font-family:-apple-system,Arial,sans-serif;background:#FAF7F4;color:#2C2420
   .cal-btn{display:block;width:100%}
 }
 
-/* Pre-appointment checklist */
-.checklist-card{background:#F5EFE8;border-left:3px solid #C9A96E;border-radius:0 8px 8px 0;padding:18px 20px;margin:0 0 24px}
-.checklist-label{font-size:11px;color:#C9A96E;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 12px}
-.check-item{font-size:13px;color:#2C2420;line-height:1.6;margin:5px 0;display:flex;align-items:baseline;gap:8px}
-.check-dot{color:#C9A96E;flex-shrink:0;font-size:14px}
+/* Pre-appointment info card */
+.checklist-card{background:#F5EFE8;border-left:3px solid #C9A96E;border-radius:0 8px 8px 0;padding:20px 22px;margin:0 0 24px}
+.checklist-label{font-size:11px;color:#C9A96E;text-transform:uppercase;letter-spacing:0.12em;margin:0 0 14px}
+.apt-note{font-size:13px;color:#2C2420;line-height:1.65;margin:0 0 12px}
+.apt-subheading{font-size:12px;font-weight:700;color:#3D3D3D;margin:14px 0 6px;letter-spacing:0.03em}
+.apt-list{margin:0 0 12px;padding-left:18px}
+.apt-list li{font-size:13px;color:#2C2420;line-height:1.65;margin:4px 0}
+.apt-divider{height:1px;background:#E8DDD3;margin:14px 0}
+.apt-policy{font-size:12px;color:#8C7B6B;line-height:1.6;margin:0;font-style:italic}
 
 /* Contact card */
 .contact-card{background:#FFFFFF;border:1px solid #E8DDD3;border-radius:12px;padding:24px;text-align:center;margin:0 0 24px;box-shadow:0 2px 8px rgba(92,30,30,0.04)}
@@ -145,7 +149,7 @@ async function init() {
     return;
   }
 
-  let bk = {}, locName = 'StarrBeauty', locAddr = 'StarrBeauty Clinic';
+  let bk = {}, locName = 'StarrBeauty', locAddr = 'StarrBeauty Clinic', locSlug = '';
   try {
     const res = await fetch('/api/forms/status?booking=' + encodeURIComponent(BOOKING_ID));
     const data = await res.json();
@@ -161,13 +165,25 @@ async function init() {
           if (found) {
             locName = found.name || locName;
             locAddr = found.address || found.address_full || locAddr;
+            locSlug = found.slug || '';
           }
         }
       } catch (_) {}
     }
   } catch(_) {
-    // Fallback if fetch fails
     bk = {};
+  }
+
+  function buildDirections(slug) {
+    if (slug === 'hornchurch') {
+      return `<p class="apt-subheading">How to find us</p>
+        <p class="apt-note">To locate us &mdash; look out for the <strong>'HOP INN'</strong> green micro pub. If you see this, you are in the right place. You can park your car directly in front of those shops, on the road on the right (avoid dropped curbs). From there please look out for the white door on the right of the 'HOP INN'. Walk through the corridor and it's the first door at the bottom of the black stairs.</p>`;
+    }
+    if (slug === 'marylebone') {
+      return `<p class="apt-subheading">How to find us</p>
+        <p class="apt-note">Find us at <strong>209 Old Marylebone Road</strong>. Use the entrance from Old Marylebone Road to access the clinic. We look forward to welcoming you!</p>`;
+    }
+    return '';
   }
 
   const treatment = bk.treatment_name || bk.treatment || 'Your appointment';
@@ -233,11 +249,17 @@ async function init() {
 
     <div class="checklist-card">
       <p class="checklist-label">Before your appointment</p>
-      <div class="check-item"><span class="check-dot">✦</span><span>Arrive 5 minutes early</span></div>
-      <div class="check-item"><span class="check-dot">✦</span><span>Clean face — no makeup on treatment area</span></div>
-      <div class="check-item"><span class="check-dot">✦</span><span>Avoid alcohol 24 hours before</span></div>
-      <div class="check-item"><span class="check-dot">✦</span><span>No blood thinners 24hrs before injectables</span></div>
-      <div class="check-item"><span class="check-dot">✦</span><span>Contact us if any medical details change</span></div>
+      <p class="apt-note">Hey Babe! Your appointment is officially scheduled and I can't wait to see you!</p>
+      <p class="apt-note">We have a range of treatments we offer — this is a reminder that before each treatment, an in depth consultation is carried out to make sure we are giving you exactly what you need!</p>
+      ${buildDirections(locSlug)}
+      <div class="apt-divider"></div>
+      <p class="apt-subheading">Please Reach Out:</p>
+      <ul class="apt-list">
+        <li>If you are unwell and wish to reschedule &mdash; please do this as soon as possible to avoid any delays.</li>
+        <li>Have any pressing questions or problems &mdash; <a href="https://wa.me/447701298985" style="color:#5C1A1A;font-weight:600;">07701 298985</a></li>
+      </ul>
+      <div class="apt-divider"></div>
+      <p class="apt-policy">Our Policies can be located on our website &mdash; please familiarise yourself with these to allow for a seamless appointment!</p>
     </div>
 
     <div class="contact-card">
