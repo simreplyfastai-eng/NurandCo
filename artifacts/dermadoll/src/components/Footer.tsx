@@ -44,7 +44,7 @@ export default function Footer() {
 
   return (
     <footer style={{ background: "#F5F0EB", borderTop: "1px solid #E2DDD5" }}>
-      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "72px 40px 40px" }}>
+      <div className="footer-inner" style={{ maxWidth: 1140, margin: "0 auto", padding: "72px 40px 40px" }}>
 
         {/* ── Main 3-column grid ── */}
         <div className="footer-grid">
@@ -56,7 +56,7 @@ export default function Footer() {
               onClick={(e) => scrollTo(e, "#")}
               style={{ textDecoration: "none", display: "inline-flex", flexDirection: "column", alignItems: "flex-start", gap: 4, marginBottom: 16 }}
             >
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 44, fontWeight: 600, letterSpacing: "0.02em", color: "#5C1A1A", lineHeight: 1 }}>
+              <span className="footer-logo-name" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 44, fontWeight: 600, letterSpacing: "0.02em", color: "#5C1A1A", lineHeight: 1 }}>
                 STARR
               </span>
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.4em", textTransform: "uppercase", fontWeight: 400, color: "#C9A96E", lineHeight: 1 }}>
@@ -81,16 +81,18 @@ export default function Footer() {
           {/* CENTRE — Nav */}
           <div className="footer-col footer-col--nav">
             <span className="footer-col-label">Navigate</span>
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href === "#book" ? `${BASE}book` : link.href}
-                onClick={(e) => link.href !== "#book" ? scrollTo(e, link.href) : undefined}
-                className="footer-nav-link"
-              >
-                {link.name}
-              </a>
-            ))}
+            <div className="footer-nav-links">
+              {navLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.href === "#book" ? `${BASE}book` : link.href}
+                  onClick={(e) => link.href !== "#book" ? scrollTo(e, link.href) : undefined}
+                  className="footer-nav-link"
+                >
+                  {link.name}
+                </a>
+              ))}
+            </div>
           </div>
 
           {/* RIGHT — Socials */}
