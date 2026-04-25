@@ -1,11 +1,13 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
+const CDN = "https://tithmarxgkafwgqonhfb.supabase.co/storage/v1/object/public/media/starr/hero";
+
 const DEFAULT_SLOTS = [
-  { key: "vid0", label: "HD Sculpt Lips", category: "LIP FILLER", src: "video1.mp4" },
-  { key: "vid1", label: "Lip Filler Dissolve & Refill", category: "FLAT LIPS CORRECTED", src: "video2.mp4" },
-  { key: "vid2", label: "Anti-Wrinkle Treatment", category: "NEW PRODUCT SHOWCASE", src: "video3.mp4" },
-  { key: "vid3", label: "NaturalèLips™", category: "SUBTLE YET CONFIDENT", src: "video1.mp4" },
+  { key: "vid0", label: "HD Sculpt Lips", category: "LIP FILLER", src: `${CDN}/video1.mp4` },
+  { key: "vid1", label: "Lip Filler Dissolve & Refill", category: "FLAT LIPS CORRECTED", src: `${CDN}/video2.mp4` },
+  { key: "vid2", label: "Anti-Wrinkle Treatment", category: "NEW PRODUCT SHOWCASE", src: `${CDN}/video3.mp4` },
+  { key: "vid3", label: "NaturalèLips™", category: "SUBTLE YET CONFIDENT", src: `${CDN}/video1.mp4` },
 ];
 
 interface VidSlot { key: string; label: string; category: string; src: string; }

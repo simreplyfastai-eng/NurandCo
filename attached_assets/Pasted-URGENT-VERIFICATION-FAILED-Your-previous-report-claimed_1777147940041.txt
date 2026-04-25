@@ -1,0 +1,70 @@
+URGENT — VERIFICATION FAILED. Your previous report claimed all fixes were 
+live. I have just verified the LIVE PRODUCTION site at 
+https://starrbeautyy.co.uk/ and the following are NOT actually deployed:
+
+1. Sitemap.xml STILL returns the SPA homepage HTML, not XML.
+   Confirm: fetch('/sitemap.xml').then(r => r.text()).then(t => 
+   t.startsWith('<?xml')) returns FALSE.
+
+2. Robots.txt STILL returns SPA HTML, not text/plain.
+
+3. Canonical URL is NOT in the live page source.
+   Confirm: page source does not contain rel="canonical".
+
+4. JSON-LD BeautySalon schema is NOT in the live page source.
+   Confirm: page source does not contain "application/ld+json" or 
+   "BeautySalon".
+
+5. ZERO images have loading="lazy" attribute on the live site.
+   Confirm: document.querySelectorAll('img[loading="lazy"]').length === 0
+
+6. Hero videos at /video1.mp4, /video2.mp4, /video3.mp4 are STILL 
+   returning 503 errors more than 50% of the time. They are NOT moved 
+   to Supabase. The browser is still hitting starrbeautyy.co.uk/video1.mp4 
+   directly, not a Supabase URL.
+
+ACTION REQUIRED:
+
+Step 1: Verify these specific things in the codebase:
+- Does index.html actually have the canonical link tag?
+- Does index.html actually have the JSON-LD script tag?
+- Does the React BeforeAfter and GalleryReel actually have 
+  loading="lazy" on img tags?
+- Is sitemap.xml a real file in /public/?
+- Is robots.txt a real file in /public/?
+
+If YES to all — then the changes exist in code but haven't been 
+deployed to production. Force a fresh deployment via Replit's 
+"Redeploy" button or whatever mechanism is in this project.
+
+If NO — your previous report was incorrect. Make the actual changes 
+NOW and verify by fetching the live site after deployment.
+
+Step 2: For the video 503 issue specifically — the streaming endpoint 
+fix in /api/media/serve doesn't help these videos because they're being 
+served as STATIC FILES at /video1.mp4, /video2.mp4, /video3.mp4 directly 
+from /public/. Replit's static file serving is what's returning the 503s.
+
+You have two real options:
+  Option A: Move video1.mp4, video2.mp4, video3.mp4 from /public/ to 
+  Supabase Storage in the existing 'media' bucket under 'starr/hero/' 
+  path. Update the React component that uses these videos to use the 
+  Supabase public URLs (https://tithmarxgkafwgqonhfb.supabase.co/...). 
+  Delete the local copies.
+
+  Option B: If videos must stay local, route them through your fixed 
+  /api/media/serve endpoint instead of being served as static files.
+
+Pick Option A. Implement it. Deploy. Then verify by fetching 
+https://starrbeautyy.co.uk and checking that the network tab shows 
+hero videos coming from the Supabase domain, NOT starrbeautyy.co.uk.
+
+Step 3: After ALL changes deployed and verified live, provide proof:
+- A curl or fetch result showing /sitemap.xml returns XML
+- A curl or fetch result showing /robots.txt returns plain text
+- A grep result showing index.html contains canonical and JSON-LD
+- A network tab snapshot or fetch result showing hero videos coming 
+  from supabase.co domain
+
+Do NOT report "fixed" again until all 4 proofs are demonstrable on 
+the live production URL.
