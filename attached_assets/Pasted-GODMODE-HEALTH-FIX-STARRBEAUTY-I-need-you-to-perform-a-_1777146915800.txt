@@ -1,0 +1,261 @@
+GODMODE HEALTH FIX — STARRBEAUTY
+
+I need you to perform a comprehensive health audit and fix all critical 
+issues on this site. Read every file before making changes. This is a 
+LIVE production site with real customer data — be careful, do NOT 
+break working functionality. 
+
+Work through these in order. After each section, confirm completion 
+before moving to the next.
+
+===================================================================
+ISSUE 1 — VIDEO 503 ERRORS (HIGHEST PRIORITY)
+===================================================================
+
+The hero videos (/video1.mp4, /video2.mp4, /video3.mp4) are returning 
+503 Service Unavailable errors when multiple range requests hit the 
+server simultaneously. This is breaking the user experience.
+
+Diagnose and fix:
+
+1. Check the file sizes of /public/video1.mp4, /public/video2.mp4, 
+   /public/video3.mp4. If any are over 5MB, they need compression.
+
+2. Check the Express server (server.ts or equivalent) for how static 
+   video files are being served. Look for:
+   - Missing range request support (Accept-Ranges header)
+   - Missing proper Cache-Control headers
+   - No max concurrent connection handling
+
+3. Update the static file serving for videos to:
+   - Support HTTP range requests properly (essential for video streaming)
+   - Set Accept-Ranges: bytes header
+   - Set Cache-Control: public, max-age=31536000 (long cache for videos)
+   - Set Content-Type: video/mp4 explicitly
+
+4. RECOMMENDED ARCHITECTURAL FIX: Move all hero videos from /public/ 
+   to Supabase Storage (where the gallery videos already live). The 
+   Supabase CDN handles range requests, caching, and concurrency far 
+   better than a Replit server.
+   
+   - Upload video1.mp4, video2.mp4, video3.mp4 to the existing 
+     'media' bucket under 'starr/hero/' path
+   - Update the React components that reference these videos to use 
+     the Supabase public URLs instead of relative paths
+   - Keep the local files as a fallback during transition, then 
+     remove them once verified working
+
+5. After fix, test by hard-refreshing the homepage 5 times in a row. 
+   No video request should return 503.
+
+===================================================================
+ISSUE 2 — SITEMAP.XML AND ROBOTS.TXT BROKEN  
+===================================================================
+
+Currently /sitemap.xml and /robots.txt return the SPA homepage HTML 
+instead of the actual files. This breaks SEO.
+
+Fix:
+
+1. Create /public/sitemap.xml with this exact content:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://starrbeautyy.co.uk/</loc>
+    <lastmod>2026-04-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://starrbeautyy.co.uk/book</loc>
+    <lastmod>2026-04-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+</urlset>
+
+2. Create /public/robots.txt with this exact content:
+
+User-agent: *
+Allow: /
+Disallow: /portal
+Disallow: /admin
+Disallow: /api/
+Sitemap: https://starrbeautyy.co.uk/sitemap.xml
+
+3. In the Express server, BEFORE the SPA catch-all route, explicitly 
+   serve these two files with correct Content-Types:
+   - /sitemap.xml → Content-Type: application/xml
+   - /robots.txt → Content-Type: text/plain
+
+4. Test by fetching both URLs and confirming they return XML/plain text, 
+   NOT the SPA homepage HTML.
+
+===================================================================
+ISSUE 3 — ADD SCHEMA MARKUP (LOCAL SEO)
+===================================================================
+
+Add JSON-LD structured data to the homepage <head>. This helps Google 
+rank both physical locations in local search.
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BeautySalon",
+  "name": "StarrBeauty",
+  "description": "Premium aesthetic treatments in Hornchurch, Essex and Marylebone, London. NaturalèLips, dermal fillers, anti-wrinkle treatments and more.",
+  "url": "https://starrbeautyy.co.uk",
+  "image": "https://starrbeautyy.co.uk/opengraph.jpg",
+  "priceRange": "££",
+  "telephone": "+447701298985",
+  "location": [
+    {
+      "@type": "Place",
+      "name": "StarrBeauty Hornchurch",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Hornchurch",
+        "addressRegion": "Essex",
+        "addressCountry": "GB"
+      }
+    },
+    {
+      "@type": "Place",
+      "name": "StarrBeauty Marylebone",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "Marylebone",
+        "addressRegion": "London",
+        "addressCountry": "GB"
+      }
+    }
+  ],
+  "sameAs": [
+    "https://instagram.com/StarrFacess",
+    "https://instagram.com/StarrAestheticss"
+  ]
+}
+</script>
+
+Update the address localities and any other details you can verify 
+from the existing site content.
+
+===================================================================
+ISSUE 4 — ADD CANONICAL URL
+===================================================================
+
+Add to the homepage <head>:
+
+<link rel="canonical" href="https://starrbeautyy.co.uk/" />
+
+For all other pages, the canonical should be the page's URL.
+
+===================================================================
+ISSUE 5 — SECURITY AUDIT
+===================================================================
+
+Verify the following — DO NOT MODIFY anything yet, just report findings:
+
+1. Search the entire codebase for any STRIPE SECRET KEY (starts with 
+   "sk_live_" or "sk_test_"). Confirm it ONLY exists in environment 
+   variables / Replit Secrets and never in client-side code or 
+   committed files.
+
+2. Search for any SUPABASE SERVICE_ROLE_KEY in client-side code. 
+   It should ONLY be on the server, never in React components.
+
+3. Check that all /api/* endpoints requiring auth are using the 
+   authHdr() function (or equivalent token check) before returning 
+   sensitive data.
+
+4. Verify the Supabase RLS policies are still in place on these tables:
+   - bookings
+   - clients
+   - medical_forms
+   - consent_forms
+   - portal_kv
+   - google_calendar_tokens
+
+5. Check that no .env file is committed to git history.
+
+Report findings in a clear list. DO NOT change anything in this 
+section unless I confirm.
+
+===================================================================
+ISSUE 6 — PERFORMANCE OPTIMISATIONS
+===================================================================
+
+1. Check that all images in /public/ are properly compressed. Any 
+   image over 500KB should be compressed (use sharp or report sizes 
+   so I can compress manually).
+
+2. Add lazy loading to all images below the fold:
+   <img loading="lazy" ... />
+
+3. Verify Cache-Control headers on:
+   - /assets/* (JS/CSS bundles): cache for 1 year (immutable)
+   - Images: cache for 1 month
+   - HTML: cache for 5 minutes (so updates propagate quickly)
+
+4. Confirm font preloading is in place. The Cormorant Garamond and 
+   Inter fonts should be preloaded:
+   <link rel="preload" as="font" href="..." crossorigin />
+
+===================================================================
+ISSUE 7 — VERIFY EXISTING FUNCTIONALITY STILL WORKS
+===================================================================
+
+After all changes deployed, run this checklist and confirm each:
+
+1. Homepage loads, hero videos autoplay smoothly with no 503s
+2. Both Hornchurch and Marylebone booking pages load
+3. Clicking through to a treatment shows time slots
+4. Time slots respect Google Calendar events (two-way sync)
+5. Stripe deposit flow initiates correctly
+6. Medical form loads after Stripe redirect
+7. Consent form loads after medical form
+8. Confirmation page displays correctly
+9. Admin portal login works at /portal
+10. Admin can view bookings, clients, settings
+11. Sitemap.xml and robots.txt return correct content (not SPA HTML)
+12. Schema markup visible in page source
+13. No new console errors in Chrome DevTools
+14. Mobile responsiveness intact (test at 375px width)
+
+===================================================================
+DEPLOYMENT
+===================================================================
+
+Deploy each fix incrementally. After EACH issue is fixed:
+- Test in production
+- Confirm the test from the checklist above passes
+- Move to next issue
+
+If ANY existing functionality breaks during a fix, ROLLBACK that 
+specific change immediately and report what happened. Do not 
+continue to the next issue until the previous one is verified safe.
+
+DO NOT:
+- Modify the database schema
+- Change OAuth flows
+- Touch the Google Calendar 2-way sync (it was just built and is 
+  working perfectly)
+- Modify Stripe integration logic
+- Change RLS policies (just verify them)
+- Refactor working code
+
+DO:
+- Fix the 503 video errors
+- Fix sitemap and robots
+- Add schema markup
+- Add canonical URL
+- Report security findings
+- Add image lazy loading
+- Verify everything still works after each step
+
+When complete, give me a final report with:
+- Which issues were fixed
+- Any issues you couldn't fix and why
+- Any new findings during the audit
+- Confirmation all 14 functionality tests passed

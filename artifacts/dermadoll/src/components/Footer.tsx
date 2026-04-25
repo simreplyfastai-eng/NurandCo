@@ -44,83 +44,103 @@ export default function Footer() {
 
   return (
     <footer style={{ background: "#F5F0EB", borderTop: "1px solid #E2DDD5" }}>
-      <div style={{ maxWidth: 720, margin: "0 auto", padding: "72px 32px 40px", textAlign: "center" }}>
+      <div style={{ maxWidth: 1140, margin: "0 auto", padding: "72px 40px 40px" }}>
 
-        <a href="#" onClick={(e) => scrollTo(e, "#")} style={{ textDecoration: "none", display: "inline-flex", flexDirection: "column", alignItems: "center", gap: 4, marginBottom: 16 }}>
-          <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 44, fontWeight: 600, letterSpacing: "0.02em", color: "#5C1A1A", lineHeight: 1 }}>
-            STARR
-          </span>
-          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.4em", textTransform: "uppercase", fontWeight: 400, color: "#C9A96E", lineHeight: 1 }}>
-            BEAUTY
-          </span>
-        </a>
+        {/* ── Main 3-column grid ── */}
+        <div className="footer-grid">
 
-        <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.15rem", color: "#5C1A1A", margin: "0 0 40px" }}>
-          Beauty Redefined
-        </p>
-
-        <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "8px 28px", marginBottom: 40 }}>
-          {navLinks.map((link) => (
+          {/* LEFT — Brand */}
+          <div className="footer-col footer-col--brand">
             <a
-              key={link.name}
-              href={link.href === "#book" ? `${BASE}book` : link.href}
-              onClick={(e) => link.href !== "#book" ? scrollTo(e, link.href) : undefined}
-              style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.22em", textTransform: "uppercase", color: "#737373", textDecoration: "none", transition: "color 0.2s" }}
+              href="#"
+              onClick={(e) => scrollTo(e, "#")}
+              style={{ textDecoration: "none", display: "inline-flex", flexDirection: "column", alignItems: "flex-start", gap: 4, marginBottom: 16 }}
+            >
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 44, fontWeight: 600, letterSpacing: "0.02em", color: "#5C1A1A", lineHeight: 1 }}>
+                STARR
+              </span>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.4em", textTransform: "uppercase", fontWeight: 400, color: "#C9A96E", lineHeight: 1 }}>
+                BEAUTY
+              </span>
+            </a>
+
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#5C1A1A", margin: "0 0 20px" }}>
+              Beauty Redefined
+            </p>
+
+            <a
+              href="mailto:starrbeautyyltd@gmail.com"
+              style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#737373", textDecoration: "none", letterSpacing: "0.04em", transition: "color 0.2s" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#5C1A1A")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#737373")}
             >
-              {link.name}
-            </a>
-          ))}
-        </div>
-
-        <div style={{ height: 1, background: "#E2DDD5", marginBottom: 28 }} />
-
-        <div className="footer-social-block">
-
-          <div className="footer-social-section">
-            <span className="footer-social-label">Instagram</span>
-            {SOCIAL.instagram.map((a) => (
-              <a key={a.handle} href={a.url} target="_blank" rel="noopener noreferrer" className="footer-social-link">
-                {a.handle}
-              </a>
-            ))}
-          </div>
-
-          <div className="footer-social-section">
-            <span className="footer-social-label">TikTok</span>
-            {SOCIAL.tiktok.map((a) => (
-              <a key={a.handle} href={a.url} target="_blank" rel="noopener noreferrer" className="footer-social-link">
-                {a.handle}
-              </a>
-            ))}
-          </div>
-
-          <div className="footer-social-section">
-            <span className="footer-social-label">Email</span>
-            <a href="mailto:starrbeautyyltd@gmail.com" className="footer-social-link">
               starrbeautyyltd@gmail.com
             </a>
           </div>
 
+          {/* CENTRE — Nav */}
+          <div className="footer-col footer-col--nav">
+            <span className="footer-col-label">Navigate</span>
+            {navLinks.map((link) => (
+              <a
+                key={link.name}
+                href={link.href === "#book" ? `${BASE}book` : link.href}
+                onClick={(e) => link.href !== "#book" ? scrollTo(e, link.href) : undefined}
+                className="footer-nav-link"
+              >
+                {link.name}
+              </a>
+            ))}
+          </div>
+
+          {/* RIGHT — Socials */}
+          <div className="footer-col footer-col--socials">
+            <span className="footer-col-label">Follow Us</span>
+            <div className="footer-social-grid">
+
+              <div>
+                <span className="footer-social-label">Instagram</span>
+                {SOCIAL.instagram.map((a) => (
+                  <a key={a.handle} href={a.url} target="_blank" rel="noopener noreferrer" className="footer-social-link">
+                    {a.handle}
+                  </a>
+                ))}
+              </div>
+
+              <div>
+                <span className="footer-social-label">TikTok</span>
+                {SOCIAL.tiktok.map((a) => (
+                  <a key={a.handle} href={a.url} target="_blank" rel="noopener noreferrer" className="footer-social-link">
+                    {a.handle}
+                  </a>
+                ))}
+              </div>
+
+            </div>
+          </div>
+
         </div>
 
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9A96E", margin: "0 0 10px" }}>
-          © {year} StarrBeauty. All rights reserved.
-        </p>
-        <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
-          <span style={{ color: "#C9A96E" }}>Powered By </span>
-          <a
-            href="https://aesthetix-systems.co.uk"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: "#A80000", textDecoration: "none", transition: "opacity 0.15s" }}
-            onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.75")}
-            onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
-          >
-            AESTHETIX
-          </a>
-        </p>
+        {/* ── Bottom bar ── */}
+        <div className="footer-bottom">
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9A96E", margin: 0 }}>
+            © {year} StarrBeauty. All rights reserved.
+          </p>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
+            <span style={{ color: "#C9A96E" }}>Powered By </span>
+            <a
+              href="https://aesthetix-systems.co.uk"
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: "#A80000", textDecoration: "none", transition: "opacity 0.15s" }}
+              onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.75")}
+              onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
+            >
+              AESTHETIX
+            </a>
+          </p>
+        </div>
+
       </div>
     </footer>
   );
