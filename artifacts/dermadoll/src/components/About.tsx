@@ -40,13 +40,13 @@ export default function About() {
             transition={{ duration: 0.7 }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-              <div style={{ height: 1, width: 24, background: "#C9A96E" }} />
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
+              <div style={{ height: 1, width: 24, background: "var(--brand-accent)" }} />
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>
                 Meet the Founder
               </span>
             </div>
 
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2.8rem, 6vw, 4.5rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 28px", lineHeight: 1 }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2.8rem, 6vw, 4.5rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 28px", lineHeight: 1 }}>
               Eva
             </h2>
 
@@ -64,7 +64,7 @@ export default function About() {
                 { stat: "NL™", label: "NaturalèLips™ Creator" },
               ].map((item, i) => (
                 <div key={i} style={{ textAlign: "center", borderRight: i < 2 ? "1px solid #E2DDD5" : "none", padding: "0 16px" }}>
-                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "2rem", fontWeight: 400, color: "#C9A96E", lineHeight: 1, marginBottom: 6 }}>
+                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "2rem", fontWeight: 400, color: "var(--brand-accent)", lineHeight: 1, marginBottom: 6 }}>
                     {item.stat}
                   </div>
                   <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "#737373" }}>
@@ -90,11 +90,11 @@ export default function About() {
                   style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }} />
               ) : (
                 <div style={{ width: "100%", height: "100%", minHeight: 420, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 18, color: "#C9A96E", opacity: 0.5 }}>Eva</span>
+                  <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 18, color: "var(--brand-accent)", opacity: 0.5 }}>Eva</span>
                 </div>
               )}
             </div>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 13, color: "#C9A96E", textAlign: "center", margin: 0 }}>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 13, color: "var(--brand-accent)", textAlign: "center", margin: 0 }}>
               Eva, Founder
             </p>
           </motion.div>

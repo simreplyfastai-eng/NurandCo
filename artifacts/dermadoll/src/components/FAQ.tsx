@@ -51,11 +51,11 @@ export default function FAQ() {
           style={{ textAlign: "center", marginBottom: 56 }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>FAQ</span>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>FAQ</span>
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
           </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: 0 }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 400, color: "var(--brand-primary)", margin: 0 }}>
             Your Questions Answered
           </h2>
         </motion.div>
@@ -68,7 +68,7 @@ export default function FAQ() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.05 }}
-              style={{ background: "#F5F0EB", border: "1px solid #E8E2D9", overflow: "hidden" }}
+              style={{ background: "var(--brand-bg-alt)", border: "1px solid #E8E2D9", overflow: "hidden" }}
             >
               <button
                 onClick={() => setOpen(open === i ? null : i)}
@@ -77,11 +77,11 @@ export default function FAQ() {
                   padding: "20px 24px", background: "none", border: "none", cursor: "pointer", textAlign: "left",
                 }}
               >
-                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#3D3D3D", fontWeight: 400, paddingRight: 16 }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "var(--brand-text)", fontWeight: 400, paddingRight: 16 }}>
                   {faq.question}
                 </span>
                 <motion.div animate={{ rotate: open === i ? 180 : 0 }} transition={{ duration: 0.25 }}>
-                  <ChevronDown size={16} color="#C9A96E" />
+                  <ChevronDown size={16} color="var(--brand-accent)" />
                 </motion.div>
               </button>
               <AnimatePresence initial={false}>

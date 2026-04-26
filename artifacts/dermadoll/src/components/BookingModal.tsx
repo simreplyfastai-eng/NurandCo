@@ -146,9 +146,9 @@ function Calendar({
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
-        <button onClick={prevMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10" style={{ color: "#C9A96E", fontSize: "22px" }}>‹</button>
+        <button onClick={prevMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10" style={{ color: "var(--brand-accent)", fontSize: "22px" }}>‹</button>
         <span className="font-serif" style={{ fontSize: "18px" }}>{MONTH_NAMES[viewMonth]} {viewYear}</span>
-        <button onClick={nextMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10" style={{ color: "#C9A96E", fontSize: "22px" }}>›</button>
+        <button onClick={nextMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10" style={{ color: "var(--brand-accent)", fontSize: "22px" }}>›</button>
       </div>
       <div className="grid grid-cols-7 mb-2">
         {DAY_NAMES.map((d) => (
@@ -171,7 +171,7 @@ function Calendar({
               style={{
                 width: "40px", height: "40px", borderRadius: "8px", margin: "1px auto",
                 fontSize: "14px", fontFamily: "Inter, sans-serif",
-                backgroundColor: isSelected ? "#C9A96E" : "transparent",
+                backgroundColor: isSelected ? "var(--brand-accent)" : "transparent",
                 color: isSelected ? "#fff" : disabled ? "#ddd" : "#111",
                 cursor: disabled ? "default" : "pointer",
               }}
@@ -193,7 +193,7 @@ function Field({ label, required, error, children }: { label: string; required?:
   return (
     <div className="mb-4">
       <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
-        {label} {required && <span style={{ color: "#C9A96E" }}>*</span>}
+        {label} {required && <span style={{ color: "var(--brand-accent)" }}>*</span>}
       </label>
       {children}
       {error && <p className="text-xs mt-1" style={{ color: "#C62828" }}>{error}</p>}
@@ -463,7 +463,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
           appearance: {
             theme: "stripe",
             variables: {
-              colorPrimary: "#C9A96E",
+              colorPrimary: "var(--brand-accent)",
               colorText: "#111111",
               fontFamily: "Inter, sans-serif",
               borderRadius: "8px",
@@ -656,7 +656,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
     };
     const goldLabel: React.CSSProperties = {
       fontFamily: "Inter, sans-serif", fontSize: 11,
-      color: "#C9A96E", letterSpacing: "2px",
+      color: "var(--brand-accent)", letterSpacing: "2px",
       textTransform: "uppercase", marginBottom: 16,
     };
     const glassBtn: React.CSSProperties = {
@@ -695,9 +695,9 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
 
         {/* Background blobs */}
         <div style={{ position:"fixed", inset:0, pointerEvents:"none", zIndex:0 }}>
-          <div style={{ position:"absolute", top:"-10%", left:"-10%", width:400, height:400, borderRadius:"50%", background:"#C9A96E", filter:"blur(80px)", opacity:0.3, animation:"ddBlobDrift 8s ease-in-out infinite alternate" }} />
+          <div style={{ position:"absolute", top:"-10%", left:"-10%", width:400, height:400, borderRadius:"50%", background:"var(--brand-accent)", filter:"blur(80px)", opacity:0.3, animation:"ddBlobDrift 8s ease-in-out infinite alternate" }} />
           <div style={{ position:"absolute", top:"40%", right:"-5%", width:320, height:320, borderRadius:"50%", background:"#f0d898", filter:"blur(80px)", opacity:0.35, animation:"ddBlobDrift 10s ease-in-out infinite alternate-reverse" }} />
-          <div style={{ position:"absolute", bottom:"-10%", left:"30%", width:360, height:360, borderRadius:"50%", background:"#C9A96E", filter:"blur(80px)", opacity:0.25, animation:"ddBlobDrift 12s ease-in-out infinite alternate" }} />
+          <div style={{ position:"absolute", bottom:"-10%", left:"30%", width:360, height:360, borderRadius:"50%", background:"var(--brand-accent)", filter:"blur(80px)", opacity:0.25, animation:"ddBlobDrift 12s ease-in-out infinite alternate" }} />
         </div>
 
         {/* Centred content */}
@@ -708,14 +708,14 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
             <div style={{
               width:80, height:80, borderRadius:"50%", margin:"0 auto 24px",
               background:"rgba(255,255,255,0.25)", backdropFilter:"blur(20px)", WebkitBackdropFilter:"blur(20px)",
-              border:"2px solid #C9A96E",
+              border:"2px solid var(--brand-accent)",
               display:"flex", alignItems:"center", justifyContent:"center",
               animation:"ddScaleBounce 0.4s cubic-bezier(0.34,1.56,0.64,1) both",
             }}>
               <svg width="36" height="36" viewBox="0 0 36 36" fill="none" style={{ overflow:"visible" }}>
                 <polyline
                   points="7,18 15,26 29,10"
-                  stroke="#C9A96E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"
+                  stroke="var(--brand-accent)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" fill="none"
                   strokeDasharray="60" strokeDashoffset="60"
                   style={{ animation:"ddCheckDraw 0.7s ease 0.4s forwards" }}
                 />
@@ -740,10 +740,10 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
               {selectedTime ? ` · ${selectedTime} — ${minsToTime(timeToMins(selectedTime) + bookingDuration)}` : ""}
             </div>
             <div style={{ display:"flex", gap:10, flexWrap:"wrap" }}>
-              <div style={{ background:"rgba(201,169,110,0.15)", border:"1px solid rgba(201,169,110,0.3)", borderRadius:20, padding:"6px 14px", fontFamily:"Inter, sans-serif", fontSize:13, color:"#C9A96E" }}>
+              <div style={{ background:"rgba(201,169,110,0.15)", border:"1px solid rgba(201,169,110,0.3)", borderRadius:20, padding:"6px 14px", fontFamily:"Inter, sans-serif", fontSize:13, color:"var(--brand-accent)" }}>
                 Deposit Paid: £{deposit}
               </div>
-              <div style={{ background:"rgba(201,169,110,0.15)", border:"1px solid rgba(201,169,110,0.3)", borderRadius:20, padding:"6px 14px", fontFamily:"Inter, sans-serif", fontSize:13, color:"#C9A96E" }}>
+              <div style={{ background:"rgba(201,169,110,0.15)", border:"1px solid rgba(201,169,110,0.3)", borderRadius:20, padding:"6px 14px", fontFamily:"Inter, sans-serif", fontSize:13, color:"var(--brand-accent)" }}>
                 Balance Due on Arrival: £{balance}
               </div>
             </div>
@@ -797,9 +797,9 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
               <a
                 href="https://instagram.com/[ClientName]s" target="_blank" rel="noopener noreferrer"
                 className="dd-gbtn"
-                style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10, background:"rgba(201,169,110,0.10)", border:"1px solid rgba(201,169,110,0.35)", color:"#C9A96E", borderRadius:30, padding:"13px 20px", fontFamily:"'Inter', sans-serif", fontSize:14, fontWeight:500, textDecoration:"none" }}
+                style={{ display:"flex", alignItems:"center", justifyContent:"center", gap:10, background:"rgba(201,169,110,0.10)", border:"1px solid rgba(201,169,110,0.35)", color:"var(--brand-accent)", borderRadius:30, padding:"13px 20px", fontFamily:"'Inter', sans-serif", fontSize:14, fontWeight:500, textDecoration:"none" }}
               >
-                <svg viewBox="0 0 24 24" fill="#C9A96E" width="18" height="18"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                <svg viewBox="0 0 24 24" fill="var(--brand-accent)" width="18" height="18"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
                 @[ClientName]s
               </a>
               <button
@@ -843,7 +843,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
             ref={firstFocusRef}
             onClick={onClose}
             className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10"
-            style={{ color: "#C9A96E", fontSize: "18px" }}
+            style={{ color: "var(--brand-accent)", fontSize: "18px" }}
             aria-label="Close"
           >✕</button>
         )}
@@ -851,7 +851,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
         {step !== "success" && (
           <div className="mb-7 pr-8">
             <h2 className="font-serif leading-snug mb-1" style={{ fontSize: "24px" }}>{treatment.name}</h2>
-            <span className="font-serif" style={{ fontSize: "20px", color: "#C9A96E" }}>{treatment.price}</span>
+            <span className="font-serif" style={{ fontSize: "20px", color: "var(--brand-accent)" }}>{treatment.price}</span>
           </div>
         )}
 
@@ -859,7 +859,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
         {step === 1 && (
           <motion.div key="step1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.25 }}>
             <h3 className="font-serif mb-1" style={{ fontSize: "20px" }}>Select a Date</h3>
-            <p className="mb-5" style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", color: "#C9A96E", fontStyle: "italic" }}>
+            <p className="mb-5" style={{ fontFamily: "Inter, sans-serif", fontSize: "13px", color: "var(--brand-accent)", fontStyle: "italic" }}>
               Next available: {getNextAvailableSlot()}
             </p>
             <Calendar
@@ -875,7 +875,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
         {step === 2 && (
           <motion.div key="step2" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-2">
-              <button onClick={() => setStep(1)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
+              <button onClick={() => setStep(1)} className="text-sm hover:opacity-70" style={{ color: "var(--brand-accent)" }}>← Back</button>
               <h3 className="font-serif" style={{ fontSize: "20px" }}>Select a Time</h3>
             </div>
             {selectedDate && <p className="text-sm mb-5" style={{ color: "#999" }}>{formatDate(selectedDate)}</p>}
@@ -903,11 +903,11 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
                       onClick={() => !unavailable && handleTimeSelect(slot.time)}
                       title={unavailable ? (label === "passed" ? "This time has passed" : "This slot is taken") : undefined}
                       style={{
-                        border: `1px solid ${unavailable ? "#ddd" : isActive ? "#C9A96E" : "#C9A96E"}`,
+                        border: `1px solid ${unavailable ? "#ddd" : isActive ? "var(--brand-accent)" : "var(--brand-accent)"}`,
                         borderRadius: "20px", padding: "8px 4px", fontSize: "13px",
                         fontFamily: "Inter, sans-serif",
-                        color: isActive ? "#fff" : unavailable ? "#ccc" : "#C9A96E",
-                        backgroundColor: isActive ? "#C9A96E" : unavailable ? "#f8f8f8" : "transparent",
+                        color: isActive ? "#fff" : unavailable ? "#ccc" : "var(--brand-accent)",
+                        backgroundColor: isActive ? "var(--brand-accent)" : unavailable ? "#f8f8f8" : "transparent",
                         cursor: unavailable ? "not-allowed" : "pointer",
                         transition: "all 0.15s",
                         position: "relative",
@@ -933,7 +933,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
         {step === 3 && (
           <motion.div key="step3" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-5">
-              <button onClick={() => setStep(2)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
+              <button onClick={() => setStep(2)} className="text-sm hover:opacity-70" style={{ color: "var(--brand-accent)" }}>← Back</button>
               <h3 className="font-serif" style={{ fontSize: "20px" }}>Your Details</h3>
             </div>
 
@@ -967,7 +967,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
                 </div>
                 <div className="flex justify-between text-sm">
                   <span style={{ color: "#888" }}>Deposit to pay now</span>
-                  <span className="font-medium" style={{ color: "#C9A96E" }}>£{deposit}</span>
+                  <span className="font-medium" style={{ color: "var(--brand-accent)" }}>£{deposit}</span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span style={{ color: "#888" }}>Balance due on arrival</span>
@@ -982,7 +982,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
                 onChange={(e) => { setName(e.target.value); if (nameError) setNameError(""); }}
                 placeholder="Jane Smith"
                 style={inputStyle(!!nameError)}
-                onFocus={(e) => { if (!nameError) (e.currentTarget as HTMLInputElement).style.borderColor = "#C9A96E"; }}
+                onFocus={(e) => { if (!nameError) (e.currentTarget as HTMLInputElement).style.borderColor = "var(--brand-accent)"; }}
                 onBlur={(e) => { if (!nameError) (e.currentTarget as HTMLInputElement).style.borderColor = "#E0E0E0"; }}
               />
             </Field>
@@ -993,7 +993,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
                 onChange={(e) => { setEmail(e.target.value); if (emailError) setEmailError(""); }}
                 placeholder="jane@email.com"
                 style={inputStyle(!!emailError)}
-                onFocus={(e) => { if (!emailError) (e.currentTarget as HTMLInputElement).style.borderColor = "#C9A96E"; }}
+                onFocus={(e) => { if (!emailError) (e.currentTarget as HTMLInputElement).style.borderColor = "var(--brand-accent)"; }}
                 onBlur={(e) => { if (!emailError) (e.currentTarget as HTMLInputElement).style.borderColor = "#E0E0E0"; }}
               />
             </Field>
@@ -1004,7 +1004,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
                 onChange={(e) => { setPhone(e.target.value); if (phoneError) setPhoneError(""); }}
                 placeholder="07700 900000"
                 style={inputStyle(!!phoneError)}
-                onFocus={(e) => { if (!phoneError) (e.currentTarget as HTMLInputElement).style.borderColor = "#C9A96E"; }}
+                onFocus={(e) => { if (!phoneError) (e.currentTarget as HTMLInputElement).style.borderColor = "var(--brand-accent)"; }}
                 onBlur={(e) => { if (!phoneError) (e.currentTarget as HTMLInputElement).style.borderColor = "#E0E0E0"; }}
               />
             </Field>
@@ -1012,7 +1012,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
             <button
               onClick={handleContinueToPayment}
               className="w-full py-4 text-white font-medium text-sm uppercase tracking-wider transition-all duration-200 hover:opacity-90 active:scale-[0.99]"
-              style={{ backgroundColor: "#C9A96E", borderRadius: "12px", fontFamily: "Inter, sans-serif" }}
+              style={{ backgroundColor: "var(--brand-accent)", borderRadius: "12px", fontFamily: "Inter, sans-serif" }}
             >
               Continue to Payment →
             </button>
@@ -1030,7 +1030,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
               <button
                 onClick={() => { setStep(3); setPaymentError(""); setStripeNotConfigured(false); }}
                 className="text-sm hover:opacity-70"
-                style={{ color: "#C9A96E" }}
+                style={{ color: "var(--brand-accent)" }}
                 disabled={submitting}
               >← Back</button>
               <h3 className="font-serif" style={{ fontSize: "20px" }}>{stripeNotConfigured ? "Test Mode" : "Secure Payment"}</h3>
@@ -1061,7 +1061,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
               </div>
               <div className="border-t pt-2 mt-1 flex justify-between" style={{ borderColor: "rgba(201,169,110,0.15)" }}>
                 <span className="text-sm font-semibold">Deposit to pay now</span>
-                <span className="font-serif font-semibold" style={{ color: "#C9A96E", fontSize: "17px" }}>£{deposit}</span>
+                <span className="font-serif font-semibold" style={{ color: "var(--brand-accent)", fontSize: "17px" }}>£{deposit}</span>
               </div>
               <div className="flex justify-between text-xs" style={{ color: "#aaa" }}>
                 <span>Balance due on arrival</span>
@@ -1073,13 +1073,13 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
             {stripeNotConfigured && (
               <div className="text-center py-4">
                 <div className="flex items-center justify-center w-14 h-14 mx-auto mb-4 rounded-full" style={{ backgroundColor: "rgba(201,169,110,0.1)" }}>
-                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#C9A96E" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--brand-accent)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                     <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/>
                   </svg>
                 </div>
                 <h3 className="font-serif mb-2" style={{ fontSize: "20px" }}>Test Mode</h3>
                 <p className="text-sm mb-2" style={{ color: "#888", fontFamily: "Inter, sans-serif", lineHeight: "1.65" }}>
-                  Stripe is not yet configured. Add <code style={{ fontSize: "12px", background: "#f5f0eb", padding: "1px 5px", borderRadius: "4px" }}>STRIPE_SECRET_KEY</code> in the portal to enable live payments.
+                  Stripe is not yet configured. Add <code style={{ fontSize: "12px", background: "var(--brand-bg-alt)", padding: "1px 5px", borderRadius: "4px" }}>STRIPE_SECRET_KEY</code> in the portal to enable live payments.
                 </p>
                 <p className="text-sm mb-6" style={{ color: "#aaa", fontFamily: "Inter, sans-serif", lineHeight: "1.65" }}>
                   Click below to create a test booking and go through the forms flow without payment.
@@ -1093,7 +1093,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
                   onClick={handleTestModeBooking}
                   disabled={testModeLoading}
                   className="flex items-center justify-center gap-2 w-full py-3.5 font-medium text-sm transition-all duration-200 hover:opacity-90 disabled:opacity-60"
-                  style={{ backgroundColor: "#5C1A1A", color: "#fff", borderRadius: "12px", fontFamily: "Inter, sans-serif", border: "none", cursor: testModeLoading ? "not-allowed" : "pointer" }}
+                  style={{ backgroundColor: "var(--brand-primary)", color: "#fff", borderRadius: "12px", fontFamily: "Inter, sans-serif", border: "none", cursor: testModeLoading ? "not-allowed" : "pointer" }}
                 >
                   {testModeLoading ? (
                     <>
@@ -1127,7 +1127,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
                     <div style={{
                       width: "28px", height: "28px", borderRadius: "50%",
                       border: "2px solid rgba(201,169,110,0.2)",
-                      borderTopColor: "#C9A96E",
+                      borderTopColor: "var(--brand-accent)",
                       animation: "spin 0.8s linear infinite",
                     }} />
                     <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
@@ -1142,7 +1142,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
                     onClick={handlePayment}
                     disabled={submitting}
                     className="w-full py-4 text-white font-medium text-sm uppercase tracking-wider transition-all duration-200 hover:opacity-90 active:scale-[0.99]"
-                    style={{ backgroundColor: "#C9A96E", borderRadius: "12px", fontFamily: "Inter, sans-serif", opacity: submitting ? 0.7 : 1 }}
+                    style={{ backgroundColor: "var(--brand-accent)", borderRadius: "12px", fontFamily: "Inter, sans-serif", opacity: submitting ? 0.7 : 1 }}
                   >
                     {submitting ? "Processing…" : `Pay £${deposit} Securely`}
                   </button>

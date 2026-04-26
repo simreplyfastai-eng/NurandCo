@@ -20,7 +20,7 @@ const floatVariants = [
 
 export default function InstagramSection() {
   return (
-    <section className="py-[100px] overflow-hidden" style={{ backgroundColor: "#F5F0EB" }}>
+    <section className="py-[100px] overflow-hidden" style={{ backgroundColor: "var(--brand-bg-alt)" }}>
       <div className="container mx-auto px-6 max-w-5xl">
         {/* Heading */}
         <div className="text-center mb-16">
@@ -29,7 +29,7 @@ export default function InstagramSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             className="font-sans text-xs uppercase tracking-[0.35em] mb-4"
-            style={{ color: "#C9A96E" }}
+            style={{ color: "var(--brand-accent)" }}
           >
             Follow Along
           </motion.p>
@@ -122,17 +122,17 @@ export default function InstagramSection() {
             rel="noopener noreferrer"
             className="inline-flex items-center gap-3 px-8 py-3.5 rounded-full text-sm uppercase tracking-wider font-medium transition-all duration-300 hover:opacity-90"
             style={{
-              border: "1px solid #C9A96E",
-              color: "#C9A96E",
+              border: "1px solid var(--brand-accent)",
+              color: "var(--brand-accent)",
               backgroundColor: "transparent",
             }}
             onMouseEnter={(e) => {
-              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "#C9A96E";
+              (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "var(--brand-accent)";
               (e.currentTarget as HTMLAnchorElement).style.color = "#fff";
             }}
             onMouseLeave={(e) => {
               (e.currentTarget as HTMLAnchorElement).style.backgroundColor = "transparent";
-              (e.currentTarget as HTMLAnchorElement).style.color = "#C9A96E";
+              (e.currentTarget as HTMLAnchorElement).style.color = "var(--brand-accent)";
             }}
           >
             <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24">

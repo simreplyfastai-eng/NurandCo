@@ -80,8 +80,14 @@
   --elevate-2: rgba(0,0,0, .08);
 
   /* [CLIENT_NAME] palette */
-  --background: 39 44% 97%;       /* #F5F0EB cream */
-  --foreground: 35 100% 5%;       /* #3D3D3D dark brown */
+  /* TODO: replace per client */
+  --brand-primary: var(--brand-primary);        /* burgundy */
+  --brand-accent:  var(--brand-accent);        /* gold */
+  --brand-bg:      var(--brand-bg);        /* cream (email) */
+  --brand-bg-alt:  var(--brand-bg-alt);        /* warmer cream */
+  --brand-text:    var(--brand-text);        /* dark grey */
+  --background: 39 44% 97%;       /* var(--brand-bg-alt) cream */
+  --foreground: 35 100% 5%;       /* var(--brand-text) dark brown */
   --border: 38 18% 86%;           /* #E2DDD5 */
 
   --card: 39 44% 97%;
@@ -101,10 +107,10 @@
   --popover-foreground: 35 100% 5%;
   --popover-border: 38 18% 86%;
 
-  --primary: 39 46% 61%;          /* #C9A96E amber */
+  --primary: 39 46% 61%;          /* var(--brand-accent) amber */
   --primary-foreground: 39 44% 97%;
 
-  --secondary: 41 34% 91%;        /* #F5F0EB cream dark */
+  --secondary: 41 34% 91%;        /* var(--brand-bg-alt) cream dark */
   --secondary-foreground: 35 100% 5%;
 
   --muted: 41 34% 91%;
@@ -444,7 +450,7 @@ video::-webkit-media-controls-enclosure {
   font-size: 10px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: #C9A96E;
+  color: var(--brand-accent);
   font-weight: 500;
   margin-bottom: 20px;
 }
@@ -461,7 +467,7 @@ video::-webkit-media-controls-enclosure {
 }
 
 .footer-nav-link:hover {
-  color: #5C1A1A;
+  color: var(--brand-primary);
 }
 
 .footer-social-grid {
@@ -476,7 +482,7 @@ video::-webkit-media-controls-enclosure {
   font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.14em;
-  color: #C9A96E;
+  color: var(--brand-accent);
   margin-bottom: 10px;
   font-weight: 500;
   font-family: 'Inter', sans-serif;
@@ -485,7 +491,7 @@ video::-webkit-media-controls-enclosure {
 .footer-social-link {
   display: block;
   font-size: 12px;
-  color: #5C1A1A;
+  color: var(--brand-primary);
   text-decoration: none;
   line-height: 2;
   font-family: 'Inter', sans-serif;
@@ -494,7 +500,7 @@ video::-webkit-media-controls-enclosure {
 }
 
 .footer-social-link:hover {
-  color: #C9A96E;
+  color: var(--brand-accent);
 }
 
 .footer-bottom {

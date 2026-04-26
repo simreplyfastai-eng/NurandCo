@@ -57,11 +57,11 @@ export default function Hero() {
           display: flex;
           flex-direction: row;
           min-height: 100dvh;
-          background: #F5F0EB;
+          background: var(--brand-bg-alt);
         }
         .hero-left {
           flex: 1;
-          background: #F5F0EB;
+          background: var(--brand-bg-alt);
           display: flex;
           align-items: center;
           padding: 120px 64px 80px 80px;
@@ -91,11 +91,11 @@ export default function Hero() {
           .hero-wrap {
             flex-direction: column !important;
             min-height: 100dvh;
-            background: #F5F0EB;
+            background: var(--brand-bg-alt);
           }
           .hero-right {
             flex: unset !important;
-            background: #F5F0EB !important;
+            background: var(--brand-bg-alt) !important;
             height: 68dvh;
             min-height: 320px;
             max-height: 540px;
@@ -119,13 +119,13 @@ export default function Hero() {
             left: 0;
             right: 0;
             height: 45%;
-            background: linear-gradient(to bottom, transparent 0%, #F5F0EB 100%);
+            background: linear-gradient(to bottom, transparent 0%, var(--brand-bg-alt) 100%);
             pointer-events: none;
             z-index: 2;
           }
           .hero-left {
             flex: unset !important;
-            background: #F5F0EB !important;
+            background: var(--brand-bg-alt) !important;
             padding: 0px 24px 52px !important;
             align-items: flex-start !important;
           }
@@ -166,7 +166,7 @@ export default function Hero() {
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center" }} />
           ) : (
             <div style={{ position: "absolute", inset: 0, background: "#E8E2D9", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 28, color: "#C9A96E", opacity: 0.5 }}>[CLIENT_NAME]</span>
+              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 28, color: "var(--brand-accent)", opacity: 0.5 }}>[CLIENT_NAME]</span>
             </div>
           )}
           {/* Gradient fade — visible only on mobile */}
@@ -178,19 +178,19 @@ export default function Hero() {
           <div style={{ maxWidth: 480, width: "100%" }}>
 
             <div className="h-ey" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
-              <div style={{ height: 1, width: 24, background: "#C9A96E" }} />
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
+              <div style={{ height: 1, width: 24, background: "var(--brand-accent)" }} />
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>
                 [LOCATION_1] &amp; [LOCATION_2]
               </span>
             </div>
 
-            <h1 className="h-h1" style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2.6rem, 5.5vw, 4.4rem)", fontWeight: 400, color: "#5C1A1A", lineHeight: 1.1, margin: "0 0 20px" }}>
+            <h1 className="h-h1" style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2.6rem, 5.5vw, 4.4rem)", fontWeight: 400, color: "var(--brand-primary)", lineHeight: 1.1, margin: "0 0 20px" }}>
               Welcome to<br />[CLIENT_NAME]
             </h1>
 
             <p className="h-sub" style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, lineHeight: 1.7, margin: "0 0 28px", maxWidth: 380 }}>
-              <span style={{ color: "#C9A96E" }}>Premium aesthetic & beauty treatments by Eva</span><br />
-              <span style={{ color: "#5C1A1A" }}>Essex &amp; London</span>
+              <span style={{ color: "var(--brand-accent)" }}>Premium aesthetic & beauty treatments by Eva</span><br />
+              <span style={{ color: "var(--brand-primary)" }}>Essex &amp; London</span>
             </p>
 
             <div className="h-chip" style={{ marginBottom: 24 }}>
@@ -198,11 +198,11 @@ export default function Hero() {
                 onClick={scrollToServices}
                 style={{
                   fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
-                  border: "1px solid #3D3D3D", background: "transparent", color: "#3D3D3D",
+                  border: "1px solid var(--brand-text)", background: "transparent", color: "var(--brand-text)",
                   padding: "10px 18px", cursor: "pointer", transition: "all 0.2s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#3D3D3D"; e.currentTarget.style.color = "#F5F0EB"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-text)"; e.currentTarget.style.color = "var(--brand-bg-alt)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-text)"; }}
               >
                 SIGNATURE: NATURALÉLIPS™
               </button>
@@ -212,18 +212,18 @@ export default function Hero() {
               <button
                 className="hero-btn"
                 onClick={scrollToServices}
-                style={{ border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                style={{ border: "1px solid var(--brand-primary)", background: "transparent", color: "var(--brand-primary)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-bg-alt)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-primary)"; }}
               >
                 VIEW TREATMENTS
               </button>
               <a
                 className="hero-btn"
                 href={`${import.meta.env.BASE_URL}book`}
-                style={{ border: "1px solid #C9A96E", background: "transparent", color: "#3D3D3D", textDecoration: "none", display: "inline-block", cursor: "pointer" }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#3D3D3D"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#3D3D3D"; }}
+                style={{ border: "1px solid var(--brand-accent)", background: "transparent", color: "var(--brand-text)", textDecoration: "none", display: "inline-block", cursor: "pointer" }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-accent)"; e.currentTarget.style.color = "var(--brand-text)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-text)"; }}
               >
                 BOOK NOW
               </a>

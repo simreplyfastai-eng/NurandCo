@@ -34,19 +34,19 @@ function LocationSelector() {
   ];
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F5F0EB", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 24px" }}>
+    <div style={{ minHeight: "100vh", background: "var(--brand-bg-alt)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 24px" }}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ width: "100%", maxWidth: 680, textAlign: "center" }}>
         <a href={BASE} style={{ display: "inline-block", marginBottom: 48, textDecoration: "none" }}>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", letterSpacing: "0.15em", color: "#5C1A1A", lineHeight: 1 }}>[CLIENT]</div>
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "0.35em", color: "#C9A96E", textTransform: "uppercase" }}>BEAUTY</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", letterSpacing: "0.15em", color: "var(--brand-primary)", lineHeight: 1 }}>[CLIENT]</div>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "0.35em", color: "var(--brand-accent)", textTransform: "uppercase" }}>[CLIENT_TYPE]</div>
         </a>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-          <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
-          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Choose Location</span>
-          <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+          <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
+          <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>Choose Location</span>
+          <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
         </div>
-        <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,6vw,3rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 40px" }}>
+        <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,6vw,3rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 40px" }}>
           Where would you like to book?
         </h1>
 
@@ -62,13 +62,13 @@ function LocationSelector() {
                 background: "#fff", border: "1px solid #E8E2D9", padding: "36px 28px",
                 textAlign: "left", cursor: "pointer", transition: "all 0.2s",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "#5C1A1A"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,.08)"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = "var(--brand-primary)"; e.currentTarget.style.boxShadow = "0 4px 24px rgba(0,0,0,.08)"; }}
               onMouseLeave={(e) => { e.currentTarget.style.borderColor = "#E8E2D9"; e.currentTarget.style.boxShadow = "none"; }}
             >
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2.5px", textTransform: "uppercase", color: "#C9A96E", marginBottom: 10 }}>{loc.region}</div>
-              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "2rem", color: "#5C1A1A", marginBottom: 12, lineHeight: 1 }}>{loc.label}</div>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2.5px", textTransform: "uppercase", color: "var(--brand-accent)", marginBottom: 10 }}>{loc.region}</div>
+              <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "2rem", color: "var(--brand-primary)", marginBottom: 12, lineHeight: 1 }}>{loc.label}</div>
               <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", lineHeight: 1.6, margin: "0 0 20px" }}>{loc.desc}</p>
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "#5C1A1A", borderTop: "1px solid #E8E2D9", paddingTop: 16 }}>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "var(--brand-primary)", borderTop: "1px solid #E8E2D9", paddingTop: 16 }}>
                 Book Here →
               </div>
             </motion.button>
@@ -124,11 +124,11 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
   const fmtDuration = (m: number) => m >= 60 ? `${Math.floor(m / 60)}hr${m % 60 ? ` ${m % 60}m` : ""}` : `${m} mins`;
 
   return (
-    <div style={{ minHeight: "100vh", background: "#F5F0EB" }}>
+    <div style={{ minHeight: "100vh", background: "var(--brand-bg-alt)" }}>
       <div style={{ background: "#fff", borderBottom: "1px solid #F0EAE2", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <a href={BASE} style={{ textDecoration: "none" }}>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.2rem", letterSpacing: "0.15em", color: "#5C1A1A", lineHeight: 1 }}>[CLIENT]</div>
-          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "0.35em", color: "#C9A96E", textTransform: "uppercase" }}>BEAUTY</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.2rem", letterSpacing: "0.15em", color: "var(--brand-primary)", lineHeight: 1 }}>[CLIENT]</div>
+          <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "0.35em", color: "var(--brand-accent)", textTransform: "uppercase" }}>[CLIENT_TYPE]</div>
         </a>
         <button
           onClick={() => navigate("/book")}
@@ -141,17 +141,17 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
       <div style={{ maxWidth: 760, margin: "0 auto", padding: "60px 24px 100px" }}>
         <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{locationLabel}</span>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>{locationLabel}</span>
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
           </div>
-          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,2.8rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 48px" }}>
+          <h1 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,2.8rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 48px" }}>
             Choose a Treatment
           </h1>
 
           {loading && (
             <div style={{ textAlign: "center", padding: "60px 0" }}>
-              <div style={{ width: 28, height: 28, border: "2px solid #F0EAE2", borderTopColor: "#5C1A1A", borderRadius: "50%", animation: "spin .8s linear infinite", margin: "0 auto 12px" }} />
+              <div style={{ width: 28, height: 28, border: "2px solid #F0EAE2", borderTopColor: "var(--brand-primary)", borderRadius: "50%", animation: "spin .8s linear infinite", margin: "0 auto 12px" }} />
               <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373" }}>Loading treatments…</p>
             </div>
           )}
@@ -170,11 +170,11 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
                   width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between",
                   padding: "18px 20px", background: "#fff", border: "none", cursor: "pointer",
                   fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase",
-                  color: "#3D3D3D",
+                  color: "var(--brand-text)",
                 }}
               >
                 {group.category.toUpperCase()}
-                {openGroups.has(group.category) ? <ChevronUp size={14} color="#C9A96E" /> : <ChevronDown size={14} color="#C9A96E" />}
+                {openGroups.has(group.category) ? <ChevronUp size={14} color="var(--brand-accent)" /> : <ChevronDown size={14} color="var(--brand-accent)" />}
               </button>
 
               <AnimatePresence initial={false}>
@@ -190,7 +190,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
                       const isPoa = t.price === 0;
                       const bookBtnStyle = {
                         fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "1.5px", textTransform: "uppercase" as const,
-                        border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                        border: "1px solid var(--brand-primary)", background: "transparent", color: "var(--brand-primary)",
                         padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
                         textDecoration: "none", display: "inline-block", whiteSpace: "nowrap" as const,
                       };
@@ -199,11 +199,11 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
                           key={t.id}
                           style={{
                             display: "flex", alignItems: "center", justifyContent: "space-between",
-                            padding: "14px 20px", background: "#F5F0EB", marginBottom: 2, gap: 8,
+                            padding: "14px 20px", background: "var(--brand-bg-alt)", marginBottom: 2, gap: 8,
                           }}
                         >
                           <div>
-                            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#3D3D3D" }}>{t.name}</span>
+                            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "var(--brand-text)" }}>{t.name}</span>
                             <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "#737373", marginLeft: 8 }}>{fmtDuration(t.duration_minutes)}</span>
                             {isPoa && (
                               <div style={{ fontFamily: "'Inter', sans-serif", fontStyle: "italic", fontSize: 11, color: "#737373", marginTop: 3 }}>
@@ -213,7 +213,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
                           </div>
                           <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                             {!isPoa && (
-                              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C9A96E" }}>
+                              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "var(--brand-accent)" }}>
                                 {fmtPrice(t.price)}
                               </span>
                             )}
@@ -223,8 +223,8 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 style={bookBtnStyle}
-                                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-bg-alt)"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-primary)"; }}
                               >
                                 BOOK
                               </a>
@@ -232,8 +232,8 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
                               <button
                                 onClick={() => setActiveTreatment(t)}
                                 style={bookBtnStyle}
-                                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-bg-alt)"; }}
+                                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-primary)"; }}
                               >
                                 BOOK
                               </button>

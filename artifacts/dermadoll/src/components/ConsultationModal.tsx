@@ -172,9 +172,9 @@ function Calendar({
   return (
     <div>
       <div className="flex items-center justify-between mb-5">
-        <button onClick={prevMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10" style={{ color: "#C9A96E", fontSize: "22px" }}>‹</button>
+        <button onClick={prevMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10" style={{ color: "var(--brand-accent)", fontSize: "22px" }}>‹</button>
         <span className="font-serif" style={{ fontSize: "18px" }}>{MONTH_NAMES[viewMonth]} {viewYear}</span>
-        <button onClick={nextMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10" style={{ color: "#C9A96E", fontSize: "22px" }}>›</button>
+        <button onClick={nextMonth} className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10" style={{ color: "var(--brand-accent)", fontSize: "22px" }}>›</button>
       </div>
       <div className="grid grid-cols-7 mb-2">
         {DAY_NAMES.map((d) => (
@@ -198,7 +198,7 @@ function Calendar({
               style={{
                 width: "40px", height: "40px", borderRadius: "8px", margin: "1px auto",
                 fontSize: "14px", fontFamily: "Inter, sans-serif",
-                backgroundColor: isSelected ? "#C9A96E" : "transparent",
+                backgroundColor: isSelected ? "var(--brand-accent)" : "transparent",
                 color: isSelected ? "#fff" : disabled ? "#ddd" : "#111",
                 cursor: disabled ? "default" : "pointer",
               }}
@@ -218,7 +218,7 @@ function Field({ label, required, error, children, hint }: { label: string; requ
   return (
     <div className="mb-4">
       <label className="block text-xs uppercase tracking-wider mb-1.5" style={{ color: "#888", fontFamily: "Inter, sans-serif" }}>
-        {label} {required && <span style={{ color: "#C9A96E" }}>*</span>}
+        {label} {required && <span style={{ color: "var(--brand-accent)" }}>*</span>}
       </label>
       {children}
       {hint && !error && <p className="text-xs mt-1" style={{ color: "#aaa" }}>{hint}</p>}
@@ -418,7 +418,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
             ref={firstFocusRef}
             onClick={onClose}
             className="absolute top-5 right-5 w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary/10"
-            style={{ color: "#C9A96E", fontSize: "18px" }}
+            style={{ color: "var(--brand-accent)", fontSize: "18px" }}
             aria-label="Close"
           >✕</button>
         )}
@@ -433,7 +433,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
                 <div key={label} className="flex items-center gap-1 flex-1">
                   <div style={{
                     width: "100%", height: "3px", borderRadius: "2px",
-                    background: i <= currentStepIndex ? "#C9A96E" : "#E8E8E8",
+                    background: i <= currentStepIndex ? "var(--brand-accent)" : "#E8E8E8",
                     transition: "background 0.3s",
                   }} />
                 </div>
@@ -494,7 +494,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
               onClick={handleDetailsNext}
               className="w-full mt-2"
               style={{
-                background: "#C9A96E", color: "#fff", border: "none",
+                background: "var(--brand-accent)", color: "#fff", border: "none",
                 borderRadius: "8px", padding: "16px", fontSize: "13px",
                 fontFamily: "Inter, sans-serif", fontWeight: 700,
                 letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer",
@@ -509,7 +509,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
         {step === 2 && (
           <motion.div key="step2" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-5">
-              <button onClick={() => setStep(1)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
+              <button onClick={() => setStep(1)} className="text-sm hover:opacity-70" style={{ color: "var(--brand-accent)" }}>← Back</button>
               <h3 className="font-serif" style={{ fontSize: "20px" }}>Your Treatment Interest</h3>
             </div>
 
@@ -540,7 +540,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
               onClick={handleTreatmentNext}
               className="w-full mt-2"
               style={{
-                background: "#C9A96E", color: "#fff", border: "none",
+                background: "var(--brand-accent)", color: "#fff", border: "none",
                 borderRadius: "8px", padding: "16px", fontSize: "13px",
                 fontFamily: "Inter, sans-serif", fontWeight: 700,
                 letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer",
@@ -555,7 +555,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
         {step === 3 && (
           <motion.div key="step3" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-5">
-              <button onClick={() => setStep(2)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
+              <button onClick={() => setStep(2)} className="text-sm hover:opacity-70" style={{ color: "var(--brand-accent)" }}>← Back</button>
               <h3 className="font-serif" style={{ fontSize: "20px" }}>Select a Date</h3>
             </div>
             <Calendar onSelect={handleDateSelect} selected={selectedDate} avail={avail} />
@@ -566,7 +566,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
         {step === 4 && (
           <motion.div key="step4" initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
             <div className="flex items-center gap-3 mb-2">
-              <button onClick={() => setStep(3)} className="text-sm hover:opacity-70" style={{ color: "#C9A96E" }}>← Back</button>
+              <button onClick={() => setStep(3)} className="text-sm hover:opacity-70" style={{ color: "var(--brand-accent)" }}>← Back</button>
               <h3 className="font-serif" style={{ fontSize: "20px" }}>Select a Time</h3>
             </div>
             {selectedDate && <p className="text-sm mb-5" style={{ color: "#999" }}>{formatDate(selectedDate)}</p>}
@@ -579,7 +579,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
 
             {submitting ? (
               <div className="flex flex-col items-center justify-center py-12 gap-4">
-                <div style={{ width: "28px", height: "28px", border: "3px solid #E8E8E8", borderTopColor: "#C9A96E", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+                <div style={{ width: "28px", height: "28px", border: "3px solid #E8E8E8", borderTopColor: "var(--brand-accent)", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
                 <p className="text-sm" style={{ color: "#aaa", fontFamily: "Inter, sans-serif" }}>Confirming your booking…</p>
               </div>
             ) : loadingSlots ? (
@@ -587,7 +587,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
             ) : availableSlots.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-sm mb-4" style={{ color: "#aaa" }}>No available slots for this date. Please select another day.</p>
-                <button onClick={() => setStep(3)} style={{ color: "#C9A96E", fontSize: "14px", background: "none", border: "none", cursor: "pointer" }}>← Choose a different date</button>
+                <button onClick={() => setStep(3)} style={{ color: "var(--brand-accent)", fontSize: "14px", background: "none", border: "none", cursor: "pointer" }}>← Choose a different date</button>
               </div>
             ) : (
               <>
@@ -604,7 +604,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
                         color: "#111",
                         cursor: "pointer",
                       }}
-                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#C9A96E"; (e.currentTarget as HTMLButtonElement).style.color = "#C9A96E"; }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "var(--brand-accent)"; (e.currentTarget as HTMLButtonElement).style.color = "var(--brand-accent)"; }}
                       onMouseLeave={(e) => { (e.currentTarget as HTMLButtonElement).style.borderColor = "#E0E0E0"; (e.currentTarget as HTMLButtonElement).style.color = "#111"; }}
                     >
                       {slot}
@@ -644,7 +644,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
             </div>
 
             <div className="p-4 rounded-xl mb-4 text-sm" style={{ background: "#FAFAF8", border: "1px solid #E8E8E8", fontFamily: "Inter, sans-serif" }}>
-              <p style={{ color: "#C9A96E", fontWeight: 700, fontSize: "10px", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px" }}>Find Us</p>
+              <p style={{ color: "var(--brand-accent)", fontWeight: 700, fontSize: "10px", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px" }}>Find Us</p>
               <p style={{ color: "#111", fontWeight: 600, marginBottom: "2px" }}>[CLIENT_NAME]</p>
               <p style={{ color: "#666" }}>[LOCATION_1], Essex (RM11)</p>
               <p style={{ color: "#666" }}>[LOCATION_2], London (W1G)</p>
@@ -666,7 +666,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
               onClick={onClose}
               className="w-full mt-2"
               style={{
-                background: "#F5F0EB", color: "#fff", border: "none",
+                background: "var(--brand-bg-alt)", color: "#fff", border: "none",
                 borderRadius: "8px", padding: "16px", fontSize: "13px",
                 fontFamily: "Inter, sans-serif", fontWeight: 700,
                 letterSpacing: "2px", textTransform: "uppercase", cursor: "pointer",

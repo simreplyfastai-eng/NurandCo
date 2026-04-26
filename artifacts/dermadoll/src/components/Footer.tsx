@@ -43,7 +43,7 @@ export default function Footer() {
   };
 
   return (
-    <footer style={{ background: "#F5F0EB", borderTop: "1px solid #E2DDD5" }}>
+    <footer style={{ background: "var(--brand-bg-alt)", borderTop: "1px solid #E2DDD5" }}>
       <div className="footer-inner" style={{ maxWidth: 1140, margin: "0 auto", padding: "72px 40px 40px" }}>
 
         {/* ── Main 3-column grid ── */}
@@ -56,22 +56,22 @@ export default function Footer() {
               onClick={(e) => scrollTo(e, "#")}
               style={{ textDecoration: "none", display: "inline-flex", flexDirection: "column", alignItems: "flex-start", gap: 4, marginBottom: 16 }}
             >
-              <span className="footer-logo-name" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 44, fontWeight: 600, letterSpacing: "0.02em", color: "#5C1A1A", lineHeight: 1 }}>
+              <span className="footer-logo-name" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 44, fontWeight: 600, letterSpacing: "0.02em", color: "var(--brand-primary)", lineHeight: 1 }}>
                 [CLIENT]
               </span>
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.4em", textTransform: "uppercase", fontWeight: 400, color: "#C9A96E", lineHeight: 1 }}>
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.4em", textTransform: "uppercase", fontWeight: 400, color: "var(--brand-accent)", lineHeight: 1 }}>
                 BEAUTY
               </span>
             </a>
 
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#5C1A1A", margin: "0 0 20px" }}>
+            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "var(--brand-primary)", margin: "0 0 20px" }}>
               Beauty Redefined
             </p>
 
             <a
               href="mailto:[CLIENT_NAME]yltd@gmail.com"
               style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#737373", textDecoration: "none", letterSpacing: "0.04em", transition: "color 0.2s" }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#5C1A1A")}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--brand-primary)")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#737373")}
             >
               [CLIENT_NAME]yltd@gmail.com
@@ -125,11 +125,11 @@ export default function Footer() {
 
         {/* ── Bottom bar ── */}
         <div className="footer-bottom">
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9A96E", margin: 0 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--brand-accent)", margin: 0 }}>
             © {year} [CLIENT_NAME]. All rights reserved.
           </p>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
-            <span style={{ color: "#C9A96E" }}>Powered By </span>
+            <span style={{ color: "var(--brand-accent)" }}>Powered By </span>
             <a
               href="https://aesthetix-systems.co.uk"
               target="_blank"

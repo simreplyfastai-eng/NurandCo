@@ -143,13 +143,13 @@ export default function ResultsVideos() {
           style={{ textAlign: "center", marginBottom: 56 }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>
               See the Results
             </span>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
           </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 8px" }}>
             Watch Real Treatments
           </h2>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", margin: 0 }}>

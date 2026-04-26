@@ -86,9 +86,9 @@ const categories: PricingCategory[] = [
 function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
-      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
+      <div style={{ height: 1, width: 28, background: "var(--brand-accent)", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "var(--brand-accent)", opacity: 0.5 }} />
     </div>
   );
 }
@@ -98,7 +98,7 @@ export default function Pricing() {
   const [consultOpen, setConsultOpen] = useState(false);
 
   return (
-    <section id="pricing" style={{ background: "#F5F0EB", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+    <section id="pricing" style={{ background: "var(--brand-bg-alt)", padding: "100px 0", position: "relative", overflow: "hidden" }}>
 
       {/* Decorative background layer */}
       {/* Large faint "£" watermark — left side */}
@@ -136,7 +136,7 @@ export default function Pricing() {
         <div key={i} aria-hidden="true" style={{
           position: "absolute", ...(pos as any),
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: pos.size, color: "#C9A96E", opacity: pos.opacity,
+          fontSize: pos.size, color: "var(--brand-accent)", opacity: pos.opacity,
           pointerEvents: "none", userSelect: "none",
         }}>✦</div>
       ))}
@@ -165,10 +165,10 @@ export default function Pricing() {
           style={{ textAlign: "center", marginBottom: 56 }}
         >
           <Eyebrow label="PRICING" />
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#3D3D3D", margin: "0 0 12px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "var(--brand-text)", margin: "0 0 12px" }}>
             Transparent Pricing
           </h2>
-          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C9A96E", margin: 0 }}>
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "var(--brand-accent)", margin: 0 }}>
             No hidden fees. Every treatment listed.
           </p>
         </motion.div>
@@ -191,7 +191,7 @@ export default function Pricing() {
                   alignItems: "center",
                   justifyContent: "space-between",
                   padding: "18px 24px",
-                  background: open === i ? "#C9A96E" : "#FFFFFF",
+                  background: open === i ? "var(--brand-accent)" : "#FFFFFF",
                   border: "none",
                   cursor: "pointer",
                   transition: "background 0.2s",
@@ -201,13 +201,13 @@ export default function Pricing() {
                   fontFamily: "'Cormorant Garamond', serif",
                   fontSize: "1.15rem",
                   fontWeight: 600,
-                  color: "#3D3D3D",
+                  color: "var(--brand-text)",
                 }}>
                   {cat.title}
                 </span>
                 <ChevronDown
                   size={16}
-                  color={open === i ? "#C9A96E" : "#737373"}
+                  color={open === i ? "var(--brand-accent)" : "#737373"}
                   style={{ transform: open === i ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s" }}
                 />
               </button>
@@ -238,7 +238,7 @@ export default function Pricing() {
                           <span style={{
                             fontFamily: "'Inter', sans-serif",
                             fontSize: 14,
-                            color: "#3D3D3D",
+                            color: "var(--brand-text)",
                             flexShrink: 0,
                           }}>
                             {item.name}
@@ -248,7 +248,7 @@ export default function Pricing() {
                               fontFamily: "'Cormorant Garamond', serif",
                               fontStyle: "italic",
                               fontSize: 20,
-                              color: "#C9A96E",
+                              color: "var(--brand-accent)",
                             }}>
                               {item.price}
                             </span>
@@ -256,8 +256,8 @@ export default function Pricing() {
                               onClick={() => setConsultOpen(true)}
                               style={{
                                 background: "transparent",
-                                border: "1px solid #C9A96E",
-                                color: "#3D3D3D",
+                                border: "1px solid var(--brand-accent)",
+                                color: "var(--brand-text)",
                                 fontFamily: "'Inter', sans-serif",
                                 fontSize: 9,
                                 letterSpacing: "2px",
@@ -269,12 +269,12 @@ export default function Pricing() {
                                 transition: "all 0.2s",
                               }}
                               onMouseEnter={(e) => {
-                                e.currentTarget.style.background = "#C9A96E";
-                                e.currentTarget.style.color = "#3D3D3D";
+                                e.currentTarget.style.background = "var(--brand-accent)";
+                                e.currentTarget.style.color = "var(--brand-text)";
                               }}
                               onMouseLeave={(e) => {
                                 e.currentTarget.style.background = "transparent";
-                                e.currentTarget.style.color = "#3D3D3D";
+                                e.currentTarget.style.color = "var(--brand-text)";
                               }}
                             >
                               BOOK

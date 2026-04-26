@@ -65,7 +65,7 @@ export default function BeforeAfter() {
 
   return (
     <>
-      <section id="results" style={{ padding: "100px 0", background: "#F5F0EB" }}>
+      <section id="results" style={{ padding: "100px 0", background: "var(--brand-bg-alt)" }}>
         <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 32px" }}>
 
           <motion.div
@@ -76,14 +76,14 @@ export default function BeforeAfter() {
             style={{ textAlign: "center", marginBottom: 56 }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-              <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Real Results</span>
-              <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+              <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>Real Results</span>
+              <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
             </div>
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px" }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 8px" }}>
               Real Transformations
             </h2>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#C9A96E", margin: 0 }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "var(--brand-accent)", margin: 0 }}>
               Natural. Tailored. Uniquely yours.
             </p>
           </motion.div>
@@ -114,7 +114,7 @@ export default function BeforeAfter() {
           </div>
 
           <div style={{ textAlign: "center", marginTop: 32 }}>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "#5C1A1A" }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--brand-primary)" }}>
               Client consent obtained · Results may vary
             </span>
           </div>
@@ -152,7 +152,7 @@ export default function BeforeAfter() {
                 position: "relative",
                 maxWidth: "min(90vw, 800px)",
                 maxHeight: "90vh",
-                border: "2px solid #C9A96E",
+                border: "2px solid var(--brand-accent)",
                 overflow: "hidden",
               }}
             >

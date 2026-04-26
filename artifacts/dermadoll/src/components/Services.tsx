@@ -122,14 +122,14 @@ export default function Services() {
           style={{ textAlign: "center", marginBottom: 48 }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Treatments</span>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>Treatments</span>
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
           </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 8px" }}>
             Our Services
           </h2>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#C9A96E", margin: "0 0 36px" }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "var(--brand-accent)", margin: "0 0 36px" }}>
             Precision aesthetics tailored to you
           </p>
 
@@ -149,9 +149,9 @@ export default function Services() {
                 style={{
                   fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2px", textTransform: "uppercase",
                   padding: "11px 28px", cursor: "pointer", transition: "all 0.2s",
-                  background: location === loc ? "#5C1A1A" : "transparent",
-                  color: location === loc ? "#F5F0EB" : "#5C1A1A",
-                  border: "1px solid #5C1A1A",
+                  background: location === loc ? "var(--brand-primary)" : "transparent",
+                  color: location === loc ? "var(--brand-bg-alt)" : "var(--brand-primary)",
+                  border: "1px solid var(--brand-primary)",
                   marginRight: loc === "[location-1-slug]" ? -1 : 0,
                 }}
               >
@@ -163,7 +163,7 @@ export default function Services() {
 
         {isLoading && (
           <div style={{ textAlign: "center", padding: "48px 0" }}>
-            <div style={{ width: 24, height: 24, border: "2px solid #E2DDD5", borderTopColor: "#5C1A1A", borderRadius: "50%", animation: "spin .8s linear infinite", margin: "0 auto 12px" }} />
+            <div style={{ width: 24, height: 24, border: "2px solid #E2DDD5", borderTopColor: "var(--brand-primary)", borderRadius: "50%", animation: "spin .8s linear infinite", margin: "0 auto 12px" }} />
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373" }}>Loading treatments…</p>
           </div>
         )}
@@ -185,10 +185,10 @@ export default function Services() {
                   cursor: "pointer", textAlign: "left",
                 }}
               >
-                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2.5px", textTransform: "uppercase", color: openGroups.has(group.category) ? "#5C1A1A" : "#C9A96E", fontWeight: 400 }}>
+                <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "2.5px", textTransform: "uppercase", color: openGroups.has(group.category) ? "var(--brand-primary)" : "var(--brand-accent)", fontWeight: 400 }}>
                   {group.category.toUpperCase()}
                 </span>
-                {openGroups.has(group.category) ? <ChevronUp size={16} color="#C9A96E" /> : <ChevronDown size={16} color="#C9A96E" />}
+                {openGroups.has(group.category) ? <ChevronUp size={16} color="var(--brand-accent)" /> : <ChevronDown size={16} color="var(--brand-accent)" />}
               </button>
 
               <AnimatePresence initial={false}>
@@ -206,7 +206,7 @@ export default function Services() {
                         const isPoa = t.price === 0;
                         const bookStyle = {
                           fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "1.5px", textTransform: "uppercase" as const,
-                          border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                          border: "1px solid var(--brand-primary)", background: "transparent", color: "var(--brand-primary)",
                           padding: "7px 16px", cursor: "pointer", transition: "all 0.2s",
                           textDecoration: "none", display: "inline-block", whiteSpace: "nowrap" as const,
                         };
@@ -215,11 +215,11 @@ export default function Services() {
                             key={t.id}
                             style={{
                               display: "flex", alignItems: "center", justifyContent: "space-between",
-                              padding: "14px 16px", background: "#F5F0EB", marginBottom: 2, gap: 8,
+                              padding: "14px 16px", background: "var(--brand-bg-alt)", marginBottom: 2, gap: 8,
                             }}
                           >
                             <div style={{ minWidth: 0 }}>
-                              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1rem", color: "#3D3D3D" }}>{t.name}</span>
+                              <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1rem", color: "var(--brand-text)" }}>{t.name}</span>
                               {t.duration_minutes > 0 && (
                                 <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "#737373", marginLeft: 8, whiteSpace: "nowrap" }}>
                                   {fmtDuration(t.duration_minutes)}
@@ -233,7 +233,7 @@ export default function Services() {
                             </div>
                             <div style={{ display: "flex", alignItems: "center", gap: 16, flexShrink: 0 }}>
                               {!isPoa && (
-                                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "#C9A96E", whiteSpace: "nowrap" }}>
+                                <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.1rem", color: "var(--brand-accent)", whiteSpace: "nowrap" }}>
                                   {fmtPrice(t.price)}
                                 </span>
                               )}
@@ -243,8 +243,8 @@ export default function Services() {
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   style={bookStyle}
-                                  onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-bg-alt)"; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-primary)"; }}
                                 >
                                   BOOK
                                 </a>
@@ -252,8 +252,8 @@ export default function Services() {
                                 <a
                                   href={`${BASE}book?location=${location}&treatment=${t.id}`}
                                   style={bookStyle}
-                                  onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-bg-alt)"; }}
+                                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-primary)"; }}
                                 >
                                   BOOK
                                 </a>

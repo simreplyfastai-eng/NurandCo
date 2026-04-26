@@ -20,7 +20,7 @@ const clinics = [
 export default function Locations() {
 
   return (
-    <section id="locations" style={{ background: "#F5F0EB", padding: "100px 0" }}>
+    <section id="locations" style={{ background: "var(--brand-bg-alt)", padding: "100px 0" }}>
       <style>{`
         .clinics-grid {
           display: grid;
@@ -39,14 +39,14 @@ export default function Locations() {
           font-style: italic;
           font-size: 2rem;
           font-weight: 400;
-          color: #5C1A1A;
+          color: var(--brand-primary);
           margin: 0 0 20px;
           line-height: 1;
         }
         .clinic-card .desc-line1 {
           font-family: 'Inter', sans-serif;
           font-size: 14px;
-          color: #C9A96E;
+          color: var(--brand-accent);
           line-height: 1.6;
           margin: 0 0 8px;
           font-weight: 500;
@@ -89,14 +89,14 @@ export default function Locations() {
           style={{ textAlign: "center", marginBottom: 48 }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Our Clinics</span>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>Our Clinics</span>
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
           </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 12px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 12px" }}>
             Two Locations
           </h2>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#C9A96E", margin: 0 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "var(--brand-accent)", margin: 0 }}>
             One standard of excellence
           </p>
         </motion.div>
@@ -110,9 +110,9 @@ export default function Locations() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.12 }}
-              style={{ border: clinic.highlight ? "1px solid #5C1A1A" : "1px solid #E2DDD5" }}
+              style={{ border: clinic.highlight ? "1px solid var(--brand-primary)" : "1px solid #E2DDD5" }}
             >
-              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E", marginBottom: 10 }}>
+              <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)", marginBottom: 10 }}>
                 {clinic.region}
               </div>
               <h3>{clinic.name}</h3>
@@ -123,12 +123,12 @@ export default function Locations() {
                   href={`${import.meta.env.BASE_URL}book?location=${clinic.name.toLowerCase()}`}
                   style={{
                     fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
-                    border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                    border: "1px solid var(--brand-primary)", background: "transparent", color: "var(--brand-primary)",
                     padding: "11px 0", cursor: "pointer", transition: "all 0.2s", width: "100%",
                     textDecoration: "none", display: "block", textAlign: "center",
                   }}
-                  onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-bg-alt)"; }}
+                  onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-primary)"; }}
                 >
                   BOOK HERE
                 </a>

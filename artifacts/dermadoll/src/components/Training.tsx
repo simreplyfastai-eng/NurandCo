@@ -35,13 +35,13 @@ function SuccessTick() {
       <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
         <motion.circle
           cx="32" cy="32" r="30"
-          stroke="#C9A96E" strokeWidth="2.5" fill="none"
+          stroke="var(--brand-accent)" strokeWidth="2.5" fill="none"
           initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
           transition={{ duration: 0.5, ease: "easeOut" }}
         />
         <motion.path
           d="M18 33 L28 43 L46 23"
-          stroke="#C9A96E" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"
+          stroke="var(--brand-accent)" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none"
           initial={{ pathLength: 0 }} animate={{ pathLength: 1 }}
           transition={{ duration: 0.4, ease: "easeOut", delay: 0.4 }}
         />
@@ -56,7 +56,7 @@ const inputStyle: React.CSSProperties = {
   fontSize: 13,
   fontWeight: 300,
   color: "#2C2420",
-  background: "#FAF7F4",
+  background: "var(--brand-bg)",
   border: "1px solid #E2DDD5",
   padding: "11px 14px",
   outline: "none",
@@ -143,15 +143,15 @@ export default function Training() {
             transition={{ duration: 0.7 }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-              <div style={{ height: 1, width: 24, background: "#C9A96E" }} />
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
+              <div style={{ height: 1, width: 24, background: "var(--brand-accent)" }} />
+              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>
                 [Client] Academy
               </span>
             </div>
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px" }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 8px" }}>
               Train With Eva
             </h2>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#C9A96E", margin: "0 0 28px" }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "var(--brand-accent)", margin: "0 0 28px" }}>
               Training based in [LOCATION_1], Essex
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
@@ -160,7 +160,7 @@ export default function Training() {
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
               All courses are open to candidates with no prior background required.
             </p>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#5C1A1A", lineHeight: 1.8, margin: 0 }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "var(--brand-primary)", lineHeight: 1.8, margin: 0 }}>
               Small groups. Real models. Real confidence.
             </p>
           </motion.div>
@@ -182,7 +182,7 @@ export default function Training() {
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.15 + i * 0.08 }}
                 style={{
-                  background: "#F5F0EB",
+                  background: "var(--brand-bg-alt)",
                   border: "1px solid #E2DDD5",
                   padding: "20px 24px",
                   display: "flex",
@@ -192,7 +192,7 @@ export default function Training() {
                 }}
               >
                 <div>
-                  <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.15rem", fontWeight: 400, color: "#5C1A1A", margin: "0 0 4px" }}>
+                  <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.15rem", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 4px" }}>
                     {c.name}
                   </p>
                   <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#737373", margin: 0 }}>
@@ -209,8 +209,8 @@ export default function Training() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.15 + courses.length * 0.08 }}
               style={{
-                background: "#FAF7F4",
-                border: "1px dashed #C9A96E",
+                background: "var(--brand-bg)",
+                border: "1px dashed var(--brand-accent)",
                 padding: "16px 24px",
                 display: "flex",
                 alignItems: "center",
@@ -219,7 +219,7 @@ export default function Training() {
             >
               <span style={{
                 fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "1.5px", textTransform: "uppercase",
-                border: "1px solid #C9A96E", color: "#C9A96E", padding: "4px 8px", flexShrink: 0,
+                border: "1px solid var(--brand-accent)", color: "var(--brand-accent)", padding: "4px 8px", flexShrink: 0,
               }}>
                 COMING SOON
               </span>
@@ -235,35 +235,35 @@ export default function Training() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: 0.15 + (courses.length + 1) * 0.08 }}
               style={{
-                background: "#F5F0EB",
+                background: "var(--brand-bg-alt)",
                 border: "1px solid #E2DDD5",
                 padding: "28px 28px 24px",
                 marginTop: 4,
               }}
             >
               <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 8 }}>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.3rem", fontWeight: 400, color: "#5C1A1A", margin: 0 }}>
+                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.3rem", fontWeight: 400, color: "var(--brand-primary)", margin: 0 }}>
                   Training Enquiries
                 </h3>
                 <span style={{
                   fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "1.5px", textTransform: "uppercase",
-                  border: "1px solid #C9A96E", color: "#C9A96E", padding: "4px 8px", flexShrink: 0, marginLeft: 12,
+                  border: "1px solid var(--brand-accent)", color: "var(--brand-accent)", padding: "4px 8px", flexShrink: 0, marginLeft: 12,
                 }}>
                   [LOCATION_1]
                 </span>
               </div>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#C9A96E", margin: "0 0 20px" }}>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "var(--brand-accent)", margin: "0 0 20px" }}>
                 [LOCATION_1] Clinic, Essex
               </p>
               <button
                 onClick={handleEnquire}
                 style={{
                   width: "100%", fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
-                  border: "1px solid #5C1A1A", background: "transparent", color: "#5C1A1A",
+                  border: "1px solid var(--brand-primary)", background: "transparent", color: "var(--brand-primary)",
                   padding: "12px 0", cursor: "pointer", transition: "all 0.2s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-bg-alt)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-primary)"; }}
               >
                 ENQUIRE NOW
               </button>
@@ -309,14 +309,14 @@ export default function Training() {
                   cursor: "pointer", fontSize: 22, color: "#737373", lineHeight: 1,
                   transition: "color 0.15s",
                 }}
-                onMouseEnter={(e) => { e.currentTarget.style.color = "#C9A96E"; }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--brand-accent)"; }}
                 onMouseLeave={(e) => { e.currentTarget.style.color = "#737373"; }}
               >×</button>
 
               {formState === "success" ? (
                 <div style={{ textAlign: "center", padding: "8px 0" }}>
                   <SuccessTick />
-                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.8rem", color: "#5C1A1A", margin: "0 0 10px" }}>
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.8rem", color: "var(--brand-primary)", margin: "0 0 10px" }}>
                     Enquiry received!
                   </h3>
                   <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", lineHeight: 1.7, margin: "0 0 24px" }}>
@@ -330,7 +330,7 @@ export default function Training() {
                     target="_blank"
                     rel="noopener noreferrer"
                     style={{
-                      display: "inline-block", background: "#C9A96E", color: "#FFFFFF",
+                      display: "inline-block", background: "var(--brand-accent)", color: "#FFFFFF",
                       fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.12em",
                       textTransform: "uppercase", padding: "13px 28px", textDecoration: "none",
                       borderRadius: 4, marginBottom: 20,
@@ -352,12 +352,12 @@ export default function Training() {
               ) : (
                 <>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
-                    <div style={{ height: 1, width: 20, background: "#C9A96E" }} />
-                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
+                    <div style={{ height: 1, width: 20, background: "var(--brand-accent)" }} />
+                    <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>
                       [Client] Academy
                     </span>
                   </div>
-                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.8rem", color: "#5C1A1A", margin: "0 0 6px" }}>
+                  <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.8rem", color: "var(--brand-primary)", margin: "0 0 6px" }}>
                     Training Enquiry
                   </h3>
                   <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", margin: "0 0 28px" }}>
@@ -366,28 +366,28 @@ export default function Training() {
 
                   <form onSubmit={handleSubmit} noValidate>
                     <div style={{ marginBottom: 14 }}>
-                      <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "#5C1A1A", marginBottom: 6 }}>
-                        Full Name <span style={{ color: "#C9A96E" }}>*</span>
+                      <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "var(--brand-primary)", marginBottom: 6 }}>
+                        Full Name <span style={{ color: "var(--brand-accent)" }}>*</span>
                       </label>
                       <input ref={nameRef} type="text" placeholder="Your full name" required style={inputStyle} />
                     </div>
 
                     <div style={{ marginBottom: 14 }}>
-                      <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "#5C1A1A", marginBottom: 6 }}>
-                        Email Address <span style={{ color: "#C9A96E" }}>*</span>
+                      <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "var(--brand-primary)", marginBottom: 6 }}>
+                        Email Address <span style={{ color: "var(--brand-accent)" }}>*</span>
                       </label>
                       <input ref={emailRef} type="email" placeholder="your@email.com" required style={inputStyle} />
                     </div>
 
                     <div style={{ marginBottom: 14 }}>
-                      <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "#5C1A1A", marginBottom: 6 }}>
-                        Phone Number <span style={{ color: "#C9A96E" }}>*</span>
+                      <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "var(--brand-primary)", marginBottom: 6 }}>
+                        Phone Number <span style={{ color: "var(--brand-accent)" }}>*</span>
                       </label>
                       <input ref={phoneRef} type="tel" placeholder="+44 7700 000000" required style={inputStyle} />
                     </div>
 
                     <div style={{ marginBottom: 14 }}>
-                      <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "#5C1A1A", marginBottom: 6 }}>
+                      <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "var(--brand-primary)", marginBottom: 6 }}>
                         Course of Interest
                       </label>
                       <select ref={expRef} style={{ ...inputStyle, appearance: "none", WebkitAppearance: "none" }}>
@@ -401,7 +401,7 @@ export default function Training() {
                     </div>
 
                     <div style={{ marginBottom: 24 }}>
-                      <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "#5C1A1A", marginBottom: 6 }}>
+                      <label style={{ display: "block", fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1px", textTransform: "uppercase", color: "var(--brand-primary)", marginBottom: 6 }}>
                         Message <span style={{ fontWeight: 300, textTransform: "none", letterSpacing: 0 }}>(optional)</span>
                       </label>
                       <textarea
@@ -436,7 +436,7 @@ export default function Training() {
                         marginBottom: 14,
                       }}
                       onMouseEnter={(e) => {
-                        if (formState !== "loading") e.currentTarget.style.background = "#C9A96E";
+                        if (formState !== "loading") e.currentTarget.style.background = "var(--brand-accent)";
                       }}
                       onMouseLeave={(e) => {
                         if (formState !== "loading") e.currentTarget.style.background = "#5C1E1E";

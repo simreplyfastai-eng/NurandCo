@@ -45,7 +45,7 @@ export default function FacesGallery() {
     <section
       style={{
         padding: "96px 0",
-        background: "#F5F0EB",
+        background: "var(--brand-bg-alt)",
         position: "relative",
         overflow: "hidden",
       }}
@@ -64,16 +64,16 @@ export default function FacesGallery() {
         >
           {/* Eyebrow */}
           <div style={{ display: "flex", alignItems: "center", gap: 14, justifyContent: "center", marginBottom: 16 }}>
-            <div style={{ height: 1, width: 32, background: "#C9A96E", opacity: 0.5 }} />
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Gallery</span>
-            <div style={{ height: 1, width: 32, background: "#C9A96E", opacity: 0.5 }} />
+            <div style={{ height: 1, width: 32, background: "var(--brand-accent)", opacity: 0.5 }} />
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>Gallery</span>
+            <div style={{ height: 1, width: 32, background: "var(--brand-accent)", opacity: 0.5 }} />
           </div>
 
           <h2 style={{
             fontFamily: "'Cormorant Garamond', serif",
             fontSize: "clamp(2rem, 5vw, 3.2rem)",
             fontWeight: 600,
-            color: "#3D3D3D",
+            color: "var(--brand-text)",
             margin: "0 0 10px",
             lineHeight: 1.15,
           }}>
@@ -84,7 +84,7 @@ export default function FacesGallery() {
             fontFamily: "'Cormorant Garamond', serif",
             fontStyle: "italic",
             fontSize: "clamp(1rem, 2vw, 1.2rem)",
-            color: "#C9A96E",
+            color: "var(--brand-accent)",
             margin: 0,
           }}>
             Real people. Real results. Every client is unique.
@@ -120,7 +120,7 @@ export default function FacesGallery() {
           position: "absolute",
           left: 0, top: 0, bottom: 0,
           width: 120,
-          background: "linear-gradient(90deg, #F5F0EB, transparent)",
+          background: "linear-gradient(90deg, var(--brand-bg-alt), transparent)",
           zIndex: 2,
           pointerEvents: "none",
         }} />
@@ -128,7 +128,7 @@ export default function FacesGallery() {
           position: "absolute",
           right: 0, top: 0, bottom: 0,
           width: 120,
-          background: "linear-gradient(270deg, #F5F0EB, transparent)",
+          background: "linear-gradient(270deg, var(--brand-bg-alt), transparent)",
           zIndex: 2,
           pointerEvents: "none",
         }} />

@@ -47,15 +47,15 @@ function ReviewCard({ r }: { r: typeof reviews[number] }) {
     >
       <div style={{ display: "flex", gap: 2, marginBottom: 16 }}>
         {Array.from({ length: 5 }).map((_, si) => (
-          <Star key={si} size={13} fill="#C9A96E" color="#C9A96E" />
+          <Star key={si} size={13} fill="var(--brand-accent)" color="var(--brand-accent)" />
         ))}
       </div>
-      <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1rem", color: "#3D3D3D", lineHeight: 1.7, margin: "0 0 20px" }}>
+      <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1rem", color: "var(--brand-text)", lineHeight: 1.7, margin: "0 0 20px" }}>
         "{r.quote}"
       </p>
       <div>
-        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "0.95rem", color: "#5C1A1A" }}>{r.name}</div>
-        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "#C9A96E", marginTop: 2 }}>{r.location}</div>
+        <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "0.95rem", color: "var(--brand-primary)" }}>{r.name}</div>
+        <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "var(--brand-accent)", marginTop: 2 }}>{r.location}</div>
       </div>
     </div>
   );
@@ -65,7 +65,7 @@ export default function Reviews() {
   const doubled = [...reviews, ...reviews];
 
   return (
-    <section id="reviews" style={{ background: "#F5F0EB", padding: "100px 0", overflow: "hidden" }}>
+    <section id="reviews" style={{ background: "var(--brand-bg-alt)", padding: "100px 0", overflow: "hidden" }}>
       <style>{`
         @keyframes marquee-scroll {
           0%   { transform: translateX(0); }
@@ -92,11 +92,11 @@ export default function Reviews() {
           style={{ textAlign: "center", marginBottom: 48 }}
         >
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 16 }}>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Client Love</span>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>Client Love</span>
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
           </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: 0 }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 5vw, 3.2rem)", fontWeight: 400, color: "var(--brand-primary)", margin: 0 }}>
             What Our Clients Say
           </h2>
         </motion.div>

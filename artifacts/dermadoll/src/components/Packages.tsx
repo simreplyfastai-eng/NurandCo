@@ -59,9 +59,9 @@ const packages: Package[] = [
 function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
-      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
+      <div style={{ height: 1, width: 28, background: "var(--brand-accent)", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "var(--brand-accent)", opacity: 0.5 }} />
     </div>
   );
 }
@@ -71,7 +71,7 @@ export default function Packages() {
   const [current, setCurrent] = useState(1);
 
   return (
-    <section id="packages" style={{ background: "#F5F0EB", padding: "100px 0" }}>
+    <section id="packages" style={{ background: "var(--brand-bg-alt)", padding: "100px 0" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 24px" }}>
 
         <motion.div
@@ -82,10 +82,10 @@ export default function Packages() {
           style={{ textAlign: "center", marginBottom: 64 }}
         >
           <Eyebrow label="PACKAGES" />
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "#3D3D3D", margin: "0 0 12px" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 600, color: "var(--brand-text)", margin: "0 0 12px" }}>
             Treatment Packages
           </h2>
-          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "#C9A96E", margin: 0 }}>
+          <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(1rem,2vw,1.2rem)", color: "var(--brand-accent)", margin: 0 }}>
             Save more when you combine.
           </p>
         </motion.div>
@@ -100,8 +100,8 @@ export default function Packages() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.12 }}
               style={{
-                background: "#F5F0EB",
-                border: pkg.popular ? "2px solid #C9A96E" : "1px solid #E2DDD5",
+                background: "var(--brand-bg-alt)",
+                border: pkg.popular ? "2px solid var(--brand-accent)" : "1px solid #E2DDD5",
                 borderRadius: 2,
                 padding: "36px 28px",
                 display: "flex",
@@ -115,8 +115,8 @@ export default function Packages() {
                   top: -14,
                   left: "50%",
                   transform: "translateX(-50%)",
-                  background: "#C9A96E",
-                  color: "#3D3D3D",
+                  background: "var(--brand-accent)",
+                  color: "var(--brand-text)",
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 9,
                   letterSpacing: "2px",
@@ -133,7 +133,7 @@ export default function Packages() {
                 fontSize: 9,
                 letterSpacing: "2.5px",
                 textTransform: "uppercase",
-                color: "#C9A96E",
+                color: "var(--brand-accent)",
                 marginBottom: 20,
               }}>{pkg.badge}</div>
 
@@ -141,7 +141,7 @@ export default function Packages() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: "clamp(2rem,4vw,2.6rem)",
                 fontWeight: 600,
-                color: "#3D3D3D",
+                color: "var(--brand-text)",
                 lineHeight: 1,
                 marginBottom: 4,
               }}>{pkg.price}</div>
@@ -150,7 +150,7 @@ export default function Packages() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontSize: "1.2rem",
                 fontWeight: 600,
-                color: "#3D3D3D",
+                color: "var(--brand-text)",
                 marginBottom: 6,
               }}>{pkg.name}</div>
 
@@ -158,7 +158,7 @@ export default function Packages() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontStyle: "italic",
                 fontSize: "1rem",
-                color: "#C9A96E",
+                color: "var(--brand-accent)",
                 marginBottom: 24,
               }}>{pkg.tagline}</div>
 
@@ -173,7 +173,7 @@ export default function Packages() {
                     color: "#737373",
                     marginBottom: 8,
                   }}>
-                    <span style={{ color: "#C9A96E", fontSize: 10 }}>✦</span>
+                    <span style={{ color: "var(--brand-accent)", fontSize: 10 }}>✦</span>
                     {item}
                   </li>
                 ))}
@@ -191,9 +191,9 @@ export default function Packages() {
               <button
                 onClick={() => setConsultOpen(true)}
                 style={{
-                  background: pkg.popular ? "#3D3D3D" : "transparent",
-                  border: "1px solid #C9A96E",
-                  color: pkg.popular ? "#F5F0EB" : "#3D3D3D",
+                  background: pkg.popular ? "var(--brand-text)" : "transparent",
+                  border: "1px solid var(--brand-accent)",
+                  color: pkg.popular ? "var(--brand-bg-alt)" : "var(--brand-text)",
                   fontFamily: "'Inter', sans-serif",
                   fontSize: 11,
                   letterSpacing: "2px",
@@ -204,12 +204,12 @@ export default function Packages() {
                   transition: "all 0.2s",
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.background = "#C9A96E";
-                  e.currentTarget.style.color = "#3D3D3D";
+                  e.currentTarget.style.background = "var(--brand-accent)";
+                  e.currentTarget.style.color = "var(--brand-text)";
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.background = pkg.popular ? "#3D3D3D" : "transparent";
-                  e.currentTarget.style.color = pkg.popular ? "#F5F0EB" : "#3D3D3D";
+                  e.currentTarget.style.background = pkg.popular ? "var(--brand-text)" : "transparent";
+                  e.currentTarget.style.color = pkg.popular ? "var(--brand-bg-alt)" : "var(--brand-text)";
                 }}
               >
                 Book Now
@@ -223,7 +223,7 @@ export default function Packages() {
           fontFamily: "'Cormorant Garamond', serif",
           fontStyle: "italic",
           fontSize: 14,
-          color: "#C9A96E",
+          color: "var(--brand-accent)",
           marginTop: 36,
           marginBottom: 0,
         }}>

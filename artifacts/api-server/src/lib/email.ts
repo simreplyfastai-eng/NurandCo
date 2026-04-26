@@ -131,7 +131,7 @@ function buildEmail(content: string, subject: string): string {
     <tr>
       <td style="background:#5C1A1A;padding:28px 40px;border-radius:12px 12px 0 0;text-align:center;">
         <div style="font-family:Georgia,serif;font-size:26px;color:#FFFFFF;letter-spacing:0.12em;font-weight:normal;">[CLIENT]</div>
-        <div style="font-family:-apple-system,Arial,sans-serif;font-size:10px;color:#C9A96E;letter-spacing:0.28em;margin-top:2px;">BEAUTY</div>
+        <div style="font-family:-apple-system,Arial,sans-serif;font-size:10px;color:#C9A96E;letter-spacing:0.28em;margin-top:2px;">[CLIENT_TYPE]</div>
       </td>
     </tr>
     </table>

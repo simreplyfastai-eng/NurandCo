@@ -4,9 +4,9 @@ import { useState } from "react";
 function Eyebrow({ label }: { label: string }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
-      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>{label}</span>
-      <div style={{ height: 1, width: 28, background: "#C9A96E", opacity: 0.5 }} />
+      <div style={{ height: 1, width: 28, background: "var(--brand-accent)", opacity: 0.5 }} />
+      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>{label}</span>
+      <div style={{ height: 1, width: 28, background: "var(--brand-accent)", opacity: 0.5 }} />
     </div>
   );
 }
@@ -16,10 +16,10 @@ const inputStyle: React.CSSProperties = {
   padding: "14px 16px",
   border: "1px solid #E2DDD5",
   borderRadius: 0,
-  background: "#F5F0EB",
+  background: "var(--brand-bg-alt)",
   fontFamily: "'Inter', sans-serif",
   fontSize: 14,
-  color: "#3D3D3D",
+  color: "var(--brand-text)",
   outline: "none",
   boxSizing: "border-box",
   transition: "border-color 0.2s",
@@ -39,7 +39,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" style={{ background: "#F5F0EB", padding: "100px 0", position: "relative", overflow: "hidden" }}>
+    <section id="contact" style={{ background: "var(--brand-bg-alt)", padding: "100px 0", position: "relative", overflow: "hidden" }}>
 
       {/* Decorative background layer */}
       {/* Large faint "@" watermark, right side */}
@@ -77,7 +77,7 @@ export default function Contact() {
         <div key={i} aria-hidden="true" style={{
           position: "absolute", ...(pos as any),
           fontFamily: "'Cormorant Garamond', serif",
-          fontSize: pos.size, color: "#C9A96E", opacity: pos.opacity,
+          fontSize: pos.size, color: "var(--brand-accent)", opacity: pos.opacity,
           pointerEvents: "none", userSelect: "none",
         }}>✦</div>
       ))}
@@ -113,7 +113,7 @@ export default function Contact() {
             transition={{ duration: 0.6 }}
           >
             <Eyebrow label="CONTACT" />
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 600, color: "#3D3D3D", margin: "0 0 20px" }}>
+            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "clamp(2rem,4vw,3rem)", fontWeight: 600, color: "var(--brand-text)", margin: "0 0 20px" }}>
               Get In Touch
             </h2>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 40px" }}>
@@ -133,7 +133,7 @@ export default function Contact() {
                       href={item.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#C9A96E", textDecoration: "none" }}
+                      style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "var(--brand-accent)", textDecoration: "none" }}
                     >
                       {item.text}
                     </a>
@@ -155,12 +155,12 @@ export default function Contact() {
             {sent ? (
               <div style={{
                 padding: "48px 32px",
-                background: "#F5F0EB",
+                background: "var(--brand-bg-alt)",
                 border: "1px solid #E2DDD5",
                 textAlign: "center",
               }}>
                 <div style={{ fontSize: 32, marginBottom: 16 }}>✦</div>
-                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.8rem", color: "#3D3D3D", margin: "0 0 10px" }}>
+                <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.8rem", color: "var(--brand-text)", margin: "0 0 10px" }}>
                   Message Received
                 </h3>
                 <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", margin: 0 }}>
@@ -179,7 +179,7 @@ export default function Contact() {
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
                     style={inputStyle}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#C9A96E"}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "var(--brand-accent)"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "#E2DDD5"}
                     placeholder="Your name"
                   />
@@ -194,7 +194,7 @@ export default function Contact() {
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
                     style={inputStyle}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#C9A96E"}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "var(--brand-accent)"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "#E2DDD5"}
                     placeholder="your@email.com"
                   />
@@ -209,7 +209,7 @@ export default function Contact() {
                     value={form.message}
                     onChange={(e) => setForm({ ...form, message: e.target.value })}
                     style={{ ...inputStyle, resize: "none" }}
-                    onFocus={(e) => e.currentTarget.style.borderColor = "#C9A96E"}
+                    onFocus={(e) => e.currentTarget.style.borderColor = "var(--brand-accent)"}
                     onBlur={(e) => e.currentTarget.style.borderColor = "#E2DDD5"}
                     placeholder="How can we help you?"
                   />
@@ -218,9 +218,9 @@ export default function Contact() {
                   type="submit"
                   disabled={sending}
                   style={{
-                    background: "#C9A96E",
-                    border: "1px solid #C9A96E",
-                    color: "#3D3D3D",
+                    background: "var(--brand-accent)",
+                    border: "1px solid var(--brand-accent)",
+                    color: "var(--brand-text)",
                     fontFamily: "'Inter', sans-serif",
                     fontSize: 11,
                     letterSpacing: "2px",

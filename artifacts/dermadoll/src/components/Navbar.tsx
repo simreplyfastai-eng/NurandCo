@@ -34,16 +34,16 @@ export default function Navbar() {
     <>
       <nav
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "py-3 shadow-sm" : "py-4"}`}
-        style={{ background: "#F5F0EB", borderBottom: "1px solid #E2DDD5" }}
+        style={{ background: "var(--brand-bg-alt)", borderBottom: "1px solid #E2DDD5" }}
       >
         <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
 
           <a href="#" onClick={(e) => scrollTo(e, "#")} style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 2, lineHeight: 1 }}>
-            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, letterSpacing: "0.01em", color: "#5C1A1A", lineHeight: 1 }}>
+            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, letterSpacing: "0.01em", color: "var(--brand-primary)", lineHeight: 1 }}>
               [CLIENT]
             </span>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 400, color: "#C9A96E", lineHeight: 1 }}>
-              BEAUTY
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 400, color: "var(--brand-accent)", lineHeight: 1 }}>
+              [CLIENT_TYPE]
             </span>
           </a>
 
@@ -53,9 +53,9 @@ export default function Navbar() {
                 key={link.name}
                 href={link.href}
                 onClick={(e) => scrollTo(e, link.href)}
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.18em", fontWeight: 400, color: "#3D3D3D", textDecoration: "none", transition: "color 0.2s" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "#5C1A1A")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "#3D3D3D")}
+                style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.18em", fontWeight: 400, color: "var(--brand-text)", textDecoration: "none", transition: "color 0.2s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--brand-primary)")}
+                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--brand-text)")}
               >
                 {link.name}
               </a>
@@ -64,18 +64,18 @@ export default function Navbar() {
               href={`${import.meta.env.BASE_URL}book`}
               style={{
                 fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.18em", fontWeight: 400,
-                color: "#5C1A1A", border: "1px solid #5C1A1A", padding: "10px 20px",
+                color: "var(--brand-primary)", border: "1px solid var(--brand-primary)", padding: "10px 20px",
                 textDecoration: "none", textTransform: "uppercase" as const, transition: "all 0.2s",
               }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "#5C1A1A"; e.currentTarget.style.color = "#F5F0EB"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#5C1A1A"; }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-bg-alt)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-primary)"; }}
             >
               BOOK NOW
             </a>
             <button
               onClick={goToPortal}
               title="Admin"
-              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, color: "#C9A96E", opacity: 0.5, transition: "opacity 0.2s", display: "flex", alignItems: "center" }}
+              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, color: "var(--brand-accent)", opacity: 0.5, transition: "opacity 0.2s", display: "flex", alignItems: "center" }}
               onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = "1")}
               onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = "0.5")}
             >
@@ -88,7 +88,7 @@ export default function Navbar() {
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             style={{ background: "none", border: "none", cursor: "pointer", padding: 8 }}
           >
-            {isMobileMenuOpen ? <X size={24} color="#5C1A1A" /> : <Menu size={24} color="#5C1A1A" />}
+            {isMobileMenuOpen ? <X size={24} color="var(--brand-primary)" /> : <Menu size={24} color="var(--brand-primary)" />}
           </button>
         </div>
       </nav>
@@ -100,7 +100,7 @@ export default function Navbar() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "-100%" }}
             transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            style={{ position: "fixed", inset: 0, zIndex: 40, background: "#F5F0EB", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 32 }}
+            style={{ position: "fixed", inset: 0, zIndex: 40, background: "var(--brand-bg-alt)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 32 }}
           >
             {navLinks.map((link, i) => (
               <motion.a
@@ -110,7 +110,7 @@ export default function Navbar() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.08 + i * 0.06 }}
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, letterSpacing: "0.3em", color: "#3D3D3D", textDecoration: "none" }}
+                style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, letterSpacing: "0.3em", color: "var(--brand-text)", textDecoration: "none" }}
               >
                 {link.name}
               </motion.a>
@@ -122,7 +122,7 @@ export default function Navbar() {
               transition={{ delay: 0.28 }}
               style={{
                 fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.18em",
-                color: "#5C1A1A", border: "1px solid #5C1A1A", padding: "12px 28px",
+                color: "var(--brand-primary)", border: "1px solid var(--brand-primary)", padding: "12px 28px",
                 textDecoration: "none", textTransform: "uppercase" as const,
               }}
             >
@@ -137,7 +137,7 @@ export default function Navbar() {
                 background: "none", border: "none", cursor: "pointer",
                 display: "flex", alignItems: "center", gap: 8,
                 fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px",
-                color: "#C9A96E", textTransform: "uppercase",
+                color: "var(--brand-accent)", textTransform: "uppercase",
               }}
             >
               <Lock size={12} />

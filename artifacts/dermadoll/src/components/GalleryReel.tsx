@@ -152,7 +152,7 @@ function InfiniteRow({ cards, direction }: { cards: Card[]; direction: "ltr" | "
             style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
             <motion.div initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
               onClick={(e) => e.stopPropagation()}
-              style={{ position: "relative", maxWidth: "min(90vw, 800px)", maxHeight: "90vh", border: "2px solid #C9A96E", overflow: "hidden" }}>
+              style={{ position: "relative", maxWidth: "min(90vw, 800px)", maxHeight: "90vh", border: "2px solid var(--brand-accent)", overflow: "hidden" }}>
               <img src={lightbox} alt="Result" style={{ display: "block", width: "100%", maxHeight: "90vh", objectFit: "contain" }} />
               <button onClick={() => setLightbox(null)}
                 style={{ position: "absolute", top: 12, right: 12, width: 36, height: 36, background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -185,18 +185,18 @@ export default function GalleryReel() {
   const row2 = cards.slice(mid);
 
   return (
-    <section id="results" style={{ padding: "100px 0 90px", background: "#F5F0EB", overflow: "hidden" }}>
+    <section id="results" style={{ padding: "100px 0 90px", background: "var(--brand-bg-alt)", overflow: "hidden" }}>
       <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 32px", marginBottom: 52 }}>
         <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>Real Results</span>
-            <div style={{ height: 1, width: 28, background: "#C9A96E" }} />
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>Real Results</span>
+            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
           </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px", textAlign: "center" }}>
+          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 8px", textAlign: "center" }}>
             Transformations & Treatments
           </h2>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#C9A96E", textAlign: "center", margin: 0 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "var(--brand-accent)", textAlign: "center", margin: 0 }}>
             Natural. Tailored. Uniquely yours.
           </p>
         </motion.div>
@@ -206,7 +206,7 @@ export default function GalleryReel() {
       {row2.length > 0 && <InfiniteRow cards={row2} direction="rtl" />}
 
       <div style={{ textAlign: "center", marginTop: 28 }}>
-        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "#5C1A1A" }}>
+        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--brand-primary)" }}>
           Client consent obtained · Results may vary
         </span>
       </div>

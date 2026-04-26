@@ -18,7 +18,7 @@ export default function SectionDivider() {
       <div style={{
         flex: 1,
         height: 1,
-        background: "linear-gradient(90deg, transparent, #3D3D3D)",
+        background: "linear-gradient(90deg, transparent, var(--brand-text))",
         opacity: 0.18,
       }} />
 
@@ -26,7 +26,7 @@ export default function SectionDivider() {
       <div style={{
         width: 18,
         height: 1,
-        background: "#C9A96E",
+        background: "var(--brand-accent)",
         opacity: 0.22,
       }} />
 
@@ -34,7 +34,7 @@ export default function SectionDivider() {
       <span style={{
         fontFamily: "'Cormorant Garamond', serif",
         fontSize: 13,
-        color: "#C9A96E",
+        color: "var(--brand-accent)",
         opacity: 0.7,
         lineHeight: 1,
         letterSpacing: 4,
@@ -47,7 +47,7 @@ export default function SectionDivider() {
       <div style={{
         width: 18,
         height: 1,
-        background: "#C9A96E",
+        background: "var(--brand-accent)",
         opacity: 0.22,
       }} />
 
@@ -55,7 +55,7 @@ export default function SectionDivider() {
       <div style={{
         flex: 1,
         height: 1,
-        background: "linear-gradient(270deg, transparent, #3D3D3D)",
+        background: "linear-gradient(270deg, transparent, var(--brand-text))",
         opacity: 0.18,
       }} />
     </div>

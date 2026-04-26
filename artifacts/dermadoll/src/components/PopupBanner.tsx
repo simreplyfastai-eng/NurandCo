@@ -70,19 +70,19 @@ export default function PopupBanner() {
               position: "relative", flexShrink: 0,
             }}
           >
-            <div style={{ position: "absolute", top: -40, right: -40, width: 180, height: 180, borderRadius: "50%", background: "#C9A96E", filter: "blur(60px)", opacity: 0.25, pointerEvents: "none", zIndex: 0 }} />
+            <div style={{ position: "absolute", top: -40, right: -40, width: 180, height: 180, borderRadius: "50%", background: "var(--brand-accent)", filter: "blur(60px)", opacity: 0.25, pointerEvents: "none", zIndex: 0 }} />
             <div style={{ position: "absolute", bottom: -30, left: -30, width: 140, height: 140, borderRadius: "50%", background: "#f0d898", filter: "blur(60px)", opacity: 0.25, pointerEvents: "none", zIndex: 0 }} />
 
             <button
               onClick={close}
               aria-label="Close"
-              style={{ position: "absolute", top: 16, right: 20, fontSize: 22, color: "#C9A96E", background: "none", border: "none", cursor: "pointer", zIndex: 1, lineHeight: 1 }}
+              style={{ position: "absolute", top: 16, right: 20, fontSize: 22, color: "var(--brand-accent)", background: "none", border: "none", cursor: "pointer", zIndex: 1, lineHeight: 1 }}
             >
               ×
             </button>
 
             <div style={{ position: "relative", zIndex: 1 }}>
-              <div style={{ display: "inline-block", background: "rgba(201,169,110,0.15)", border: "1px solid rgba(201,169,110,0.4)", color: "#C9A96E", fontFamily: "Inter, sans-serif", fontSize: 11, letterSpacing: "2px", borderRadius: 20, padding: "5px 14px" }}>
+              <div style={{ display: "inline-block", background: "rgba(201,169,110,0.15)", border: "1px solid rgba(201,169,110,0.4)", color: "var(--brand-accent)", fontFamily: "Inter, sans-serif", fontSize: 11, letterSpacing: "2px", borderRadius: 20, padding: "5px 14px" }}>
                 LIMITED AVAILABILITY
               </div>
 
@@ -94,16 +94,16 @@ export default function PopupBanner() {
                 Spaces fill up fast. Secure your appointment today and receive confirmation within minutes.
               </p>
 
-              <div style={{ width: 50, height: 1, background: "#C9A96E", margin: "20px auto" }} />
+              <div style={{ width: 50, height: 1, background: "var(--brand-accent)", margin: "20px auto" }} />
 
-              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "#C9A96E", fontStyle: "italic", margin: 0 }}>
+              <p style={{ fontFamily: "Inter, sans-serif", fontSize: 13, color: "var(--brand-accent)", fontStyle: "italic", margin: 0 }}>
                 ⏰ Next available: {nextSlot}
               </p>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 24 }}>
                 <button
                   onClick={bookNow}
-                  style={{ background: "#C9A96E", color: "#000", fontFamily: "Inter, sans-serif", fontSize: 14, fontWeight: 700, padding: 14, borderRadius: 30, border: "none", cursor: "pointer", transition: "all 0.15s", width: "100%" }}
+                  style={{ background: "var(--brand-accent)", color: "#000", fontFamily: "Inter, sans-serif", fontSize: 14, fontWeight: 700, padding: 14, borderRadius: 30, border: "none", cursor: "pointer", transition: "all 0.15s", width: "100%" }}
                   onMouseEnter={(e) => (e.currentTarget.style.opacity = "0.88")}
                   onMouseLeave={(e) => (e.currentTarget.style.opacity = "1")}
                 >
