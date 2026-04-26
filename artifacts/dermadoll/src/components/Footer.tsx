@@ -69,12 +69,12 @@ export default function Footer() {
             </p>
 
             <a
-              href="mailto:starrbeautyyltd@gmail.com"
+              href="mailto:[CLIENT_NAME]yltd@gmail.com"
               style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#737373", textDecoration: "none", letterSpacing: "0.04em", transition: "color 0.2s" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "#5C1A1A")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#737373")}
             >
-              starrbeautyyltd@gmail.com
+              [CLIENT_NAME]yltd@gmail.com
             </a>
           </div>
 
@@ -126,7 +126,7 @@ export default function Footer() {
         {/* ── Bottom bar ── */}
         <div className="footer-bottom">
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#C9A96E", margin: 0 }}>
-            © {year} StarrBeauty. All rights reserved.
+            © {year} [CLIENT_NAME]. All rights reserved.
           </p>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
             <span style={{ color: "#C9A96E" }}>Powered By </span>

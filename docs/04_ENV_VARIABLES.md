@@ -34,7 +34,7 @@ All secrets are stored in **Replit Secrets** — never in `.env` files committed
 | `PORT` | Assigned by Replit | Each artifact binds to this; do not hardcode | [SHARED] |
 | `NODE_ENV` | `development` | Set to `production` in Replit deployment; affects logging, cache headers | [SHARED] |
 | `REPLIT_DEV_DOMAIN` | Set by Replit | Used to dynamically build CORS allowlist in development | [SHARED] |
-| `PUBLIC_URL` | (empty) | Used by `lib/email.ts` for constructing form/confirmation links; set to `https://starrbeautyy.co.uk` in production | [CLIENT-SPECIFIC] |
+| `PUBLIC_URL` | (empty) | Used by `lib/email.ts` for constructing form/confirmation links; set to `https://[CLIENT_NAME]y.co.uk` in production | [CLIENT-SPECIFIC] |
 | `SESSION_HOURS` | `8` | JWT expiry in hours; configurable without code change | [SHARED] |
 | `TZ` | Set at startup in `index.ts` | Forces `Europe/London` timezone for all `new Date()` calls in the process | [SHARED] |
 
@@ -46,9 +46,9 @@ These values are hardcoded in source files and should be moved to environment va
 
 | Hardcoded value | Location | Recommended env var |
 |---|---|---|
-| `FROM = "StarrBeauty <hello@starrbeautyy.co.uk>"` | `artifacts/api-server/src/lib/email.ts` line 4 | `EMAIL_FROM` |
+| `FROM = "[CLIENT_NAME] <hello@[CLIENT_NAME]y.co.uk>"` | `artifacts/api-server/src/lib/email.ts` line 4 | `EMAIL_FROM` |
 | `+447701298985` (WhatsApp number in email templates) | `artifacts/api-server/src/lib/email.ts` | `WHATSAPP_NUMBER` (or use `dd_settings` KV — partially done) |
-| `https://starrbeautyy.co.uk` (CORS, ICS links) | `artifacts/api-server/src/app.ts` | `SITE_URL` (partially via `PUBLIC_URL`) |
+| `https://[CLIENT_NAME]y.co.uk` (CORS, ICS links) | `artifacts/api-server/src/app.ts` | `SITE_URL` (partially via `PUBLIC_URL`) |
 | `Hornchurch UUID / Marylebone UUID` | `artifacts/api-server/src/lib/seed.ts` | Should be derived from DB after location insert |
 | `BUILT_IN_TREATMENTS` array | `artifacts/api-server/src/routes/portal.ts` | Should be read from Supabase `treatments` table |
 

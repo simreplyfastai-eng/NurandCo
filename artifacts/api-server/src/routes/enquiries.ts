@@ -107,7 +107,7 @@ router.post("/enquiries", async (req, res) => {
 
     const enquiryId = (row?.id as string) ?? "";
     const locationLabel = COURSE_LOCATION_LABEL[course_name.trim()] ?? course_name.trim();
-    const adminEmail = process.env.ADMIN_EMAIL ?? "info@starrbeautyy.co.uk";
+    const adminEmail = process.env.ADMIN_EMAIL ?? "info@[CLIENT_NAME]y.co.uk";
 
     sendEnquiryEmails({
       adminEmail,

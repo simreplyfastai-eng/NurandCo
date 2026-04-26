@@ -1,13 +1,13 @@
 # 01 — Project Overview
 
 ## Project Name
-**StarrBeauty / Starr Aesthetics Clinic Platform**
+**[CLIENT_NAME] / Starr Aesthetics Clinic Platform**
 
 ## Client
-**Starr Aesthetics** (trading as StarrBeauty) — a two-location premium aesthetics clinic operated by Eva.
+**Starr Aesthetics** (trading as [CLIENT_NAME]) — a two-location premium aesthetics clinic operated by Eva.
 
 ## Live URL
-`https://starrbeautyy.co.uk`
+`https://[CLIENT_NAME]y.co.uk`
 
 ## Status
 **Live (deployed via Replit). In active development — Stripe deposit, Resend emails, and Google Calendar sync are wired; polish and feature additions ongoing.**
@@ -63,6 +63,6 @@ Built: early 2025. Last audited and updated: **April 2026**.
 |---|---|
 | Operator / owner | Eva |
 | Owner email | simrandeepssangha@icloud.com |
-| Storefront email | starrbeautyyltd@gmail.com |
+| Storefront email | [CLIENT_NAME]yltd@gmail.com |
 | Business phone / WhatsApp | +447701298985 |
-| Domain | starrbeautyy.co.uk |
+| Domain | [CLIENT_NAME]y.co.uk |

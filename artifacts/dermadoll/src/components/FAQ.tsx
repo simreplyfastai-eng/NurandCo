@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: "Which location should I choose?",
-    answer: "Both clinics offer the full StarrBeauty treatment menu. Hornchurch is our original Essex home clinic, perfect for those in Essex and East London. Marylebone is our new London clinic, ideal for those based in or near Central London.",
+    answer: "Both clinics offer the full [CLIENT_NAME] treatment menu. Hornchurch is our original Essex home clinic, perfect for those in Essex and East London. Marylebone is our new London clinic, ideal for those based in or near Central London.",
   },
   {
     question: "Does it hurt?",
@@ -29,7 +29,7 @@ const faqs = [
   },
   {
     question: "How do I book?",
-    answer: "Use the 'Book Now' button to select your treatment and preferred location. You can also message us on Instagram @StarrAestheticss, @StarrFacess or email starrbeautyyltd@gmail.com.",
+    answer: "Use the 'Book Now' button to select your treatment and preferred location. You can also message us on Instagram @StarrAestheticss, @StarrFacess or email [CLIENT_NAME]yltd@gmail.com.",
   },
   {
     question: "What should I do before my appointment?",

@@ -68,7 +68,7 @@ workspace/
 │   │       │   ├── Reviews.tsx              [CLIENT-SPECIFIC] ★ Client review testimonials (hardcoded copy)
 │   │       │   ├── Training.tsx             [CLIENT-SPECIFIC] ★ Training section; training-pathway.jpg; course enquiry form
 │   │       │   ├── FAQ.tsx                  [CLIENT-SPECIFIC] ★ FAQ copy (treatment-specific)
-│   │       │   ├── Contact.tsx              [CLIENT-SPECIFIC] ★ Contact details; links to starrbeautyyltd@gmail.com
+│   │       │   ├── Contact.tsx              [CLIENT-SPECIFIC] ★ Contact details; links to [CLIENT_NAME]yltd@gmail.com
 │   │       │   ├── Footer.tsx               [CLIENT-SPECIFIC] ★ Brand name "STARR BEAUTY", social handles, email, nav links
 │   │       │   ├── InstagramSection.tsx     [CLIENT-SPECIFIC] ★ Instagram embeds/links for Starr accounts
 │   │       │   ├── TrustTicker.tsx          [CORE]            Scrolling trust badge ticker
@@ -101,7 +101,7 @@ workspace/
 │   │   │
 │   │   └── src/
 │   │       ├── index.ts                     [CORE]            Server entry; sets TZ=Europe/London, binds to $PORT
-│   │       ├── app.ts                       [CLIENT-SPECIFIC] ★ CORS allowlist includes starrbeautyy.co.uk; CSP config
+│   │       ├── app.ts                       [CLIENT-SPECIFIC] ★ CORS allowlist includes [CLIENT_NAME]y.co.uk; CSP config
 │   │       ├── googleCalendar.ts            [CORE]            Google Calendar OAuth2, event CRUD, busy range reads
 │   │       │
 │   │       ├── routes/
@@ -129,7 +129,7 @@ workspace/
 │   │           ├── auth.ts                  [CORE]            requireAuth() middleware
 │   │           ├── seed.ts                  [CLIENT-SPECIFIC] ★ 77 Starr treatments; Hornchurch/Marylebone UUIDs
 │   │           ├── treatments.ts            [CLIENT-SPECIFIC] ★ Injectable keyword list; legacy TREATMENT_PRICES fallback
-│   │           ├── email.ts                 [CLIENT-SPECIFIC] ★ FROM address starrbeautyy.co.uk; WhatsApp number; email copy
+│   │           ├── email.ts                 [CLIENT-SPECIFIC] ★ FROM address [CLIENT_NAME]y.co.uk; WhatsApp number; email copy
 │   │           ├── tz.ts                    [CORE]            BST/GMT boundary helpers
 │   │           ├── sanitize.ts              [CORE]            XSS sanitisation helper
 │   │           ├── objectStorage.ts         [CORE]            GCS helper (upload/download/delete)
@@ -154,7 +154,7 @@ workspace/
 | `artifacts/dermadoll/public/portal.html` | Brand colours, BUILT_IN_TREATMENTS list, location UUIDs, Eva's details |
 | `artifacts/api-server/src/lib/seed.ts` | All 77 treatments, Hornchurch/Marylebone UUIDs, categories, prices |
 | `artifacts/api-server/src/lib/email.ts` | FROM address, WhatsApp number, booking copy |
-| `artifacts/api-server/src/app.ts` | CORS allowlist with starrbeautyy.co.uk |
+| `artifacts/api-server/src/app.ts` | CORS allowlist with [CLIENT_NAME]y.co.uk |
 | `artifacts/dermadoll/src/components/Footer.tsx` | "STARR BEAUTY", social handles, email |
 | `artifacts/dermadoll/src/components/Locations.tsx` | Clinic addresses, map links |
 | `artifacts/api-server/supabase-migration.sql` | Hornchurch/Marylebone addresses seeded into DB |

@@ -18,7 +18,7 @@ Before starting:
 
 ## STEP 1 — Fork the Replit project (15 min)
 
-1. In Replit, open this project (StarrBeauty).
+1. In Replit, open this project ([CLIENT_NAME]).
 2. Click the three-dot menu → **Fork**.
 3. Name the new Repl: `[ClientName]-platform` (e.g. `luminara-platform`).
 4. The fork creates a full copy of the codebase. All secrets from the original are NOT copied — the new Repl starts with an empty secrets vault.
@@ -108,15 +108,15 @@ Run these replacements across the entire codebase. Use your editor's "Find in Fi
 
 ```bash
 # Example using sed (run from workspace root):
-grep -r "starrbeautyy.co.uk" --include="*.ts" --include="*.tsx" --include="*.html" --include="*.xml" --include="*.txt" -l
+grep -r "[CLIENT_NAME]y.co.uk" --include="*.ts" --include="*.tsx" --include="*.html" --include="*.xml" --include="*.txt" -l
 ```
 
 | Replace | With |
 |---|---|
-| `starrbeautyy.co.uk` | `newclientdomain.co.uk` |
-| `StarrBeauty` | Client brand name |
-| `hello@starrbeautyy.co.uk` | `hello@newclientdomain.co.uk` (Resend FROM address) |
-| `starrbeautyyltd@gmail.com` | Client storefront email |
+| `[CLIENT_NAME]y.co.uk` | `newclientdomain.co.uk` |
+| `[CLIENT_NAME]` | Client brand name |
+| `hello@[CLIENT_NAME]y.co.uk` | `hello@newclientdomain.co.uk` (Resend FROM address) |
+| `[CLIENT_NAME]yltd@gmail.com` | Client storefront email |
 | `+447701298985` | Client WhatsApp number |
 
 ### File-by-file changes

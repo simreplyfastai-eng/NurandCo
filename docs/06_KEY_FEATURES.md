@@ -47,7 +47,7 @@
 
 **Step-by-step user flow:**
 
-1. Eva navigates to `https://starrbeautyy.co.uk/portal.html`.
+1. Eva navigates to `https://[CLIENT_NAME]y.co.uk/portal.html`.
 2. Login screen: email + password → `POST /api/auth/login` → JWT returned, stored in `localStorage` as `dd_token`.
 3. On every page load: `GET /api/auth/verify` validates token; 401 redirects to login.
 4. Location dropdown at top — switches active location; all API calls include `X-Location-Id` header.
@@ -161,7 +161,7 @@
 | `buildICSContent()` | Called by confirmation email | Generates RFC 5545 `.ics` file |
 | `buildGoogleCalendarUrl()` | Used in email templates | Generates "Add to Google Calendar" link |
 
-**From address:** `StarrBeauty <hello@starrbeautyy.co.uk>` (must be Resend-verified domain).
+**From address:** `[CLIENT_NAME] <hello@[CLIENT_NAME]y.co.uk>` (must be Resend-verified domain).
 
 **Known gap:** `sendFormsCompletedOwnerEmail()` is only called on consent form submission. If a client submits only the medical form and abandons, Eva receives no notification.
 
@@ -200,7 +200,7 @@
 
 **Flow:**
 1. After successful Stripe payment, API generates a 64-char hex token, inserts into `form_tokens` with 7-day expiry.
-2. `sendFormsLinkEmail()` sends link: `https://starrbeautyy.co.uk/forms.html?token=<hex>`.
+2. `sendFormsLinkEmail()` sends link: `https://[CLIENT_NAME]y.co.uk/forms.html?token=<hex>`.
 3. Client opens link → `GET /api/forms/check?token=<hex>` validates token, returns booking metadata.
 4. Client completes **medical questionnaire** → `POST /api/forms/medical` (token in body).
 5. Token validated (5 retries × 1s delay for Supabase eventual consistency).

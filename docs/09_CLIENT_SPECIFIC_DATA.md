@@ -8,14 +8,14 @@ This is the **search-and-replace checklist** for forking this project for a new 
 
 | Value | Where to find it | Notes |
 |---|---|---|
-| `StarrBeauty` | `index.html`, `Navbar.tsx`, `Footer.tsx`, `email.ts`, `portal.html`, `sitemap.xml`, JSON-LD | Brand name — replace everywhere |
+| `[CLIENT_NAME]` | `index.html`, `Navbar.tsx`, `Footer.tsx`, `email.ts`, `portal.html`, `sitemap.xml`, JSON-LD | Brand name — replace everywhere |
 | `Starr Aesthetics` | `PROJECT_SPEC.md`, JSON-LD, `About.tsx`, `Training.tsx` | Legal/trading name |
 | `Eva` | `About.tsx`, `Hero.tsx`, `Training.tsx`, email templates in `email.ts` | Operator name |
-| `starrbeautyy.co.uk` | `index.html`, `app.ts` (CORS), `email.ts`, `sitemap.xml`, `robots.txt`, `confirmed.html` | Domain — replace throughout |
-| `starrbeautyyltd@gmail.com` | `index.html` (JSON-LD), `Footer.tsx`, `Contact.tsx` | Storefront email |
+| `[CLIENT_NAME]y.co.uk` | `index.html`, `app.ts` (CORS), `email.ts`, `sitemap.xml`, `robots.txt`, `confirmed.html` | Domain — replace throughout |
+| `[CLIENT_NAME]yltd@gmail.com` | `index.html` (JSON-LD), `Footer.tsx`, `Contact.tsx` | Storefront email |
 | `simrandeepssangha@icloud.com` | `PROJECT_SPEC.md` only | Owner personal email — not in public codebase |
 | `+447701298985` | `index.html` (JSON-LD), `email.ts` (WhatsApp links + ICS) | Business / WhatsApp number |
-| `hello@starrbeautyy.co.uk` | `artifacts/api-server/src/lib/email.ts` line 4 (FROM address) | Resend sender address — must be a verified domain |
+| `hello@[CLIENT_NAME]y.co.uk` | `artifacts/api-server/src/lib/email.ts` line 4 (FROM address) | Resend sender address — must be a verified domain |
 | `https://aesthetix-systems.co.uk` | `Footer.tsx` ("Powered By AESTHETIX" link) | Agency backlink — keep or replace |
 
 ---
@@ -65,7 +65,7 @@ Then update every hardcoded UUID reference listed above.
 | `"NaturalèLips™"` | `index.html`, `Hero.tsx`, `Services.tsx` | Signature treatment name — replace with new client's hero treatment |
 | `"HORNCHURCH & MARYLEBONE"` | `Hero.tsx` | Location eyebrow text |
 | `"Essex & London"` | `Hero.tsx` | Location subheading |
-| `"Booked via: StarrBeauty website"` | `googleCalendar.ts` line 106 | Calendar event description |
+| `"Booked via: [CLIENT_NAME] website"` | `googleCalendar.ts` line 106 | Calendar event description |
 
 ---
 
@@ -131,8 +131,8 @@ Replace with new client's Supabase project ID and bucket path.
 
 ```typescript
 const allowedOrigins = [
-  'https://starrbeautyy.co.uk',
-  'https://www.starrbeautyy.co.uk',
+  'https://[CLIENT_NAME]y.co.uk',
+  'https://www.[CLIENT_NAME]y.co.uk',
   ...
 ];
 ```
@@ -146,7 +146,7 @@ Replace with new client's domain(s).
 **File:** `artifacts/api-server/src/lib/email.ts`
 
 ```typescript
-const FROM = "StarrBeauty <hello@starrbeautyy.co.uk>";   // line 4
+const FROM = "[CLIENT_NAME] <hello@[CLIENT_NAME]y.co.uk>";   // line 4
 // WhatsApp: +447701298985 (appears in email templates and ICS description)
 ```
 
@@ -157,14 +157,14 @@ const FROM = "StarrBeauty <hello@starrbeautyy.co.uk>";   // line 4
 **File:** `artifacts/dermadoll/public/sitemap.xml`
 
 ```xml
-<loc>https://starrbeautyy.co.uk/</loc>
-<loc>https://starrbeautyy.co.uk/book</loc>
+<loc>https://[CLIENT_NAME]y.co.uk/</loc>
+<loc>https://[CLIENT_NAME]y.co.uk/book</loc>
 ```
 
 **File:** `artifacts/dermadoll/public/robots.txt`
 
 ```
-Sitemap: https://starrbeautyy.co.uk/sitemap.xml
+Sitemap: https://[CLIENT_NAME]y.co.uk/sitemap.xml
 ```
 
 ---
@@ -175,8 +175,8 @@ Run these searches across the entire codebase when forking:
 
 | Search for | Replace with |
 |---|---|
-| `starrbeautyy.co.uk` | `newclientdomain.co.uk` |
-| `StarrBeauty` | `NewClientBrandName` |
+| `[CLIENT_NAME]y.co.uk` | `newclientdomain.co.uk` |
+| `[CLIENT_NAME]` | `NewClientBrandName` |
 | `Starr Aesthetics` | `New Client Legal Name` |
 | `starr` (in bucket paths) | `newclient` |
 | `tithmarxgkafwgqonhfb` | New Supabase project ID |
@@ -184,8 +184,8 @@ Run these searches across the entire codebase when forking:
 | `5b3d890a-bf6f-4e87-af43-5db0726a46ce` | New Marylebone/Location2 UUID |
 | `Hornchurch` | New Location 1 name |
 | `Marylebone` | New Location 2 name |
-| `hello@starrbeautyy.co.uk` | `hello@newclientdomain.co.uk` |
-| `starrbeautyyltd@gmail.com` | New client storefront email |
+| `hello@[CLIENT_NAME]y.co.uk` | `hello@newclientdomain.co.uk` |
+| `[CLIENT_NAME]yltd@gmail.com` | New client storefront email |
 | `+447701298985` | New client WhatsApp number |
 | `@StarrFacess` (and other handles) | New client social handles |
 | `Eva` | New client practitioner name |

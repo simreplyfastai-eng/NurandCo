@@ -179,5 +179,5 @@ To fully rebrand for a new client, change these files **in this order**:
 | 10 | `artifacts/dermadoll/src/components/ResultsVideos.tsx` | Supabase CDN URLs for new client's videos |
 | 11 | `artifacts/dermadoll/public/portal.html` | Brand colours at top of file, any hardcoded copy |
 | 12 | `artifacts/api-server/src/lib/email.ts` | FROM address, email copy, WhatsApp number |
-| 13 | `artifacts/api-server/src/app.ts` | CORS allowlist — replace `starrbeautyy.co.uk` |
+| 13 | `artifacts/api-server/src/app.ts` | CORS allowlist — replace `[CLIENT_NAME]y.co.uk` |
 | 14 | All `public/*.jpg` images | Replace with new client's photos |

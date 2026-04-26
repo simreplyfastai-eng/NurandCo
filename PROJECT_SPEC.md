@@ -1,9 +1,9 @@
 # PROJECT_SPEC.md
 ## Aesthetix Systems — Master Technical Reference
-### Starr Aesthetics / StarrBeauty Clinic Platform
+### Starr Aesthetics / [CLIENT_NAME] Clinic Platform
 
 > **Template reference document** for Aesthetix Systems multi-clinic deployments.
-> Supabase project: `tithmarxgkafwgqonhfb` · Domain: `starrbeautyy.co.uk`
+> Supabase project: `tithmarxgkafwgqonhfb` · Domain: `[CLIENT_NAME]y.co.uk`
 > Last audited: April 2026
 
 ---
@@ -33,12 +33,12 @@
 
 ## 1. Project Overview
 
-**Starr Aesthetics** (trading as StarrBeauty) is a two-location aesthetics clinic in the UK.
+**Starr Aesthetics** (trading as [CLIENT_NAME]) is a two-location aesthetics clinic in the UK.
 
 | Attribute | Value |
 |---|---|
-| Brand name | Starr Aesthetics / StarrBeauty |
-| Domain | `starrbeautyy.co.uk` |
+| Brand name | Starr Aesthetics / [CLIENT_NAME] |
+| Domain | `[CLIENT_NAME]y.co.uk` |
 | Locations | Hornchurch (Essex), Marylebone (London) |
 | Operator | Eva (sole proprietor) |
 | Palette | Burgundy `#5C1A1A` · Gold `#C9A96E` · Cream `#FAF7F4` |
@@ -604,7 +604,7 @@ Deposit amount is always read from the `treatments.deposit_amount` column when a
 
 ### Flow
 
-1. Client receives email with link: `https://starrbeautyy.co.uk/forms.html?token=<hex>`
+1. Client receives email with link: `https://[CLIENT_NAME]y.co.uk/forms.html?token=<hex>`
 2. `GET /api/forms/check?token=<hex>` — validates token, returns booking metadata (client name, treatment, date, time, location).
 3. Client completes **medical questionnaire** first: `POST /api/forms/medical`
    - Body: `{token, ...medicalFields}`
@@ -634,7 +634,7 @@ Deposit amount is always read from the `treatments.deposit_amount` column when a
 
 ## 10. Email System (Resend)
 
-All emails sent via the `resend` npm package. Sender address configured in `lib/email.ts` (typically `no-reply@starrbeautyy.co.uk` or a Resend verified domain).
+All emails sent via the `resend` npm package. Sender address configured in `lib/email.ts` (typically `no-reply@[CLIENT_NAME]y.co.uk` or a Resend verified domain).
 
 ### Email functions in `lib/email.ts`
 
@@ -720,7 +720,7 @@ All cron endpoints are under `GET /api/cron/*` and require either `X-Cron-Secret
 
 ## 13. Admin Portal (`portal.html`)
 
-A single-file vanilla JavaScript SPA (~6 000 lines) served as a static file from `artifacts/dermadoll/public/portal.html`. Accessible at `https://starrbeautyy.co.uk/portal.html`.
+A single-file vanilla JavaScript SPA (~6 000 lines) served as a static file from `artifacts/dermadoll/public/portal.html`. Accessible at `https://[CLIENT_NAME]y.co.uk/portal.html`.
 
 ### Sections / tabs
 
@@ -833,8 +833,8 @@ upgrade-insecure-requests
 ### CORS
 
 Allowed origins:
-- `https://starrbeautyy.co.uk`
-- `https://www.starrbeautyy.co.uk`
+- `https://[CLIENT_NAME]y.co.uk`
+- `https://www.[CLIENT_NAME]y.co.uk`
 - `http://localhost:3000`
 - `http://localhost:5173`
 - Replit dev domain (dynamic regex, development only)
@@ -1018,7 +1018,7 @@ Before deploying to production:
 - [ ] `GOOGLE_REDIRECT_URI` points to production domain
 - [ ] `SESSION_SECRET` set to a long random string
 - [ ] `CRON_SECRET` set; external cron service configured
-- [ ] Resend sender domain verified for `starrbeautyy.co.uk`
+- [ ] Resend sender domain verified for `[CLIENT_NAME]y.co.uk`
 - [ ] Google OAuth consent screen published (to avoid 7-day token expiry)
 - [ ] `ADMIN_EMAIL` and `ADMIN_PASSWORD` set to production values
 - [ ] GCS bucket permissions configured for the service account

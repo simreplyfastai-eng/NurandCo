@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>StarrBeauty — Admin Portal</title>
+<title>[CLIENT_NAME] — Admin Portal</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -782,7 +782,7 @@ select.form-input{background:var(--color-card)}
     </div>
     <div class="login-sub">Admin Portal</div>
     <label class="login-label">Email</label>
-    <input class="login-input" type="email" id="login-email" placeholder="admin@starrbeautyy.co.uk" autocomplete="email"/>
+    <input class="login-input" type="email" id="login-email" placeholder="admin@[CLIENT_NAME]y.co.uk" autocomplete="email"/>
     <label class="login-label">Password</label>
     <input class="login-input" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
     <button type="button" class="login-btn" onclick="doLogin()">Sign In</button>
@@ -1257,7 +1257,7 @@ select.form-input{background:var(--color-card)}
         <div class="settings-section">
           <div class="settings-section-header">Business Info</div>
           <div class="settings-body">
-            <div class="settings-row"><label>Clinic name</label><input type="text" id="s-clinic" value="StarrBeauty"/></div>
+            <div class="settings-row"><label>Clinic name</label><input type="text" id="s-clinic" value="[CLIENT_NAME]"/></div>
             <div class="settings-row"><label>Practitioner</label><input type="text" id="s-practitioner" value="Starr"/></div>
             <div class="settings-row"><label>Instagram</label><input type="text" id="s-instagram" value="@StarrAestheticss"/></div>
             <div class="settings-row"><label>WhatsApp</label><input type="text" id="s-whatsapp" placeholder="+44 7…"/></div>
@@ -1295,11 +1295,11 @@ select.form-input{background:var(--color-card)}
             </div>
             <div class="settings-field">
               <label>Confirmation Message</label>
-              <textarea id="s-confirm-msg" rows="3" style="resize:vertical">Thank you for booking with StarrBeauty. We'll be in touch to confirm your appointment shortly.</textarea>
+              <textarea id="s-confirm-msg" rows="3" style="resize:vertical">Thank you for booking with [CLIENT_NAME]. We'll be in touch to confirm your appointment shortly.</textarea>
             </div>
             <div class="settings-field">
               <label>Notify Email</label>
-              <input type="email" id="s-notify-email" placeholder="admin@starrbeautyy.co.uk"/>
+              <input type="email" id="s-notify-email" placeholder="admin@[CLIENT_NAME]y.co.uk"/>
             </div>
             <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--color-border)">
               <button class="btn-gold" onclick="saveBookingSettings()">Save Booking Settings</button>
@@ -4599,7 +4599,7 @@ function exportFinance(){
   b.forEach(x=>{txt+=`${x.date} | ${x.clientName} | ${x.treatment} | ${gbp(x.price)} | ${x.status}\n`;});
   const total=b.filter(x=>x.status!=='Cancelled').reduce((s,x)=>s+Number(x.price),0);
   txt+=`\n${'─'.repeat(40)}\nTotal: ${gbp(total)}`;
-  const a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(txt);a.download=`starrbeauty-finance-${months[m-1].toLowerCase()}-${y}.txt`;a.click();
+  const a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(txt);a.download=`[CLIENT_NAME]-finance-${months[m-1].toLowerCase()}-${y}.txt`;a.click();
 }
 
 // ═══════════════════════════════════════════════════
@@ -5361,7 +5361,7 @@ function exportData(){
   const b=getBookings();
   let txt='STARR BEAUTY — Bookings Export\n\nDate,Client,Treatment,Price,Deposit,Status\n';
   b.forEach(x=>{txt+=`${x.date},${x.clientName},${x.treatment},£${x.price},£${x.deposit},${x.status}\n`});
-  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(txt);a.download='starrbeauty-bookings.csv';a.click();
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(txt);a.download='[CLIENT_NAME]-bookings.csv';a.click();
 }
 
 // ═══════════════════════════════════════════════════

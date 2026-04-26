@@ -114,7 +114,7 @@
 | Service | Package | Role |
 |---|---|---|
 | **Resend** | `resend` ^6.10.0 | All transactional emails — booking confirmations, form links, reminders, owner notifications |
-| Sender | `hello@starrbeautyy.co.uk` | Must be a verified Resend domain |
+| Sender | `hello@[CLIENT_NAME]y.co.uk` | Must be a verified Resend domain |
 
 ---
 
@@ -124,7 +124,7 @@
 |---|---|---|
 | **Supabase** | Database + Storage CDN | Project `tithmarxgkafwgqonhfb`; RLS enabled |
 | **Stripe** | Deposit payments | Webhook endpoint registered at `/api/stripe/webhook` |
-| **Resend** | Transactional email | Domain `starrbeautyy.co.uk` must be DNS-verified |
+| **Resend** | Transactional email | Domain `[CLIENT_NAME]y.co.uk` must be DNS-verified |
 | **Google Calendar** | Two-way calendar sync | OAuth2 per location; app currently in **Testing mode** (7-day refresh token limit) |
 | **Google Cloud Storage** | Media file storage | Used for images/videos uploaded via admin portal |
 | **Klarna** | TODO: needs manual review — referenced in spec but not confirmed wired |

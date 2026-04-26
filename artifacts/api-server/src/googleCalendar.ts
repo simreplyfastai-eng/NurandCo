@@ -103,7 +103,7 @@ export async function createCalendarEvent(
       `============`,
       `${loc.address}`,
       ``,
-      `Booked via: StarrBeauty website`,
+      `Booked via: [CLIENT_NAME] website`,
     ].join('\n');
 
   } catch (err) {

@@ -51,7 +51,7 @@ export default function About() {
             </h2>
 
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
-              With over 6 years in beauty and a BA (Hons) in Education, Eva founded StarrBeauty with a singular vision, to enhance your natural beauty with precision, artistry and care.
+              With over 6 years in beauty and a BA (Hons) in Education, Eva founded [CLIENT_NAME] with a singular vision, to enhance your natural beauty with precision, artistry and care.
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 40px" }}>
               As the creator of the signature NaturalèLips™ technique, Eva combines clinical expertise with an educator's touch in every treatment she performs.
@@ -85,7 +85,7 @@ export default function About() {
           >
             <div style={{ aspectRatio: "3/4", overflow: "hidden", background: "#E8E2D9" }}>
               {practImage ? (
-                <img src={practImage} alt="Eva, Founder, StarrBeauty"
+                <img src={practImage} alt="Eva, Founder, [CLIENT_NAME]"
                   loading="lazy"
                   style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }} />
               ) : (

@@ -483,7 +483,7 @@ router.post("/forms/consent", async (req, res) => {
           .select("name, address")
           .eq("id", booking.location_id)
           .maybeSingle();
-        const locName = String(locRes.data?.name ?? "StarrBeauty");
+        const locName = String(locRes.data?.name ?? "[CLIENT_NAME]");
         const locAddr = String(locRes.data?.address ?? locName);
 
         // Fetch treatment duration + price
@@ -522,7 +522,7 @@ router.post("/forms/consent", async (req, res) => {
     }
 
     // Notify owner that forms are complete
-    const ownerEmail = process.env.ADMIN_EMAIL || "starrbeautyyltd@gmail.com";
+    const ownerEmail = process.env.ADMIN_EMAIL || "[CLIENT_NAME]yltd@gmail.com";
     sendFormsCompletedOwnerEmail({
       ownerEmail,
       clientName: String(booking.client_name ?? "Client"),

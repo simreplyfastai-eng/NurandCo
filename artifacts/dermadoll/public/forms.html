@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Pre-Appointment Forms — StarrBeauty</title>
+<title>Pre-Appointment Forms — [CLIENT_NAME]</title>
 <style>
 :root{
   --burgundy:#5C1A1A;
@@ -148,7 +148,7 @@ textarea{min-height:80px;resize:vertical;line-height:1.5}
 <body>
 
 <div class="hdr">
-  <div class="hdr-logo">StarrBeauty</div>
+  <div class="hdr-logo">[CLIENT_NAME]</div>
   <div class="hdr-sub">Pre-Appointment Forms</div>
 </div>
 
@@ -505,7 +505,7 @@ function renderConsent() {
       </div>
 
       <div class="declaration">
-        I, <strong>${escHtml(bk.client_name || '')}</strong>, consent to receive <strong>${escHtml(treatment)}</strong> at StarrBeauty on ${escHtml(formatDate(bk.date))}. I confirm I have read and agreed to the above statements.
+        I, <strong>${escHtml(bk.client_name || '')}</strong>, consent to receive <strong>${escHtml(treatment)}</strong> at [CLIENT_NAME] on ${escHtml(formatDate(bk.date))}. I confirm I have read and agreed to the above statements.
       </div>
 
       <div id="consent-error"></div>

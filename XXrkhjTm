@@ -33,4 +33,4 @@ channel = "stable-25_05"
 
 [userenv.shared]
 SUPABASE_URL = "https://tithmarxgkafwgqonhfb.supabase.co"
-PUBLIC_URL = "https://[CLIENT_DOMAIN]"
+PUBLIC_URL = "https://[CLIENT_NAME]y.co.uk"

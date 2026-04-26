@@ -124,7 +124,7 @@ export default function Contact() {
               {[
                 { icon: "📍", text: "Hornchurch / Marylebone" },
                 { icon: "📸", text: "@StarrAestheticss", href: "https://instagram.com/StarrAestheticss" },
-                { icon: "✉", text: "starrbeautyyltd@gmail.com", href: "mailto:starrbeautyyltd@gmail.com" },
+                { icon: "✉", text: "[CLIENT_NAME]yltd@gmail.com", href: "mailto:[CLIENT_NAME]yltd@gmail.com" },
               ].map((item) => (
                 <div key={item.text} style={{ display: "flex", alignItems: "center", gap: 14 }}>
                   <span style={{ fontSize: 18 }}>{item.icon}</span>

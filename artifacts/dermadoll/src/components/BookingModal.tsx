@@ -603,7 +603,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
 
   // ── Full-page success overlay ─────────────────────────────────────────────
   if (step === "success") {
-    const CLINIC_ADDRESS = "StarrBeauty, Hornchurch / Marylebone";
+    const CLINIC_ADDRESS = "[CLIENT_NAME], Hornchurch / Marylebone";
     const waMsg = encodeURIComponent(`Hi, I've just booked ${treatment.name} — I had a quick question about my appointment 😊`);
     const waUrl = `https://wa.me/${whatsapp || "447701298985"}?text=${waMsg}`;
 
@@ -625,14 +625,14 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
       const ics = [
         "BEGIN:VCALENDAR",
         "VERSION:2.0",
-        "PRODID:-//StarrBeauty//EN",
-        "X-WR-CALNAME:StarrBeauty",
+        "PRODID:-//[CLIENT_NAME]//EN",
+        "X-WR-CALNAME:[CLIENT_NAME]",
         "X-WR-TIMEZONE:Europe/London",
         "BEGIN:VEVENT",
         `DTSTART;TZID=Europe/London:${fmt(start)}`,
         `DTEND;TZID=Europe/London:${fmt(end)}`,
-        `SUMMARY:${treatment.name} at StarrBeauty`,
-        "LOCATION:StarrBeauty\\, Hornchurch / Marylebone",
+        `SUMMARY:${treatment.name} at [CLIENT_NAME]`,
+        "LOCATION:[CLIENT_NAME]\\, Hornchurch / Marylebone",
         `DESCRIPTION:Deposit paid £${deposit}\\, balance £${balance} due on arrival`,
         "END:VEVENT",
         "END:VCALENDAR",
@@ -640,7 +640,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
       const blob = new Blob([ics], { type: "text/calendar" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url; a.download = "starrbeauty-appointment.ics"; a.click();
+      a.href = url; a.download = "[CLIENT_NAME]-appointment.ics"; a.click();
       URL.revokeObjectURL(url);
     };
 
@@ -725,7 +725,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
               You're All Booked!
             </h1>
             <p style={{ fontFamily:"'Inter', sans-serif", fontSize:15, color:"#7a6a50", margin:0 }}>
-              Thank you for booking with StarrBeauty. We will be in touch shortly to confirm your appointment. ✨
+              Thank you for booking with [CLIENT_NAME]. We will be in touch shortly to confirm your appointment. ✨
             </p>
           </div>
 
@@ -753,7 +753,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
           <div style={{ ...glassCard, animation:"ddFadeUp 0.4s ease 0.5s both" }}>
             <div style={goldLabel}>Find Us</div>
             <div style={{ fontFamily:"'Cormorant Garamond', serif", fontSize:20, fontWeight:700, color:"#2a1f0e", marginBottom:4 }}>
-              StarrBeauty
+              [CLIENT_NAME]
             </div>
             <div style={{ fontFamily:"'Inter', sans-serif", fontSize:14, color:"#7a6a50", marginBottom:12 }}>Advanced Aesthetics Practitioner · Student Nurse</div>
             <div style={{ fontFamily:"'Inter', sans-serif", fontSize:15, color:"#2a1f0e", marginBottom:20, lineHeight:1.6 }}>
