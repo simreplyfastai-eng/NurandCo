@@ -1,0 +1,138 @@
+I'm building a Claude Project knowledge base for my agency Aesthetix Systems so I can fork this build for new clients efficiently. I need a complete documentation pack of THIS Replit project (StarrBeauty / Starr Aesthetics).
+
+Generate the following files inside a /docs/ folder at the root (create the folder if it doesn't exist).
+
+═══════════════════════════════════════════
+FILE 1: docs/01_PROJECT_OVERVIEW.md
+═══════════════════════════════════════════
+- Project name and what it is
+- Client name (Starr Aesthetics)
+- Live URL (starrbeautyy.co.uk)
+- High-level architecture summary (frontend, backend, database, services)
+- Major features delivered
+- Date built / last updated
+- Status (live, in-progress, etc)
+
+═══════════════════════════════════════════
+FILE 2: docs/02_TECH_STACK.md
+═══════════════════════════════════════════
+- Read package.json and list every dependency with its version
+- Group by category: Frontend / Backend / Database / Auth / Payments / Email / SMS / AI / Other
+- For each, write 1 line on what it does in this project
+- External services list: Supabase, Stripe, Resend, Google Calendar, Klarna (and any others)
+- Why this stack was chosen
+
+═══════════════════════════════════════════
+FILE 3: docs/03_FILE_STRUCTURE.md
+═══════════════════════════════════════════
+- Generate a tree of the entire project (excluding node_modules, .git, dist, build)
+- For each major file/folder, add a one-line description of its purpose
+- TAG each file as either:
+  [CORE] → stays the same across all client builds
+  [CLIENT-SPECIFIC] → must be changed per new client
+  [CONFIG] → environment / settings
+- Highlight files that contain hardcoded Starr-specific data
+
+═══════════════════════════════════════════
+FILE 4: docs/04_ENV_VARIABLES.md
+═══════════════════════════════════════════
+- List every environment variable the project uses
+- For each: name, what it does, which service it relates to
+- Mark each as [CLIENT-SPECIFIC] (gets swapped per build) or [SHARED]
+- DO NOT include actual values — names and descriptions only
+- Note any that are baked into code instead of env (these are bugs to fix)
+
+═══════════════════════════════════════════
+FILE 5: docs/05_SUPABASE_SCHEMA.sql
+═══════════════════════════════════════════
+- Full SQL dump of every table in the Supabase database
+- Include: CREATE TABLE statements, columns, types, constraints, foreign keys
+- All RLS (Row Level Security) policies — write them out as CREATE POLICY statements
+- All indexes
+- Any triggers or functions
+- Add SQL comments above each table explaining what it's for in plain English
+
+═══════════════════════════════════════════
+FILE 6: docs/06_KEY_FEATURES.md
+═══════════════════════════════════════════
+For each major feature, document:
+- What it does
+- File path(s) where the logic lives
+- Step-by-step user flow
+- Any quirks or known issues
+
+Cover at least:
+- Booking system flow (treatment selection → time → confirmation)
+- Admin portal (login, dashboard, bookings, treatments, settings)
+- Two-way Google Calendar sync (highlight where getGoogleCalendarBusyRanges helper lives in googleCalendar.ts)
+- Deposit collection flow via Stripe
+- Email automation flow via Resend
+- Multi-location handling (how Hornchurch vs Marylebone is differentiated)
+- Klarna integration
+
+═══════════════════════════════════════════
+FILE 7: docs/07_BRAND_TOKENS.md
+═══════════════════════════════════════════
+- All CSS variables / Tailwind tokens used for branding
+- Colour palette: bg #FAF7F4 (cream), burgundy #5C1E1E, gold #C9A96E
+- Font pairings (which fonts, where applied)
+- Logo file paths
+- Hero image / video file paths
+- Button styles, card styles, form styles
+- WHERE in the codebase these tokens are defined (the file path)
+- Map showing: change this file → entire site rebrands
+
+═══════════════════════════════════════════
+FILE 8: docs/08_KNOWN_ISSUES_AND_LESSONS.md
+═══════════════════════════════════════════
+- Any bugs found during build and how they were fixed
+- Workarounds applied
+- Critical lessons:
+  • Supabase times return HH:MM:SS (always slice 0,5)
+  • availability_settings needs UNIQUE constraint on (location_id, day_of_week)
+  • Only blocked_dates table exists (not blocked_slots)
+  • All protected API calls must use authHdr()
+  • Auth token key: fbn_token (localStorage)
+- Anything else you discover while documenting
+
+═══════════════════════════════════════════
+FILE 9: docs/09_CLIENT_SPECIFIC_DATA.md
+═══════════════════════════════════════════
+- Every hardcoded reference to Starr / Eva / Hornchurch / Marylebone
+- Location UUIDs (Hornchurch: ccb325d5-6b17-4218-b97d-1a1a0383410a, Marylebone: 5b3d890a-bf6f-4e87-af43-5db0726a46ce)
+- Brand strings, addresses, phone numbers, emails
+- Treatment seed data references
+- File paths where each hardcoded value lives
+- This becomes the "search and replace" checklist for forking
+
+═══════════════════════════════════════════
+FILE 10: docs/10_FORK_GUIDE.md
+═══════════════════════════════════════════
+Step-by-step guide for forking this project for a new client. Format:
+
+STEP 1 — [name] (estimated time)
+What to do, file paths, exact changes
+
+Cover:
+- Forking the Replit
+- Creating new Supabase project (and running 05_SUPABASE_SCHEMA.sql)
+- Updating environment variables
+- Replacing brand tokens (07_BRAND_TOKENS.md)
+- Replacing client-specific data (09_CLIENT_SPECIFIC_DATA.md)
+- Connecting new Stripe account
+- Connecting new Google Calendar OAuth
+- Connecting domain
+- Testing checklist before handover
+
+End with estimated total fork time if everything goes smoothly.
+
+═══════════════════════════════════════════
+DELIVERY:
+═══════════════════════════════════════════
+1. Generate ALL 10 files
+2. Be thorough — this is the source of truth for every future build
+3. Once complete, list each file with line count for completeness check
+4. If you can't find info for any section, write "TODO: needs manual review" rather than skipping
+5. Do NOT generate any code or modify the project — documentation only
+
+Begin.
