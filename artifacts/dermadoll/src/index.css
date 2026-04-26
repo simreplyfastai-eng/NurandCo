@@ -81,13 +81,13 @@
 
   /* [CLIENT_NAME] palette */
   /* TODO: replace per client */
-  --brand-primary: var(--brand-primary);        /* burgundy */
-  --brand-accent:  var(--brand-accent);        /* gold */
-  --brand-bg:      var(--brand-bg);        /* cream (email) */
-  --brand-bg-alt:  var(--brand-bg-alt);        /* warmer cream */
-  --brand-text:    var(--brand-text);        /* dark grey */
-  --background: 39 44% 97%;       /* var(--brand-bg-alt) cream */
-  --foreground: 35 100% 5%;       /* var(--brand-text) dark brown */
+  --brand-primary: #5C1A1A;        /* burgundy */
+  --brand-accent:  #C9A96E;        /* gold */
+  --brand-bg:      #FAF7F4;        /* cream (email bg) */
+  --brand-bg-alt:  #F5F0EB;        /* warmer cream */
+  --brand-text:    #3D3D3D;        /* dark grey */
+  --background: 39 44% 97%;       /* #F5F0EB cream */
+  --foreground: 35 100% 5%;       /* #3D3D3D dark brown */
   --border: 38 18% 86%;           /* #E2DDD5 */
 
   --card: 39 44% 97%;
