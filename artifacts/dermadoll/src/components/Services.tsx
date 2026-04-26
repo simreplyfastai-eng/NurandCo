@@ -5,8 +5,8 @@ import { ChevronUp, ChevronDown } from "lucide-react";
 const BASE = import.meta.env.BASE_URL;
 
 const LOCATION_IDS: Record<string, string> = {
-  hornchurch: "ccb325d5-6b17-4218-b97d-1a1a0383410a",
-  marylebone: "5b3d890a-bf6f-4e87-af43-5db0726a46ce",
+  hornchurch: "[LOCATION_1_UUID]",
+  marylebone: "[LOCATION_2_UUID]",
 };
 
 const CATEGORY_ORDER = [
@@ -62,13 +62,13 @@ function groupByCategory(treatments: ApiTreatment[]): CategoryGroup[] {
 }
 
 export default function Services() {
-  const [location, setLocation] = useState<"hornchurch" | "marylebone">("hornchurch");
+  const [location, setLocation] = useState<"[location-1-slug]" | "[location-2-slug]">("[location-1-slug]");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
   const [data, setData] = useState<Record<string, CategoryGroup[]>>({ hornchurch: [], marylebone: [] });
   const [loading, setLoading] = useState<Record<string, boolean>>({ hornchurch: true, marylebone: false });
   const [fetched, setFetched] = useState<Record<string, boolean>>({ hornchurch: false, marylebone: false });
 
-  const fetchLocation = async (loc: "hornchurch" | "marylebone") => {
+  const fetchLocation = async (loc: "[location-1-slug]" | "[location-2-slug]") => {
     if (fetched[loc]) return;
     setLoading((prev) => ({ ...prev, [loc]: true }));
     try {
@@ -86,9 +86,9 @@ export default function Services() {
     }
   };
 
-  useEffect(() => { fetchLocation("hornchurch"); }, []);
+  useEffect(() => { fetchLocation("[location-1-slug]"); }, []);
 
-  const handleTabClick = (loc: "hornchurch" | "marylebone") => {
+  const handleTabClick = (loc: "[location-1-slug]" | "[location-2-slug]") => {
     setLocation(loc);
     if (fetched[loc]) {
       setOpenGroups(new Set());
@@ -141,7 +141,7 @@ export default function Services() {
                 .svc-loc-btn { flex: 1 !important; }
               }
             `}</style>
-            {(["hornchurch", "marylebone"] as const).map((loc) => (
+            {(["[location-1-slug]", "[location-2-slug]"] as const).map((loc) => (
               <button
                 key={loc}
                 className="svc-loc-btn"
@@ -152,10 +152,10 @@ export default function Services() {
                   background: location === loc ? "#5C1A1A" : "transparent",
                   color: location === loc ? "#F5F0EB" : "#5C1A1A",
                   border: "1px solid #5C1A1A",
-                  marginRight: loc === "hornchurch" ? -1 : 0,
+                  marginRight: loc === "[location-1-slug]" ? -1 : 0,
                 }}
               >
-                {loc === "hornchurch" ? "[LOCATION_1]" : "[LOCATION_2]"}
+                {loc === "[location-1-slug]" ? "[LOCATION_1]" : "[LOCATION_2]"}
               </button>
             ))}
           </div>

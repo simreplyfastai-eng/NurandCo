@@ -4595,7 +4595,7 @@ function exportFinance(){
   const [y,m]=sel?sel.value.split('-').map(Number):[new Date().getFullYear(),new Date().getMonth()+1];
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
   const b=getBookings().filter(x=>{const d=new Date(x.date);return d.getFullYear()===y&&d.getMonth()+1===m;});
-  let txt=`STARR BEAUTY — Finance Export\n${months[m-1]} ${y}\n${'─'.repeat(40)}\n\n`;
+  let txt=`[CLIENT NAME] — Finance Export\n${months[m-1]} ${y}\n${'─'.repeat(40)}\n\n`;
   b.forEach(x=>{txt+=`${x.date} | ${x.clientName} | ${x.treatment} | ${gbp(x.price)} | ${x.status}\n`;});
   const total=b.filter(x=>x.status!=='Cancelled').reduce((s,x)=>s+Number(x.price),0);
   txt+=`\n${'─'.repeat(40)}\nTotal: ${gbp(total)}`;
@@ -5359,7 +5359,7 @@ function globalSearch(v){
 // ═══════════════════════════════════════════════════
 function exportData(){
   const b=getBookings();
-  let txt='STARR BEAUTY — Bookings Export\n\nDate,Client,Treatment,Price,Deposit,Status\n';
+  let txt='[CLIENT NAME] — Bookings Export\n\nDate,Client,Treatment,Price,Deposit,Status\n';
   b.forEach(x=>{txt+=`${x.date},${x.clientName},${x.treatment},£${x.price},£${x.deposit},${x.status}\n`});
   const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(txt);a.download='[CLIENT_NAME]-bookings.csv';a.click();
 }

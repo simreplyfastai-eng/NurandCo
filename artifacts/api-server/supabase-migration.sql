@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
--- STARR AESTHETICS — Supabase Migration
+-- [CLIENT NAME] — Supabase Migration
 -- Run this ONCE in your Supabase dashboard → SQL Editor
 -- ═══════════════════════════════════════════════════════════════════
 
@@ -61,12 +61,12 @@ CREATE POLICY IF NOT EXISTS "blocked_slots_anon_read"
 
 -- ── 4. Seed clinic locations ───────────────────────────────────────
 INSERT INTO locations (id, slug, name, address)
-SELECT gen_random_uuid(), 'hornchurch', '[LOCATION_1]', '[LOCATION_1], Essex RM11'
-WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = 'hornchurch');
+SELECT gen_random_uuid(), '[location-1-slug]', '[LOCATION_1]', '[LOCATION_1], Essex RM11'
+WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = '[location-1-slug]');
 
 INSERT INTO locations (id, slug, name, address)
-SELECT gen_random_uuid(), 'marylebone', '[LOCATION_2]', '[LOCATION_2], London W1G'
-WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = 'marylebone');
+SELECT gen_random_uuid(), '[location-2-slug]', '[LOCATION_2]', '[LOCATION_2], London W1G'
+WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = '[location-2-slug]');
 
 -- ── 4b. Medical forms table ────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS medical_forms (

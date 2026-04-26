@@ -47,7 +47,7 @@
 
 | Font | Weight / Style | Applied to |
 |---|---|---|
-| **Cormorant Garamond** | 300, 400, 600, 700 (+ italic variants) | All headings, logo "STARR", section titles, pull quotes |
+| **Cormorant Garamond** | 300, 400, 600, 700 (+ italic variants) | All headings, logo "[CLIENT]", section titles, pull quotes |
 | **Inter** | 300, 400, 500 | All body copy, labels, buttons, navigation links |
 
 ### Where fonts are loaded
@@ -74,7 +74,7 @@
 | Asset | Path | Notes |
 |---|---|---|
 | SVG favicon / logo | `artifacts/dermadoll/public/favicon.svg` | Used in browser tab and as base for in-app logo |
-| Logo text (wordmark) | Rendered in code — `artifacts/dermadoll/src/components/Navbar.tsx` and `Footer.tsx` | "STARR" in Cormorant Garamond 700, "BEAUTY" in Inter 400 with wide letter-spacing |
+| Logo text (wordmark) | Rendered in code — `artifacts/dermadoll/src/components/Navbar.tsx` and `Footer.tsx` | "[CLIENT]" in Cormorant Garamond 700, "BEAUTY" in Inter 400 with wide letter-spacing |
 
 **To rebrand logo:** Replace `favicon.svg` AND update the text in `Navbar.tsx` and `Footer.tsx`.
 

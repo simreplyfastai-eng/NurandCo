@@ -11,7 +11,7 @@ export interface TreatmentGroup {
   items: { subname: string; treatments: Treatment[] }[];
 }
 
-export const SERVICES: Record<"hornchurch" | "marylebone", TreatmentGroup[]> = {
+export const SERVICES: Record<"[location-1-slug]" | "[location-2-slug]", TreatmentGroup[]> = {
   hornchurch: [
     {
       group: "SIGNATURE TREATMENTS",
@@ -191,7 +191,7 @@ export const SERVICES: Record<"hornchurch" | "marylebone", TreatmentGroup[]> = {
 };
 
 export function findTreatment(locationSlug: string, treatmentId: string): Treatment | null {
-  const loc = SERVICES[locationSlug as "hornchurch" | "marylebone"];
+  const loc = SERVICES[locationSlug as "[location-1-slug]" | "[location-2-slug]"];
   if (!loc) return null;
   for (const group of loc) {
     for (const item of group.items) {

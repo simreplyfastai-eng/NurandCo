@@ -1,5 +1,5 @@
 -- ═══════════════════════════════════════════════════════════════════
--- STARR AESTHETICS — Complete Supabase Schema
+-- [CLIENT NAME] — Complete Supabase Schema
 -- Derived from: supabase-migration.sql + PROJECT_SPEC.md + source audit
 -- Run in Supabase dashboard → SQL Editor on a fresh project
 -- ═══════════════════════════════════════════════════════════════════
@@ -24,7 +24,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 CREATE TABLE IF NOT EXISTS locations (
   id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   name        TEXT NOT NULL,               -- Human-readable name e.g. "[LOCATION_1]"
-  slug        TEXT UNIQUE NOT NULL,        -- URL-safe slug e.g. "hornchurch"
+  slug        TEXT UNIQUE NOT NULL,        -- URL-safe slug e.g. "[location-1-slug]"
   address     TEXT,                        -- Full postal address
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
@@ -352,12 +352,12 @@ ALTER TABLE google_calendar_tokens ENABLE ROW LEVEL SECURITY;
 -- use the explicit UUIDs from 09_CLIENT_SPECIFIC_DATA.md.
 -- ═══════════════════════════════════════════════════════════════════
 INSERT INTO locations (id, slug, name, address)
-SELECT gen_random_uuid(), 'hornchurch', '[LOCATION_1]', '[LOCATION_1], Essex RM11'
-WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = 'hornchurch');
+SELECT gen_random_uuid(), '[location-1-slug]', '[LOCATION_1]', '[LOCATION_1], Essex RM11'
+WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = '[location-1-slug]');
 
 INSERT INTO locations (id, slug, name, address)
-SELECT gen_random_uuid(), 'marylebone', '[LOCATION_2]', '[LOCATION_2], London W1G'
-WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = 'marylebone');
+SELECT gen_random_uuid(), '[location-2-slug]', '[LOCATION_2]', '[LOCATION_2], London W1G'
+WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = '[location-2-slug]');
 
 
 -- ═══════════════════════════════════════════════════════════════════

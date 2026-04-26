@@ -122,7 +122,7 @@ grep -r "[CLIENT_NAME]y.co.uk" --include="*.ts" --include="*.tsx" --include="*.h
 ### File-by-file changes
 
 1. **`artifacts/dermadoll/index.html`** — Update `<title>`, meta description, OG tags, JSON-LD schema (name, phone, email, locations, social handles).
-2. **`artifacts/dermadoll/src/components/Navbar.tsx`** — Update "STARR" / "BEAUTY" wordmark text.
+2. **`artifacts/dermadoll/src/components/Navbar.tsx`** — Update "[CLIENT]" / "BEAUTY" wordmark text.
 3. **`artifacts/dermadoll/src/components/Footer.tsx`** — Update brand name, social handles, email.
 4. **`artifacts/dermadoll/src/components/Locations.tsx`** — Update location names, addresses, map links.
 5. **`artifacts/dermadoll/src/components/About.tsx`** — Update practitioner name, bio copy.

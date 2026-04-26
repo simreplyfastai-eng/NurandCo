@@ -69,7 +69,7 @@ workspace/
 │   │       │   ├── Training.tsx             [CLIENT-SPECIFIC] ★ Training section; training-pathway.jpg; course enquiry form
 │   │       │   ├── FAQ.tsx                  [CLIENT-SPECIFIC] ★ FAQ copy (treatment-specific)
 │   │       │   ├── Contact.tsx              [CLIENT-SPECIFIC] ★ Contact details; links to [CLIENT_NAME]yltd@gmail.com
-│   │       │   ├── Footer.tsx               [CLIENT-SPECIFIC] ★ Brand name "STARR BEAUTY", social handles, email, nav links
+│   │       │   ├── Footer.tsx               [CLIENT-SPECIFIC] ★ Brand name "[CLIENT NAME]", social handles, email, nav links
 │   │       │   ├── InstagramSection.tsx     [CLIENT-SPECIFIC] ★ Instagram embeds/links for [Client] accounts
 │   │       │   ├── TrustTicker.tsx          [CORE]            Scrolling trust badge ticker
 │   │       │   ├── SectionDivider.tsx       [CORE]            Decorative divider
@@ -155,6 +155,6 @@ workspace/
 | `artifacts/api-server/src/lib/seed.ts` | All 77 treatments, [LOCATION_1]/[LOCATION_2] UUIDs, categories, prices |
 | `artifacts/api-server/src/lib/email.ts` | FROM address, WhatsApp number, booking copy |
 | `artifacts/api-server/src/app.ts` | CORS allowlist with [CLIENT_NAME]y.co.uk |
-| `artifacts/dermadoll/src/components/Footer.tsx` | "STARR BEAUTY", social handles, email |
+| `artifacts/dermadoll/src/components/Footer.tsx` | "[CLIENT NAME]", social handles, email |
 | `artifacts/dermadoll/src/components/Locations.tsx` | Clinic addresses, map links |
 | `artifacts/api-server/supabase-migration.sql` | [LOCATION_1]/[LOCATION_2] addresses seeded into DB |

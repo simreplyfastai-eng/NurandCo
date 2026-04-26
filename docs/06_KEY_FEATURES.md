@@ -185,8 +185,8 @@
 | Google Calendar | One `google_calendar_tokens` row per `location_id`; booking events go to the correct calendar |
 
 **Location UUIDs (production):**
-- [LOCATION_1]: `ccb325d5-6b17-4218-b97d-1a1a0383410a`
-- [LOCATION_2]: `5b3d890a-bf6f-4e87-af43-5db0726a46ce`
+- [LOCATION_1]: `[LOCATION_1_UUID]`
+- [LOCATION_2]: `[LOCATION_2_UUID]`
 
 ---
 

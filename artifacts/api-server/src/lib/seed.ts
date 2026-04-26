@@ -15,7 +15,7 @@ type TreatmentRow = {
   category: string;
 };
 
-const HORNCHURCH_TREATMENTS: TreatmentRow[] = [
+const [LOCATION_1]_TREATMENTS: TreatmentRow[] = [
   // Aesthetics — fillers (deposit £20)
   { name: "NATURALE LIPS 0.5ml",                                      duration_minutes: 45,  price: 135,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
   { name: "NATURALE LIPS 0.8ml",                                      duration_minutes: 45,  price: 175,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
@@ -67,7 +67,7 @@ const HORNCHURCH_TREATMENTS: TreatmentRow[] = [
   { name: "Eyebrow Wax and Tint",                                     duration_minutes: 20,  price: 25,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
   // Facials (deposit £10)
   { name: "Microneedling Facial",                                     duration_minutes: 60,  price: 55,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Facials" },
-  { name: "STARRFACIAL Hydrofacial",                                  duration_minutes: 60,  price: 70,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Facials" },
+  { name: "[CLIENT]FACIAL Hydrofacial",                                  duration_minutes: 60,  price: 70,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Facials" },
   { name: "Luxe Microneedling Facial",                                duration_minutes: 30,  price: 75,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Facials" },
   // Nails (deposit £10)
   { name: "Plain Acrylic Set",                                        duration_minutes: 120, price: 50,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
@@ -93,7 +93,7 @@ const HORNCHURCH_TREATMENTS: TreatmentRow[] = [
   { name: "Vitaran / Plinest / Nucleofill Full Face Combo",           duration_minutes: 90,  price: 850,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Skin Boosters" },
 ];
 
-const MARYLEBONE_TREATMENTS: TreatmentRow[] = [
+const [LOCATION_2]_TREATMENTS: TreatmentRow[] = [
   // Aesthetics (deposit £20)
   { name: "NATURALE LIPS 0.5ml",                                      duration_minutes: 60,  price: 140,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
   { name: "NATURALE LIPS 0.8ml",                                      duration_minutes: 60,  price: 185,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
@@ -190,8 +190,8 @@ async function ensureEnquiriesTable(): Promise<void> {
 /** Keep location addresses up to date on every startup. */
 async function ensureLocationAddresses(): Promise<void> {
   const updates = [
-    { slug: "hornchurch", address: "122B North Street, RM11 1SU" },
-    { slug: "marylebone", address: "209 Old [LOCATION_2] Rd, London NW1 5QT (entrance from Old [LOCATION_2] Road)" },
+    { slug: "[location-1-slug]", address: "122B North Street, RM11 1SU" },
+    { slug: "[location-2-slug]", address: "209 Old [LOCATION_2] Rd, London NW1 5QT (entrance from Old [LOCATION_2] Road)" },
   ];
   for (const { slug, address } of updates) {
     const { error } = await supabaseAdmin
@@ -238,8 +238,8 @@ export async function seedTreatments(): Promise<void> {
       return;
     }
 
-    const H = locs.find((l: { slug: string }) => l.slug === "hornchurch")?.id as string | undefined;
-    const M = locs.find((l: { slug: string }) => l.slug === "marylebone")?.id as string | undefined;
+    const H = locs.find((l: { slug: string }) => l.slug === "[location-1-slug]")?.id as string | undefined;
+    const M = locs.find((l: { slug: string }) => l.slug === "[location-2-slug]")?.id as string | undefined;
 
     if (!H || !M) {
       console.error(`Seed: missing location IDs — hornchurch=${H} marylebone=${M}`);
@@ -248,8 +248,8 @@ export async function seedTreatments(): Promise<void> {
 
     // ── Insert all 77 treatments in a single batch ─────────────────────────────
     const rows = [
-      ...HORNCHURCH_TREATMENTS.map((t) => ({ ...t, location_id: H })),
-      ...MARYLEBONE_TREATMENTS.map((t) => ({ ...t, location_id: M })),
+      ...[LOCATION_1]_TREATMENTS.map((t) => ({ ...t, location_id: H })),
+      ...[LOCATION_2]_TREATMENTS.map((t) => ({ ...t, location_id: M })),
     ];
 
     const { error: insertErr } = await supabaseAdmin.from("treatments").insert(rows);

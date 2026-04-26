@@ -7,8 +7,8 @@ import BookingModal from "@/components/BookingModal";
 const BASE = import.meta.env.BASE_URL;
 
 const LOCATION_IDS: Record<string, string> = {
-  hornchurch: "ccb325d5-6b17-4218-b97d-1a1a0383410a",
-  marylebone: "5b3d890a-bf6f-4e87-af43-5db0726a46ce",
+  hornchurch: "[LOCATION_1_UUID]",
+  marylebone: "[LOCATION_2_UUID]",
 };
 
 interface ApiTreatment {
@@ -29,15 +29,15 @@ interface TreatmentGroup {
 function LocationSelector() {
   const [, navigate] = useLocation();
   const locations = [
-    { slug: "hornchurch", label: "[LOCATION_1]", region: "ESSEX", desc: "Our original home clinic, serving Essex and East London with our full treatment menu." },
-    { slug: "marylebone", label: "[LOCATION_2]", region: "LONDON · NEW", desc: "Now open in the heart of London. Premium flat-rate pricing for all treatments." },
+    { slug: "[location-1-slug]", label: "[LOCATION_1]", region: "ESSEX", desc: "Our original home clinic, serving Essex and East London with our full treatment menu." },
+    { slug: "[location-2-slug]", label: "[LOCATION_2]", region: "LONDON · NEW", desc: "Now open in the heart of London. Premium flat-rate pricing for all treatments." },
   ];
 
   return (
     <div style={{ minHeight: "100vh", background: "#F5F0EB", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "60px 24px" }}>
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} style={{ width: "100%", maxWidth: 680, textAlign: "center" }}>
         <a href={BASE} style={{ display: "inline-block", marginBottom: 48, textDecoration: "none" }}>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", letterSpacing: "0.15em", color: "#5C1A1A", lineHeight: 1 }}>STARR</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.5rem", letterSpacing: "0.15em", color: "#5C1A1A", lineHeight: 1 }}>[CLIENT]</div>
           <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "0.35em", color: "#C9A96E", textTransform: "uppercase" }}>BEAUTY</div>
         </a>
 
@@ -87,7 +87,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
   const [activeTreatment, setActiveTreatment] = useState<ApiTreatment | null>(null);
 
   const locationId = LOCATION_IDS[locationSlug];
-  const locationLabel = locationSlug === "hornchurch" ? "[LOCATION_1]" : "[LOCATION_2]";
+  const locationLabel = locationSlug === "[location-1-slug]" ? "[LOCATION_1]" : "[LOCATION_2]";
 
   useEffect(() => {
     if (!locationId) { setLoading(false); return; }
@@ -127,7 +127,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
     <div style={{ minHeight: "100vh", background: "#F5F0EB" }}>
       <div style={{ background: "#fff", borderBottom: "1px solid #F0EAE2", padding: "20px 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
         <a href={BASE} style={{ textDecoration: "none" }}>
-          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.2rem", letterSpacing: "0.15em", color: "#5C1A1A", lineHeight: 1 }}>STARR</div>
+          <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: "1.2rem", letterSpacing: "0.15em", color: "#5C1A1A", lineHeight: 1 }}>[CLIENT]</div>
           <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "0.35em", color: "#C9A96E", textTransform: "uppercase" }}>BEAUTY</div>
         </a>
         <button

@@ -249,7 +249,7 @@ export default function Training() {
                   fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "1.5px", textTransform: "uppercase",
                   border: "1px solid #C9A96E", color: "#C9A96E", padding: "4px 8px", flexShrink: 0, marginLeft: 12,
                 }}>
-                  HORNCHURCH
+                  [LOCATION_1]
                 </span>
               </div>
               <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#C9A96E", margin: "0 0 20px" }}>

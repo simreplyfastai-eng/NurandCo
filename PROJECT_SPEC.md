@@ -174,13 +174,13 @@ Supabase (PostgreSQL). All tables use `gen_random_uuid()` for UUIDs. All writes 
 |---|---|---|
 | `id` | UUID PK | Auto-generated |
 | `name` | TEXT | "[LOCATION_1]" / "[LOCATION_2]" |
-| `slug` | TEXT UNIQUE | "hornchurch" / "marylebone" |
+| `slug` | TEXT UNIQUE | "[location-1-slug]" / "[location-2-slug]" |
 | `address` | TEXT | Full postal address |
 | `created_at` | TIMESTAMPTZ | Default NOW() |
 
 **Seeded location IDs (production):**
-- [LOCATION_1]: `ccb325d5-6b17-4218-b97d-1a1a0383410a`
-- [LOCATION_2]: `5b3d890a-bf6f-4e87-af43-5db0726a46ce`
+- [LOCATION_1]: `[LOCATION_1_UUID]`
+- [LOCATION_2]: `[LOCATION_2_UUID]`
 
 ### 4.2 `treatments`
 
@@ -990,7 +990,7 @@ export const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY, {
 });
 ```
 
-`resolveLocationId(slugOrId)` accepts either a UUID or a slug string (e.g., `"hornchurch"`) and returns the UUID. Used by availability and treatment endpoints.
+`resolveLocationId(slugOrId)` accepts either a UUID or a slug string (e.g., `"[location-1-slug]"`) and returns the UUID. Used by availability and treatment endpoints.
 
 ## Appendix B — Timezone Handling
 

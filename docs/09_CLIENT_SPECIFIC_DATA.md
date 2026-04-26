@@ -24,8 +24,8 @@ This is the **search-and-replace checklist** for forking this project for a new 
 
 | Value | Where used | UUID |
 |---|---|---|
-| **[LOCATION_1]** (name) | `Locations.tsx`, `portal.html`, `supabase-migration.sql`, `seed.ts` | `ccb325d5-6b17-4218-b97d-1a1a0383410a` |
-| **[LOCATION_2]** (name) | `Locations.tsx`, `portal.html`, `supabase-migration.sql`, `seed.ts` | `5b3d890a-bf6f-4e87-af43-5db0726a46ce` |
+| **[LOCATION_1]** (name) | `Locations.tsx`, `portal.html`, `supabase-migration.sql`, `seed.ts` | `[LOCATION_1_UUID]` |
+| **[LOCATION_2]** (name) | `Locations.tsx`, `portal.html`, `supabase-migration.sql`, `seed.ts` | `[LOCATION_2_UUID]` |
 | **[LOCATION_1], Essex RM11** | `supabase-migration.sql` (seed address), `index.html` (JSON-LD) | — |
 | **[LOCATION_2], London W1G** | `supabase-migration.sql` (seed address), `index.html` (JSON-LD) | — |
 
@@ -57,13 +57,13 @@ Then update every hardcoded UUID reference listed above.
 
 | Value | File | Line / Context |
 |---|---|---|
-| `"STARR"` (wordmark) | `Navbar.tsx`, `Footer.tsx` | `<span>` text — Cormorant Garamond display |
+| `"[CLIENT]"` (wordmark) | `Navbar.tsx`, `Footer.tsx` | `<span>` text — Cormorant Garamond display |
 | `"BEAUTY"` (submark) | `Navbar.tsx`, `Footer.tsx` | `<span>` text — Inter uppercase |
 | `"Beauty Redefined"` (tagline) | `Footer.tsx` | Italic serif tagline |
 | `"Precision Aesthetics. Confident Results."` | `index.html` `<title>` | SEO page title |
 | `"Premium aesthetic treatments in [LOCATION_1], Essex and [LOCATION_2], London"` | `index.html` meta description | SEO description |
 | `"NaturalèLips™"` | `index.html`, `Hero.tsx`, `Services.tsx` | Signature treatment name — replace with new client's hero treatment |
-| `"HORNCHURCH & MARYLEBONE"` | `Hero.tsx` | Location eyebrow text |
+| `"[LOCATION_1] & [LOCATION_2]"` | `Hero.tsx` | Location eyebrow text |
 | `"Essex & London"` | `Hero.tsx` | Location subheading |
 | `"Booked via: [CLIENT_NAME] website"` | `googleCalendar.ts` line 106 | Calendar event description |
 
@@ -89,7 +89,7 @@ Contains the full list of 77 treatments hardcoded for [Client]:
 **Replace with:** New client's treatment catalogue. Maintain the same data structure:
 ```typescript
 {
-  location_id: HORNCHURCH_ID,
+  location_id: [LOCATION_1]_ID,
   name: "Treatment Name",
   category: "Category Name",
   duration_minutes: 60,
@@ -180,8 +180,8 @@ Run these searches across the entire codebase when forking:
 | `[Client Name]` | `New Client Legal Name` |
 | `starr` (in bucket paths) | `newclient` |
 | `[SUPABASE_PROJECT_REF]` | New Supabase project ID |
-| `ccb325d5-6b17-4218-b97d-1a1a0383410a` | New [LOCATION_1]/Location1 UUID |
-| `5b3d890a-bf6f-4e87-af43-5db0726a46ce` | New [LOCATION_2]/Location2 UUID |
+| `[LOCATION_1_UUID]` | New [LOCATION_1]/Location1 UUID |
+| `[LOCATION_2_UUID]` | New [LOCATION_2]/Location2 UUID |
 | `[LOCATION_1]` | New Location 1 name |
 | `[LOCATION_2]` | New Location 2 name |
 | `hello@[CLIENT_NAME]y.co.uk` | `hello@newclientdomain.co.uk` |

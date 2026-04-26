@@ -7,8 +7,8 @@ import { sanitize } from "../lib/sanitize";
 const router = Router();
 
 const COURSE_LOCATION_SLUG: Record<string, string> = {
-  "Essex Masterclass": "hornchurch",
-  "London Masterclass": "marylebone",
+  "Essex Masterclass": "[location-1-slug]",
+  "London Masterclass": "[location-2-slug]",
 };
 
 const COURSE_LOCATION_LABEL: Record<string, string> = {

@@ -130,7 +130,7 @@ function buildEmail(content: string, subject: string): string {
     <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
       <td style="background:#5C1A1A;padding:28px 40px;border-radius:12px 12px 0 0;text-align:center;">
-        <div style="font-family:Georgia,serif;font-size:26px;color:#FFFFFF;letter-spacing:0.12em;font-weight:normal;">STARR</div>
+        <div style="font-family:Georgia,serif;font-size:26px;color:#FFFFFF;letter-spacing:0.12em;font-weight:normal;">[CLIENT]</div>
         <div style="font-family:-apple-system,Arial,sans-serif;font-size:10px;color:#C9A96E;letter-spacing:0.28em;margin-top:2px;">BEAUTY</div>
       </td>
     </tr>
@@ -147,7 +147,7 @@ function buildEmail(content: string, subject: string): string {
     <table width="100%" cellpadding="0" cellspacing="0">
     <tr>
       <td style="padding:20px 40px 24px;border-top:1px solid #E8DDD3;text-align:center;">
-        <p style="margin:0 0 6px;font-size:11px;color:#8C7B6B;letter-spacing:0.08em;">STARR BEAUTY &middot; ESSEX &amp; LONDON</p>
+        <p style="margin:0 0 6px;font-size:11px;color:#8C7B6B;letter-spacing:0.08em;">[CLIENT NAME] &middot; ESSEX &amp; LONDON</p>
         <p style="margin:0 0 2px;font-size:10px;color:#B5A89A;">[LOCATION_1], Essex &middot; [LOCATION_2], London</p>
         <p style="margin:0 0 8px;font-size:10px;color:#B5A89A;">
           <a href="mailto:hello@[CLIENT_NAME]y.co.uk" style="color:#C9A96E;text-decoration:none;">hello@[CLIENT_NAME]y.co.uk</a>

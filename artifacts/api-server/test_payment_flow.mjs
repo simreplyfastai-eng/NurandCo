@@ -19,7 +19,7 @@ const TEST_DATA = {
   bookingDate: '2026-05-15',
   bookingTime: '11:00',
   bookingId: TEST_BOOKING_ID,
-  locationId: 'ccb325d5-6b17-4218-b97d-1a1a0383410a', // Hornchurch
+  locationId: '[LOCATION_1_UUID]', // Hornchurch
 };
 
 let passed = 0, failed = 0;
