@@ -110,7 +110,7 @@ export default function Training() {
           name,
           email,
           phone,
-          course_name: "Training Enquiry — Hornchurch",
+          course_name: "Training Enquiry — [LOCATION_1]",
           experience_level: experience_level || undefined,
           message: message || undefined,
         }),
@@ -145,17 +145,17 @@ export default function Training() {
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
               <div style={{ height: 1, width: 24, background: "#C9A96E" }} />
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
-                Starr Academy
+                [Client] Academy
               </span>
             </div>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 400, color: "#5C1A1A", margin: "0 0 8px" }}>
               Train With Eva
             </h2>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#C9A96E", margin: "0 0 28px" }}>
-              Training based in Hornchurch, Essex
+              Training based in [LOCATION_1], Essex
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
-              Eva's background in education meets her clinical expertise, delivering world-class training through Starr Academy.
+              Eva's background in education meets her clinical expertise, delivering world-class training through [Client] Academy.
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
               All courses are open to candidates with no prior background required.
@@ -253,7 +253,7 @@ export default function Training() {
                 </span>
               </div>
               <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#C9A96E", margin: "0 0 20px" }}>
-                Hornchurch Clinic, Essex
+                [LOCATION_1] Clinic, Essex
               </p>
               <button
                 onClick={handleEnquire}
@@ -354,14 +354,14 @@ export default function Training() {
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                     <div style={{ height: 1, width: 20, background: "#C9A96E" }} />
                     <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
-                      Starr Academy
+                      [Client] Academy
                     </span>
                   </div>
                   <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.8rem", color: "#5C1A1A", margin: "0 0 6px" }}>
                     Training Enquiry
                   </h3>
                   <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", margin: "0 0 28px" }}>
-                    Hornchurch Clinic, Essex
+                    [LOCATION_1] Clinic, Essex
                   </p>
 
                   <form onSubmit={handleSubmit} noValidate>

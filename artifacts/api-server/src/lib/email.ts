@@ -101,7 +101,7 @@ export function buildICSContent(booking: CalBooking, location: CalLocation): str
 const PLAIN_FOOTER = `
 --
 [CLIENT_NAME]
-Hornchurch, Essex · Marylebone, London
+[LOCATION_1], Essex · [LOCATION_2], London
 hello@[CLIENT_NAME]y.co.uk | [CLIENT_NAME]y.co.uk | WhatsApp: +44 7701 298985
 
 You received this email because you have an appointment booked with [CLIENT_NAME].
@@ -148,7 +148,7 @@ function buildEmail(content: string, subject: string): string {
     <tr>
       <td style="padding:20px 40px 24px;border-top:1px solid #E8DDD3;text-align:center;">
         <p style="margin:0 0 6px;font-size:11px;color:#8C7B6B;letter-spacing:0.08em;">STARR BEAUTY &middot; ESSEX &amp; LONDON</p>
-        <p style="margin:0 0 2px;font-size:10px;color:#B5A89A;">Hornchurch, Essex &middot; Marylebone, London</p>
+        <p style="margin:0 0 2px;font-size:10px;color:#B5A89A;">[LOCATION_1], Essex &middot; [LOCATION_2], London</p>
         <p style="margin:0 0 8px;font-size:10px;color:#B5A89A;">
           <a href="mailto:hello@[CLIENT_NAME]y.co.uk" style="color:#C9A96E;text-decoration:none;">hello@[CLIENT_NAME]y.co.uk</a>
           &nbsp;&middot;&nbsp;
@@ -299,9 +299,9 @@ export async function sendClientConfirmationEmail(params: {
 
     <table width="100%" cellpadding="0" cellspacing="0">
     <tr><td align="center">
-      <a href="https://instagram.com/StarrAestheticss" style="display:inline-block;margin:0 6px;font-size:11px;color:#C9A96E;text-decoration:none;letter-spacing:0.08em;">@StarrAestheticss</a>
-      <a href="https://instagram.com/StarrFacess" style="display:inline-block;margin:0 6px;font-size:11px;color:#C9A96E;text-decoration:none;letter-spacing:0.08em;">@StarrFacess</a>
-      <a href="https://instagram.com/StarrNailedd" style="display:inline-block;margin:0 6px;font-size:11px;color:#C9A96E;text-decoration:none;letter-spacing:0.08em;">@StarrNailedd</a>
+      <a href="https://instagram.com/[ClientName]s" style="display:inline-block;margin:0 6px;font-size:11px;color:#C9A96E;text-decoration:none;letter-spacing:0.08em;">@[ClientName]s</a>
+      <a href="https://instagram.com/[Client]Facess" style="display:inline-block;margin:0 6px;font-size:11px;color:#C9A96E;text-decoration:none;letter-spacing:0.08em;">@[Client]Facess</a>
+      <a href="https://instagram.com/[Client]Nailedd" style="display:inline-block;margin:0 6px;font-size:11px;color:#C9A96E;text-decoration:none;letter-spacing:0.08em;">@[Client]Nailedd</a>
     </td></tr>
     </table>`;
 
@@ -898,7 +898,7 @@ export async function sendEnquiryEmails(params: {
 
   // EMAIL B — Auto-reply to enquirer
   if (params.email) {
-    const clientSubject = `Your enquiry has been received — Starr Academy`;
+    const clientSubject = `Your enquiry has been received — [Client] Academy`;
     const clientContent = `
       <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 16px;">We've received your enquiry ✨</p>
       <p style="font-size:15px;color:#2C2420;margin:0 0 8px;">Hi ${firstName},</p>
@@ -919,7 +919,7 @@ export async function sendEnquiryEmails(params: {
         </tr>
       </table>
       <p style="font-size:13px;color:#8C7B6B;margin:0;">
-        Instagram: <a href="https://instagram.com/StarrAestheticss" style="color:#C9A96E;">@StarrAestheticss</a> &nbsp;·&nbsp; <a href="https://instagram.com/StarrFacess" style="color:#C9A96E;">@StarrFacess</a>
+        Instagram: <a href="https://instagram.com/[ClientName]s" style="color:#C9A96E;">@[ClientName]s</a> &nbsp;·&nbsp; <a href="https://instagram.com/[Client]Facess" style="color:#C9A96E;">@[Client]Facess</a>
       </p>`;
     const clientText = [
       `Hi ${firstName},`,

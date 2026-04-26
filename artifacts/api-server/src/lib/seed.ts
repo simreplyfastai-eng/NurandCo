@@ -1,7 +1,7 @@
 import { supabaseAdmin } from "./supabase";
 
 // ── Exact treatment rows per spec ─────────────────────────────────────────────
-// 66 Hornchurch + 11 Marylebone = 77 total
+// 66 [LOCATION_1] + 11 [LOCATION_2] = 77 total
 // Only Fat Dissolving Lemon Bottle has price=0 (shown as POA on the site)
 // deposit_type is 'fixed' for all rows
 
@@ -191,7 +191,7 @@ async function ensureEnquiriesTable(): Promise<void> {
 async function ensureLocationAddresses(): Promise<void> {
   const updates = [
     { slug: "hornchurch", address: "122B North Street, RM11 1SU" },
-    { slug: "marylebone", address: "209 Old Marylebone Rd, London NW1 5QT (entrance from Old Marylebone Road)" },
+    { slug: "marylebone", address: "209 Old [LOCATION_2] Rd, London NW1 5QT (entrance from Old [LOCATION_2] Road)" },
   ];
   for (const { slug, address } of updates) {
     const { error } = await supabaseAdmin

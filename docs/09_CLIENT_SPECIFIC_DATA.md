@@ -1,6 +1,6 @@
 # 09 — Client-Specific Data
 
-This is the **search-and-replace checklist** for forking this project for a new client. Every item listed here contains hardcoded Starr-specific data that must be swapped out.
+This is the **search-and-replace checklist** for forking this project for a new client. Every item listed here contains hardcoded [Client]-specific data that must be swapped out.
 
 ---
 
@@ -9,7 +9,7 @@ This is the **search-and-replace checklist** for forking this project for a new 
 | Value | Where to find it | Notes |
 |---|---|---|
 | `[CLIENT_NAME]` | `index.html`, `Navbar.tsx`, `Footer.tsx`, `email.ts`, `portal.html`, `sitemap.xml`, JSON-LD | Brand name — replace everywhere |
-| `Starr Aesthetics` | `PROJECT_SPEC.md`, JSON-LD, `About.tsx`, `Training.tsx` | Legal/trading name |
+| `[Client Name]` | `PROJECT_SPEC.md`, JSON-LD, `About.tsx`, `Training.tsx` | Legal/trading name |
 | `Eva` | `About.tsx`, `Hero.tsx`, `Training.tsx`, email templates in `email.ts` | Operator name |
 | `[CLIENT_NAME]y.co.uk` | `index.html`, `app.ts` (CORS), `email.ts`, `sitemap.xml`, `robots.txt`, `confirmed.html` | Domain — replace throughout |
 | `[CLIENT_NAME]yltd@gmail.com` | `index.html` (JSON-LD), `Footer.tsx`, `Contact.tsx` | Storefront email |
@@ -24,10 +24,10 @@ This is the **search-and-replace checklist** for forking this project for a new 
 
 | Value | Where used | UUID |
 |---|---|---|
-| **Hornchurch** (name) | `Locations.tsx`, `portal.html`, `supabase-migration.sql`, `seed.ts` | `ccb325d5-6b17-4218-b97d-1a1a0383410a` |
-| **Marylebone** (name) | `Locations.tsx`, `portal.html`, `supabase-migration.sql`, `seed.ts` | `5b3d890a-bf6f-4e87-af43-5db0726a46ce` |
-| **Hornchurch, Essex RM11** | `supabase-migration.sql` (seed address), `index.html` (JSON-LD) | — |
-| **Marylebone, London W1G** | `supabase-migration.sql` (seed address), `index.html` (JSON-LD) | — |
+| **[LOCATION_1]** (name) | `Locations.tsx`, `portal.html`, `supabase-migration.sql`, `seed.ts` | `ccb325d5-6b17-4218-b97d-1a1a0383410a` |
+| **[LOCATION_2]** (name) | `Locations.tsx`, `portal.html`, `supabase-migration.sql`, `seed.ts` | `5b3d890a-bf6f-4e87-af43-5db0726a46ce` |
+| **[LOCATION_1], Essex RM11** | `supabase-migration.sql` (seed address), `index.html` (JSON-LD) | — |
+| **[LOCATION_2], London W1G** | `supabase-migration.sql` (seed address), `index.html` (JSON-LD) | — |
 
 ### Files containing location UUIDs
 
@@ -61,7 +61,7 @@ Then update every hardcoded UUID reference listed above.
 | `"BEAUTY"` (submark) | `Navbar.tsx`, `Footer.tsx` | `<span>` text — Inter uppercase |
 | `"Beauty Redefined"` (tagline) | `Footer.tsx` | Italic serif tagline |
 | `"Precision Aesthetics. Confident Results."` | `index.html` `<title>` | SEO page title |
-| `"Premium aesthetic treatments in Hornchurch, Essex and Marylebone, London"` | `index.html` meta description | SEO description |
+| `"Premium aesthetic treatments in [LOCATION_1], Essex and [LOCATION_2], London"` | `index.html` meta description | SEO description |
 | `"NaturalèLips™"` | `index.html`, `Hero.tsx`, `Services.tsx` | Signature treatment name — replace with new client's hero treatment |
 | `"HORNCHURCH & MARYLEBONE"` | `Hero.tsx` | Location eyebrow text |
 | `"Essex & London"` | `Hero.tsx` | Location subheading |
@@ -73,8 +73,8 @@ Then update every hardcoded UUID reference listed above.
 
 | Platform | Handles | File |
 |---|---|---|
-| Instagram | @StarrFacess, @StarrAestheticss, @StarrSuitess, @StarrNailedd | `Footer.tsx` lines 3–9, `index.html` JSON-LD sameAs |
-| TikTok | @StarrFacess, @StarrAestheticss, @StarrSuitess, @StarrNailedd | `Footer.tsx` lines 10–16 |
+| Instagram | @[Client]Facess, @[ClientName]s, @[Client]Suitess, @[Client]Nailedd | `Footer.tsx` lines 3–9, `index.html` JSON-LD sameAs |
+| TikTok | @[Client]Facess, @[ClientName]s, @[Client]Suitess, @[Client]Nailedd | `Footer.tsx` lines 10–16 |
 
 ---
 
@@ -82,9 +82,9 @@ Then update every hardcoded UUID reference listed above.
 
 **File:** `artifacts/api-server/src/lib/seed.ts`
 
-Contains the full list of 77 treatments hardcoded for Starr:
-- 66 Hornchurch treatments across: Aesthetics (fillers, SPMU, anti-wrinkle, consultation, fat dissolving, skin boosters), Lashes & Brows, Facials, Nails
-- 11 Marylebone treatments (Aesthetics + Lashes & Brows)
+Contains the full list of 77 treatments hardcoded for [Client]:
+- 66 [LOCATION_1] treatments across: Aesthetics (fillers, SPMU, anti-wrinkle, consultation, fat dissolving, skin boosters), Lashes & Brows, Facials, Nails
+- 11 [LOCATION_2] treatments (Aesthetics + Lashes & Brows)
 
 **Replace with:** New client's treatment catalogue. Maintain the same data structure:
 ```typescript
@@ -115,10 +115,10 @@ Contains a separate `BUILT_IN_TREATMENTS` array used for the public-facing catal
 **File:** `artifacts/dermadoll/src/components/ResultsVideos.tsx`
 
 ```typescript
-// Hardcoded Starr CDN video URLs:
-https://tithmarxgkafwgqonhfb.supabase.co/storage/v1/object/public/media/starr/hero/video1.mp4
-https://tithmarxgkafwgqonhfb.supabase.co/storage/v1/object/public/media/starr/hero/video2.mp4
-https://tithmarxgkafwgqonhfb.supabase.co/storage/v1/object/public/media/starr/hero/video3.mp4
+// Hardcoded [Client] CDN video URLs:
+https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/starr/hero/video1.mp4
+https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/starr/hero/video2.mp4
+https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/starr/hero/video3.mp4
 ```
 
 Replace with new client's Supabase project ID and bucket path.
@@ -177,16 +177,16 @@ Run these searches across the entire codebase when forking:
 |---|---|
 | `[CLIENT_NAME]y.co.uk` | `newclientdomain.co.uk` |
 | `[CLIENT_NAME]` | `NewClientBrandName` |
-| `Starr Aesthetics` | `New Client Legal Name` |
+| `[Client Name]` | `New Client Legal Name` |
 | `starr` (in bucket paths) | `newclient` |
-| `tithmarxgkafwgqonhfb` | New Supabase project ID |
-| `ccb325d5-6b17-4218-b97d-1a1a0383410a` | New Hornchurch/Location1 UUID |
-| `5b3d890a-bf6f-4e87-af43-5db0726a46ce` | New Marylebone/Location2 UUID |
-| `Hornchurch` | New Location 1 name |
-| `Marylebone` | New Location 2 name |
+| `[SUPABASE_PROJECT_REF]` | New Supabase project ID |
+| `ccb325d5-6b17-4218-b97d-1a1a0383410a` | New [LOCATION_1]/Location1 UUID |
+| `5b3d890a-bf6f-4e87-af43-5db0726a46ce` | New [LOCATION_2]/Location2 UUID |
+| `[LOCATION_1]` | New Location 1 name |
+| `[LOCATION_2]` | New Location 2 name |
 | `hello@[CLIENT_NAME]y.co.uk` | `hello@newclientdomain.co.uk` |
 | `[CLIENT_NAME]yltd@gmail.com` | New client storefront email |
 | `+447701298985` | New client WhatsApp number |
-| `@StarrFacess` (and other handles) | New client social handles |
+| `@[Client]Facess` (and other handles) | New client social handles |
 | `Eva` | New client practitioner name |
 | `NaturalèLips™` | New client signature treatment |

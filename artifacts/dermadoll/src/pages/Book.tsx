@@ -29,8 +29,8 @@ interface TreatmentGroup {
 function LocationSelector() {
   const [, navigate] = useLocation();
   const locations = [
-    { slug: "hornchurch", label: "Hornchurch", region: "ESSEX", desc: "Our original home clinic, serving Essex and East London with our full treatment menu." },
-    { slug: "marylebone", label: "Marylebone", region: "LONDON · NEW", desc: "Now open in the heart of London. Premium flat-rate pricing for all treatments." },
+    { slug: "hornchurch", label: "[LOCATION_1]", region: "ESSEX", desc: "Our original home clinic, serving Essex and East London with our full treatment menu." },
+    { slug: "marylebone", label: "[LOCATION_2]", region: "LONDON · NEW", desc: "Now open in the heart of London. Premium flat-rate pricing for all treatments." },
   ];
 
   return (
@@ -87,7 +87,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
   const [activeTreatment, setActiveTreatment] = useState<ApiTreatment | null>(null);
 
   const locationId = LOCATION_IDS[locationSlug];
-  const locationLabel = locationSlug === "hornchurch" ? "Hornchurch" : "Marylebone";
+  const locationLabel = locationSlug === "hornchurch" ? "[LOCATION_1]" : "[LOCATION_2]";
 
   useEffect(() => {
     if (!locationId) { setLoading(false); return; }

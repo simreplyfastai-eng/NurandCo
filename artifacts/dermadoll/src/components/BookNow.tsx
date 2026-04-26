@@ -47,7 +47,7 @@ export default function BookNow() {
               WhatsApp Us
             </a>
             <a
-              href="https://instagram.com/StarrAestheticss"
+              href="https://instagram.com/[ClientName]s"
               target="_blank"
               rel="noopener noreferrer"
               className="border border-primary text-primary px-8 py-4 rounded-full text-sm uppercase tracking-wider font-medium hover:bg-primary hover:text-white transition-all duration-300 w-full sm:w-auto flex items-center justify-center gap-2"

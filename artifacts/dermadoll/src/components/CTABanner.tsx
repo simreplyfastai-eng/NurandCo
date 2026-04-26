@@ -44,7 +44,7 @@ export default function CTABanner() {
             onMouseEnter={(e) => { e.currentTarget.style.background = "#F5F0EB"; e.currentTarget.style.color = "#5C1A1A"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#F5F0EB"; }}
           >
-            Book Hornchurch
+            Book [LOCATION_1]
           </a>
           <a
             href={`${import.meta.env.BASE_URL}book?location=marylebone`}
@@ -56,7 +56,7 @@ export default function CTABanner() {
             onMouseEnter={(e) => { e.currentTarget.style.background = "#C9A96E"; e.currentTarget.style.color = "#5C1A1A"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "#C9A96E"; }}
           >
-            Book Marylebone
+            Book [LOCATION_2]
           </a>
         </div>
       </motion.div>

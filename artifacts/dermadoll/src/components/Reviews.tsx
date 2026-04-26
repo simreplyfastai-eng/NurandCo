@@ -13,7 +13,7 @@ const reviews = [
     location: "London",
   },
   {
-    quote: "Been to the Marylebone clinic twice now. The space is beautiful and Eva's expertise is second to none. Worth every penny.",
+    quote: "Been to the [LOCATION_2] clinic twice now. The space is beautiful and Eva's expertise is second to none. Worth every penny.",
     name: "Amara K.",
     location: "London",
   },
@@ -28,7 +28,7 @@ const reviews = [
     location: "Essex",
   },
   {
-    quote: "I trained with Eva through Starr Academy and it was genuinely life-changing. Brilliant educator and incredible practitioner.",
+    quote: "I trained with Eva through [Client] Academy and it was genuinely life-changing. Brilliant educator and incredible practitioner.",
     name: "Natasha W.",
     location: "London",
   },

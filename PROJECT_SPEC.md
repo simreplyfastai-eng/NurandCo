@@ -1,9 +1,9 @@
 # PROJECT_SPEC.md
 ## Aesthetix Systems — Master Technical Reference
-### Starr Aesthetics / [CLIENT_NAME] Clinic Platform
+### [Client Name] / [CLIENT_NAME] Clinic Platform
 
 > **Template reference document** for Aesthetix Systems multi-clinic deployments.
-> Supabase project: `tithmarxgkafwgqonhfb` · Domain: `[CLIENT_NAME]y.co.uk`
+> Supabase project: `[SUPABASE_PROJECT_REF]` · Domain: `[CLIENT_NAME]y.co.uk`
 > Last audited: April 2026
 
 ---
@@ -33,13 +33,13 @@
 
 ## 1. Project Overview
 
-**Starr Aesthetics** (trading as [CLIENT_NAME]) is a two-location aesthetics clinic in the UK.
+**[Client Name]** (trading as [CLIENT_NAME]) is a two-location aesthetics clinic in the UK.
 
 | Attribute | Value |
 |---|---|
-| Brand name | Starr Aesthetics / [CLIENT_NAME] |
+| Brand name | [Client Name] / [CLIENT_NAME] |
 | Domain | `[CLIENT_NAME]y.co.uk` |
-| Locations | Hornchurch (Essex), Marylebone (London) |
+| Locations | [LOCATION_1] (Essex), [LOCATION_2] (London) |
 | Operator | Eva (sole proprietor) |
 | Palette | Burgundy `#5C1A1A` · Gold `#C9A96E` · Cream `#FAF7F4` |
 | Timezone | `Europe/London` (BST/GMT auto-switches) |
@@ -173,14 +173,14 @@ Supabase (PostgreSQL). All tables use `gen_random_uuid()` for UUIDs. All writes 
 | Column | Type | Notes |
 |---|---|---|
 | `id` | UUID PK | Auto-generated |
-| `name` | TEXT | "Hornchurch" / "Marylebone" |
+| `name` | TEXT | "[LOCATION_1]" / "[LOCATION_2]" |
 | `slug` | TEXT UNIQUE | "hornchurch" / "marylebone" |
 | `address` | TEXT | Full postal address |
 | `created_at` | TIMESTAMPTZ | Default NOW() |
 
 **Seeded location IDs (production):**
-- Hornchurch: `ccb325d5-6b17-4218-b97d-1a1a0383410a`
-- Marylebone: `5b3d890a-bf6f-4e87-af43-5db0726a46ce`
+- [LOCATION_1]: `ccb325d5-6b17-4218-b97d-1a1a0383410a`
+- [LOCATION_2]: `5b3d890a-bf6f-4e87-af43-5db0726a46ce`
 
 ### 4.2 `treatments`
 
@@ -197,8 +197,8 @@ Supabase (PostgreSQL). All tables use `gen_random_uuid()` for UUIDs. All writes 
 | `active` | BOOLEAN | Whether bookable |
 | `created_at` | TIMESTAMPTZ | Default NOW() |
 
-**Seeded counts:** 66 Hornchurch + 11 Marylebone = 77 total.
-**Only one price=0 row:** "Fat Dissolving Lemon Bottle" (Hornchurch, shown as POA).
+**Seeded counts:** 66 [LOCATION_1] + 11 [LOCATION_2] = 77 total.
+**Only one price=0 row:** "Fat Dissolving Lemon Bottle" ([LOCATION_1], shown as POA).
 
 Seed runs once on server startup only when the table is completely empty. Re-seed by deleting all treatment rows.
 
@@ -864,14 +864,14 @@ Allowed origins:
 
 ## 16. Location Isolation Rules
 
-**Critical design constraint:** Hornchurch and Marylebone are completely isolated. A user or booking at one location must never appear in the other location's views.
+**Critical design constraint:** [LOCATION_1] and [LOCATION_2] are completely isolated. A user or booking at one location must never appear in the other location's views.
 
 Enforcement points:
 
 1. **`location_id` column on all core tables** (`treatments`, `clients`, `bookings`, `enquiries`, `portal_kv`).
 2. **Every admin API query** filters by `X-Location-Id` header (required for all admin endpoints).
 3. **`PUT /api/clients/:id` IDOR guard** — server reads the client's actual `location_id` from the DB and rejects the update if it does not match the header.
-4. **Treatments seed** — 66 rows for Hornchurch UUID, 11 rows for Marylebone UUID; no cross-location rows.
+4. **Treatments seed** — 66 rows for [LOCATION_1] UUID, 11 rows for [LOCATION_2] UUID; no cross-location rows.
 5. **Portal KV** — all KV keys stored with a `location_id`; global keys use the `__global__` prefix convention.
 6. **Client dedup** — unique index on `(location_id, LOWER(email))` — same client email at different locations creates two independent client records.
 7. **Finance endpoints** — filter by `location_id` when header present; return cross-location data only if header absent (admin aggregate view).
@@ -924,7 +924,7 @@ export function getDepositAmount(
 
 `settings` comes from `dd_settings` KV value for the location; defaults are £20/£10.
 
-### Full treatment list (Hornchurch — 66 treatments)
+### Full treatment list ([LOCATION_1] — 66 treatments)
 
 | Category | Count | Deposit |
 |---|---|---|
@@ -938,7 +938,7 @@ export function getDepositAmount(
 | SPMU | 2 | £20 |
 | Skin Boosters | 6 | £20 |
 
-**Full treatment list (Marylebone — 11 treatments):** 10 Aesthetics + 1 Lashes & Brows.
+**Full treatment list ([LOCATION_2] — 11 treatments):** 10 Aesthetics + 1 Lashes & Brows.
 
 ---
 

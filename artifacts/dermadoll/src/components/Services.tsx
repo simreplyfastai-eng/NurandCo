@@ -155,7 +155,7 @@ export default function Services() {
                   marginRight: loc === "hornchurch" ? -1 : 0,
                 }}
               >
-                {loc === "hornchurch" ? "Hornchurch" : "Marylebone"}
+                {loc === "hornchurch" ? "[LOCATION_1]" : "[LOCATION_2]"}
               </button>
             ))}
           </div>

@@ -23,7 +23,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public
 -- ═══════════════════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS locations (
   id          UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  name        TEXT NOT NULL,               -- Human-readable name e.g. "Hornchurch"
+  name        TEXT NOT NULL,               -- Human-readable name e.g. "[LOCATION_1]"
   slug        TEXT UNIQUE NOT NULL,        -- URL-safe slug e.g. "hornchurch"
   address     TEXT,                        -- Full postal address
   created_at  TIMESTAMPTZ DEFAULT NOW()
@@ -39,7 +39,7 @@ CREATE POLICY IF NOT EXISTS "locations_anon_read"
 
 -- ═══════════════════════════════════════════════════════════════════
 -- TABLE: treatments
--- All bookable treatments. Seeded with 77 rows (66 Hornchurch + 11 Marylebone).
+-- All bookable treatments. Seeded with 77 rows (66 [LOCATION_1] + 11 [LOCATION_2]).
 -- deposit_amount is always fixed: £20 for injectables, £10 for all others.
 -- ═══════════════════════════════════════════════════════════════════
 CREATE TABLE IF NOT EXISTS treatments (
@@ -348,15 +348,15 @@ ALTER TABLE google_calendar_tokens ENABLE ROW LEVEL SECURITY;
 -- ═══════════════════════════════════════════════════════════════════
 -- SEED: Locations
 -- NOTE: These INSERT statements use gen_random_uuid() — the IDs will
--- differ from the production Starr UUIDs. For production migration,
+-- differ from the production [Client] UUIDs. For production migration,
 -- use the explicit UUIDs from 09_CLIENT_SPECIFIC_DATA.md.
 -- ═══════════════════════════════════════════════════════════════════
 INSERT INTO locations (id, slug, name, address)
-SELECT gen_random_uuid(), 'hornchurch', 'Hornchurch', 'Hornchurch, Essex RM11'
+SELECT gen_random_uuid(), 'hornchurch', '[LOCATION_1]', '[LOCATION_1], Essex RM11'
 WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = 'hornchurch');
 
 INSERT INTO locations (id, slug, name, address)
-SELECT gen_random_uuid(), 'marylebone', 'Marylebone', 'Marylebone, London W1G'
+SELECT gen_random_uuid(), 'marylebone', '[LOCATION_2]', '[LOCATION_2], London W1G'
 WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = 'marylebone');
 
 

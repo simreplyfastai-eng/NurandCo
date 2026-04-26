@@ -180,7 +180,7 @@ export default function Hero() {
             <div className="h-ey" style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 24 }}>
               <div style={{ height: 1, width: 24, background: "#C9A96E" }} />
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "#C9A96E" }}>
-                Hornchurch &amp; Marylebone
+                [LOCATION_1] &amp; [LOCATION_2]
               </span>
             </div>
 

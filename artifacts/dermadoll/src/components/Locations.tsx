@@ -3,14 +3,14 @@ import { motion } from "framer-motion";
 const clinics = [
   {
     region: "ESSEX",
-    name: "Hornchurch",
+    name: "[LOCATION_1]",
     line1: "Our original home clinic in Essex.",
     line2: "Serving Essex & East London with our full treatment menu.",
     highlight: true,
   },
   {
     region: "LONDON ◆ NEW",
-    name: "Marylebone",
+    name: "[LOCATION_2]",
     line1: "Now open in the heart of London.",
     line2: "Premium flat-rate pricing for all treatments.",
     highlight: false,

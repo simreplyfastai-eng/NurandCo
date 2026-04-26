@@ -61,11 +61,11 @@ CREATE POLICY IF NOT EXISTS "blocked_slots_anon_read"
 
 -- ── 4. Seed clinic locations ───────────────────────────────────────
 INSERT INTO locations (id, slug, name, address)
-SELECT gen_random_uuid(), 'hornchurch', 'Hornchurch', 'Hornchurch, Essex RM11'
+SELECT gen_random_uuid(), 'hornchurch', '[LOCATION_1]', '[LOCATION_1], Essex RM11'
 WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = 'hornchurch');
 
 INSERT INTO locations (id, slug, name, address)
-SELECT gen_random_uuid(), 'marylebone', 'Marylebone', 'Marylebone, London W1G'
+SELECT gen_random_uuid(), 'marylebone', '[LOCATION_2]', '[LOCATION_2], London W1G'
 WHERE NOT EXISTS (SELECT 1 FROM locations WHERE slug = 'marylebone');
 
 -- ── 4b. Medical forms table ────────────────────────────────────────

@@ -85,7 +85,7 @@
 
 | Service | Details |
 |---|---|
-| **Supabase** | Managed PostgreSQL; project ID `tithmarxgkafwgqonhfb` |
+| **Supabase** | Managed PostgreSQL; project ID `[SUPABASE_PROJECT_REF]` |
 | Connection | `@supabase/supabase-js` with anon key (public reads) and service_role key (all writes) |
 | RLS | Enabled on all tables; service_role bypasses automatically |
 | Storage | Supabase Storage bucket `media` — hero/result videos at `starr/hero/` |
@@ -122,7 +122,7 @@
 
 | Service | Purpose | Notes |
 |---|---|---|
-| **Supabase** | Database + Storage CDN | Project `tithmarxgkafwgqonhfb`; RLS enabled |
+| **Supabase** | Database + Storage CDN | Project `[SUPABASE_PROJECT_REF]`; RLS enabled |
 | **Stripe** | Deposit payments | Webhook endpoint registered at `/api/stripe/webhook` |
 | **Resend** | Transactional email | Domain `[CLIENT_NAME]y.co.uk` must be DNS-verified |
 | **Google Calendar** | Two-way calendar sync | OAuth2 per location; app currently in **Testing mode** (7-day refresh token limit) |

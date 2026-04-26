@@ -49,7 +49,7 @@ These values are hardcoded in source files and should be moved to environment va
 | `FROM = "[CLIENT_NAME] <hello@[CLIENT_NAME]y.co.uk>"` | `artifacts/api-server/src/lib/email.ts` line 4 | `EMAIL_FROM` |
 | `+447701298985` (WhatsApp number in email templates) | `artifacts/api-server/src/lib/email.ts` | `WHATSAPP_NUMBER` (or use `dd_settings` KV — partially done) |
 | `https://[CLIENT_NAME]y.co.uk` (CORS, ICS links) | `artifacts/api-server/src/app.ts` | `SITE_URL` (partially via `PUBLIC_URL`) |
-| `Hornchurch UUID / Marylebone UUID` | `artifacts/api-server/src/lib/seed.ts` | Should be derived from DB after location insert |
+| `[LOCATION_1] UUID / [LOCATION_2] UUID` | `artifacts/api-server/src/lib/seed.ts` | Should be derived from DB after location insert |
 | `BUILT_IN_TREATMENTS` array | `artifacts/api-server/src/routes/portal.ts` | Should be read from Supabase `treatments` table |
 
 ---

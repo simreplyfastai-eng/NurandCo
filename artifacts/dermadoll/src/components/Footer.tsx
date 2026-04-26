@@ -2,16 +2,16 @@ import { useEffect, useState } from "react";
 
 const SOCIAL = {
   instagram: [
-    { handle: "@StarrFacess",      url: "https://instagram.com/StarrFacess" },
-    { handle: "@StarrAestheticss", url: "https://instagram.com/StarrAestheticss" },
-    { handle: "@StarrSuitess",     url: "https://instagram.com/StarrSuitess" },
-    { handle: "@StarrNailedd",     url: "https://instagram.com/StarrNailedd" },
+    { handle: "@[Client]Facess",      url: "https://instagram.com/[Client]Facess" },
+    { handle: "@[ClientName]s", url: "https://instagram.com/[ClientName]s" },
+    { handle: "@[Client]Suitess",     url: "https://instagram.com/[Client]Suitess" },
+    { handle: "@[Client]Nailedd",     url: "https://instagram.com/[Client]Nailedd" },
   ],
   tiktok: [
-    { handle: "@StarrFacess",      url: "https://tiktok.com/@StarrFacess" },
-    { handle: "@StarrAestheticss", url: "https://tiktok.com/@StarrAestheticss" },
-    { handle: "@StarrSuitess",     url: "https://tiktok.com/@StarrSuitess" },
-    { handle: "@StarrNailedd",     url: "https://tiktok.com/@StarrNailedd" },
+    { handle: "@[Client]Facess",      url: "https://tiktok.com/@[Client]Facess" },
+    { handle: "@[ClientName]s", url: "https://tiktok.com/@[ClientName]s" },
+    { handle: "@[Client]Suitess",     url: "https://tiktok.com/@[Client]Suitess" },
+    { handle: "@[Client]Nailedd",     url: "https://tiktok.com/@[Client]Nailedd" },
   ],
 };
 

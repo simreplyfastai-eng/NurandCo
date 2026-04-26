@@ -116,16 +116,16 @@ async function getDepositSettings(locationId: string): Promise<{ depositInjectab
 }
 
 const IG_ACCOUNTS_DEFAULT = [
-  { handle: "@StarrFacess",      label: "Face Treatments", url: "https://instagram.com/StarrFacess" },
-  { handle: "@StarrAestheticss", label: "Aesthetics",       url: "https://instagram.com/StarrAestheticss" },
-  { handle: "@StarrSuitess",     label: "The Suite",        url: "https://instagram.com/StarrSuitess" },
-  { handle: "@StarrNailedd",     label: "Nails",            url: "https://instagram.com/StarrNailedd" },
+  { handle: "@[Client]Facess",      label: "Face Treatments", url: "https://instagram.com/[Client]Facess" },
+  { handle: "@[ClientName]s", label: "Aesthetics",       url: "https://instagram.com/[ClientName]s" },
+  { handle: "@[Client]Suitess",     label: "The Suite",        url: "https://instagram.com/[Client]Suitess" },
+  { handle: "@[Client]Nailedd",     label: "Nails",            url: "https://instagram.com/[Client]Nailedd" },
 ];
 const TT_ACCOUNTS_DEFAULT = [
-  { handle: "@StarrFacess",      label: "Face Treatments", url: "https://tiktok.com/@StarrFacess" },
-  { handle: "@StarrAestheticss", label: "Aesthetics",       url: "https://tiktok.com/@StarrAestheticss" },
-  { handle: "@StarrSuitess",     label: "The Suite",        url: "https://tiktok.com/@StarrSuitess" },
-  { handle: "@StarrNailedd",     label: "Nails",            url: "https://tiktok.com/@StarrNailedd" },
+  { handle: "@[Client]Facess",      label: "Face Treatments", url: "https://tiktok.com/@[Client]Facess" },
+  { handle: "@[ClientName]s", label: "Aesthetics",       url: "https://tiktok.com/@[ClientName]s" },
+  { handle: "@[Client]Suitess",     label: "The Suite",        url: "https://tiktok.com/@[Client]Suitess" },
+  { handle: "@[Client]Nailedd",     label: "Nails",            url: "https://tiktok.com/@[Client]Nailedd" },
 ];
 
 // GET /api/config — public config + checklist

@@ -3,7 +3,7 @@
  * [CLIENT_NAME] — BOOKING SYSTEM API
  * ═══════════════════════════════════════════════════════
  *
- * Clinics: Hornchurch (Essex RM11) & Marylebone (London W1G)
+ * Clinics: [LOCATION_1] (Essex RM11) & [LOCATION_2] (London W1G)
  * Backend: Supabase (PostgreSQL) with location isolation
  *
  * Every booking, treatment, and availability rule

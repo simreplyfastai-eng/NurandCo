@@ -12,8 +12,8 @@ const COURSE_LOCATION_SLUG: Record<string, string> = {
 };
 
 const COURSE_LOCATION_LABEL: Record<string, string> = {
-  "Essex Masterclass": "Hornchurch Clinic",
-  "London Masterclass": "Marylebone Clinic",
+  "Essex Masterclass": "[LOCATION_1] Clinic",
+  "London Masterclass": "[LOCATION_2] Clinic",
 };
 
 function getLocationId(req: import("express").Request): string | null {

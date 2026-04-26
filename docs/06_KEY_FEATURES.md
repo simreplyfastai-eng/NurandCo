@@ -17,7 +17,7 @@
 **Step-by-step user flow:**
 
 1. Customer visits `/book` or opens BookingModal from any CTA.
-2. **Location select** — customer picks Hornchurch or Marylebone.
+2. **Location select** — customer picks [LOCATION_1] or [LOCATION_2].
 3. **Treatment select** — treatments loaded from `GET /api/portal/catalog?locationId=<uuid>` (60s cached).
 4. **Date picker** — calendar rendered; closed days (per `availability_settings`) and `blocked_dates` are greyed out.
 5. **Time slot picker** — `GET /api/availability?locationId=&date=&duration=` returns free 15-minute slots. Slots already occupied by existing bookings and Google Calendar events are excluded.
@@ -169,7 +169,7 @@
 
 ## 6. Multi-Location Handling
 
-**What it does:** Strictly isolates Hornchurch and Marylebone data — a client or booking at one location is completely invisible from the other.
+**What it does:** Strictly isolates [LOCATION_1] and [LOCATION_2] data — a client or booking at one location is completely invisible from the other.
 
 **Enforcement points:**
 
@@ -178,15 +178,15 @@
 | Database | `location_id` FK on all core tables (`treatments`, `clients`, `bookings`, `enquiries`, `portal_kv`) |
 | API — all admin queries | Filter by `X-Location-Id` header (required for all admin endpoints) |
 | API — client update IDOR guard | `PUT /api/clients/:id` reads the stored `location_id` from DB and rejects if it doesn't match the header |
-| Treatments seed | 66 rows for Hornchurch UUID, 11 rows for Marylebone UUID |
+| Treatments seed | 66 rows for [LOCATION_1] UUID, 11 rows for [LOCATION_2] UUID |
 | Portal KV | All KV keys stored with a `location_id`; global keys use `__global__` prefix |
 | Client dedup | Unique index on `(location_id, LOWER(email))` — same email at different locations = two independent records |
 | Finance | Filter by `location_id` when header present; aggregate view when absent |
 | Google Calendar | One `google_calendar_tokens` row per `location_id`; booking events go to the correct calendar |
 
 **Location UUIDs (production):**
-- Hornchurch: `ccb325d5-6b17-4218-b97d-1a1a0383410a`
-- Marylebone: `5b3d890a-bf6f-4e87-af43-5db0726a46ce`
+- [LOCATION_1]: `ccb325d5-6b17-4218-b97d-1a1a0383410a`
+- [LOCATION_2]: `5b3d890a-bf6f-4e87-af43-5db0726a46ce`
 
 ---
 

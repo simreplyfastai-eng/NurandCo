@@ -4,13 +4,13 @@ Tags:
 - `[CORE]` — generic infrastructure; safe to reuse unchanged across builds
 - `[CLIENT-SPECIFIC]` — must be swapped out for each new client
 - `[CONFIG]` — environment / settings file
-- `★ HARDCODED` — contains hardcoded Starr-specific data (highlighted below)
+- `★ HARDCODED` — contains hardcoded [Client]-specific data (highlighted below)
 
 ---
 
 ```
 workspace/
-├── PROJECT_SPEC.md                          [CLIENT-SPECIFIC] ★ Master technical reference for Starr build
+├── PROJECT_SPEC.md                          [CLIENT-SPECIFIC] ★ Master technical reference for [Client] build
 ├── pnpm-workspace.yaml                      [CORE]            pnpm monorepo workspace configuration
 ├── package.json                             [CORE]            Root workspace package
 │
@@ -19,7 +19,7 @@ workspace/
 ├── artifacts/
 │   │
 │   ├── dermadoll/                           ← Public marketing site + static admin pages
-│   │   ├── index.html                       [CLIENT-SPECIFIC] ★ SEO meta, OG tags, JSON-LD schema, canonical URL — all Starr-specific
+│   │   ├── index.html                       [CLIENT-SPECIFIC] ★ SEO meta, OG tags, JSON-LD schema, canonical URL — all [Client]-specific
 │   │   ├── vite.config.ts                   [CONFIG]          Vite build config; BASE_URL, port, proxy rules
 │   │   ├── tsconfig.json                    [CORE]            TypeScript config for frontend
 │   │   ├── package.json                     [CORE]            Frontend dependencies
@@ -29,9 +29,9 @@ workspace/
 │   │   │   ├── portal.html                  [CLIENT-SPECIFIC] ★ Admin SPA (~6000 lines vanilla JS); brand colours, KV keys, location UUIDs hardcoded
 │   │   │   ├── forms.html                   [CORE]            Medical/consent forms page (token-gated); mostly generic
 │   │   │   ├── confirmed.html               [CLIENT-SPECIFIC] ★ Post-booking confirmation page; brand copy hardcoded
-│   │   │   ├── sitemap.xml                  [CLIENT-SPECIFIC] ★ Starr domain and URL structure
-│   │   │   ├── robots.txt                   [CLIENT-SPECIFIC] ★ Starr domain in sitemap reference
-│   │   │   ├── favicon.svg                  [CLIENT-SPECIFIC] ★ Starr brand logo
+│   │   │   ├── sitemap.xml                  [CLIENT-SPECIFIC] ★ [Client] domain and URL structure
+│   │   │   ├── robots.txt                   [CLIENT-SPECIFIC] ★ [Client] domain in sitemap reference
+│   │   │   ├── favicon.svg                  [CLIENT-SPECIFIC] ★ [Client] brand logo
 │   │   │   ├── opengraph.jpg                [CLIENT-SPECIFIC] ★ OG image for social sharing
 │   │   │   ├── hero.mp4                     [CLIENT-SPECIFIC] ★ Legacy hero video (currently unused; Hero.tsx fetches from API)
 │   │   │   ├── eva-hero.jpg                 [CLIENT-SPECIFIC] ★ Eva hero portrait
@@ -46,31 +46,31 @@ workspace/
 │   │   └── src/
 │   │       ├── main.tsx                     [CORE]            React app entry point
 │   │       ├── App.tsx                      [CLIENT-SPECIFIC] ★ Route definitions; wraps all pages
-│   │       ├── index.css                    [CLIENT-SPECIFIC] ★ Global CSS; Starr brand palette, fonts (Cormorant Garamond, Inter)
+│   │       ├── index.css                    [CLIENT-SPECIFIC] ★ Global CSS; [Client] brand palette, fonts (Cormorant Garamond, Inter)
 │   │       │
 │   │       ├── assets/
 │   │       │   └── training-pathway.jpg     [CLIENT-SPECIFIC] ★ Training section image
 │   │       │
 │   │       ├── components/
-│   │       │   ├── Navbar.tsx               [CLIENT-SPECIFIC] ★ Starr logo, nav links, brand colours
+│   │       │   ├── Navbar.tsx               [CLIENT-SPECIFIC] ★ [Client] logo, nav links, brand colours
 │   │       │   ├── Hero.tsx                 [CLIENT-SPECIFIC] ★ Hero copy, eva-hero.jpg, video from API
 │   │       │   ├── About.tsx                [CLIENT-SPECIFIC] ★ Eva bio copy, photos
 │   │       │   ├── Services.tsx             [CLIENT-SPECIFIC] ★ Service cards pulled from /api/portal/catalog
 │   │       │   ├── Pricing.tsx              [CLIENT-SPECIFIC] ★ Pricing section; pulls from API
 │   │       │   ├── Packages.tsx             [CLIENT-SPECIFIC] ★ Package deals copy
-│   │       │   ├── Locations.tsx            [CLIENT-SPECIFIC] ★ Hardcodes Hornchurch/Marylebone addresses and maps
+│   │       │   ├── Locations.tsx            [CLIENT-SPECIFIC] ★ Hardcodes [LOCATION_1]/[LOCATION_2] addresses and maps
 │   │       │   ├── BookingModal.tsx         [CORE]            ★ Booking flow UI (treatment → slot → Stripe); location UUIDs passed via props
 │   │       │   ├── BookNow.tsx              [CLIENT-SPECIFIC] ★ Book Now section CTA
 │   │       │   ├── BeforeAfter.tsx          [CLIENT-SPECIFIC] ★ Before/after slider; uses result-*.jpg
 │   │       │   ├── GalleryReel.tsx          [CLIENT-SPECIFIC] ★ Gallery carousel; uses gallery-*.jpg
-│   │       │   ├── ResultsVideos.tsx        [CLIENT-SPECIFIC] ★ Result videos; hardcodes Supabase CDN URLs for Starr bucket
+│   │       │   ├── ResultsVideos.tsx        [CLIENT-SPECIFIC] ★ Result videos; hardcodes Supabase CDN URLs for [Client] bucket
 │   │       │   ├── FacesGallery.tsx         [CLIENT-SPECIFIC] ★ Faces gallery
 │   │       │   ├── Reviews.tsx              [CLIENT-SPECIFIC] ★ Client review testimonials (hardcoded copy)
 │   │       │   ├── Training.tsx             [CLIENT-SPECIFIC] ★ Training section; training-pathway.jpg; course enquiry form
 │   │       │   ├── FAQ.tsx                  [CLIENT-SPECIFIC] ★ FAQ copy (treatment-specific)
 │   │       │   ├── Contact.tsx              [CLIENT-SPECIFIC] ★ Contact details; links to [CLIENT_NAME]yltd@gmail.com
 │   │       │   ├── Footer.tsx               [CLIENT-SPECIFIC] ★ Brand name "STARR BEAUTY", social handles, email, nav links
-│   │       │   ├── InstagramSection.tsx     [CLIENT-SPECIFIC] ★ Instagram embeds/links for Starr accounts
+│   │       │   ├── InstagramSection.tsx     [CLIENT-SPECIFIC] ★ Instagram embeds/links for [Client] accounts
 │   │       │   ├── TrustTicker.tsx          [CORE]            Scrolling trust badge ticker
 │   │       │   ├── SectionDivider.tsx       [CORE]            Decorative divider
 │   │       │   ├── CTABanner.tsx            [CLIENT-SPECIFIC] ★ CTA copy
@@ -96,7 +96,7 @@ workspace/
 │   │   ├── package.json                     [CORE]            Backend dependencies
 │   │   ├── tsconfig.json                    [CORE]            TypeScript config
 │   │   ├── build.mjs                        [CORE]            esbuild bundler config
-│   │   ├── supabase-migration.sql           [CLIENT-SPECIFIC] ★ SQL migration for Starr; seeds locations with Starr addresses
+│   │   ├── supabase-migration.sql           [CLIENT-SPECIFIC] ★ SQL migration for [Client]; seeds locations with [Client] addresses
 │   │   ├── test_payment_flow.mjs            [CORE]            Manual Stripe payment flow test script
 │   │   │
 │   │   └── src/
@@ -112,7 +112,7 @@ workspace/
 │   │       │   ├── clients.ts               [CORE]            Client CRUD, dedup, IDOR guard
 │   │       │   ├── availability.ts          [CORE]            Slot availability engine
 │   │       │   ├── treatments-route.ts      [CORE]            GET/POST/PUT/DELETE /api/treatments
-│   │       │   ├── portal.ts                [CLIENT-SPECIFIC] ★ BUILT_IN_TREATMENTS hardcoded for Starr; KV store
+│   │       │   ├── portal.ts                [CLIENT-SPECIFIC] ★ BUILT_IN_TREATMENTS hardcoded for [Client]; KV store
 │   │       │   ├── forms.ts                 [CORE]            Token-gated medical/consent submission
 │   │       │   ├── stripe.ts                [CORE]            Payment intent + webhook
 │   │       │   ├── finance.ts               [CORE]            Monthly revenue summary + chart data
@@ -127,7 +127,7 @@ workspace/
 │   │       └── lib/
 │   │           ├── supabase.ts              [CORE]            Supabase anon + service_role clients
 │   │           ├── auth.ts                  [CORE]            requireAuth() middleware
-│   │           ├── seed.ts                  [CLIENT-SPECIFIC] ★ 77 Starr treatments; Hornchurch/Marylebone UUIDs
+│   │           ├── seed.ts                  [CLIENT-SPECIFIC] ★ 77 [Client] treatments; [LOCATION_1]/[LOCATION_2] UUIDs
 │   │           ├── treatments.ts            [CLIENT-SPECIFIC] ★ Injectable keyword list; legacy TREATMENT_PRICES fallback
 │   │           ├── email.ts                 [CLIENT-SPECIFIC] ★ FROM address [CLIENT_NAME]y.co.uk; WhatsApp number; email copy
 │   │           ├── tz.ts                    [CORE]            BST/GMT boundary helpers
@@ -146,15 +146,15 @@ workspace/
 
 ---
 
-## Files with the Most Hardcoded Starr Data
+## Files with the Most Hardcoded [Client] Data
 
 | File | Hardcoded content |
 |---|---|
 | `artifacts/dermadoll/index.html` | Domain, OG image, JSON-LD schema, phone, email, social handles |
 | `artifacts/dermadoll/public/portal.html` | Brand colours, BUILT_IN_TREATMENTS list, location UUIDs, Eva's details |
-| `artifacts/api-server/src/lib/seed.ts` | All 77 treatments, Hornchurch/Marylebone UUIDs, categories, prices |
+| `artifacts/api-server/src/lib/seed.ts` | All 77 treatments, [LOCATION_1]/[LOCATION_2] UUIDs, categories, prices |
 | `artifacts/api-server/src/lib/email.ts` | FROM address, WhatsApp number, booking copy |
 | `artifacts/api-server/src/app.ts` | CORS allowlist with [CLIENT_NAME]y.co.uk |
 | `artifacts/dermadoll/src/components/Footer.tsx` | "STARR BEAUTY", social handles, email |
 | `artifacts/dermadoll/src/components/Locations.tsx` | Clinic addresses, map links |
-| `artifacts/api-server/supabase-migration.sql` | Hornchurch/Marylebone addresses seeded into DB |
+| `artifacts/api-server/supabase-migration.sql` | [LOCATION_1]/[LOCATION_2] addresses seeded into DB |

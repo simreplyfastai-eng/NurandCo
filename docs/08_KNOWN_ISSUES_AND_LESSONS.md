@@ -152,4 +152,4 @@ Owner notification (`sendFormsCompletedOwnerEmail()`) is only called on consent 
 
 5. **Portal KV key naming** — `fbn_*` in browser localStorage → `dd_*` in Supabase `portal_kv`. The translation happens in the API's `portal.ts`. If you add a new KV key, update both the portal.html read/write logic AND the API translation map.
 
-6. **Location UUIDs are environment-specific** — the Hornchurch/Marylebone UUIDs used in seed.ts and hardcoded in portal.html are specific to the production Supabase project. A new Supabase project generates different UUIDs. Always read UUIDs from the DB via `GET /api/locations` rather than hardcoding.
+6. **Location UUIDs are environment-specific** — the [LOCATION_1]/[LOCATION_2] UUIDs used in seed.ts and hardcoded in portal.html are specific to the production Supabase project. A new Supabase project generates different UUIDs. Always read UUIDs from the DB via `GET /api/locations` rather than hardcoding.

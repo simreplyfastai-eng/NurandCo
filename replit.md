@@ -14,7 +14,7 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 - **Primary Database**: Supabase (PostgreSQL, via @supabase/supabase-js v2) — ALL routes fully migrated
 - **Legacy Database**: PostgreSQL pool — FULLY REMOVED from all routes (no more pool.query anywhere)
 - **Build**: esbuild (ESM bundle)
-- **Frontend**: React + Vite (Starr Aesthetics website)
+- **Frontend**: React + Vite ([Client Name] website)
 
 ## Key Commands
 
@@ -24,12 +24,12 @@ pnpm workspace monorepo using TypeScript. Each package manages its own dependenc
 
 ## Artifacts
 
-### Starr Aesthetics (`artifacts/dermadoll`)
-Single-page luxury aesthetics clinic website with admin portal. Founder: **Eva**. Two clinic locations: Hornchurch (Essex RM11) + Marylebone (London W1G). Signature: NaturalèLips™ technique.
+### [Client Name] (`artifacts/dermadoll`)
+Single-page luxury aesthetics clinic website with admin portal. Founder: **Eva**. Two clinic locations: [LOCATION_1] (Essex RM11) + [LOCATION_2] (London W1G). Signature: NaturalèLips™ technique.
 - **Design tokens**: Burgundy #5C1A1A · Gold #C9A96E · Cream #F5F0EB. Fonts: Cormorant Garamond (italic headings) + Inter (body). 0 border-radius, outlined buttons only.
-- **Brand**: Instagram @starraestheticss · Website www.[CLIENT_NAME]y.co.uk · Email [CLIENT_NAME]yltd@gmail.com
-- **Page sections** (in order): Navbar (SERVICES | LOCATIONS | TRAINING + BOOK NOW) → Hero (split cream/photo) → About (Eva founder, 6+ yrs, NL™ stats) → TreatmentMarquee (THE EDIT, dual scrolling rows) → Locations (Hornchurch/Marylebone cards) → Services (accordion with location toggle, per-location pricing) → BeforeAfter (Real Transformations grid) → ResultsVideos (Watch Real Treatments) → Training (Starr Academy, Essex/London masterclasses) → Reviews (6-card grid, CLIENT LOVE) → FAQ (NaturalèLips™ questions) → CTABanner (BOOK HORNCHURCH / BOOK MARYLEBONE) → Footer (Beauty Redefined, clean)
-- **Admin portal**: `/portal.html` — Starr Aesthetics rebrand; location selector for Hornchurch / Marylebone; API calls use `fbn_*` keys (mapped to `dd_*` in Supabase portal_kv backend); `X-Location-Id` header passed on all KV/bookings/clients calls
+- **Brand**: Instagram @[client-slug]s · Website www.[CLIENT_NAME]y.co.uk · Email [CLIENT_NAME]yltd@gmail.com
+- **Page sections** (in order): Navbar (SERVICES | LOCATIONS | TRAINING + BOOK NOW) → Hero (split cream/photo) → About (Eva founder, 6+ yrs, NL™ stats) → TreatmentMarquee (THE EDIT, dual scrolling rows) → Locations ([LOCATION_1]/[LOCATION_2] cards) → Services (accordion with location toggle, per-location pricing) → BeforeAfter (Real Transformations grid) → ResultsVideos (Watch Real Treatments) → Training ([Client] Academy, Essex/London masterclasses) → Reviews (6-card grid, CLIENT LOVE) → FAQ (NaturalèLips™ questions) → CTABanner (BOOK HORNCHURCH / BOOK MARYLEBONE) → Footer (Beauty Redefined, clean)
+- **Admin portal**: `/portal.html` — [Client Name] rebrand; location selector for [LOCATION_1] / [LOCATION_2]; API calls use `fbn_*` keys (mapped to `dd_*` in Supabase portal_kv backend); `X-Location-Id` header passed on all KV/bookings/clients calls
 
 ### API Server (`artifacts/api-server`)
 Express 5 REST API on port 8080. All routes prefixed `/api/`.

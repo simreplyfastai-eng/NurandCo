@@ -117,13 +117,13 @@ export default function Contact() {
               Get In Touch
             </h2>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 40px" }}>
-              Clinics in Hornchurch, Essex and Marylebone, London. DM on Instagram or send an email, we'll get back to you promptly.
+              Clinics in [LOCATION_1], Essex and [LOCATION_2], London. DM on Instagram or send an email, we'll get back to you promptly.
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
               {[
-                { icon: "📍", text: "Hornchurch / Marylebone" },
-                { icon: "📸", text: "@StarrAestheticss", href: "https://instagram.com/StarrAestheticss" },
+                { icon: "📍", text: "[LOCATION_1] / [LOCATION_2]" },
+                { icon: "📸", text: "@[ClientName]s", href: "https://instagram.com/[ClientName]s" },
                 { icon: "✉", text: "[CLIENT_NAME]yltd@gmail.com", href: "mailto:[CLIENT_NAME]yltd@gmail.com" },
               ].map((item) => (
                 <div key={item.text} style={{ display: "flex", alignItems: "center", gap: 14 }}>

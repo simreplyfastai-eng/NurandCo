@@ -777,7 +777,7 @@ select.form-input{background:var(--color-card)}
   <div class="login-card" id="login-card">
     <button class="login-close" onclick="window.location.href='/'" aria-label="Back to site">✕</button>
     <div class="login-logo">
-      <div class="login-logo-name">Starr</div>
+      <div class="login-logo-name">[Client]</div>
       <div class="login-logo-sub">Beauty</div>
     </div>
     <div class="login-sub">Admin Portal</div>
@@ -793,7 +793,7 @@ select.form-input{background:var(--color-card)}
 <!-- ═══ LOCATION SELECTOR ═══════════════════════════════ -->
 <div id="location-selector">
   <div class="loc-logo">
-    <div class="loc-logo-name">Starr</div>
+    <div class="loc-logo-name">[Client]</div>
     <div class="loc-logo-sub">Beauty</div>
   </div>
   <div class="loc-eyebrow">
@@ -803,14 +803,14 @@ select.form-input{background:var(--color-card)}
   </div>
   <h2 class="loc-heading">Which clinic are you managing?</h2>
   <div class="loc-cards">
-    <div class="loc-card" onclick="selectLocation('Hornchurch')">
+    <div class="loc-card" onclick="selectLocation('[LOCATION_1]')">
       <svg class="loc-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <div class="loc-card-name">Hornchurch</div>
+      <div class="loc-card-name">[LOCATION_1]</div>
       <div class="loc-card-addr">Essex, RM11</div>
     </div>
-    <div class="loc-card" onclick="selectLocation('Marylebone')">
+    <div class="loc-card" onclick="selectLocation('[LOCATION_2]')">
       <svg class="loc-card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-      <div class="loc-card-name">Marylebone</div>
+      <div class="loc-card-name">[LOCATION_2]</div>
       <div class="loc-card-addr">London, W1G</div>
     </div>
   </div>
@@ -830,7 +830,7 @@ select.form-input{background:var(--color-card)}
   <!-- SIDEBAR -->
   <aside id="sidebar">
     <div class="sb-brand">
-      <div class="sb-logo-name">Starr</div>
+      <div class="sb-logo-name">[Client]</div>
       <div class="sb-logo-sub">Beauty</div>
       <div class="sb-location-badge" id="sb-location-label">— Admin Portal</div>
     </div>
@@ -1258,8 +1258,8 @@ select.form-input{background:var(--color-card)}
           <div class="settings-section-header">Business Info</div>
           <div class="settings-body">
             <div class="settings-row"><label>Clinic name</label><input type="text" id="s-clinic" value="[CLIENT_NAME]"/></div>
-            <div class="settings-row"><label>Practitioner</label><input type="text" id="s-practitioner" value="Starr"/></div>
-            <div class="settings-row"><label>Instagram</label><input type="text" id="s-instagram" value="@StarrAestheticss"/></div>
+            <div class="settings-row"><label>Practitioner</label><input type="text" id="s-practitioner" value="[Client]"/></div>
+            <div class="settings-row"><label>Instagram</label><input type="text" id="s-instagram" value="@[ClientName]s"/></div>
             <div class="settings-row"><label>WhatsApp</label><input type="text" id="s-whatsapp" placeholder="+44 7…"/></div>
             <div class="settings-row" style="align-items:center">
               <label>Working hours</label>

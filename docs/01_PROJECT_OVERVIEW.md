@@ -1,10 +1,10 @@
 # 01 — Project Overview
 
 ## Project Name
-**[CLIENT_NAME] / Starr Aesthetics Clinic Platform**
+**[CLIENT_NAME] / [Client Name] Clinic Platform**
 
 ## Client
-**Starr Aesthetics** (trading as [CLIENT_NAME]) — a two-location premium aesthetics clinic operated by Eva.
+**[Client Name]** (trading as [CLIENT_NAME]) — a two-location premium aesthetics clinic operated by Eva.
 
 ## Live URL
 `https://[CLIENT_NAME]y.co.uk`
@@ -41,7 +41,7 @@ Built: early 2025. Last audited and updated: **April 2026**.
 4. **Medical & consent forms system** — token-gated forms page; single-use 256-bit tokens; 7-day expiry; auto-sent after deposit.
 5. **Google Calendar two-way sync** — per-location OAuth2; `createCalendarEvent()` on booking confirmed; `getGoogleCalendarBusyRanges()` reads calendar events to block availability slots.
 6. **Email automation** — booking confirmation + ICS, forms link, 24h reminder, forms 48h reminder, owner notifications via Resend.
-7. **Multi-location isolation** — Hornchurch (Essex) and Marylebone (London) are fully isolated at DB, API, and UI level.
+7. **Multi-location isolation** — [LOCATION_1] (Essex) and [LOCATION_2] (London) are fully isolated at DB, API, and UI level.
 8. **SEO / health audit** — `sitemap.xml`, `robots.txt`, JSON-LD BeautySalon schema, canonical URL, lazy-loading, CDN range-request streaming.
 9. **Cron jobs** — auto-complete past bookings, 24h appointment reminders, 48h forms reminders.
 10. **Security hardening** — Helmet CSP, rate limits per endpoint, CORS allowlist, IDOR guard on client updates, XSS escaping in portal.
@@ -52,8 +52,8 @@ Built: early 2025. Last audited and updated: **April 2026**.
 
 | Location | UUID (production) | Address |
 |---|---|---|
-| Hornchurch | `ccb325d5-6b17-4218-b97d-1a1a0383410a` | Hornchurch, Essex RM11 |
-| Marylebone | `5b3d890a-bf6f-4e87-af43-5db0726a46ce` | Marylebone, London W1G |
+| [LOCATION_1] | `ccb325d5-6b17-4218-b97d-1a1a0383410a` | [LOCATION_1], Essex RM11 |
+| [LOCATION_2] | `5b3d890a-bf6f-4e87-af43-5db0726a46ce` | [LOCATION_2], London W1G |
 
 ---
 

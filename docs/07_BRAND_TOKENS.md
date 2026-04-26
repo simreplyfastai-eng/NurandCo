@@ -30,7 +30,7 @@
 ### CSS custom properties (defined in `index.css`)
 
 ```css
-/* Starr brand palette — line ~60 of index.css */
+/* [Client] brand palette — line ~60 of index.css */
 --app-font-sans: 'Inter', sans-serif;
 --app-font-serif: 'Cormorant Garamond', serif;
 
@@ -85,7 +85,7 @@
 | Asset | Source | Notes |
 |---|---|---|
 | Hero background image | `artifacts/dermadoll/public/eva-hero.jpg` | Used in `Hero.tsx` |
-| Hero videos (results) | Supabase CDN: `https://tithmarxgkafwgqonhfb.supabase.co/storage/v1/object/public/media/starr/hero/video1.mp4` (video2, video3) | Loaded in `ResultsVideos.tsx` with hardcoded CDN URLs |
+| Hero videos (results) | Supabase CDN: `https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/starr/hero/video1.mp4` (video2, video3) | Loaded in `ResultsVideos.tsx` with hardcoded CDN URLs |
 | About section image | `artifacts/dermadoll/public/eva-about.jpg` | Used in `About.tsx` |
 | Chair/clinic image | `artifacts/dermadoll/public/eva-chair.jpg` | Used in multiple sections |
 | Practitioner photo | `artifacts/dermadoll/public/niamh-practitioner.jpg` | Used in team section |
@@ -150,12 +150,12 @@ Box shadow on hover: `0 8px 32px rgba(92,26,26,0.08)` (subtle burgundy tint)
 
 ---
 
-## Social Media Handles (Starr-specific)
+## Social Media Handles ([Client]-specific)
 
 | Platform | Handles |
 |---|---|
-| Instagram | @StarrFacess, @StarrAestheticss, @StarrSuitess, @StarrNailedd |
-| TikTok | @StarrFacess, @StarrAestheticss, @StarrSuitess, @StarrNailedd |
+| Instagram | @[Client]Facess, @[ClientName]s, @[Client]Suitess, @[Client]Nailedd |
+| TikTok | @[Client]Facess, @[ClientName]s, @[Client]Suitess, @[Client]Nailedd |
 
 Defined in `artifacts/dermadoll/src/components/Footer.tsx` lines 3–16.
 

@@ -1,7 +1,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 
-const CDN = "https://tithmarxgkafwgqonhfb.supabase.co/storage/v1/object/public/media/starr/hero";
+const CDN = "https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/starr/hero";
 
 const DEFAULT_SLOTS = [
   { key: "vid0", label: "HD Sculpt Lips", category: "LIP FILLER", src: `${CDN}/video1.mp4` },
