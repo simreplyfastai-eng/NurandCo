@@ -242,7 +242,7 @@ export async function seedTreatments(): Promise<void> {
     const M = locs.find((l: { slug: string }) => l.slug === "[location-2-slug]")?.id as string | undefined;
 
     if (!H || !M) {
-      console.error(`Seed: missing location IDs — hornchurch=${H} marylebone=${M}`);
+      console.error(`Seed: missing location IDs — [location-1-slug]=${H} [location-2-slug]=${M}`);
       return;
     }
 
@@ -279,11 +279,11 @@ export async function seedTreatments(): Promise<void> {
       .select("*", { count: "exact", head: true })
       .eq("price", 0);
 
-    console.log(`Seed complete: total=${total} hornchurch=${hCount} marylebone=${mCount} price=0 rows=${zeroPrice}`);
+    console.log(`Seed complete: total=${total} [location-1-slug]=${hCount} [location-2-slug]=${mCount} price=0 rows=${zeroPrice}`);
 
     if (total !== 77) console.warn(`Seed WARNING: expected 77 total, got ${total}`);
-    if (hCount !== 66) console.warn(`Seed WARNING: expected 66 hornchurch, got ${hCount}`);
-    if (mCount !== 11) console.warn(`Seed WARNING: expected 11 marylebone, got ${mCount}`);
+    if (hCount !== 66) console.warn(`Seed WARNING: expected 66 [location-1-slug], got ${hCount}`);
+    if (mCount !== 11) console.warn(`Seed WARNING: expected 11 [location-2-slug], got ${mCount}`);
     if (zeroPrice !== 1) console.warn(`Seed WARNING: expected exactly 1 price=0 row (Fat Dissolving Lemon Bottle), got ${zeroPrice}`);
 
   } catch (err) {

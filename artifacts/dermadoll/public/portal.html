@@ -1756,14 +1756,14 @@ let _fpBmDate=null, _fpRsDate=null; // Flatpickr instances
 
 function authHdr(){
   const t=localStorage.getItem('fbn_token');
-  const locId=_SESSION_LOC_ID||sessionStorage.getItem('starr_location_id')||'';
+  const locId=_SESSION_LOC_ID||sessionStorage.getItem('[client-slug]_location_id')||'';
   const h=t?{'Authorization':'Bearer '+t}:{};
   if(locId)h['X-Location-Id']=locId;
   return h;
 }
 
-function getSessionLocId(){return _SESSION_LOC_ID||sessionStorage.getItem('starr_location_id')||'';}
-function getSessionLocName(){return _SESSION_LOC_NAME||sessionStorage.getItem('starr_location')||'';}
+function getSessionLocId(){return _SESSION_LOC_ID||sessionStorage.getItem('[client-slug]_location_id')||'';}
+function getSessionLocName(){return _SESSION_LOC_NAME||sessionStorage.getItem('[client-slug]_location')||'';}
 
 const CloudStore = {
   BASE: '/api/portal/store',
@@ -2121,14 +2121,14 @@ function showLocationSelector(){
 }
 
 async function selectLocation(loc){
-  sessionStorage.setItem('starr_location',loc);
+  sessionStorage.setItem('[client-slug]_location',loc);
   // Resolve and store the location UUID so all API calls send X-Location-Id
   try{
     const r=await fetch('/api/locations');
     if(r.ok){
       const locs=await r.json();
       const found=locs.find(l=>l.name===loc||l.slug===loc.toLowerCase().replace(/\s+/g,'-'));
-      if(found){sessionStorage.setItem('starr_location_id',found.id);}
+      if(found){sessionStorage.setItem('[client-slug]_location_id',found.id);}
     }
   }catch(e){console.warn('selectLocation: could not resolve location UUID',e);}
   document.getElementById('location-selector').classList.remove('visible');
@@ -2136,8 +2136,8 @@ async function selectLocation(loc){
 }
 
 function switchLocation(){
-  sessionStorage.removeItem('starr_location');
-  sessionStorage.removeItem('starr_location_id');
+  sessionStorage.removeItem('[client-slug]_location');
+  sessionStorage.removeItem('[client-slug]_location_id');
   _SESSION_LOC_ID='';
   _SESSION_LOC_NAME='';
   _supabaseClients=null;
@@ -2148,8 +2148,8 @@ function switchLocation(){
 function doLogout(){
   _loginJustSucceeded=false; // ensure clearSession always runs on explicit logout
   _loginDone=false;
-  sessionStorage.removeItem('starr_location');
-  sessionStorage.removeItem('starr_location_id');
+  sessionStorage.removeItem('[client-slug]_location');
+  sessionStorage.removeItem('[client-slug]_location_id');
   clearSession();
   window.location.href='/';
 }
@@ -2157,8 +2157,8 @@ function doLogout(){
 let _sessionWatcherStarted=false;
 function showPortal(loc){
   // Lock location module-level on first call; ignore any subsequent attempt to change it
-  const resolvedLoc=loc||sessionStorage.getItem('starr_location')||'';
-  const resolvedLocId=sessionStorage.getItem('starr_location_id')||'';
+  const resolvedLoc=loc||sessionStorage.getItem('[client-slug]_location')||'';
+  const resolvedLocId=sessionStorage.getItem('[client-slug]_location_id')||'';
   if(!_SESSION_LOC_ID&&resolvedLocId){_SESSION_LOC_ID=resolvedLocId;_SESSION_LOC_NAME=resolvedLoc;}
   document.getElementById('login-page').style.display='none';
   document.getElementById('location-selector').classList.remove('visible');
@@ -2170,7 +2170,7 @@ function showPortal(loc){
   if(!_sessionWatcherStarted){_sessionWatcherStarted=true;startSessionWatcher();}
   CloudStore.init().then(async ()=>{
     // Load location-specific availability from Supabase
-    const _locId=sessionStorage.getItem('starr_location_id');
+    const _locId=sessionStorage.getItem('[client-slug]_location_id');
     if(_locId){
       try{
         const _ar=await fetch('/api/availability',{headers:authHdr(),cache:'no-store'});
@@ -2240,7 +2240,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
       if(d.valid){
         if(d.token)saveSession(d.token,d.expiresAt||Date.now()+8*3600*1000);
         // If we have a saved location, go straight to portal
-        const savedLoc=sessionStorage.getItem('starr_location');
+        const savedLoc=sessionStorage.getItem('[client-slug]_location');
         if(savedLoc){showPortal(savedLoc);}else{showLocationSelector();}
         return;
       }
@@ -2649,7 +2649,7 @@ function renderDayTimeline(dateStr){
 function openBookingDetailPanel(bookingId){
   const b=getBookings().find(x=>x.id===bookingId);
   if(!b)return;
-  const locName=_SESSION_LOC_NAME||sessionStorage.getItem('starr_location')||'Clinic';
+  const locName=_SESSION_LOC_NAME||sessionStorage.getItem('[client-slug]_location')||'Clinic';
   const medColor=b.hasMedical?'#2D6A4F':'#aaa';
   const conColor=b.hasConsent?'#2D6A4F':'#aaa';
   const _lbl='font-size:10px;color:var(--color-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;font-weight:600';
@@ -2782,7 +2782,7 @@ async function saveAvailability(){
   const origText=btn?btn.textContent:'Save Changes';
   if(btn){btn.disabled=true;btn.textContent='Saving…';}
 
-  const locId=sessionStorage.getItem('starr_location_id');
+  const locId=sessionStorage.getItem('[client-slug]_location_id');
   if(!locId){
     showToast('No location selected — cannot save');
     if(btn){btn.disabled=false;btn.textContent=origText;}
@@ -2840,7 +2840,7 @@ async function renderAvailability(){
   renderAvailDays(avail);
   renderAvailMiniCal(avail);
   // 2. Fetch FRESH data from Supabase and re-render — this is the source of truth
-  const locId=sessionStorage.getItem('starr_location_id');
+  const locId=sessionStorage.getItem('[client-slug]_location_id');
   if(locId){
     try{
       const r=await fetch('/api/admin/availability',{headers:authHdr(),cache:'no-store'});
@@ -2920,7 +2920,7 @@ function onToggleAvailDay(dow,checked){
 let _blockedDates=new Set(); // Set of YYYY-MM-DD strings
 
 async function loadBlockedDates(){
-  const locId=sessionStorage.getItem('starr_location_id');
+  const locId=sessionStorage.getItem('[client-slug]_location_id');
   if(!locId)return;
   try{
     const res=await fetch('/api/admin/blocked-dates',{headers:authHdr(),cache:'no-store'});
@@ -2931,7 +2931,7 @@ async function loadBlockedDates(){
 }
 
 async function toggleBlockedDate(dateStr){
-  const locId=sessionStorage.getItem('starr_location_id');
+  const locId=sessionStorage.getItem('[client-slug]_location_id');
   if(!locId){showToast('No location selected');return;}
   try{
     const res=await fetch('/api/admin/blocked-dates',{
@@ -2961,7 +2961,7 @@ const BS_DAY_NAMES={0:'Sunday',1:'Monday',2:'Tuesday',3:'Wednesday',4:'Thursday'
 let _blockedSlots=[];
 
 async function loadBlockedSlots(){
-  const locId=sessionStorage.getItem('starr_location_id');
+  const locId=sessionStorage.getItem('[client-slug]_location_id');
   if(!locId)return;
   try{
     const res=await fetch('/api/admin/blocked-slots',{headers:authHdr()});
@@ -3044,7 +3044,7 @@ async function deleteBlockedSlot(btn,id){
 
 // ─── Deposit Settings ───────────────────────────────────────────────────────
 async function loadDepositSettings(){
-  const locId=sessionStorage.getItem('starr_location_id');
+  const locId=sessionStorage.getItem('[client-slug]_location_id');
   if(!locId)return;
   try{
     const s=await CloudStore.get('fbn_settings')||{};
@@ -3056,7 +3056,7 @@ async function loadDepositSettings(){
   }catch(e){console.error('loadDepositSettings',e);}
 }
 async function saveDepositSettings(){
-  const locId=sessionStorage.getItem('starr_location_id');
+  const locId=sessionStorage.getItem('[client-slug]_location_id');
   if(!locId){showToast('No location selected');return;}
   const injEl=document.getElementById('dep-injectables');
   const otherEl=document.getElementById('dep-other');
@@ -3390,7 +3390,7 @@ async function openBookingModal(prefill){
     document.getElementById('bm-secondary-row').style.display='flex';
     // Show location
     document.getElementById('bm-location-group').style.display='';
-    document.getElementById('bm-location-display').textContent=_SESSION_LOC_NAME||sessionStorage.getItem('starr_location')||'Clinic';
+    document.getElementById('bm-location-display').textContent=_SESSION_LOC_NAME||sessionStorage.getItem('[client-slug]_location')||'Clinic';
     // Show forms status
     document.getElementById('bm-forms-group').style.display='';
     document.getElementById('bm-forms-location-card').style.display='';
@@ -3773,7 +3773,7 @@ async function saveBooking(){
 let _supabaseClients=null;
 
 async function loadSupabaseClients(){
-  const locId=sessionStorage.getItem('starr_location_id');
+  const locId=sessionStorage.getItem('[client-slug]_location_id');
   if(!locId)return;
   try{
     const res=await fetch('/api/admin/clients-supabase',{headers:authHdr()});

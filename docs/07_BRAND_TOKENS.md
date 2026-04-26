@@ -85,7 +85,7 @@
 | Asset | Source | Notes |
 |---|---|---|
 | Hero background image | `artifacts/dermadoll/public/eva-hero.jpg` | Used in `Hero.tsx` |
-| Hero videos (results) | Supabase CDN: `https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/starr/hero/video1.mp4` (video2, video3) | Loaded in `ResultsVideos.tsx` with hardcoded CDN URLs |
+| Hero videos (results) | Supabase CDN: `https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/[client-slug]/hero/video1.mp4` (video2, video3) | Loaded in `ResultsVideos.tsx` with hardcoded CDN URLs |
 | About section image | `artifacts/dermadoll/public/eva-about.jpg` | Used in `About.tsx` |
 | Chair/clinic image | `artifacts/dermadoll/public/eva-chair.jpg` | Used in multiple sections |
 | Practitioner photo | `artifacts/dermadoll/public/niamh-practitioner.jpg` | Used in team section |

@@ -215,7 +215,7 @@ router.post("/media/upload", upload.single("file"), async (req, res) => {
     const type = (req.body?.type as string) || "gallery";
     const ext = (file.originalname.split(".").pop() || "bin").toLowerCase();
     const filename = `${type}-${Date.now()}.${ext}`;
-    const path = `starr/${type}/${filename}`;
+    const path = `[client-slug]/${type}/${filename}`;
 
     const { error: uploadError } = await supabaseAdmin.storage
       .from("media")

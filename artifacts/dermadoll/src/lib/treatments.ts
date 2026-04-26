@@ -12,7 +12,7 @@ export interface TreatmentGroup {
 }
 
 export const SERVICES: Record<"[location-1-slug]" | "[location-2-slug]", TreatmentGroup[]> = {
-  hornchurch: [
+  [location-1-slug]: [
     {
       group: "SIGNATURE TREATMENTS",
       items: [
@@ -104,7 +104,7 @@ export const SERVICES: Record<"[location-1-slug]" | "[location-2-slug]", Treatme
       ],
     },
   ],
-  marylebone: [
+  [location-2-slug]: [
     {
       group: "SIGNATURE TREATMENTS",
       items: [

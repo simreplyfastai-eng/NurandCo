@@ -7,8 +7,8 @@ import BookingModal from "@/components/BookingModal";
 const BASE = import.meta.env.BASE_URL;
 
 const LOCATION_IDS: Record<string, string> = {
-  hornchurch: "[LOCATION_1_UUID]",
-  marylebone: "[LOCATION_2_UUID]",
+  [location-1-slug]: "[LOCATION_1_UUID]",
+  [location-2-slug]: "[LOCATION_2_UUID]",
 };
 
 interface ApiTreatment {

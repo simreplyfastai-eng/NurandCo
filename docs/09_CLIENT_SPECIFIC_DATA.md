@@ -116,9 +116,9 @@ Contains a separate `BUILT_IN_TREATMENTS` array used for the public-facing catal
 
 ```typescript
 // Hardcoded [Client] CDN video URLs:
-https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/starr/hero/video1.mp4
-https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/starr/hero/video2.mp4
-https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/starr/hero/video3.mp4
+https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/[client-slug]/hero/video1.mp4
+https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/[client-slug]/hero/video2.mp4
+https://[SUPABASE_PROJECT_REF].supabase.co/storage/v1/object/public/media/[client-slug]/hero/video3.mp4
 ```
 
 Replace with new client's Supabase project ID and bucket path.
@@ -178,7 +178,7 @@ Run these searches across the entire codebase when forking:
 | `[CLIENT_NAME]y.co.uk` | `newclientdomain.co.uk` |
 | `[CLIENT_NAME]` | `NewClientBrandName` |
 | `[Client Name]` | `New Client Legal Name` |
-| `starr` (in bucket paths) | `newclient` |
+| `[client-slug]` (in bucket paths) | `newclient` |
 | `[SUPABASE_PROJECT_REF]` | New Supabase project ID |
 | `[LOCATION_1_UUID]` | New [LOCATION_1]/Location1 UUID |
 | `[LOCATION_2_UUID]` | New [LOCATION_2]/Location2 UUID |

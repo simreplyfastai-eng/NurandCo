@@ -5,8 +5,8 @@ import { ChevronUp, ChevronDown } from "lucide-react";
 const BASE = import.meta.env.BASE_URL;
 
 const LOCATION_IDS: Record<string, string> = {
-  hornchurch: "[LOCATION_1_UUID]",
-  marylebone: "[LOCATION_2_UUID]",
+  [location-1-slug]: "[LOCATION_1_UUID]",
+  [location-2-slug]: "[LOCATION_2_UUID]",
 };
 
 const CATEGORY_ORDER = [
@@ -64,9 +64,9 @@ function groupByCategory(treatments: ApiTreatment[]): CategoryGroup[] {
 export default function Services() {
   const [location, setLocation] = useState<"[location-1-slug]" | "[location-2-slug]">("[location-1-slug]");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
-  const [data, setData] = useState<Record<string, CategoryGroup[]>>({ hornchurch: [], marylebone: [] });
-  const [loading, setLoading] = useState<Record<string, boolean>>({ hornchurch: true, marylebone: false });
-  const [fetched, setFetched] = useState<Record<string, boolean>>({ hornchurch: false, marylebone: false });
+  const [data, setData] = useState<Record<string, CategoryGroup[]>>({ [location-1-slug]: [], [location-2-slug]: [] });
+  const [loading, setLoading] = useState<Record<string, boolean>>({ [location-1-slug]: true, [location-2-slug]: false });
+  const [fetched, setFetched] = useState<Record<string, boolean>>({ [location-1-slug]: false, [location-2-slug]: false });
 
   const fetchLocation = async (loc: "[location-1-slug]" | "[location-2-slug]") => {
     if (fetched[loc]) return;

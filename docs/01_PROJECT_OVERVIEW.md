@@ -28,7 +28,7 @@ Built: early 2025. Last audited and updated: **April 2026**.
 | Payments | Stripe | Fixed-amount deposits (£20 / £10) |
 | Email | Resend | Booking confirmations, form links, reminders, owner notifications |
 | Calendar | Google Calendar API (OAuth2) | Two-way sync — creates and reads events per location |
-| Media | Supabase Storage (CDN) | Hero videos, result videos (bucket: `media`, path: `starr/`) |
+| Media | Supabase Storage (CDN) | Hero videos, result videos (bucket: `media`, path: `[client-slug]/`) |
 | Hosting | Replit + custom domain | pnpm monorepo; two workflow artifacts |
 
 ---

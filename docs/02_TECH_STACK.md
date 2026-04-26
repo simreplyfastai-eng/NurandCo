@@ -88,7 +88,7 @@
 | **Supabase** | Managed PostgreSQL; project ID `[SUPABASE_PROJECT_REF]` |
 | Connection | `@supabase/supabase-js` with anon key (public reads) and service_role key (all writes) |
 | RLS | Enabled on all tables; service_role bypasses automatically |
-| Storage | Supabase Storage bucket `media` — hero/result videos at `starr/hero/` |
+| Storage | Supabase Storage bucket `media` — hero/result videos at `[client-slug]/hero/` |
 
 ---
 
