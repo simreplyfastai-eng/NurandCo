@@ -647,7 +647,7 @@ export default function ConsultationModal({ onClose }: { onClose: () => void }) 
               <p style={{ color: "var(--brand-accent)", fontWeight: 700, fontSize: "10px", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px" }}>Find Us</p>
               <p style={{ color: "#111", fontWeight: 600, marginBottom: "2px" }}>Nur &amp; Co Aesthetics</p>
               <p style={{ color: "#666" }}>[LOCATION_1], Essex (RM11)</p>
-              <p style={{ color: "#666" }}>[LOCATION_2], London (W1G)</p>
+              <p style={{ color: "#666" }}>[LOCATION_2], Nottingham</p>
               {whatsapp && (
                 <a
                   href={`https://wa.me/${whatsapp}`}

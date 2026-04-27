@@ -1,5 +1,4 @@
-import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 
 function mediaUrl(path: string | null): string | null {
   if (!path) return null;
@@ -8,7 +7,7 @@ function mediaUrl(path: string | null): string | null {
 }
 
 export default function About() {
-  const [practImage, setPractImage] = useState<string | null>(`${import.meta.env.BASE_URL}eva-hero.jpg`);
+  const [practImage, setPractImage] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/media/config")
@@ -21,84 +20,100 @@ export default function About() {
   }, []);
 
   return (
-    <section id="about" style={{ background: "var(--brand-bg)", padding: "100px 0" }}>
-      <div style={{ maxWidth: 1100, margin: "0 auto", padding: "0 32px" }}>
-        <div className="about-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 80, alignItems: "center" }}>
-          <style>{`
-            @media (max-width: 768px) {
-              .about-grid { grid-template-columns: 1fr !important; gap: 40px !important; }
-              .about-text-col { order: 1 !important; }
-              .about-img-col { order: 2 !important; }
-            }
-          `}</style>
+    <section id="about" style={{ background: "#F2EFE9", padding: "6rem 2.5rem" }}>
+      <style>{`
+        .about-grid {
+          display: grid;
+          grid-template-columns: 5fr 7fr;
+          gap: 5rem;
+          align-items: start;
+          max-width: 1140px;
+          margin: 0 auto;
+        }
+        @media (max-width: 768px) {
+          .about-grid {
+            grid-template-columns: 1fr;
+            gap: 2.5rem;
+          }
+          section#about { padding: 3rem 1.25rem; }
+        }
+      `}</style>
 
-          <motion.div
-            className="about-text-col"
-            initial={{ opacity: 0, x: -24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7 }}
+      <div className="about-grid">
+        {/* Portrait */}
+        <div
+          style={{
+            aspectRatio: "3/4",
+            background: "#D4CEC8",
+            borderRadius: 2,
+            overflow: "hidden",
+          }}
+        >
+          {practImage && (
+            <img
+              src={practImage}
+              alt="Nur — practitioner"
+              loading="lazy"
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }}
+            />
+          )}
+        </div>
+
+        {/* Text */}
+        <div>
+          <p className="eyebrow" style={{ marginBottom: "1rem" }}>THE PRACTITIONER</p>
+
+          <h2
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontWeight: 300,
+              fontSize: "clamp(3rem, 6vw, 4.5rem)",
+              color: "#1A1917",
+              margin: "0 0 1.5rem",
+              lineHeight: 1,
+            }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
-              <div style={{ height: 1, width: 24, background: "var(--brand-accent)" }} />
-              <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>
-                Meet the Founder
-              </span>
-            </div>
+            Nur
+          </h2>
 
-            <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2.8rem, 6vw, 4.5rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 28px", lineHeight: 1 }}>
-              Eva
-            </h2>
-
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
-              With over 6 years in beauty and a BA (Hons) in Education, Eva founded Nur &amp; Co Aesthetics with a singular vision, to enhance your natural beauty with precision, artistry and care.
-            </p>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 40px" }}>
-              As the creator of the signature NaturalèLips™ technique, Eva combines clinical expertise with an educator's touch in every treatment she performs.
-            </p>
-
-            <div style={{ borderTop: "1px solid #E2DDD5", paddingTop: 32, display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 0 }}>
-              {[
-                { stat: "6+", label: "Years Experience" },
-                { stat: "2", label: "Clinic Locations" },
-                { stat: "NL™", label: "NaturalèLips™ Creator" },
-              ].map((item, i) => (
-                <div key={i} style={{ textAlign: "center", borderRight: i < 2 ? "1px solid #E2DDD5" : "none", padding: "0 16px" }}>
-                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "2rem", fontWeight: 400, color: "var(--brand-accent)", lineHeight: 1, marginBottom: 6 }}>
-                    {item.stat}
-                  </div>
-                  <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2px", textTransform: "uppercase", color: "#737373" }}>
-                    {item.label}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-
-          <motion.div
-            className="about-img-col"
-            initial={{ opacity: 0, x: 24 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1 }}
-            style={{ display: "flex", flexDirection: "column", gap: 12 }}
+          <p
+            style={{
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 300,
+              fontSize: "0.9375rem",
+              color: "#6B6560",
+              lineHeight: 1.8,
+              margin: "0 0 2rem",
+            }}
           >
-            <div style={{ aspectRatio: "3/4", overflow: "hidden", background: "#E8E2D9" }}>
-              {practImage ? (
-                <img src={practImage} alt="Eva, Founder, Nur &amp; Co Aesthetics"
-                  loading="lazy"
-                  style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }} />
-              ) : (
-                <div style={{ width: "100%", height: "100%", minHeight: 420, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <span style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 18, color: "var(--brand-accent)", opacity: 0.5 }}>Eva</span>
-                </div>
-              )}
-            </div>
-            <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: 13, color: "var(--brand-accent)", textAlign: "center", margin: 0 }}>
-              Eva, Founder
-            </p>
-          </motion.div>
+            [PLACEHOLDER — NUR TO SUPPLY bio copy]
+          </p>
 
+          <div
+            style={{
+              borderTop: "1px solid #BFB5A8",
+              paddingTop: "1.5rem",
+            }}
+          >
+            <p
+              style={{
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 300,
+                fontSize: "0.8125rem",
+                color: "#6B6560",
+                lineHeight: 1.9,
+                margin: 0,
+              }}
+            >
+              Over 10,000 treatments
+              <span style={{ margin: "0 0.6em", color: "#BFB5A8" }}>·</span>
+              Top 2.91% UK practitioners (Faces)
+              <span style={{ margin: "0 0.6em", color: "#BFB5A8" }}>·</span>
+              Fully insured
+              <span style={{ margin: "0 0.6em", color: "#BFB5A8" }}>·</span>
+              Works with qualified prescriber
+            </p>
+          </div>
         </div>
       </div>
     </section>

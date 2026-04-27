@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: "Which location should I choose?",
-    answer: "Both clinics offer the full Nur & Co Aesthetics treatment menu. [LOCATION_1] is our original Essex home clinic, perfect for those in Essex and East London. [LOCATION_2] is our new London clinic, ideal for those based in or near Central London.",
+    answer: "Both clinics offer the full Nur & Co Aesthetics treatment menu. [LOCATION_1] is our original Essex home clinic, perfect for those in Essex and East Nottingham. [LOCATION_2] is our new Nottingham clinic, ideal for those based in or near Central Nottingham.",
   },
   {
     question: "Does it hurt?",

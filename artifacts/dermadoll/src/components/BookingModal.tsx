@@ -758,7 +758,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
             <div style={{ fontFamily:"'Inter', sans-serif", fontSize:14, color:"#7a6a50", marginBottom:12 }}>Advanced Aesthetics Practitioner · Student Nurse</div>
             <div style={{ fontFamily:"'Inter', sans-serif", fontSize:15, color:"#2a1f0e", marginBottom:20, lineHeight:1.6 }}>
               [LOCATION_1], Essex (RM11)<br />
-              [LOCATION_2], London (W1G)<br />
+              [LOCATION_2], Nottingham<br />
               <span style={{ fontSize:13, color:"#7a6a50" }}>Exact location sent with confirmation</span>
             </div>
             <div style={{ display:"flex", gap:10 }}>

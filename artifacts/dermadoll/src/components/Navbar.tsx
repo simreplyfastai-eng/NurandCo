@@ -1,152 +1,200 @@
 import { useState, useEffect } from "react";
 import { Menu, X, Lock } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
 
 const goToPortal = () => {
   window.location.href = `${import.meta.env.BASE_URL}portal.html`;
 };
 
 export default function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 50);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const handler = () => setScrolled(window.scrollY > window.innerHeight * 0.75);
+    window.addEventListener("scroll", handler, { passive: true });
+    handler();
+    return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  const navLinks = [
-    { name: "SERVICES", href: "#services" },
-    { name: "LOCATIONS", href: "#locations" },
-    { name: "TRAINING", href: "#training" },
+  const textColor = scrolled ? "#1A1917" : "#FFFFFF";
+  const bg = scrolled ? "#EAE5DF" : "transparent";
+  const borderColor = scrolled ? "#BFB5A8" : "transparent";
+
+  const links = [
+    { label: "SERVICES", href: "#services" },
+    { label: "ABOUT", href: "#about" },
+    { label: "GALLERY", href: "#gallery" },
+    { label: "MEMBERSHIP", href: "#subscription" },
+    { label: "CONTACT", href: "#contact" },
   ];
 
-  const scrollTo = (e: React.MouseEvent<HTMLAnchorElement>, href: string) => {
+  const scrollTo = (e: React.MouseEvent, href: string) => {
     e.preventDefault();
-    setIsMobileMenuOpen(false);
+    setMenuOpen(false);
     if (href === "#") { window.scrollTo({ top: 0, behavior: "smooth" }); return; }
-    const el = document.querySelector(href);
-    if (el) el.scrollIntoView({ behavior: "smooth" });
+    document.querySelector(href)?.scrollIntoView({ behavior: "smooth" });
   };
 
   return (
     <>
-      <nav
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? "py-3 shadow-sm" : "py-4"}`}
-        style={{ background: "var(--brand-bg-alt)", borderBottom: "1px solid #E2DDD5" }}
-      >
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 32px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+      <style>{`
+        .nav-root {
+          position: fixed;
+          top: 0; left: 0; right: 0;
+          z-index: 50;
+          transition: background 0.2s ease, border-color 0.2s ease;
+          border-bottom: 1px solid transparent;
+        }
+        .nav-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 0 2.5rem;
+          height: 72px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+        }
+        .nav-logo {
+          text-decoration: none;
+          display: flex;
+          align-items: baseline;
+          gap: 0.5ch;
+          font-family: 'Inter', sans-serif;
+          font-weight: 300;
+          font-size: 0.8125rem;
+          letter-spacing: 0.2em;
+          text-transform: uppercase;
+          transition: color 0.2s;
+        }
+        .nav-logo-sep {
+          opacity: 0.4;
+        }
+        .nav-hamburger {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 6px;
+          display: flex;
+          align-items: center;
+          transition: opacity 0.2s;
+        }
+        .nav-hamburger:hover { opacity: 0.6; }
+        /* Mobile drawer */
+        .nav-drawer {
+          position: fixed;
+          inset: 0;
+          z-index: 49;
+          background: #111111;
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          gap: 2.5rem;
+          transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+        .nav-drawer.closed {
+          opacity: 0;
+          pointer-events: none;
+          transform: translateY(-8px);
+        }
+        .nav-drawer.open {
+          opacity: 1;
+          pointer-events: all;
+          transform: translateY(0);
+        }
+        .nav-drawer-link {
+          font-family: 'Inter', sans-serif;
+          font-weight: 300;
+          font-size: 0.8125rem;
+          letter-spacing: 0.25em;
+          text-transform: uppercase;
+          color: #FFFFFF;
+          text-decoration: none;
+          transition: color 0.2s;
+        }
+        .nav-drawer-link:hover { color: #BFB5A8; }
+        .nav-drawer-book {
+          display: inline-block;
+          font-family: 'Inter', sans-serif;
+          font-weight: 300;
+          font-size: 0.75rem;
+          letter-spacing: 0.12em;
+          text-transform: uppercase;
+          color: #FFFFFF;
+          border: 1px solid #EAE5DF;
+          border-radius: 2px;
+          padding: 14px 36px;
+          text-decoration: none;
+          background: transparent;
+          transition: background 0.2s, color 0.2s;
+          cursor: pointer;
+        }
+        .nav-drawer-book:hover { background: #EAE5DF; color: #1A1917; }
+        @media (max-width: 767px) {
+          .nav-inner { padding: 0 1.25rem; }
+        }
+      `}</style>
 
-          <a href="#" onClick={(e) => scrollTo(e, "#")} style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 2, lineHeight: 1 }}>
-            <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, letterSpacing: "0.01em", color: "var(--brand-primary)", lineHeight: 1 }}>
-              Nur &amp; Co
-            </span>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 400, color: "var(--brand-accent)", lineHeight: 1 }}>
-              AESTHETICS
-            </span>
+      <nav
+        className="nav-root"
+        style={{ background: bg, borderColor }}
+      >
+        <div className="nav-inner">
+          <a
+            href="#"
+            className="nav-logo"
+            style={{ color: textColor }}
+            onClick={(e) => scrollTo(e, "#")}
+          >
+            NUR &amp; CO
+            <span className="nav-logo-sep">/</span>
+            AESTHETICS
           </a>
 
-          <div className="hidden md:flex" style={{ alignItems: "center", gap: 36 }}>
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => scrollTo(e, link.href)}
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.18em", fontWeight: 400, color: "var(--brand-text)", textDecoration: "none", transition: "color 0.2s" }}
-                onMouseEnter={(e) => (e.currentTarget.style.color = "var(--brand-primary)")}
-                onMouseLeave={(e) => (e.currentTarget.style.color = "var(--brand-text)")}
-              >
-                {link.name}
-              </a>
-            ))}
-            <a
-              href={`${import.meta.env.BASE_URL}book`}
-              style={{
-                fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.18em", fontWeight: 400,
-                color: "var(--brand-primary)", border: "1px solid var(--brand-primary)", padding: "10px 20px",
-                textDecoration: "none", textTransform: "uppercase" as const, transition: "all 0.2s",
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-primary)"; e.currentTarget.style.color = "var(--brand-bg-alt)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-primary)"; }}
-            >
-              BOOK NOW
-            </a>
-            <button
-              onClick={goToPortal}
-              title="Admin"
-              style={{ background: "none", border: "none", cursor: "pointer", padding: 4, color: "var(--brand-accent)", opacity: 0.5, transition: "opacity 0.2s", display: "flex", alignItems: "center" }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = "1")}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLButtonElement).style.opacity = "0.5")}
-            >
-              <Lock size={14} />
-            </button>
-          </div>
-
           <button
-            className="md:hidden"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            style={{ background: "none", border: "none", cursor: "pointer", padding: 8 }}
+            className="nav-hamburger"
+            style={{ color: textColor }}
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
           >
-            {isMobileMenuOpen ? <X size={24} color="var(--brand-primary)" /> : <Menu size={24} color="var(--brand-primary)" />}
+            {menuOpen
+              ? <X size={22} color={textColor} />
+              : <Menu size={22} color={textColor} />}
           </button>
         </div>
       </nav>
 
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: "-100%" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "-100%" }}
-            transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            style={{ position: "fixed", inset: 0, zIndex: 40, background: "var(--brand-bg-alt)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 32 }}
+      <div className={`nav-drawer ${menuOpen ? "open" : "closed"}`}>
+        {links.map((link) => (
+          <a
+            key={link.label}
+            href={link.href}
+            className="nav-drawer-link"
+            onClick={(e) => scrollTo(e, link.href)}
           >
-            {navLinks.map((link, i) => (
-              <motion.a
-                key={link.name}
-                href={link.href}
-                onClick={(e) => scrollTo(e, link.href)}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.08 + i * 0.06 }}
-                style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, letterSpacing: "0.3em", color: "var(--brand-text)", textDecoration: "none" }}
-              >
-                {link.name}
-              </motion.a>
-            ))}
-            <motion.a
-              href={`${import.meta.env.BASE_URL}book`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.28 }}
-              style={{
-                fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.18em",
-                color: "var(--brand-primary)", border: "1px solid var(--brand-primary)", padding: "12px 28px",
-                textDecoration: "none", textTransform: "uppercase" as const,
-              }}
-            >
-              BOOK NOW
-            </motion.a>
-            <motion.button
-              onClick={() => { setIsMobileMenuOpen(false); goToPortal(); }}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.34 }}
-              style={{
-                background: "none", border: "none", cursor: "pointer",
-                display: "flex", alignItems: "center", gap: 8,
-                fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px",
-                color: "var(--brand-accent)", textTransform: "uppercase",
-              }}
-            >
-              <Lock size={12} />
-              Admin
-            </motion.button>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+            {link.label}
+          </a>
+        ))}
+        <a
+          href={`${import.meta.env.BASE_URL}book`}
+          className="nav-drawer-book"
+        >
+          BOOK NOW
+        </a>
+        <button
+          onClick={() => { setMenuOpen(false); goToPortal(); }}
+          style={{
+            background: "none", border: "none", cursor: "pointer",
+            display: "flex", alignItems: "center", gap: 6,
+            fontFamily: "'Inter', sans-serif", fontWeight: 300,
+            fontSize: "0.625rem", letterSpacing: "0.2em",
+            color: "#6B6560", textTransform: "uppercase",
+          }}
+        >
+          <Lock size={11} />
+          Admin
+        </button>
+      </div>
     </>
   );
 }

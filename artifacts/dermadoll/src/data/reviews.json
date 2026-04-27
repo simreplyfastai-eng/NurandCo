@@ -1,0 +1,26 @@
+[
+  {
+    "id": "1",
+    "reviewer": "Sarah M.",
+    "quote": "[PLACEHOLDER REVIEW]",
+    "rating": 5,
+    "source": "Google",
+    "date": "2026-03"
+  },
+  {
+    "id": "2",
+    "reviewer": "Amara K.",
+    "quote": "[PLACEHOLDER REVIEW]",
+    "rating": 5,
+    "source": "Google",
+    "date": "2026-03"
+  },
+  {
+    "id": "3",
+    "reviewer": "Priya S.",
+    "quote": "[PLACEHOLDER REVIEW]",
+    "rating": 5,
+    "source": "Google",
+    "date": "2026-02"
+  }
+]

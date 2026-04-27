@@ -1,222 +1,100 @@
-import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+const TILE_COUNT = 4;
+// Duplicate tiles for the seamless mobile marquee loop
+const MOBILE_TILES = Array.from({ length: TILE_COUNT * 2 }, (_, i) => i);
 
-const BASE = import.meta.env.BASE_URL;
-const res = (src: string) => src.startsWith("http") || src.startsWith("/api/") ? src : `${BASE}${src}`;
-
-interface Card { key: string; type: "image" | "video"; src: string; label: string; category: string; }
-
-const DEFAULT_CARDS: Card[] = [
-  { key: "r1a", type: "image", src: "result-1.jpg",  label: "NaturalèLips™",           category: "LIP FILLER" },
-  { key: "r1b", type: "video", src: "video1.mp4",    label: "HD Sculpt Lips",           category: "LIP FILLER" },
-  { key: "r1c", type: "image", src: "result-4.jpg",  label: "Facial Contouring",        category: "ADVANCED FILLER" },
-  { key: "r1d", type: "video", src: "video2.mp4",    label: "Filler Dissolve & Refill", category: "FLAT LIPS CORRECTED" },
-  { key: "r2a", type: "image", src: "result-2.jpg",  label: "NaturalèLips™",            category: "LIP FILLER" },
-  { key: "r2b", type: "video", src: "video3.mp4",    label: "Anti-Wrinkle",             category: "NEW PRODUCT SHOWCASE" },
-  { key: "r2c", type: "image", src: "result-3.jpg",  label: "NaturalèLips™",            category: "HD SCULPT LIPS" },
-  { key: "r2d", type: "video", src: "video1.mp4",    label: "NaturalèLips™",            category: "SUBTLE YET CONFIDENT" },
-];
-
-function VideoCard({ src }: { src: string }) {
-  const ref = useRef<HTMLVideoElement>(null);
-  const loaded = useRef(false);
-
-  useEffect(() => {
-    const v = ref.current;
-    if (!v) return;
-
-    let dead = false;
-
-    const loadAndPlay = () => {
-      if (dead) return;
-      v.muted = true;
-      v.volume = 0;
-      (v as HTMLVideoElement & { playsInline: boolean }).playsInline = true;
-      // With preload="none" we must call load() before play() or the browser
-      // has no data to play. Only do this once per element lifecycle.
-      if (!loaded.current) {
-        loaded.current = true;
-        v.load();
-      }
-      v.play().catch(() => {});
-    };
-
-    v.addEventListener("canplay", loadAndPlay);
-    v.addEventListener("canplaythrough", loadAndPlay);
-    v.addEventListener("loadeddata", loadAndPlay);
-
-    // IntersectionObserver: load+play when visible, pause when off-screen.
-    // Using preload="none" means only visible videos pull data from the network,
-    // preventing 24 simultaneous video downloads that overwhelm the browser.
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          loadAndPlay();
-        } else {
-          v.pause();
-        }
-      },
-      { threshold: 0.1 },
-    );
-    obs.observe(v);
-
-    // First user touch unlocks autoplay on iOS
-    const onTouch = () => loadAndPlay();
-    window.addEventListener("touchstart", onTouch, { once: true, passive: true });
-
-    return () => {
-      dead = true;
-      v.removeEventListener("canplay", loadAndPlay);
-      v.removeEventListener("canplaythrough", loadAndPlay);
-      v.removeEventListener("loadeddata", loadAndPlay);
-      obs.disconnect();
-      window.removeEventListener("touchstart", onTouch);
-      loaded.current = false;
-    };
-  }, [src]);
-
+export default function GalleryReel() {
   return (
-    <div style={{ position: "relative", width: "100%", height: "100%" }}>
-      <video
-        ref={ref}
-        src={src}
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="none"
-        disablePictureInPicture
-        disableRemotePlayback
-        style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
-      />
-      <div style={{ position: "absolute", inset: 0, zIndex: 1 }} aria-hidden="true" />
-    </div>
-  );
-}
-
-const isLocalSrc = (src: string) => !src.startsWith("http") && !src.startsWith("/api/");
-
-function ReelCard({ card, onClick }: { card: Card; onClick?: () => void }) {
-  return (
-    <div
-      onClick={onClick}
-      style={{
-        flexShrink: 0,
-        width: 240,
-        height: 340,
-        position: "relative",
-        overflow: "hidden",
-        background: "#1A1917",
-        cursor: card.type === "image" ? "zoom-in" : "default",
-        marginRight: 12,
-      }}
-    >
-      {card.type === "image" ? (
-        isLocalSrc(card.src) ? (
-          <div style={{ width: "100%", height: "100%", backgroundColor: "#D4CEC8", display: "flex", alignItems: "flex-end", padding: "12px" }}>
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "2px", textTransform: "uppercase", color: "#1A1917", opacity: 0.5 }}>{card.category}</span>
-          </div>
-        ) : (
-          <img src={res(card.src)} alt={card.label}
-            loading="lazy"
-            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-        )
-      ) : (
-        <VideoCard src={res(card.src)} />
-      )}
-    </div>
-  );
-}
-
-function InfiniteRow({ cards, direction }: { cards: Card[]; direction: "ltr" | "rtl" }) {
-  const doubled = [...cards, ...cards, ...cards];
-  const animName = direction === "ltr" ? "reel-ltr" : "reel-rtl";
-  const cardW = 240 + 12;
-  const totalW = cards.length * cardW;
-  const [lightbox, setLightbox] = useState<string | null>(null);
-
-  return (
-    <>
+    <section id="gallery" style={{ background: "#EAE5DF", padding: "6rem 2.5rem" }}>
       <style>{`
-        @keyframes reel-ltr { from { transform: translateX(0); } to { transform: translateX(-${totalW}px); } }
-        @keyframes reel-rtl { from { transform: translateX(-${totalW}px); } to { transform: translateX(0); } }
-        .reel-track-${direction} { animation: ${animName} ${cards.length * 5}s linear infinite; display: flex; will-change: transform; }
-        .reel-track-${direction}:hover { animation-play-state: paused; }
+        /* ── Desktop grid ── */
+        .gallery-header { /* inherits section padding */ }
+
+        .gallery-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 8px;
+          margin-top: 3rem;
+        }
+        .gallery-tile {
+          aspect-ratio: 4/5;
+          background: #D4CEC8;
+          border-radius: 2px;
+          overflow: hidden;
+        }
+        .gallery-mobile-wrapper { display: none; }
+
+        /* ── Mobile marquee ── */
+        @keyframes gallery-autoscroll {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
+
+        @media (max-width: 768px) {
+          section#gallery { padding: 3rem 0; }
+          .gallery-header { padding: 0 1.25rem; }
+          .gallery-grid { display: none; }
+
+          .gallery-mobile-wrapper {
+            display: block;
+            overflow: hidden;
+            margin-top: 2rem;
+          }
+          .gallery-mobile-track {
+            display: flex;
+            gap: 8px;
+            width: max-content;
+            animation: gallery-autoscroll 20s linear infinite;
+            will-change: transform;
+          }
+          .gallery-mobile-track:active {
+            animation-play-state: paused;
+          }
+          .gallery-mobile-tile {
+            min-width: 75vw;
+            aspect-ratio: 3/4;
+            background: #D4CEC8;
+            border-radius: 2px;
+            overflow: hidden;
+            flex-shrink: 0;
+          }
+        }
       `}</style>
 
-      <div style={{ overflow: "hidden", marginBottom: 12 }}>
-        <div className={`reel-track-${direction}`} style={{ width: `${doubled.length * cardW}px` }}>
-          {doubled.map((card, i) => (
-            <ReelCard key={`${card.key}-${i}`} card={card}
-              onClick={card.type === "image" ? () => setLightbox(res(card.src)) : undefined} />
+      {/* Heading — always visible */}
+      <div style={{ maxWidth: 1140, margin: "0 auto" }}>
+        <div className="gallery-header">
+          <p className="eyebrow" style={{ marginBottom: "1rem" }}>RESULTS</p>
+          <h2
+            style={{
+              fontFamily: "'Cormorant Garamond', serif",
+              fontWeight: 300,
+              fontSize: "clamp(2rem, 4vw, 3rem)",
+              color: "#1A1917",
+              margin: 0,
+              lineHeight: 1.1,
+            }}
+          >
+            Before &amp; after
+          </h2>
+        </div>
+      </div>
+
+      {/* Desktop 2-col grid */}
+      <div style={{ maxWidth: 1140, margin: "0 auto" }}>
+        <div className="gallery-grid">
+          {Array.from({ length: TILE_COUNT }, (_, i) => (
+            <div key={i} className="gallery-tile" />
           ))}
         </div>
       </div>
 
-      <AnimatePresence>
-        {lightbox && (
-          <motion.div key="lb" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            onClick={() => setLightbox(null)}
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.88)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
-            <motion.div initial={{ scale: 0.92, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.92, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              style={{ position: "relative", maxWidth: "min(90vw, 800px)", maxHeight: "90vh", border: "2px solid var(--brand-accent)", overflow: "hidden" }}>
-              <img src={lightbox} alt="Result" style={{ display: "block", width: "100%", maxHeight: "90vh", objectFit: "contain" }} />
-              <button onClick={() => setLightbox(null)}
-                style={{ position: "absolute", top: 12, right: 12, width: 36, height: 36, background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.2)", color: "#fff", fontSize: 18, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                ×
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
-  );
-}
-
-export default function GalleryReel() {
-  const [cards, setCards] = useState<Card[]>(DEFAULT_CARDS);
-
-  useEffect(() => {
-    fetch("/api/media/config")
-      .then(r => r.ok ? r.json() : null)
-      .then(data => {
-        if (Array.isArray(data?.transformations) && data.transformations.length > 0) {
-          setCards(data.transformations as Card[]);
-        }
-      })
-      .catch(() => {});
-  }, []);
-
-  const mid = Math.ceil(cards.length / 2);
-  const row1 = cards.slice(0, mid);
-  const row2 = cards.slice(mid);
-
-  return (
-    <section id="results" style={{ padding: "100px 0 90px", background: "var(--brand-bg-alt)", overflow: "hidden" }}>
-      <div style={{ maxWidth: 920, margin: "0 auto", padding: "0 32px", marginBottom: 52 }}>
-        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 12, justifyContent: "center", marginBottom: 16 }}>
-            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
-            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>Real Results</span>
-            <div style={{ height: 1, width: 28, background: "var(--brand-accent)" }} />
-          </div>
-          <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 8px", textAlign: "center" }}>
-            Transformations & Treatments
-          </h2>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "var(--brand-accent)", textAlign: "center", margin: 0 }}>
-            Natural. Tailored. Uniquely yours.
-          </p>
-        </motion.div>
-      </div>
-
-      {row1.length > 0 && <InfiniteRow cards={row1} direction="ltr" />}
-      {row2.length > 0 && <InfiniteRow cards={row2} direction="rtl" />}
-
-      <div style={{ textAlign: "center", marginTop: 28 }}>
-        <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "1.5px", textTransform: "uppercase", color: "var(--brand-primary)" }}>
-          Client consent obtained · Results may vary
-        </span>
+      {/* Mobile auto-scroll marquee (full bleed) */}
+      <div className="gallery-mobile-wrapper">
+        <div className="gallery-mobile-track">
+          {MOBILE_TILES.map((_, i) => (
+            <div key={i} className="gallery-mobile-tile" />
+          ))}
+        </div>
       </div>
     </section>
   );

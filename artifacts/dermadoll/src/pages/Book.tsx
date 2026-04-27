@@ -29,8 +29,8 @@ interface TreatmentGroup {
 function LocationSelector() {
   const [, navigate] = useLocation();
   const locations = [
-    { slug: "[location-1-slug]", label: "[LOCATION_1]", region: "ESSEX", desc: "Our original home clinic, serving Essex and East London with our full treatment menu." },
-    { slug: "[location-2-slug]", label: "[LOCATION_2]", region: "LONDON · NEW", desc: "Now open in the heart of London. Premium flat-rate pricing for all treatments." },
+    { slug: "[location-1-slug]", label: "[LOCATION_1]", region: "ESSEX", desc: "Our original home clinic, serving Essex and East Nottingham with our full treatment menu." },
+    { slug: "[location-2-slug]", label: "[LOCATION_2]", region: "NOTTINGHAM · NEW", desc: "Now open in the heart of Nottingham. Premium flat-rate pricing for all treatments." },
   ];
 
   return (
