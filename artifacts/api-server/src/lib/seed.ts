@@ -15,7 +15,7 @@ type TreatmentRow = {
   category: string;
 };
 
-const [LOCATION_1]_TREATMENTS: TreatmentRow[] = [
+const LOCATION_1_TREATMENTS: TreatmentRow[] = [
   // Aesthetics — fillers (deposit £20)
   { name: "NATURALE LIPS 0.5ml",                                      duration_minutes: 45,  price: 135,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
   { name: "NATURALE LIPS 0.8ml",                                      duration_minutes: 45,  price: 175,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
@@ -93,7 +93,7 @@ const [LOCATION_1]_TREATMENTS: TreatmentRow[] = [
   { name: "Vitaran / Plinest / Nucleofill Full Face Combo",           duration_minutes: 90,  price: 850,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Skin Boosters" },
 ];
 
-const [LOCATION_2]_TREATMENTS: TreatmentRow[] = [
+const LOCATION_2_TREATMENTS: TreatmentRow[] = [
   // Aesthetics (deposit £20)
   { name: "NATURALE LIPS 0.5ml",                                      duration_minutes: 60,  price: 140,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
   { name: "NATURALE LIPS 0.8ml",                                      duration_minutes: 60,  price: 185,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
@@ -248,8 +248,8 @@ export async function seedTreatments(): Promise<void> {
 
     // ── Insert all 77 treatments in a single batch ─────────────────────────────
     const rows = [
-      ...[LOCATION_1]_TREATMENTS.map((t) => ({ ...t, location_id: H })),
-      ...[LOCATION_2]_TREATMENTS.map((t) => ({ ...t, location_id: M })),
+      ...LOCATION_1_TREATMENTS.map((t) => ({ ...t, location_id: H })),
+      ...LOCATION_2_TREATMENTS.map((t) => ({ ...t, location_id: M })),
     ];
 
     const { error: insertErr } = await supabaseAdmin.from("treatments").insert(rows);

@@ -5,8 +5,8 @@ import { ChevronUp, ChevronDown } from "lucide-react";
 const BASE = import.meta.env.BASE_URL;
 
 const LOCATION_IDS: Record<string, string> = {
-  [location-1-slug]: "[LOCATION_1_UUID]",
-  [location-2-slug]: "[LOCATION_2_UUID]",
+  "nur-and-co": "[LOCATION_1_UUID]",
+  "nur-and-co-2": "[LOCATION_2_UUID]",
 };
 
 const CATEGORY_ORDER = [
@@ -62,13 +62,13 @@ function groupByCategory(treatments: ApiTreatment[]): CategoryGroup[] {
 }
 
 export default function Services() {
-  const [location, setLocation] = useState<"[location-1-slug]" | "[location-2-slug]">("[location-1-slug]");
+  const [location, setLocation] = useState<"nur-and-co" | "nur-and-co-2">("nur-and-co");
   const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
-  const [data, setData] = useState<Record<string, CategoryGroup[]>>({ [location-1-slug]: [], [location-2-slug]: [] });
-  const [loading, setLoading] = useState<Record<string, boolean>>({ [location-1-slug]: true, [location-2-slug]: false });
-  const [fetched, setFetched] = useState<Record<string, boolean>>({ [location-1-slug]: false, [location-2-slug]: false });
+  const [data, setData] = useState<Record<string, CategoryGroup[]>>({ "nur-and-co": [], "nur-and-co-2": [] });
+  const [loading, setLoading] = useState<Record<string, boolean>>({ "nur-and-co": true, "nur-and-co-2": false });
+  const [fetched, setFetched] = useState<Record<string, boolean>>({ "nur-and-co": false, "nur-and-co-2": false });
 
-  const fetchLocation = async (loc: "[location-1-slug]" | "[location-2-slug]") => {
+  const fetchLocation = async (loc: "nur-and-co" | "nur-and-co-2") => {
     if (fetched[loc]) return;
     setLoading((prev) => ({ ...prev, [loc]: true }));
     try {
@@ -86,9 +86,9 @@ export default function Services() {
     }
   };
 
-  useEffect(() => { fetchLocation("[location-1-slug]"); }, []);
+  useEffect(() => { fetchLocation("nur-and-co"); }, []);
 
-  const handleTabClick = (loc: "[location-1-slug]" | "[location-2-slug]") => {
+  const handleTabClick = (loc: "nur-and-co" | "nur-and-co-2") => {
     setLocation(loc);
     if (fetched[loc]) {
       setOpenGroups(new Set());
@@ -141,7 +141,7 @@ export default function Services() {
                 .svc-loc-btn { flex: 1 !important; }
               }
             `}</style>
-            {(["[location-1-slug]", "[location-2-slug]"] as const).map((loc) => (
+            {(["nur-and-co", "nur-and-co-2"] as const).map((loc) => (
               <button
                 key={loc}
                 className="svc-loc-btn"
@@ -152,10 +152,10 @@ export default function Services() {
                   background: location === loc ? "var(--brand-primary)" : "transparent",
                   color: location === loc ? "var(--brand-bg-alt)" : "var(--brand-primary)",
                   border: "1px solid var(--brand-primary)",
-                  marginRight: loc === "[location-1-slug]" ? -1 : 0,
+                  marginRight: loc === "nur-and-co" ? -1 : 0,
                 }}
               >
-                {loc === "[location-1-slug]" ? "[LOCATION_1]" : "[LOCATION_2]"}
+                {loc === "nur-and-co" ? "[LOCATION_1]" : "[LOCATION_2]"}
               </button>
             ))}
           </div>
