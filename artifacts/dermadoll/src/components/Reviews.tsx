@@ -28,7 +28,7 @@ const reviews = [
     location: "Essex",
   },
   {
-    quote: "I trained with Eva through [Client] Academy and it was genuinely life-changing. Brilliant educator and incredible practitioner.",
+    quote: "I trained with Eva through Nur & Co Academy and it was genuinely life-changing. Brilliant educator and incredible practitioner.",
     name: "Natasha W.",
     location: "London",
   },

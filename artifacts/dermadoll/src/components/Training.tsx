@@ -145,7 +145,7 @@ export default function Training() {
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 20 }}>
               <div style={{ height: 1, width: 24, background: "var(--brand-accent)" }} />
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>
-                [Client] Academy
+                Nur &amp; Co Academy
               </span>
             </div>
             <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem, 4vw, 3rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 8px" }}>
@@ -155,7 +155,7 @@ export default function Training() {
               Training based in [LOCATION_1], Essex
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
-              Eva's background in education meets her clinical expertise, delivering world-class training through [Client] Academy.
+              Eva's background in education meets her clinical expertise, delivering world-class training through Nur &amp; Co Academy.
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
               All courses are open to candidates with no prior background required.
@@ -354,7 +354,7 @@ export default function Training() {
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
                     <div style={{ height: 1, width: 20, background: "var(--brand-accent)" }} />
                     <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "3px", textTransform: "uppercase", color: "var(--brand-accent)" }}>
-                      [Client] Academy
+                      Nur &amp; Co Academy
                     </span>
                   </div>
                   <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.8rem", color: "var(--brand-primary)", margin: "0 0 6px" }}>

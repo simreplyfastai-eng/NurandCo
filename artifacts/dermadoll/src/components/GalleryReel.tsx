@@ -94,6 +94,8 @@ function VideoCard({ src }: { src: string }) {
   );
 }
 
+const isLocalSrc = (src: string) => !src.startsWith("http") && !src.startsWith("/api/");
+
 function ReelCard({ card, onClick }: { card: Card; onClick?: () => void }) {
   return (
     <div
@@ -104,15 +106,21 @@ function ReelCard({ card, onClick }: { card: Card; onClick?: () => void }) {
         height: 340,
         position: "relative",
         overflow: "hidden",
-        background: "#2A2A2A",
+        background: "#1A1917",
         cursor: card.type === "image" ? "zoom-in" : "default",
         marginRight: 12,
       }}
     >
       {card.type === "image" ? (
-        <img src={res(card.src)} alt={card.label}
-          loading="lazy"
-          style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        isLocalSrc(card.src) ? (
+          <div style={{ width: "100%", height: "100%", backgroundColor: "#D4CEC8", display: "flex", alignItems: "flex-end", padding: "12px" }}>
+            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "2px", textTransform: "uppercase", color: "#1A1917", opacity: 0.5 }}>{card.category}</span>
+          </div>
+        ) : (
+          <img src={res(card.src)} alt={card.label}
+            loading="lazy"
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+        )
       ) : (
         <VideoCard src={res(card.src)} />
       )}

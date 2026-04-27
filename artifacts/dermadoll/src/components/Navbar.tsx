@@ -40,10 +40,10 @@ export default function Navbar() {
 
           <a href="#" onClick={(e) => scrollTo(e, "#")} style={{ textDecoration: "none", display: "flex", flexDirection: "column", gap: 2, lineHeight: 1 }}>
             <span style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 600, letterSpacing: "0.01em", color: "var(--brand-primary)", lineHeight: 1 }}>
-              [CLIENT]
+              Nur &amp; Co
             </span>
             <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "0.22em", textTransform: "uppercase", fontWeight: 400, color: "var(--brand-accent)", lineHeight: 1 }}>
-              [CLIENT_TYPE]
+              AESTHETICS
             </span>
           </a>
 

@@ -2,16 +2,10 @@ import { useEffect, useState } from "react";
 
 const SOCIAL = {
   instagram: [
-    { handle: "@[Client]Facess",      url: "https://instagram.com/[Client]Facess" },
-    { handle: "@[ClientName]s", url: "https://instagram.com/[ClientName]s" },
-    { handle: "@[Client]Suitess",     url: "https://instagram.com/[Client]Suitess" },
-    { handle: "@[Client]Nailedd",     url: "https://instagram.com/[Client]Nailedd" },
+    { handle: "@nurandcoaesthetics", url: "https://instagram.com/nurandcoaesthetics" },
   ],
   tiktok: [
-    { handle: "@[Client]Facess",      url: "https://tiktok.com/@[Client]Facess" },
-    { handle: "@[ClientName]s", url: "https://tiktok.com/@[ClientName]s" },
-    { handle: "@[Client]Suitess",     url: "https://tiktok.com/@[Client]Suitess" },
-    { handle: "@[Client]Nailedd",     url: "https://tiktok.com/@[Client]Nailedd" },
+    { handle: "@nurandcoaesthetics", url: "https://tiktok.com/@nurandcoaesthetics" },
   ],
 };
 
@@ -57,10 +51,10 @@ export default function Footer() {
               style={{ textDecoration: "none", display: "inline-flex", flexDirection: "column", alignItems: "flex-start", gap: 4, marginBottom: 16 }}
             >
               <span className="footer-logo-name" style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 44, fontWeight: 600, letterSpacing: "0.02em", color: "var(--brand-primary)", lineHeight: 1 }}>
-                [CLIENT]
+                Nur &amp; Co
               </span>
               <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "0.4em", textTransform: "uppercase", fontWeight: 400, color: "var(--brand-accent)", lineHeight: 1 }}>
-                BEAUTY
+                AESTHETICS
               </span>
             </a>
 
@@ -69,12 +63,12 @@ export default function Footer() {
             </p>
 
             <a
-              href="mailto:[CLIENT_NAME]yltd@gmail.com"
+              href="mailto:nurandcoaesthetics@gmail.com"
               style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#737373", textDecoration: "none", letterSpacing: "0.04em", transition: "color 0.2s" }}
               onMouseEnter={(e) => (e.currentTarget.style.color = "var(--brand-primary)")}
               onMouseLeave={(e) => (e.currentTarget.style.color = "#737373")}
             >
-              [CLIENT_NAME]yltd@gmail.com
+              nurandcoaesthetics@gmail.com
             </a>
           </div>
 
@@ -126,7 +120,7 @@ export default function Footer() {
         {/* ── Bottom bar ── */}
         <div className="footer-bottom">
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "var(--brand-accent)", margin: 0 }}>
-            © {year} [CLIENT_NAME]. All rights reserved.
+            © {year} Nur &amp; Co Aesthetics. All rights reserved.
           </p>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
             <span style={{ color: "var(--brand-accent)" }}>Powered By </span>

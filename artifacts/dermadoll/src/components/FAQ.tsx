@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: "Which location should I choose?",
-    answer: "Both clinics offer the full [CLIENT_NAME] treatment menu. [LOCATION_1] is our original Essex home clinic, perfect for those in Essex and East London. [LOCATION_2] is our new London clinic, ideal for those based in or near Central London.",
+    answer: "Both clinics offer the full Nur & Co Aesthetics treatment menu. [LOCATION_1] is our original Essex home clinic, perfect for those in Essex and East London. [LOCATION_2] is our new London clinic, ideal for those based in or near Central London.",
   },
   {
     question: "Does it hurt?",
@@ -25,11 +25,11 @@ const faqs = [
   },
   {
     question: "Do you offer training?",
-    answer: "Yes, through [Client] Academy, Eva offers CPD accredited training at both the [LOCATION_1] and [LOCATION_2] clinics. Courses are open to candidates with no prior background required. Enquire via Instagram or email.",
+    answer: "Yes, through Nur & Co Academy, Eva offers CPD accredited training at both the [LOCATION_1] and [LOCATION_2] clinics. Courses are open to candidates with no prior background required. Enquire via Instagram or email.",
   },
   {
     question: "How do I book?",
-    answer: "Use the 'Book Now' button to select your treatment and preferred location. You can also message us on Instagram @[ClientName]s, @[Client]Facess or email [CLIENT_NAME]yltd@gmail.com.",
+    answer: "Use the 'Book Now' button to select your treatment and preferred location. You can also message us on Instagram @nurandcoaesthetics or email nurandcoaesthetics@gmail.com.",
   },
   {
     question: "What should I do before my appointment?",
