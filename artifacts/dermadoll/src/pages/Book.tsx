@@ -7,8 +7,8 @@ import BookingModal from "@/components/BookingModal";
 const BASE = import.meta.env.BASE_URL;
 
 const LOCATION_IDS: Record<string, string> = {
-  [location-1-slug]: "[LOCATION_1_UUID]",
-  [location-2-slug]: "[LOCATION_2_UUID]",
+  "nur-and-co": "[LOCATION_1_UUID]",
+  "nur-and-co-2": "[LOCATION_2_UUID]",
 };
 
 interface ApiTreatment {
@@ -87,7 +87,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
   const [activeTreatment, setActiveTreatment] = useState<ApiTreatment | null>(null);
 
   const locationId = LOCATION_IDS[locationSlug];
-  const locationLabel = locationSlug === "[location-1-slug]" ? "[LOCATION_1]" : "[LOCATION_2]";
+  const locationLabel = locationSlug === "nur-and-co" ? "[LOCATION_1]" : "[LOCATION_2]";
 
   useEffect(() => {
     if (!locationId) { setLoading(false); return; }

@@ -35,7 +35,7 @@ export default function CTABanner() {
         {/* Right: buttons */}
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "flex-end", flex: "0 0 auto" }}>
           <a
-            href={`${import.meta.env.BASE_URL}book?location=[location-1-slug]`}
+            href={`${import.meta.env.BASE_URL}book?location=nur-and-co`}
             style={{
               fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
               border: "1px solid var(--brand-bg-alt)", background: "transparent", color: "var(--brand-bg-alt)",
@@ -47,7 +47,7 @@ export default function CTABanner() {
             Book [LOCATION_1]
           </a>
           <a
-            href={`${import.meta.env.BASE_URL}book?location=[location-2-slug]`}
+            href={`${import.meta.env.BASE_URL}book?location=nur-and-co-2`}
             style={{
               fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase",
               border: "1px solid var(--brand-accent)", background: "transparent", color: "var(--brand-accent)",
