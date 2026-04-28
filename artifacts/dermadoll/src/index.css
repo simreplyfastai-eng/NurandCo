@@ -82,19 +82,19 @@
   /* Nur & Co Aesthetics palette */
   --brand-primary: #0E0D0B;
   --brand-accent:  #B89968;
-  --brand-bg:      #F4EFE6;
-  --brand-bg-alt:  #EBE3D4;
+  --brand-bg:      #FFFFFF;
+  --brand-bg-alt:  #F8F8F6;
   --brand-text:    #6B6258;
 
   /* Semantic colour tokens */
-  --color-bg-primary:    #F4EFE6;
-  --color-bg-secondary:  #EBE3D4;
+  --color-bg-primary:    #FFFFFF;
+  --color-bg-secondary:  #F8F8F6;
   --color-bg-dark:       #0E0D0B;
   --color-text-primary:  #0E0D0B;
   --color-text-secondary:#6B6258;
   --color-primary:       #0E0D0B;
   --color-accent:        #B89968;
-  --color-border:        #D9CFBC;
+  --color-border:        #E8E5DD;
   --font-heading: 'Cormorant Garamond', serif;
   --font-body:    'Inter', sans-serif;
 

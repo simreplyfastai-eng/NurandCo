@@ -9,15 +9,15 @@ export const brand = {
   },
 
   colors: {
-    bgPrimary:    "#F4EFE6",
-    bgSecondary:  "#EBE3D4",
+    bgPrimary:    "#FFFFFF",
+    bgSecondary:  "#F8F8F6",
     bgDark:       "#0E0D0B",
     textPrimary:  "#0E0D0B",
     textSecondary:"#6B6258",
     primary:      "#0E0D0B",
     accent:       "#B89968",
     accentDark:   "#9A7E50",
-    border:       "#D9CFBC",
+    border:       "#E8E5DD",
     success:      "#4F7A4A",
     error:        "#A33E3E",
   },
