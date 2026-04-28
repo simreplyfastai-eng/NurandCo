@@ -80,21 +80,21 @@
   --elevate-2: rgba(0,0,0, .08);
 
   /* Nur & Co Aesthetics palette */
-  --brand-primary: #1A1917;
-  --brand-accent:  #BFB5A8;
-  --brand-bg:      #EAE5DF;
-  --brand-bg-alt:  #F2EFE9;
-  --brand-text:    #6B6560;
+  --brand-primary: #0E0D0B;
+  --brand-accent:  #B89968;
+  --brand-bg:      #F4EFE6;
+  --brand-bg-alt:  #EBE3D4;
+  --brand-text:    #6B6258;
 
   /* Semantic colour tokens */
-  --color-bg-primary:    #EAE5DF;
-  --color-bg-secondary:  #F2EFE9;
-  --color-bg-dark:       #111111;
-  --color-text-primary:  #1A1917;
-  --color-text-secondary:#6B6560;
-  --color-primary:       #1A1917;
-  --color-accent:        #BFB5A8;
-  --color-border:        #BFB5A8;
+  --color-bg-primary:    #F4EFE6;
+  --color-bg-secondary:  #EBE3D4;
+  --color-bg-dark:       #0E0D0B;
+  --color-text-primary:  #0E0D0B;
+  --color-text-secondary:#6B6258;
+  --color-primary:       #0E0D0B;
+  --color-accent:        #B89968;
+  --color-border:        #D9CFBC;
   --font-heading: 'Cormorant Garamond', serif;
   --font-body:    'Inter', sans-serif;
 

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>[CLIENT_NAME] — Admin Portal</title>
+<title>Nur &amp; Co — Admin Portal</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
@@ -38,26 +38,26 @@ span.flatpickr-weekday{color:#5C1A1A;font-size:10px;font-weight:600;letter-spaci
 *{box-sizing:border-box;margin:0;padding:0;max-width:100%}
 :root{
   /* ── Colours ── */
-  --color-background:#F5F0EB;
-  --color-foreground:#3D3D3D;
-  --color-primary:#5C1A1A;
-  --color-primary-fg:#F5F0EB;
-  --color-secondary:#C9A96E;
-  --color-secondary-fg:#3D3D3D;
-  --color-accent:#E8B4B8;
-  --color-muted:#F7F4F1;
-  --color-muted-fg:#737373;
+  --color-background:#F4EFE6;
+  --color-foreground:#0E0D0B;
+  --color-primary:#0E0D0B;
+  --color-primary-fg:#F4EFE6;
+  --color-secondary:#B89968;
+  --color-secondary-fg:#0E0D0B;
+  --color-accent:#B89968;
+  --color-muted:#EBE3D4;
+  --color-muted-fg:#6B6258;
   --color-card:#FFFFFF;
-  --color-card-fg:#3D3D3D;
-  --color-calendar-bg:#FAF7F4;
-  --color-border:rgba(92,26,26,0.15);
-  --color-border-subtle:rgba(92,26,26,0.10);
-  --color-destructive:#F23A3A;
+  --color-card-fg:#0E0D0B;
+  --color-calendar-bg:#EBE3D4;
+  --color-border:#D9CFBC;
+  --color-border-subtle:rgba(14,13,11,0.08);
+  --color-destructive:#A33E3E;
   /* ── Legacy aliases (keep for JS/CSS that still uses these) ── */
-  --gold:#C9A96E;
-  --bg:#F5F0EB;
+  --gold:#B89968;
+  --bg:#F4EFE6;
   --sidebar:#F5F0EB;
-  --text:#3D3D3D;
+  --text:#0E0D0B;
   --muted:#737373;
   --border:rgba(92,26,26,0.15);
   --card-shadow:var(--shadow-sm);
@@ -65,7 +65,7 @@ span.flatpickr-weekday{color:#5C1A1A;font-size:10px;font-weight:600;letter-spaci
   --font-serif:'Cormorant Garamond',Georgia,serif;
   --font-sans:'Inter',system-ui,sans-serif;
   /* ── Border radius ── */
-  --radius:6px;
+  --radius:4px;
   --radius-pill:9999px;
   /* ── Shadows ── */
   --shadow-sm:0 1px 2px 0 rgb(0 0 0/0.05);
@@ -777,8 +777,8 @@ select.form-input{background:var(--color-card)}
   <div class="login-card" id="login-card">
     <button class="login-close" onclick="window.location.href='/'" aria-label="Back to site">✕</button>
     <div class="login-logo">
-      <div class="login-logo-name">[Client]</div>
-      <div class="login-logo-sub">[CLIENT_TYPE]</div>
+      <div class="login-logo-name">Nur & Co</div>
+      <div class="login-logo-sub">Aesthetics</div>
     </div>
     <div class="login-sub">Admin Portal</div>
     <label class="login-label">Email</label>
@@ -793,7 +793,7 @@ select.form-input{background:var(--color-card)}
 <!-- ═══ LOCATION SELECTOR ═══════════════════════════════ -->
 <div id="location-selector">
   <div class="loc-logo">
-    <div class="loc-logo-name">[Client]</div>
+    <div class="loc-logo-name">Nur & Co</div>
     <div class="loc-logo-sub">[CLIENT_TYPE]</div>
   </div>
   <div class="loc-eyebrow">
@@ -830,8 +830,8 @@ select.form-input{background:var(--color-card)}
   <!-- SIDEBAR -->
   <aside id="sidebar">
     <div class="sb-brand">
-      <div class="sb-logo-name">[Client]</div>
-      <div class="sb-logo-sub">[CLIENT_TYPE]</div>
+      <div class="sb-logo-name">Nur & Co</div>
+      <div class="sb-logo-sub">Aesthetics</div>
       <div class="sb-location-badge" id="sb-location-label">— Admin Portal</div>
     </div>
     <nav class="sb-nav">
@@ -1258,7 +1258,7 @@ select.form-input{background:var(--color-card)}
           <div class="settings-section-header">Business Info</div>
           <div class="settings-body">
             <div class="settings-row"><label>Clinic name</label><input type="text" id="s-clinic" value="[CLIENT_NAME]"/></div>
-            <div class="settings-row"><label>Practitioner</label><input type="text" id="s-practitioner" value="[Client]"/></div>
+            <div class="settings-row"><label>Practitioner</label><input type="text" id="s-practitioner" value="Nur & Co"/></div>
             <div class="settings-row"><label>Instagram</label><input type="text" id="s-instagram" value="@[ClientName]s"/></div>
             <div class="settings-row"><label>WhatsApp</label><input type="text" id="s-whatsapp" placeholder="+44 7…"/></div>
             <div class="settings-row" style="align-items:center">
@@ -2098,6 +2098,17 @@ async function doLogin(){
       _loginDone=true;
       _loginJustSucceeded=true;
       saveSession(token,expiresAt||Date.now()+8*3600*1000);
+      // Single-clinic auto-skip: if only one location, select it and go straight to dashboard
+      try {
+        const lr = await fetch('/api/locations');
+        if (lr.ok) {
+          const ll = await lr.json();
+          if (Array.isArray(ll) && ll.length === 1) {
+            await selectLocation(ll[0].name);
+            return;
+          }
+        }
+      } catch (e) { console.warn('auto-skip locations check failed', e); }
       showLocationSelector();
     } else {
       const card=document.getElementById('login-card');
