@@ -2,18 +2,11 @@ import { motion } from "framer-motion";
 
 const clinics = [
   {
-    region: "ESSEX",
-    name: "[LOCATION_1]",
-    line1: "Our original home clinic in Essex.",
-    line2: "Serving Essex & East Nottingham with our full treatment menu.",
+    region: "NOTTINGHAM",
+    name: "Nur & Co Aesthetics",
+    line1: "Private clinic on Bedale Road, Sherwood.",
+    line2: "Bookings receive full address by email.",
     highlight: true,
-  },
-  {
-    region: "NOTTINGHAM ◆ NEW",
-    name: "[LOCATION_2]",
-    line1: "Now open in the heart of Nottingham.",
-    line2: "Premium flat-rate pricing for all treatments.",
-    highlight: false,
   },
 ];
 

@@ -100,13 +100,13 @@ async function ensureEnquiriesTable(): Promise<void> {
 /** Keep location addresses up to date on every startup. */
 async function ensureLocationAddresses(): Promise<void> {
   const updates = [
-    { slug: "nur-and-co", address: "122B North Street, RM11 1SU" },
-    { slug: "nur-and-co-2", address: "209 Old [LOCATION_2] Rd, London NW1 5QT (entrance from Old [LOCATION_2] Road)" },
+    { slug: "nur-and-co", address: "Private Clinic, Bedale Road, Sherwood, Nottingham, NG5 3GL", address_full: "19 Bedale Road, Sherwood, Nottingham, NG5 3GL" },
+    { slug: "nur-and-co-2", address: "", address_full: "" },
   ];
-  for (const { slug, address } of updates) {
+  for (const { slug, address, address_full } of updates) {
     const { error } = await supabaseAdmin
       .from("locations")
-      .update({ address })
+      .update({ address, address_full })
       .eq("slug", slug);
     if (error) {
       console.warn(`Seed: could not update address for ${slug}:`, error.message);

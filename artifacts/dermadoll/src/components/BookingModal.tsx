@@ -605,7 +605,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
 
   // ── Full-page success overlay ─────────────────────────────────────────────
   if (step === "success") {
-    const CLINIC_ADDRESS = "Nur & Co Aesthetics, [LOCATION_1] / [LOCATION_2]";
+    const CLINIC_ADDRESS = "Nur & Co Aesthetics, Bedale Road, Sherwood, Nottingham, NG5 3GL";
     const waMsg = encodeURIComponent(`Hi, I've just booked ${treatment.name} — I had a quick question about my appointment 😊`);
     const waUrl = `https://wa.me/${whatsapp || "447701298985"}?text=${waMsg}`;
 
@@ -634,7 +634,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
         `DTSTART;TZID=Europe/London:${fmt(start)}`,
         `DTEND;TZID=Europe/London:${fmt(end)}`,
         `SUMMARY:${treatment.name} at Nur & Co Aesthetics`,
-        "LOCATION:Nur & Co Aesthetics\\, [LOCATION_1] / [LOCATION_2]",
+        "LOCATION:Nur & Co Aesthetics\\, Bedale Road\\, Sherwood\\, Nottingham\\, NG5 3GL",
         `DESCRIPTION:Deposit paid £${deposit}\\, balance £${balance} due on arrival`,
         "END:VEVENT",
         "END:VCALENDAR",
@@ -759,8 +759,8 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
             </div>
             <div style={{ fontFamily:"'Inter', sans-serif", fontSize:14, color:"#7a6a50", marginBottom:12 }}>Advanced Aesthetics Practitioner · Student Nurse</div>
             <div style={{ fontFamily:"'Inter', sans-serif", fontSize:15, color:"#2a1f0e", marginBottom:20, lineHeight:1.6 }}>
-              [LOCATION_1], Essex (RM11)<br />
-              [LOCATION_2], Nottingham<br />
+              Bedale Road, Sherwood<br />
+              Nottingham, NG5 3GL<br />
               <span style={{ fontSize:13, color:"#7a6a50" }}>Exact location sent with confirmation</span>
             </div>
             <div style={{ display:"flex", gap:10 }}>

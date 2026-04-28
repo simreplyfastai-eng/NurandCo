@@ -8,7 +8,6 @@ const BASE = import.meta.env.BASE_URL;
 
 const LOCATION_IDS: Record<string, string> = {
   "nur-and-co": "f2c78e92-66bd-4fca-8006-e31009edfa8f",
-  "nur-and-co-2": "[LOCATION_2_UUID]",
 };
 
 interface ApiTreatment {
@@ -29,8 +28,7 @@ interface TreatmentGroup {
 function LocationSelector() {
   const [, navigate] = useLocation();
   const locations = [
-    { slug: "[location-1-slug]", label: "[LOCATION_1]", region: "ESSEX", desc: "Our original home clinic, serving Essex and East Nottingham with our full treatment menu." },
-    { slug: "[location-2-slug]", label: "[LOCATION_2]", region: "NOTTINGHAM · NEW", desc: "Now open in the heart of Nottingham. Premium flat-rate pricing for all treatments." },
+    { slug: "nur-and-co", label: "Nur & Co Aesthetics", region: "NOTTINGHAM", desc: "Private clinic on Bedale Road, Sherwood. Full address sent in your booking confirmation." },
   ];
 
   return (
@@ -87,7 +85,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
   const [activeTreatment, setActiveTreatment] = useState<ApiTreatment | null>(null);
 
   const locationId = LOCATION_IDS[locationSlug];
-  const locationLabel = locationSlug === "nur-and-co" ? "[LOCATION_1]" : "[LOCATION_2]";
+  const locationLabel = "Nottingham";
 
   useEffect(() => {
     if (!locationId) { setLoading(false); return; }

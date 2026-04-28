@@ -9,7 +9,7 @@ const faqs = [
   },
   {
     question: "Which location should I choose?",
-    answer: "Both clinics offer the full Nur & Co Aesthetics treatment menu. [LOCATION_1] is our original Essex home clinic, perfect for those in Essex and East Nottingham. [LOCATION_2] is our new Nottingham clinic, ideal for those based in or near Central Nottingham.",
+    answer: "Our private clinic is on Bedale Road in Sherwood, Nottingham. Full address details are sent to you in your booking confirmation email.",
   },
   {
     question: "Does it hurt?",
@@ -25,7 +25,7 @@ const faqs = [
   },
   {
     question: "Do you offer training?",
-    answer: "Yes, through Nur & Co Academy, Eva offers CPD accredited training at both the [LOCATION_1] and [LOCATION_2] clinics. Courses are open to candidates with no prior background required. Enquire via Instagram or email.",
+    answer: "Yes, training courses are available. Please enquire via Instagram or email for current dates and details.",
   },
   {
     question: "How do I book?",

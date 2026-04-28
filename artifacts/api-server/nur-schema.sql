@@ -17,6 +17,7 @@ create table if not exists locations (
   name text not null,
   slug text not null unique,
   address text,
+  address_full text,
   postcode text,
   phone text,
   email text,

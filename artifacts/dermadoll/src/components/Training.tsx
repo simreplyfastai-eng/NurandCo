@@ -110,7 +110,7 @@ export default function Training() {
           name,
           email,
           phone,
-          course_name: "Training Enquiry — [LOCATION_1]",
+          course_name: "Training Enquiry",
           experience_level: experience_level || undefined,
           message: message || undefined,
         }),
@@ -152,7 +152,7 @@ export default function Training() {
               Train With Eva
             </h2>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "var(--brand-accent)", margin: "0 0 28px" }}>
-              Training based in [LOCATION_1], Essex
+              Training based in Nottingham
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
               Eva's background in education meets her clinical expertise, delivering world-class training through Nur &amp; Co Academy.
@@ -249,11 +249,11 @@ export default function Training() {
                   fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "1.5px", textTransform: "uppercase",
                   border: "1px solid var(--brand-accent)", color: "var(--brand-accent)", padding: "4px 8px", flexShrink: 0, marginLeft: 12,
                 }}>
-                  [LOCATION_1]
+                  Nottingham
                 </span>
               </div>
               <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "var(--brand-accent)", margin: "0 0 20px" }}>
-                [LOCATION_1] Clinic, Essex
+                Nur & Co Clinic, Nottingham
               </p>
               <button
                 onClick={handleEnquire}
@@ -361,7 +361,7 @@ export default function Training() {
                     Training Enquiry
                   </h3>
                   <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", margin: "0 0 28px" }}>
-                    [LOCATION_1] Clinic, Essex
+                    Nur & Co Clinic, Nottingham
                   </p>
 
                   <form onSubmit={handleSubmit} noValidate>

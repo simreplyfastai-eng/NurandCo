@@ -44,7 +44,7 @@ export default function CTABanner() {
             onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-bg-alt)"; e.currentTarget.style.color = "var(--brand-primary)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-bg-alt)"; }}
           >
-            Book [LOCATION_1]
+            Book Now
           </a>
           <a
             href={`${import.meta.env.BASE_URL}book?location=nur-and-co-2`}
@@ -56,7 +56,7 @@ export default function CTABanner() {
             onMouseEnter={(e) => { e.currentTarget.style.background = "var(--brand-accent)"; e.currentTarget.style.color = "var(--brand-primary)"; }}
             onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; e.currentTarget.style.color = "var(--brand-accent)"; }}
           >
-            Book [LOCATION_2]
+            Book Now
           </a>
         </div>
       </motion.div>

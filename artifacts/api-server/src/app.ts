@@ -50,8 +50,10 @@ app.use(
   }),
 );
 const allowedOrigins: (string | RegExp)[] = [
-  "https://[CLIENT_NAME]y.co.uk",
-  "https://www.[CLIENT_NAME]y.co.uk",
+  "https://nurandcoaesthetics.co.uk",
+  "https://aestheticsnottingham.co.uk",
+  "https://www.nurandcoaesthetics.co.uk",
+  "https://www.aestheticsnottingham.co.uk",
   "http://localhost:3000",
   "http://localhost:5173",
 ];
