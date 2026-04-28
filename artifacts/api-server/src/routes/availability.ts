@@ -125,7 +125,7 @@ router.get("/availability/check", async (req, res) => {
     const dayOfWeek = parseDayOfWeek(date);
     const { data: availRow } = await supabaseAdmin
       .from("availability_settings")
-      .select("is_open, open_time, close_time")
+      .select("is_open, open_time, close_time, slot_duration_minutes, buffer_minutes")
       .eq("location_id", locationId)
       .eq("day_of_week", dayOfWeek)
       .maybeSingle();
@@ -561,6 +561,8 @@ router.get("/availability/slots", async (req, res) => {
 
   if (!date) return res.status(400).json({ error: "date required" });
   if (!locationParam) return res.status(400).json({ error: "location required" });
+  const treatmentId = (req.query.treatmentId as string | undefined) ?? undefined;
+  if (!treatmentId) return res.status(400).json({ error: "treatmentId required" });
 
   try {
     const locationId = await resolveLocationId(locationParam);
@@ -584,7 +586,7 @@ router.get("/availability/slots", async (req, res) => {
     // 2. Clinic open this day?
     const { data: availRow } = await supabaseAdmin
       .from("availability_settings")
-      .select("is_open, open_time, close_time")
+      .select("is_open, open_time, close_time, slot_duration_minutes, buffer_minutes")
       .eq("location_id", locationId)
       .eq("day_of_week", dayOfWeek)
       .maybeSingle();
@@ -597,21 +599,44 @@ router.get("/availability/slots", async (req, res) => {
       return res.json({ available: false, reason: "CLINIC_CLOSED", date, slots: [] });
     }
 
-    // 3. Generate 2-hour slots (RULE 4: string arithmetic, no Date objects)
-    const allSlots = generateTimeSlots(startTime, endTime, 120);
+    // 2b. Look up treatment duration (Interpretation B: per-treatment slot length)
+    const { data: treatmentRow } = await supabaseAdmin
+      .from("treatments")
+      .select("duration_minutes, active")
+      .eq("id", treatmentId)
+      .eq("location_id", locationId)
+      .maybeSingle();
+
+    if (!treatmentRow || !treatmentRow.active) {
+      return res.status(404).json({ error: "Treatment not found" });
+    }
+    const TREATMENT_DURATION_MINS = treatmentRow.duration_minutes ?? 30;
+    const BUFFER_MINS = (availRow as any)?.buffer_minutes ?? 15;
+
+    // 3. Generate slot ticks at the clinic's configured interval (default 30 min)
+    const SLOT_TICK_MINS = (availRow as any)?.slot_duration_minutes ?? 30;
+    const allSlots = generateTimeSlots(startTime, endTime, SLOT_TICK_MINS);
 
     // 4. No intra-day recurring blocks (blocked_slots table not in schema)
     const blockedSlots: { start_time: string; end_time: string }[] = [];
 
     // 5. Get existing bookings — only paid/confirmed bookings block slots
+    //    Pull treatment duration via FK so we can compute true occupancy.
     const { data: bookings } = await supabaseAdmin
       .from("bookings")
-      .select("time_slot")
+      .select("time_slot, treatments(duration_minutes)")
       .eq("location_id", locationId)
       .eq("booking_date", date)
       .in("status", ["confirmed", "completed"]);
 
-    const bookedSet = new Set((bookings ?? []).map((b: { time_slot: string }) => b.time_slot?.substring(0, 5)));
+    // Each booking occupies [start .. start + duration + buffer] in minutes from midnight.
+    const bookedRanges: { start: number; end: number }[] = (bookings ?? []).map((b: any) => {
+      const ts = String(b.time_slot ?? "00:00").substring(0, 5);
+      const [h, m] = ts.split(":").map(Number);
+      const start = (h || 0) * 60 + (m || 0);
+      const dur = b.treatments?.duration_minutes ?? TREATMENT_DURATION_MINS;
+      return { start, end: start + dur + BUFFER_MINS };
+    });
 
     // 6. RULE 7: remove past slots using London time with 30-min buffer
     const todayStr = londonToday();
@@ -626,7 +651,7 @@ router.get("/availability/slots", async (req, res) => {
 
     // 7. Google Calendar busy ranges — fetched ONCE, reused across all slot checks
     const gcalBusyRanges = await getGoogleCalendarBusyRanges(locationId, date);
-    const SLOT_DURATION_MINS = 120; // 2-hour slots match the generateTimeSlots interval
+    const SLOT_DURATION_MINS = TREATMENT_DURATION_MINS + BUFFER_MINS; // Match treatment occupancy used in booked-range check
 
     // Build rich slot list
     const slots = allSlots.map((slotTime) => {
@@ -638,7 +663,10 @@ router.get("/availability/slots", async (req, res) => {
       }
 
       // Booked?
-      if (bookedSet.has(slotTime)) {
+      // Check if [slot start, slot start + treatment duration + buffer] overlaps any booked range.
+      const slotEndMins = slotMins + TREATMENT_DURATION_MINS + BUFFER_MINS;
+      const isBooked = bookedRanges.some((r) => slotMins < r.end && slotEndMins > r.start);
+      if (isBooked) {
         return { time: slotTime, available: false, reason: "booked" };
       }
 

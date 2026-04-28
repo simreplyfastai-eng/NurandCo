@@ -1,7 +1,9 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm build *)"
+      "Bash(pnpm build *)",
+      "Read(//home/runner/workspace/**)",
+      "Bash(node -e ' *)"
     ]
   }
 }

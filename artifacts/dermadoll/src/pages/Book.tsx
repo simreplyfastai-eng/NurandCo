@@ -7,7 +7,7 @@ import BookingModal from "@/components/BookingModal";
 const BASE = import.meta.env.BASE_URL;
 
 const LOCATION_IDS: Record<string, string> = {
-  "nur-and-co": "[LOCATION_1_UUID]",
+  "nur-and-co": "f2c78e92-66bd-4fca-8006-e31009edfa8f",
   "nur-and-co-2": "[LOCATION_2_UUID]",
 };
 
@@ -252,7 +252,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
 
       {activeTreatment && (
         <BookingModal
-          treatment={{ name: activeTreatment.name, price: `£${activeTreatment.price}` }}
+          treatment={{ id: activeTreatment.id, name: activeTreatment.name, price: `£${activeTreatment.price}` }}
           onClose={() => setActiveTreatment(null)}
           locationId={LOCATION_IDS[locationSlug]}
           locationSlug={locationSlug}
@@ -265,7 +265,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
 export default function BookPage() {
   const search = useSearch();
   const params = new URLSearchParams(search);
-  const locationSlug = params.get("location") ?? "";
+  const locationSlug = params.get("location") ?? "nur-and-co";
   const treatmentId = params.get("treatment") ?? "";
 
   if (!locationSlug) {

@@ -4,6 +4,7 @@ import type { Stripe, StripeElements } from "@stripe/stripe-js";
 import { getNextAvailableSlot } from "@/lib/nextSlot";
 
 interface Treatment {
+  id?: string;
   name: string;
   price: string;
   duration?: string;
@@ -305,7 +306,8 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
         : locationId
         ? `location=${encodeURIComponent(locationId)}`
         : "";
-      const r = await fetch(`/api/availability/slots?${locParam}&date=${dateStr}`, { cache: "no-store" });
+      if (!treatment?.id) { setApiSlots([]); setLoadingSlots(false); return; }
+      const r = await fetch(`/api/availability/slots?${locParam}&date=${dateStr}&treatmentId=${encodeURIComponent(treatment.id)}`, { cache: "no-store" });
       if (r.ok) {
         const data = await r.json() as { available?: boolean; slots?: { time: string; available: boolean; reason?: string }[] };
         setApiSlots(data.slots ?? []);
@@ -318,7 +320,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
       setLoadingSlots(false);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [locationId, locationSlug]);
+  }, [locationId, locationSlug, treatment?.id]);
 
   // Refresh availability data (called on month change to get fresh Supabase data)
   const refreshAvail = useCallback(async () => {
