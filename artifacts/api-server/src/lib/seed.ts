@@ -15,99 +15,9 @@ type TreatmentRow = {
   category: string;
 };
 
-const LOCATION_1_TREATMENTS: TreatmentRow[] = [
-  // Aesthetics — fillers (deposit £20)
-  { name: "NATURALE LIPS 0.5ml",                                      duration_minutes: 45,  price: 135,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "NATURALE LIPS 0.8ml",                                      duration_minutes: 45,  price: 175,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "NATURALE LIPS 1.1ml",                                      duration_minutes: 45,  price: 185,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Smile Line Filler",                                        duration_minutes: 60,  price: 185,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "HD Sculpt Lips 0.8ml",                                     duration_minutes: 60,  price: 175,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "HD Sculpt Lips 1.1ml",                                     duration_minutes: 60,  price: 210,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Lips Russian Technique 0.5ml",                             duration_minutes: 40,  price: 135,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Lips Russian Technique 0.8ml",                             duration_minutes: 40,  price: 175,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Lips Russian Technique 1.1ml",                             duration_minutes: 40,  price: 185,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  // Aesthetics — price=0 = POA (the ONLY zero-price treatment)
-  { name: "Fat Dissolving Lemon Bottle",                              duration_minutes: 30,  price: 0,    deposit_amount: 10, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  // Aesthetics — anti-wrinkle (deposit £10)
-  { name: "Anti Wrinkle 1 Area",                                      duration_minutes: 30,  price: 180,  deposit_amount: 10, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Anti Wrinkle 2 Areas",                                     duration_minutes: 30,  price: 220,  deposit_amount: 10, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Anti Wrinkle 3 Areas",                                     duration_minutes: 30,  price: 300,  deposit_amount: 10, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  // Aesthetics — more fillers (deposit £20)
-  { name: "Chin Filler 0.5ml",                                        duration_minutes: 30,  price: 130,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Chin Filler 1.1ml",                                        duration_minutes: 30,  price: 150,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Filler Dissolve Only",                                     duration_minutes: 60,  price: 200,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Lip Filler Dissolve and Refill Package",                   duration_minutes: 60,  price: 350,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Tear Trough Filler",                                       duration_minutes: 30,  price: 230,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Non-Surgical Rhinoplasty",                                 duration_minutes: 30,  price: 180,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Jaw Filler 1ml",                                           duration_minutes: 40,  price: 150,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Jaw Filler 2ml",                                           duration_minutes: 40,  price: 180,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Cheek Filler 1ml",                                         duration_minutes: 40,  price: 150,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Cheek Filler 2ml",                                         duration_minutes: 40,  price: 180,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Facial Contouring 3ml",                                    duration_minutes: 60,  price: 360,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Facial Contouring 4ml",                                    duration_minutes: 60,  price: 470,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Facial Contouring 5ml",                                    duration_minutes: 60,  price: 580,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Consultation",                                             duration_minutes: 30,  price: 30,   deposit_amount: 0,  deposit_type: "fixed", active: true, category: "Aesthetics" },
-  // Lashes & Brows (deposit £10)
-  { name: "Classic Full Set Lashes",                                  duration_minutes: 120, price: 55,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Mega Classics",                                            duration_minutes: 150, price: 55,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Hybrid Full Set",                                          duration_minutes: 120, price: 60,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Signature Wisp Me Hybrids",                                duration_minutes: 120, price: 70,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Russians Full Set",                                        duration_minutes: 120, price: 70,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Mega Volumes Full Set",                                    duration_minutes: 120, price: 75,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Classic Infill",                                           duration_minutes: 60,  price: 35,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Mega Classics Infill",                                     duration_minutes: 60,  price: 35,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Hybrid Infill",                                            duration_minutes: 60,  price: 40,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Signature Wisp Me Infill",                                 duration_minutes: 60,  price: 50,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Russians Infill",                                          duration_minutes: 60,  price: 50,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Mega Volumes Infill",                                      duration_minutes: 60,  price: 55,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Lash Removal",                                             duration_minutes: 30,  price: 15,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "LVL Lash Lift",                                            duration_minutes: 90,  price: 50,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Korean Lash Lift",                                         duration_minutes: 60,  price: 60,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Eyebrow Wax",                                              duration_minutes: 15,  price: 15,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  { name: "Eyebrow Wax and Tint",                                     duration_minutes: 20,  price: 25,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-  // Facials (deposit £10)
-  { name: "Microneedling Facial",                                     duration_minutes: 60,  price: 55,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Facials" },
-  { name: "[CLIENT]FACIAL Hydrofacial",                                  duration_minutes: 60,  price: 70,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Facials" },
-  { name: "Luxe Microneedling Facial",                                duration_minutes: 30,  price: 75,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Facials" },
-  // Nails (deposit £10)
-  { name: "Plain Acrylic Set",                                        duration_minutes: 120, price: 50,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
-  { name: "French Tip Acrylic Set",                                   duration_minutes: 120, price: 55,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
-  { name: "Nail Art Acrylic Set",                                     duration_minutes: 120, price: 55,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
-  { name: "Plain BIAB Set",                                           duration_minutes: 120, price: 45,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
-  { name: "French Tip BIAB Set",                                      duration_minutes: 120, price: 50,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
-  { name: "Nail Art BIAB Set",                                        duration_minutes: 120, price: 55,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
-  { name: "Plain Hard Gel Set",                                       duration_minutes: 120, price: 53,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
-  { name: "French Tip Hard Gel Set",                                  duration_minutes: 120, price: 55,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
-  { name: "Nail Art Hard Gel Set",                                    duration_minutes: 120, price: 60,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
-  { name: "Toes",                                                     duration_minutes: 60,  price: 25,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
-  { name: "Russian Wet Pedicure",                                     duration_minutes: 100, price: 40,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Nails" },
-  // SPMU (deposit £20)
-  { name: "Lip Blush SPMU",                                           duration_minutes: 140, price: 120,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "SPMU" },
-  { name: "Lip Blush SPMU Top Up",                                    duration_minutes: 90,  price: 95,   deposit_amount: 20, deposit_type: "fixed", active: true, category: "SPMU" },
-  // Skin Boosters (deposit £20)
-  { name: "Phlenyage 3 Sessions Full Face",                           duration_minutes: 90,  price: 800,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Skin Boosters" },
-  { name: "Phlenyage 3 Sessions Eyes Only",                           duration_minutes: 90,  price: 450,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Skin Boosters" },
-  { name: "Phlenyage Full Face Combo",                                duration_minutes: 90,  price: 1000, deposit_amount: 20, deposit_type: "fixed", active: true, category: "Skin Boosters" },
-  { name: "Vitaran / Plinest / Nucleofill 3 Sessions Full Face",      duration_minutes: 90,  price: 570,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Skin Boosters" },
-  { name: "Vitaran / Plinest / Nucleofill 3 Sessions Eyes Only",      duration_minutes: 90,  price: 380,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Skin Boosters" },
-  { name: "Vitaran / Plinest / Nucleofill Full Face Combo",           duration_minutes: 90,  price: 850,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Skin Boosters" },
-];
+const LOCATION_1_TREATMENTS: TreatmentRow[] = [];
 
-const LOCATION_2_TREATMENTS: TreatmentRow[] = [
-  // Aesthetics (deposit £20)
-  { name: "NATURALE LIPS 0.5ml",                                      duration_minutes: 60,  price: 140,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "NATURALE LIPS 0.8ml",                                      duration_minutes: 60,  price: 185,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "NATURALE LIPS 1.1ml",                                      duration_minutes: 60,  price: 200,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "HD Sculpt Lips 0.8ml",                                     duration_minutes: 60,  price: 195,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "HD Sculpt Lips 1ml",                                       duration_minutes: 60,  price: 225,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Facial Contouring 3ml",                                    duration_minutes: 60,  price: 395,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Facial Contouring 4ml",                                    duration_minutes: 60,  price: 495,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Facial Contouring 5ml",                                    duration_minutes: 60,  price: 595,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Non-Surgical Rhinoplasty with 2 Week Top Up",              duration_minutes: 60,  price: 250,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  { name: "Tear Trough Filler",                                       duration_minutes: 60,  price: 250,  deposit_amount: 20, deposit_type: "fixed", active: true, category: "Aesthetics" },
-  // Lashes & Brows (deposit £10)
-  { name: "Eyelash Extensions",                                       duration_minutes: 60,  price: 75,   deposit_amount: 10, deposit_type: "fixed", active: true, category: "Lashes & Brows" },
-];
+const LOCATION_2_TREATMENTS: TreatmentRow[] = [];
 
 /** Ensure the category column exists on the treatments table. */
 async function ensureCategoryColumn(): Promise<void> {
@@ -190,8 +100,8 @@ async function ensureEnquiriesTable(): Promise<void> {
 /** Keep location addresses up to date on every startup. */
 async function ensureLocationAddresses(): Promise<void> {
   const updates = [
-    { slug: "[location-1-slug]", address: "122B North Street, RM11 1SU" },
-    { slug: "[location-2-slug]", address: "209 Old [LOCATION_2] Rd, London NW1 5QT (entrance from Old [LOCATION_2] Road)" },
+    { slug: "nur-and-co", address: "122B North Street, RM11 1SU" },
+    { slug: "nur-and-co-2", address: "209 Old [LOCATION_2] Rd, London NW1 5QT (entrance from Old [LOCATION_2] Road)" },
   ];
   for (const { slug, address } of updates) {
     const { error } = await supabaseAdmin
@@ -238,19 +148,25 @@ export async function seedTreatments(): Promise<void> {
       return;
     }
 
-    const H = locs.find((l: { slug: string }) => l.slug === "[location-1-slug]")?.id as string | undefined;
-    const M = locs.find((l: { slug: string }) => l.slug === "[location-2-slug]")?.id as string | undefined;
+    const H = locs.find((l: { slug: string }) => l.slug === "nur-and-co")?.id as string | undefined;
+    const M = locs.find((l: { slug: string }) => l.slug === "nur-and-co-2")?.id as string | undefined;
 
-    if (!H || !M) {
-      console.error(`Seed: missing location IDs — [location-1-slug]=${H} [location-2-slug]=${M}`);
+    if (!H) {
+      console.warn("Seed: nur-and-co location not found - skipping treatment seed");
       return;
     }
+
 
     // ── Insert all 77 treatments in a single batch ─────────────────────────────
     const rows = [
       ...LOCATION_1_TREATMENTS.map((t) => ({ ...t, location_id: H })),
-      ...LOCATION_2_TREATMENTS.map((t) => ({ ...t, location_id: M })),
+      ...(M ? LOCATION_2_TREATMENTS.map((t) => ({ ...t, location_id: M })) : []),
     ];
+
+    if (rows.length === 0) {
+      console.log("Seed: no template treatments to insert - skipping");
+      return;
+    }
 
     const { error: insertErr } = await supabaseAdmin.from("treatments").insert(rows);
 
