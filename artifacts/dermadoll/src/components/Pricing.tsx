@@ -207,7 +207,7 @@ export default function Pricing() {
                 </span>
                 <ChevronDown
                   size={16}
-                  color={open === i ? "var(--brand-accent)" : "#737373"}
+                  color={open === i ? "var(--brand-accent)" : "#5A5248"}
                   style={{ transform: open === i ? "rotate(180deg)" : "rotate(0deg)", transition: "transform 0.3s" }}
                 />
               </button>

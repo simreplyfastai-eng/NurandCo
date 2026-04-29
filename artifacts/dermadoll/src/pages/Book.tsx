@@ -65,7 +65,7 @@ function LocationSelector() {
             >
               <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 9, letterSpacing: "2.5px", textTransform: "uppercase", color: "var(--brand-accent)", marginBottom: 10 }}>{loc.region}</div>
               <div style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "2rem", color: "var(--brand-primary)", marginBottom: 12, lineHeight: 1 }}>{loc.label}</div>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", lineHeight: 1.6, margin: "0 0 20px" }}>{loc.desc}</p>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#5A5248", lineHeight: 1.6, margin: "0 0 20px" }}>{loc.desc}</p>
               <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "2px", textTransform: "uppercase", color: "var(--brand-primary)", borderTop: "1px solid #E8E2D9", paddingTop: 16 }}>
                 Book Here →
               </div>
@@ -130,7 +130,7 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
         </a>
         <button
           onClick={() => navigate("/book")}
-          style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", color: "#737373", background: "none", border: "none", cursor: "pointer" }}
+          style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", color: "#5A5248", background: "none", border: "none", cursor: "pointer" }}
         >
           ← Change Location
         </button>
@@ -150,12 +150,12 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
           {loading && (
             <div style={{ textAlign: "center", padding: "60px 0" }}>
               <div style={{ width: 28, height: 28, border: "2px solid #F0EAE2", borderTopColor: "var(--brand-primary)", borderRadius: "50%", animation: "spin .8s linear infinite", margin: "0 auto 12px" }} />
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373" }}>Loading treatments…</p>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#5A5248" }}>Loading treatments…</p>
             </div>
           )}
 
           {!loading && groups.length === 0 && (
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", textAlign: "center", padding: "40px 0" }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#5A5248", textAlign: "center", padding: "40px 0" }}>
               No treatments available for this location yet.
             </p>
           )}
@@ -202,9 +202,9 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
                         >
                           <div>
                             <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "var(--brand-text)" }}>{t.name}</span>
-                            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "#737373", marginLeft: 8 }}>{fmtDuration(t.duration_minutes)}</span>
+                            <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, color: "#5A5248", marginLeft: 8 }}>{fmtDuration(t.duration_minutes)}</span>
                             {isPoa && (
-                              <div style={{ fontFamily: "'Inter', sans-serif", fontStyle: "italic", fontSize: 11, color: "#737373", marginTop: 3 }}>
+                              <div style={{ fontFamily: "'Inter', sans-serif", fontStyle: "italic", fontSize: 11, color: "#5A5248", marginTop: 3 }}>
                                 Ask for pricing
                               </div>
                             )}

@@ -3,7 +3,7 @@ export default function Hero() {
     <section
       id="home"
       style={{
-        background: "#111111",
+        background: "#E5E4E2",
         minHeight: "100dvh",
         display: "flex",
         alignItems: "center",
@@ -36,17 +36,17 @@ export default function Hero() {
           letter-spacing: 0.12em;
           text-transform: uppercase;
           padding: 14px 36px;
-          border: 1px solid #EAE5DF;
+          border: 1px solid #002C5E;
           border-radius: 2px;
-          background: transparent;
+          background: #002C5E;
           color: #FFFFFF;
           text-decoration: none;
           cursor: pointer;
           transition: background 0.2s ease, color 0.2s ease;
         }
         .hero-btn:hover {
-          background: #EAE5DF;
-          color: #111111;
+          background: #003E80;
+          color: #FFFFFF;
         }
         @media (max-width: 480px) {
           .hero-content { padding: 100px 1.25rem 3rem; }
@@ -73,7 +73,7 @@ export default function Hero() {
           style={{
             fontFamily: "'Inter', sans-serif",
             fontWeight: 300,
-            color: "#BFB5A8",
+            color: "#E8E5DD",
             fontSize: "1rem",
             margin: "0 0 2.5rem",
             lineHeight: 1.6,
@@ -99,13 +99,13 @@ export default function Hero() {
 
           <a
             className="hero-btn"
-            href="#subscription"
+            href="#treatments"
             onClick={(e) => {
               e.preventDefault();
               document.getElementById("subscription")?.scrollIntoView({ behavior: "smooth" });
             }}
           >
-            Membership
+            Treatments
           </a>
         </div>
       </div>

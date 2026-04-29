@@ -94,7 +94,7 @@ export default function FAQ() {
                     transition={{ duration: 0.3 }}
                     style={{ overflow: "hidden" }}
                   >
-                    <div style={{ padding: "0 24px 20px", fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", lineHeight: 1.75 }}>
+                    <div style={{ padding: "0 24px 20px", fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#5A5248", lineHeight: 1.75 }}>
                       {faq.answer}
                     </div>
                   </motion.div>

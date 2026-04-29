@@ -3,7 +3,7 @@ export default function BookCTA() {
     <section
       id="book-cta"
       style={{
-        background: "#111111",
+        background: "#FFFFFF",
         padding: "6rem 2.5rem",
         textAlign: "center",
       }}
@@ -17,7 +17,7 @@ export default function BookCTA() {
       <div style={{ maxWidth: 640, margin: "0 auto" }}>
         <p
           className="eyebrow"
-          style={{ color: "#BFB5A8", marginBottom: "1.25rem" }}
+          style={{ color: "#E8E5DD", marginBottom: "1.25rem" }}
         >
           READY TO BEGIN
         </p>

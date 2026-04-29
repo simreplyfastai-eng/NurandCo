@@ -152,7 +152,7 @@ export default function ResultsVideos() {
           <h2 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "clamp(2rem,5vw,3.2rem)", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 8px" }}>
             Watch Real Treatments
           </h2>
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", margin: 0 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#5A5248", margin: 0 }}>
             Watch real treatments and transformations
           </p>
         </motion.div>

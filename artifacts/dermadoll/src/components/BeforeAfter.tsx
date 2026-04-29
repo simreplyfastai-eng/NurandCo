@@ -99,10 +99,10 @@ export default function BeforeAfter() {
                 onClick={() => setLightbox(resolvedSrc(item.src))}
                 style={{ cursor: "zoom-in" }}
               >
-                <div style={{ aspectRatio: "1 / 1", width: "100%", overflow: "hidden", background: "#D4CEC8" }}>
+                <div style={{ aspectRatio: "1 / 1", width: "100%", overflow: "hidden", background: "#F8F8F6" }}>
                   {isLocal(item.src) ? (
-                    <div style={{ width: "100%", height: "100%", backgroundColor: "#D4CEC8", display: "flex", alignItems: "flex-end", padding: "12px 14px" }}>
-                      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "2px", textTransform: "uppercase", color: "#1A1917", opacity: 0.4 }}>{item.category}</span>
+                    <div style={{ width: "100%", height: "100%", backgroundColor: "#F8F8F6", display: "flex", alignItems: "flex-end", padding: "12px 14px" }}>
+                      <span style={{ fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "2px", textTransform: "uppercase", color: "#0E0D0B", opacity: 0.4 }}>{item.category}</span>
                     </div>
                   ) : (
                     <img

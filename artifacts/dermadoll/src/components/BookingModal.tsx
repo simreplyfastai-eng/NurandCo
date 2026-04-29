@@ -466,7 +466,7 @@ export default function BookingModal({ treatment, onClose, locationId, locationS
             theme: "stripe",
             variables: {
               colorPrimary: "var(--brand-accent)",
-              colorText: "#111111",
+              colorText: "#FFFFFF",
               fontFamily: "Inter, sans-serif",
               borderRadius: "8px",
             },

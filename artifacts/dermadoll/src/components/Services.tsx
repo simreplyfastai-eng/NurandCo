@@ -34,7 +34,7 @@ const TREATMENTS = [
 export default function Services() {
   return (
     /* padding moved to CSS class so media query can override it — inline styles can't be overridden by @media */
-    <section id="services" className="services-section" style={{ background: "#EAE5DF" }}>
+    <section id="services" className="services-section" style={{ background: "#FFFFFF" }}>
       <style>{`
         /* ── Desktop ── */
         .services-section {
@@ -47,8 +47,8 @@ export default function Services() {
           margin-top: 3rem;
         }
         .service-card {
-          background: #F2EFE9;
-          border: 1px solid #BFB5A8;
+          background: #F8F8F6;
+          border: 1px solid #E8E5DD;
           border-radius: 2px;
           padding: 2rem;
           display: flex;
@@ -63,7 +63,7 @@ export default function Services() {
           font-family: 'Inter', sans-serif;
           font-weight: 300;
           font-size: 0.875rem;
-          color: #6B6560;
+          color: #5A5248;
           line-height: 1.65;
           margin: 0;
           flex-grow: 1;
@@ -75,12 +75,12 @@ export default function Services() {
           font-family: 'Inter', sans-serif;
           font-weight: 300;
           font-size: 0.75rem;
-          color: #1A1917;
+          color: #0E0D0B;
           text-decoration: none;
           transition: color 0.2s;
           flex-shrink: 0;
         }
-        .service-card-link:hover { color: #BFB5A8; }
+        .service-card-link:hover { color: #E8E5DD; }
 
         @media (max-width: 1024px) {
           .services-grid { grid-template-columns: repeat(2, 1fr); }
@@ -135,7 +135,7 @@ export default function Services() {
               fontFamily: "'Cormorant Garamond', serif",
               fontWeight: 300,
               fontSize: "clamp(2rem, 4vw, 3rem)",
-              color: "#1A1917",
+              color: "#0E0D0B",
               margin: 0,
               lineHeight: 1.1,
             }}
@@ -153,7 +153,7 @@ export default function Services() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontWeight: 300,
                 fontSize: "1.35rem",
-                color: "#1A1917",
+                color: "#0E0D0B",
                 margin: 0,
                 lineHeight: 1.2,
                 overflow: "hidden",

@@ -154,10 +154,10 @@ export default function Training() {
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "var(--brand-accent)", margin: "0 0 28px" }}>
               Training based in Nottingham
             </p>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#5A5248", lineHeight: 1.8, margin: "0 0 18px" }}>
               Eva's background in education meets her clinical expertise, delivering world-class training through Nur &amp; Co Academy.
             </p>
-            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#737373", lineHeight: 1.8, margin: "0 0 18px" }}>
+            <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "#5A5248", lineHeight: 1.8, margin: "0 0 18px" }}>
               All courses are open to candidates with no prior background required.
             </p>
             <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 15, color: "var(--brand-primary)", lineHeight: 1.8, margin: 0 }}>
@@ -195,7 +195,7 @@ export default function Training() {
                   <p style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.15rem", fontWeight: 400, color: "var(--brand-primary)", margin: "0 0 4px" }}>
                     {c.name}
                   </p>
-                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#737373", margin: 0 }}>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 12, color: "#5A5248", margin: 0 }}>
                     {c.course}
                   </p>
                 </div>
@@ -223,7 +223,7 @@ export default function Training() {
               }}>
                 COMING SOON
               </span>
-              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", margin: 0, lineHeight: 1.5 }}>
+              <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#5A5248", margin: 0, lineHeight: 1.5 }}>
                 CPD Accredited Aesthetic Courses
               </p>
             </motion.div>
@@ -306,11 +306,11 @@ export default function Training() {
                 onClick={closeModal}
                 style={{
                   position: "absolute", top: 16, right: 20, background: "none", border: "none",
-                  cursor: "pointer", fontSize: 22, color: "#737373", lineHeight: 1,
+                  cursor: "pointer", fontSize: 22, color: "#5A5248", lineHeight: 1,
                   transition: "color 0.15s",
                 }}
                 onMouseEnter={(e) => { e.currentTarget.style.color = "var(--brand-accent)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.color = "#737373"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "#5A5248"; }}
               >×</button>
 
               {formState === "success" ? (
@@ -319,10 +319,10 @@ export default function Training() {
                   <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.8rem", color: "var(--brand-primary)", margin: "0 0 10px" }}>
                     Enquiry received!
                   </h3>
-                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#737373", lineHeight: 1.7, margin: "0 0 24px" }}>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 14, color: "#5A5248", lineHeight: 1.7, margin: "0 0 24px" }}>
                     Thanks {submittedName.split(" ")[0]}, Eva will be in touch within 24 hours.
                   </p>
-                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", margin: "0 0 12px" }}>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#5A5248", margin: "0 0 12px" }}>
                     WhatsApp us in the meantime:
                   </p>
                   <a
@@ -343,7 +343,7 @@ export default function Training() {
                     onClick={closeModal}
                     style={{
                       background: "none", border: "1px solid #E2DDD5", fontFamily: "'Inter', sans-serif",
-                      fontSize: 12, color: "#737373", padding: "10px 24px", cursor: "pointer", borderRadius: 4,
+                      fontSize: 12, color: "#5A5248", padding: "10px 24px", cursor: "pointer", borderRadius: 4,
                     }}
                   >
                     Close
@@ -360,7 +360,7 @@ export default function Training() {
                   <h3 style={{ fontFamily: "'Cormorant Garamond', serif", fontStyle: "italic", fontSize: "1.8rem", color: "var(--brand-primary)", margin: "0 0 6px" }}>
                     Training Enquiry
                   </h3>
-                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#737373", margin: "0 0 28px" }}>
+                  <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 13, color: "#5A5248", margin: "0 0 28px" }}>
                     Nur & Co Clinic, Nottingham
                   </p>
 

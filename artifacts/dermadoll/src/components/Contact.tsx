@@ -3,13 +3,13 @@ import { useState } from "react";
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "14px 16px",
-  border: "1px solid #BFB5A8",
+  border: "1px solid #E8E5DD",
   borderRadius: 2,
-  background: "#EAE5DF",
+  background: "#E5E4E2",
   fontFamily: "'Inter', sans-serif",
   fontWeight: 300,
   fontSize: "0.9375rem",
-  color: "#1A1917",
+  color: "#0E0D0B",
   outline: "none",
   boxSizing: "border-box",
   transition: "border-color 0.2s",
@@ -29,7 +29,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" style={{ background: "#F2EFE9", padding: "6rem 2.5rem" }}>
+    <section id="contact" style={{ background: "#F8F8F6", padding: "6rem 2.5rem" }}>
       <style>{`
         .contact-grid {
           display: grid;
@@ -55,7 +55,7 @@ export default function Contact() {
               fontFamily: "'Cormorant Garamond', serif",
               fontWeight: 300,
               fontSize: "clamp(2rem, 4vw, 3rem)",
-              color: "#1A1917",
+              color: "#0E0D0B",
               margin: "0 0 1.5rem",
               lineHeight: 1.1,
             }}
@@ -68,7 +68,7 @@ export default function Contact() {
               fontFamily: "'Inter', sans-serif",
               fontWeight: 300,
               fontSize: "0.9375rem",
-              color: "#6B6560",
+              color: "#5A5248",
               lineHeight: 1.8,
               margin: "0 0 2rem",
             }}
@@ -85,12 +85,12 @@ export default function Contact() {
                 fontFamily: "'Inter', sans-serif",
                 fontWeight: 300,
                 fontSize: "0.875rem",
-                color: "#1A1917",
+                color: "#0E0D0B",
                 textDecoration: "none",
                 transition: "color 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#BFB5A8")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#1A1917")}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#E8E5DD")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#0E0D0B")}
             >
               @nurandcoaesthetics
             </a>
@@ -101,12 +101,12 @@ export default function Contact() {
                 fontFamily: "'Inter', sans-serif",
                 fontWeight: 300,
                 fontSize: "0.875rem",
-                color: "#1A1917",
+                color: "#0E0D0B",
                 textDecoration: "none",
                 transition: "color 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#BFB5A8")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#1A1917")}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#E8E5DD")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#0E0D0B")}
             >
               nurandcoaesthetics@gmail.com
             </a>
@@ -119,12 +119,12 @@ export default function Contact() {
                 fontFamily: "'Inter', sans-serif",
                 fontWeight: 300,
                 fontSize: "0.875rem",
-                color: "#1A1917",
+                color: "#0E0D0B",
                 textDecoration: "none",
                 transition: "color 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#BFB5A8")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#1A1917")}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#E8E5DD")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#0E0D0B")}
             >
               WhatsApp — [PLACEHOLDER — NUR TO SUPPLY number]
             </a>
@@ -137,8 +137,8 @@ export default function Contact() {
             <div
               style={{
                 padding: "3rem 2rem",
-                background: "#EAE5DF",
-                border: "1px solid #BFB5A8",
+                background: "#E5E4E2",
+                border: "1px solid #E8E5DD",
                 borderRadius: 2,
                 textAlign: "center",
               }}
@@ -148,7 +148,7 @@ export default function Contact() {
                   fontFamily: "'Cormorant Garamond', serif",
                   fontWeight: 300,
                   fontSize: "1.75rem",
-                  color: "#1A1917",
+                  color: "#0E0D0B",
                   margin: "0 0 0.75rem",
                 }}
               >
@@ -159,7 +159,7 @@ export default function Contact() {
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 300,
                   fontSize: "0.875rem",
-                  color: "#6B6560",
+                  color: "#5A5248",
                   margin: 0,
                 }}
               >
@@ -177,7 +177,7 @@ export default function Contact() {
                     fontSize: "0.6875rem",
                     letterSpacing: "0.15em",
                     textTransform: "uppercase",
-                    color: "#6B6560",
+                    color: "#5A5248",
                     marginBottom: "0.5rem",
                   }}
                 >
@@ -189,8 +189,8 @@ export default function Contact() {
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   style={inputStyle}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = "#1A1917")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "#BFB5A8")}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#0E0D0B")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#E8E5DD")}
                   placeholder="Your name"
                 />
               </div>
@@ -204,7 +204,7 @@ export default function Contact() {
                     fontSize: "0.6875rem",
                     letterSpacing: "0.15em",
                     textTransform: "uppercase",
-                    color: "#6B6560",
+                    color: "#5A5248",
                     marginBottom: "0.5rem",
                   }}
                 >
@@ -216,8 +216,8 @@ export default function Contact() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   style={inputStyle}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = "#1A1917")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "#BFB5A8")}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#0E0D0B")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#E8E5DD")}
                   placeholder="your@email.com"
                 />
               </div>
@@ -231,7 +231,7 @@ export default function Contact() {
                     fontSize: "0.6875rem",
                     letterSpacing: "0.15em",
                     textTransform: "uppercase",
-                    color: "#6B6560",
+                    color: "#5A5248",
                     marginBottom: "0.5rem",
                   }}
                 >
@@ -243,8 +243,8 @@ export default function Contact() {
                   value={form.message}
                   onChange={(e) => setForm({ ...form, message: e.target.value })}
                   style={{ ...inputStyle, resize: "none" }}
-                  onFocus={(e) => (e.currentTarget.style.borderColor = "#1A1917")}
-                  onBlur={(e) => (e.currentTarget.style.borderColor = "#BFB5A8")}
+                  onFocus={(e) => (e.currentTarget.style.borderColor = "#0E0D0B")}
+                  onBlur={(e) => (e.currentTarget.style.borderColor = "#E8E5DD")}
                   placeholder="How can we help you?"
                 />
               </div>

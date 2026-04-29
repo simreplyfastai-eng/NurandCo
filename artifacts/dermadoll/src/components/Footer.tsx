@@ -18,7 +18,7 @@ export default function Footer() {
     { name: "SERVICES",    href: "#services" },
     { name: "ABOUT",       href: "#about" },
     { name: "GALLERY",     href: "#gallery" },
-    { name: "MEMBERSHIP",  href: "#subscription" },
+    { name: "TREATMENTS",  href: "#treatments" },
     { name: "CONTACT",     href: "#contact" },
   ];
 
@@ -35,7 +35,7 @@ export default function Footer() {
   };
 
   return (
-    <footer style={{ background: "#F2EFE9", borderTop: "1px solid #BFB5A8" }}>
+    <footer style={{ background: "#F8F8F6", borderTop: "1px solid #E8E5DD" }}>
       <div className="footer-inner" style={{ maxWidth: 1140, margin: "0 auto", padding: "72px 2.5rem 40px" }}>
 
         <div className="footer-grid">
@@ -56,7 +56,7 @@ export default function Footer() {
                 fontSize: "0.8125rem",
                 letterSpacing: "0.2em",
                 textTransform: "uppercase",
-                color: "#1A1917",
+                color: "#0E0D0B",
               }}
             >
               NUR &amp; CO
@@ -70,12 +70,12 @@ export default function Footer() {
                 fontFamily: "'Inter', sans-serif",
                 fontWeight: 300,
                 fontSize: "0.8125rem",
-                color: "#6B6560",
+                color: "#5A5248",
                 textDecoration: "none",
                 transition: "color 0.2s",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "#1A1917")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "#6B6560")}
+              onMouseEnter={(e) => (e.currentTarget.style.color = "#0E0D0B")}
+              onMouseLeave={(e) => (e.currentTarget.style.color = "#5A5248")}
             >
               nurandcoaesthetics@gmail.com
             </a>
@@ -131,11 +131,11 @@ export default function Footer() {
 
         {/* Bottom bar */}
         <div className="footer-bottom">
-          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#BFB5A8", margin: 0 }}>
+          <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.1em", textTransform: "uppercase", color: "#E8E5DD", margin: 0 }}>
             © {year} Nur &amp; Co Aesthetics. All rights reserved.
           </p>
           <p style={{ fontFamily: "'Inter', sans-serif", fontSize: 10, letterSpacing: "0.08em", textTransform: "uppercase", margin: 0 }}>
-            <span style={{ color: "#BFB5A8" }}>Powered By </span>
+            <span style={{ color: "#E8E5DD" }}>Powered By </span>
             <a
               href="https://aesthetix-systems.co.uk"
               target="_blank"

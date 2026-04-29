@@ -35,7 +35,7 @@ export default function Subscription() {
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
-    <section id="subscription" style={{ background: "#EAE5DF", padding: "6rem 2.5rem" }}>
+    <section id="subscription" style={{ background: "#FFFFFF", padding: "6rem 2.5rem" }}>
       <style>{`
         /* ── Desktop grid ── */
         .sub-header { /* inherits section padding */ }
@@ -47,7 +47,7 @@ export default function Subscription() {
           margin-top: 3rem;
         }
         .sub-card {
-          background: #F2EFE9;
+          background: #F8F8F6;
           border-radius: 2px;
           padding: 2.5rem;
           display: flex;
@@ -55,10 +55,10 @@ export default function Subscription() {
           gap: 1.25rem;
         }
         .faq-item {
-          border-top: 1px solid #BFB5A8;
+          border-top: 1px solid #E8E5DD;
         }
         .faq-item:last-child {
-          border-bottom: 1px solid #BFB5A8;
+          border-bottom: 1px solid #E8E5DD;
         }
         .faq-trigger {
           width: 100%;
@@ -120,7 +120,7 @@ export default function Subscription() {
               fontFamily: "'Cormorant Garamond', serif",
               fontWeight: 300,
               fontSize: "clamp(2rem, 4vw, 3rem)",
-              color: "#1A1917",
+              color: "#0E0D0B",
               margin: 0,
               lineHeight: 1.1,
             }}
@@ -137,11 +137,11 @@ export default function Subscription() {
             key={tier.id}
             className={`sub-card${tier.featured ? " sub-card--featured" : ""}`}
             style={{
-              border: tier.featured ? "1px solid #1A1917" : "1px solid #BFB5A8",
+              border: tier.featured ? "1px solid #0E0D0B" : "1px solid #E8E5DD",
             }}
           >
             {tier.featured && (
-              <p className="eyebrow" style={{ margin: 0, color: "#1A1917" }}>
+              <p className="eyebrow" style={{ margin: 0, color: "#0E0D0B" }}>
                 MOST POPULAR
               </p>
             )}
@@ -151,7 +151,7 @@ export default function Subscription() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontWeight: 300,
                 fontSize: "1.75rem",
-                color: "#1A1917",
+                color: "#0E0D0B",
                 margin: 0,
                 lineHeight: 1.1,
               }}
@@ -164,7 +164,7 @@ export default function Subscription() {
                 fontFamily: "'Inter', sans-serif",
                 fontWeight: 300,
                 fontSize: "1.125rem",
-                color: "#1A1917",
+                color: "#0E0D0B",
                 margin: 0,
               }}
             >
@@ -176,7 +176,7 @@ export default function Subscription() {
                 fontFamily: "'Inter', sans-serif",
                 fontWeight: 300,
                 fontSize: "0.875rem",
-                color: "#6B6560",
+                color: "#5A5248",
                 lineHeight: 1.7,
                 margin: 0,
                 flexGrow: 1,
@@ -208,7 +208,7 @@ export default function Subscription() {
               fontFamily: "'Cormorant Garamond', serif",
               fontWeight: 300,
               fontSize: "1.5rem",
-              color: "#1A1917",
+              color: "#0E0D0B",
               margin: "0 0 1.5rem",
             }}
           >
@@ -227,7 +227,7 @@ export default function Subscription() {
                     fontFamily: "'Inter', sans-serif",
                     fontWeight: 300,
                     fontSize: "0.875rem",
-                    color: "#1A1917",
+                    color: "#0E0D0B",
                   }}
                 >
                   {faq.q}
@@ -236,7 +236,7 @@ export default function Subscription() {
                   style={{
                     fontFamily: "'Inter', sans-serif",
                     fontSize: "1rem",
-                    color: "#BFB5A8",
+                    color: "#E8E5DD",
                     flexShrink: 0,
                     lineHeight: 1,
                   }}
@@ -251,7 +251,7 @@ export default function Subscription() {
                     fontFamily: "'Inter', sans-serif",
                     fontWeight: 300,
                     fontSize: "0.875rem",
-                    color: "#6B6560",
+                    color: "#5A5248",
                     lineHeight: 1.7,
                     margin: 0,
                   }}

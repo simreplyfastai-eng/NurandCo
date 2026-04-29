@@ -4,7 +4,7 @@ const MOBILE_TILES = Array.from({ length: TILE_COUNT * 2 }, (_, i) => i);
 
 export default function GalleryReel() {
   return (
-    <section id="gallery" style={{ background: "#EAE5DF", padding: "6rem 2.5rem" }}>
+    <section id="gallery" style={{ background: "#FFFFFF", padding: "6rem 2.5rem" }}>
       <style>{`
         /* ── Desktop grid ── */
         .gallery-header { /* inherits section padding */ }
@@ -17,7 +17,7 @@ export default function GalleryReel() {
         }
         .gallery-tile {
           aspect-ratio: 4/5;
-          background: #D4CEC8;
+          background: #F8F8F6;
           border-radius: 2px;
           overflow: hidden;
         }
@@ -52,7 +52,7 @@ export default function GalleryReel() {
           .gallery-mobile-tile {
             min-width: 75vw;
             aspect-ratio: 3/4;
-            background: #D4CEC8;
+            background: #F8F8F6;
             border-radius: 2px;
             overflow: hidden;
             flex-shrink: 0;
@@ -69,7 +69,7 @@ export default function GalleryReel() {
               fontFamily: "'Cormorant Garamond', serif",
               fontWeight: 300,
               fontSize: "clamp(2rem, 4vw, 3rem)",
-              color: "#1A1917",
+              color: "#0E0D0B",
               margin: 0,
               lineHeight: 1.1,
             }}

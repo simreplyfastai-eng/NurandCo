@@ -16,15 +16,15 @@ export default function Navbar() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  const textColor = scrolled ? "#1A1917" : "#FFFFFF";
-  const bg = scrolled ? "#EAE5DF" : "transparent";
-  const borderColor = scrolled ? "#BFB5A8" : "transparent";
+  const textColor = "#0E0D0B";
+  const bg = scrolled ? "#FFFFFF" : "transparent";
+  const borderColor = scrolled ? "#E8E5DD" : "transparent";
 
   const links = [
     { label: "SERVICES", href: "#services" },
     { label: "ABOUT", href: "#about" },
     { label: "GALLERY", href: "#gallery" },
-    { label: "MEMBERSHIP", href: "#subscription" },
+    { label: "TREATMENTS", href: "#treatments" },
     { label: "CONTACT", href: "#contact" },
   ];
 
@@ -84,7 +84,7 @@ export default function Navbar() {
           position: fixed;
           inset: 0;
           z-index: 49;
-          background: #111111;
+          background: #FFFFFF;
           display: flex;
           flex-direction: column;
           align-items: center;
@@ -112,7 +112,7 @@ export default function Navbar() {
           text-decoration: none;
           transition: color 0.2s;
         }
-        .nav-drawer-link:hover { color: #BFB5A8; }
+        .nav-drawer-link:hover { color: #E8E5DD; }
         .nav-drawer-book {
           display: inline-block;
           font-family: 'Inter', sans-serif;
@@ -121,7 +121,7 @@ export default function Navbar() {
           letter-spacing: 0.12em;
           text-transform: uppercase;
           color: #FFFFFF;
-          border: 1px solid #EAE5DF;
+          border: 1px solid #FFFFFF;
           border-radius: 2px;
           padding: 14px 36px;
           text-decoration: none;
@@ -129,7 +129,7 @@ export default function Navbar() {
           transition: background 0.2s, color 0.2s;
           cursor: pointer;
         }
-        .nav-drawer-book:hover { background: #EAE5DF; color: #1A1917; }
+        .nav-drawer-book:hover { background: #FFFFFF; color: #0E0D0B; }
         @media (max-width: 767px) {
           .nav-inner { padding: 0 1.25rem; }
         }
@@ -188,7 +188,7 @@ export default function Navbar() {
             display: "flex", alignItems: "center", gap: 6,
             fontFamily: "'Inter', sans-serif", fontWeight: 300,
             fontSize: "0.625rem", letterSpacing: "0.2em",
-            color: "#6B6560", textTransform: "uppercase",
+            color: "#5A5248", textTransform: "uppercase",
           }}
         >
           <Lock size={11} />

@@ -14,7 +14,7 @@ const reviews: Review[] = reviewsData;
 
 function StarIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="#BFB5A8" aria-hidden="true">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="#E8E5DD" aria-hidden="true">
       <polygon points="6,0.5 7.7,4.1 11.7,4.7 8.9,7.5 9.6,11.5 6,9.6 2.4,11.5 3.1,7.5 0.3,4.7 4.3,4.1" />
     </svg>
   );
@@ -37,7 +37,7 @@ export default function Reviews() {
   }, []);
 
   return (
-    <section id="reviews" style={{ background: "#111111", padding: "6rem 2.5rem" }}>
+    <section id="reviews" style={{ background: "#FFFFFF", padding: "6rem 2.5rem" }}>
       <style>{`
         /* ── Desktop grid ── */
         .reviews-header { /* inherits section padding */ }
@@ -50,7 +50,7 @@ export default function Reviews() {
         }
         .review-card {
           background: transparent;
-          border: 1px solid #1A1917;
+          border: 1px solid #0E0D0B;
           border-radius: 2px;
           padding: 2rem;
           display: flex;
@@ -81,7 +81,7 @@ export default function Reviews() {
             scroll-snap-align: start;
             flex-shrink: 0;
             border: none;
-            border-top: 1px solid #1A1917;
+            border-top: 1px solid #0E0D0B;
             border-radius: 0;
             padding: 2rem 1.25rem;
             box-sizing: border-box;
@@ -108,7 +108,7 @@ export default function Reviews() {
         <div className="reviews-header">
           <p
             className="eyebrow"
-            style={{ marginBottom: "1rem", color: "#BFB5A8" }}
+            style={{ marginBottom: "1rem", color: "#E8E5DD" }}
           >
             CLIENT REVIEWS
           </p>
@@ -117,7 +117,7 @@ export default function Reviews() {
               fontFamily: "'Cormorant Garamond', serif",
               fontWeight: 300,
               fontSize: "clamp(2rem, 4vw, 3rem)",
-              color: "#F2EFE9",
+              color: "#F8F8F6",
               margin: 0,
               lineHeight: 1.1,
             }}
@@ -137,7 +137,7 @@ export default function Reviews() {
                 fontFamily: "'Cormorant Garamond', serif",
                 fontStyle: "italic",
                 fontSize: "5rem",
-                color: "#BFB5A8",
+                color: "#E8E5DD",
                 lineHeight: 0.7,
                 marginBottom: "0.25rem",
                 userSelect: "none",
@@ -152,7 +152,7 @@ export default function Reviews() {
                 fontStyle: "italic",
                 fontWeight: 300,
                 fontSize: "1.2rem",
-                color: "#F2EFE9",
+                color: "#F8F8F6",
                 lineHeight: 1.6,
                 margin: 0,
                 flexGrow: 1,
@@ -175,7 +175,7 @@ export default function Reviews() {
                   fontSize: "0.75rem",
                   textTransform: "uppercase",
                   letterSpacing: "0.1em",
-                  color: "#BFB5A8",
+                  color: "#E8E5DD",
                   margin: "0 0 0.25rem",
                 }}
               >
@@ -186,7 +186,7 @@ export default function Reviews() {
                   fontFamily: "'Inter', sans-serif",
                   fontWeight: 300,
                   fontSize: "0.625rem",
-                  color: "#6B6560",
+                  color: "#5A5248",
                   margin: 0,
                   letterSpacing: "0.05em",
                 }}
@@ -204,7 +204,7 @@ export default function Reviews() {
           <div
             key={i}
             className="reviews-dot"
-            style={{ background: i === activeIdx ? "#1A1917" : "#BFB5A8" }}
+            style={{ background: i === activeIdx ? "#0E0D0B" : "#E8E5DD" }}
           />
         ))}
       </div>

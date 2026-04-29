@@ -170,7 +170,7 @@ export default function Packages() {
                     gap: 10,
                     fontFamily: "'Inter', sans-serif",
                     fontSize: 13,
-                    color: "#737373",
+                    color: "#5A5248",
                     marginBottom: 8,
                   }}>
                     <span style={{ color: "var(--brand-accent)", fontSize: 10 }}>✦</span>
@@ -184,7 +184,7 @@ export default function Packages() {
                 fontSize: 9,
                 letterSpacing: "2px",
                 textTransform: "uppercase",
-                color: "#737373",
+                color: "#5A5248",
                 marginBottom: 12,
               }}>Best for: {pkg.bestFor}</div>
 

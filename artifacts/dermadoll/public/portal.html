@@ -103,8 +103,8 @@ h1,h2,h3,h4,.serif{font-family:var(--font-serif);font-style:italic;font-weight:4
 .login-close{position:absolute;top:16px;right:16px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border:none;background:transparent;cursor:pointer;color:var(--color-muted-fg);font-size:18px;line-height:1;transition:color var(--transition-base)}
 .login-close:hover{color:var(--color-primary)}
 .login-logo{text-align:center;margin-bottom:32px}
-.login-logo-name{font-family:var(--font-serif);font-size:30px;font-weight:400;font-style:normal;color:var(--color-primary);letter-spacing:.02em;line-height:1}
-.login-logo-sub{font-family:var(--font-sans);font-size:9px;font-weight:400;color:var(--color-secondary);letter-spacing:.25em;text-transform:uppercase;margin-top:4px}
+.login-logo-name{font-family:var(--font-serif);font-size:28px;font-weight:500;font-style:italic;color:var(--color-primary);letter-spacing:.18em;line-height:1;text-transform:uppercase}
+.login-logo-sub{font-family:var(--font-serif);font-size:10px;font-weight:400;font-style:italic;color:var(--gold);letter-spacing:.32em;text-transform:uppercase;margin-top:4px}
 .login-wordmark{font-family:var(--font-serif);font-size:30px;font-weight:400;color:var(--color-primary);text-align:center;font-style:normal;display:none}
 .login-sub{font-family:var(--font-sans);font-size:9px;font-weight:400;color:var(--color-muted-fg);text-align:center;margin-top:-24px;margin-bottom:32px;letter-spacing:.25em;text-transform:uppercase}
 .login-label{font-family:var(--font-sans);font-size:9px;font-weight:400;color:var(--color-muted-fg);letter-spacing:.2em;display:block;margin-bottom:6px;text-transform:uppercase}
@@ -127,8 +127,8 @@ h1,h2,h3,h4,.serif{font-family:var(--font-serif);font-style:italic;font-weight:4
 
 /* ── SIDEBAR ────────────────────────────────────── */
 .sb-brand{padding:28px 20px 16px;border-bottom:1px solid var(--color-border)}
-.sb-logo-name{font-family:var(--font-serif);font-size:20px;font-weight:400;font-style:normal;color:var(--color-primary);letter-spacing:.02em;line-height:1}
-.sb-logo-sub{font-family:var(--font-sans);font-size:9px;font-weight:400;color:var(--color-secondary);letter-spacing:.2em;text-transform:uppercase;margin-top:3px}
+.sb-logo-name{font-family:var(--font-serif);font-size:18px;font-weight:500;font-style:italic;color:var(--color-primary);letter-spacing:.18em;line-height:1;text-transform:uppercase}
+.sb-logo-sub{font-family:var(--font-serif);font-size:10px;font-weight:400;font-style:italic;color:var(--gold);letter-spacing:.32em;text-transform:uppercase;margin-top:4px}
 .sb-wordmark{font-family:var(--font-serif);font-size:18px;font-weight:400;letter-spacing:.02em;color:var(--color-primary);font-style:normal}
 .sb-sub{font-size:9px;letter-spacing:.2em;color:var(--color-secondary);margin-top:3px;font-weight:400;text-transform:uppercase}
 .sb-location-badge{font-family:var(--font-sans);font-size:9px;font-weight:400;color:var(--color-muted-fg);letter-spacing:.1em;text-transform:uppercase;margin-top:6px}
@@ -782,7 +782,7 @@ select.form-input{background:var(--color-card)}
     </div>
     <div class="login-sub">Admin Portal</div>
     <label class="login-label">Email</label>
-    <input class="login-input" type="email" id="login-email" placeholder="admin@[CLIENT_NAME]y.co.uk" autocomplete="email"/>
+    <input class="login-input" type="email" id="login-email" placeholder="admin@nurandcoaesthetics.co.uk" autocomplete="email"/>
     <label class="login-label">Password</label>
     <input class="login-input" type="password" id="login-pass" placeholder="••••••••" autocomplete="current-password"/>
     <button type="button" class="login-btn" onclick="doLogin()">Sign In</button>
@@ -1257,7 +1257,7 @@ select.form-input{background:var(--color-card)}
         <div class="settings-section">
           <div class="settings-section-header">Business Info</div>
           <div class="settings-body">
-            <div class="settings-row"><label>Clinic name</label><input type="text" id="s-clinic" value="[CLIENT_NAME]"/></div>
+            <div class="settings-row"><label>Clinic name</label><input type="text" id="s-clinic" value="Nur & Co Aesthetics"/></div>
             <div class="settings-row"><label>Practitioner</label><input type="text" id="s-practitioner" value="Nur & Co"/></div>
             <div class="settings-row"><label>Instagram</label><input type="text" id="s-instagram" value="@[ClientName]s"/></div>
             <div class="settings-row"><label>WhatsApp</label><input type="text" id="s-whatsapp" placeholder="+44 7…"/></div>
@@ -1295,11 +1295,11 @@ select.form-input{background:var(--color-card)}
             </div>
             <div class="settings-field">
               <label>Confirmation Message</label>
-              <textarea id="s-confirm-msg" rows="3" style="resize:vertical">Thank you for booking with [CLIENT_NAME]. We'll be in touch to confirm your appointment shortly.</textarea>
+              <textarea id="s-confirm-msg" rows="3" style="resize:vertical">Thank you for booking with Nur & Co Aesthetics. We'll be in touch to confirm your appointment shortly.</textarea>
             </div>
             <div class="settings-field">
               <label>Notify Email</label>
-              <input type="email" id="s-notify-email" placeholder="admin@[CLIENT_NAME]y.co.uk"/>
+              <input type="email" id="s-notify-email" placeholder="admin@nurandcoaesthetics.co.uk"/>
             </div>
             <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--color-border)">
               <button class="btn-gold" onclick="saveBookingSettings()">Save Booking Settings</button>
@@ -1756,14 +1756,14 @@ let _fpBmDate=null, _fpRsDate=null; // Flatpickr instances
 
 function authHdr(){
   const t=localStorage.getItem('fbn_token');
-  const locId=_SESSION_LOC_ID||sessionStorage.getItem('[client-slug]_location_id')||'';
+  const locId=_SESSION_LOC_ID||sessionStorage.getItem('nur-and-co_location_id')||'';
   const h=t?{'Authorization':'Bearer '+t}:{};
   if(locId)h['X-Location-Id']=locId;
   return h;
 }
 
-function getSessionLocId(){return _SESSION_LOC_ID||sessionStorage.getItem('[client-slug]_location_id')||'';}
-function getSessionLocName(){return _SESSION_LOC_NAME||sessionStorage.getItem('[client-slug]_location')||'';}
+function getSessionLocId(){return _SESSION_LOC_ID||sessionStorage.getItem('nur-and-co_location_id')||'';}
+function getSessionLocName(){return _SESSION_LOC_NAME||sessionStorage.getItem('nur-and-co_location')||'';}
 
 const CloudStore = {
   BASE: '/api/portal/store',
@@ -2132,14 +2132,14 @@ function showLocationSelector(){
 }
 
 async function selectLocation(loc){
-  sessionStorage.setItem('[client-slug]_location',loc);
+  sessionStorage.setItem('nur-and-co_location',loc);
   // Resolve and store the location UUID so all API calls send X-Location-Id
   try{
     const r=await fetch('/api/locations');
     if(r.ok){
       const locs=await r.json();
       const found=locs.find(l=>l.name===loc||l.slug===loc.toLowerCase().replace(/\s+/g,'-'));
-      if(found){sessionStorage.setItem('[client-slug]_location_id',found.id);}
+      if(found){sessionStorage.setItem('nur-and-co_location_id',found.id);}
     }
   }catch(e){console.warn('selectLocation: could not resolve location UUID',e);}
   document.getElementById('location-selector').classList.remove('visible');
@@ -2147,8 +2147,8 @@ async function selectLocation(loc){
 }
 
 function switchLocation(){
-  sessionStorage.removeItem('[client-slug]_location');
-  sessionStorage.removeItem('[client-slug]_location_id');
+  sessionStorage.removeItem('nur-and-co_location');
+  sessionStorage.removeItem('nur-and-co_location_id');
   _SESSION_LOC_ID='';
   _SESSION_LOC_NAME='';
   _supabaseClients=null;
@@ -2159,8 +2159,8 @@ function switchLocation(){
 function doLogout(){
   _loginJustSucceeded=false; // ensure clearSession always runs on explicit logout
   _loginDone=false;
-  sessionStorage.removeItem('[client-slug]_location');
-  sessionStorage.removeItem('[client-slug]_location_id');
+  sessionStorage.removeItem('nur-and-co_location');
+  sessionStorage.removeItem('nur-and-co_location_id');
   clearSession();
   window.location.href='/';
 }
@@ -2168,8 +2168,8 @@ function doLogout(){
 let _sessionWatcherStarted=false;
 function showPortal(loc){
   // Lock location module-level on first call; ignore any subsequent attempt to change it
-  const resolvedLoc=loc||sessionStorage.getItem('[client-slug]_location')||'';
-  const resolvedLocId=sessionStorage.getItem('[client-slug]_location_id')||'';
+  const resolvedLoc=loc||sessionStorage.getItem('nur-and-co_location')||'';
+  const resolvedLocId=sessionStorage.getItem('nur-and-co_location_id')||'';
   if(!_SESSION_LOC_ID&&resolvedLocId){_SESSION_LOC_ID=resolvedLocId;_SESSION_LOC_NAME=resolvedLoc;}
   document.getElementById('login-page').style.display='none';
   document.getElementById('location-selector').classList.remove('visible');
@@ -2181,7 +2181,7 @@ function showPortal(loc){
   if(!_sessionWatcherStarted){_sessionWatcherStarted=true;startSessionWatcher();}
   CloudStore.init().then(async ()=>{
     // Load location-specific availability from Supabase
-    const _locId=sessionStorage.getItem('[client-slug]_location_id');
+    const _locId=sessionStorage.getItem('nur-and-co_location_id');
     if(_locId){
       try{
         const _ar=await fetch('/api/availability',{headers:authHdr(),cache:'no-store'});
@@ -2251,7 +2251,7 @@ window.addEventListener('DOMContentLoaded',async()=>{
       if(d.valid){
         if(d.token)saveSession(d.token,d.expiresAt||Date.now()+8*3600*1000);
         // If we have a saved location, go straight to portal
-        const savedLoc=sessionStorage.getItem('[client-slug]_location');
+        const savedLoc=sessionStorage.getItem('nur-and-co_location');
         if(savedLoc){showPortal(savedLoc);}else{showLocationSelector();}
         return;
       }
@@ -2660,7 +2660,7 @@ function renderDayTimeline(dateStr){
 function openBookingDetailPanel(bookingId){
   const b=getBookings().find(x=>x.id===bookingId);
   if(!b)return;
-  const locName=_SESSION_LOC_NAME||sessionStorage.getItem('[client-slug]_location')||'Clinic';
+  const locName=_SESSION_LOC_NAME||sessionStorage.getItem('nur-and-co_location')||'Clinic';
   const medColor=b.hasMedical?'#2D6A4F':'#aaa';
   const conColor=b.hasConsent?'#2D6A4F':'#aaa';
   const _lbl='font-size:10px;color:var(--color-secondary);text-transform:uppercase;letter-spacing:1px;margin-bottom:2px;font-weight:600';
@@ -2793,7 +2793,7 @@ async function saveAvailability(){
   const origText=btn?btn.textContent:'Save Changes';
   if(btn){btn.disabled=true;btn.textContent='Saving…';}
 
-  const locId=sessionStorage.getItem('[client-slug]_location_id');
+  const locId=sessionStorage.getItem('nur-and-co_location_id');
   if(!locId){
     showToast('No location selected — cannot save');
     if(btn){btn.disabled=false;btn.textContent=origText;}
@@ -2851,7 +2851,7 @@ async function renderAvailability(){
   renderAvailDays(avail);
   renderAvailMiniCal(avail);
   // 2. Fetch FRESH data from Supabase and re-render — this is the source of truth
-  const locId=sessionStorage.getItem('[client-slug]_location_id');
+  const locId=sessionStorage.getItem('nur-and-co_location_id');
   if(locId){
     try{
       const r=await fetch('/api/admin/availability',{headers:authHdr(),cache:'no-store'});
@@ -2931,7 +2931,7 @@ function onToggleAvailDay(dow,checked){
 let _blockedDates=new Set(); // Set of YYYY-MM-DD strings
 
 async function loadBlockedDates(){
-  const locId=sessionStorage.getItem('[client-slug]_location_id');
+  const locId=sessionStorage.getItem('nur-and-co_location_id');
   if(!locId)return;
   try{
     const res=await fetch('/api/admin/blocked-dates',{headers:authHdr(),cache:'no-store'});
@@ -2942,7 +2942,7 @@ async function loadBlockedDates(){
 }
 
 async function toggleBlockedDate(dateStr){
-  const locId=sessionStorage.getItem('[client-slug]_location_id');
+  const locId=sessionStorage.getItem('nur-and-co_location_id');
   if(!locId){showToast('No location selected');return;}
   try{
     const res=await fetch('/api/admin/blocked-dates',{
@@ -2972,7 +2972,7 @@ const BS_DAY_NAMES={0:'Sunday',1:'Monday',2:'Tuesday',3:'Wednesday',4:'Thursday'
 let _blockedSlots=[];
 
 async function loadBlockedSlots(){
-  const locId=sessionStorage.getItem('[client-slug]_location_id');
+  const locId=sessionStorage.getItem('nur-and-co_location_id');
   if(!locId)return;
   try{
     const res=await fetch('/api/admin/blocked-slots',{headers:authHdr()});
@@ -3055,7 +3055,7 @@ async function deleteBlockedSlot(btn,id){
 
 // ─── Deposit Settings ───────────────────────────────────────────────────────
 async function loadDepositSettings(){
-  const locId=sessionStorage.getItem('[client-slug]_location_id');
+  const locId=sessionStorage.getItem('nur-and-co_location_id');
   if(!locId)return;
   try{
     const s=await CloudStore.get('fbn_settings')||{};
@@ -3067,7 +3067,7 @@ async function loadDepositSettings(){
   }catch(e){console.error('loadDepositSettings',e);}
 }
 async function saveDepositSettings(){
-  const locId=sessionStorage.getItem('[client-slug]_location_id');
+  const locId=sessionStorage.getItem('nur-and-co_location_id');
   if(!locId){showToast('No location selected');return;}
   const injEl=document.getElementById('dep-injectables');
   const otherEl=document.getElementById('dep-other');
@@ -3401,7 +3401,7 @@ async function openBookingModal(prefill){
     document.getElementById('bm-secondary-row').style.display='flex';
     // Show location
     document.getElementById('bm-location-group').style.display='';
-    document.getElementById('bm-location-display').textContent=_SESSION_LOC_NAME||sessionStorage.getItem('[client-slug]_location')||'Clinic';
+    document.getElementById('bm-location-display').textContent=_SESSION_LOC_NAME||sessionStorage.getItem('nur-and-co_location')||'Clinic';
     // Show forms status
     document.getElementById('bm-forms-group').style.display='';
     document.getElementById('bm-forms-location-card').style.display='';
@@ -3784,7 +3784,7 @@ async function saveBooking(){
 let _supabaseClients=null;
 
 async function loadSupabaseClients(){
-  const locId=sessionStorage.getItem('[client-slug]_location_id');
+  const locId=sessionStorage.getItem('nur-and-co_location_id');
   if(!locId)return;
   try{
     const res=await fetch('/api/admin/clients-supabase',{headers:authHdr()});
@@ -4610,7 +4610,7 @@ function exportFinance(){
   b.forEach(x=>{txt+=`${x.date} | ${x.clientName} | ${x.treatment} | ${gbp(x.price)} | ${x.status}\n`;});
   const total=b.filter(x=>x.status!=='Cancelled').reduce((s,x)=>s+Number(x.price),0);
   txt+=`\n${'─'.repeat(40)}\nTotal: ${gbp(total)}`;
-  const a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(txt);a.download=`[CLIENT_NAME]-finance-${months[m-1].toLowerCase()}-${y}.txt`;a.click();
+  const a=document.createElement('a');a.href='data:text/plain,'+encodeURIComponent(txt);a.download=`NurAndCo-finance-${months[m-1].toLowerCase()}-${y}.txt`;a.click();
 }
 
 // ═══════════════════════════════════════════════════
@@ -5372,7 +5372,7 @@ function exportData(){
   const b=getBookings();
   let txt='[CLIENT NAME] — Bookings Export\n\nDate,Client,Treatment,Price,Deposit,Status\n';
   b.forEach(x=>{txt+=`${x.date},${x.clientName},${x.treatment},£${x.price},£${x.deposit},${x.status}\n`});
-  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(txt);a.download='[CLIENT_NAME]-bookings.csv';a.click();
+  const a=document.createElement('a');a.href='data:text/csv,'+encodeURIComponent(txt);a.download='NurAndCo-bookings.csv';a.click();
 }
 
 // ═══════════════════════════════════════════════════

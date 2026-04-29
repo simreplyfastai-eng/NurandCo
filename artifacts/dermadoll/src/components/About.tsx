@@ -20,7 +20,7 @@ export default function About() {
   }, []);
 
   return (
-    <section id="about" style={{ background: "#F2EFE9", padding: "6rem 2.5rem" }}>
+    <section id="about" style={{ background: "#F8F8F6", padding: "6rem 2.5rem" }}>
       <style>{`
         .about-grid {
           display: grid;
@@ -44,7 +44,7 @@ export default function About() {
         <div
           style={{
             aspectRatio: "3/4",
-            background: "#D4CEC8",
+            background: "#F8F8F6",
             borderRadius: 2,
             overflow: "hidden",
           }}
@@ -68,7 +68,7 @@ export default function About() {
               fontFamily: "'Cormorant Garamond', serif",
               fontWeight: 300,
               fontSize: "clamp(3rem, 6vw, 4.5rem)",
-              color: "#1A1917",
+              color: "#0E0D0B",
               margin: "0 0 1.5rem",
               lineHeight: 1,
             }}
@@ -81,7 +81,7 @@ export default function About() {
               fontFamily: "'Inter', sans-serif",
               fontWeight: 300,
               fontSize: "0.9375rem",
-              color: "#6B6560",
+              color: "#5A5248",
               lineHeight: 1.8,
               margin: "0 0 2rem",
             }}
@@ -91,7 +91,7 @@ export default function About() {
 
           <div
             style={{
-              borderTop: "1px solid #BFB5A8",
+              borderTop: "1px solid #E8E5DD",
               paddingTop: "1.5rem",
             }}
           >
@@ -100,17 +100,17 @@ export default function About() {
                 fontFamily: "'Inter', sans-serif",
                 fontWeight: 300,
                 fontSize: "0.8125rem",
-                color: "#6B6560",
+                color: "#5A5248",
                 lineHeight: 1.9,
                 margin: 0,
               }}
             >
               Over 10,000 treatments
-              <span style={{ margin: "0 0.6em", color: "#BFB5A8" }}>·</span>
+              <span style={{ margin: "0 0.6em", color: "#E8E5DD" }}>·</span>
               Top 2.91% UK practitioners (Faces)
-              <span style={{ margin: "0 0.6em", color: "#BFB5A8" }}>·</span>
+              <span style={{ margin: "0 0.6em", color: "#E8E5DD" }}>·</span>
               Fully insured
-              <span style={{ margin: "0 0.6em", color: "#BFB5A8" }}>·</span>
+              <span style={{ margin: "0 0.6em", color: "#E8E5DD" }}>·</span>
               Works with qualified prescriber
             </p>
           </div>
