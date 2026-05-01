@@ -18,6 +18,7 @@ import calendarRouter from "./calendar";
 import googleRoutes from "./google";
 import campaignsRouter from "./campaigns";
 import heroTextRouter from "./heroText";
+import treatmentPagesRouter from "./treatmentPages";
 
 const router: IRouter = Router();
 
@@ -40,5 +41,6 @@ router.use(calendarRouter);
 router.use('/google', googleRoutes);
 router.use(campaignsRouter);
 router.use(heroTextRouter);
+router.use(treatmentPagesRouter);
 
 export default router;

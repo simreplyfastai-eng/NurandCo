@@ -164,7 +164,7 @@ export default function Services() {
             </h3>
             <p className="service-card-desc">{t.desc}</p>
             <a
-              href={`${import.meta.env.BASE_URL}book?category=${encodeURIComponent(t.name)}`}
+              href={t.id === "lip-filler" ? `${import.meta.env.BASE_URL}treatment/signature-lip-filler` : `${import.meta.env.BASE_URL}book?category=${encodeURIComponent(t.name)}`}
               className="service-card-link"
             >
               Explore →

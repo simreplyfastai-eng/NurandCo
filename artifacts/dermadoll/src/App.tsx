@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import Home from "@/pages/Home";
 import BookPage from "@/pages/Book";
+import TreatmentLipFiller from "@/pages/TreatmentLipFiller";
 
 const queryClient = new QueryClient();
 
@@ -13,6 +14,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/book" component={BookPage} />
+        <Route path="/treatment/signature-lip-filler" component={TreatmentLipFiller} />
       <Route component={NotFound} />
     </Switch>
   );

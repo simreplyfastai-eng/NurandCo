@@ -191,15 +191,16 @@ export default function Treatments() {
           font-family: 'Inter', sans-serif;
           font-size: 10px; font-weight: 400;
           letter-spacing: 0.35em; text-transform: uppercase;
-          color: #0E0D0B;
-          border: 1px solid #3D3935;
-          background: #3D3935; color: #FFFFFF !important;
+          color: #FFFFFF;
+          border: 1px solid #0E0D0B;
+          background: #0E0D0B;
           padding: 18px 56px;
-          background: transparent; cursor: pointer;
+          cursor: pointer;
           transition: all 0.3s ease;
           text-decoration: none; display: inline-block;
           position: relative; overflow: hidden;
         }
+        .tr-btn:hover { background: #3D3935; border-color: #3D3935; }
         
 
         .tr-row-right {
@@ -284,7 +285,7 @@ export default function Treatments() {
         <div className="tr-cta">
           <div className="tr-cta-line" />
           <div className="tr-cta-text">Begin your transformation.</div>
-          <a href="#book" className="tr-btn"><span>Book Consultation</span></a>
+          <a href={`${import.meta.env.BASE_URL}book`} className="tr-btn"><span>Book Consultation</span></a>
         </div>
       </div>
     </section>
