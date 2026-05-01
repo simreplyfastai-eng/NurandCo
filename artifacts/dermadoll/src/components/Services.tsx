@@ -80,7 +80,7 @@ export default function Services() {
           transition: color 0.2s;
           flex-shrink: 0;
         }
-        .service-card-link:hover { color: #E8E5DD; }
+        .service-card-link:hover { color: #3D3935; }
 
         @media (max-width: 1024px) {
           .services-grid { grid-template-columns: repeat(2, 1fr); }
@@ -164,7 +164,7 @@ export default function Services() {
             </h3>
             <p className="service-card-desc">{t.desc}</p>
             <a
-              href={`${import.meta.env.BASE_URL}book`}
+              href={`${import.meta.env.BASE_URL}book?category=${encodeURIComponent(t.name)}`}
               className="service-card-link"
             >
               Explore →

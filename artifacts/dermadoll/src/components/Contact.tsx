@@ -29,7 +29,7 @@ export default function Contact() {
   };
 
   return (
-    <section id="contact" style={{ background: "#F8F8F6", padding: "6rem 2.5rem" }}>
+    <section id="contact" className="has-texture" style={{ background: "#F8F8F6", padding: "6rem 2.5rem" }}>
       <style>{`
         .contact-grid {
           display: grid;

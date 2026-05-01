@@ -52,7 +52,7 @@ export default function BeforeAfter() {
   const dupB = [...rowB, ...rowB];
 
   return (
-    <section id="results" className="has-texture" style={{
+    <section id="results" style={{
       background: "#FFFFFF",
       padding: "96px 0 112px",
       overflow: "hidden",

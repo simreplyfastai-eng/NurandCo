@@ -1,10 +1,40 @@
+import { useEffect, useState } from "react";
+
+function mediaUrl(path){if(!path)return null;if(path.startsWith("/objects/"))return `/api/media/serve?path=${encodeURIComponent(path)}`;return path;}
+
 export default function Hero() {
+  const [heroVideo, setHeroVideo] = useState(null);
+  const [heroImage, setHeroImage] = useState(null);
+  const [heroType, setHeroType] = useState('image');
+  const [heroText, setHeroText] = useState({
+    headline: 'Considered aesthetics.',
+    subtitle: 'Precision aesthetics. Confident results.',
+    locationLabel: 'NOTTINGHAM',
+  });
+  useEffect(() => {
+    fetch('/api/hero/config')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => { if (d) setHeroText(d); })
+      .catch(() => {});
+  }, []);
+  useEffect(() => {
+    fetch('/api/media/config')
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        if (!d) return;
+        if (d.heroVideo) { setHeroVideo(mediaUrl(d.heroVideo)); setHeroType('video'); }
+        else if (d.heroImage || d.heroSrc) { setHeroImage(mediaUrl(d.heroImage || d.heroSrc)); setHeroType('image'); }
+      })
+      .catch(() => {});
+  }, []);
   return (
     <section
       id="home"
       style={{
         background: "#E5E4E2",
         minHeight: "100dvh",
+        position: "relative",
+        overflow: "hidden",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
@@ -36,16 +66,18 @@ export default function Hero() {
           letter-spacing: 0.12em;
           text-transform: uppercase;
           padding: 14px 36px;
-          border: 1px solid #002C5E;
+          border: 1px solid #3D3935;
           border-radius: 2px;
-          background: #002C5E;
+          background: #3D3935;
           color: #FFFFFF;
           text-decoration: none;
           cursor: pointer;
           transition: background 0.2s ease, color 0.2s ease;
         }
+        .hero-btn--label { cursor: default; pointer-events: none; }
+        .hero-btn--label:hover { background: transparent !important; color: inherit !important; }
         .hero-btn:hover {
-          background: #003E80;
+          background: #2A2724;
           color: #FFFFFF;
         }
         @media (max-width: 480px) {
@@ -55,18 +87,29 @@ export default function Hero() {
         }
       `}</style>
 
-      <div className="hero-content">
+      {(heroVideo || heroImage) && (
+        <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+          {heroType === 'video' && heroVideo ? (
+            <video src={heroVideo} autoPlay muted loop playsInline style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : heroImage ? (
+            <img src={heroImage} alt="" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+          ) : null}
+          <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg, rgba(229,228,226,0.15) 0%, rgba(229,228,226,0.55) 100%)" }} />
+        </div>
+      )}
+
+      <div className="hero-content" style={{ position: "relative", zIndex: 1 }}>
         <h1
           style={{
             fontFamily: "'Cormorant Garamond', serif",
             fontWeight: 300,
-            color: "#FFFFFF",
+            color: "#0E0D0B",
             fontSize: "clamp(3rem, 6vw, 5rem)",
             lineHeight: 1.05,
             margin: "0 0 1.5rem",
           }}
         >
-          Considered aesthetics.
+          {heroText.headline}
         </h1>
 
         <p
@@ -79,33 +122,14 @@ export default function Hero() {
             lineHeight: 1.6,
           }}
         >
-          [NUR'S TAGLINE HERE]
+          {heroText.subtitle}
         </p>
 
         <div className="hero-ctas">
-          <button
-            className="hero-btn"
-            onClick={() => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" })}
-          >
-            Nottingham
-          </button>
+          <span className="hero-btn hero-btn--label">{heroText.locationLabel}</span>
 
-          <a
-            className="hero-btn"
-            href={`${import.meta.env.BASE_URL}book`}
-          >
+          <a className="hero-btn" href="/book">
             Book Now
-          </a>
-
-          <a
-            className="hero-btn"
-            href="#treatments"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById("subscription")?.scrollIntoView({ behavior: "smooth" });
-            }}
-          >
-            Treatments
           </a>
         </div>
       </div>

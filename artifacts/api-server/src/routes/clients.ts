@@ -16,7 +16,7 @@ function getLocationId(req: import("express").Request): string | null {
 function rowToClient(row: Record<string, unknown>) {
   return {
     id: row.id,
-    name: row.name,
+    name: row.full_name ?? row.name ?? "",
     email: row.email ?? "",
     phone: row.phone ?? "",
     joinDate: row.join_date ?? (row.created_at ? new Date(String(row.created_at)).toISOString().slice(0, 10) : ""),
@@ -27,6 +27,8 @@ function rowToClient(row: Record<string, unknown>) {
     visitCount: Number(row.visit_count ?? 0),
     totalSpent: Number(row.total_spent ?? 0),
     lastVisit: row.last_visit ?? null,
+    marketingConsent: !!row.marketing_consent,
+    marketingConsentAt: row.marketing_consent_at ?? null,
   };
 }
 
@@ -79,7 +81,7 @@ router.post("/clients", async (req, res) => {
 
     if (existing) {
       const updates: Record<string, unknown> = {};
-      if (c.name) updates.name = c.name;
+      if (c.name) updates.full_name = c.name;
       if (email) updates.email = email;
       if (phone) updates.phone = phone;
       if (c.notes) updates.notes = c.notes;
@@ -90,7 +92,7 @@ router.post("/clients", async (req, res) => {
 
     if (!locationId) return res.status(400).json({ error: "locationId required" });
     const payload: Record<string, unknown> = {
-      name: c.name,
+      full_name: c.name,
       email: email || "",
       phone: phone || "",
       notes: c.notes ?? "",

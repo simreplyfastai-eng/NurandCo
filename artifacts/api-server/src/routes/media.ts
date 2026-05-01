@@ -194,14 +194,19 @@ router.post("/media/config", async (req, res) => {
     }
 
     if (writeError) {
-      console.error("POST /api/media/config write error:", writeError);
-      return res.status(500).json({ error: "Failed to save media config" });
+      const wMsg = (writeError && (writeError.message || JSON.stringify(writeError))) || "unknown";
+      console.error("POST /api/media/config write error:", wMsg);
+      try { require("fs").appendFileSync("/tmp/upload-debug.log", `[${new Date().toISOString()}] SAVE WRITE FAIL field=${field} loc=${locationId}: ${wMsg}\n\n`); } catch(_){}
+      return res.status(500).json({ error: "Failed to save media config", detail: wMsg });
     }
 
     return res.json({ success: true, field });
   } catch (err: any) {
-    console.error("POST /api/media/config", err);
-    return res.status(500).json({ error: "Failed to save media config" });
+    const eMsg = (err && (err.message || err.toString())) || "unknown";
+    const eStack = (err && err.stack) || "";
+    console.error("POST /api/media/config FAILED:", eMsg, eStack);
+    try { require("fs").appendFileSync("/tmp/upload-debug.log", `[${new Date().toISOString()}] SAVE CATCH FAIL: ${eMsg}\n${eStack}\n\n`); } catch(_){}
+    return res.status(500).json({ error: "Failed to save media config", detail: eMsg });
   }
 });
 
@@ -215,7 +220,7 @@ router.post("/media/upload", upload.single("file"), async (req, res) => {
     const type = (req.body?.type as string) || "gallery";
     const ext = (file.originalname.split(".").pop() || "bin").toLowerCase();
     const filename = `${type}-${Date.now()}.${ext}`;
-    const path = `[client-slug]/${type}/${filename}`;
+    const path = `nur-and-co/${type}/${filename}`;
 
     const { error: uploadError } = await supabaseAdmin.storage
       .from("media")
@@ -226,7 +231,8 @@ router.post("/media/upload", upload.single("file"), async (req, res) => {
 
     if (uploadError) {
       console.error("Supabase storage upload error:", uploadError);
-      return res.status(500).json({ error: "Storage upload failed", detail: uploadError.message });
+      try { require("fs").appendFileSync("/tmp/upload-debug.log", `[${new Date().toISOString()}] STORAGE FAIL path=${path}: ${uploadError.message}\n\n`); } catch(_){}
+      return res.status(500).json({ error: "Storage upload failed", detail: uploadError.message, path });
     }
 
     const { data: urlData } = supabaseAdmin.storage.from("media").getPublicUrl(path);
@@ -261,10 +267,14 @@ router.post("/media/upload", upload.single("file"), async (req, res) => {
       }
     }
 
-    return res.json({ success: true, url: publicUrl });
+    try { require("fs").appendFileSync("/tmp/upload-debug.log", `[${new Date().toISOString()}] UPLOAD OK path=${path} url=${publicUrl}\n\n`); } catch(_){}
+    return res.json({ success: true, url: publicUrl, path });
   } catch (err: any) {
-    console.error("POST /api/media/upload", err);
-    return res.status(500).json({ error: "Upload failed" });
+    const errMsg = (err && (err.message || err.toString())) || "unknown";
+    const errStack = (err && err.stack) || "";
+    console.error("POST /api/media/upload FAILED:", errMsg, errStack);
+    try { require("fs").appendFileSync("/tmp/upload-debug.log", `[${new Date().toISOString()}] UPLOAD FAILED: ${errMsg}\n${errStack}\n\n`); } catch(_){}
+    return res.status(500).json({ error: "Upload failed", detail: errMsg });
   }
 });
 

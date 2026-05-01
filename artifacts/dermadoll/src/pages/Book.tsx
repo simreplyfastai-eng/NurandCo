@@ -100,6 +100,12 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
         }
         const gs: TreatmentGroup[] = Array.from(groupMap.entries()).map(([category, items]) => ({ category, items }));
         setGroups(gs);
+        // Auto-open category from URL ?category=...
+        const urlCat = new URLSearchParams(window.location.search).get("category");
+        if (urlCat) {
+          const matched = gs.find(g => g.category.toLowerCase() === urlCat.toLowerCase());
+          if (matched) setOpenGroups(new Set([matched.category]));
+        }
         if (initialTreatmentId) {
           const found = data.find((t) => t.id === initialTreatmentId || t.name === initialTreatmentId);
           if (found) setActiveTreatment(found);
@@ -129,10 +135,10 @@ function TreatmentPicker({ locationSlug, initialTreatmentId }: { locationSlug: s
           <div style={{ fontFamily: "'Inter', sans-serif", fontSize: 8, letterSpacing: "0.35em", color: "var(--brand-accent)", textTransform: "uppercase" }}>AESTHETICS</div>
         </a>
         <button
-          onClick={() => navigate("/book")}
+          onClick={() => navigate("/")}
           style={{ fontFamily: "'Inter', sans-serif", fontSize: 11, letterSpacing: "1.5px", textTransform: "uppercase", color: "#5A5248", background: "none", border: "none", cursor: "pointer" }}
         >
-          ← Change Location
+          ← Back to Site
         </button>
       </div>
 

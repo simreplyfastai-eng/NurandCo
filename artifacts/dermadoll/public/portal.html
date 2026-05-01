@@ -873,7 +873,12 @@ select.form-input{background:var(--color-card)}
         Enquiries
         <span class="sb-badge-count" id="sb-enq-badge" style="display:none">0</span>
       </div>
-      <div class="sb-section">System</div>
+      <div class="sb-item" onclick="showPage('campaigns',this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 8l9 6 9-6"/><rect x="3" y="4" width="18" height="16" rx="2"/></svg>
+          Campaigns
+          <span class="sb-badge-count" id="sb-camp-badge" style="display:none">0</span>
+        </div>
+        <div class="sb-section">System</div>
       <div class="sb-item" onclick="showPage('media',this)">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
         Media
@@ -1212,7 +1217,7 @@ select.form-input{background:var(--color-card)}
 
     <!-- ── ENQUIRIES ── -->
     <div id="page-enquiries" class="page">
-      <div class="topbar"><span class="topbar-title serif">Training Enquiries</span></div>
+      <div class="topbar"><span class="topbar-title serif">Enquiries</span></div>
       <div style="padding:20px 24px;box-sizing:border-box">
         <div class="card" style="padding:0;overflow:hidden">
           <table id="enq-table" style="width:100%;border-collapse:collapse;table-layout:fixed">
@@ -1220,7 +1225,7 @@ select.form-input{background:var(--color-card)}
               <tr style="background:var(--color-muted)">
                 <th style="width:13%;text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Date</th>
                 <th style="width:20%;text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Name</th>
-                <th style="width:22%;text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Course</th>
+                <th style="width:22%;text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Treatment</th>
                 <th class="enq-col-phone" style="width:14%;text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Phone</th>
                 <th class="enq-col-email" style="width:17%;text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Email</th>
                 <th style="width:14%;text-align:left;padding:10px 14px;font-family:var(--font-sans);font-size:9px;font-weight:400;text-transform:uppercase;letter-spacing:.2em;color:var(--color-muted-fg);border-bottom:1px solid var(--color-border)">Status</th>
@@ -1234,6 +1239,16 @@ select.form-input{background:var(--color-card)}
     </div>
 
     <!-- ── MEDIA ── -->
+    <div id="page-campaigns" class="page">
+      <div class="client-page-hdr">
+        <h1 class="page-title"><em>Campaigns</em></h1>
+        <button class="btn-primary" id="camp-new-btn" onclick="openCampComposer()">+ New Campaign</button>
+      </div>
+      <div id="camp-list-wrap" style="padding:0 24px 80px">
+        <p style="color:var(--color-muted-fg);padding:24px 0;font-style:italic">Loading campaigns...</p>
+      </div>
+    </div>
+
     <div id="page-media" class="page">
       <div class="topbar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px">
         <div>
@@ -1307,6 +1322,31 @@ select.form-input{background:var(--color-card)}
           </div>
         </div>
 
+        <!-- Hero Text -->
+        <div class="settings-section">
+          <div class="settings-section-header">Hero Text</div>
+          <div class="settings-body">
+            <div style="background:var(--color-muted);border:1px solid var(--color-border);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;font-size:12px;color:var(--color-muted-fg);line-height:1.6">
+              Edit the hero section text shown to visitors. Changes go live on save.
+            </div>
+            <div class="settings-field">
+              <label>Headline</label>
+              <input type="text" id="s-hero-headline" placeholder="Considered aesthetics."/>
+            </div>
+            <div class="settings-field">
+              <label>Subtitle</label>
+              <input type="text" id="s-hero-subtitle" placeholder="Precision aesthetics. Confident results."/>
+            </div>
+            <div class="settings-field">
+              <label>Location Label</label>
+              <input type="text" id="s-hero-location" placeholder="NOTTINGHAM"/>
+            </div>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--color-border)">
+              <button class="btn-gold" onclick="saveHeroText()">Save Hero Text</button>
+            </div>
+          </div>
+        </div>
+        
         <!-- ── Change Password ── -->
         <div class="settings-section">
           <div class="settings-section-header">Change Password</div>
@@ -2201,7 +2241,7 @@ function showPortal(loc){
     renderMedia();
     updateSidebarBadges();
     // Restore last active tab (URL hash > sessionStorage > dashboard)
-    const validPages=['dashboard','schedule','bookings','availability','clients','treatments','finance','enquiries','media','settings'];
+    const validPages=['dashboard','schedule','bookings','availability','clients','treatments','finance','enquiries','campaigns','media','settings'];
     const hashPage=(location.hash||'').replace('#','');
     const storedPage=sessionStorage.getItem('fbn_page');
     const startPage=validPages.includes(hashPage)?hashPage:(validPages.includes(storedPage)?storedPage:'dashboard');
@@ -2292,6 +2332,7 @@ function showPage(id,el,fromKpi){
   if(id==='finance')renderFinance();
   if(id==='enquiries')renderEnquiries();
   if(id==='media')renderMedia();
+  if(id==='campaigns')renderCampaigns();
   if(id==='settings'){populateSettingsForm();loadLaunchChecklist();loadWebhookEvents();loadGoogleCalendarStatus();}
   // manage back button visibility
   document.querySelectorAll('.back-to-dash').forEach(b=>b.classList.remove('visible'));
@@ -3954,7 +3995,19 @@ function openClientPanel(id){
       </tbody>
     </table>
     </div>`:'<p style="color:var(--muted);font-size:13px;margin-top:4px">No visits yet</p>'}
-    <div class="cp-section-label">Notes</div>
+    <div class="cp-section-label" style="margin-top:14px">Marketing Consent</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid #E8E5DD;border-radius:var(--radius);margin-top:6px;background:#F8F8F6">
+          <div>
+            <div style="font-size:13px;font-weight:600;color:#0E0D0B">SMS &amp; email marketing</div>
+            <div id="cp-consent-status" style="font-size:11px;color:var(--color-muted-fg);margin-top:2px">${c.marketingConsent ? (c.marketingConsentAt ? "Opted in " + new Date(c.marketingConsentAt).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}) : "Opted in") : "Not opted in"}</div>
+          </div>
+          <label class="switch-lbl" style="position:relative;display:inline-block;width:44px;height:24px;cursor:pointer">
+            <input type="checkbox" id="cp-consent-toggle" ${c.marketingConsent?"checked":""} onchange="toggleClientConsent('${c.id}', this.checked)" style="opacity:0;width:0;height:0">
+            <span style="position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:${c.marketingConsent?"#B89968":"#cfcabe"};transition:.2s;border-radius:99px"></span>
+            <span style="position:absolute;height:18px;width:18px;left:${c.marketingConsent?"23px":"3px"};top:3px;background:#fff;transition:.2s;border-radius:50%;box-shadow:0 1px 3px rgba(0,0,0,.2)"></span>
+          </label>
+        </div>
+        <div class="cp-section-label">Notes</div>
     <textarea id="cp-notes" rows="3" style="width:100%;padding:12px;border:1px solid #E8E8E8;border-radius:var(--radius);font-family:var(--font-sans);font-size:13px;resize:vertical;min-height:80px;box-sizing:border-box;outline:none">${c.notes||''}</textarea>
     <div style="display:flex;gap:8px;margin-top:10px">
       <button style="flex:1;background:var(--color-secondary);color:#fff;border:none;border-radius:var(--radius);padding:10px 20px;font-family:var(--font-sans);font-size:13px;font-weight:700;cursor:pointer" onclick="saveClientNote('${c.id}')">Save Notes</button>
@@ -3965,6 +4018,39 @@ function openClientPanel(id){
   document.getElementById('client-panel').classList.add('open');
 }
 function closeClientPanel(){document.getElementById('client-panel').classList.remove('open')}
+async function toggleClientConsent(clientId, consent){
+  try {
+    const r = await fetch('/api/clients/'+clientId+'/consent', {
+      method:'PUT', headers:{...authHdr(),'Content-Type':'application/json'},
+      body: JSON.stringify({consent: !!consent})
+    });
+    if(!r.ok){ throw new Error('Save failed'); }
+    const data = await r.json();
+    const statusEl = document.getElementById('cp-consent-status');
+    if(statusEl){
+      statusEl.textContent = consent ? (data.marketing_consent_at ? 'Opted in '+ new Date(data.marketing_consent_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}) : 'Opted in') : 'Not opted in';
+    }
+    // Update toggle visual
+    const toggle = document.getElementById('cp-consent-toggle');
+    if(toggle){
+      const wrap = toggle.parentElement;
+      const track = wrap.querySelector('span:nth-of-type(1)');
+      const knob = wrap.querySelector('span:nth-of-type(2)');
+      if(track) track.style.background = consent ? '#B89968' : '#cfcabe';
+      if(knob) knob.style.left = consent ? '23px' : '3px';
+    }
+    // Refresh client cache so the side panel reflects change next time it opens
+    if(typeof _supabaseClients !== 'undefined' && _supabaseClients){
+      const c = _supabaseClients.find(c=>c.id===clientId);
+      if(c){ c.marketingConsent = !!consent; c.marketingConsentAt = data.marketing_consent_at; }
+    }
+  } catch(e){
+    alert('Could not save: '+e.message);
+    // Revert toggle
+    const t = document.getElementById('cp-consent-toggle');
+    if(t) t.checked = !consent;
+  }
+}
 
 function confirmDeleteClient(id,name){
   const wrap=document.getElementById(`dcc-${id}`);
@@ -4550,8 +4636,8 @@ async function renderFinance(){
       return (b.date||'').slice(0,7)===pfx&&b.status!=='Cancelled';
     });
     const totalRev=allMonthBookings.reduce((s,b)=>s+Number(b.price),0);
-    const deposits=allMonthBookings.reduce((s,b)=>s+Number(b.deposit||0),0);
-    const outstanding=allMonthBookings.filter(b=>b.status!=='Complete').reduce((s,b)=>s+(Number(b.price)-Number(b.deposit||0)),0);
+    const deposits=allMonthBookings.reduce((s,b)=>s+Number(b.deposit||0)+(b.balancePaid?Math.max(0,Number(b.price||0)-Number(b.deposit||0)):0),0);
+    const outstanding=allMonthBookings.filter(b=>b.status!=='Complete'&&!b.balancePaid).reduce((s,b)=>s+(Number(b.price)-Number(b.deposit||0)),0);
     document.getElementById('finance-kpi').innerHTML=`
       <div class="fin-kpi-card"><div class="fin-kpi-label">Total Revenue</div><div class="fin-kpi-value" style="color:var(--color-secondary)">${gbp(totalRev)}</div></div>
       <div class="fin-kpi-card"><div class="fin-kpi-label">Deposits Collected</div><div class="fin-kpi-value" style="color:#2D6A4F">${gbp(deposits)}</div></div>
@@ -4705,253 +4791,438 @@ function mBtn(label,onclick,ghost){
   return`<button style="${s}" onclick="${onclick}" onmouseover="this.style.background='#B89968';this.style.color='#fff'" onmouseout="this.style.background='#fff';this.style.color='#B89968'">${label}</button>`;
 }
 
-function renderMedia(){
-  const data=getMediaData();
-  const heroVideo=data.heroVideo||'';
-  const heroImage=data.heroImage||'';
-  const aboutImage=data.aboutImage||'';
+/* === NEW POLISHED MEDIA SECTION === */
 
-  const css='<style>'
-    +'.mc-card{background:#fff;border:1px solid #F0EAE2;border-radius:12px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.05);margin-bottom:20px}'
-    +'.mc-section-label{display:flex;align-items:center;gap:10px;margin-bottom:20px}'
-    +'.mc-section-tag{font-family:var(--font-sans);font-size:9px;text-transform:uppercase;letter-spacing:.15em;color:#fff;background:var(--color-primary);border-radius:20px;padding:3px 10px}'
-    +'.mc-section-line{flex:1;height:1px;background:#F0EAE2}'
-    +'.mc-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}'
-    +'@media(max-width:640px){.mc-row{grid-template-columns:1fr}}'
-    +'.mc-slot-label{font-family:var(--font-sans);font-size:11px;font-weight:600;color:#111;margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em}'
-    +'.mc-slot-hint{font-family:var(--font-sans);font-size:11px;color:var(--color-muted-fg);margin-bottom:14px;line-height:1.5}'
-    +'.mc-dashed{border:2px dashed #E5DFD3;border-radius:8px;padding:22px;text-align:center;background:rgba(249,245,240,.5)}'
-    +'.mc-input{width:100%;border:1px solid #E5DFD3;border-radius:var(--radius);padding:8px 12px;font-family:var(--font-sans);font-size:12px;box-sizing:border-box;outline:none;background:#fff;color:#111}'
-    +'.mc-input:focus{border-color:var(--color-secondary)}'
-    +'.mc-btn-primary{background:var(--color-secondary);color:#fff;border:none;border-radius:var(--radius-pill);padding:7px 16px;font-family:var(--font-sans);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap}'
-    +'.mc-btn-outline{background:#fff;color:var(--color-secondary);border:1px solid var(--color-secondary);border-radius:var(--radius-pill);padding:6px 14px;font-family:var(--font-sans);font-size:12px;cursor:pointer;white-space:nowrap}'
-    +'.mc-btn-ghost{background:none;border:none;cursor:pointer;padding:4px 8px;line-height:1;color:#CCC;font-size:16px}'
-    +'.mc-url-pill{background:#F9F5F0;border:1px solid #E5DFD3;border-radius:var(--radius-pill);padding:4px 12px;font-family:var(--font-sans);font-size:10px;color:var(--color-muted-fg);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;margin-bottom:10px}'
-    +'</style>';
-
-  /* ── HERO SECTION ── */
-  let heroVideoContent;
-  if(heroVideo){
-    const vidSrc=cloudSrc(heroVideo)||heroVideo;
-    const shortUrl=heroVideo.length>45?heroVideo.substring(0,42)+'...':heroVideo;
-    heroVideoContent='<video src="'+vidSrc+'" controls muted style="width:100%;max-height:130px;border-radius:8px;background:#111;display:block;margin-bottom:10px"></video>'
-      +'<span class="mc-url-pill">'+shortUrl+'</span>'
-      +'<div style="display:flex;gap:8px;margin-top:6px;align-items:center">'
-      +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-hero-vid-file\').click()">Replace</button>'
-      +'<button class="mc-btn-ghost" onclick="clearHeroVideo(this)" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">Remove</button>'
-      +'</div>'
-      +'<input type="file" id="mc-hero-vid-file" accept="video/mp4,video/*" style="display:none" onchange="handleMcHeroVideoUpload(this)"/>';
-  }else{
-    heroVideoContent='<div class="mc-dashed">'
-      +'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B89968" stroke-width="1.2" style="margin-bottom:8px"><rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-4v12l-6-4"/></svg>'
-      +'<div style="font-family:var(--font-sans);font-size:12px;color:var(--color-muted-fg);margin-bottom:10px">No video set</div>'
-      +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-hero-vid-file\').click()">Upload Video</button>'
-      +'</div>'
-      +'<input type="file" id="mc-hero-vid-file" accept="video/mp4,video/*" style="display:none" onchange="handleMcHeroVideoUpload(this)"/>'
-      +'<div style="display:flex;gap:8px;margin-top:10px">'
-      +'<input type="text" id="mc-hero-vid-url" class="mc-input" placeholder="Or paste video URL…" style="flex:1"/>'
-      +'<button class="mc-btn-primary" onclick="setHeroVideo()">Set</button>'
-      +'</div>';
-  }
-
-  let heroImageContent;
-  if(heroImage){
-    const imgSrc=cloudSrc(heroImage)||heroImage;
-    heroImageContent='<div style="position:relative;border-radius:8px;overflow:hidden;height:130px;margin-bottom:10px;background:#E8E2D9">'
-      +'<img src="'+imgSrc+'" alt="Hero image" style="width:100%;height:100%;object-fit:cover;display:block"/>'
-      +'</div>'
-      +'<div style="display:flex;gap:8px;align-items:center">'
-      +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-hero-img-file\').click()">Replace</button>'
-      +'<button class="mc-btn-ghost" onclick="clearHeroImage(this)" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">Remove</button>'
-      +'</div>'
-      +'<input type="file" id="mc-hero-img-file" accept="image/*" style="display:none" onchange="handleMcHeroImageUpload(this)"/>';
-  }else{
-    heroImageContent='<div class="mc-dashed">'
-      +'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B89968" stroke-width="1.2" style="margin-bottom:8px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>'
-      +'<div style="font-family:var(--font-sans);font-size:12px;color:var(--color-muted-fg);margin-bottom:10px">No image set</div>'
-      +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-hero-img-file\').click()">Upload Image</button>'
-      +'</div>'
-      +'<input type="file" id="mc-hero-img-file" accept="image/*" style="display:none" onchange="handleMcHeroImageUpload(this)"/>'
-      +'<div style="display:flex;gap:8px;margin-top:10px">'
-      +'<input type="text" id="mc-hero-img-url" class="mc-input" placeholder="Or paste image URL…" style="flex:1"/>'
-      +'<button class="mc-btn-primary" onclick="setHeroImage()">Set</button>'
-      +'</div>';
-  }
-
-  const heroCard='<div class="mc-card">'
-    +'<div class="mc-section-label"><span class="mc-section-tag">Hero</span><div class="mc-section-line"></div></div>'
-    +'<div class="mc-row">'
-    +'<div>'
-    +'<div class="mc-slot-label">Video</div>'
-    +'<div class="mc-slot-hint">Plays fullscreen behind the hero text. Leave empty to show the photo instead.</div>'
-    +heroVideoContent
-    +'</div>'
-    +'<div>'
-    +'<div class="mc-slot-label">Photo</div>'
-    +'<div class="mc-slot-hint">Shown as the hero background when no video is set. Use a high quality portrait.</div>'
-    +heroImageContent
-    +'</div>'
-    +'</div>'
-    +'</div>';
-
-  /* ── MEET EVA SECTION ── */
-  let aboutImageContent;
-  if(aboutImage){
-    const imgSrc=cloudSrc(aboutImage)||aboutImage;
-    aboutImageContent='<div style="display:flex;align-items:center;gap:20px">'
-      +'<div style="width:100px;height:100px;border-radius:50%;overflow:hidden;background:#E8E2D9;border:2px solid #F0EAE2;flex-shrink:0">'
-      +'<img src="'+imgSrc+'" alt="Practitioner photo" style="width:100%;height:100%;object-fit:cover;display:block"/>'
-      +'</div>'
-      +'<div>'
-      +'<div style="font-family:var(--font-sans);font-size:12px;color:#555;margin-bottom:10px">Your photo is live on the website.</div>'
-      +'<div style="display:flex;gap:8px;align-items:center">'
-      +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-about-img-file\').click()">Replace</button>'
-      +'<button class="mc-btn-ghost" onclick="clearAboutImage(this)" onmouseover="this.style.color=\'#e53935\'" onmouseout="this.style.color=\'#CCC\'">Remove</button>'
-      +'</div>'
-      +'</div>'
-      +'<input type="file" id="mc-about-img-file" accept="image/*" style="display:none" onchange="handleMcAboutImageUpload(this)"/>'
-      +'</div>';
-  }else{
-    aboutImageContent='<div class="mc-dashed">'
-      +'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#B89968" stroke-width="1.2" style="margin-bottom:8px"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>'
-      +'<div style="font-family:var(--font-sans);font-size:12px;color:var(--color-muted-fg);margin-bottom:10px">No photo set</div>'
-      +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-about-img-file\').click()">Upload Photo</button>'
-      +'</div>'
-      +'<input type="file" id="mc-about-img-file" accept="image/*" style="display:none" onchange="handleMcAboutImageUpload(this)"/>'
-      +'<div style="display:flex;gap:8px;margin-top:10px">'
-      +'<input type="text" id="mc-about-img-url" class="mc-input" placeholder="Or paste image URL…" style="flex:1"/>'
-      +'<button class="mc-btn-primary" onclick="setAboutImage()">Set</button>'
-      +'</div>';
-  }
-
-  const aboutCard='<div class="mc-card">'
-    +'<div class="mc-section-label"><span class="mc-section-tag">Meet Eva</span><div class="mc-section-line"></div></div>'
-    +'<div class="mc-slot-hint" style="margin-bottom:16px">Your practitioner photo shown in the Meet Eva section of the website.</div>'
-    +aboutImageContent
-    +'</div>';
-
-  /* ── TRANSFORMATIONS CARD ── */
-  const DEFAULT_TX=[
-    {key:'r1a',type:'image',src:'result-1.jpg',  label:'NaturalèLips™',           category:'LIP FILLER'},
-    {key:'r1b',type:'video',src:'video1.mp4',    label:'HD Sculpt Lips',           category:'LIP FILLER'},
-    {key:'r1c',type:'image',src:'result-4.jpg',  label:'Facial Contouring',        category:'ADVANCED FILLER'},
-    {key:'r1d',type:'video',src:'video2.mp4',    label:'Filler Dissolve & Refill', category:'FLAT LIPS CORRECTED'},
-    {key:'r2a',type:'image',src:'result-2.jpg',  label:'NaturalèLips™',            category:'LIP FILLER'},
-    {key:'r2b',type:'video',src:'video3.mp4',    label:'Anti-Wrinkle',             category:'NEW PRODUCT SHOWCASE'},
-    {key:'r2c',type:'image',src:'result-3.jpg',  label:'NaturalèLips™',            category:'HD SCULPT LIPS'},
-    {key:'r2d',type:'video',src:'video1.mp4',    label:'NaturalèLips™',            category:'SUBTLE YET CONFIDENT'},
-  ];
-  const txItems=(Array.isArray(data.transformations)&&data.transformations.length>0)?data.transformations:DEFAULT_TX;
-
-  const txCards=txItems.map(function(item,i){
-    const rawSrc=item.src||'';
-    const resolved=cloudSrc(rawSrc)||rawSrc;
-    const isVideo=item.type==='video';
-    const isExternal=resolved.startsWith('http')||resolved.startsWith('/api/');
-    const isLocal=!isExternal&&rawSrc!=='';
-    const hasSrc=resolved!=='';
-
-    let mediaEl='';
-    if(hasSrc){
-      if(isVideo){
-        mediaEl='<video src="'+resolved+'" autoplay muted preload="auto" loop playsinline webkit-playsinline="true"'
-          +' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none"></video>';
-      }else{
-        mediaEl='<img src="'+resolved+'" alt="'+escHtml(item.label)+'"'
-          +' style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block"/>';
-      }
-    }else{
-      mediaEl='<div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">'
-        +'<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="1.2">'
-        +(isVideo?'<rect x="2" y="6" width="14" height="12" rx="2"/><path d="M16 10l6-4v12l-6-4"/>'
-          :'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>')
-        +'</svg>'
-        +'<span style="font-family:var(--font-sans);font-size:9px;color:#666;letter-spacing:.05em">'+(isVideo?'VIDEO SLOT':'IMAGE SLOT')+'</span>'
-        +'</div>';
+// === CAMPAIGNS SUITE ===
+async function renderCampaigns(){
+  const wrap = document.getElementById('camp-list-wrap');
+  if(!wrap) return;
+  wrap.innerHTML = '<p style="color:var(--color-muted-fg);padding:24px 0;font-style:italic">Loading...</p>';
+  try {
+    const r = await fetch('/api/campaigns', { headers: authHdr() });
+    if(!r.ok) throw new Error('load failed');
+    const list = await r.json();
+    if(!list.length){
+      wrap.innerHTML = `<div style="text-align:center;padding:48px 24px;color:var(--color-muted-fg)">
+        <p style="font-style:italic;font-size:14px;margin-bottom:8px">No campaigns yet</p>
+        <p style="font-size:13px">Click <strong>+ New Campaign</strong> to send your first SMS or email.</p></div>`;
+      return;
     }
-
-    const videoBadge=isVideo
-      ?'<div style="position:absolute;top:8px;left:8px;background:rgba(0,0,0,0.55);border-radius:3px;padding:2px 6px;display:flex;align-items:center;gap:4px">'
-        +'<svg width="9" height="9" viewBox="0 0 24 24" fill="#fff"><polygon points="5 3 19 12 5 21 5 3"/></svg>'
-        +'<span style="font-family:var(--font-sans);font-size:8px;color:#fff;letter-spacing:.08em">VIDEO</span>'
-        +'</div>'
-      :'';
-
-    const slotNum=(i+1);
-
-    return'<div style="position:relative;aspect-ratio:240/340;background:#1E1E1E;overflow:hidden;border-radius:4px;cursor:pointer" onclick="triggerTxReplace('+i+')" title="Click to replace">'
-      +mediaEl
-      +'<div style="position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.72) 0%,rgba(0,0,0,.12) 45%,transparent 70%);pointer-events:none"></div>'
-      +videoBadge
-      +'<button class="tx-replace-btn" onclick="event.stopPropagation();triggerTxReplace('+i+')" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.92);border:none;border-radius:20px;padding:4px 10px;font-family:var(--font-sans);font-size:9px;font-weight:700;color:#111;cursor:pointer;letter-spacing:.05em">REPLACE</button>'
-      +'<div style="position:absolute;bottom:12px;left:12px;right:12px;pointer-events:none">'
-      +'<div style="font-family:\'Inter\',sans-serif;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:#B89968;margin-bottom:4px">'+escHtml(item.category||'')+'</div>'
-      +'<div style="font-family:\'Cormorant Garamond\',serif;font-style:italic;font-size:.9rem;color:#FFFFFF;line-height:1.2">'+escHtml(item.label||'')+'</div>'
-      +'</div>'
-      +'<div id="tx-loading-'+i+'" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,.7);z-index:10;align-items:center;justify-content:center;flex-direction:column;gap:8px">'
-      +'<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#B89968" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>'
-      +'<span style="font-family:var(--font-sans);font-size:10px;color:#FFFFFF">Uploading…</span>'
-      +'</div>'
-      +'<input type="file" id="tx-file-'+i+'" accept="image/*,video/mp4,video/*" style="display:none" onchange="handleTxReplace(this,'+i+')"/>'
-      +'</div>';
-  }).join('');
-
-  const txCard='<div class="mc-card">'
-    +'<style>@keyframes spin{to{transform:rotate(360deg)}}</style>'
-    +'<div class="mc-section-label"><span class="mc-section-tag">Transformations</span><div class="mc-section-line"></div></div>'
-    +'<div class="mc-slot-hint" style="margin-bottom:16px">Click any card to replace it with your own image or video. Changes save automatically and go live for all visitors.</div>'
-    +'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+txCards+'</div>'
-    +'</div>';
-
-  /* ── GALLERY IMAGES CARD ── */
-  const galleryImages=Array.isArray(data.galleryImages)?data.galleryImages:[];
-  const galleryThumbsHtml=galleryImages.map(function(url,i){
-    const src=cloudSrc(url)||url;
-    return'<div style="position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:#E8E2D9">'
-      +'<img src="'+src+'" alt="Gallery '+i+'" style="width:100%;height:100%;object-fit:cover;display:block"/>'
-      +'<button onclick="deleteGalleryImage(this,'+i+')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:20px;height:20px;font-size:11px;color:#fff;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center" title="Remove">&times;</button>'
-      +'</div>';
-  }).join('');
-
-  const galleryCard='<div class="mc-card">'
-    +'<div class="mc-section-label"><span class="mc-section-tag">Gallery Reel</span><div class="mc-section-line"></div></div>'
-    +'<div class="mc-slot-hint" style="margin-bottom:16px">Photos shown in the scrolling gallery on the homepage. Drag-and-drop files or paste image URLs below.</div>'
-    +(galleryImages.length>0?'<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:16px">'+galleryThumbsHtml+'</div>':'')
-    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
-    +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-gallery-file\').click()">Upload Image</button>'
-    +'<input type="file" id="mc-gallery-file" accept="image/*" multiple style="display:none" onchange="handleGalleryUpload(this)"/>'
-    +'<input type="text" id="mc-gallery-url" class="mc-input" placeholder="Or paste image URL…" style="flex:1;min-width:160px"/>'
-    +'<button class="mc-btn-primary" onclick="addGalleryImage()">Add</button>'
-    +'</div>'
-    +'<div id="gallery-upload-status" style="font-family:var(--font-sans);font-size:11px;color:#B89968;margin-top:6px;min-height:14px"></div>'
-    +'</div>';
-
-  /* ── RESULTS VIDEOS CARD ── */
-  const resultsVideos=Array.isArray(data.resultsVideos)?data.resultsVideos:[];
-  const resultsThumbsHtml=resultsVideos.map(function(url,i){
-    const src=cloudSrc(url)||url;
-    return'<div style="position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;background:#1E1E1E">'
-      +'<video src="'+src+'" muted preload="metadata" style="width:100%;height:100%;object-fit:cover;display:block"></video>'
-      +'<div style="position:absolute;bottom:4px;left:4px;background:rgba(0,0,0,.55);border-radius:3px;padding:1px 5px;font-family:var(--font-sans);font-size:8px;color:#fff">Video '+(i+1)+'</div>'
-      +'<button onclick="deleteResultsVideo(this,'+i+')" style="position:absolute;top:4px;right:4px;background:rgba(0,0,0,.55);border:none;border-radius:50%;width:20px;height:20px;font-size:11px;color:#fff;cursor:pointer;line-height:1;display:flex;align-items:center;justify-content:center" title="Remove">&times;</button>'
-      +'</div>';
-  }).join('');
-
-  const resultsCard='<div class="mc-card">'
-    +'<div class="mc-section-label"><span class="mc-section-tag">Results Videos</span><div class="mc-section-line"></div></div>'
-    +'<div class="mc-slot-hint" style="margin-bottom:16px">Videos shown in the "Watch Real Treatments" section. Up to 4 videos displayed. Upload MP4 files or paste video URLs.</div>'
-    +(resultsVideos.length>0?'<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px">'+resultsThumbsHtml+'</div>':'')
-    +'<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">'
-    +'<button class="mc-btn-outline" onclick="document.getElementById(\'mc-results-vid-file\').click()">Upload Video</button>'
-    +'<input type="file" id="mc-results-vid-file" accept="video/mp4,video/*" style="display:none" onchange="handleResultsVideoUpload(this)"/>'
-    +'<input type="text" id="mc-vid-url" class="mc-input" placeholder="Or paste video URL…" style="flex:1;min-width:160px"/>'
-    +'<button class="mc-btn-primary" onclick="addResultsVideo()">Add</button>'
-    +'</div>'
-    +'<div id="results-upload-status" style="font-family:var(--font-sans);font-size:11px;color:#B89968;margin-top:6px;min-height:14px"></div>'
-    +'</div>';
-
-  document.getElementById('media-root').innerHTML=css+'<div style="max-width:780px">'+heroCard+aboutCard+txCard+galleryCard+resultsCard+'</div>';
+    wrap.innerHTML = `<table class="data-tbl" style="width:100%;border-collapse:collapse">
+      <thead><tr style="text-align:left;border-bottom:1px solid var(--color-border)">
+        <th style="padding:12px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-muted-fg)">Date</th>
+        <th style="padding:12px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-muted-fg)">Channel</th>
+        <th style="padding:12px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-muted-fg)">Subject / Preview</th>
+        <th style="padding:12px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-muted-fg)">Recipients</th>
+        <th style="padding:12px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-muted-fg)">Sent / Failed</th>
+        <th style="padding:12px 8px;font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--color-muted-fg)">Status</th>
+      </tr></thead>
+      <tbody>${list.map(c => `<tr style="border-bottom:1px solid var(--color-border)">
+        <td style="padding:14px 8px;font-size:13px">${new Date(c.created_at).toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'})}</td>
+        <td style="padding:14px 8px;font-size:13px;text-transform:uppercase;letter-spacing:.04em">${c.channel}</td>
+        <td style="padding:14px 8px;font-size:13px;max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtmlCamp(c.subject || c.body.slice(0,80))}</td>
+        <td style="padding:14px 8px;font-size:13px">${c.total_recipients}</td>
+        <td style="padding:14px 8px;font-size:13px">${c.total_sent} / <span style="color:${c.total_failed>0?'var(--color-error,#A33E3E)':'inherit'}">${c.total_failed}</span></td>
+        <td style="padding:14px 8px;font-size:12px"><span style="display:inline-block;padding:3px 10px;border-radius:99px;background:${c.status==='sent'?'rgba(79,122,74,.12)':c.status==='failed'?'rgba(163,62,62,.12)':'rgba(184,153,104,.15)'};color:${c.status==='sent'?'#4F7A4A':c.status==='failed'?'#A33E3E':'#9A7E50'}">${c.status}</span></td>
+      </tr>`).join('')}</tbody></table>`;
+  } catch(e){
+    wrap.innerHTML = `<p style="color:var(--color-error,#A33E3E);padding:24px 0">Failed to load: ${e.message}</p>`;
+  }
 }
+function escapeHtmlCamp(str){return String(str||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+function openCampComposer(){
+  const overlay = document.createElement('div');
+  overlay.id = 'camp-modal-overlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML = `<div style="background:#fff;max-width:540px;width:100%;max-height:90vh;overflow-y:auto;padding:32px;border-radius:4px">
+    <h2 style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:24px;margin:0 0 24px;color:#0E0D0B">New Campaign</h2>
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-muted-fg);margin-bottom:6px">Channel</label>
+      <select id="camp-channel" onchange="updateCampPreview()" style="width:100%;padding:10px 12px;border:1px solid var(--color-border);background:#fff;font-size:14px">
+        <option value="email">Email only</option>
+        <option value="sms">SMS only</option>
+        <option value="both">Email + SMS</option>
+      </select>
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-muted-fg);margin-bottom:6px">Audience</label>
+      <select id="camp-audience" onchange="updateCampPreview()" style="width:100%;padding:10px 12px;border:1px solid var(--color-border);background:#fff;font-size:14px">
+        <option value="all_consented">Clients with marketing consent (recommended)</option>
+        <option value="all">All clients (use only if you have consent)</option>
+      </select>
+    </div>
+    <div id="camp-subject-wrap" style="margin-bottom:16px">
+      <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-muted-fg);margin-bottom:6px">Subject (email only)</label>
+      <input id="camp-subject" type="text" placeholder="e.g. New offer at Nur & Co" style="width:100%;padding:10px 12px;border:1px solid var(--color-border);background:#fff;font-size:14px">
+    </div>
+    <div style="margin-bottom:16px">
+      <label style="display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--color-muted-fg);margin-bottom:6px">Message</label>
+      <textarea id="camp-body" oninput="updateCampPreview()" rows="6" placeholder="Type your message..." style="width:100%;padding:10px 12px;border:1px solid var(--color-border);background:#fff;font-size:14px;font-family:Inter,sans-serif;resize:vertical"></textarea>
+      <div id="camp-char-info" style="font-size:11px;color:var(--color-muted-fg);margin-top:4px">0 characters · 1 SMS segment</div>
+    </div>
+    <div id="camp-preview-box" style="background:#F8F8F6;padding:14px 16px;border:1px solid var(--color-border);font-size:12px;color:var(--color-muted-fg);margin-bottom:24px">
+      <strong style="color:#0E0D0B">Preview</strong> — click "Send" after reviewing.
+    </div>
+    <div style="display:flex;gap:12px;justify-content:flex-end">
+      <button class="btn-outline" onclick="closeCampModal()" style="padding:10px 20px;font-size:13px">Cancel</button>
+      <button class="btn-primary" id="camp-send-btn" onclick="sendCampaign()" style="padding:10px 24px;font-size:13px;background:#0E0D0B;color:#fff;border:none;letter-spacing:.04em">Review & Send</button>
+    </div></div>`;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', e => { if(e.target === overlay) closeCampModal(); });
+  updateCampPreview();
+}
+function closeCampModal(){
+  const o = document.getElementById('camp-modal-overlay');
+  if(o) o.remove();
+}
+async function updateCampPreview(){
+  const channel = document.getElementById('camp-channel')?.value;
+  const audience = document.getElementById('camp-audience')?.value;
+  const body = document.getElementById('camp-body')?.value || '';
+  const subjW = document.getElementById('camp-subject-wrap');
+  if(subjW) subjW.style.display = (channel === 'sms') ? 'none' : 'block';
+  // SMS char info
+  const len = body.length;
+  const segs = len <= 160 ? 1 : Math.ceil(len/153);
+  const ci = document.getElementById('camp-char-info');
+  if(ci) ci.textContent = `${len} characters · ${segs} SMS segment${segs>1?'s':''}`;
+  // Audience preview
+  try {
+    const r = await fetch('/api/campaigns/audience', {
+      method:'POST', headers:{...authHdr(),'Content-Type':'application/json'},
+      body: JSON.stringify({audience, channel, body})
+    });
+    const d = await r.json();
+    const pb = document.getElementById('camp-preview-box');
+    if(pb){
+      const reachable = (channel==='email'?d.reachable.email:channel==='sms'?d.reachable.sms:Math.max(d.reachable.email,d.reachable.sms));
+      pb.innerHTML = `<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div><strong style="color:#0E0D0B">${d.totalClients}</strong> client${d.totalClients!==1?'s':''} match audience</div>
+        <div>Reachable: <strong style="color:#0E0D0B">${d.reachable.email} email</strong> / <strong style="color:#0E0D0B">${d.reachable.sms} SMS</strong></div>
+        ${(channel!=='email' && d.reachable.sms > 0) ? `<div>Est. SMS cost: <strong style="color:#0E0D0B">£${d.estimatedCostGbp}</strong></div>` : ''}
+      </div>`;
+    }
+  } catch(e){}
+}
+async function sendCampaign(){
+  const channel = document.getElementById('camp-channel').value;
+  const audience = document.getElementById('camp-audience').value;
+  const subject = document.getElementById('camp-subject')?.value || '';
+  const body = document.getElementById('camp-body').value.trim();
+  if(!body){ alert('Please write a message'); return; }
+  if((channel==='email'||channel==='both') && !subject){ alert('Subject required for email'); return; }
+  if(!confirm(`Send this campaign?
+
+Channel: ${channel}
+Audience: ${audience}
+
+This cannot be undone.`)) return;
+  const btn = document.getElementById('camp-send-btn');
+  if(btn){ btn.disabled = true; btn.textContent = 'Sending...'; }
+  try {
+    const r = await fetch('/api/campaigns', {
+      method:'POST', headers:{...authHdr(),'Content-Type':'application/json'},
+      body: JSON.stringify({channel, audience, subject, body})
+    });
+    if(!r.ok){ const e = await r.json(); throw new Error(e.error||'send failed'); }
+    const d = await r.json();
+    closeCampModal();
+    alert(`Campaign queued. Sending to ${d.queued} client${d.queued!==1?'s':''}.
+
+Refresh to see status.`);
+    setTimeout(renderCampaigns, 1500);
+  } catch(e){
+    alert('Send failed: '+e.message);
+    if(btn){ btn.disabled = false; btn.textContent = 'Review & Send'; }
+  }
+}
+
+function renderMedia(){
+  const root=document.getElementById('media-root');
+  if(!root)return;
+  const d=getMediaData();
+  const heroType=d.heroType||(d.heroVideo?'video':'image');
+  const heroSrc=d.heroVideo||d.heroImage||d.heroSrc||'';
+  const practSrc=d.practitionerImage||d.aboutImage||'';
+  const baList=Array.isArray(d.galleryImages)?d.galleryImages.map(u=>typeof u==='string'?{url:u,label:''}:u):[];
+
+  root.innerHTML=`
+    <style>
+      .mc-wrap{max-width:980px;margin:0 auto;padding:8px 0 64px}
+      .mc-card{background:var(--color-card);border:1px solid var(--color-border);border-radius:var(--radius);padding:28px;margin-bottom:20px;box-shadow:0 1px 0 rgba(14,13,11,.02)}
+      .mc-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;gap:12px}
+      .mc-title{font-family:var(--font-serif);font-size:20px;font-weight:500;color:var(--color-foreground);letter-spacing:-.005em;margin:0}
+      .mc-sub{font-family:var(--font-sans);font-size:12px;color:var(--color-muted-fg);margin:0 0 22px;line-height:1.6}
+      .mc-status{font-family:var(--font-sans);font-size:11px;letter-spacing:.05em;color:#999;display:inline-flex;align-items:center;gap:6px;transition:color .3s}
+      .mc-status.saved{color:#3D3935}
+      .mc-status.syncing{color:#9A8A6E}
+      .mc-status.error{color:#a33}
+      .mc-status .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+      .mc-drop{position:relative;border:1.5px dashed var(--color-border);border-radius:var(--radius);min-height:280px;display:flex;align-items:center;justify-content:center;background:#FAFAF8;cursor:pointer;overflow:hidden;transition:all .25s}
+      .mc-drop:hover{border-color:#3D3935;background:#F4F2EE}
+      .mc-drop.drag{border-color:#3D3935;border-style:solid;background:#EFEAE2}
+      .mc-drop.has-media{border-style:solid;border-color:var(--color-border);min-height:0}
+      .mc-drop img,.mc-drop video{width:100%;height:auto;display:block;max-height:480px;object-fit:cover}
+      .mc-empty{display:flex;flex-direction:column;align-items:center;gap:10px;color:#888;font-family:var(--font-sans);font-size:13px;text-align:center;padding:32px}
+      .mc-empty .icn{width:38px;height:38px;opacity:.5}
+      .mc-empty .hint{font-size:11px;color:#aaa;letter-spacing:.04em}
+      .mc-actions{display:flex;gap:10px;margin-top:14px;align-items:center;flex-wrap:wrap}
+      .mc-btn{font-family:var(--font-sans);font-size:11px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;padding:10px 22px;border-radius:2px;cursor:pointer;transition:all .2s;border:1px solid #3D3935;background:#3D3935;color:#fff}
+      .mc-btn:hover{background:#2A2724;border-color:#2A2724}
+      .mc-btn.ghost{background:transparent;color:#3D3935}
+      .mc-btn.ghost:hover{background:#3D3935;color:#fff}
+      .mc-btn.danger{border-color:#aa3d3d;background:transparent;color:#aa3d3d}
+      .mc-btn.danger:hover{background:#aa3d3d;color:#fff}
+      .mc-btn:disabled{opacity:.4;cursor:not-allowed}
+      .mc-toggle{display:inline-flex;background:#F0EBE2;border-radius:999px;padding:3px;margin-bottom:14px}
+      .mc-toggle button{font-family:var(--font-sans);font-size:11px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;padding:7px 18px;border-radius:999px;border:none;background:transparent;color:#7a6f60;cursor:pointer;transition:all .2s}
+      .mc-toggle button.active{background:#3D3935;color:#fff}
+      .mc-progress{position:absolute;inset:0;background:rgba(0,0,0,.55);display:none;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;font-family:var(--font-sans);font-size:12px;letter-spacing:.05em;z-index:5}
+      .mc-progress.show{display:flex}
+      .mc-progress .ring{width:30px;height:30px;border:2px solid rgba(255,255,255,.25);border-top-color:#fff;border-radius:50%;animation:mc-spin 1s linear infinite}
+      @keyframes mc-spin{to{transform:rotate(360deg)}}
+      .mc-ba-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:14px}
+      .mc-ba-item{position:relative;border-radius:var(--radius);overflow:hidden;border:1px solid var(--color-border);background:#fff;aspect-ratio:1;cursor:pointer;transition:all .2s}
+      .mc-ba-item:hover{transform:translateY(-2px);box-shadow:0 4px 16px rgba(0,0,0,.08)}
+      .mc-ba-item img{width:100%;height:100%;object-fit:cover;display:block}
+      .mc-ba-item .ba-label{position:absolute;bottom:0;left:0;right:0;padding:8px 10px;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);color:#fff;font-family:var(--font-sans);font-size:10px;letter-spacing:.1em;text-transform:uppercase}
+      .mc-ba-item .ba-del{position:absolute;top:6px;right:6px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:24px;height:24px;display:flex;align-items:center;justify-content:center;cursor:pointer;opacity:0;transition:opacity .2s}
+      .mc-ba-item:hover .ba-del{opacity:1}
+      .mc-ba-item .ba-del:hover{background:#aa3d3d;color:#fff}
+      .mc-ba-add{border:1.5px dashed var(--color-border);border-radius:var(--radius);aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;cursor:pointer;color:#888;font-family:var(--font-sans);font-size:11px;letter-spacing:.05em;background:#FAFAF8;transition:all .2s}
+      .mc-ba-add:hover{border-color:#3D3935;color:#3D3935;background:#F4F2EE}
+      .mc-ba-add svg{width:24px;height:24px;opacity:.6}
+    </style>
+    <div class="mc-wrap">
+
+      <!-- HERO MEDIA -->
+      <div class="mc-card">
+        <div class="mc-head">
+          <div>
+            <h3 class="mc-title">Hero Media</h3>
+            <p class="mc-sub">The first thing visitors see. Image or video — recommended 1920\u00d71080, under 12MB.</p>
+          </div>
+          <span class="mc-status" id="mc-st-hero"><span class="dot"></span><span class="txt">Ready</span></span>
+        </div>
+        <div class="mc-toggle">
+          <button class="${heroType==='image'?'active':''}" onclick="mcSetHeroType('image')">Image</button>
+          <button class="${heroType==='video'?'active':''}" onclick="mcSetHeroType('video')">Video</button>
+        </div>
+        <div class="mc-drop ${heroSrc?'has-media':''}" id="mc-drop-hero" onclick="document.getElementById('mc-file-hero').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="mcHandleDrop(event,'hero')">
+          ${heroSrc?(heroType==='video'?`<video src="${mcResolveSrc(heroSrc)}" autoplay muted loop playsinline></video>`:`<img src="${mcResolveSrc(heroSrc)}" alt="Hero"/>`):`
+            <div class="mc-empty">
+              <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <div>Click or drag to upload</div>
+              <div class="hint">JPG, PNG, MP4 \u00b7 max 12MB</div>
+            </div>`}
+          <div class="mc-progress" id="mc-prog-hero"><div class="ring"></div><span>Uploading\u2026</span></div>
+        </div>
+        <input type="file" id="mc-file-hero" accept="image/*,video/mp4,video/*" style="display:none" onchange="mcHandleFile(event,'hero')"/>
+        <div class="mc-actions">
+          <button class="mc-btn" onclick="mcSaveSection('hero')">Save Hero</button>
+          ${heroSrc?`<button class="mc-btn ghost" onclick="document.getElementById('mc-file-hero').click()">Replace</button><button class="mc-btn danger" onclick="mcClear('hero')">Remove</button>`:''}
+        </div>
+      </div>
+
+      <!-- PRACTITIONER -->
+      <div class="mc-card">
+        <div class="mc-head">
+          <div>
+            <h3 class="mc-title">Practitioner Photo</h3>
+            <p class="mc-sub">Shown in the About section beside Nur\u2019s bio. Portrait orientation works best.</p>
+          </div>
+          <span class="mc-status" id="mc-st-pract"><span class="dot"></span><span class="txt">Ready</span></span>
+        </div>
+        <div class="mc-drop ${practSrc?'has-media':''}" id="mc-drop-pract" onclick="document.getElementById('mc-file-pract').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="mcHandleDrop(event,'pract')">
+          ${practSrc?`<img src="${mcResolveSrc(practSrc)}" alt="Practitioner"/>`:`
+            <div class="mc-empty">
+              <svg class="icn" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+              <div>Click or drag to upload</div>
+              <div class="hint">JPG, PNG \u00b7 max 8MB</div>
+            </div>`}
+          <div class="mc-progress" id="mc-prog-pract"><div class="ring"></div><span>Uploading\u2026</span></div>
+        </div>
+        <input type="file" id="mc-file-pract" accept="image/*" style="display:none" onchange="mcHandleFile(event,'pract')"/>
+        <div class="mc-actions">
+          <button class="mc-btn" onclick="mcSaveSection('pract')">Save Photo</button>
+          ${practSrc?`<button class="mc-btn ghost" onclick="document.getElementById('mc-file-pract').click()">Replace</button><button class="mc-btn danger" onclick="mcClear('pract')">Remove</button>`:''}
+        </div>
+      </div>
+
+      <!-- BEFORE & AFTER -->
+      <div class="mc-card">
+        <div class="mc-head">
+          <div>
+            <h3 class="mc-title">Before &amp; After</h3>
+            <p class="mc-sub">Treatment results gallery. Upload pairs or single comparison images. Drag to reorder.</p>
+          </div>
+          <span class="mc-status" id="mc-st-ba"><span class="dot"></span><span class="txt">Ready</span></span>
+        </div>
+        <div class="mc-ba-grid" id="mc-ba-grid">
+          ${baList.map((item,idx)=>`
+            <div class="mc-ba-item">
+              <img src="${mcResolveSrc(item.url||item.src||'')}" alt="${escHtml(item.label||'')}"/>
+              ${item.label?`<div class="ba-label">${escHtml(item.label)}</div>`:''}
+              <button class="ba-del" onclick="event.stopPropagation();mcRemoveBA(${idx})" title="Remove">\u00d7</button>
+            </div>`).join('')}
+          <div class="mc-ba-add" onclick="document.getElementById('mc-file-ba').click()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            <span>Add Image</span>
+          </div>
+        </div>
+        <input type="file" id="mc-file-ba" accept="image/*" multiple style="display:none" onchange="mcHandleFile(event,'ba')"/>
+        <div class="mc-actions">
+          <button class="mc-btn" onclick="mcSaveSection('ba')">Save Gallery</button>
+          <span class="mc-sub" style="margin:0">${baList.length} item${baList.length===1?'':'s'}</span>
+        </div>
+      </div>
+
+    </div>`;
+}
+
+function mcResolveSrc(s){
+  if(!s)return '';
+  if(s.startsWith('http')||s.startsWith('/api/'))return s;
+  if(s.startsWith('/objects/'))return '/api/media/serve?path='+encodeURIComponent(s);
+  return s;
+}
+
+function mcSetHeroType(t){
+  const d=getMediaData();
+  d.heroType=t;
+  if(t==='image'){d.heroVideo='';}
+  saveMediaData(d);
+  renderMedia();
+}
+
+function mcSetStatus(section,state,txt){
+  const el=document.getElementById('mc-st-'+section);
+  if(!el)return;
+  el.className='mc-status '+state;
+  el.querySelector('.txt').textContent=txt||(state==='saved'?'Saved':state==='syncing'?'Saving\u2026':state==='error'?'Error':'Ready');
+  if(state==='saved'){setTimeout(()=>{el.className='mc-status';el.querySelector('.txt').textContent='Ready';},2400);}
+}
+
+function mcShowProgress(section,show){
+  const el=document.getElementById('mc-prog-'+section);
+  if(el)el.classList.toggle('show',show);
+}
+
+async function mcUploadFile(file,sectionType){
+  const fd=new FormData();
+  fd.append('file',file);
+  if(sectionType)fd.append('type',sectionType);
+  const fieldMap={hero:'heroImage',pract:'practitionerImage',gallery:'galleryImages'};
+  if(sectionType&&fieldMap[sectionType])fd.append('field',fieldMap[sectionType]);
+  const t=localStorage.getItem('fbn_token')||'';
+  const locId=(typeof _SESSION_LOC_ID!=='undefined'&&_SESSION_LOC_ID)||sessionStorage.getItem('nur-and-co_location_id')||'';
+  const headers={};
+  if(t)headers['Authorization']='Bearer '+t;
+  if(locId)headers['X-Location-Id']=locId;
+  console.log('[mcUploadFile] start',{section:sectionType,size:file.size,name:file.name,hasToken:!!t,hasLocId:!!locId});
+  let r;
+  try{r=await fetch('/api/media/upload',{method:'POST',headers,body:fd,credentials:'same-origin'});}
+  catch(netErr){console.error('[mcUploadFile] network',netErr);throw new Error('Network: '+(netErr.message||'fetch failed'));}
+  console.log('[mcUploadFile] status='+r.status);
+  let bj; try{bj=await r.json();}catch(_){bj={};}
+  console.log('[mcUploadFile] body',bj);
+  if(!r.ok){
+    const msg=bj.detail||bj.error||('HTTP '+r.status);
+    if(r.status===401)throw new Error('Auth expired \u2014 sign out & in');
+    throw new Error(msg);
+  }
+  return bj.url||bj.path||bj.objectPath||bj.location||'';
+}
+
+async function mcHandleFile(ev,section){
+  const files=Array.from(ev.target.files||[]);
+  if(!files.length)return;
+  await mcProcessFiles(files,section);
+  ev.target.value='';
+}
+
+async function mcHandleDrop(ev,section){
+  ev.preventDefault();
+  ev.currentTarget.classList.remove('drag');
+  const files=Array.from(ev.dataTransfer.files||[]).filter(f=>f.type.startsWith('image/')||f.type.startsWith('video/'));
+  if(!files.length)return;
+  await mcProcessFiles(files,section);
+}
+
+async function mcProcessFiles(files,section){
+  mcShowProgress(section,true);
+  mcSetStatus(section,'syncing','Uploading\u2026');
+  try{
+    if(section==='hero'){
+      const f=files[0];const url=await mcUploadFile(f,'hero');
+      const d=getMediaData();const isVid=f.type.startsWith('video/');
+      if(isVid){d.heroVideo=url;d.heroType='video';}else{d.heroImage=url;d.heroType='image';d.heroVideo='';}
+      saveMediaData(d);
+      mcSetStatus(section,'saved','Uploaded');
+    }else if(section==='pract'){
+      const url=await mcUploadFile(files[0],'pract');
+      const d=getMediaData();d.practitionerImage=url;d.aboutImage=url;
+      saveMediaData(d);
+      mcSetStatus(section,'saved','Uploaded');
+    }else if(section==='ba'){
+      const d=getMediaData();
+      const list=Array.isArray(d.galleryImages)?d.galleryImages.slice():[];
+      for(const f of files){const url=await mcUploadFile(f,'gallery');list.push(url);}
+      d.galleryImages=list;
+      saveMediaData(d);
+      mcSetStatus(section,'saved','Uploaded');
+    }
+    renderMedia();
+  }catch(e){
+    console.warn('upload failed',e);
+    const detail=(e&&e.message)||'Failed';
+    mcSetStatus(section,'error',detail.length>40?detail.substring(0,40)+'...':detail);
+    if(typeof showToast==='function'){showToast('Upload error: '+detail);}
+  }finally{
+    mcShowProgress(section,false);
+  }
+}
+
+async function mcSaveSection(section){
+  mcSetStatus(section,'syncing','Saving\u2026');
+  const d=getMediaData();
+  try{
+    if(section==='hero'){
+      await saveMediaField('heroImage',d.heroImage||'');
+      await saveMediaField('heroVideo',d.heroVideo||'');
+      await saveMediaField('heroType',d.heroType||'image');
+    }else if(section==='pract'){
+      await saveMediaField('practitionerImage',d.practitionerImage||'');
+      await saveMediaField('aboutImage',d.aboutImage||d.practitionerImage||'');
+    }else if(section==='ba'){
+      await saveMediaField('galleryImages',d.galleryImages||[]);
+    }
+    mcSetStatus(section,'saved','Saved \u2713');
+  }catch(e){
+    console.warn('save failed',e);
+    mcSetStatus(section,'error','Save failed');
+  }
+}
+
+function mcClear(section){
+  if(!confirm('Remove this media?'))return;
+  const d=getMediaData();
+  if(section==='hero'){d.heroImage='';d.heroVideo='';}
+  else if(section==='pract'){d.practitionerImage='';d.aboutImage='';}
+  saveMediaData(d);
+  renderMedia();
+  mcSaveSection(section);
+}
+
+function mcRemoveBA(idx){
+  const d=getMediaData();
+  if(!Array.isArray(d.galleryImages))return;
+  d.galleryImages.splice(idx,1);
+  saveMediaData(d);
+  renderMedia();
+}
+
 
 function escHtml(s){return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function escPortal(s){return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
@@ -5291,6 +5562,35 @@ async function saveBookingSettings(){
   }
 }
 
+
+// ============== HERO TEXT (loaded on Settings page) ==============
+async function loadHeroText(){
+  try{
+    const r = await fetch('/api/hero/config');
+    if(!r.ok) return;
+    const d = await r.json();
+    const h = document.getElementById('s-hero-headline');
+    const sub = document.getElementById('s-hero-subtitle');
+    const loc = document.getElementById('s-hero-location');
+    if(h) h.value = d.headline || '';
+    if(sub) sub.value = d.subtitle || '';
+    if(loc) loc.value = d.locationLabel || '';
+  }catch(e){console.warn('loadHeroText failed', e);}
+}
+async function saveHeroText(){
+  const headline = (document.getElementById('s-hero-headline')||{}).value || '';
+  const subtitle = (document.getElementById('s-hero-subtitle')||{}).value || '';
+  const locationLabel = (document.getElementById('s-hero-location')||{}).value || '';
+  const token = localStorage.getItem('fbn_token');
+  const locId = sessionStorage.getItem('nur-and-co_location_id');
+  if(!token || !locId){ showToast('Not signed in'); return; }
+  const headers = {'Content-Type':'application/json','Authorization':'Bearer '+token,'X-Location-Id':locId};
+  try{
+    const r = await fetch('/api/hero/config',{method:'POST',headers,body:JSON.stringify({field:'all',value:{headline,subtitle,locationLabel}})});
+    if(r.ok){ showToast('\u2713 Hero text saved'); }
+    else{ const d=await r.json().catch(()=>({})); showToast('Save failed: '+(d.error||r.status)); }
+  }catch(e){ showToast('Save failed \u2014 network error'); }
+}
 async function changePassword(){
   const current=document.getElementById('s-pw-current').value.trim();
   const newPw=document.getElementById('s-pw-new').value;
@@ -5566,7 +5866,7 @@ async function renderEnquiries(){
               <div class="enq-detail-value"><a href="tel:${e.phone}" style="color:var(--color-foreground)">${e.phone}</a></div>
             </div>
             <div>
-              <div class="enq-detail-label">Course</div>
+              <div class="enq-detail-label">Treatment</div>
               <div class="enq-detail-value">${e.courseName||'—'}</div>
             </div>
             <div>

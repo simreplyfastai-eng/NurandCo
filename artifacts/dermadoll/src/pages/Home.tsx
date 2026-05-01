@@ -5,7 +5,7 @@ import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import Services from "@/components/Services";
 import About from "@/components/About";
-import GalleryReel from "@/components/GalleryReel";
+import BeforeAfter from "@/components/BeforeAfter";
 import Reviews from "@/components/Reviews";
 import Treatments from "@/components/Treatments";
 import BookCTA from "@/components/BookCTA";
@@ -99,7 +99,7 @@ export default function Home() {
       <Services />
       <About />
         <Treatments />
-      <GalleryReel />
+      <BeforeAfter />
       <Reviews />
       <BookCTA />
       <Contact />

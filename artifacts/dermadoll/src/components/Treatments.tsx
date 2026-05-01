@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const CATEGORIES = [
@@ -30,40 +30,71 @@ const CATEGORIES = [
 
 export default function Treatments() {
   const [open, setOpen] = useState<number | null>(null);
+  const [categories, setCategories] = useState(CATEGORIES);
+
+  useEffect(() => {
+    const LOCATION_ID = "f2c78e92-66bd-4fca-8006-e31009edfa8f";
+    fetch(`/api/treatments?locationId=${LOCATION_ID}`)
+      .then(r => r.ok ? r.json() : null)
+      .then((rows: any[] | null) => {
+        if (!rows || !Array.isArray(rows) || rows.length === 0) return;
+        // Group by category, preserving the order categories appear
+        const groups: Record<string, any[]> = {};
+        const order: string[] = [];
+        for (const t of rows) {
+          const cat = t.category || "Other";
+          if (!groups[cat]) { groups[cat] = []; order.push(cat); }
+          groups[cat].push({
+            name: t.name,
+            time: `${t.duration_minutes} min`,
+            price: `£${Number(t.price).toFixed(0)}`,
+            desc: t.description || "",
+          });
+        }
+        const built = order.map((cat, i) => ({
+          num: String(i + 1).padStart(2, "0"),
+          name: cat,
+          desc: "",
+          items: groups[cat],
+        }));
+        setCategories(built);
+      })
+      .catch(() => {});
+  }, []);
   const toggle = (i: number) => setOpen(open === i ? null : i);
 
   return (
     <section id="treatments" style={{ background: "#FFFFFF", padding: "120px 0 100px", position: "relative" }}>
       <style>{`
         .tr-wrap { max-width: 960px; margin: 0 auto; padding: 0 32px; }
-        .tr-eyebrow { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; color: #B89968; text-align: center; margin-bottom: 20px; }
+        .tr-eyebrow { font-family: 'Inter', sans-serif; font-size: 10px; font-weight: 400; letter-spacing: 0.4em; text-transform: uppercase; color: #3D3935; text-align: center; margin-bottom: 20px; }
         .tr-title { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 300; font-size: clamp(2.4rem, 5vw, 3.6rem); text-align: center; color: #0E0D0B; margin: 0 0 16px; line-height: 1.05; letter-spacing: -0.005em; }
         .tr-sub { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 300; color: #5A5248; text-align: center; margin: 0 auto 20px; max-width: 420px; line-height: 1.7; }
-        .tr-divider { width: 60px; height: 1px; background: #B89968; margin: 0 auto 72px; }
+        .tr-divider { width: 60px; height: 1px; background: #3D3935; margin: 0 auto 72px; }
 
         /* Accordion category */
         .tr-cat { border-top: 1px solid #E8E5DD; transition: background 0.4s ease; position: relative; }
         .tr-cat:last-of-type { border-bottom: 1px solid #E8E5DD; }
-        .tr-cat.open { background: linear-gradient(180deg, rgba(184,153,104,0.025) 0%, rgba(255,255,255,0) 100%); }
+        .tr-cat.open { background: linear-gradient(180deg, rgba(61,57,53,0.025) 0%, rgba(255,255,255,0) 100%); }
         .tr-cat::before {
           content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 0;
-          background: #B89968; transition: width 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
+          background: #3D3935; transition: width 0.5s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
         .tr-cat.open::before { width: 2px; }
 
         .tr-header { display: grid; grid-template-columns: 60px 1fr auto; gap: 24px; align-items: center; padding: 32px 0 32px 24px; cursor: pointer; user-select: none; transition: padding 0.3s ease; }
-        .tr-header:hover .tr-cat-name { color: #B89968; }
-        .tr-header:hover .tr-num { color: #B89968; }
+        .tr-header:hover .tr-cat-name { color: #3D3935; }
+        .tr-header:hover .tr-num { color: #3D3935; }
 
         .tr-num {
           font-family: 'Cormorant Garamond', serif;
           font-style: italic; font-weight: 300;
-          font-size: 1.4rem; color: #B89968;
+          font-size: 1.4rem; color: #3D3935;
           opacity: 0.5;
           transition: all 0.3s ease;
           letter-spacing: 0.05em;
         }
-        .tr-cat.open .tr-num { opacity: 1; color: #B89968; }
+        .tr-cat.open .tr-num { opacity: 1; color: #3D3935; }
 
         .tr-cat-name {
           font-family: 'Cormorant Garamond', serif;
@@ -74,7 +105,7 @@ export default function Treatments() {
         }
         .tr-cat-desc {
           font-family: 'Inter', sans-serif;
-          font-size: 11px; font-weight: 300; color: #5A5248;
+          font-size: 11px; font-weight: 400; color: #3D3935;
           margin-top: 6px; letter-spacing: 0.04em;
         }
 
@@ -86,7 +117,7 @@ export default function Treatments() {
           transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
           position: relative; flex-shrink: 0;
         }
-        .tr-cat.open .tr-toggle { background: #B89968; border-color: #B89968; transform: rotate(180deg); }
+        .tr-cat.open .tr-toggle { background: #3D3935; border-color: #3D3935; transform: rotate(180deg); }
         .tr-toggle::before, .tr-toggle::after {
           content: ''; position: absolute;
           background: #0E0D0B; transition: all 0.3s ease;
@@ -101,7 +132,7 @@ export default function Treatments() {
         .tr-items-inner { padding: 0 0 36px 84px; }
 
         .tr-row {
-          display: grid; grid-template-columns: 1fr auto auto;
+          display: grid; grid-template-columns: 1fr auto;
           gap: 24px; align-items: center;
           padding: 18px 0;
           border-top: 1px solid rgba(232,229,221,0.6);
@@ -114,14 +145,14 @@ export default function Treatments() {
           position: absolute;
           right: -28px;
           font-family: 'Inter', sans-serif;
-          color: #B89968;
+          color: #3D3935;
           opacity: 0;
           transform: translateX(-8px);
           transition: all 0.3s ease;
         }
         .tr-row:hover { padding-left: 8px; }
         .tr-row:hover::after { opacity: 1; transform: translateX(0); }
-        .tr-row:hover .tr-name { color: #B89968; }
+        .tr-row:hover .tr-name { color: #3D3935; }
 
         .tr-name {
           font-family: 'Cormorant Garamond', serif;
@@ -131,20 +162,20 @@ export default function Treatments() {
         }
         .tr-rdesc {
           font-family: 'Inter', sans-serif;
-          font-size: 11px; color: #5A5248;
-          margin-top: 4px; font-weight: 300;
+          font-size: 11px; color: #3D3935;
+          margin-top: 4px; font-weight: 400;
           line-height: 1.6;
         }
         .tr-time {
           font-family: 'Inter', sans-serif;
-          font-size: 10px; color: #B89968;
+          font-size: 10px; color: #3D3935;
           letter-spacing: 0.15em; text-transform: uppercase;
           white-space: nowrap;
         }
         .tr-price {
           font-family: 'Cormorant Garamond', serif;
           font-style: italic; font-weight: 400;
-          font-size: 1.1rem; color: #B89968;
+          font-size: 1.1rem; color: #3D3935;
           white-space: nowrap; min-width: 90px; text-align: right;
         }
 
@@ -161,24 +192,31 @@ export default function Treatments() {
           font-size: 10px; font-weight: 400;
           letter-spacing: 0.35em; text-transform: uppercase;
           color: #0E0D0B;
-          border: 1px solid #B89968;
-          background: #B89968; color: #FFFFFF !important;
+          border: 1px solid #3D3935;
+          background: #3D3935; color: #FFFFFF !important;
           padding: 18px 56px;
           background: transparent; cursor: pointer;
           transition: all 0.3s ease;
           text-decoration: none; display: inline-block;
           position: relative; overflow: hidden;
         }
-        .tr-btn::before {
-          content: ''; position: absolute; inset: 0;
-          background: #0E0D0B;
-          transform: translateX(-100%);
-          transition: transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
-        }
-        .tr-btn span { position: relative; z-index: 1; transition: color 0.3s ease; }
-        .tr-btn:hover::before { transform: translateX(0); }
-        .tr-btn:hover span { color: #FFFFFF; }
+        
 
+        .tr-row-right {
+          display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+        }
+        .tr-book-btn {
+          font-family: 'Inter', sans-serif;
+          font-size: 9px; font-weight: 500;
+          letter-spacing: 0.25em; text-transform: uppercase;
+          color: #FFFFFF; background: #3D3935;
+          border: 1px solid #3D3935;
+          padding: 8px 18px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          white-space: nowrap;
+        }
+        .tr-book-btn:hover { background: #2A2724; border-color: #2A2724; }
         @media (max-width: 720px) {
           .tr-header { grid-template-columns: 40px 1fr auto; padding: 24px 0 24px 12px; gap: 16px; }
           .tr-num { font-size: 1.1rem; }
@@ -197,7 +235,7 @@ export default function Treatments() {
           <div className="tr-divider" />
         </motion.div>
 
-        {CATEGORIES.map((cat, i) => (
+        {categories.map((cat, i) => (
           <div key={cat.name} className={`tr-cat ${open === i ? "open" : ""}`}>
             <div className="tr-header" onClick={() => toggle(i)}>
               <span className="tr-num">{cat.num}</span>
@@ -230,8 +268,10 @@ export default function Treatments() {
                           <div className="tr-name">{t.name}</div>
                           <div className="tr-rdesc">{t.desc}</div>
                         </div>
-                        <span className="tr-time">{t.time}</span>
-                        <span className="tr-price">{t.price}</span>
+                        <div className="tr-row-right">
+                          <span className="tr-price">{t.price}</span>
+                          <button className="tr-book-btn" onClick={(e) => { e.stopPropagation(); document.querySelector("#book")?.scrollIntoView({ behavior: "smooth" }); }}>Book Now</button>
+                        </div>
                       </motion.div>
                     ))}
                   </div>

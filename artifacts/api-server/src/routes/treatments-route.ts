@@ -59,7 +59,7 @@ router.post("/treatments", async (req, res) => {
   if (!requireAuth(req, res)) return;
   const locationId = getLocationId(req);
   if (!locationId) return res.status(400).json({ error: "locationId required" });
-  const { name, duration_minutes, price, deposit_amount, category } = req.body as Record<string, unknown>;
+  const { name, duration_minutes, price, deposit_amount, category, description } = req.body as Record<string, unknown>;
   if (!name) return res.status(400).json({ error: "name required" });
   try {
     const { data, error } = await supabaseAdmin
@@ -71,6 +71,7 @@ router.post("/treatments", async (req, res) => {
         price,
         deposit_amount,
         category: category ?? "Aesthetics",
+        description: description ?? null,
         active: true,
       })
       .select()
@@ -88,7 +89,7 @@ router.put("/treatments/:id", async (req, res) => {
   if (!requireAuth(req, res)) return;
   const locationId = getLocationId(req);
   if (!locationId) return res.status(400).json({ error: "locationId required" });
-  const { name, duration_minutes, price, deposit_amount, category, active } = req.body as Record<string, unknown>;
+  const { name, duration_minutes, price, deposit_amount, category, active, description } = req.body as Record<string, unknown>;
   try {
     const updates: Record<string, unknown> = {};
     if (name !== undefined) updates.name = name;
@@ -97,6 +98,7 @@ router.put("/treatments/:id", async (req, res) => {
     if (deposit_amount !== undefined) updates.deposit_amount = deposit_amount;
     if (category !== undefined) updates.category = category;
     if (active !== undefined) updates.active = active;
+    if (description !== undefined) updates.description = description;
     const { data, error } = await supabaseAdmin
       .from("treatments")
       .update(updates)
@@ -109,6 +111,43 @@ router.put("/treatments/:id", async (req, res) => {
   } catch (err) {
     console.error("PUT /api/treatments/:id", err);
     return res.status(500).json({ error: "Failed to update treatment" });
+  }
+});
+
+// DELETE /api/treatments/:id - delete a treatment - admin only
+router.delete("/treatments/:id", async (req, res) => {
+  if (!requireAuth(req, res)) return;
+  const locationId = getLocationId(req);
+  if (!locationId) return res.status(400).json({ error: "locationId required" });
+  try {
+    // Check if treatment has any bookings - prevent orphaned bookings
+    const { count: bookingCount } = await supabaseAdmin
+      .from("bookings")
+      .select("*", { count: "exact", head: true })
+      .eq("treatment_id", req.params.id);
+    if (bookingCount && bookingCount > 0) {
+      // Soft-delete by setting active=false instead of hard delete
+      const { data, error } = await supabaseAdmin
+        .from("treatments")
+        .update({ active: false })
+        .eq("id", req.params.id)
+        .eq("location_id", locationId)
+        .select()
+        .single();
+      if (error) throw error;
+      return res.json({ ...data, soft_deleted: true, reason: "has bookings" });
+    }
+    // No bookings - safe to hard delete
+    const { error } = await supabaseAdmin
+      .from("treatments")
+      .delete()
+      .eq("id", req.params.id)
+      .eq("location_id", locationId);
+    if (error) throw error;
+    return res.json({ success: true, id: req.params.id });
+  } catch (err) {
+    console.error("DELETE /api/treatments/:id", err);
+    return res.status(500).json({ error: "Failed to delete treatment" });
   }
 });
 

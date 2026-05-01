@@ -27,7 +27,7 @@ router.get("/finance/summary", async (req, res) => {
 
     let query = supabaseAdmin
       .from("bookings")
-      .select("booking_date, total_amount, deposit_amount, status, deposit_paid")
+      .select("booking_date, total_amount, deposit_amount, status, deposit_paid, balance_paid")
       .gte("booking_date", startDate)
       .lte("booking_date", endDate);
 
@@ -45,14 +45,20 @@ router.get("/finance/summary", async (req, res) => {
     for (const b of (data ?? [])) {
       const total = Number(b.total_amount ?? 0);
       const dep = Number(b.deposit_amount ?? 0);
+      const balPaid = Boolean(b.balance_paid);
       if (b.status !== "cancelled") {
         totalRevenue += total;
         bookingCount++;
         const bal = b.balance_due != null ? Number(b.balance_due) : Math.max(0, total - dep);
-        // balance is outstanding if balance_due > 0
-        if (bal > 0) balanceOutstanding += bal;
+        // outstanding only if balance not yet paid
+        if (bal > 0 && !balPaid) balanceOutstanding += bal;
       }
       if (b.deposit_paid) depositsCollected += dep;
+      if (balPaid) {
+        // when full balance is paid, count remaining (price - deposit) as collected too
+        const bal = b.balance_due != null ? Number(b.balance_due) : Math.max(0, total - dep);
+        depositsCollected += bal;
+      }
     }
 
     return res.json({

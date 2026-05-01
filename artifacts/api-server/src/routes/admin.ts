@@ -101,14 +101,14 @@ router.get("/admin/blocked-dates", async (req, res) => {
   try {
     let query = supabaseAdmin
       .from("blocked_dates")
-      .select("date, reason")
+      .select("blocked_date, reason")
       .eq("location_id", locationId)
-      .order("date");
-    if (from) query = query.gte("date", from);
-    if (to) query = query.lte("date", to);
+      .order("blocked_date");
+    if (from) query = query.gte("blocked_date", from);
+    if (to) query = query.lte("blocked_date", to);
     const { data, error } = await query;
     if (error) throw error;
-    return res.json((data ?? []).map((r: { date: string }) => r.date));
+    return res.json((data ?? []).map((r: { blocked_date: string }) => r.blocked_date));
   } catch (err) {
     console.error("GET /api/admin/blocked-dates", err);
     return res.status(500).json({ error: "Failed to fetch blocked dates" });
@@ -126,20 +126,20 @@ router.post("/admin/blocked-dates", async (req, res) => {
 
   try {
     if (action === "unblock") {
-      await supabaseAdmin.from("blocked_dates").delete().eq("location_id", locationId).eq("date", date);
+      await supabaseAdmin.from("blocked_dates").delete().eq("location_id", locationId).eq("blocked_date", date);
       return res.json({ ok: true, blocked: false });
     }
     if (action === "block") {
-      await supabaseAdmin.from("blocked_dates").upsert({ location_id: locationId, date, reason: "Manual block" }, { onConflict: "location_id,date" });
+      await supabaseAdmin.from("blocked_dates").upsert({ location_id: locationId, blocked_date: date, reason: "Manual block" }, { onConflict: "location_id,blocked_date" });
       return res.json({ ok: true, blocked: true });
     }
     // Toggle: check if exists
-    const { data: existing } = await supabaseAdmin.from("blocked_dates").select("id").eq("location_id", locationId).eq("date", date).maybeSingle();
+    const { data: existing } = await supabaseAdmin.from("blocked_dates").select("id").eq("location_id", locationId).eq("blocked_date", date).maybeSingle();
     if (existing) {
-      await supabaseAdmin.from("blocked_dates").delete().eq("location_id", locationId).eq("date", date);
+      await supabaseAdmin.from("blocked_dates").delete().eq("location_id", locationId).eq("blocked_date", date);
       return res.json({ ok: true, blocked: false });
     } else {
-      await supabaseAdmin.from("blocked_dates").upsert({ location_id: locationId, date, reason: "Manual block" }, { onConflict: "location_id,date" });
+      await supabaseAdmin.from("blocked_dates").upsert({ location_id: locationId, blocked_date: date, reason: "Manual block" }, { onConflict: "location_id,blocked_date" });
       return res.json({ ok: true, blocked: true });
     }
   } catch (err) {

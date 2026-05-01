@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const RESEND_KEY = process.env.RESEND_API_KEY ?? "";
-const FROM = "[CLIENT_NAME] <hello@[CLIENT_NAME]y.co.uk>";
+const FROM = "Nur & Co Aesthetics <bookings@nurandcoaesthetics.co.uk>";
 const SITE_URL = (process.env.PUBLIC_URL ?? "").replace(/\/$/, "");
 
 let _resend: Resend | null = null;
@@ -57,9 +57,9 @@ export function buildGoogleCalendarUrl(booking: CalBooking, location: CalLocatio
   const start = booking.time_slot.slice(0, 5);
   const end = addMinutesToTime(start, booking.duration_minutes ?? 60);
   const fmt = (d: string, t: string) => d.replace(/-/g, "") + "T" + t.replace(":", "") + "00";
-  const title = encodeURIComponent(`${booking.treatment_name} @ [CLIENT_NAME]`);
+  const title = encodeURIComponent(`${booking.treatment_name} @ Nur & Co Aesthetics`);
   const details = encodeURIComponent(
-    `[CLIENT_NAME] appointment\nTreatment: ${booking.treatment_name}\nLocation: ${location.address_full}\nContact: wa.me/447701298985`,
+    `Nur & Co Aesthetics appointment\nTreatment: ${booking.treatment_name}\nLocation: ${location.address_full}\nContact: nurandcoaesthetics.co.uk`,
   );
   const loc = encodeURIComponent(location.address_full);
   return (
@@ -74,11 +74,11 @@ export function buildICSContent(booking: CalBooking, location: CalLocation): str
   const end = addMinutesToTime(start, booking.duration_minutes ?? 60);
   const dtFmt = (d: string, t: string) => `${d.replace(/-/g, "")}T${t.replace(":", "")}00`;
   const stamp = new Date().toISOString().replace(/[-:.]/g, "").slice(0, 15) + "Z";
-  const uid = `${booking.id ?? Date.now()}@[CLIENT_NAME]y.co.uk`;
+  const uid = `${booking.id ?? Date.now()}@nurandcoaesthetics.co.uk`;
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
-    "PRODID:-//[CLIENT_NAME]//EN",
+    "PRODID:-//Nur & Co Aesthetics//EN",
     "CALSCALE:GREGORIAN",
     "METHOD:PUBLISH",
     "BEGIN:VEVENT",
@@ -86,10 +86,10 @@ export function buildICSContent(booking: CalBooking, location: CalLocation): str
     `DTSTAMP:${stamp}`,
     `DTSTART;TZID=Europe/London:${dtFmt(booking.booking_date, start)}`,
     `DTEND;TZID=Europe/London:${dtFmt(booking.booking_date, end)}`,
-    `SUMMARY:${booking.treatment_name} @ [CLIENT_NAME]`,
+    `SUMMARY:${booking.treatment_name} @ Nur & Co Aesthetics`,
     `DESCRIPTION:Treatment: ${booking.treatment_name}\\nContact: +44 7701 298985`,
     `LOCATION:${location.address_full}`,
-    `ORGANIZER;CN=[CLIENT_NAME]:mailto:info@[CLIENT_NAME]y.co.uk`,
+    `ORGANIZER;CN=Nur & Co Aesthetics:mailto:info@nurandcoaesthetics.co.uk`,
     "STATUS:CONFIRMED",
     "END:VEVENT",
     "END:VCALENDAR",
@@ -100,14 +100,14 @@ export function buildICSContent(booking: CalBooking, location: CalLocation): str
 
 const PLAIN_FOOTER = `
 --
-[CLIENT_NAME]
-[LOCATION_1], Essex · [LOCATION_2], London
-hello@[CLIENT_NAME]y.co.uk | [CLIENT_NAME]y.co.uk | WhatsApp: +44 7701 298985
+Nur & Co Aesthetics
+Bedale Road, Sherwood, Nottingham NG5 3GL
+bookings@nurandcoaesthetics.co.uk | nurandcoaesthetics.co.uk 
 
-You received this email because you have an appointment booked with [CLIENT_NAME].
-To stop receiving appointment emails, reply to this message or email hello@[CLIENT_NAME]y.co.uk with the subject "Unsubscribe".
+You received this email because you have an appointment booked with Nur & Co Aesthetics.
+To stop receiving appointment emails, reply to this message or email bookings@nurandcoaesthetics.co.uk with the subject "Unsubscribe".
 
-© 2026 [CLIENT_NAME]. All rights reserved.
+© 2026 Nur & Co Aesthetics. All rights reserved.
 `.trim();
 
 // ── Base email template ───────────────────────────────────────────────────────
@@ -148,20 +148,20 @@ function buildEmail(content: string, subject: string): string {
     <tr>
       <td style="padding:20px 40px 24px;border-top:1px solid #E8DDD3;text-align:center;">
         <p style="margin:0 0 6px;font-size:11px;color:#8C7B6B;letter-spacing:0.08em;">[CLIENT NAME] &middot; ESSEX &amp; LONDON</p>
-        <p style="margin:0 0 2px;font-size:10px;color:#B5A89A;">[LOCATION_1], Essex &middot; [LOCATION_2], London</p>
+        <p style="margin:0 0 2px;font-size:10px;color:#B5A89A;">Bedale Road, Sherwood, Nottingham NG5 3GL</p>
         <p style="margin:0 0 8px;font-size:10px;color:#B5A89A;">
-          <a href="mailto:hello@[CLIENT_NAME]y.co.uk" style="color:#C9A96E;text-decoration:none;">hello@[CLIENT_NAME]y.co.uk</a>
+          <a href="mailto:bookings@nurandcoaesthetics.co.uk" style="color:#C9A96E;text-decoration:none;">bookings@nurandcoaesthetics.co.uk</a>
           &nbsp;&middot;&nbsp;
-          <a href="https://wa.me/447701298985" style="color:#C9A96E;text-decoration:none;">WhatsApp</a>
+          <a href="https://nurandcoaesthetics.co.uk" style="color:#C9A96E;text-decoration:none;">WhatsApp</a>
           &nbsp;&middot;&nbsp;
-          <a href="https://[CLIENT_NAME]y.co.uk" style="color:#C9A96E;text-decoration:none;">[CLIENT_NAME]y.co.uk</a>
+          <a href="https://nurandcoaesthetics.co.uk" style="color:#C9A96E;text-decoration:none;">nurandcoaesthetics.co.uk</a>
         </p>
         <p style="margin:0 0 6px;font-size:10px;color:#B5A89A;line-height:1.5;">
-          You received this email because you have an appointment booked with [CLIENT_NAME].<br>
-          <a href="mailto:hello@[CLIENT_NAME]y.co.uk?subject=Unsubscribe" style="color:#B5A89A;text-decoration:underline;">Unsubscribe</a>
+          You received this email because you have an appointment booked with Nur & Co Aesthetics.<br>
+          <a href="mailto:bookings@nurandcoaesthetics.co.uk?subject=Unsubscribe" style="color:#B5A89A;text-decoration:underline;">Unsubscribe</a>
           from appointment emails.
         </p>
-        <p style="margin:0;font-size:10px;color:#B5A89A;">&copy; 2026 [CLIENT_NAME]. All rights reserved.</p>
+        <p style="margin:0;font-size:10px;color:#B5A89A;">&copy; 2026 Nur & Co Aesthetics. All rights reserved.</p>
       </td>
     </tr>
     </table>
@@ -251,8 +251,8 @@ export async function sendClientConfirmationEmail(params: {
 }): Promise<void> {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
   const loc: CalLocation = {
-    name: params.locationName ?? "[CLIENT_NAME]",
-    address_full: params.locationAddress ?? "[CLIENT_NAME] Clinic",
+    name: params.locationName ?? "Nur & Co Aesthetics",
+    address_full: params.locationAddress ?? "Nur & Co Aesthetics",
   };
   const bk: CalBooking = {
     treatment_name: params.treatment,
@@ -294,7 +294,7 @@ export async function sendClientConfirmationEmail(params: {
     </table>
 
     <p style="font-size:12px;color:#8C7B6B;line-height:1.6;margin:0 0 20px;border-top:1px solid #E8DDD3;padding-top:16px;">
-      <strong style="color:#5C1A1A;">Cancellation policy:</strong> Please give at least 48 hours notice to cancel or reschedule. Deposits are non-refundable for cancellations under 48 hours or no-shows. To reschedule, WhatsApp us at <a href="https://wa.me/447701298985" style="color:#C9A96E;">+44 7701 298985</a>
+      <strong style="color:#5C1A1A;">Cancellation policy:</strong> Please give at least 48 hours notice to cancel or reschedule. Deposits are non-refundable for cancellations under 48 hours or no-shows. To reschedule, WhatsApp us at <a href="https://nurandcoaesthetics.co.uk" style="color:#C9A96E;">+44 7701 298985</a>
     </p>
 
     <table width="100%" cellpadding="0" cellspacing="0">
@@ -305,7 +305,7 @@ export async function sendClientConfirmationEmail(params: {
     </td></tr>
     </table>`;
 
-  const subject = `Appointment confirmed: ${params.treatment} — [CLIENT_NAME]`;
+  const subject = `Appointment confirmed: ${params.treatment} — Nur & Co Aesthetics`;
   const text = [
     `You're booked in, ${firstName}`,
     "",
@@ -361,8 +361,8 @@ export async function sendAdminNotificationEmail(params: {
 }): Promise<void> {
   const dateDisp = params.date ? fmtDateUK(params.date) : "TBC";
   const loc: CalLocation = {
-    name: params.locationName ?? "[CLIENT_NAME]",
-    address_full: params.locationAddress ?? params.locationName ?? "[CLIENT_NAME] Clinic",
+    name: params.locationName ?? "Nur & Co Aesthetics",
+    address_full: params.locationAddress ?? params.locationName ?? "Nur & Co Aesthetics",
   };
   const bk: CalBooking = {
     treatment_name: params.treatment,
@@ -446,8 +446,8 @@ export async function sendReminderEmail(params: {
 }): Promise<void> {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
   const loc: CalLocation = {
-    name: params.locationName ?? "[CLIENT_NAME]",
-    address_full: params.locationAddress ?? params.locationName ?? "[CLIENT_NAME] Clinic",
+    name: params.locationName ?? "Nur & Co Aesthetics",
+    address_full: params.locationAddress ?? params.locationName ?? "Nur & Co Aesthetics",
   };
   const bk: CalBooking = {
     treatment_name: params.treatment,
@@ -473,7 +473,7 @@ export async function sendReminderEmail(params: {
     </td></tr>
     </table>
 
-    <p style="font-size:13px;color:#8C7B6B;margin:0 0 16px;line-height:1.6;">Need to cancel or reschedule? Please let us know as soon as possible. <a href="https://wa.me/447701298985" style="color:#C9A96E;text-decoration:none;">WhatsApp us &rarr;</a></p>`;
+    <p style="font-size:13px;color:#8C7B6B;margin:0 0 16px;line-height:1.6;">Need to cancel or reschedule? Please let us know as soon as possible. <a href="https://nurandcoaesthetics.co.uk" style="color:#C9A96E;text-decoration:none;">WhatsApp us &rarr;</a></p>`;
 
   const subject = `Reminder: your ${params.treatment} appointment is tomorrow`;
   const text = [
@@ -489,7 +489,7 @@ export async function sendReminderEmail(params: {
     "- Arrive 5 minutes early",
     "- Bring a valid ID",
     "",
-    "Need to cancel or reschedule? WhatsApp us: https://wa.me/447701298985",
+    "Need to cancel or reschedule? WhatsApp us: https://nurandcoaesthetics.co.uk",
     "",
     PLAIN_FOOTER,
   ].join("\n");
@@ -519,7 +519,7 @@ export async function sendCancellationEmail(params: {
   locationName?: string;
 }): Promise<void> {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
-  const locationName = params.locationName ?? "[CLIENT_NAME]";
+  const locationName = params.locationName ?? "Nur & Co Aesthetics";
 
   const content = `
     <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">Appointment cancelled</p>
@@ -535,11 +535,11 @@ export async function sendCancellationEmail(params: {
 
     <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
     <tr><td align="center">
-      <a href="https://wa.me/447701298985" style="display:inline-block;padding:12px 28px;background:#C9A96E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">Rebook via WhatsApp &rarr;</a>
+      <a href="https://nurandcoaesthetics.co.uk" style="display:inline-block;padding:12px 28px;background:#C9A96E;color:#FFFFFF;text-decoration:none;border-radius:6px;font-size:13px;letter-spacing:0.1em;">Rebook via WhatsApp &rarr;</a>
     </td></tr>
     </table>`;
 
-  const subject = `Your [CLIENT_NAME] appointment has been cancelled`;
+  const subject = `Your Nur & Co Aesthetics appointment has been cancelled`;
   const text = [
     `Hi ${firstName},`,
     "",
@@ -549,7 +549,7 @@ export async function sendCancellationEmail(params: {
     `Date & Time: ${formatDate(params.date)} at ${params.time}`,
     `Location: ${locationName}`,
     "",
-    "To rebook, WhatsApp us: https://wa.me/447701298985",
+    "To rebook, WhatsApp us: https://nurandcoaesthetics.co.uk",
     "",
     PLAIN_FOOTER,
   ].join("\n");
@@ -579,7 +579,7 @@ export async function sendRescheduleEmail(params: {
   locationName?: string;
 }): Promise<void> {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
-  const locationName = params.locationName ?? "[CLIENT_NAME]";
+  const locationName = params.locationName ?? "Nur & Co Aesthetics";
   const whatsapp = params.whatsapp ?? "447701298985";
 
   const content = `
@@ -600,7 +600,7 @@ export async function sendRescheduleEmail(params: {
     </td></tr>
     </table>`;
 
-  const subject = `Your [CLIENT_NAME] appointment has been rescheduled`;
+  const subject = `Your Nur & Co Aesthetics appointment has been rescheduled`;
   const text = [
     `Hi ${firstName},`,
     "",
@@ -643,8 +643,8 @@ export async function sendFormsReminderEmail(params: {
 }): Promise<void> {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
   const loc: CalLocation = {
-    name: params.locationName ?? "[CLIENT_NAME]",
-    address_full: params.locationAddress ?? params.locationName ?? "[CLIENT_NAME] Clinic",
+    name: params.locationName ?? "Nur & Co Aesthetics",
+    address_full: params.locationAddress ?? params.locationName ?? "Nur & Co Aesthetics",
   };
   const bk: CalBooking = {
     treatment_name: params.treatment,
@@ -708,8 +708,8 @@ export async function sendConsultationConfirmationEmail(params: {
   const firstName = params.clientName.split(" ")[0] ?? params.clientName;
   const dateStr = params.date ? formatDate(params.date) : "To be confirmed";
   const wa = params.whatsapp || "available on request";
-  const locationName = params.locationName ?? "[CLIENT_NAME]";
-  const locationAddress = params.locationAddress ?? "[CLIENT_NAME] Clinic";
+  const locationName = params.locationName ?? "Nur & Co Aesthetics";
+  const locationAddress = params.locationAddress ?? "Nur & Co Aesthetics";
 
   const content = `
     <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">Looking forward to meeting you, ${firstName}</p>
@@ -725,7 +725,7 @@ export async function sendConsultationConfirmationEmail(params: {
     <p style="font-size:13px;color:#8C7B6B;margin:0 0 8px;">Questions before your visit? <a href="https://wa.me/${wa.replace(/\s/g, "")}" style="color:#C9A96E;text-decoration:none;">WhatsApp us</a></p>
     <p style="font-size:12px;color:#8C7B6B;margin:0;font-style:italic;">Please arrive 5 minutes early. We look forward to seeing you.</p>`;
 
-  const subject = `Consultation confirmed — [CLIENT_NAME] ${locationName}`;
+  const subject = `Consultation confirmed — Nur & Co Aesthetics ${locationName}`;
   const text = [
     `Hi ${firstName},`,
     "",
@@ -769,7 +769,7 @@ export async function sendConsultationAdminEmail(params: {
   locationName?: string;
 }): Promise<void> {
   const dateDisp = params.date ? fmtDateUK(params.date) : "TBC";
-  const locationName = params.locationName ?? "[CLIENT_NAME]";
+  const locationName = params.locationName ?? "Nur & Co Aesthetics";
 
   const content = `
     <p style="font-size:22px;font-family:Georgia,serif;color:#5C1A1A;margin:0 0 6px;">New consultation booked</p>
@@ -914,7 +914,7 @@ export async function sendEnquiryEmails(params: {
       <table cellpadding="0" cellspacing="0" style="margin:0 0 20px;">
         <tr>
           <td>
-            <a href="https://wa.me/447701298985" style="display:inline-block;background:#C9A96E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;padding:12px 28px;text-decoration:none;border-radius:4px;">WhatsApp us</a>
+            <a href="https://nurandcoaesthetics.co.uk" style="display:inline-block;background:#C9A96E;color:#FFFFFF;font-family:Arial,sans-serif;font-size:12px;letter-spacing:.1em;padding:12px 28px;text-decoration:none;border-radius:4px;">WhatsApp us</a>
           </td>
         </tr>
       </table>
@@ -930,7 +930,7 @@ export async function sendEnquiryEmails(params: {
       `Location:  ${params.locationLabel}`,
       `Reference: ${refCode}`,
       "",
-      "Questions? WhatsApp us: https://wa.me/447701298985",
+      "Questions? WhatsApp us: https://nurandcoaesthetics.co.uk",
       "",
       PLAIN_FOOTER,
     ].join("\n");
@@ -1086,10 +1086,10 @@ export async function sendFormsLinkEmail(params: {
       <a href="${formsUrl}" style="color:#C9A96E;word-break:break-all;">${formsUrl}</a>
     </p>
     <p style="font-size:12px;color:#8C7B6B;line-height:1.6;margin:0;">
-      If you have any questions, please WhatsApp us at <a href="https://wa.me/447701298985" style="color:#C9A96E;">+44 7701 298985</a>
+      If you have any questions, please WhatsApp us at <a href="https://nurandcoaesthetics.co.uk" style="color:#C9A96E;">+44 7701 298985</a>
     </p>`;
 
-  const subject = `Action required: complete your forms — ${params.treatment} at [CLIENT_NAME]`;
+  const subject = `Action required: complete your forms — ${params.treatment} at Nur & Co Aesthetics`;
   const text = [
     `Hi ${firstName},`,
     "",
@@ -1102,7 +1102,7 @@ export async function sendFormsLinkEmail(params: {
     "Complete your forms here:",
     formsUrl,
     "",
-    "If you have any questions, WhatsApp us: https://wa.me/447701298985",
+    "If you have any questions, WhatsApp us: https://nurandcoaesthetics.co.uk",
     "",
     PLAIN_FOOTER,
   ].filter(Boolean).join("\n");

@@ -16,6 +16,8 @@ import adminRouter from "./admin";
 import formsRouter from "./forms";
 import calendarRouter from "./calendar";
 import googleRoutes from "./google";
+import campaignsRouter from "./campaigns";
+import heroTextRouter from "./heroText";
 
 const router: IRouter = Router();
 
@@ -36,5 +38,7 @@ router.use(stripeRouter);
 router.use(formsRouter);
 router.use(calendarRouter);
 router.use('/google', googleRoutes);
+router.use(campaignsRouter);
+router.use(heroTextRouter);
 
 export default router;

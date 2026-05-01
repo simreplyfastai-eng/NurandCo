@@ -53,7 +53,7 @@ function supabaseRowToBooking(row: Record<string, unknown>) {
     price: Number(row.total_amount ?? row.price ?? 0),
     deposit: Number(row.deposit_amount ?? row.deposit ?? 0),
     depositPaid: Boolean(row.deposit_paid),
-    balancePaid: false,
+    balancePaid: Boolean(row.balance_paid),
     date: (row.booking_date ?? row.date ?? "") as string,
     time: (row.time_slot ?? row.time ?? "") as string,
     status,
@@ -635,6 +635,10 @@ router.put("/bookings/:id", async (req, res) => {
     if (b.status != null) updates.status = String(b.status).toLowerCase();
     if (b.notes != null) updates.notes = b.notes;
     if (b.depositPaid != null) updates.deposit_paid = b.depositPaid;
+    if (b.balancePaid != null) {
+      updates.balance_paid = Boolean(b.balancePaid);
+      updates.balance_paid_at = Boolean(b.balancePaid) ? new Date().toISOString() : null;
+    }
     if (b.stripePaymentId != null) updates.stripe_payment_intent_id = b.stripePaymentId;
     if (b.price != null) updates.total_amount = Number(b.price);
     if (b.deposit != null) updates.deposit_amount = Number(b.deposit);
